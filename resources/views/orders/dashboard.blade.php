@@ -146,6 +146,12 @@
         </fieldset>
 
         <button type="submit">Simpan Draft</button>
+        <a href="{{ route('orders.review.show', [
+            'orderId' => $order->order_id,
+            'token' => $plainToken
+        ]) }}">
+        Semak Maklumat & Teruskan
+    </a>
     </form>
 </main>
 </body>
