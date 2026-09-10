@@ -8,4 +8,8 @@ class OrderFulfilment extends Model
 {
     protected $fillable = ['order_id', 'method', 'recipient_name', 'recipient_phone', 'shipping_address'];
     public function order() { return $this->belongsTo(Order::class); }
+    public function fulfilmentJob()
+    {
+        return $this->hasOne(\App\Models\FulfilmentJob::class);
+    }
 }

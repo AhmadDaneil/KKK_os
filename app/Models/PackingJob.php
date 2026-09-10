@@ -40,4 +40,8 @@ class PackingJob extends Model
     {
         return $this->hasMany(PackingJobEvent::class);
     }
+    public function fulfilmentJob()
+    {
+        return $this->hasOne(\App\Models\FulfilmentJob::class);
+    }
 }

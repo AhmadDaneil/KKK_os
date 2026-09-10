@@ -11,6 +11,7 @@ use App\Http\Controllers\DevDesignJobController;
 use App\Http\Controllers\CustomerArtworkReviewController;
 use App\Http\Controllers\DevPrintJobController;
 use App\Http\Controllers\DevPackingJobController;
+use App\Http\Controllers\DevFulfilmentJobController;
 
 Route::get('/order/{orderId}', [CustomerDashboardController::class, 'show'])
     ->name('orders.dashboard');
@@ -85,4 +86,26 @@ if (app()->environment('local')) {
         '/dev/orders/{orderId}/packing-job',
         [DevPackingJobController::class, 'store']
     )->name('dev.orders.packing-job.store');
+}
+
+if (app()->environment('local')) {
+    Route::post(
+        '/dev/orders/{orderId}/fulfilment-job',
+        [DevFulfilmentJobController::class, 'store']
+    )->name('dev.orders.fulfilment-job.store');
+
+    Route::post(
+        '/dev/fulfilment-jobs/{fulfilmentJobId}/ship',
+        [DevFulfilmentJobController::class, 'ship']
+    )->name('dev.fulfilment-jobs.ship');
+
+    Route::post(
+        '/dev/fulfilment-jobs/{fulfilmentJobId}/deliver',
+        [DevFulfilmentJobController::class, 'deliver']
+    )->name('dev.fulfilment-jobs.deliver');
+
+    Route::post(
+        '/dev/fulfilment-jobs/{fulfilmentJobId}/collect',
+        [DevFulfilmentJobController::class, 'collect']
+    )->name('dev.fulfilment-jobs.collect');
 }

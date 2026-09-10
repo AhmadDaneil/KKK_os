@@ -20,6 +20,10 @@ return Application::configure(basePath: dirname(__DIR__))
             'dev/payments/*/pay',
             'dev/orders/*/print-jobs',
             'dev/orders/*/packing-job',
+            'dev/orders/*/fulfilment-job',
+            'dev/fulfilment-jobs/*/ship',
+            'dev/fulfilment-jobs/*/deliver',
+            'dev/fulfilment-jobs/*/collect',
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

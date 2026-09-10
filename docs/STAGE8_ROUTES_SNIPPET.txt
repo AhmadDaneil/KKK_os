@@ -1,0 +1,34 @@
+Add to routes/web.php:
+
+use App\Http\Controllers\DevFulfilmentJobController;
+
+if (app()->environment('local')) {
+    Route::post(
+        '/dev/orders/{orderId}/fulfilment-job',
+        [DevFulfilmentJobController::class, 'store']
+    )->name('dev.orders.fulfilment-job.store');
+
+    Route::post(
+        '/dev/fulfilment-jobs/{fulfilmentJobId}/ship',
+        [DevFulfilmentJobController::class, 'ship']
+    )->name('dev.fulfilment-jobs.ship');
+
+    Route::post(
+        '/dev/fulfilment-jobs/{fulfilmentJobId}/deliver',
+        [DevFulfilmentJobController::class, 'deliver']
+    )->name('dev.fulfilment-jobs.deliver');
+
+    Route::post(
+        '/dev/fulfilment-jobs/{fulfilmentJobId}/collect',
+        [DevFulfilmentJobController::class, 'collect']
+    )->name('dev.fulfilment-jobs.collect');
+}
+
+Add these local-only CSRF exceptions in bootstrap/app.php:
+
+'dev/orders/*/fulfilment-job',
+'dev/fulfilment-jobs/*/ship',
+'dev/fulfilment-jobs/*/deliver',
+'dev/fulfilment-jobs/*/collect',
+
+Do NOT exempt real production staff/customer endpoints.

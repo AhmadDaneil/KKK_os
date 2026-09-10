@@ -69,4 +69,9 @@ class Order extends Model
     {
         return $this->hasOne(\App\Models\PackingJob::class);
     }
+    public function fulfilmentJob()
+    {
+        return $this->hasOne(\App\Models\FulfilmentJob::class);
+    }
+    
 }
