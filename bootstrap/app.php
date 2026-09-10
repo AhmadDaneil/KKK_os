@@ -14,6 +14,7 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->validateCsrfTokens(except: [
             'dev/orders',
+            'dev/orders/*/merge-jobs',
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

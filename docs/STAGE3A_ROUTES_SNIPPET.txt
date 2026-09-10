@@ -1,0 +1,12 @@
+Add to routes/web.php:
+
+use App\Http\Controllers\DevMergeJobController;
+
+if (app()->environment('local')) {
+    Route::post(
+        '/dev/orders/{orderId}/merge-jobs',
+        [DevMergeJobController::class, 'store']
+    )->name('dev.orders.merge-jobs.store');
+}
+
+Do NOT expose this development endpoint in production.

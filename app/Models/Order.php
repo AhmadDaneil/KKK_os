@@ -49,4 +49,8 @@ class Order extends Model
     {
         return $this->hasOne(\App\Models\OrderConfirmation::class);
     }
+    public function mergeJobs()
+    {
+        return $this->hasMany(\App\Models\MergeJob::class);
+    }
 }
