@@ -26,6 +26,7 @@ class Order extends Model
         return [
             'package_count' => 'integer',
             'details_confirmed_at' => 'datetime',
+            'card_quantity' => 'integer',
         ];
     }
 
@@ -73,5 +74,5 @@ class Order extends Model
     {
         return $this->hasOne(\App\Models\FulfilmentJob::class);
     }
-    
+
 }

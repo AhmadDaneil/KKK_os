@@ -20,6 +20,14 @@ class SaveOrderDraftService
                 'fulfilment',
             ]);
 
+            if (array_key_exists('card_quantity', $data)) {
+                $order->forceFill([
+                'card_quantity' => $data['card_quantity'] === null
+                ? null
+                : (int) $data['card_quantity'],
+                ])->save();
+            }
+
             if (array_key_exists('couple', $data)) {
                 $couple = $order->couples->firstWhere('couple_number', 1);
 
