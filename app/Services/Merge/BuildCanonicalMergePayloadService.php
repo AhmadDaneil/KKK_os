@@ -28,7 +28,9 @@ class BuildCanonicalMergePayloadService
         }
 
         if (! $packageSide->design || ! $packageSide->parents || ! $packageSide->event) {
-            throw new RuntimeException("Package structure is incomplete for side {$packageSide->side}.");
+            throw new RuntimeException(
+                "Package structure is incomplete for side {$packageSide->side}."
+            );
         }
 
         $event = $packageSide->event;
@@ -42,18 +44,18 @@ class BuildCanonicalMergePayloadService
                 'package_side_id' => $packageSide->id,
                 'side' => $packageSide->side,
                 'details_confirmed_at' => optional($order->details_confirmed_at)?->toISOString(),
+
+                // Option A business rule:
+                // one approved card quantity belongs to the whole business order.
+                // Both 2-package merge jobs inherit this same value.
+                'card_quantity' => $order->card_quantity,
             ],
 
-            // Canonical generic merge concepts.
-            // Exact Photoshop export headers/display formatting remain intentionally unlocked.
             'generic' => [
                 'namapengantin1' => $couple->groom_name,
                 'namapengantin2' => $couple->bride_name,
                 'namabapa' => $packageSide->parents->father_name,
                 'namaibu' => $packageSide->parents->mother_name,
-
-                // Keep structured source values here. Exporter will format them only
-                // after the real Photoshop contract has been inspected.
                 'tarikh_iso' => $event->event_date?->format('Y-m-d'),
                 'masa_raw' => $event->meal_time,
                 'alamat' => $event->full_address,
