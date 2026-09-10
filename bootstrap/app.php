@@ -19,6 +19,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'dev/orders/*/balance-payment',
             'dev/payments/*/pay',
             'dev/orders/*/print-jobs',
+            'dev/orders/*/packing-job',
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

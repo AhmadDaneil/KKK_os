@@ -10,6 +10,7 @@ use App\Http\Controllers\DevMergeJobController;
 use App\Http\Controllers\DevDesignJobController;
 use App\Http\Controllers\CustomerArtworkReviewController;
 use App\Http\Controllers\DevPrintJobController;
+use App\Http\Controllers\DevPackingJobController;
 
 Route::get('/order/{orderId}', [CustomerDashboardController::class, 'show'])
     ->name('orders.dashboard');
@@ -78,4 +79,10 @@ if (app()->environment('local')) {
         '/dev/orders/{orderId}/print-jobs',
         [DevPrintJobController::class, 'store']
     )->name('dev.orders.print-jobs.store');
+}
+if (app()->environment('local')) {
+    Route::post(
+        '/dev/orders/{orderId}/packing-job',
+        [DevPackingJobController::class, 'store']
+    )->name('dev.orders.packing-job.store');
 }

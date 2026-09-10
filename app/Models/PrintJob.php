@@ -55,4 +55,8 @@ class PrintJob extends Model
     {
         return $this->hasMany(PrintJobEvent::class);
     }
+    public function packingItem()
+    {
+        return $this->hasOne(\App\Models\PackingJobItem::class);
+    }
 }

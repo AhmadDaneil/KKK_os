@@ -32,5 +32,9 @@ class OrderPackageSide extends Model
     {
         return $this->hasOne(\App\Models\DesignJob::class);
     }
-    
+    public function packingItem()
+    {
+        return $this->hasOne(\App\Models\PackingJobItem::class);
+    }
+
 }

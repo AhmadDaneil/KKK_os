@@ -65,4 +65,8 @@ class Order extends Model
     {
         return $this->hasMany(\App\Models\PrintJob::class);
     }
+    public function packingJob()
+    {
+        return $this->hasOne(\App\Models\PackingJob::class);
+    }
 }

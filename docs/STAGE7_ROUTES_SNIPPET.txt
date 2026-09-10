@@ -1,0 +1,16 @@
+Add to routes/web.php:
+
+use App\Http\Controllers\DevPackingJobController;
+
+if (app()->environment('local')) {
+    Route::post(
+        '/dev/orders/{orderId}/packing-job',
+        [DevPackingJobController::class, 'store']
+    )->name('dev.orders.packing-job.store');
+}
+
+Add this local-only CSRF exception in bootstrap/app.php:
+
+'dev/orders/*/packing-job',
+
+Do NOT exempt real production staff/customer routes.
