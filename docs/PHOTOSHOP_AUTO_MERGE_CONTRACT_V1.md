@@ -1,602 +1,340 @@
-# KKK OS V1 — Photoshop Auto Merge Contract V1
+# KKK OS V1 — Photoshop Auto Merge Contract V1 (VERIFIED)
 
-Status: PENDING VERIFICATION
+Status: VERIFIED AGAINST WORKING CSV + CURRENT JSX + PROVIDED PSD  
+Date locked: 2026-09-10
 
-## 1. Purpose
+## 1. Evidence audited
 
-This document defines the exact integration contract between:
+The contract below is based on these actual working artefacts:
 
-KKK OS Database
-→ KKK Engine
-→ Canonical Merge Jobs
-→ Photoshop Export Adapter
-→ Google Sheet / CSV
-→ Photoshop Auto Merge
+1. `V2_DESIGNER_CREATE_HERE_JANGAN_DELETE_DI_TAB_RTM!_READY_TO_MERGE(1).csv`
+2. `V1 ALIVECARD CREATE HERE - READY TO MERGE (2)(1).csv`
+3. `auto_kad_full_qr_patched_v10_2026(1).jsx`
+4. `IMG_20260910_143115_471.psd`
 
-The database remains the application source of truth.
+The JSX is the authoritative consumer for the current Photoshop automation.
+The V2 28-column CSV is the compatibility shape used as the Photoshop CSV contract.
+The V1 CSV contains the same first 28 columns plus 8 AliveCard/downstream columns.
 
-Google Sheet / CSV is a downstream Photoshop Auto Merge
-integration/output layer only.
+## 2. Exact Photoshop compatibility CSV headers
 
-This contract must NOT be marked as VERIFIED or LOCKED until
-the current working Photoshop Auto Merge files and process
-have been inspected directly.
+Header order is locked as:
 
----
+```text
+noinvoice
+qtykad
+tema
+designcode
+gambar
+majlis
+namapengantinlelaki
+namapengantinperempuan
+singkatanlelaki
+singkatanperempuan
+namaayah
+namaibu
+hari
+tarikh
+tarikhhari
+bulan
+bulanislam
+masabersanding
+masajamuanmakan
+alamat
+qrlink
+nama1
+notel1
+nama2
+notel2
+nama3
+notel3
+flaggambar
+```
 
-## 2. Source of Truth
+The current JSX performs case-insensitive header matching, but KKK OS should export the
+exact lowercase header spelling/order above for deterministic compatibility.
 
-Primary business/system authority:
+## 3. JSX-required headers
 
-MASTER BLUEPRINT & SYSTEM SPECIFICATION
+The current JSX hard-fails if these are missing:
 
-Technical Photoshop contract authority:
+- `noinvoice`
+- `tema`
+- `designcode`
 
-The current real working Photoshop Auto Merge implementation,
-including:
+Rows with blank `noinvoice` are skipped.
 
-- current working Sheet / CSV;
-- current PSD template;
-- current script / action / plugin;
-- actual designer execution process;
-- successful output samples.
+## 4. Columns consumed by the current JSX
 
-If an older spreadsheet, prototype, chat or assumption conflicts
-with the real current working Auto Merge integration, the
-verified working integration must be documented before the
-export implementation is locked.
+The JSX reads these columns:
 
----
-
-## 3. Verification Status
-
-Current status:
-
-PENDING VERIFICATION
-
-Do not implement final production headers or formatting rules
-until the following have been inspected.
-
-### Required source files
-
-- [ ] Real working Google Sheet / CSV
-- [ ] Real working PSD
-- [ ] Photoshop script / action / plugin, if used
-- [ ] Successful output sample
-- [ ] 2-package example, if available
-- [ ] Designer workflow notes or screenshots
-
----
-
-## 4. Known KKK OS Internal Architecture
-
-Confirmed customer data is stored in the KKK OS database.
-
-After customer confirmation:
-
-DETAILS_CONFIRMED
-→ KKK Engine
-→ Canonical Merge Job(s)
-
-### 1-package
-
-1 business order
-→ 1 package side
-→ 1 merge job
-
-Recommended internal job identity:
-
-ORDERID-L
-
-or
-
-ORDERID-P
-
-depending on the selected side.
-
-### 2-package
-
-1 business order
-→ 2 package sides
-→ 2 independent merge jobs
-
-Recommended internal identities:
-
-ORDERID-L
-ORDERID-P
-
-The two jobs must never overwrite each other.
-
----
-
-## 5. Canonical Internal Merge Concepts
-
-KKK Engine currently exposes internal canonical concepts such as:
-
-- job_id
-- order_id
-- side
-- namapengantin1
-- namapengantin2
-- namabapa
+- noinvoice
+- qtykad
+- tema
+- designcode
+- namapengantinlelaki
+- namapengantinperempuan
+- singkatanlelaki
+- singkatanperempuan
+- namaayah
 - namaibu
-- tarikh_iso
-- masa_raw
-- alamat
-- design_code
-
-These are internal canonical concepts.
-
-They are NOT confirmation of the final Photoshop Sheet / CSV
-headers.
-
----
-
-## 6. Exact Input File Contract
-
-Status: NOT YET VERIFIED
-
-### File type
-
-Pending verification.
-
-Possible examples:
-
-- CSV
-- XLSX
-- Google Sheet export
-- other
-
-### Encoding
-
-Pending verification.
-
-Examples to verify:
-
-- UTF-8
-- UTF-8 BOM
-- ANSI / Windows encoding
-
-### Delimiter
-
-Pending verification.
-
-Examples to verify:
-
-- comma
-- semicolon
-- tab
-
-### Line ending
-
-Pending verification.
-
-### Sheet / Tab name
-
-Pending verification.
-
----
-
-## 7. Exact Column Headers
-
-Status: NOT YET VERIFIED
-
-The final column names must match the real working Auto Merge
-input exactly.
-
-| Position | Exact Header | Required | Meaning | KKK Source |
-|---|---|---|---|---|
-| TBD | TBD | TBD | TBD | TBD |
-
-Do not rename, normalize or improve existing Photoshop headers
-without verification.
-
-For example, the following are considered different contracts:
-
-- namabapa
-- nama_bapa
-- NamaBapa
-- NAMA BAPA
-
-Exact spelling and casing must be preserved if required by the
-working integration.
-
----
-
-## 8. Photoshop Variables / Layers
-
-Status: NOT YET VERIFIED
-
-The KKK Master Blueprint prefers generic Photoshop fields such as:
-
-- namabapa
-- namaibu
-- namapengantin1
-- namapengantin2
+- hari
 - tarikh
-- masa
+- tarikhhari
+- bulan
+- bulanislam
+- masabersanding
+- masajamuanmakan
 - alamat
+- qrlink
+- nama1 / notel1
+- nama2 / notel2
+- nama3 / notel3
+
+Present in V2 but not consumed by the current JSX:
+
+- gambar
+- majlis
+- flaggambar
+
+They remain in the compatibility CSV because they are present in the working V2 shape.
+Do not remove them until the wider downstream workflow is explicitly retired or changed.
+
+## 5. V1 AliveCard extra fields
+
+The V1 CSV contains these additional columns after the 28-column V2 contract:
+
+```text
+pagetitle
+slug
+wa1
+wa2
+wa3
+calllink1
+calllink2
+calllink3
+```
+
+The current Photoshop JSX does not read them.
+
+Therefore they are not part of `photoshop_auto_merge_v1`.
+They belong to an AliveCard/downstream export contract if KKK OS later automates that path.
+
+## 6. Canonical KKK Engine → Photoshop CSV mapping
+
+| CSV field | Canonical source | Rule |
+|---|---|---|
+| noinvoice | `source.order_id` | Exact order ID |
+| qtykad | **UNRESOLVED DB SOURCE** | Export numeric quantity only; see blocker below |
+| tema | `design.theme` | Trim; preserve approved theme naming |
+| designcode | `design.design_code` | Trim + uppercase |
+| gambar | **UNRESOLVED / NOT CONSUMED BY JSX** | Empty until source meaning is verified |
+| majlis | `source.side` | `LELAKI` or `PEREMPUAN`; compatibility only, JSX does not consume it |
+| namapengantinlelaki | `couple.groom_name` | Preserve approved spelling/case |
+| namapengantinperempuan | `couple.bride_name` | Preserve approved spelling/case |
+| singkatanlelaki | `couple.groom_abbreviation` | Preserve approved spelling/case |
+| singkatanperempuan | `couple.bride_abbreviation` | Preserve approved spelling/case |
+| namaayah | `parents.father_name` | Note: canonical generic `namabapa` maps to Photoshop `namaayah` |
+| namaibu | `parents.mother_name` | Preserve approved spelling/case |
+| hari | `event.day_name` | Uppercase for compatibility |
+| tarikh | `event.event_date` | Malay display date, e.g. `26 DISEMBER 2026` |
+| tarikhhari | `event.event_date` | Day number without leading zero, e.g. `26` |
+| bulan | `event.event_date` | Malay short month + year, e.g. `DIS 2026` |
+| bulanislam | `event.hijri_date` | Preserve approved display text |
+| masabersanding | `event.bersanding_time` | Preserve approved display text |
+| masajamuanmakan | `event.meal_time` | Preserve approved display text |
+| alamat | `event.full_address` | Preserve cleaned approved address |
+| qrlink | `event.google_maps_url` | Valid URL; current JSX turns it into QR |
+| nama1 | `event.contacts[1].contact_name` | Empty if missing |
+| notel1 | `event.contacts[1].contact_phone` | Normalized phone |
+| nama2 | `event.contacts[2].contact_name` | Empty if missing |
+| notel2 | `event.contacts[2].contact_phone` | Normalized phone |
+| nama3 | `event.contacts[3].contact_name` | Empty if missing |
+| notel3 | `event.contacts[3].contact_phone` | Normalized phone |
+| flaggambar | **UNRESOLVED / NOT CONSUMED BY JSX** | Empty until semantics are verified |
+
+## 7. Verified PSD/JSX layer contract
+
+The supplied PSD exposes layer metadata consistent with the current JSX for:
+
+```text
+namaayah
+namaibu
+namapengantinlelaki
+namapengantinperempuan
+nama1
+notel1
+nama2
+notel2
+nama3
+notel3
+hari
+tarikhhari
+bulan
+bulanislam
+masabersanding
+masajamuanmakan
+alamat
+qrlocation
+```
+
+The JSX additionally attempts to write:
+- singkatanlelaki
+- singkatanperempuan
+- tarikh
+
+Because templates can vary, the exporter contract is CSV-based and the JSX remains
+responsible for "set if layer exists" behavior.
+
+## 8. QR behavior
 
-However, the exact production PSD variable/layer names must be
-verified from the current working PSD.
+Current JSX:
 
-| Photoshop Variable / Layer | Meaning | Export Column | Verified |
-|---|---|---|---|
-| TBD | TBD | TBD | No |
+1. Reads `qrlink`.
+2. Calls `api.qrserver.com` via PowerShell to create a 1200x1200 PNG.
+3. Finds layer `qrlocation`.
+4. Converts it to Smart Object if needed.
+5. Replaces Smart Object content with the QR PNG.
+6. Auto-fits the replacement into the previous layer bounds.
 
-Do not introduce standard side-specific layers such as:
+This is verified current behavior, but it introduces an external runtime dependency:
+internet access to the QR API and Windows PowerShell.
 
-- namabapa_lelaki
-- namabapa_perempuan
+## 9. Template discovery
 
-unless a genuine technical discovery requires escalation.
+The JSX searches:
 
-KKK Engine should perform the side mapping before export.
+```text
+ROOT/MASTER/<Tema>/<DesignCode>/*.psd
+```
 
----
+If that folder does not exist, it falls back to PSD files directly under:
 
-## 9. Mapping Rules
+```text
+ROOT/MASTER/<Tema>/
+```
 
-Status: PENDING VERIFICATION
+whose filenames contain the design code.
 
-### Couple
+Files containing `_patched` or `copy` are skipped.
 
-Internal source:
+## 10. Output behavior
 
-- groom_name
-- bride_name
-- groom_abbreviation
-- bride_abbreviation
+For each processed CSV row, the JSX creates a batch under `OUTPUT` and places the customer
+initially in:
 
-Final Photoshop mapping:
+```text
+1 Waiting Customer
+```
 
-Pending verification.
+It creates per-customer folders:
 
-### Parents
+```text
+Export JPEG
+PSD
+QR
+```
 
-For each merge job, KKK Engine maps the parents belonging to
-that package side into generic parent fields.
+and writes both global and customer logs.
 
-Conceptual example:
+It exports:
+- JPEG quality 12
+- layered PSD
 
-LELAKI job
-→ Lelaki parent records
-→ generic namabapa / namaibu
+The JSX defines stage folders for:
+1. Waiting Customer
+2. Correction
+3. Approved & Balance Payment
+4. Ready To Print
 
-PEREMPUAN job
-→ Perempuan parent records
-→ generic namabapa / namaibu
+but the current script itself initially writes the newly merged customer into stage 1.
 
-Final export headers remain pending verification.
+## 11. Quantity behavior and verified integration defect
 
-### Event
+Current working CSV examples contain values such as:
 
-Each package side has its own event data.
+```text
+200 PCS
+500 PCS
+```
 
-Fields may include:
+The current JSX later appends `" PCS"` again when building customer/output filenames.
 
-- date
-- Hijri date
-- meal time
-- bersanding time
-- venue
-- address
-- Google Maps URL
-- contact persons
+Therefore a literal `200 PCS` input can produce filename/folder text containing:
 
-Final Photoshop fields remain pending verification.
+```text
+200 PCS PCS
+```
 
----
+KKK OS exporter must export **numeric quantity only**, for example:
 
-## 10. Date Formatting
+```text
+200
+```
 
-Status: NOT YET VERIFIED
+This preserves the intended visible result when the current JSX appends `PCS`.
 
-KKK OS stores structured date values internally.
+For special template names the JSX overrides quantity:
+- banner → 1
+- banting → 1
+- arrow kanan → 2
+- arrow kiri → 2
+- sticker → 150
+- hanger → 1
 
-Example internal value:
+## 12. Current blocker: qtykad source
 
-2026-12-20
+`kkk_merge_internal_v1` does not currently contain a card quantity field.
 
-The final Photoshop display format must be verified.
+Photoshop export cannot be considered fully production-ready until the approved order/database
+source for `qtykad` is identified or added.
 
-Possible formats must NOT be assumed.
+This document does NOT invent a database field or business rule.
 
-Examples only:
+Technical adapter code therefore requires `qtykad` to be supplied explicitly until the
+database source is approved and wired into the canonical payload.
 
-- 20/12/2026
-- 20 DISEMBER 2026
-- 20 Disember 2026
+## 13. CSV encoding and escaping
 
-Final required format:
+Export:
+- UTF-8 with BOM recommended for Photoshop/Windows compatibility.
+- RFC-style CSV quoting using PHP `fputcsv`.
+- Preserve commas and newlines inside address fields through proper CSV quoting.
+- Do not hand-concatenate CSV rows.
 
-TBD
+The current JSX CSV parser is quote-aware and supports quoted commas/newlines.
 
----
+## 14. One-package and two-package behavior
 
-## 11. Time Formatting
+No change to KKK OS business model:
 
-Status: NOT YET VERIFIED
+- 1-package business order → 1 package side → 1 merge job → 1 CSV row.
+- 2-package business order → 2 package sides → 2 independent merge jobs → 2 CSV rows.
 
-KKK OS stores time consistently.
+Each side must preserve its own:
+- design/theme
+- parents
+- event
+- contacts
+- QR link
 
-Example internal value:
+Rows must never overwrite each other.
 
-12:00
+## 15. Lock status
 
-The final Photoshop display format must be verified.
+VERIFIED and safe to lock now:
+- 28 header names/order
+- columns consumed by JSX
+- CSV → JSX mapping
+- current template lookup behavior
+- current text-layer names
+- QR replacement behavior
+- JPEG/PSD output behavior
+- one-row-per-merge-job rule
 
-Examples only:
+Still pending business/data-source confirmation:
+- database source of `qtykad`
+- semantics/source of `gambar`
+- semantics/source of `flaggambar`
 
-- 12:00
-- 12.00 PM
-- 12.00 TENGAH HARI
-
-Final required format:
-
-TBD
-
----
-
-## 12. Address Formatting
-
-Status: NOT YET VERIFIED
-
-KKK OS performs safe address cleanup while preserving meaningful
-structure.
-
-Need to verify:
-
-- single-line vs multiline;
-- line-break character;
-- maximum lines;
-- punctuation behavior;
-- uppercase/lowercase requirements;
-- handling of postcode/state;
-- CSV quoting behavior.
-
-Final required format:
-
-TBD
-
----
-
-## 13. Name Formatting
-
-KKK OS must not blindly Title Case Malaysian names.
-
-Need to preserve valid formats such as:
-
-- bin / binti
-- A/L
-- A/P
-- apostrophes
-- hyphens
-- initials
-- supported non-standard capitalization
-
-Photoshop export must use the already approved cleaned customer
-representation unless the verified Photoshop contract requires
-additional display formatting.
-
----
-
-## 14. Contact Persons
-
-Current KKK V1 rule:
-
-Maximum and required operational contact slots remain 3 per event.
-
-Need to verify whether contact persons are:
-
-- included in Photoshop merge;
-- excluded from Photoshop merge;
-- partially included.
-
-Final mapping:
-
-TBD
-
----
-
-## 15. Second Couple
-
-Optional second-couple fields remain supported by KKK OS.
-
-V1 rule:
-
-Second-couple data is NOT part of standard Photoshop automation.
-
-Designer handles this rare case manually.
-
-Therefore no standard Photoshop merge mapping should be added for
-second-couple fields unless Project Owner approves a scope change.
-
----
-
-## 16. File Naming Contract
-
-Status: NOT YET VERIFIED
-
-Need to verify actual downstream file naming for:
-
-- imported data file;
-- PSD output;
-- JPG output;
-- PDF output;
-- folders;
-- versioned corrections.
-
-### Internal KKK job IDs
-
-1-package Lelaki:
-
-ORDERID-L
-
-1-package Perempuan:
-
-ORDERID-P
-
-2-package:
-
-ORDERID-L
-ORDERID-P
-
-Need to verify whether these job IDs should also become downstream
-filenames.
-
----
-
-## 17. Two-Package Collision Protection
-
-Mandatory behavior:
-
-One business order with two packages must generate two independent
-Photoshop merge jobs.
-
-Example:
-
-KKK-260909-0007-L
-KKK-260909-0007-P
-
-Need to verify:
-
-- unique output filename;
-- unique row;
-- unique PSD output;
-- unique preview;
-- unique designer job reference.
-
-No Lelaki/Perempuan output may overwrite the other.
-
----
-
-## 18. Photoshop Execution Process
-
-Status: NOT YET VERIFIED
-
-Document the actual designer workflow exactly.
-
-Example structure:
-
-1. Designer receives ready job.
-2. Designer obtains merge data.
-3. Designer opens PSD.
-4. Designer imports data / runs script.
-5. Photoshop generates artwork.
-6. Output file is saved using verified naming.
-7. Artwork is attached to the KKK workflow.
-
-Actual current procedure:
-
-TBD
-
----
-
-## 19. Error Handling
-
-Need to verify actual Photoshop-side behavior when:
-
-- required value is blank;
-- CSV column missing;
-- invalid date/time;
-- multiline text too long;
-- filename already exists;
-- invalid encoding;
-- image/path missing;
-- script fails.
-
-KKK OS should block or clearly surface export errors where
-practical.
-
----
-
-## 20. Verification Test Matrix
-
-### T09A — 1-Package
-
-Confirmed KKK order
-→ one merge job
-→ one verified export row
-→ successful Photoshop merge
-
-Status: PENDING
-
-### T09B — 2-Package
-
-Confirmed KKK order
-→ Lelaki merge job
-→ Perempuan merge job
-→ two verified export rows
-→ two successful Photoshop outputs
-→ no overwrite
-
-Status: PENDING
-
-### T09C — Exact Headers
-
-Generated headers exactly match working Auto Merge contract.
-
-Status: PENDING
-
-### T09D — Date Formatting
-
-Generated date matches actual Photoshop requirement.
-
-Status: PENDING
-
-### T09E — Time Formatting
-
-Generated time matches actual Photoshop requirement.
-
-Status: PENDING
-
-### T09F — Address / Line Breaks
-
-Multiline address survives export/import correctly.
-
-Status: PENDING
-
-### T09G — Malaysian Names / Encoding
-
-Names with legitimate Malaysian formats survive without corruption.
-
-Status: PENDING
-
-### T09H — Collision Protection
-
-Lelaki and Perempuan output files do not overwrite each other.
-
-Status: PENDING
-
----
-
-## 21. Contract Approval State
-
-Current state:
-
-PENDING VERIFICATION
-
-The contract may only move to:
-
-VERIFIED
-
-after the KKK Systems Team has directly inspected and tested the
-current working Auto Merge implementation.
-
-The contract may only move to:
-
-LOCKED FOR V1
-
-after:
-
-- exact headers are documented;
-- exact formatting is documented;
-- 1-package test succeeds;
-- 2-package test succeeds;
-- output naming is collision-safe;
-- relevant technical limitations are documented.
-
-Any discovery that changes KKK business rules, V1 scope, customer
-experience, meaningful cost or operational policy must be
-escalated to the Project Owner.
+No final business rule has been invented for those unresolved fields.
