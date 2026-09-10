@@ -33,4 +33,8 @@ class MergeJob extends Model
     {
         return $this->belongsTo(OrderPackageSide::class, 'order_package_side_id');
     }
+    public function designJob()
+    {
+        return $this->hasOne(\App\Models\DesignJob::class);
+    }
 }

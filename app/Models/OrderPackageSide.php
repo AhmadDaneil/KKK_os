@@ -28,4 +28,9 @@ class OrderPackageSide extends Model
     {
     return $this->hasOne(\App\Models\MergeJob::class);
     }
+    public function designJob()
+    {
+        return $this->hasOne(\App\Models\DesignJob::class);
+    }
+    
 }

@@ -53,4 +53,12 @@ class Order extends Model
     {
         return $this->hasMany(\App\Models\MergeJob::class);
     }
+    public function designJobs()
+    {
+        return $this->hasMany(\App\Models\DesignJob::class);
+    }
+    public function payments()
+    {
+        return $this->hasMany(\App\Models\PaymentTransaction::class);
+    }
 }

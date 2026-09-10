@@ -1,0 +1,23 @@
+Add to routes/web.php:
+
+use App\Http\Controllers\DevBalancePaymentController;
+
+if (app()->environment('local')) {
+    Route::post(
+        '/dev/orders/{orderId}/balance-payment',
+        [DevBalancePaymentController::class, 'create']
+    )->name('dev.orders.balance-payment.create');
+
+    Route::post(
+        '/dev/payments/{paymentId}/pay',
+        [DevBalancePaymentController::class, 'pay']
+    )->name('dev.payments.pay');
+}
+
+Add these local-only CSRF exceptions in bootstrap/app.php:
+
+'dev/orders/*/balance-payment',
+'dev/payments/*/pay',
+
+Do NOT exempt production payment callbacks blindly.
+A real payment provider callback must be verified according to the provider's documented signature/authentication mechanism.

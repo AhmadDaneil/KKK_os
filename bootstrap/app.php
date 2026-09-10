@@ -15,6 +15,9 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->validateCsrfTokens(except: [
             'dev/orders',
             'dev/orders/*/merge-jobs',
+            'dev/orders/*/design-jobs',
+            'dev/orders/*/balance-payment',
+            'dev/payments/*/pay',
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

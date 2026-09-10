@@ -1,0 +1,20 @@
+Add to routes/web.php:
+
+use App\Http\Controllers\CustomerArtworkReviewController;
+
+Route::get(
+    '/order/{orderId}/artwork',
+    [CustomerArtworkReviewController::class, 'show']
+)->name('orders.artwork.review');
+
+Route::post(
+    '/order/{orderId}/artwork/{designJobId}/correction',
+    [CustomerArtworkReviewController::class, 'correction']
+)->name('orders.artwork.correction');
+
+Route::post(
+    '/order/{orderId}/artwork/{designJobId}/approve',
+    [CustomerArtworkReviewController::class, 'approve']
+)->name('orders.artwork.approve');
+
+Do NOT exempt these customer routes from CSRF.

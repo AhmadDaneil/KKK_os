@@ -7,18 +7,28 @@ use App\Models\MergeJob;
 interface PhotoshopExportContract
 {
     /**
-     * Transform one canonical merge job into the exact
-     * row required by the verified Photoshop integration.
+     * Transform one internal canonical merge job
+     * into one exact Photoshop-ready export row.
+     *
+     * The actual mapping must follow the verified
+     * Photoshop Auto Merge contract.
      */
     public function transform(MergeJob $job): array;
 
     /**
-     * Exact ordered column/header list required downstream.
+     * Return the exact ordered list of export headers.
+     *
+     * Do not guess these headers.
+     * They must be verified from the real working
+     * Photoshop Sheet/CSV.
      */
     public function headers(): array;
 
     /**
-     * Contract version for auditability.
+     * Contract version for traceability.
+     *
+     * Example:
+     * photoshop_auto_merge_v1
      */
     public function version(): string;
 }
