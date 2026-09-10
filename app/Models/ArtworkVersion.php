@@ -18,4 +18,8 @@ class ArtworkVersion extends Model
     {
         return $this->hasMany(\App\Models\ArtworkReviewAction::class);
     }
+    public function printJobs()
+    {
+        return $this->hasMany(\App\Models\PrintJob::class);
+    }
 }

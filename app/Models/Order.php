@@ -61,4 +61,8 @@ class Order extends Model
     {
         return $this->hasMany(\App\Models\PaymentTransaction::class);
     }
+    public function printJobs()
+    {
+        return $this->hasMany(\App\Models\PrintJob::class);
+    }
 }

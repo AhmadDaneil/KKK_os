@@ -9,6 +9,7 @@ use App\Http\Controllers\CustomerOrderConfirmController;
 use App\Http\Controllers\DevMergeJobController;
 use App\Http\Controllers\DevDesignJobController;
 use App\Http\Controllers\CustomerArtworkReviewController;
+use App\Http\Controllers\DevPrintJobController;
 
 Route::get('/order/{orderId}', [CustomerDashboardController::class, 'show'])
     ->name('orders.dashboard');
@@ -70,4 +71,11 @@ if (app()->environment('local')) {
         '/dev/payments/{paymentId}/pay',
         [DevBalancePaymentController::class, 'pay']
     )->name('dev.payments.pay');
+}
+
+if (app()->environment('local')) {
+    Route::post(
+        '/dev/orders/{orderId}/print-jobs',
+        [DevPrintJobController::class, 'store']
+    )->name('dev.orders.print-jobs.store');
 }

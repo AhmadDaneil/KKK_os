@@ -27,4 +27,8 @@ class DesignJob extends Model
     {
         return $this->hasMany(\App\Models\ArtworkReviewAction::class);
     }
+    public function printJob()
+    {
+        return $this->hasOne(\App\Models\PrintJob::class);
+    }
 }
