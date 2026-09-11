@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Services\Orders\CustomerOrderSessionAccessService;
+use App\Services\Orders\ResolveOrderAccessService;
 use App\Services\Orders\SaveOrderDraftService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -12,10 +12,11 @@ class CustomerOrderDraftController extends Controller
     public function update(
         Request $request,
         string $orderId,
-        CustomerOrderSessionAccessService $access,
+        ResolveOrderAccessService $access,
         SaveOrderDraftService $saveDraft,
     ): RedirectResponse {
-        $order = $access->resolve($request, $orderId);
+        $plainToken = (string) $request->query('token', '');
+        $order = $access->resolve($orderId, $plainToken);
 
         $validated = $request->validate([
             'couple' => ['sometimes', 'array'],
@@ -23,7 +24,9 @@ class CustomerOrderDraftController extends Controller
             'couple.groom_abbreviation' => ['nullable', 'string', 'max:100'],
             'couple.bride_name' => ['nullable', 'string', 'max:255'],
             'couple.bride_abbreviation' => ['nullable', 'string', 'max:100'],
+
             'sides' => ['sometimes', 'array'],
+
             'sides.LELAKI.design.theme' => ['nullable', 'string', 'max:255'],
             'sides.LELAKI.design.design_code' => ['nullable', 'string', 'max:100'],
             'sides.LELAKI.design.card_title' => ['nullable', 'string', 'max:255'],
@@ -40,6 +43,7 @@ class CustomerOrderDraftController extends Controller
             'sides.LELAKI.event.contacts' => ['sometimes', 'array'],
             'sides.LELAKI.event.contacts.*.contact_name' => ['nullable', 'string', 'max:255'],
             'sides.LELAKI.event.contacts.*.contact_phone' => ['nullable', 'string', 'max:50'],
+
             'sides.PEREMPUAN.design.theme' => ['nullable', 'string', 'max:255'],
             'sides.PEREMPUAN.design.design_code' => ['nullable', 'string', 'max:100'],
             'sides.PEREMPUAN.design.card_title' => ['nullable', 'string', 'max:255'],
@@ -56,6 +60,7 @@ class CustomerOrderDraftController extends Controller
             'sides.PEREMPUAN.event.contacts' => ['sometimes', 'array'],
             'sides.PEREMPUAN.event.contacts.*.contact_name' => ['nullable', 'string', 'max:255'],
             'sides.PEREMPUAN.event.contacts.*.contact_phone' => ['nullable', 'string', 'max:50'],
+
             'fulfilment' => ['sometimes', 'array'],
             'fulfilment.method' => ['nullable', 'in:COURIER,PICKUP'],
             'fulfilment.recipient_name' => ['nullable', 'string', 'max:255'],
@@ -66,7 +71,10 @@ class CustomerOrderDraftController extends Controller
         $saveDraft->save($order, $validated);
 
         return redirect()
-            ->route('orders.dashboard', ['orderId' => $order->order_id])
+            ->route('orders.dashboard', [
+                'orderId' => $order->order_id,
+                'token' => $plainToken,
+            ])
             ->with('draft_saved', true);
     }
 }

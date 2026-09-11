@@ -98,40 +98,50 @@ class SaveAndResumeDraftTest extends TestCase
     }
 
     public function test_dashboard_form_can_save_and_resume_existing_values(): void
-    {
-        $order = app(CreateOrderService::class)->create([
-            'package_count' => 1,
-            'side' => 'PEREMPUAN',
-        ]);
+{
+    $order = app(CreateOrderService::class)->create([
+        'package_count' => 1,
+        'side' => 'PEREMPUAN',
+    ]);
 
-        $url = app(GenerateOrderAccessLinkService::class)->generate($order);
-        parse_str((string) parse_url($url, PHP_URL_QUERY), $query);
-        $token = $query['token'];
+    $url = app(GenerateOrderAccessLinkService::class)->generate($order);
 
-        $response = $this->post(route('orders.draft.update', [
+    $path = (string) parse_url($url, PHP_URL_PATH);
+    $query = (string) parse_url($url, PHP_URL_QUERY);
+    $magicLinkRequest = $query === ''
+        ? $path
+        : $path.'?'.$query;
+
+    $this->get($magicLinkRequest)
+        ->assertRedirect(route('orders.dashboard', [
             'orderId' => $order->order_id,
-            'token' => $token,
-        ]), [
-            'couple' => [
-                'groom_name' => 'Hakim',
-                'bride_name' => 'Sarah',
-            ],
-            'sides' => [
-                'PEREMPUAN' => [
-                    'design' => ['design_code' => 'p500'],
-                ],
-            ],
-        ]);
+        ]));
 
-        $response->assertRedirect();
+    $response = $this->post(route('orders.draft.update', [
+        'orderId' => $order->order_id,
+    ]), [
+        'couple' => [
+            'groom_name' => 'Hakim',
+            'bride_name' => 'Sarah',
+        ],
+        'sides' => [
+            'PEREMPUAN' => [
+                'design' => ['design_code' => 'p500'],
+            ],
+        ],
+    ]);
 
-        $this->get(route('orders.dashboard', [
-            'orderId' => $order->order_id,
-            'token' => $token,
-        ]))
-            ->assertOk()
-            ->assertSee('Hakim')
-            ->assertSee('Sarah')
-            ->assertSee('P500');
+    $response->assertRedirect(route('orders.dashboard', [
+        'orderId' => $order->order_id,
+    ]));
+
+    $this->get(route('orders.dashboard', [
+        'orderId' => $order->order_id,
+    ]))
+        ->assertOk()
+        ->assertSee('Hakim')
+        ->assertSee('Sarah')
+        ->assertSee('P500')
+        ->assertDontSee('token=');
     }
 }

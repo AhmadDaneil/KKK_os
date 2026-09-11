@@ -1,17 +1,18 @@
 <?php
 
+use App\Http\Controllers\CustomerArtworkReviewController;
 use App\Http\Controllers\CustomerDashboardController;
-use App\Http\Controllers\DevOrderController;
-use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\CustomerOrderConfirmController;
 use App\Http\Controllers\CustomerOrderDraftController;
 use App\Http\Controllers\CustomerOrderReviewController;
-use App\Http\Controllers\CustomerOrderConfirmController;
-use App\Http\Controllers\DevMergeJobController;
+use App\Http\Controllers\DevBalancePaymentController;
 use App\Http\Controllers\DevDesignJobController;
-use App\Http\Controllers\CustomerArtworkReviewController;
-use App\Http\Controllers\DevPrintJobController;
-use App\Http\Controllers\DevPackingJobController;
 use App\Http\Controllers\DevFulfilmentJobController;
+use App\Http\Controllers\DevMergeJobController;
+use App\Http\Controllers\DevOrderController;
+use App\Http\Controllers\DevPackingJobController;
+use App\Http\Controllers\DevPrintJobController;
+use Illuminate\Support\Facades\Route;
 
 Route::get('/order/{orderId}', [CustomerDashboardController::class, 'show'])
     ->name('orders.dashboard');
@@ -20,9 +21,6 @@ Route::post(
     '/order/{orderId}/draft',
     [CustomerOrderDraftController::class, 'update']
 )->name('orders.draft.update');
-
-Route::post('/dev/orders', [DevOrderController::class, 'store'])
-    ->name('dev.orders.store');
 
 Route::get(
     '/order/{orderId}/review',
@@ -49,21 +47,29 @@ Route::post(
     [CustomerArtworkReviewController::class, 'approve']
 )->name('orders.artwork.approve');
 
+/*
+|--------------------------------------------------------------------------
+| Local development routes
+|--------------------------------------------------------------------------
+|
+| These endpoints exist only for local development/testing workflows.
+| They MUST NOT be registered in testing, staging, or production.
+|
+*/
 if (app()->environment('local')) {
+    Route::post('/dev/orders', [DevOrderController::class, 'store'])
+        ->name('dev.orders.store');
+
     Route::post(
         '/dev/orders/{orderId}/merge-jobs',
         [DevMergeJobController::class, 'store']
     )->name('dev.orders.merge-jobs.store');
-}
 
-if (app()->environment('local')) {
     Route::post(
         '/dev/orders/{orderId}/design-jobs',
         [DevDesignJobController::class, 'store']
     )->name('dev.orders.design-jobs.store');
-}
 
-if (app()->environment('local')) {
     Route::post(
         '/dev/orders/{orderId}/balance-payment',
         [DevBalancePaymentController::class, 'create']
@@ -73,22 +79,17 @@ if (app()->environment('local')) {
         '/dev/payments/{paymentId}/pay',
         [DevBalancePaymentController::class, 'pay']
     )->name('dev.payments.pay');
-}
 
-if (app()->environment('local')) {
     Route::post(
         '/dev/orders/{orderId}/print-jobs',
         [DevPrintJobController::class, 'store']
     )->name('dev.orders.print-jobs.store');
-}
-if (app()->environment('local')) {
+
     Route::post(
         '/dev/orders/{orderId}/packing-job',
         [DevPackingJobController::class, 'store']
     )->name('dev.orders.packing-job.store');
-}
 
-if (app()->environment('local')) {
     Route::post(
         '/dev/orders/{orderId}/fulfilment-job',
         [DevFulfilmentJobController::class, 'store']

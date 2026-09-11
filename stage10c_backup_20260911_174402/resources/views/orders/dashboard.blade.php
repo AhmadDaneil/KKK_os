@@ -3,7 +3,6 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="referrer" content="no-referrer">
     <title>KKK OS - {{ $order->order_id }}</title>
     <style>
         body { font-family: Arial, sans-serif; max-width: 980px; margin: 32px auto; padding: 0 16px; line-height: 1.4; }
@@ -41,16 +40,28 @@
 
     @php($couple = $order->couples->firstWhere('couple_number', 1))
 
-    <form method="POST" action="{{ route('orders.draft.update', ['orderId' => $order->order_id]) }}">
+    <form method="POST" action="{{ route('orders.draft.update', ['orderId' => $order->order_id, 'token' => $plainToken]) }}">
         @csrf
 
         <fieldset>
             <legend>Maklumat Pasangan</legend>
             <div class="grid">
-                <div><label>Nama Pengantin Lelaki</label><input name="couple[groom_name]" value="{{ old('couple.groom_name', $couple?->groom_name) }}"></div>
-                <div><label>Singkatan Pengantin Lelaki</label><input name="couple[groom_abbreviation]" value="{{ old('couple.groom_abbreviation', $couple?->groom_abbreviation) }}"></div>
-                <div><label>Nama Pengantin Perempuan</label><input name="couple[bride_name]" value="{{ old('couple.bride_name', $couple?->bride_name) }}"></div>
-                <div><label>Singkatan Pengantin Perempuan</label><input name="couple[bride_abbreviation]" value="{{ old('couple.bride_abbreviation', $couple?->bride_abbreviation) }}"></div>
+                <div>
+                    <label>Nama Pengantin Lelaki</label>
+                    <input name="couple[groom_name]" value="{{ old('couple.groom_name', $couple?->groom_name) }}">
+                </div>
+                <div>
+                    <label>Singkatan Pengantin Lelaki</label>
+                    <input name="couple[groom_abbreviation]" value="{{ old('couple.groom_abbreviation', $couple?->groom_abbreviation) }}">
+                </div>
+                <div>
+                    <label>Nama Pengantin Perempuan</label>
+                    <input name="couple[bride_name]" value="{{ old('couple.bride_name', $couple?->bride_name) }}">
+                </div>
+                <div>
+                    <label>Singkatan Pengantin Perempuan</label>
+                    <input name="couple[bride_abbreviation]" value="{{ old('couple.bride_abbreviation', $couple?->bride_abbreviation) }}">
+                </div>
             </div>
         </fieldset>
 
@@ -59,17 +70,35 @@
             @php($event = $packageSide->event)
             <fieldset>
                 <legend>Pakej {{ ucfirst(strtolower($side)) }}</legend>
+
                 <h3>Design</h3>
                 <div class="grid">
-                    <div><label>Tema</label><input name="sides[{{ $side }}][design][theme]" value="{{ old("sides.$side.design.theme", $packageSide->design?->theme) }}"></div>
-                    <div><label>Kod Design</label><input name="sides[{{ $side }}][design][design_code]" value="{{ old("sides.$side.design.design_code", $packageSide->design?->design_code) }}"></div>
-                    <div><label>Tajuk Kad</label><input name="sides[{{ $side }}][design][card_title]" value="{{ old("sides.$side.design.card_title", $packageSide->design?->card_title) }}"></div>
+                    <div>
+                        <label>Tema</label>
+                        <input name="sides[{{ $side }}][design][theme]" value="{{ old("sides.$side.design.theme", $packageSide->design?->theme) }}">
+                    </div>
+                    <div>
+                        <label>Kod Design</label>
+                        <input name="sides[{{ $side }}][design][design_code]" value="{{ old("sides.$side.design.design_code", $packageSide->design?->design_code) }}">
+                    </div>
+                    <div>
+                        <label>Tajuk Kad</label>
+                        <input name="sides[{{ $side }}][design][card_title]" value="{{ old("sides.$side.design.card_title", $packageSide->design?->card_title) }}">
+                    </div>
                 </div>
+
                 <h3>Ibu Bapa</h3>
                 <div class="grid">
-                    <div><label>Nama Bapa</label><input name="sides[{{ $side }}][parents][father_name]" value="{{ old("sides.$side.parents.father_name", $packageSide->parents?->father_name) }}"></div>
-                    <div><label>Nama Ibu</label><input name="sides[{{ $side }}][parents][mother_name]" value="{{ old("sides.$side.parents.mother_name", $packageSide->parents?->mother_name) }}"></div>
+                    <div>
+                        <label>Nama Bapa</label>
+                        <input name="sides[{{ $side }}][parents][father_name]" value="{{ old("sides.$side.parents.father_name", $packageSide->parents?->father_name) }}">
+                    </div>
+                    <div>
+                        <label>Nama Ibu</label>
+                        <input name="sides[{{ $side }}][parents][mother_name]" value="{{ old("sides.$side.parents.mother_name", $packageSide->parents?->mother_name) }}">
+                    </div>
                 </div>
+
                 <h3>Majlis</h3>
                 <div class="grid">
                     <div><label>Hari</label><input name="sides[{{ $side }}][event][day_name]" value="{{ old("sides.$side.event.day_name", $event?->day_name) }}"></div>
@@ -83,11 +112,18 @@
                 <textarea rows="4" name="sides[{{ $side }}][event][full_address]">{{ old("sides.$side.event.full_address", $event?->full_address) }}</textarea>
                 <label>Google Maps URL</label>
                 <input type="url" name="sides[{{ $side }}][event][google_maps_url]" value="{{ old("sides.$side.event.google_maps_url", $event?->google_maps_url) }}">
+
                 <h3>Contact Person</h3>
                 @foreach ($event?->contacts?->sortBy('contact_number') ?? [] as $contact)
                     <div class="grid">
-                        <div><label>Contact {{ $contact->contact_number }} - Nama</label><input name="sides[{{ $side }}][event][contacts][{{ $contact->contact_number }}][contact_name]" value="{{ old("sides.$side.event.contacts.{$contact->contact_number}.contact_name", $contact->contact_name) }}"></div>
-                        <div><label>Contact {{ $contact->contact_number }} - Telefon</label><input name="sides[{{ $side }}][event][contacts][{{ $contact->contact_number }}][contact_phone]" value="{{ old("sides.$side.event.contacts.{$contact->contact_number}.contact_phone", $contact->contact_phone) }}"></div>
+                        <div>
+                            <label>Contact {{ $contact->contact_number }} - Nama</label>
+                            <input name="sides[{{ $side }}][event][contacts][{{ $contact->contact_number }}][contact_name]" value="{{ old("sides.$side.event.contacts.{$contact->contact_number}.contact_name", $contact->contact_name) }}">
+                        </div>
+                        <div>
+                            <label>Contact {{ $contact->contact_number }} - Telefon</label>
+                            <input name="sides[{{ $side }}][event][contacts][{{ $contact->contact_number }}][contact_phone]" value="{{ old("sides.$side.event.contacts.{$contact->contact_number}.contact_phone", $contact->contact_phone) }}">
+                        </div>
                     </div>
                 @endforeach
             </fieldset>
@@ -101,13 +137,21 @@
                 <option value="COURIER" @selected(old('fulfilment.method', $order->fulfilment?->method) === 'COURIER')>Courier</option>
                 <option value="PICKUP" @selected(old('fulfilment.method', $order->fulfilment?->method) === 'PICKUP')>Self Pickup</option>
             </select>
-            <label>Nama Penerima (Courier)</label><input name="fulfilment[recipient_name]" value="{{ old('fulfilment.recipient_name', $order->fulfilment?->recipient_name) }}">
-            <label>Telefon Penerima (Courier)</label><input name="fulfilment[recipient_phone]" value="{{ old('fulfilment.recipient_phone', $order->fulfilment?->recipient_phone) }}">
-            <label>Alamat Penghantaran (Courier)</label><textarea rows="4" name="fulfilment[shipping_address]">{{ old('fulfilment.shipping_address', $order->fulfilment?->shipping_address) }}</textarea>
+            <label>Nama Penerima (Courier)</label>
+            <input name="fulfilment[recipient_name]" value="{{ old('fulfilment.recipient_name', $order->fulfilment?->recipient_name) }}">
+            <label>Telefon Penerima (Courier)</label>
+            <input name="fulfilment[recipient_phone]" value="{{ old('fulfilment.recipient_phone', $order->fulfilment?->recipient_phone) }}">
+            <label>Alamat Penghantaran (Courier)</label>
+            <textarea rows="4" name="fulfilment[shipping_address]">{{ old('fulfilment.shipping_address', $order->fulfilment?->shipping_address) }}</textarea>
         </fieldset>
 
         <button type="submit">Simpan Draft</button>
-        <a href="{{ route('orders.review.show', ['orderId' => $order->order_id]) }}">Semak Maklumat & Teruskan</a>
+        <a href="{{ route('orders.review.show', [
+            'orderId' => $order->order_id,
+            'token' => $plainToken
+        ]) }}">
+        Semak Maklumat & Teruskan
+    </a>
     </form>
 </main>
 </body>

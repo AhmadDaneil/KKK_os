@@ -2,19 +2,32 @@
 
 namespace App\Http\Controllers;
 
+use App\Services\Orders\CustomerOrderSessionAccessService;
 use App\Services\Orders\ResolveOrderAccessService;
 use Illuminate\Http\Request;
-use Illuminate\View\View;
 
 class CustomerDashboardController extends Controller
 {
     public function show(
         Request $request,
         string $orderId,
-        ResolveOrderAccessService $access,
-    ): View {
+        ResolveOrderAccessService $tokenAccess,
+        CustomerOrderSessionAccessService $sessionAccess,
+    ) {
         $plainToken = (string) $request->query('token', '');
-        $order = $access->resolve($orderId, $plainToken);
+
+        if ($plainToken !== '') {
+            $order = $sessionAccess->establishFromToken($request, $orderId, $plainToken, $tokenAccess);
+
+            return redirect()
+                ->route('orders.dashboard', ['orderId' => $order->order_id])
+                ->withHeaders([
+                    'Cache-Control' => 'no-store',
+                    'Referrer-Policy' => 'no-referrer',
+                ]);
+        }
+
+        $order = $sessionAccess->resolve($request, $orderId);
 
         $order->load([
             'couples',
@@ -24,6 +37,6 @@ class CustomerDashboardController extends Controller
             'fulfilment',
         ]);
 
-        return view('orders.dashboard', compact('order', 'plainToken'));
+        return view('orders.dashboard', compact('order'));
     }
 }

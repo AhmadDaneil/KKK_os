@@ -12,19 +12,30 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        $middleware->validateCsrfTokens(except: [
-            'dev/orders',
-            'dev/orders/*/merge-jobs',
-            'dev/orders/*/design-jobs',
-            'dev/orders/*/balance-payment',
-            'dev/payments/*/pay',
-            'dev/orders/*/print-jobs',
-            'dev/orders/*/packing-job',
-            'dev/orders/*/fulfilment-job',
-            'dev/fulfilment-jobs/*/ship',
-            'dev/fulfilment-jobs/*/deliver',
-            'dev/fulfilment-jobs/*/collect',
-        ]);
+        /*
+        |--------------------------------------------------------------------------
+        | Local development CSRF exceptions
+        |--------------------------------------------------------------------------
+        |
+        | Only local DEV endpoints are exempted. No production/customer endpoint
+        | is included here, and these exceptions are not activated outside local.
+        |
+        */
+        if (($_ENV['APP_ENV'] ?? $_SERVER['APP_ENV'] ?? getenv('APP_ENV') ?: 'production') === 'local') {
+            $middleware->validateCsrfTokens(except: [
+                'dev/orders',
+                'dev/orders/*/merge-jobs',
+                'dev/orders/*/design-jobs',
+                'dev/orders/*/balance-payment',
+                'dev/payments/*/pay',
+                'dev/orders/*/print-jobs',
+                'dev/orders/*/packing-job',
+                'dev/orders/*/fulfilment-job',
+                'dev/fulfilment-jobs/*/ship',
+                'dev/fulfilment-jobs/*/deliver',
+                'dev/fulfilment-jobs/*/collect',
+            ]);
+        }
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->shouldRenderJsonWhen(
