@@ -1,0 +1,8 @@
+Static patch verification:
+- majlis index: PASS
+- majlis required: PASS
+- PEREMPUAN detection: PASS
+- top/bottom name mapping: PASS
+- top/bottom short mapping: PASS
+- side in folder: PASS
+- side in output basename: PASS
