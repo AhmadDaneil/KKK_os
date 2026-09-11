@@ -1,28 +1,34 @@
-# KKK OS V1 — Stage 9B Photopea Adapter v0.2.2 STANDALONE
+# KKK OS V1 — Stage 9B Photopea Adapter v0.4
 
-This fixes the packaging error in v0.2.1.
+## Purpose
+Validate automatic JPG + PSD generation in Photopea after the already-passing mapping / QR workflow.
 
-v0.2.1 contained only a replacement `updateText()` function. Running that file by itself only defined a function and did not execute the adapter.
+## Expected generated files
+- KKK-260909-0006_KAD_DEPAN.jpg
+- KKK-260909-0006_KAD_DEPAN.psd
+- KKK-260909-0006_KAD_BELAKANG.jpg
+- KKK-260909-0006_KAD_BELAKANG.psd
 
-v0.2.2 is a complete standalone script.
+Photopea documentation states that files created in its script filesystem are offered as a ZIP after the script finishes.
 
 ## Test
-
 1. Close modified PSDs.
-2. Re-open fresh test copies of:
-   - KAD DEPAN
-   - KAD BELAKANG
-3. Photopea > File > Script.
-4. Paste the entire contents of:
-   `photopea/KKK_Photopea_AutoMerge_Adapter_v0_2_2_STANDALONE.js`
-5. Click Run.
+2. Open fresh test copies of KAD DEPAN and KAD BELAKANG.
+3. File > Script.
+4. Paste the complete `KKK_Photopea_AutoMerge_Adapter_v0_4_AUTO_EXPORT.js`.
+5. Run.
+6. Observe:
+   - final report;
+   - whether Photopea offers / downloads a ZIP;
+   - contents of the ZIP.
 
-This build deliberately does NOT auto-fit text. It first verifies reliable full-field mapping on both documents.
+## Acceptance
+PASS only if:
+- both card sides still map correctly;
+- QR remains correct;
+- 2 JPG files exist;
+- 2 PSD files exist;
+- PSD files remain layered/editable;
+- source master copies were not overwritten.
 
-Expected:
-- KAD DEPAN updates.
-- KAD BELAKANG updates.
-- QR updates.
-- Popup report has per-field PASS / MISSING / ERROR.
-
-Do not use the old PATCH_v0_2_1_updateText.js by itself.
+Folder hierarchy and 2-package processing are intentionally not included yet.
