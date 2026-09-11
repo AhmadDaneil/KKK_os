@@ -114,4 +114,39 @@ class PhotoshopAutoMergeContractV1Test extends TestCase
         $this->assertSame('', $row['gambar']);
         $this->assertSame('', $row['flaggambar']);
     }
+
+    public function test_side_aware_contract_requires_majlis_for_photoshop_runtime(): void
+    {
+        $this->assertContains('majlis', PhotoshopAutoMergeContractV1::HEADERS);
+        $this->assertContains('majlis', PhotoshopAutoMergeContractV1::JSX_CONSUMED_HEADERS);
+        $this->assertContains('majlis', PhotoshopAutoMergeContractV1::JSX_REQUIRED_HEADERS);
+        $this->assertNotContains('majlis', PhotoshopAutoMergeContractV1::COMPATIBILITY_ONLY_HEADERS);
+    }
+
+    public function test_row_builder_rejects_invalid_majlis_before_export(): void
+    {
+        $mergeJob = new MergeJob([
+            'job_id' => 'KKK-260911-9999-X',
+            'side' => 'UNKNOWN',
+            'canonical_payload' => [
+                'source' => [
+                    'order_id' => 'KKK-260911-9999',
+                    'side' => 'UNKNOWN',
+                ],
+                'design' => [
+                    'theme' => 'Songket',
+                    'design_code' => 'CKS-218',
+                ],
+                'couple' => [],
+                'parents' => [],
+                'event' => [],
+            ],
+        ]);
+
+        $this->expectException(\RuntimeException::class);
+        $this->expectExceptionMessage('invalid majlis/side');
+
+        app(BuildPhotoshopAutoMergeRowService::class)->build($mergeJob, 500);
+    }
+
 }

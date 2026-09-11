@@ -48,6 +48,7 @@ final class PhotoshopAutoMergeContractV1
         'qtykad',
         'tema',
         'designcode',
+        'majlis',
         'namapengantinlelaki',
         'namapengantinperempuan',
         'singkatanlelaki',
@@ -78,14 +79,14 @@ final class PhotoshopAutoMergeContractV1
         'noinvoice',
         'tema',
         'designcode',
+        'majlis',
     ];
 
     /**
-     * Present in V2 for compatibility but not consumed by the current JSX.
+     * Present in V2 for compatibility but not consumed by the current side-aware JSX.
      */
     public const COMPATIBILITY_ONLY_HEADERS = [
         'gambar',
-        'majlis',
         'flaggambar',
     ];
 

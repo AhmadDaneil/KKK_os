@@ -65,10 +65,17 @@ class BuildPhotoshopAutoMergeRowService
         $orderId = trim((string) ($source['order_id'] ?? ''));
         $theme = trim((string) ($design['theme'] ?? ''));
         $designCode = strtoupper(trim((string) ($design['design_code'] ?? '')));
+        $majlis = strtoupper(trim((string) ($source['side'] ?? '')));
 
         if ($orderId === '' || $theme === '' || $designCode === '') {
             throw new RuntimeException(
                 "Merge job {$mergeJob->job_id} is missing noinvoice, tema, or designcode."
+            );
+        }
+
+        if (! in_array($majlis, ['LELAKI', 'PEREMPUAN'], true)) {
+            throw new RuntimeException(
+                "Merge job {$mergeJob->job_id} has invalid majlis/side: {$majlis}."
             );
         }
 
@@ -81,10 +88,13 @@ class BuildPhotoshopAutoMergeRowService
             'tema' => $theme,
             'designcode' => $designCode,
 
-            // Present in the working V2 CSV but not consumed by the current JSX.
-            // Do not invent semantics until their sources are verified.
+            // `gambar` remains compatibility-only.
             'gambar' => '',
-            'majlis' => strtoupper(trim((string) ($source['side'] ?? ''))),
+
+            // `majlis` is now actively consumed by the approved side-aware JSX:
+            // LELAKI = groom above bride; PEREMPUAN = bride above groom.
+            // The semantic bride/groom CSV fields themselves remain unchanged.
+            'majlis' => $majlis,
 
             'namapengantinlelaki' => $this->text($couple['groom_name'] ?? ''),
             'namapengantinperempuan' => $this->text($couple['bride_name'] ?? ''),
