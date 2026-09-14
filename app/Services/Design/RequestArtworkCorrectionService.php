@@ -14,6 +14,14 @@ class RequestArtworkCorrectionService
         return DB::transaction(function () use ($designJob, $comment) {
             $designJob->refresh();
 
+            $designJob->loadMissing('order');
+
+            if ($designJob->order->isTerminalOperationalStatus()) {
+            throw new RuntimeException(
+            "Correction cannot be requested because order {$designJob->order->order_id} is terminal."
+            );
+            }
+
             if ($designJob->status !== 'DESIGN_READY') {
                 throw new RuntimeException(
                     "Correction can only be requested when design job {$designJob->id} is DESIGN_READY."

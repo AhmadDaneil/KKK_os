@@ -12,6 +12,12 @@ class CustomerOrderReviewController extends Controller
     public function show(Request $request, string $orderId, CustomerOrderSessionAccessService $access, ValidateOrderCompletionService $validator, BuildFinalReviewService $review)
     {
         $order = $access->resolve($request, $orderId);
+
+        if ($order->status !== 'DETAILS_INCOMPLETE') {
+            return redirect()->route('orders.dashboard', [
+            'orderId' => $order->order_id,
+            ]);
+        }
         $validation = $validator->validate($order);
 
         if (! $validation['complete']) {

@@ -14,7 +14,18 @@ class ConfirmOrderDetailsService
 
     public function confirm(Order $order): Order
     {
+        if ($order->status !== 'DETAILS_INCOMPLETE') {
+            throw ValidationException::withMessages([
+            'order' => 'Maklumat tempahan ini tidak boleh disahkan semula.',
+        ]);
+}
         $result = $this->completionValidator->validate($order);
+
+        if ($order->status !== 'DETAILS_INCOMPLETE') {
+        throw ValidationException::withMessages([
+            'order' => 'Maklumat tempahan ini tidak boleh disahkan semula.',
+        ]);
+        }
 
         if (! $result['complete']) {
             throw ValidationException::withMessages([

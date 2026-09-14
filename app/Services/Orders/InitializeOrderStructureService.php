@@ -23,6 +23,7 @@ class InitializeOrderStructureService
             }
 
             $order->couples()->firstOrCreate(['couple_number' => 1]);
+            $order->couples()->firstOrCreate(['couple_number' => 2]);
             $order->fulfilment()->firstOrCreate([]);
 
             foreach ($sides as $side) {

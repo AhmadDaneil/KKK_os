@@ -5,24 +5,161 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="referrer" content="no-referrer">
     <title>KKK OS - {{ $order->order_id }}</title>
-    <style>
-        body { font-family: Arial, sans-serif; max-width: 980px; margin: 32px auto; padding: 0 16px; line-height: 1.4; }
-        fieldset { margin: 24px 0; padding: 18px; }
-        label { display: block; margin-top: 12px; font-weight: 600; }
-        input, textarea, select { width: 100%; box-sizing: border-box; padding: 9px; margin-top: 4px; }
-        .grid { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 12px; }
-        .notice { padding: 12px; background: #eef8ee; margin: 16px 0; }
-        .errors { padding: 12px; background: #fff0f0; margin: 16px 0; }
-        button { padding: 11px 18px; cursor: pointer; }
-        @media (max-width: 700px) { .grid { grid-template-columns: 1fr; } }
-    </style>
+    <link rel="stylesheet" href="{{ asset('css/customer-dashboard.css') }}">
 </head>
 <body>
 <main>
-    <h1>King Kad Kahwin</h1>
-    <p><strong>Order ID:</strong> {{ $order->order_id }}</p>
-    <p><strong>Status:</strong> {{ $order->status }}</p>
-    <p><strong>Pakej:</strong> {{ $order->package_count }}</p>
+    @php
+    $statusInfo = match ($order->status) {
+        'BOOKING_PENDING' => [
+            'label' => 'Tempahan Sedang Diproses',
+            'message' => 'Tempahan anda sedang diproses.',
+        ],
+
+        'BOOKED', 'DEPOSIT_PAID' => [
+            'label' => 'Tempahan Diterima',
+            'message' => 'Tempahan anda telah diterima.',
+        ],
+
+        'DETAILS_INCOMPLETE' => [
+            'label' => 'Maklumat Belum Lengkap',
+            'message' => 'Lengkapkan maklumat yang diperlukan sebelum membuat pengesahan.',
+        ],
+
+        'DETAILS_CONFIRMED' => [
+            'label' => 'Maklumat Telah Disahkan',
+            'message' => 'Maklumat tempahan anda telah berjaya disahkan.',
+        ],
+
+        'READY_FOR_DESIGN' => [
+            'label' => 'Menunggu Proses Design',
+            'message' => 'Maklumat anda telah diterima dan sedia untuk proses design.',
+        ],
+
+        'DESIGN_IN_PROGRESS' => [
+            'label' => 'Design Sedang Disediakan',
+            'message' => 'Designer sedang menyediakan artwork tempahan anda.',
+        ],
+
+        'DESIGN_READY' => [
+            'label' => 'Artwork Sedia Untuk Semakan',
+            'message' => 'Artwork anda telah tersedia untuk semakan.',
+        ],
+
+        'CORRECTION_REQUESTED' => [
+            'label' => 'Pembetulan Artwork Sedang Diproses',
+            'message' => 'Permintaan pembetulan anda telah diterima.',
+        ],
+
+        'DESIGN_APPROVED' => [
+            'label' => 'Artwork Diluluskan',
+            'message' => 'Artwork anda telah diluluskan.',
+        ],
+
+        'BALANCE_PENDING' => [
+            'label' => 'Menunggu Bayaran Baki',
+            'message' => 'Bayaran baki diperlukan sebelum proses seterusnya.',
+        ],
+
+        'PAID' => [
+            'label' => 'Bayaran Selesai',
+            'message' => 'Bayaran tempahan anda telah selesai.',
+        ],
+
+        'PRINTING' => [
+            'label' => 'Dalam Proses Cetakan',
+            'message' => 'Tempahan anda sedang dicetak.',
+        ],
+
+        'PACKING' => [
+            'label' => 'Dalam Proses Pembungkusan',
+            'message' => 'Tempahan anda sedang dibungkus.',
+        ],
+
+        'READY_FOR_PICKUP' => [
+            'label' => 'Sedia Untuk Pickup',
+            'message' => 'Tempahan anda telah sedia untuk diambil.',
+        ],
+
+        'SHIPPED' => [
+            'label' => 'Telah Dihantar',
+            'message' => 'Tempahan anda telah diserahkan kepada courier.',
+        ],
+
+        'COMPLETED' => [
+            'label' => 'Tempahan Selesai',
+            'message' => 'Tempahan anda telah selesai.',
+        ],
+
+        'CANCELLED' => [
+            'label' => 'Tempahan Dibatalkan',
+            'message' => 'Tempahan ini telah dibatalkan.',
+        ],
+
+        'ARCHIVED' => [
+            'label' => 'Tempahan Diarkibkan',
+            'message' => 'Tempahan ini telah diarkibkan.',
+        ],
+
+        default => [
+            'label' => 'Status Tempahan',
+            'message' => 'Status tempahan anda sedang dikemas kini.',
+        ],
+    };
+@endphp
+
+<header class="order-summary">
+    <div class="order-summary-heading">
+        <div>
+            <p class="eyebrow">KING KAD KAHWIN</p>
+            <h1>Tempahan Anda</h1>
+        </div>
+
+        <span class="status-badge">
+            {{ $statusInfo['label'] }}
+        </span>
+    </div>
+
+    <div class="order-summary-grid">
+        <div>
+            <span class="summary-label">Order ID</span>
+            <strong>{{ $order->order_id }}</strong>
+        </div>
+
+        <div>
+            <span class="summary-label">Pakej</span>
+            <strong>
+                {{ $order->package_count }}
+                Pakej
+            </strong>
+        </div>
+
+        @if ($order->customer_name)
+            <div>
+                <span class="summary-label">Nama Pelanggan</span>
+                <strong>{{ $order->customer_name }}</strong>
+            </div>
+        @endif
+
+        @if ($order->customer_phone)
+            <div>
+                <span class="summary-label">No. Telefon</span>
+                <strong>{{ $order->customer_phone }}</strong>
+            </div>
+        @endif
+
+        @if ($order->customer_email)
+            <div>
+                <span class="summary-label">Email</span>
+                <strong>{{ $order->customer_email }}</strong>
+            </div>
+        @endif
+    </div>
+
+    <div class="order-status-message">
+        {{ $statusInfo['message'] }}
+    </div>
+</header>
 
     @if (session('draft_saved'))
         <div class="notice">Draft berjaya disimpan. Anda boleh keluar dan sambung semula melalui link dashboard yang sama.</div>
@@ -40,9 +177,26 @@
     @endif
 
     @php($couple = $order->couples->firstWhere('couple_number', 1))
+    @php($secondCouple = $order->couples->firstWhere('couple_number', 2))
+    @php($isEditable = $order->status === 'DETAILS_INCOMPLETE')
 
-    <form method="POST" action="{{ route('orders.draft.update', ['orderId' => $order->order_id]) }}">
+    @if (! $isEditable)
+        <div class="notice readonly-notice">
+            <strong>Maklumat tempahan telah dikunci.</strong>
+            <div>
+                Maklumat yang telah disahkan hanya boleh dilihat dan tidak boleh diubah.
+            </div>
+        </div>
+    @endif
+
+    <form
+        method="POST"
+        action="{{ route('orders.draft.update', ['orderId' => $order->order_id]) }}"
+        enctype="multipart/form-data"
+    >
         @csrf
+
+        <fieldset class="customer-data-lock" @disabled(! $isEditable)>
 
         <fieldset>
             <legend>Maklumat Pasangan</legend>
@@ -53,18 +207,139 @@
                 <div><label>Singkatan Pengantin Perempuan</label><input name="couple[bride_abbreviation]" value="{{ old('couple.bride_abbreviation', $couple?->bride_abbreviation) }}"></div>
             </div>
         </fieldset>
+        <fieldset>
+    <legend>Pasangan Kedua (Jika Ada)</legend>
+
+    <p class="field-help">
+        Isi bahagian ini hanya jika majlis melibatkan dua pasangan pengantin.
+        Jika tidak berkenaan, biarkan kosong.
+    </p>
+
+    <div class="grid">
+        <div>
+            <label>Nama Pengantin Lelaki Kedua</label>
+            <input
+                name="second_couple[groom_name]"
+                value="{{ old('second_couple.groom_name', $secondCouple?->groom_name) }}"
+            >
+        </div>
+
+        <div>
+            <label>Singkatan Pengantin Lelaki Kedua</label>
+            <input
+                name="second_couple[groom_abbreviation]"
+                value="{{ old('second_couple.groom_abbreviation', $secondCouple?->groom_abbreviation) }}"
+            >
+        </div>
+
+        <div>
+            <label>Nama Pengantin Perempuan Kedua</label>
+            <input
+                name="second_couple[bride_name]"
+                value="{{ old('second_couple.bride_name', $secondCouple?->bride_name) }}"
+            >
+        </div>
+
+        <div>
+            <label>Singkatan Pengantin Perempuan Kedua</label>
+            <input
+                name="second_couple[bride_abbreviation]"
+                value="{{ old('second_couple.bride_abbreviation', $secondCouple?->bride_abbreviation) }}"
+            >
+        </div>
+    </div>
+</fieldset>
 
         @foreach ($order->packageSides->sortBy('side') as $packageSide)
             @php($side = $packageSide->side)
             @php($event = $packageSide->event)
-            <fieldset>
+            <fieldset data-package-side="{{ $side }}">
                 <legend>Pakej {{ ucfirst(strtolower($side)) }}</legend>
                 <h3>Design</h3>
-                <div class="grid">
-                    <div><label>Tema</label><input name="sides[{{ $side }}][design][theme]" value="{{ old("sides.$side.design.theme", $packageSide->design?->theme) }}"></div>
-                    <div><label>Kod Design</label><input name="sides[{{ $side }}][design][design_code]" value="{{ old("sides.$side.design.design_code", $packageSide->design?->design_code) }}"></div>
-                    <div><label>Tajuk Kad</label><input name="sides[{{ $side }}][design][card_title]" value="{{ old("sides.$side.design.card_title", $packageSide->design?->card_title) }}"></div>
-                </div>
+
+<div class="grid">
+    <div>
+        <label>Tema</label>
+        @php($selectedTheme = old("sides.$side.design.theme", $packageSide->design?->theme))
+
+<select name="sides[{{ $side }}][design][theme]">
+    <option value="">-- Pilih Tema --</option>
+
+    @foreach ([
+        'PORTRAIT',
+        'ARCH',
+        'CARTOON',
+        'ISLAMIC',
+        'MINIMALIST',
+        'RUSTY',
+        'SONGKET',
+        'GARDEN',
+        'NOSTALGIA',
+        'DESA',
+    ] as $theme)
+        <option value="{{ $theme }}" @selected($selectedTheme === $theme)>
+            {{ $theme }}
+        </option>
+    @endforeach
+</select>
+    </div>
+
+    <div>
+        <label>Kod Design</label>
+        <input
+            name="sides[{{ $side }}][design][design_code]"
+            value="{{ old("sides.$side.design.design_code", $packageSide->design?->design_code) }}"
+        >
+    </div>
+
+    @php($selectedCardTitle = old("sides.$side.design.card_title", $packageSide->design?->card_title))
+
+<div>
+    <label>Tajuk Majlis</label>
+
+    <select name="sides[{{ $side }}][design][card_title]">
+        <option value="">-- Pilih Tajuk Majlis --</option>
+        <option value="Walimatul Urus" @selected($selectedCardTitle === 'Walimatul Urus')>
+            Walimatul Urus
+        </option>
+        <option value="Majlis Perkahwinan" @selected($selectedCardTitle === 'Majlis Perkahwinan')>
+            Majlis Perkahwinan
+        </option>
+        <option value="Kenduri Kesyukuran" @selected($selectedCardTitle === 'Kenduri Kesyukuran')>
+            Kenduri Kesyukuran
+        </option>
+    </select>
+</div>
+</div>
+
+<div class="image-upload-field">
+    <label for="card-image-{{ strtolower($side) }}">
+        Gambar Pengantin
+    </label>
+
+    <p class="field-help">
+        Muat naik jika design yang dipilih memerlukan gambar pengantin.
+        Format JPG, JPEG, PNG atau WEBP. Maksimum 10 MB.
+    </p>
+
+    @if ($packageSide->design?->card_image_path)
+        <p class="upload-status">
+            Gambar telah dimuat naik.
+            Pilih fail baharu di bawah hanya jika anda mahu menggantikannya.
+        </p>
+    @endif
+
+    <input
+        id="card-image-{{ strtolower($side) }}"
+        type="file"
+        name="sides[{{ $side }}][design][card_image]"
+        accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp"
+    >
+
+    @error("sides.$side.design.card_image")
+        <p class="field-error">{{ $message }}</p>
+    @enderror
+</div>
                 <h3>Ibu Bapa</h3>
                 <div class="grid">
                     <div><label>Nama Bapa</label><input name="sides[{{ $side }}][parents][father_name]" value="{{ old("sides.$side.parents.father_name", $packageSide->parents?->father_name) }}"></div>
@@ -72,7 +347,29 @@
                 </div>
                 <h3>Majlis</h3>
                 <div class="grid">
-                    <div><label>Hari</label><input name="sides[{{ $side }}][event][day_name]" value="{{ old("sides.$side.event.day_name", $event?->day_name) }}"></div>
+                    @php($selectedDay = old("sides.$side.event.day_name", $event?->day_name))
+
+<div>
+    <label>Hari</label>
+
+    <select name="sides[{{ $side }}][event][day_name]">
+        <option value="">-- Pilih Hari --</option>
+
+        @foreach ([
+            'Ahad',
+            'Isnin',
+            'Selasa',
+            'Rabu',
+            'Khamis',
+            'Jumaat',
+            'Sabtu',
+        ] as $day)
+            <option value="{{ $day }}" @selected($selectedDay === $day)>
+                {{ $day }}
+            </option>
+        @endforeach
+    </select>
+</div>
                     <div><label>Tarikh</label><input type="date" name="sides[{{ $side }}][event][event_date]" value="{{ old("sides.$side.event.event_date", $event?->event_date?->format('Y-m-d')) }}"></div>
                     <div><label>Tarikh Hijri</label><input name="sides[{{ $side }}][event][hijri_date]" value="{{ old("sides.$side.event.hijri_date", $event?->hijri_date) }}"></div>
                     <div><label>Masa Makan</label><input type="time" name="sides[{{ $side }}][event][meal_time]" value="{{ old("sides.$side.event.meal_time", $event?->meal_time ? substr($event->meal_time, 0, 5) : '') }}"></div>
@@ -84,31 +381,332 @@
                 <label>Google Maps URL</label>
                 <input type="url" name="sides[{{ $side }}][event][google_maps_url]" value="{{ old("sides.$side.event.google_maps_url", $event?->google_maps_url) }}">
                 <h3>Contact Person</h3>
-                @foreach ($event?->contacts?->sortBy('contact_number') ?? [] as $contact)
-                    <div class="grid">
-                        <div><label>Contact {{ $contact->contact_number }} - Nama</label><input name="sides[{{ $side }}][event][contacts][{{ $contact->contact_number }}][contact_name]" value="{{ old("sides.$side.event.contacts.{$contact->contact_number}.contact_name", $contact->contact_name) }}"></div>
-                        <div><label>Contact {{ $contact->contact_number }} - Telefon</label><input name="sides[{{ $side }}][event][contacts][{{ $contact->contact_number }}][contact_phone]" value="{{ old("sides.$side.event.contacts.{$contact->contact_number}.contact_phone", $contact->contact_phone) }}"></div>
-                    </div>
-                @endforeach
+
+@for ($contactNumber = 1; $contactNumber <= 3; $contactNumber++)
+    @php($contact = $event?->contacts?->firstWhere('contact_number', $contactNumber))
+
+    <div class="grid">
+        <div>
+            <label>Contact {{ $contactNumber }} - Nama</label>
+            <input
+                name="sides[{{ $side }}][event][contacts][{{ $contactNumber }}][contact_name]"
+                value="{{ old("sides.$side.event.contacts.$contactNumber.contact_name", $contact?->contact_name) }}"
+            >
+        </div>
+
+        <div>
+            <label>Contact {{ $contactNumber }} - Telefon</label>
+            <input
+                name="sides[{{ $side }}][event][contacts][{{ $contactNumber }}][contact_phone]"
+                value="{{ old("sides.$side.event.contacts.$contactNumber.contact_phone", $contact?->contact_phone) }}"
+            >
+        </div>
+    </div>
+@endfor
             </fieldset>
         @endforeach
 
         <fieldset>
-            <legend>Penghantaran / Pickup</legend>
-            <label>Kaedah</label>
-            <select name="fulfilment[method]">
-                <option value="">-- Pilih --</option>
-                <option value="COURIER" @selected(old('fulfilment.method', $order->fulfilment?->method) === 'COURIER')>Courier</option>
-                <option value="PICKUP" @selected(old('fulfilment.method', $order->fulfilment?->method) === 'PICKUP')>Self Pickup</option>
-            </select>
-            <label>Nama Penerima (Courier)</label><input name="fulfilment[recipient_name]" value="{{ old('fulfilment.recipient_name', $order->fulfilment?->recipient_name) }}">
-            <label>Telefon Penerima (Courier)</label><input name="fulfilment[recipient_phone]" value="{{ old('fulfilment.recipient_phone', $order->fulfilment?->recipient_phone) }}">
-            <label>Alamat Penghantaran (Courier)</label><textarea rows="4" name="fulfilment[shipping_address]">{{ old('fulfilment.shipping_address', $order->fulfilment?->shipping_address) }}</textarea>
-        </fieldset>
+    <legend>Penghantaran / Pickup</legend>
 
+    @php($fulfilmentMethod = old('fulfilment.method', $order->fulfilment?->method))
+
+    <p class="field-help">
+        Pilih bagaimana tempahan anda akan diterima selepas siap.
+    </p>
+
+    <div class="fulfilment-options">
+        <label class="fulfilment-option">
+            <input
+                type="radio"
+                name="fulfilment[method]"
+                value="COURIER"
+                @checked($fulfilmentMethod === 'COURIER')
+            >
+            <span>
+                <strong>Pos / Courier</strong><br>
+                Tempahan akan dihantar ke alamat yang diberikan.
+            </span>
+        </label>
+
+        <label class="fulfilment-option">
+            <input
+                type="radio"
+                name="fulfilment[method]"
+                value="PICKUP"
+                @checked($fulfilmentMethod === 'PICKUP')
+            >
+            <span>
+                <strong>Self Pickup</strong><br>
+                Ambil sendiri tempahan di KKK.
+            </span>
+        </label>
+    </div>
+
+    <div
+    id="courier-details"
+    class="courier-details"
+    @if ($fulfilmentMethod !== 'COURIER') hidden @endif
+>
+    <h3>Maklumat Penghantaran Courier</h3>
+
+    <div class="grid">
+        <div>
+            <label>Nama Penerima</label>
+            <input
+                id="courier-recipient-name"
+                name="fulfilment[recipient_name]"
+                value="{{ old('fulfilment.recipient_name', $order->fulfilment?->recipient_name) }}"
+            >
+        </div>
+
+        <div>
+            <label>Telefon Penerima</label>
+            <input
+                id="courier-recipient-phone"
+                name="fulfilment[recipient_phone]"
+                value="{{ old('fulfilment.recipient_phone', $order->fulfilment?->recipient_phone) }}"
+            >
+        </div>
+    </div>
+
+    <label>Alamat Penghantaran</label>
+    <textarea
+        id="courier-shipping-address"
+        rows="4"
+        name="fulfilment[shipping_address]"
+    >{{ old('fulfilment.shipping_address', $order->fulfilment?->shipping_address) }}</textarea>
+</div>
+</fieldset>
+
+    </fieldset>
+
+@if ($isEditable)
+    <div class="form-actions">
         <button type="submit">Simpan Draft</button>
-        <a href="{{ route('orders.review.show', ['orderId' => $order->order_id]) }}">Semak Maklumat & Teruskan</a>
-    </form>
+
+        <a
+            id="review-order-link"
+            href="{{ route('orders.review.show', ['orderId' => $order->order_id]) }}"
+        >
+            Semak Maklumat & Teruskan
+        </a>
+    </div>
+@endif
+
+</form>
 </main>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const reviewLink = document.getElementById('review-order-link');
+
+    if (!reviewLink) {
+        return;
+    }
+
+    function clearRequiredErrors() {
+        document
+            .querySelectorAll('.required-field-error')
+            .forEach(function (element) {
+                element.remove();
+            });
+
+        document
+            .querySelectorAll('.input-error')
+            .forEach(function (element) {
+                element.classList.remove('input-error');
+            });
+    }
+
+    function addRequiredError(field, message) {
+        if (!field) {
+            return;
+        }
+
+        field.classList.add('input-error');
+
+        const error = document.createElement('p');
+        error.className = 'field-error required-field-error';
+        error.textContent = 'Sila isi ' + message + '.';
+
+        field.insertAdjacentElement('afterend', error);
+    }
+
+    function validateRequiredField(selector, label) {
+        const field = document.querySelector(selector);
+
+        if (!field) {
+            return true;
+        }
+
+        if (String(field.value ?? '').trim() !== '') {
+            return true;
+        }
+
+        addRequiredError(field, label);
+
+        return false;
+    }
+
+    reviewLink.addEventListener('click', function (event) {
+        clearRequiredErrors();
+
+        let valid = true;
+
+        const requiredFields = [
+            {
+                selector: '[name="couple[groom_name]"]',
+                label: 'Nama Pengantin Lelaki'
+            },
+            {
+                selector: '[name="couple[bride_name]"]',
+                label: 'Nama Pengantin Perempuan'
+            },
+            {
+                selector: '[name="fulfilment[method]"]:checked',
+                label: 'Kaedah Fulfilment',
+                type: 'radio'
+            }
+        ];
+
+        requiredFields.forEach(function (item) {
+            if (item.type === 'radio') {
+                const checked = document.querySelector(item.selector);
+
+                if (!checked) {
+                    const firstRadio = document.querySelector(
+                        '[name="fulfilment[method]"]'
+                    );
+
+                    if (firstRadio) {
+                        const container = firstRadio.closest('.fulfilment-options');
+
+                        const error = document.createElement('p');
+                        error.className = 'field-error required-field-error';
+                        error.textContent = 'Sila pilih Kaedah Fulfilment.';
+
+                        container.insertAdjacentElement('afterend', error);
+                    }
+
+                    valid = false;
+                }
+
+                return;
+            }
+
+            if (!validateRequiredField(item.selector, item.label)) {
+                valid = false;
+            }
+        });
+
+        document
+            .querySelectorAll('fieldset[data-package-side]')
+            .forEach(function (fieldset) {
+                const side = fieldset.dataset.packageSide;
+                const sideLabel = side === 'LELAKI'
+                    ? 'Pakej Lelaki'
+                    : 'Pakej Perempuan';
+
+                const sideRequiredFields = [
+                    ['design][design_code]', 'Kod Design'],
+                    ['parents][father_name]', 'Nama Bapa'],
+                    ['parents][mother_name]', 'Nama Ibu'],
+                    ['event][event_date]', 'Tarikh Majlis'],
+                    ['event][meal_time]', 'Masa Majlis / Jamuan'],
+                    ['event][venue_name]', 'Nama Tempat Majlis'],
+                    ['event][full_address]', 'Alamat Penuh'],
+
+                    ['event][contacts][1][contact_name]', 'Contact 1 - Nama'],
+                    ['event][contacts][1][contact_phone]', 'Contact 1 - Telefon'],
+
+                    ['event][contacts][2][contact_name]', 'Contact 2 - Nama'],
+                    ['event][contacts][2][contact_phone]', 'Contact 2 - Telefon'],
+
+                    ['event][contacts][3][contact_name]', 'Contact 3 - Nama'],
+                    ['event][contacts][3][contact_phone]', 'Contact 3 - Telefon']
+                ];
+
+                sideRequiredFields.forEach(function (item) {
+                    const field = fieldset.querySelector(
+                        '[name="sides[' + side + '][' + item[0] + '"]'
+                    );
+
+                    if (!field) {
+                        return;
+                    }
+
+                    if (String(field.value ?? '').trim() === '') {
+                        addRequiredError(
+                            field,
+                            sideLabel + ': ' + item[1]
+                        );
+
+                        valid = false;
+                    }
+                });
+            });
+
+        /*
+         * Courier fields hanya wajib apabila customer pilih Courier.
+         */
+        const fulfilmentMethod = document.querySelector(
+            '[name="fulfilment[method]"]:checked'
+        );
+
+        if (fulfilmentMethod && fulfilmentMethod.value === 'COURIER') {
+            [
+                ['[name="fulfilment[recipient_name]"]', 'Nama Penerima'],
+                ['[name="fulfilment[recipient_phone]"]', 'No Telefon Penerima'],
+                ['[name="fulfilment[shipping_address]"]', 'Alamat Penghantaran']
+            ].forEach(function (item) {
+                if (!validateRequiredField(item[0], item[1])) {
+                    valid = false;
+                }
+            });
+        }
+
+        if (!valid) {
+            event.preventDefault();
+
+            const firstError = document.querySelector('.input-error');
+
+            if (firstError) {
+                firstError.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'center'
+                });
+
+                firstError.focus();
+            }
+        }
+    });
+});
+</script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const courierDetails = document.getElementById('courier-details');
+        const methodInputs = document.querySelectorAll('input[name="fulfilment[method]"]');
+
+        if (!courierDetails) {
+            return;
+        }
+
+        function updateFulfilmentFields() {
+            const selected = document.querySelector(
+                'input[name="fulfilment[method]"]:checked'
+            );
+
+            const isCourier = selected && selected.value === 'COURIER';
+
+            courierDetails.hidden = !isCourier;
+        }
+
+        methodInputs.forEach(function (input) {
+            input.addEventListener('change', updateFulfilmentFields);
+        });
+
+        updateFulfilmentFields();
+    });
+</script>
 </body>
 </html>

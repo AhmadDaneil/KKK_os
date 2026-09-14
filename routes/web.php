@@ -37,6 +37,11 @@ Route::get(
     [CustomerArtworkReviewController::class, 'show']
 )->name('orders.artwork.review');
 
+Route::get(
+    '/order/{orderId}/artwork/{designJobId}/preview',
+    [CustomerArtworkReviewController::class, 'preview']
+)->name('orders.artwork.preview');
+
 Route::post(
     '/order/{orderId}/artwork/{designJobId}/correction',
     [CustomerArtworkReviewController::class, 'correction']

@@ -1,0 +1,269 @@
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: #f5f7fb;
+    color: #1f2937;
+    line-height: 1.5;
+}
+
+.final-review-page {
+    width: min(960px, calc(100% - 32px));
+    margin: 32px auto;
+}
+
+.review-header {
+    margin-bottom: 1.5rem;
+    padding: 1.5rem;
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 14px;
+}
+
+.review-header-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 1rem;
+}
+
+.review-header h1 {
+    margin: 0.25rem 0 0;
+    font-size: 1.8rem;
+}
+
+.eyebrow {
+    margin: 0;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    opacity: 0.65;
+}
+
+.review-intro {
+    margin: 1rem 0 0;
+    color: #4b5563;
+}
+
+.order-badge {
+    display: inline-block;
+    padding: 0.45rem 0.75rem;
+    border-radius: 999px;
+    background: #eef4ff;
+    font-size: 0.875rem;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.review-card {
+    margin-bottom: 1.25rem;
+    padding: 1.5rem;
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 14px;
+}
+
+.review-card h2 {
+    margin: 0 0 1rem;
+    font-size: 1.25rem;
+}
+
+.review-card h3 {
+    margin: 1.25rem 0 0.75rem;
+    font-size: 1rem;
+}
+
+.review-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1rem;
+}
+
+.review-item {
+    padding: 0.85rem 1rem;
+    background: #f8fafc;
+    border-radius: 10px;
+}
+
+.review-item.full-width {
+    grid-column: 1 / -1;
+}
+
+.review-label {
+    display: block;
+    margin-bottom: 0.25rem;
+    font-size: 0.8rem;
+    color: #6b7280;
+}
+
+.review-value {
+    display: block;
+    font-weight: 600;
+    overflow-wrap: anywhere;
+}
+
+.package-card {
+    border-left: 4px solid #cbd5e1;
+}
+
+.package-heading {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.package-heading h2 {
+    margin: 0;
+}
+
+.side-badge {
+    display: inline-block;
+    padding: 0.35rem 0.65rem;
+    border-radius: 999px;
+    background: #f1f5f9;
+    font-size: 0.8rem;
+    font-weight: 700;
+}
+
+.upload-status {
+    display: inline-block;
+    padding: 0.45rem 0.7rem;
+    border-radius: 8px;
+    background: #eef8f0;
+    font-size: 0.875rem;
+    font-weight: 600;
+}
+
+.upload-status.not-uploaded {
+    background: #f8fafc;
+    color: #6b7280;
+}
+
+.contact-list {
+    display: grid;
+    gap: 0.75rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.contact-list li {
+    padding: 0.85rem 1rem;
+    background: #f8fafc;
+    border-radius: 10px;
+}
+
+.contact-number {
+    display: block;
+    margin-bottom: 0.2rem;
+    font-size: 0.8rem;
+    color: #6b7280;
+}
+
+.maps-link,
+.back-link {
+    color: #1d4ed8;
+    text-decoration: none;
+}
+
+.maps-link:hover,
+.back-link:hover {
+    text-decoration: underline;
+}
+
+.confirmation-card {
+    border-color: #dbe4f0;
+}
+
+.confirmation-note {
+    margin: 0 0 1rem;
+    padding: 1rem;
+    background: #fff8e7;
+    border-radius: 10px;
+}
+
+.confirmation-checkbox {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    margin: 1rem 0;
+    font-weight: 600;
+}
+
+.confirmation-checkbox input {
+    width: auto;
+    margin-top: 0.25rem;
+}
+
+.review-actions {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+    margin-top: 1.25rem;
+}
+
+.confirm-button {
+    border: 0;
+    border-radius: 9px;
+    padding: 0.8rem 1.15rem;
+    background: #111827;
+    color: #ffffff;
+    font: inherit;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.confirm-button:hover {
+    opacity: 0.92;
+}
+
+.confirm-button:focus,
+.back-link:focus,
+.maps-link:focus {
+    outline: 3px solid rgba(37, 99, 235, 0.25);
+    outline-offset: 2px;
+}
+
+.empty-value {
+    color: #9ca3af;
+    font-weight: 400;
+}
+
+@media (max-width: 700px) {
+    .final-review-page {
+        width: min(100% - 24px, 960px);
+        margin: 20px auto;
+    }
+
+    .review-header-top,
+    .package-heading {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .review-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .review-item.full-width {
+        grid-column: auto;
+    }
+
+    .review-card,
+    .review-header {
+        padding: 1rem;
+        border-radius: 12px;
+    }
+
+    .review-actions {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .confirm-button {
+        width: 100%;
+    }
+}

@@ -13,6 +13,14 @@ class ApproveArtworkService
         return DB::transaction(function () use ($designJob) {
             $designJob->refresh();
 
+            $designJob->loadMissing('order');
+
+            if ($designJob->order->isTerminalOperationalStatus()) {
+                throw new RuntimeException(
+                "Design job {$designJob->id} cannot be approved because the order is terminal."
+                );
+            }
+
             if ($designJob->status !== 'DESIGN_READY') {
                 throw new RuntimeException(
                     "Design job {$designJob->id} can only be approved from DESIGN_READY."

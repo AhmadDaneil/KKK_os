@@ -7,11 +7,25 @@ use App\Services\Orders\GenerateOrderAccessLinkService;
 use App\Services\Orders\SaveOrderDraftService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Validation\ValidationException;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
 class SaveAndResumeDraftTest extends TestCase
 {
     use RefreshDatabase;
+
+    public function save(Order $order, array $data): Order
+{
+    if ($order->status !== 'DETAILS_INCOMPLETE') {
+        throw ValidationException::withMessages([
+            'order' => 'Maklumat tempahan yang telah disahkan tidak boleh diubah.',
+        ]);
+    }
+
+    $newUploadedPaths = [];
+    $oldPathsToDelete = [];
+}
 
     public function test_one_package_draft_saves_normalized_data_and_keeps_order_incomplete(): void
     {
@@ -97,6 +111,301 @@ class SaveAndResumeDraftTest extends TestCase
         $this->assertDatabaseCount('orders', 1);
     }
 
+    public function test_optional_second_couple_saves_normalized_data_and_can_be_resumed(): void
+{
+    $order = app(CreateOrderService::class)->create([
+        'package_count' => 1,
+        'side' => 'LELAKI',
+    ]);
+
+    $saved = app(SaveOrderDraftService::class)->save($order, [
+        'second_couple' => [
+            'groom_name' => '  Ahmad   Fauzi  ',
+            'groom_abbreviation' => ' Fauzi ',
+            'bride_name' => '  Nur   Syafiqah ',
+            'bride_abbreviation' => ' Syafiqah ',
+        ],
+    ]);
+
+    $secondCouple = $saved->couples->firstWhere('couple_number', 2);
+
+    $this->assertNotNull($secondCouple);
+    $this->assertSame('Ahmad Fauzi', $secondCouple->groom_name);
+    $this->assertSame('Fauzi', $secondCouple->groom_abbreviation);
+    $this->assertSame('Nur Syafiqah', $secondCouple->bride_name);
+    $this->assertSame('Syafiqah', $secondCouple->bride_abbreviation);
+
+    $resumedOrder = $order->fresh('couples');
+    $resumedSecondCouple = $resumedOrder->couples->firstWhere('couple_number', 2);
+
+    $this->assertNotNull($resumedSecondCouple);
+    $this->assertSame('Ahmad Fauzi', $resumedSecondCouple->groom_name);
+    $this->assertSame('Fauzi', $resumedSecondCouple->groom_abbreviation);
+    $this->assertSame('Nur Syafiqah', $resumedSecondCouple->bride_name);
+    $this->assertSame('Syafiqah', $resumedSecondCouple->bride_abbreviation);
+}
+
+public function test_one_package_card_image_is_stored_privately_and_path_is_persisted(): void
+{
+    Storage::fake('local');
+
+    $order = app(CreateOrderService::class)->create([
+        'package_count' => 1,
+        'side' => 'LELAKI',
+    ]);
+
+    $image = UploadedFile::fake()->image('pengantin.jpg');
+
+    $saved = app(SaveOrderDraftService::class)->save($order, [
+        'sides' => [
+            'LELAKI' => [
+                'design' => [
+                    'card_image' => $image,
+                ],
+            ],
+        ],
+    ]);
+
+    $design = $saved->packageSides
+        ->firstWhere('side', 'LELAKI')
+        ->design;
+
+    $this->assertNotNull($design->card_image_path);
+    $this->assertStringStartsWith(
+        "orders/{$order->order_id}/LELAKI/",
+        $design->card_image_path
+    );
+
+    Storage::disk('local')->assertExists($design->card_image_path);
+
+    $this->assertDatabaseHas('order_designs', [
+        'id' => $design->id,
+        'card_image_path' => $design->card_image_path,
+    ]);
+}
+
+public function test_reuploading_card_image_replaces_old_file_for_same_side(): void
+{
+    Storage::fake('local');
+
+    $order = app(CreateOrderService::class)->create([
+        'package_count' => 1,
+        'side' => 'LELAKI',
+    ]);
+
+    $firstSaved = app(SaveOrderDraftService::class)->save($order, [
+        'sides' => [
+            'LELAKI' => [
+                'design' => [
+                    'card_image' => UploadedFile::fake()->image('first.jpg'),
+                ],
+            ],
+        ],
+    ]);
+
+    $firstPath = $firstSaved->packageSides
+        ->firstWhere('side', 'LELAKI')
+        ->design
+        ->card_image_path;
+
+    Storage::disk('local')->assertExists($firstPath);
+
+    $secondSaved = app(SaveOrderDraftService::class)->save($order->fresh(), [
+        'sides' => [
+            'LELAKI' => [
+                'design' => [
+                    'card_image' => UploadedFile::fake()->image('second.jpg'),
+                ],
+            ],
+        ],
+    ]);
+
+    $secondPath = $secondSaved->packageSides
+        ->firstWhere('side', 'LELAKI')
+        ->design
+        ->card_image_path;
+
+    $this->assertNotSame($firstPath, $secondPath);
+
+    Storage::disk('local')->assertMissing($firstPath);
+    Storage::disk('local')->assertExists($secondPath);
+
+    $this->assertDatabaseHas('order_designs', [
+        'id' => $secondSaved->packageSides
+            ->firstWhere('side', 'LELAKI')
+            ->design
+            ->id,
+        'card_image_path' => $secondPath,
+    ]);
+}
+
+public function test_two_package_card_images_are_stored_independently_by_side(): void
+{
+    Storage::fake('local');
+
+    $order = app(CreateOrderService::class)->create([
+        'package_count' => 2,
+    ]);
+
+    $saved = app(SaveOrderDraftService::class)->save($order, [
+        'sides' => [
+            'LELAKI' => [
+                'design' => [
+                    'card_image' => UploadedFile::fake()->image('lelaki.jpg'),
+                ],
+            ],
+            'PEREMPUAN' => [
+                'design' => [
+                    'card_image' => UploadedFile::fake()->image('perempuan.jpg'),
+                ],
+            ],
+        ],
+    ]);
+
+    $lelakiPath = $saved->packageSides
+        ->firstWhere('side', 'LELAKI')
+        ->design
+        ->card_image_path;
+
+    $perempuanPath = $saved->packageSides
+        ->firstWhere('side', 'PEREMPUAN')
+        ->design
+        ->card_image_path;
+
+    $this->assertNotSame($lelakiPath, $perempuanPath);
+
+    $this->assertStringStartsWith(
+        "orders/{$order->order_id}/LELAKI/",
+        $lelakiPath
+    );
+
+    $this->assertStringStartsWith(
+        "orders/{$order->order_id}/PEREMPUAN/",
+        $perempuanPath
+    );
+
+    Storage::disk('local')->assertExists($lelakiPath);
+    Storage::disk('local')->assertExists($perempuanPath);
+}
+
+public function test_dashboard_rejects_non_image_card_upload(): void
+{
+    Storage::fake('local');
+
+    $order = app(CreateOrderService::class)->create([
+        'package_count' => 1,
+        'side' => 'LELAKI',
+    ]);
+
+    $url = app(GenerateOrderAccessLinkService::class)->generate($order);
+
+    $path = (string) parse_url($url, PHP_URL_PATH);
+    $query = (string) parse_url($url, PHP_URL_QUERY);
+
+    $magicLinkRequest = $query === ''
+        ? $path
+        : $path.'?'.$query;
+
+    $this->get($magicLinkRequest)
+        ->assertRedirect(route('orders.dashboard', [
+            'orderId' => $order->order_id,
+        ]));
+
+    $response = $this
+        ->from(route('orders.dashboard', [
+            'orderId' => $order->order_id,
+        ]))
+        ->post(route('orders.draft.update', [
+            'orderId' => $order->order_id,
+        ]), [
+            'sides' => [
+                'LELAKI' => [
+                    'design' => [
+                        'card_image' => UploadedFile::fake()->create(
+                            'not-an-image.pdf',
+                            100,
+                            'application/pdf'
+                        ),
+                    ],
+                ],
+            ],
+        ]);
+
+    $response
+        ->assertRedirect(route('orders.dashboard', [
+            'orderId' => $order->order_id,
+        ]))
+        ->assertSessionHasErrors([
+            'sides.LELAKI.design.card_image',
+        ]);
+
+    $design = $order->fresh('packageSides.design')
+        ->packageSides
+        ->firstWhere('side', 'LELAKI')
+        ->design;
+
+    $this->assertNull($design->card_image_path);
+}
+
+public function test_dashboard_rejects_card_image_larger_than_ten_megabytes(): void
+{
+    Storage::fake('local');
+
+    $order = app(CreateOrderService::class)->create([
+        'package_count' => 1,
+        'side' => 'PEREMPUAN',
+    ]);
+
+    $url = app(GenerateOrderAccessLinkService::class)->generate($order);
+
+    $path = (string) parse_url($url, PHP_URL_PATH);
+    $query = (string) parse_url($url, PHP_URL_QUERY);
+
+    $magicLinkRequest = $query === ''
+        ? $path
+        : $path.'?'.$query;
+
+    $this->get($magicLinkRequest)
+        ->assertRedirect(route('orders.dashboard', [
+            'orderId' => $order->order_id,
+        ]));
+
+    $response = $this
+        ->from(route('orders.dashboard', [
+            'orderId' => $order->order_id,
+        ]))
+        ->post(route('orders.draft.update', [
+            'orderId' => $order->order_id,
+        ]), [
+            'sides' => [
+                'PEREMPUAN' => [
+                    'design' => [
+                        'card_image' => UploadedFile::fake()->create(
+                            'too-large.jpg',
+                            10241,
+                            'image/jpeg'
+                        ),
+                    ],
+                ],
+            ],
+        ]);
+
+    $response
+        ->assertRedirect(route('orders.dashboard', [
+            'orderId' => $order->order_id,
+        ]))
+        ->assertSessionHasErrors([
+            'sides.PEREMPUAN.design.card_image',
+        ]);
+
+    $design = $order->fresh('packageSides.design')
+        ->packageSides
+        ->firstWhere('side', 'PEREMPUAN')
+        ->design;
+
+    $this->assertNull($design->card_image_path);
+}
+
     public function test_dashboard_form_can_save_and_resume_existing_values(): void
 {
     $order = app(CreateOrderService::class)->create([
@@ -143,5 +452,89 @@ class SaveAndResumeDraftTest extends TestCase
         ->assertSee('Sarah')
         ->assertSee('P500')
         ->assertDontSee('token=');
+    }
+    public function test_confirmed_order_cannot_be_changed_by_save_draft(): void
+{
+    $order = app(CreateOrderService::class)->create([
+        'package_count' => 1,
+        'side' => 'LELAKI',
+        'customer_name' => 'Confirmed Draft Guard',
+    ]);
+
+    app(SaveOrderDraftService::class)->save($order, [
+        'couple' => [
+            'groom_name' => 'Ahmad',
+            'bride_name' => 'Aisyah',
+        ],
+        'sides' => [
+            'LELAKI' => [
+                'design' => [
+                    'design_code' => 'L100',
+                ],
+            ],
+        ],
+    ]);
+
+    $confirmedAt = now()->subMinute();
+
+    $order->forceFill([
+        'status' => 'DETAILS_CONFIRMED',
+        'details_confirmed_at' => $confirmedAt,
+    ])->save();
+
+    try {
+        app(SaveOrderDraftService::class)->save($order->fresh(), [
+            'couple' => [
+                'groom_name' => 'Nama Diubah',
+                'bride_name' => 'Nama Diubah',
+            ],
+            'sides' => [
+                'LELAKI' => [
+                    'design' => [
+                        'design_code' => 'CHANGED',
+                    ],
+                ],
+            ],
+        ]);
+
+        $this->fail('Confirmed order was unexpectedly allowed to save draft changes.');
+    } catch (ValidationException $exception) {
+        $this->assertArrayHasKey('order', $exception->errors());
+    }
+
+    $freshOrder = $order->fresh([
+        'couples',
+        'packageSides.design',
+    ]);
+
+    $this->assertSame('DETAILS_CONFIRMED', $freshOrder->status);
+    $this->assertNotNull($freshOrder->details_confirmed_at);
+
+    $this->assertSame(
+        $confirmedAt->timestamp,
+        $freshOrder->details_confirmed_at->timestamp
+    );
+
+    $this->assertSame(
+        'Ahmad',
+        $freshOrder->couples
+            ->firstWhere('couple_number', 1)
+            ->groom_name
+    );
+
+    $this->assertSame(
+        'Aisyah',
+        $freshOrder->couples
+            ->firstWhere('couple_number', 1)
+            ->bride_name
+    );
+
+    $this->assertSame(
+        'L100',
+        $freshOrder->packageSides
+            ->firstWhere('side', 'LELAKI')
+            ->design
+            ->design_code
+    );
     }
 }

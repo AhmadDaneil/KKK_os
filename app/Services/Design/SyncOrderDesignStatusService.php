@@ -20,25 +20,25 @@ class SyncOrderDesignStatusService
             return $order;
         }
 
-        $nextStatus = match (true) {
-            $statuses->every(fn ($status) => $status === 'DESIGN_APPROVED')
-                => 'DESIGN_APPROVED',
+        $newStatus = match (true) {
+    $statuses->every(fn ($status) => $status === 'DESIGN_APPROVED')
+        => 'DESIGN_APPROVED',
 
-            $statuses->contains('CORRECTION_REQUESTED')
-                => 'CORRECTION_REQUESTED',
+    $statuses->contains('CORRECTION_REQUESTED')
+        => 'CORRECTION_REQUESTED',
 
-            $statuses->every(fn ($status) => $status === 'DESIGN_READY')
-                => 'DESIGN_READY',
+    $statuses->contains('DESIGN_IN_PROGRESS')
+        => 'DESIGN_IN_PROGRESS',
 
-            $statuses->contains('DESIGN_IN_PROGRESS')
-                => 'DESIGN_IN_PROGRESS',
+    $statuses->contains('DESIGN_READY')
+        => 'DESIGN_READY',
 
-            default
-                => 'READY_FOR_DESIGN',
-        };
+    default
+        => 'READY_FOR_DESIGN',
+};
 
-        if ($order->status !== $nextStatus) {
-            $order->update(['status' => $nextStatus]);
+        if ($order->status !== $newStatus) {
+            $order->update(['status' => $newStatus]);
         }
 
         return $order->fresh();

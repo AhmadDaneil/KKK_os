@@ -3,157 +3,251 @@
 namespace App\Services\Orders;
 
 use App\Models\Order;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
+use RuntimeException;
+use Throwable;
 
 class SaveOrderDraftService
 {
     public function save(Order $order, array $data): Order
-    {
-        return DB::transaction(function () use ($order, $data) {
-            $order->load([
-                'couples',
-                'packageSides.design',
-                'packageSides.parents',
-                'packageSides.event.contacts',
-                'fulfilment',
-            ]);
+{
+    if ($order->status !== 'DETAILS_INCOMPLETE') {
+        throw ValidationException::withMessages([
+            'order' => 'Maklumat tempahan yang telah disahkan tidak boleh diubah.',
+        ]);
+    }
 
-            if (array_key_exists('card_quantity', $data)) {
-                $order->forceFill([
-                'card_quantity' => $data['card_quantity'] === null
-                ? null
-                : (int) $data['card_quantity'],
-                ])->save();
-            }
+    $newUploadedPaths = [];
+    $oldPathsToDelete = [];
 
-            if (array_key_exists('couple', $data)) {
-                $couple = $order->couples->firstWhere('couple_number', 1);
-
-                if (! $couple) {
-                    throw ValidationException::withMessages([
-                        'couple' => 'Main couple structure is missing for this order.',
-                    ]);
-                }
-
-                $couple->update([
-                    'groom_name' => $this->cleanString(Arr::get($data, 'couple.groom_name')),
-                    'groom_abbreviation' => $this->cleanString(Arr::get($data, 'couple.groom_abbreviation')),
-                    'bride_name' => $this->cleanString(Arr::get($data, 'couple.bride_name')),
-                    'bride_abbreviation' => $this->cleanString(Arr::get($data, 'couple.bride_abbreviation')),
+        try {
+            $savedOrder = DB::transaction(function () use (
+                $order,
+                $data,
+                &$newUploadedPaths,
+                &$oldPathsToDelete
+            ) {
+                $order->load([
+                    'couples',
+                    'packageSides.design',
+                    'packageSides.parents',
+                    'packageSides.event.contacts',
+                    'fulfilment',
                 ]);
-            }
 
-            foreach ((array) ($data['sides'] ?? []) as $sideName => $sideData) {
-                if (! in_array($sideName, ['LELAKI', 'PEREMPUAN'], true)) {
-                    throw ValidationException::withMessages([
-                        "sides.$sideName" => 'Unsupported package side.',
-                    ]);
+                if (array_key_exists('card_quantity', $data)) {
+                    $order->forceFill([
+                        'card_quantity' => $data['card_quantity'] === null
+                            ? null
+                            : (int) $data['card_quantity'],
+                    ])->save();
                 }
 
-                $packageSide = $order->packageSides->firstWhere('side', $sideName);
+                if (array_key_exists('couple', $data)) {
+                    $couple = $order->couples->firstWhere('couple_number', 1);
 
-                if (! $packageSide) {
-                    throw ValidationException::withMessages([
-                        "sides.$sideName" => 'This package side does not belong to the order.',
-                    ]);
-                }
-
-                if (array_key_exists('design', $sideData)) {
-                    $packageSide->design->update([
-                        'theme' => $this->cleanString(Arr::get($sideData, 'design.theme')),
-                        'design_code' => $this->normalizeDesignCode(Arr::get($sideData, 'design.design_code')),
-                        'card_title' => $this->cleanString(Arr::get($sideData, 'design.card_title')),
-                    ]);
-                }
-
-                if (array_key_exists('parents', $sideData)) {
-                    $packageSide->parents->update([
-                        'father_name' => $this->cleanString(Arr::get($sideData, 'parents.father_name')),
-                        'mother_name' => $this->cleanString(Arr::get($sideData, 'parents.mother_name')),
-                    ]);
-                }
-
-                if (array_key_exists('event', $sideData)) {
-                    $event = $packageSide->event;
-
-                    $event->update([
-                        'day_name' => $this->cleanString(Arr::get($sideData, 'event.day_name')),
-                        'event_date' => $this->emptyToNull(Arr::get($sideData, 'event.event_date')),
-                        'hijri_date' => $this->cleanString(Arr::get($sideData, 'event.hijri_date')),
-                        'meal_time' => $this->emptyToNull(Arr::get($sideData, 'event.meal_time')),
-                        'bersanding_time' => $this->emptyToNull(Arr::get($sideData, 'event.bersanding_time')),
-                        'venue_name' => $this->cleanString(Arr::get($sideData, 'event.venue_name')),
-                        'full_address' => $this->cleanMultiline(Arr::get($sideData, 'event.full_address')),
-                        'google_maps_url' => $this->cleanString(Arr::get($sideData, 'event.google_maps_url')),
-                    ]);
-
-                    foreach ((array) Arr::get($sideData, 'event.contacts', []) as $contactNumber => $contactData) {
-                        $contactNumber = (int) $contactNumber;
-
-                        if (! in_array($contactNumber, [1, 2, 3], true)) {
-                            throw ValidationException::withMessages([
-                                "sides.$sideName.event.contacts.$contactNumber" => 'Only contact persons 1 to 3 are supported.',
-                            ]);
-                        }
-
-                        $contact = $event->contacts->firstWhere('contact_number', $contactNumber);
-
-                        if (! $contact) {
-                            throw ValidationException::withMessages([
-                                "sides.$sideName.event.contacts.$contactNumber" => 'Contact slot is missing.',
-                            ]);
-                        }
-
-                        $contact->update([
-                            'contact_name' => $this->cleanString($contactData['contact_name'] ?? null),
-                            'contact_phone' => $this->normalizePhone($contactData['contact_phone'] ?? null),
+                    if (! $couple) {
+                        throw ValidationException::withMessages([
+                            'couple' => 'Main couple structure is missing for this order.',
                         ]);
                     }
-                }
-            }
 
-            if (array_key_exists('fulfilment', $data)) {
-                $method = Arr::get($data, 'fulfilment.method');
-                $method = $method === '' ? null : $method;
-
-                $fulfilment = $order->fulfilment;
-
-                if (! $fulfilment) {
-                    throw ValidationException::withMessages([
-                        'fulfilment' => 'Fulfilment structure is missing for this order.',
+                    $couple->update([
+                        'groom_name' => $this->cleanString(Arr::get($data, 'couple.groom_name')),
+                        'groom_abbreviation' => $this->cleanString(Arr::get($data, 'couple.groom_abbreviation')),
+                        'bride_name' => $this->cleanString(Arr::get($data, 'couple.bride_name')),
+                        'bride_abbreviation' => $this->cleanString(Arr::get($data, 'couple.bride_abbreviation')),
                     ]);
                 }
 
-                $fulfilment->update([
-                    'method' => $method,
-                    'recipient_name' => $method === 'COURIER'
-                        ? $this->cleanString(Arr::get($data, 'fulfilment.recipient_name'))
-                        : null,
-                    'recipient_phone' => $method === 'COURIER'
-                        ? $this->normalizePhone(Arr::get($data, 'fulfilment.recipient_phone'))
-                        : null,
-                    'shipping_address' => $method === 'COURIER'
-                        ? $this->cleanMultiline(Arr::get($data, 'fulfilment.shipping_address'))
-                        : null,
+                if (array_key_exists('second_couple', $data)) {
+                    $secondCouple = $order->couples->firstWhere('couple_number', 2);
+
+                    if (! $secondCouple) {
+                        throw ValidationException::withMessages([
+                            'second_couple' => 'Second couple structure is missing for this order.',
+                        ]);
+                    }
+
+                    $secondCouple->update([
+                        'groom_name' => $this->cleanString(Arr::get($data, 'second_couple.groom_name')),
+                        'groom_abbreviation' => $this->cleanString(Arr::get($data, 'second_couple.groom_abbreviation')),
+                        'bride_name' => $this->cleanString(Arr::get($data, 'second_couple.bride_name')),
+                        'bride_abbreviation' => $this->cleanString(Arr::get($data, 'second_couple.bride_abbreviation')),
+                    ]);
+                }
+
+                foreach ((array) ($data['sides'] ?? []) as $sideName => $sideData) {
+                    if (! in_array($sideName, ['LELAKI', 'PEREMPUAN'], true)) {
+                        throw ValidationException::withMessages([
+                            "sides.$sideName" => 'Unsupported package side.',
+                        ]);
+                    }
+
+                    $packageSide = $order->packageSides->firstWhere('side', $sideName);
+
+                    if (! $packageSide) {
+                        throw ValidationException::withMessages([
+                            "sides.$sideName" => 'This package side does not belong to the order.',
+                        ]);
+                    }
+
+                    if (array_key_exists('design', $sideData)) {
+                        $designData = [
+                            'theme' => $this->cleanString(Arr::get($sideData, 'design.theme')),
+                            'design_code' => $this->normalizeDesignCode(Arr::get($sideData, 'design.design_code')),
+                            'card_title' => $this->cleanString(Arr::get($sideData, 'design.card_title')),
+                        ];
+
+                        $cardImage = Arr::get($sideData, 'design.card_image');
+
+                        if ($cardImage instanceof UploadedFile) {
+                            $oldPath = $packageSide->design->card_image_path;
+                            $newPath = $this->storeCardImage(
+                                $order->order_id,
+                                $sideName,
+                                $cardImage
+                            );
+
+                            $newUploadedPaths[] = $newPath;
+                            $designData['card_image_path'] = $newPath;
+
+                            if (is_string($oldPath) && $oldPath !== '') {
+                                $oldPathsToDelete[] = $oldPath;
+                            }
+                        }
+
+                        $packageSide->design->update($designData);
+                    }
+
+                    if (array_key_exists('parents', $sideData)) {
+                        $packageSide->parents->update([
+                            'father_name' => $this->cleanString(Arr::get($sideData, 'parents.father_name')),
+                            'mother_name' => $this->cleanString(Arr::get($sideData, 'parents.mother_name')),
+                        ]);
+                    }
+
+                    if (array_key_exists('event', $sideData)) {
+                        $event = $packageSide->event;
+
+                        $event->update([
+                            'day_name' => $this->cleanString(Arr::get($sideData, 'event.day_name')),
+                            'event_date' => $this->emptyToNull(Arr::get($sideData, 'event.event_date')),
+                            'hijri_date' => $this->cleanString(Arr::get($sideData, 'event.hijri_date')),
+                            'meal_time' => $this->emptyToNull(Arr::get($sideData, 'event.meal_time')),
+                            'bersanding_time' => $this->emptyToNull(Arr::get($sideData, 'event.bersanding_time')),
+                            'venue_name' => $this->cleanString(Arr::get($sideData, 'event.venue_name')),
+                            'full_address' => $this->cleanMultiline(Arr::get($sideData, 'event.full_address')),
+                            'google_maps_url' => $this->cleanString(Arr::get($sideData, 'event.google_maps_url')),
+                        ]);
+
+                        foreach ((array) Arr::get($sideData, 'event.contacts', []) as $contactNumber => $contactData) {
+                            $contactNumber = (int) $contactNumber;
+
+                            if (! in_array($contactNumber, [1, 2, 3], true)) {
+                                throw ValidationException::withMessages([
+                                    "sides.$sideName.event.contacts.$contactNumber" => 'Only contact persons 1 to 3 are supported.',
+                                ]);
+                            }
+
+                            $contact = $event->contacts->firstWhere('contact_number', $contactNumber);
+
+                            if (! $contact) {
+                                throw ValidationException::withMessages([
+                                    "sides.$sideName.event.contacts.$contactNumber" => 'Contact slot is missing.',
+                                ]);
+                            }
+
+                            $contact->update([
+                                'contact_name' => $this->cleanString($contactData['contact_name'] ?? null),
+                                'contact_phone' => $this->normalizePhone($contactData['contact_phone'] ?? null),
+                            ]);
+                        }
+                    }
+                }
+
+                if (array_key_exists('fulfilment', $data)) {
+                    $method = Arr::get($data, 'fulfilment.method');
+                    $method = $method === '' ? null : $method;
+
+                    $fulfilment = $order->fulfilment;
+
+                    if (! $fulfilment) {
+                        throw ValidationException::withMessages([
+                            'fulfilment' => 'Fulfilment structure is missing for this order.',
+                        ]);
+                    }
+
+                    $fulfilment->update([
+                        'method' => $method,
+                        'recipient_name' => $method === 'COURIER'
+                            ? $this->cleanString(Arr::get($data, 'fulfilment.recipient_name'))
+                            : null,
+                        'recipient_phone' => $method === 'COURIER'
+                            ? $this->normalizePhone(Arr::get($data, 'fulfilment.recipient_phone'))
+                            : null,
+                        'shipping_address' => $method === 'COURIER'
+                            ? $this->cleanMultiline(Arr::get($data, 'fulfilment.shipping_address'))
+                            : null,
+                    ]);
+                }
+
+                // Save Draft never confirms the order.
+                $order->forceFill([
+                    'status' => 'DETAILS_INCOMPLETE',
+                    'details_confirmed_at' => null,
+                ])->save();
+
+                return $order->fresh([
+                    'couples',
+                    'packageSides.design',
+                    'packageSides.parents',
+                    'packageSides.event.contacts',
+                    'fulfilment',
                 ]);
+            });
+        } catch (Throwable $exception) {
+            foreach (array_unique($newUploadedPaths) as $path) {
+                Storage::disk('local')->delete($path);
             }
 
-            // Save Draft never confirms the order.
-            $order->forceFill([
-                'status' => 'DETAILS_INCOMPLETE',
-                'details_confirmed_at' => null,
-            ])->save();
+            throw $exception;
+        }
 
-            return $order->fresh([
-                'couples',
-                'packageSides.design',
-                'packageSides.parents',
-                'packageSides.event.contacts',
-                'fulfilment',
-            ]);
-        });
+        foreach (array_unique($oldPathsToDelete) as $path) {
+            if (! in_array($path, $newUploadedPaths, true)) {
+                Storage::disk('local')->delete($path);
+            }
+        }
+
+        return $savedOrder;
+    }
+
+    private function storeCardImage(
+        string $orderId,
+        string $sideName,
+        UploadedFile $image
+    ): string {
+        $directory = "orders/{$orderId}/{$sideName}";
+        $extension = strtolower($image->extension() ?: 'jpg');
+        $filename = 'card-image-' . Str::uuid() . '.' . $extension;
+
+        $storedPath = Storage::disk('local')->putFileAs(
+            $directory,
+            $image,
+            $filename
+        );
+
+        if (! is_string($storedPath) || $storedPath === '') {
+            throw new RuntimeException('Unable to store card image.');
+        }
+
+        return $storedPath;
     }
 
     private function cleanString(mixed $value): ?string
