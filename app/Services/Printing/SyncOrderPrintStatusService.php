@@ -10,6 +10,10 @@ class SyncOrderPrintStatusService
     {
         $order->refresh()->load('printJobs');
 
+        if ($order->isTerminalOperationalStatus()) {
+            return $order;
+        }
+
         if ($order->printJobs->isEmpty()) {
             return $order;
         }

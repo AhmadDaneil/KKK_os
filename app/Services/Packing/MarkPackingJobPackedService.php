@@ -12,7 +12,13 @@ class MarkPackingJobPackedService
     public function markPacked(PackingJob $packingJob, ?User $actor = null): PackingJob
     {
         return DB::transaction(function () use ($packingJob, $actor) {
-            $packingJob->refresh()->load('items');
+            $packingJob->refresh()->load(['items', 'order']);
+
+            if ($packingJob->order->isTerminalOperationalStatus()) {
+                throw new RuntimeException(
+                    "Order {$packingJob->order->order_id} is {$packingJob->order->status}; packing cannot continue."
+                );
+            }
 
             if ($packingJob->status !== 'PACKING') {
                 throw new RuntimeException(

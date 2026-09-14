@@ -15,7 +15,13 @@ class MarkCourierDeliveredService
         ?User $actor = null,
     ): FulfilmentJob {
         return DB::transaction(function () use ($job, $completionReference, $actor) {
-            $job->refresh();
+            $job->refresh()->load('order');
+
+            if ($job->order->isTerminalOperationalStatus()) {
+                throw new RuntimeException(
+                    "Order {$job->order->order_id} is {$job->order->status}; fulfilment cannot continue."
+                );
+            }
 
             if ($job->method !== 'COURIER') {
                 throw new RuntimeException(

@@ -50,9 +50,15 @@ class HandlePaymentCallbackService
                 }
 
                 if ($payment->payment_type === 'BALANCE') {
-                    $payment->order()->update([
-                        'status' => 'PAID',
-                    ]);
+                    $order = $payment->order()
+                        ->lockForUpdate()
+                        ->firstOrFail();
+
+                    if (! $order->isTerminalOperationalStatus()) {
+                        $order->update([
+                            'status' => 'PAID',
+                        ]);
+                    }
                 }
             } elseif ($verified['status'] === 'FAILED') {
                 if ($payment->status !== 'PAID') {

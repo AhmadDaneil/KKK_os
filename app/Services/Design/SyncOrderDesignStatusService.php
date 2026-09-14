@@ -10,6 +10,10 @@ class SyncOrderDesignStatusService
     {
         $order->refresh()->load('designJobs');
 
+        if ($order->isTerminalOperationalStatus()) {
+            return $order;
+        }
+
         $statuses = $order->designJobs->pluck('status');
 
         if ($statuses->isEmpty()) {
