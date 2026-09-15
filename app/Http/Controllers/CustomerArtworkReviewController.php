@@ -72,7 +72,7 @@ class CustomerArtworkReviewController extends Controller
         abort_if($stream === false, 404);
 
         $mimeType = $storage->mimeType($path)
-        ?: 'application/octet-stream';
+            ?: 'application/octet-stream';
 
         $filename = basename($path);
 
