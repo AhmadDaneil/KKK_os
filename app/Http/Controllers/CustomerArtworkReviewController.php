@@ -57,8 +57,7 @@ class CustomerArtworkReviewController extends Controller
 
         $disk = $artwork->storage_disk ?: 'local';
 
-        $path = $artwork->preview_storage_path
-            ?: $artwork->storage_path;
+        $path = $artwork->preview_storage_path;
 
         abort_unless(
             filled($path)

@@ -41,6 +41,7 @@ class ArtworkReviewApprovalTest extends TestCase
 
         app(CreateArtworkVersionService::class)->create($job, [
             'storage_path' => 'artworks/v1.pdf',
+            'preview_storage_path' => 'artworks/v1-preview.png',
             'original_filename' => 'v1.pdf',
         ], $designer);
 
@@ -57,6 +58,7 @@ class ArtworkReviewApprovalTest extends TestCase
 
         $v2 = app(CreateArtworkVersionService::class)->create($job, [
             'storage_path' => 'artworks/v2.pdf',
+            'preview_storage_path' => 'artworks/v2-preview.png',
             'original_filename' => 'v2.pdf',
         ], $designer);
 
@@ -70,6 +72,7 @@ class ArtworkReviewApprovalTest extends TestCase
 
         app(CreateArtworkVersionService::class)->create($job, [
             'storage_path' => 'artworks/v1.pdf',
+            'preview_storage_path' => 'artworks/v1-preview.png',
             'original_filename' => 'v1.pdf',
         ], $designer);
 
@@ -96,6 +99,7 @@ class ArtworkReviewApprovalTest extends TestCase
             app(StartDesignJobService::class)->start($job, $designer);
             app(CreateArtworkVersionService::class)->create($job->fresh(), [
                 'storage_path' => "artworks/{$job->side}-v1.pdf",
+                'preview_storage_path' => "artworks/{$job->side}-v1-preview.png",
             ], $designer);
             app(MarkDesignReadyService::class)->markReady($job->fresh(), $designer);
         }
@@ -131,9 +135,10 @@ class ArtworkReviewApprovalTest extends TestCase
     );
 
     app(CreateArtworkVersionService::class)->create($job, [
-        'storage_path' => 'artworks/test/latest-preview.png',
-        'original_filename' => 'latest-preview.png',
-        'mime_type' => 'image/png',
+        'storage_path' => 'artworks/test/latest-source.psd',
+        'preview_storage_path' => 'artworks/test/latest-preview.png',
+        'original_filename' => 'latest-source.psd',
+        'mime_type' => 'application/octet-stream',
     ], $designer);
 
     $job = app(MarkDesignReadyService::class)
@@ -179,9 +184,10 @@ public function test_artwork_preview_requires_authorized_customer_session(): voi
     );
 
     app(CreateArtworkVersionService::class)->create($job, [
-        'storage_path' => 'artworks/test/session-required.png',
-        'original_filename' => 'session-required.png',
-        'mime_type' => 'image/png',
+        'storage_path' => 'artworks/test/session-required-source.psd',
+        'preview_storage_path' => 'artworks/test/session-required.png',
+        'original_filename' => 'session-required-source.psd',
+        'mime_type' => 'application/octet-stream',
     ], $designer);
 
     $job = app(MarkDesignReadyService::class)
@@ -208,9 +214,10 @@ public function test_customer_cannot_preview_design_job_from_another_order(): vo
     );
 
     app(CreateArtworkVersionService::class)->create($jobB, [
-        'storage_path' => 'artworks/test/order-b-preview.png',
-        'original_filename' => 'order-b-preview.png',
-        'mime_type' => 'image/png',
+        'storage_path' => 'artworks/test/order-b-source.psd',
+        'preview_storage_path' => 'artworks/test/order-b-preview.png',
+        'original_filename' => 'order-b-source.psd',
+        'mime_type' => 'application/octet-stream',
     ], $designerB);
 
     $jobB = app(MarkDesignReadyService::class)
@@ -280,13 +287,64 @@ public function test_artwork_preview_prefers_preview_file_over_original_file(): 
     );
 }
 
+public function test_customer_preview_never_falls_back_to_source_artwork(): void
+{
+    Storage::fake('local');
+
+    [$order, $job, $designer] = $this->preparedDesignJob();
+
+    Storage::disk('local')->put(
+        'artworks/test/private-source.psd',
+        'private-source-content'
+    );
+
+    $artwork = app(CreateArtworkVersionService::class)->create($job, [
+        'storage_path' => 'artworks/test/private-source.psd',
+        'original_filename' => 'private-source.psd',
+        'mime_type' => 'application/octet-stream',
+    ], $designer);
+
+    /*
+     * Simulate legacy/inconsistent persisted data.
+     * New production flow cannot reach DESIGN_READY without a
+     * customer preview, but the HTTP boundary must still never
+     * expose storage_path.
+     */
+    $job->update([
+        'status' => 'DESIGN_READY',
+        'design_ready_at' => now(),
+    ]);
+
+    $this->assertNull(
+        $artwork->fresh()->preview_storage_path
+    );
+
+    $link = app(GenerateOrderAccessLinkService::class)
+        ->generate($order->fresh());
+
+    $this->get($this->requestUri($link))
+        ->assertRedirect(
+            route('orders.dashboard', [
+                'orderId' => $order->order_id,
+            ])
+        );
+
+    $this->get(
+        route('orders.artwork.preview', [
+            'orderId' => $order->order_id,
+            'designJobId' => $job->id,
+        ])
+    )->assertNotFound();
+}
+
 public function test_cancelled_order_cannot_approve_artwork(): void
 {
     [$order, $job, $designer] = $this->preparedDesignJob();
 
     app(CreateArtworkVersionService::class)->create($job, [
-        'storage_path' => 'artworks/test/cancelled-v1.pdf',
-        'original_filename' => 'cancelled-v1.pdf',
+        'storage_path' => 'artworks/test/archived-v1.pdf',
+        'preview_storage_path' => 'artworks/test/archived-v1-preview.png',
+        'original_filename' => 'archived-v1.pdf',
     ], $designer);
 
     $job = app(MarkDesignReadyService::class)
@@ -310,8 +368,9 @@ public function test_archived_order_cannot_request_artwork_correction(): void
     [$order, $job, $designer] = $this->preparedDesignJob();
 
     app(CreateArtworkVersionService::class)->create($job, [
-        'storage_path' => 'artworks/test/archived-v1.pdf',
-        'original_filename' => 'archived-v1.pdf',
+    'storage_path' => 'artworks/test/archived-v1.pdf',
+    'preview_storage_path' => 'artworks/test/archived-v1-preview.png',
+    'original_filename' => 'archived-v1.pdf',
     ], $designer);
 
     $job = app(MarkDesignReadyService::class)
@@ -440,6 +499,48 @@ public function test_archived_order_cannot_request_artwork_correction(): void
         ])
     )->assertNotFound();
 }
+
+    public function test_design_cannot_be_marked_ready_without_customer_preview(): void
+{
+    [$order, $job, $designer] = $this->preparedDesignJob();
+
+    app(CreateArtworkVersionService::class)->create($job, [
+        'storage_path' => 'artworks/test/source-only.psd',
+        'original_filename' => 'source-only.psd',
+        'mime_type' => 'application/octet-stream',
+    ], $designer);
+
+    $this->expectException(RuntimeException::class);
+    $this->expectExceptionMessage('customer preview');
+
+    app(MarkDesignReadyService::class)
+        ->markReady($job->fresh(), $designer);
+    }
+
+    public function test_design_can_be_marked_ready_when_customer_preview_exists(): void
+{
+    [$order, $job, $designer] = $this->preparedDesignJob();
+
+    $artwork = app(CreateArtworkVersionService::class)->create($job, [
+        'storage_path' => 'artworks/test/source.psd',
+        'preview_storage_path' => 'artworks/test/customer-preview.png',
+        'original_filename' => 'source.psd',
+        'mime_type' => 'application/octet-stream',
+    ], $designer);
+
+    $this->assertSame(
+        'artworks/test/customer-preview.png',
+        $artwork->preview_storage_path
+    );
+
+    $job = app(MarkDesignReadyService::class)
+        ->markReady($job->fresh(), $designer);
+
+    $this->assertSame(
+        'DESIGN_READY',
+        $job->status
+    );
+    }
 
     private function requestUri(string $url): string
     {

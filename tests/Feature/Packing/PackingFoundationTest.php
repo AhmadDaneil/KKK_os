@@ -222,10 +222,11 @@ class PackingFoundationTest extends TestCase
             $designJob = app(StartDesignJobService::class)->start($designJob);
 
             app(CreateArtworkVersionService::class)->create($designJob, [
-                'storage_path' => "artworks/{$designJob->side}/v1.pdf",
-                'original_filename' => "{$designJob->side}-v1.pdf",
-                'mime_type' => 'application/pdf',
-            ]);
+            'storage_path' => "artworks/{$designJob->side}/v1.pdf",
+            'preview_storage_path' => "artworks/{$designJob->side}/v1-preview.png",
+            'original_filename' => "{$designJob->side}-v1.pdf",
+            'mime_type' => 'application/pdf',
+        ]);
 
             $designJob = app(MarkDesignReadyService::class)->markReady($designJob->fresh());
             app(ApproveArtworkService::class)->approve($designJob);

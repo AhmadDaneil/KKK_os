@@ -30,6 +30,12 @@ class MarkDesignReadyService
                 );
             }
 
+            if (! filled($latestArtwork->preview_storage_path)) {
+                throw new RuntimeException(
+                "Design job {$designJob->id} has no customer preview."
+                );
+            }
+
             $fromStatus = $designJob->status;
 
             $designJob->update([

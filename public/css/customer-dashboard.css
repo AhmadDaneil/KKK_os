@@ -217,10 +217,123 @@ button {
     align-items: center;
     gap: 1rem;
     flex-wrap: wrap;
+    margin: 1.5rem 0 2rem;
+    padding: 1.25rem;
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 14px;
+}
+
+.form-actions button,
+.form-actions a {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 44px;
+    padding: 0.75rem 1.1rem;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    font-weight: 700;
+    text-decoration: none;
+    box-sizing: border-box;
+}
+
+.form-actions button {
+    border: 1px solid #d1d5db;
+    background: #fff;
+    color: #111827;
+}
+
+.form-actions a {
+    border: 1px solid #111827;
+    background: #111827;
+    color: #fff;
+}
+
+.form-actions button:hover {
+    background: #f3f4f6;
+}
+
+.form-actions a:hover {
+    background: #374151;
+}
+
+.form-actions button:focus-visible,
+.form-actions a:focus-visible {
+    outline: 3px solid #93c5fd;
+    outline-offset: 2px;
+}
+
+@media (max-width: 700px) {
+    .form-actions {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .form-actions button,
+    .form-actions a {
+        width: 100%;
+    }
 }
 
 @media (max-width: 700px) {
     .grid {
         grid-template-columns: 1fr;
+    }
+}
+
+.dashboard-action-card {
+    margin-bottom: 1.5rem;
+    padding: 1.5rem;
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 14px;
+}
+
+.dashboard-action-card h2 {
+    margin: 0 0 0.5rem;
+    font-size: 1.25rem;
+}
+
+.dashboard-action-card p {
+    margin: 0 0 1rem;
+    line-height: 1.6;
+}
+
+.dashboard-action-card a {
+    display: inline-block;
+    padding: 0.7rem 1rem;
+    border-radius: 8px;
+    background: #111827;
+    color: #fff;
+    font-weight: 700;
+    text-decoration: none;
+}
+
+.dashboard-action-card a:hover {
+    background: #374151;
+}
+
+.dashboard-action-card a:focus-visible {
+    outline: 3px solid #93c5fd;
+    outline-offset: 2px;
+}
+
+.artwork-progress-label {
+    display: inline-block;
+    padding: 0.45rem 0.75rem;
+    border-radius: 999px;
+    background: #f3f4f6;
+    color: #374151;
+    font-size: 0.875rem;
+    font-weight: 700;
+}
+
+@media (max-width: 700px) {
+    .dashboard-action-card a {
+        display: block;
+        width: 100%;
+        box-sizing: border-box;
+        text-align: center;
     }
 }

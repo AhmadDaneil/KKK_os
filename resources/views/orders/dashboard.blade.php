@@ -161,7 +161,78 @@
     </div>
 </header>
 
-    @if (session('draft_saved'))
+    @if (in_array($order->status, [
+    'DETAILS_CONFIRMED',
+    'READY_FOR_DESIGN',
+    'DESIGN_IN_PROGRESS',
+    'DESIGN_READY',
+    'CORRECTION_REQUESTED',
+    'DESIGN_APPROVED',
+], true))
+    <section class="dashboard-action-card">
+        <h2>Artwork Tempahan</h2>
+
+        @if ($order->status === 'DETAILS_CONFIRMED')
+            <p>
+                Maklumat tempahan anda telah disahkan.
+                Artwork anda akan disediakan oleh designer.
+            </p>
+
+            <span class="artwork-progress-label">
+                Menunggu proses design
+            </span>
+
+        @elseif ($order->status === 'READY_FOR_DESIGN')
+            <p>
+                Tempahan anda sedang menunggu proses design.
+            </p>
+
+            <span class="artwork-progress-label">
+                Menunggu designer
+            </span>
+
+        @elseif ($order->status === 'DESIGN_IN_PROGRESS')
+            <p>
+                Designer sedang menyediakan artwork tempahan anda.
+            </p>
+
+            <span class="artwork-progress-label">
+                Design sedang disediakan
+            </span>
+
+        @elseif ($order->status === 'DESIGN_READY')
+            <p>
+                Artwork anda telah tersedia. Sila semak artwork sebelum membuat
+                kelulusan atau meminta pembetulan.
+            </p>
+
+            <a href="{{ route('orders.artwork.review', ['orderId' => $order->order_id]) }}">
+                Semak Artwork
+            </a>
+
+        @elseif ($order->status === 'CORRECTION_REQUESTED')
+            <p>
+                Permintaan pembetulan anda sedang diproses. Anda masih boleh
+                melihat status semakan artwork.
+            </p>
+
+            <a href="{{ route('orders.artwork.review', ['orderId' => $order->order_id]) }}">
+                Lihat Status Artwork
+            </a>
+
+        @else
+            <p>
+                Artwork tempahan anda telah diluluskan.
+            </p>
+
+            <a href="{{ route('orders.artwork.review', ['orderId' => $order->order_id]) }}">
+                Lihat Artwork
+            </a>
+        @endif
+    </section>
+@endif
+
+@if (session('draft_saved'))
         <div class="notice">Draft berjaya disimpan. Anda boleh keluar dan sambung semula melalui link dashboard yang sama.</div>
     @endif
 
