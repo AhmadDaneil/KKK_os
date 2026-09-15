@@ -285,6 +285,26 @@ public function test_artwork_preview_prefers_preview_file_over_original_file(): 
         'preview-file-content',
         $response->streamedContent()
     );
+
+    $this->assertSame(
+    'image/png',
+    $response->headers->get('Content-Type')
+);
+
+    $this->assertSame(
+        'inline; filename="preview.png"',
+        $response->headers->get('Content-Disposition')
+    );
+
+    $this->assertNotSame(
+        'application/pdf',
+        $response->headers->get('Content-Type')
+    );
+
+    $this->assertStringNotContainsString(
+        'original.pdf',
+        (string) $response->headers->get('Content-Disposition')
+    );
 }
 
 public function test_customer_preview_never_falls_back_to_source_artwork(): void

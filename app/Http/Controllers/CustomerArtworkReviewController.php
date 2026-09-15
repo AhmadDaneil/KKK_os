@@ -72,11 +72,9 @@ class CustomerArtworkReviewController extends Controller
         abort_if($stream === false, 404);
 
         $mimeType = $storage->mimeType($path)
-            ?: $artwork->mime_type
-            ?: 'application/octet-stream';
+        ?: 'application/octet-stream';
 
-        $filename = $artwork->original_filename
-            ?: basename($path);
+        $filename = basename($path);
 
         return response()->stream(
             function () use ($stream) {
