@@ -8,8 +8,6 @@ use App\Services\Design\InitializeDesignJobsForOrderService;
 use App\Services\Design\MarkDesignReadyService;
 use App\Services\Design\StartDesignJobService;
 use App\Services\Fulfilment\InitializeFulfilmentJobForOrderService;
-use App\Services\Fulfilment\MarkCourierDeliveredService;
-use App\Services\Fulfilment\MarkCourierShippedService;
 use App\Services\Fulfilment\MarkPickupCollectedService;
 use App\Services\Merge\GenerateMergeJobsForOrderService;
 use App\Services\Orders\ConfirmOrderDetailsService;
@@ -25,6 +23,8 @@ use App\Services\Printing\InitializePrintJobsForOrderService;
 use App\Services\Printing\MarkPrintJobPrintedService;
 use App\Services\Printing\StartPrintingService;
 use App\Services\Printing\SyncOrderPrintStatusService;
+use App\Services\Fulfilment\CompleteCourierFulfilmentService;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use RuntimeException;
 use Tests\TestCase;
@@ -98,40 +98,155 @@ class FulfilmentFoundationTest extends TestCase
         $this->assertSame('COMPLETED', $order->fresh()->status);
     }
 
-    public function test_courier_must_be_shipped_before_delivered(): void
+        public function test_courier_completion_requires_packing_proof(): void
     {
+        Storage::fake('local');
+
         $order = $this->packedOrder(1, 'COURIER', 'LELAKI');
 
-        $job = app(InitializeFulfilmentJobForOrderService::class)->initialize($order);
+        $job = app(InitializeFulfilmentJobForOrderService::class)
+            ->initialize($order);
 
         $this->expectException(RuntimeException::class);
+        $this->expectExceptionMessage(
+            "Courier job {$job->id} requires packing proof before completion."
+        );
 
-        app(MarkCourierDeliveredService::class)->deliver($job);
+        app(CompleteCourierFulfilmentService::class)->complete(
+            $job,
+            'POS LAJU',
+            'TRACK-001'
+        );
     }
 
-    public function test_courier_delivery_completes_order(): void
+    public function test_courier_completion_requires_courier_and_tracking_number(): void
     {
-        $order = $this->packedOrder(2, 'COURIER');
+        Storage::fake('local');
 
-        $job = app(InitializeFulfilmentJobForOrderService::class)->initialize($order);
+        $order = $this->packedOrder(1, 'COURIER', 'LELAKI');
 
-        $job = app(MarkCourierShippedService::class)->ship(
+        $job = app(InitializeFulfilmentJobForOrderService::class)
+            ->initialize($order);
+
+        $proofPath = "packing-proofs/{$job->packing_job_id}/proof.jpg";
+
+        Storage::disk('local')->put($proofPath, 'test-proof');
+
+        $job->packingJob()->update([
+            'proof_storage_path' => $proofPath,
+            'proof_original_name' => 'proof.jpg',
+            'proof_mime_type' => 'image/jpeg',
+        ]);
+
+        $this->expectException(RuntimeException::class);
+        $this->expectExceptionMessage(
+            'Courier provider and tracking number are required before courier completion.'
+        );
+
+        app(CompleteCourierFulfilmentService::class)->complete(
             $job,
-            'TEST_COURIER',
+            null,
+            null
+        );
+    }
+
+    public function test_one_package_courier_completion_completes_order(): void
+    {
+        Storage::fake('local');
+
+        $order = $this->packedOrder(1, 'COURIER', 'LELAKI');
+
+        $job = app(InitializeFulfilmentJobForOrderService::class)
+            ->initialize($order);
+
+        $proofPath = "packing-proofs/{$job->packing_job_id}/proof.jpg";
+
+        Storage::disk('local')->put($proofPath, 'test-proof');
+
+        $job->packingJob()->update([
+            'proof_storage_path' => $proofPath,
+            'proof_original_name' => 'proof.jpg',
+            'proof_mime_type' => 'image/jpeg',
+        ]);
+
+        $job = app(CompleteCourierFulfilmentService::class)->complete(
+            $job,
+            'POS LAJU',
             'TRACK-001'
         );
 
-        $this->assertSame('SHIPPED', $job->status);
-        $this->assertSame('SHIPPED', $order->fresh()->status);
+        $this->assertSame('COMPLETED', $job->status);
+        $this->assertSame('COMPLETED', $order->fresh()->status);
+        $this->assertSame('POS LAJU', $job->courier_provider);
+        $this->assertSame('TRACK-001', $job->tracking_number);
+        $this->assertNotNull($job->shipped_at);
+        $this->assertNull($job->delivered_at);
 
-        $job = app(MarkCourierDeliveredService::class)->deliver(
-            $job,
-            'DELIVERY-001'
+        $event = $job->events()
+            ->where('event_type', 'COURIER_COMPLETED')
+            ->latest('id')
+            ->firstOrFail();
+
+        $this->assertSame('READY', $event->from_status);
+        $this->assertSame('COMPLETED', $event->to_status);
+        $this->assertSame('POS LAJU', $event->metadata['courier_provider']);
+        $this->assertSame('TRACK-001', $event->metadata['tracking_number']);
+        $this->assertSame(
+            $proofPath,
+            $event->metadata['packing_proof_storage_path']
+        );
+    }
+
+    public function test_two_package_courier_completion_is_one_business_fulfilment_and_idempotent(): void
+    {
+        Storage::fake('local');
+
+        $order = $this->packedOrder(2, 'COURIER');
+
+        $this->assertSame(
+            2,
+            $order->packingJob->items()->count()
         );
 
-        $this->assertSame('DELIVERED', $job->status);
-        $this->assertNotNull($job->delivered_at);
+        $job = app(InitializeFulfilmentJobForOrderService::class)
+            ->initialize($order);
+
+        $proofPath = "packing-proofs/{$job->packing_job_id}/proof.jpg";
+
+        Storage::disk('local')->put($proofPath, 'test-proof');
+
+        $job->packingJob()->update([
+            'proof_storage_path' => $proofPath,
+            'proof_original_name' => 'proof.jpg',
+            'proof_mime_type' => 'image/jpeg',
+        ]);
+
+        $service = app(CompleteCourierFulfilmentService::class);
+
+        $first = $service->complete(
+            $job,
+            'POS LAJU',
+            'TRACK-002'
+        );
+
+        $second = $service->complete(
+            $first,
+            'POS LAJU',
+            'TRACK-002'
+        );
+
+        $this->assertSame($first->id, $second->id);
+        $this->assertSame('COMPLETED', $second->status);
         $this->assertSame('COMPLETED', $order->fresh()->status);
+
+        $this->assertDatabaseCount('fulfilment_jobs', 1);
+
+        $this->assertSame(
+            1,
+            $second->events()
+                ->where('event_type', 'COURIER_COMPLETED')
+                ->count()
+        );
     }
 
     private function packedOrder(

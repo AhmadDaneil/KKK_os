@@ -9,7 +9,7 @@ use App\Services\Packing\MarkPackingJobPackedService;
 use App\Services\Packing\StartPackingService;
 use App\Services\Packing\VerifyPackingItemService;
 use App\Services\Fulfilment\InitializeFulfilmentJobForOrderService;
-use App\Services\Fulfilment\MarkCourierShippedService;
+use App\Services\Fulfilment\CompleteCourierFulfilmentService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -78,46 +78,190 @@ class StaffPackingWorkflowController extends Controller
         PackingJob $packingJob,
         MarkPackingJobPackedService $service,
         InitializeFulfilmentJobForOrderService $initializeFulfilment,
-        MarkCourierShippedService $markShipped,
     ): RedirectResponse {
         $this->authorizeAssignedPackingStaff($request, $packingJob);
+
         $packingJob->load('order.fulfilment');
 
         $isCourier = $packingJob->order->fulfilment?->method === 'COURIER';
+
         $validated = $request->validate([
-            'packing_proof' => ['required', 'image', 'mimes:jpg,jpeg,png,webp', 'max:10240'],
-            'courier_provider' => [$isCourier ? 'required' : 'nullable', 'string', 'max:255'],
-            'tracking_number' => [$isCourier ? 'required' : 'nullable', 'string', 'max:255'],
+            'packing_proof' => [
+                $isCourier ? 'nullable' : 'required',
+                'image',
+                'mimes:jpg,jpeg,png,webp',
+                'max:10240',
+            ],
         ], [
-            'packing_proof.required' => 'Bukti gambar barang yang telah dipack wajib dimuat naik.',
-            'packing_proof.image' => 'Bukti packing mestilah fail gambar.',
-            'packing_proof.max' => 'Saiz bukti packing tidak boleh melebihi 10 MB.',
-            'courier_provider.required' => 'Sila masukkan nama courier.',
-            'tracking_number.required' => 'Sila masukkan tracking number untuk penghantaran courier.',
+            'packing_proof.required' =>
+                'Bukti gambar barang yang telah dipack wajib dimuat naik.',
+            'packing_proof.image' =>
+                'Bukti packing mestilah fail gambar.',
+            'packing_proof.max' =>
+                'Saiz bukti packing tidak boleh melebihi 10 MB.',
         ]);
 
-        $proof = $validated['packing_proof'];
-        $proofPath = $proof->store("packing-proofs/{$packingJob->id}", 'local');
+        $proof = $validated['packing_proof'] ?? null;
+        $proofPath = null;
+
+        if ($proof) {
+            $proofPath = $proof->store(
+                "packing-proofs/{$packingJob->id}",
+                'local'
+            );
+        }
 
         try {
-            DB::transaction(function () use ($packingJob, $service, $initializeFulfilment, $markShipped, $request, $validated, $proof, $proofPath, $isCourier) {
+            DB::transaction(function () use (
+                $packingJob,
+                $service,
+                $initializeFulfilment,
+                $request,
+                $proof,
+                $proofPath
+            ) {
+                if ($proof && $proofPath) {
+                    $packingJob->update([
+                        'proof_storage_path' => $proofPath,
+                        'proof_original_name' => basename(
+                            $proof->getClientOriginalName()
+                        ),
+                        'proof_mime_type' => $proof->getMimeType(),
+                    ]);
+                }
+
+                $packedJob = $service->markPacked(
+                    $packingJob,
+                    $request->user()
+                );
+
+                $initializeFulfilment->initialize(
+                    $packedJob->order()->firstOrFail()
+                );
+            });
+        } catch (RuntimeException $exception) {
+            if ($proofPath) {
+                Storage::disk('local')->delete($proofPath);
+            }
+
+            return back()->withErrors([
+                'packing_job' => $exception->getMessage(),
+            ]);
+        } catch (Throwable $exception) {
+            if ($proofPath) {
+                Storage::disk('local')->delete($proofPath);
+            }
+
+            throw $exception;
+        }
+
+        return back()->with(
+            'status',
+            'Packing completed successfully.'
+        );
+    }
+
+    public function completeCourier(
+        Request $request,
+        PackingJob $packingJob,
+        CompleteCourierFulfilmentService $service,
+    ): RedirectResponse {
+        $this->authorizeAssignedPackingStaff($request, $packingJob);
+
+        $packingJob->load(['order.fulfilment', 'order.fulfilmentJob']);
+
+        $validated = $request->validate([
+            'packing_proof' => [
+                'required',
+                'image',
+                'mimes:jpg,jpeg,png,webp',
+                'max:10240',
+            ],
+            'courier_provider' => [
+                'required',
+                'string',
+                'max:255',
+            ],
+            'tracking_number' => [
+                'required',
+                'string',
+                'max:255',
+            ],
+            'complete' => [
+                'required',
+                'accepted',
+            ],
+        ], [
+            'packing_proof.required' =>
+                'Bukti gambar parcel bersama label tracking wajib dimuat naik.',
+            'packing_proof.image' =>
+                'Bukti courier mestilah fail gambar.',
+            'packing_proof.max' =>
+                'Saiz bukti courier tidak boleh melebihi 10 MB.',
+            'courier_provider.required' =>
+                'Sila masukkan nama courier.',
+            'tracking_number.required' =>
+                'Sila masukkan tracking number.',
+            'complete.required' =>
+                'Sila tandakan COMPLETE sebelum menamatkan order.',
+            'complete.accepted' =>
+                'Sila tandakan COMPLETE sebelum menamatkan order.',
+        ]);
+
+        $fulfilmentJob = $packingJob->order->fulfilmentJob;
+
+        if (! $fulfilmentJob) {
+            return back()->withErrors([
+                'packing_job' =>
+                    'Fulfilment job belum tersedia untuk order ini.',
+            ]);
+        }
+
+        if ($fulfilmentJob->method !== 'COURIER') {
+            return back()->withErrors([
+                'packing_job' =>
+                    'Courier completion hanya dibenarkan untuk order COURIER.',
+            ]);
+        }
+
+        if ($fulfilmentJob->status === 'COMPLETED') {
+            return back()->with(
+                'status',
+                'Courier fulfilment already completed.'
+            );
+        }
+
+        $proof = $validated['packing_proof'];
+
+        $proofPath = $proof->store(
+            "packing-proofs/{$packingJob->id}",
+            'local'
+        );
+
+        try {
+            DB::transaction(function () use (
+                $packingJob,
+                $fulfilmentJob,
+                $service,
+                $request,
+                $validated,
+                $proof,
+                $proofPath
+            ) {
                 $packingJob->update([
                     'proof_storage_path' => $proofPath,
-                    'proof_original_name' => $proof->getClientOriginalName(),
+                    'proof_original_name' => basename(
+                        $proof->getClientOriginalName()
+                    ),
                     'proof_mime_type' => $proof->getMimeType(),
                 ]);
 
-                $packedJob = $service->markPacked($packingJob, $request->user());
-                $fulfilmentJob = $initializeFulfilment->initialize($packedJob->order()->firstOrFail());
-
-                if ($isCourier) {
-                    $markShipped->ship(
-                        $fulfilmentJob,
-                        $validated['courier_provider'],
-                        $validated['tracking_number'],
-                        $request->user(),
-                    );
-                }
+                $service->complete(
+                    $fulfilmentJob,
+                    $validated['courier_provider'],
+                    $validated['tracking_number'],
+                    $request->user()
+                );
             });
         } catch (RuntimeException $exception) {
             Storage::disk('local')->delete($proofPath);
@@ -132,7 +276,7 @@ class StaffPackingWorkflowController extends Controller
 
         return back()->with(
             'status',
-            'Packing completed successfully.'
+            'Courier fulfilment completed successfully.'
         );
     }
 
