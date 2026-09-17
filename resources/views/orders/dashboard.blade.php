@@ -9,105 +9,6 @@
 </head>
 <body>
 <main>
-    @php
-    $statusInfo = match ($order->status) {
-        'BOOKING_PENDING' => [
-            'label' => 'Tempahan Sedang Diproses',
-            'message' => 'Tempahan anda sedang diproses.',
-        ],
-
-        'BOOKED', 'DEPOSIT_PAID' => [
-            'label' => 'Tempahan Diterima',
-            'message' => 'Tempahan anda telah diterima.',
-        ],
-
-        'DETAILS_INCOMPLETE' => [
-            'label' => 'Maklumat Belum Lengkap',
-            'message' => 'Lengkapkan maklumat yang diperlukan sebelum membuat pengesahan.',
-        ],
-
-        'DETAILS_CONFIRMED' => [
-            'label' => 'Maklumat Telah Disahkan',
-            'message' => 'Maklumat tempahan anda telah berjaya disahkan.',
-        ],
-
-        'READY_FOR_DESIGN' => [
-            'label' => 'Menunggu Proses Design',
-            'message' => 'Maklumat anda telah diterima dan sedia untuk proses design.',
-        ],
-
-        'DESIGN_IN_PROGRESS' => [
-            'label' => 'Design Sedang Disediakan',
-            'message' => 'Designer sedang menyediakan artwork tempahan anda.',
-        ],
-
-        'DESIGN_READY' => [
-            'label' => 'Artwork Sedia Untuk Semakan',
-            'message' => 'Artwork anda telah tersedia untuk semakan.',
-        ],
-
-        'CORRECTION_REQUESTED' => [
-            'label' => 'Pembetulan Artwork Sedang Diproses',
-            'message' => 'Permintaan pembetulan anda telah diterima.',
-        ],
-
-        'DESIGN_APPROVED' => [
-            'label' => 'Artwork Diluluskan',
-            'message' => 'Artwork anda telah diluluskan.',
-        ],
-
-        'BALANCE_PENDING' => [
-            'label' => 'Menunggu Bayaran Baki',
-            'message' => 'Bayaran baki diperlukan sebelum proses seterusnya.',
-        ],
-
-        'PAID' => [
-            'label' => 'Bayaran Selesai',
-            'message' => 'Bayaran tempahan anda telah selesai.',
-        ],
-
-        'PRINTING' => [
-            'label' => 'Dalam Proses Cetakan',
-            'message' => 'Tempahan anda sedang dicetak.',
-        ],
-
-        'PACKING' => [
-            'label' => 'Dalam Proses Pembungkusan',
-            'message' => 'Tempahan anda sedang dibungkus.',
-        ],
-
-        'READY_FOR_PICKUP' => [
-            'label' => 'Sedia Untuk Pickup',
-            'message' => 'Tempahan anda telah sedia untuk diambil.',
-        ],
-
-        'SHIPPED' => [
-            'label' => 'Telah Dihantar',
-            'message' => 'Tempahan anda telah diserahkan kepada courier.',
-        ],
-
-        'COMPLETED' => [
-            'label' => 'Tempahan Selesai',
-            'message' => 'Tempahan anda telah selesai.',
-        ],
-
-        'CANCELLED' => [
-            'label' => 'Tempahan Dibatalkan',
-            'message' => 'Tempahan ini telah dibatalkan.',
-        ],
-
-        'ARCHIVED' => [
-            'label' => 'Tempahan Diarkibkan',
-            'message' => 'Tempahan ini telah diarkibkan.',
-        ],
-
-        default => [
-            'label' => 'Status Tempahan',
-            'message' => 'Status tempahan anda sedang dikemas kini.',
-        ],
-    };
-@endphp
-
 <header class="order-summary">
     <div class="order-summary-heading">
         <div>
@@ -116,7 +17,7 @@
         </div>
 
         <span class="status-badge">
-            {{ $statusInfo['label'] }}
+            {{ $progress['label'] }}
         </span>
     </div>
 
@@ -156,8 +57,38 @@
         @endif
     </div>
 
+    <section class="progress-panel" data-progress-tone="{{ $progress['tone'] }}">
+        <div class="progress-heading">
+            <div>
+                <span class="summary-label">Kemajuan Tempahan</span>
+                <strong>{{ $progress['label'] }}</strong>
+            </div>
+            <span class="progress-percentage">{{ $progress['percentage'] }}%</span>
+        </div>
+
+        <div
+            class="progress-track"
+            role="progressbar"
+            aria-label="Kemajuan tempahan"
+            aria-valuemin="0"
+            aria-valuemax="100"
+            aria-valuenow="{{ $progress['percentage'] }}"
+        >
+            <span class="progress-fill" style="width: {{ $progress['percentage'] }}%"></span>
+        </div>
+
+        <div class="progress-stages" aria-label="Peringkat tempahan">
+            @foreach ($progress['stages'] as $stage)
+                <div class="progress-stage @if ($stage['complete']) is-complete @endif">
+                    <span class="stage-dot" aria-hidden="true"></span>
+                    <span>{{ $stage['label'] }}</span>
+                </div>
+            @endforeach
+        </div>
+    </section>
+
     <div class="order-status-message">
-        {{ $statusInfo['message'] }}
+        {{ $progress['message'] }}
     </div>
 </header>
 

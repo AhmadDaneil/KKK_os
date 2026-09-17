@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Services\Orders\CustomerOrderSessionAccessService;
+use App\Services\Orders\BuildCustomerProgressService;
 use App\Services\Orders\ResolveOrderAccessService;
 use Illuminate\Http\Request;
 
@@ -13,6 +14,7 @@ class CustomerDashboardController extends Controller
         string $orderId,
         ResolveOrderAccessService $tokenAccess,
         CustomerOrderSessionAccessService $sessionAccess,
+        BuildCustomerProgressService $customerProgress,
     ) {
         $plainToken = (string) $request->query('token', '');
 
@@ -37,6 +39,9 @@ class CustomerDashboardController extends Controller
             'fulfilment',
         ]);
 
-        return view('orders.dashboard', compact('order'));
+        return view('orders.dashboard', [
+            'order' => $order,
+            'progress' => $customerProgress->build($order),
+        ]);
     }
 }

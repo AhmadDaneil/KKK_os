@@ -171,6 +171,8 @@ public function test_correction_requested_dashboard_shows_artwork_status_cta(): 
         ->assertOk()
         ->assertSee('Artwork Tempahan')
         ->assertSee('Menunggu proses design')
+        ->assertSee('35%')
+        ->assertSee('data-progress-tone="red"', false)
         ->assertDontSee('Semak Artwork')
         ->assertDontSee(route('orders.artwork.review', [
             'orderId' => $order->order_id,
@@ -197,6 +199,8 @@ public function test_correction_requested_dashboard_shows_artwork_status_cta(): 
         ->assertOk()
         ->assertSee('Artwork Tempahan')
         ->assertSee('Menunggu designer')
+        ->assertSee('40%')
+        ->assertSee('data-progress-tone="yellow"', false)
         ->assertDontSee('Semak Artwork')
         ->assertDontSee(route('orders.artwork.review', [
             'orderId' => $order->order_id,
