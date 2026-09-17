@@ -37,6 +37,13 @@ class CustomerDashboardAccessTest extends TestCase
     ]))
         ->assertOk()
         ->assertSee($order->order_id)
+        ->assertSee('Live Preview')
+        ->assertSee('Kad 4 × 6')
+        ->assertSee('data-card-preview="LELAKI"', false)
+        ->assertSee('data-preview-face-target="front"', false)
+        ->assertSee('data-preview-face-target="back"', false)
+        ->assertSee('data-preview-field="card_title_jawi"', false)
+        ->assertSee('وليمة العروس')
         ->assertDontSee('token=');
 }
 

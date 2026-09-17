@@ -199,6 +199,11 @@
     >
         @csrf
 
+        <div class="order-form-layout">
+            @include('orders.partials.card-preview')
+
+            <div class="order-form-fields">
+
         <fieldset class="customer-data-lock" @disabled(! $isEditable)>
 
         <fieldset>
@@ -483,6 +488,8 @@
 </fieldset>
 
     </fieldset>
+            </div>
+        </div>
 
 @if ($isEditable)
     <div class="form-actions">
@@ -781,6 +788,143 @@ document.addEventListener('DOMContentLoaded', function () {
                     reviewLink.removeAttribute('aria-disabled');
                 });
         });
+    });
+</script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const form = document.getElementById('customer-order-form');
+        const preview = document.querySelector('.live-preview');
+
+        if (!form || !preview) {
+            return;
+        }
+
+        let activeSide = preview.querySelector('[data-card-preview]:not(.is-hidden)')?.dataset.cardPreview;
+        let activeFace = 'front';
+
+        function field(name) {
+            return form.elements.namedItem(name);
+        }
+
+        function value(name, fallback) {
+            const control = field(name);
+            return control && control.value.trim() ? control.value.trim() : fallback;
+        }
+
+        function setText(card, key, text) {
+            card.querySelectorAll('[data-preview-field="' + key + '"]').forEach(function (node) {
+                node.textContent = text;
+            });
+        }
+
+        function formatDate(raw) {
+            if (!raw) {
+                return 'TARIKH MAJLIS';
+            }
+
+            const date = new Date(raw + 'T00:00:00');
+            return new Intl.DateTimeFormat('ms-MY', {
+                day: 'numeric',
+                month: 'long',
+                year: 'numeric'
+            }).format(date);
+        }
+
+        function jawiCardTitle(title) {
+            const translations = {
+                'Walimatul Urus': 'وليمة العروس',
+                'Majlis Perkahwinan': 'مجليس ڤركهوينن',
+                'Kenduri Kesyukuran': 'کندوري کشوکورن'
+            };
+
+            return translations[title] || translations['Walimatul Urus'];
+        }
+
+        function syncCard(side) {
+            const cardWrap = preview.querySelector('[data-card-preview="' + side + '"]');
+
+            if (!cardWrap) {
+                return;
+            }
+
+            const prefix = 'sides[' + side + ']';
+            const groomName = value('couple[groom_name]', 'NAMA PENGANTIN');
+            const brideName = value('couple[bride_name]', 'NAMA PASANGAN');
+            const groomDisplay = value('couple[groom_abbreviation]', groomName);
+            const brideDisplay = value('couple[bride_abbreviation]', brideName);
+
+            setText(cardWrap, 'groom_name', groomName);
+            setText(cardWrap, 'bride_name', brideName);
+            setText(cardWrap, 'groom_display', groomDisplay);
+            setText(cardWrap, 'bride_display', brideDisplay);
+            const cardTitle = value(prefix + '[design][card_title]', 'Walimatul Urus');
+            setText(cardWrap, 'card_title', cardTitle);
+            setText(cardWrap, 'card_title_jawi', jawiCardTitle(cardTitle));
+            setText(cardWrap, 'father_name', value(prefix + '[parents][father_name]', 'NAMA BAPA'));
+            setText(cardWrap, 'mother_name', value(prefix + '[parents][mother_name]', 'NAMA IBU'));
+            setText(cardWrap, 'day_name', value(prefix + '[event][day_name]', 'HARI').toUpperCase());
+            setText(cardWrap, 'event_date', formatDate(value(prefix + '[event][event_date]', '')));
+            setText(cardWrap, 'hijri_date', value(prefix + '[event][hijri_date]', ''));
+            setText(cardWrap, 'meal_time', value(prefix + '[event][meal_time]', '-'));
+            setText(cardWrap, 'bersanding_time', value(prefix + '[event][bersanding_time]', '-'));
+            setText(cardWrap, 'venue_name', value(prefix + '[event][venue_name]', 'NAMA TEMPAT'));
+            setText(cardWrap, 'full_address', value(prefix + '[event][full_address]', 'Alamat penuh majlis'));
+
+            for (let number = 1; number <= 3; number += 1) {
+                const contactPrefix = prefix + '[event][contacts][' + number + ']';
+                setText(cardWrap, 'contact_' + number + '_name', value(contactPrefix + '[contact_name]', 'Ahli ' + number));
+                setText(cardWrap, 'contact_' + number + '_phone', value(contactPrefix + '[contact_phone]', '-'));
+            }
+
+            const theme = value(prefix + '[design][theme]', 'songket').toLowerCase();
+            cardWrap.querySelector('.wedding-card-front')?.setAttribute('data-theme', theme);
+        }
+
+        function showSelection() {
+            preview.querySelectorAll('[data-card-preview]').forEach(function (card) {
+                card.classList.toggle('is-hidden', card.dataset.cardPreview !== activeSide);
+                card.querySelectorAll('[data-card-face]').forEach(function (face) {
+                    face.classList.toggle('is-hidden', face.dataset.cardFace !== activeFace);
+                });
+            });
+        }
+
+        preview.querySelectorAll('[data-preview-side-target]').forEach(function (button) {
+            button.addEventListener('click', function () {
+                activeSide = button.dataset.previewSideTarget;
+                preview.querySelectorAll('[data-preview-side-target]').forEach(function (tab) {
+                    tab.classList.toggle('is-active', tab === button);
+                });
+                showSelection();
+            });
+        });
+
+        preview.querySelectorAll('[data-preview-face-target]').forEach(function (button) {
+            button.addEventListener('click', function () {
+                activeFace = button.dataset.previewFaceTarget;
+                preview.querySelectorAll('[data-preview-face-target]').forEach(function (tab) {
+                    tab.classList.toggle('is-active', tab === button);
+                });
+                showSelection();
+            });
+        });
+
+        form.addEventListener('input', function () {
+            preview.querySelectorAll('[data-card-preview]').forEach(function (card) {
+                syncCard(card.dataset.cardPreview);
+            });
+        });
+
+        form.addEventListener('change', function () {
+            preview.querySelectorAll('[data-card-preview]').forEach(function (card) {
+                syncCard(card.dataset.cardPreview);
+            });
+        });
+
+        preview.querySelectorAll('[data-card-preview]').forEach(function (card) {
+            syncCard(card.dataset.cardPreview);
+        });
+        showSelection();
     });
 </script>
 <script>

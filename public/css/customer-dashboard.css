@@ -476,6 +476,174 @@ button {
     font-weight: 700;
 }
 
+/* Compact live card preview: the card always keeps the physical 4 x 6 ratio. */
+.order-form-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 292px;
+    gap: 1.5rem;
+    align-items: start;
+}
+
+.order-form-fields {
+    grid-column: 1;
+    min-width: 0;
+}
+
+.live-preview {
+    grid-column: 2;
+    grid-row: 1;
+    position: sticky;
+    top: 1rem;
+    padding: 1rem;
+    border: 1px solid #d9dee7;
+    border-radius: 16px;
+    background: #fff;
+    box-shadow: 0 10px 28px rgba(15, 23, 42, 0.09);
+}
+
+.live-preview-heading {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 0.75rem;
+    margin-bottom: 0.75rem;
+}
+
+.live-preview-heading .eyebrow {
+    margin: 0 0 0.15rem;
+    color: #9b2c74;
+    font-size: 0.68rem;
+    font-weight: 800;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+}
+
+.live-preview-heading h2 { margin: 0; font-size: 1.05rem; }
+.live-preview-heading > span { color: #6b7280; font-size: 0.68rem; text-align: right; }
+
+.preview-side-tabs,
+.preview-face-tabs {
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: 1fr;
+    gap: 0.35rem;
+    margin-bottom: 0.55rem;
+}
+
+.preview-side-tab,
+.preview-face-tab {
+    min-height: 32px;
+    padding: 0.35rem 0.45rem;
+    border: 1px solid #d7dce4;
+    border-radius: 8px;
+    background: #f8fafc;
+    color: #475569;
+    font-size: 0.7rem;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.preview-side-tab.is-active,
+.preview-face-tab.is-active {
+    border-color: #9b2c74;
+    background: #9b2c74;
+    color: #fff;
+}
+
+.card-preview-wrap { display: flex; justify-content: center; }
+.is-hidden { display: none !important; }
+
+.wedding-card {
+    position: relative;
+    width: 100%;
+    max-width: 258px;
+    aspect-ratio: 2 / 3;
+    overflow: hidden;
+    border: 1px solid #d8dce0;
+    background: #f4fbfc;
+    color: #172033;
+    box-shadow: 0 5px 15px rgba(15, 23, 42, 0.12);
+}
+
+.wedding-card-front {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 12%;
+    box-sizing: border-box;
+    background: linear-gradient(150deg, #f8ffff 0%, #edf9fb 54%, #fff 100%);
+    color: #a62d8b;
+    text-align: center;
+}
+
+.wedding-card-front::before,
+.wedding-card-front::after,
+.card-ornament {
+    position: absolute;
+    width: 94px;
+    height: 94px;
+    border: 2px solid currentColor;
+    opacity: 0.72;
+    content: "";
+    transform: rotate(45deg);
+}
+
+.wedding-card-front::before { top: -58px; left: -42px; }
+.wedding-card-front::after { right: -42px; bottom: -58px; }
+.card-ornament { width: 42px; height: 42px; opacity: 0.3; }
+.ornament-top { top: 18px; right: -25px; }
+.ornament-bottom { bottom: 18px; left: -25px; }
+
+.card-front-copy { position: relative; z-index: 1; width: 100%; }
+.card-title { margin: 0 0 2.7rem; font-family: Georgia, serif; font-size: 1rem; font-style: italic; }
+.card-couple-names { display: grid; gap: 0.05rem; font-family: Georgia, serif; font-size: 1.65rem; font-style: italic; line-height: 1; }
+.card-couple-names b { color: rgba(166, 45, 139, 0.38); font-size: 2.1rem; line-height: 0.72; }
+.card-date-lockup { display: grid; gap: 0.12rem; margin-top: 3rem; font-size: 0.66rem; text-transform: uppercase; }
+.calendar-symbol { font-size: 1.2rem; }
+
+.wedding-card-front[data-theme="garden"] { background: linear-gradient(145deg, #f8fff8, #eaf6ed); color: #477a55; }
+.wedding-card-front[data-theme="minimalist"] { background: #fff; color: #252525; }
+.wedding-card-front[data-theme="rusty"] { background: #fff8f0; color: #a34f35; }
+.wedding-card-front[data-theme="islamic"] { background: linear-gradient(150deg, #f7fffc, #e5f4ed); color: #267058; }
+.wedding-card-front[data-theme="nostalgia"] { background: #fbf4e8; color: #805f45; }
+.wedding-card-front[data-theme="desa"] { background: #fffaf0; color: #68783f; }
+
+.wedding-card-back {
+    display: flex;
+    flex-direction: column;
+    padding: 6% 5%;
+    box-sizing: border-box;
+    background: linear-gradient(150deg, #eef8fa, #fff 35%, #fff 80%, #edf7f8);
+    color: #111827;
+    font-size: 0.46rem;
+    line-height: 1.22;
+    text-align: center;
+}
+
+.card-invitation-header { flex: 1; }
+.card-invitation-header p { margin: 0.25rem 0; }
+.card-invitation-header strong { display: block; font-family: Georgia, serif; font-size: 0.7rem; text-transform: uppercase; }
+.arabic-mark { display: block; margin-bottom: 0.2rem; font-family: Georgia, serif; font-size: 0.78rem; }
+.card-info-grid { display: grid; grid-template-columns: 0.9fr 1.2fr 1fr; border: 1px solid #111827; }
+.card-info-grid section { display: flex; min-width: 0; flex-direction: column; justify-content: center; padding: 0.35rem 0.15rem; border-right: 1px solid #111827; }
+.card-info-grid section:last-child { border-right: 0; }
+.card-info-grid small { font-weight: 800; text-transform: uppercase; }
+.card-info-grid b { font-size: 0.55rem; text-transform: uppercase; }
+.card-location { display: grid; grid-template-columns: 34% 1fr; align-items: center; gap: 0.35rem; padding: 0.55rem 0.3rem; border: 1px solid #111827; border-top: 0; }
+.card-location strong, .card-location b { display: block; text-transform: uppercase; }
+.card-location p { margin: 0.1rem 0 0; overflow-wrap: anywhere; }
+.qr-placeholder { position: relative; aspect-ratio: 1; background: repeating-conic-gradient(#111 0 25%, #fff 0 50%) 0 / 9px 9px; border: 4px solid #fff; outline: 1px solid #111; }
+.qr-placeholder span { position: absolute; inset: 23%; background: #fff; border: 4px solid #111; }
+.wedding-card-back footer { padding-top: 0.42rem; font-style: italic; }
+.preview-note { margin: 0.7rem 0 0; color: #6b7280; font-size: 0.68rem; line-height: 1.45; }
+
+@media (max-width: 960px) {
+    .order-form-layout { grid-template-columns: 1fr; }
+    .live-preview { grid-column: 1; position: static; }
+    .order-form-fields { grid-row: 2; }
+    .wedding-card { max-width: 238px; }
+}
+
 @media (max-width: 700px) {
     .dashboard-action-card a {
         display: block;
