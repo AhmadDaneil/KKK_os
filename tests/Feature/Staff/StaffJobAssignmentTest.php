@@ -146,6 +146,86 @@ class StaffJobAssignmentTest extends TestCase
         );
     }
 
+    public function test_print_reassignment_records_previous_and_new_assignee_with_admin_actor(): void
+    {
+        $admin = $this->admin();
+        $first = $this->staff(User::ROLE_PRINTING);
+        $second = $this->staff(User::ROLE_PRINTING);
+
+        $job = $this->printJob();
+
+        $this->actingAs($admin)->post(
+            route('staff.print-jobs.assign', $job),
+            ['assigned_user_id' => $first->id]
+        )->assertRedirect();
+
+        $this->actingAs($admin)->post(
+            route('staff.print-jobs.assign', $job),
+            ['assigned_user_id' => $second->id]
+        )->assertRedirect();
+
+        $job->refresh();
+
+        $this->assertSame($second->id, $job->assigned_user_id);
+
+        $event = $job->events()
+            ->where('event_type', 'PRINT_JOB_ASSIGNED')
+            ->latest('id')
+            ->firstOrFail();
+
+        $this->assertSame($admin->id, $event->actor_user_id);
+
+        $this->assertSame(
+            $first->id,
+            $event->metadata['previous_assigned_user_id']
+        );
+
+        $this->assertSame(
+            $second->id,
+            $event->metadata['assigned_user_id']
+        );
+    }
+
+    public function test_packing_reassignment_records_previous_and_new_assignee_with_admin_actor(): void
+    {
+        $admin = $this->admin();
+        $first = $this->staff(User::ROLE_PACKING);
+        $second = $this->staff(User::ROLE_PACKING);
+
+        $job = $this->packingJob();
+
+        $this->actingAs($admin)->post(
+            route('staff.packing-jobs.assign', $job),
+            ['assigned_user_id' => $first->id]
+        )->assertRedirect();
+
+        $this->actingAs($admin)->post(
+            route('staff.packing-jobs.assign', $job),
+            ['assigned_user_id' => $second->id]
+        )->assertRedirect();
+
+        $job->refresh();
+
+        $this->assertSame($second->id, $job->assigned_user_id);
+
+        $event = $job->events()
+            ->where('event_type', 'PACKING_JOB_ASSIGNED')
+            ->latest('id')
+            ->firstOrFail();
+
+        $this->assertSame($admin->id, $event->actor_user_id);
+
+        $this->assertSame(
+            $first->id,
+            $event->metadata['previous_assigned_user_id']
+        );
+
+        $this->assertSame(
+            $second->id,
+            $event->metadata['assigned_user_id']
+        );
+    }
+
     public function test_admin_cannot_assign_design_job_to_wrong_role(): void
     {
         $admin = $this->admin();
