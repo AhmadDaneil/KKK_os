@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Staff\StaffDashboardController;
+use App\Http\Controllers\Staff\StaffPrintingWorkflowController;
 use App\Http\Controllers\Staff\StaffOrderController;
 use App\Http\Controllers\Staff\StaffJobAssignmentController;
 use App\Http\Controllers\Staff\StaffDesignWorkflowController;
@@ -149,6 +150,29 @@ Route::middleware('staff.context')
     '/design-jobs/{designJob}/mark-ready',
     [StaffDesignWorkflowController::class, 'markReady']
     )->name('design-jobs.mark-ready');
+
+    /*
+|--------------------------------------------------------------------------
+| Printing Actions
+|--------------------------------------------------------------------------
+|
+| PRINTING staff may operate only on print jobs assigned to them.
+| Job ownership is additionally enforced by the production controller.
+|
+*/
+
+Route::middleware('staff.role:PRINTING')->group(function () {
+    Route::post(
+        '/print-jobs/{printJob}/start',
+        [StaffPrintingWorkflowController::class, 'start']
+    )->name('print-jobs.start');
+
+    Route::post(
+        '/print-jobs/{printJob}/mark-printed',
+        [StaffPrintingWorkflowController::class, 'markPrinted']
+    )->name('print-jobs.mark-printed');
+    });
+
 });
 
 /*
