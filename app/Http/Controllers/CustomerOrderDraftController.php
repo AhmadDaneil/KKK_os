@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Services\Orders\CustomerOrderSessionAccessService;
 use App\Services\Orders\SaveOrderDraftService;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 class CustomerOrderDraftController extends Controller
@@ -14,7 +15,7 @@ class CustomerOrderDraftController extends Controller
         string $orderId,
         CustomerOrderSessionAccessService $access,
         SaveOrderDraftService $saveDraft,
-    ): RedirectResponse {
+    ): RedirectResponse|JsonResponse {
         $order = $access->resolve($request, $orderId);
 
         $validated = $request->validate([
@@ -76,6 +77,13 @@ class CustomerOrderDraftController extends Controller
         ]);
 
         $saveDraft->save($order, $validated);
+
+        if ($request->expectsJson()) {
+            return response()->json([
+                'saved' => true,
+                'saved_at' => now()->toIso8601String(),
+            ]);
+        }
 
         return redirect()
             ->route('orders.dashboard', ['orderId' => $order->order_id])

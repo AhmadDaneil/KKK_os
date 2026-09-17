@@ -10,6 +10,7 @@ use App\Http\Controllers\CustomerDashboardController;
 use App\Http\Controllers\CustomerOrderConfirmController;
 use App\Http\Controllers\CustomerOrderDraftController;
 use App\Http\Controllers\CustomerOrderReviewController;
+use App\Http\Controllers\CustomerOrderThankYouController;
 use App\Http\Controllers\DevBalancePaymentController;
 use App\Http\Controllers\DevDesignJobController;
 use App\Http\Controllers\DevFulfilmentJobController;
@@ -42,6 +43,11 @@ Route::post(
     '/order/{orderId}/confirm',
     [CustomerOrderConfirmController::class, 'store']
 )->name('orders.confirm.store');
+
+Route::get(
+    '/order/{orderId}/thank-you',
+    [CustomerOrderThankYouController::class, 'show']
+)->name('orders.thank-you.show');
 
 Route::get(
     '/order/{orderId}/artwork',

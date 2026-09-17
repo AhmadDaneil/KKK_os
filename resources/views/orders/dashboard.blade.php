@@ -261,6 +261,7 @@
     @endif
 
     <form
+        id="customer-order-form"
         method="POST"
         action="{{ route('orders.draft.update', ['orderId' => $order->order_id]) }}"
         enctype="multipart/form-data"
@@ -556,6 +557,10 @@
     <div class="form-actions">
         <button type="submit">Simpan Draft</button>
 
+        <span id="autosave-status" class="autosave-status" role="status" aria-live="polite">
+            Perubahan disimpan secara automatik
+        </span>
+
         <a
             id="review-order-link"
             href="{{ route('orders.review.show', ['orderId' => $order->order_id]) }}"
@@ -752,6 +757,100 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     });
 });
+</script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const form = document.getElementById('customer-order-form');
+        const reviewLink = document.getElementById('review-order-link');
+        const status = document.getElementById('autosave-status');
+
+        if (!form || !reviewLink || !status) {
+            return;
+        }
+
+        let autosaveTimer;
+        let saveQueue = Promise.resolve();
+
+        function setStatus(message, state) {
+            status.textContent = message;
+            status.dataset.state = state;
+        }
+
+        function saveDraft(includeFiles) {
+            const formData = new FormData(form);
+
+            if (!includeFiles) {
+                form.querySelectorAll('input[type="file"]').forEach(function (input) {
+                    formData.delete(input.name);
+                });
+            }
+
+            setStatus('Menyimpan...', 'saving');
+
+            return fetch(form.action, {
+                method: 'POST',
+                body: formData,
+                credentials: 'same-origin',
+                headers: {
+                    'Accept': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            }).then(function (response) {
+                if (!response.ok) {
+                    throw new Error('Autosave failed');
+                }
+
+                setStatus('Semua perubahan telah disimpan', 'saved');
+            }).catch(function (error) {
+                setStatus('Simpanan automatik gagal. Sila tekan Simpan Draft.', 'error');
+                throw error;
+            });
+        }
+
+        function queueSave(includeFiles) {
+            saveQueue = saveQueue
+                .catch(function () {})
+                .then(function () {
+                    return saveDraft(includeFiles);
+                });
+
+            return saveQueue;
+        }
+
+        function scheduleAutosave(event) {
+            if (event.target.type === 'file') {
+                setStatus('Tekan Simpan Draft atau Seterusnya untuk memuat naik fail', 'pending');
+                return;
+            }
+
+            window.clearTimeout(autosaveTimer);
+            setStatus('Perubahan belum disimpan', 'pending');
+            autosaveTimer = window.setTimeout(function () {
+                queueSave(false).catch(function () {});
+            }, 800);
+        }
+
+        form.addEventListener('input', scheduleAutosave);
+        form.addEventListener('change', scheduleAutosave);
+
+        reviewLink.addEventListener('click', function (event) {
+            if (event.defaultPrevented) {
+                return;
+            }
+
+            event.preventDefault();
+            window.clearTimeout(autosaveTimer);
+            reviewLink.setAttribute('aria-disabled', 'true');
+
+            queueSave(true)
+                .then(function () {
+                    window.location.assign(reviewLink.href);
+                })
+                .catch(function () {
+                    reviewLink.removeAttribute('aria-disabled');
+                });
+        });
+    });
 </script>
 <script>
     document.addEventListener('DOMContentLoaded', function () {

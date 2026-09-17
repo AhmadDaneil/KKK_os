@@ -12,9 +12,9 @@ class CustomerOrderConfirmController extends Controller
     {
         $request->validate(['responsibility_acknowledged' => ['accepted']]);
         $order = $access->resolve($request, $orderId);
-        $confirm->confirm($order);
+        $order = $confirm->confirm($order);
 
-        return redirect()->route('orders.dashboard', ['orderId' => $order->order_id])
+        return redirect()->route('orders.thank-you.show', ['orderId' => $order->order_id])
             ->with('success', 'Maklumat tempahan telah disahkan.');
     }
 }

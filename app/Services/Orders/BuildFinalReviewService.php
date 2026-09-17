@@ -21,6 +21,7 @@ class BuildFinalReviewService
 
         return [
             'order_id' => $order->order_id,
+            'customer_name' => $order->customer_name,
             'package_count' => $order->package_count,
             'status' => $order->status,
 

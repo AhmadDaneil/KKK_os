@@ -34,6 +34,7 @@ class DevRoutesAreLocalOnlyTest extends TestCase
         $this->assertContains('orders.draft.update', $names);
         $this->assertContains('orders.review.show', $names);
         $this->assertContains('orders.confirm.store', $names);
+        $this->assertContains('orders.thank-you.show', $names);
         $this->assertContains('orders.artwork.review', $names);
         $this->assertContains('orders.artwork.correction', $names);
         $this->assertContains('orders.artwork.approve', $names);

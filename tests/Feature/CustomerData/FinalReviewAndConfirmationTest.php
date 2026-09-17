@@ -300,6 +300,7 @@ class FinalReviewAndConfirmationTest extends TestCase
     $review = app(BuildFinalReviewService::class)->build($order->fresh());
 
     $this->assertSame($order->order_id, $review['order_id']);
+    $this->assertSame('Final Review Contract', $review['customer_name']);
     $this->assertSame(2, $review['package_count']);
 
     $this->assertSame('Muhammad Syafiq', $review['couple']['groom_name']);

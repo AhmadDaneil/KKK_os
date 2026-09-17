@@ -238,6 +238,16 @@ button {
     box-sizing: border-box;
 }
 
+.autosave-status {
+    flex: 1 1 220px;
+    color: #6b7280;
+    font-size: 0.875rem;
+}
+
+.autosave-status[data-state="saved"] { color: #166534; }
+.autosave-status[data-state="error"] { color: #b91c1c; }
+.autosave-status[data-state="saving"] { color: #1d4ed8; }
+
 .form-actions button {
     border: 1px solid #d1d5db;
     background: #fff;
