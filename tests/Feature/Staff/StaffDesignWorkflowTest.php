@@ -7,6 +7,7 @@ use App\Services\Design\AssignDesignJobService;
 use App\Services\Design\CreateArtworkVersionService;
 use App\Services\Design\InitializeDesignJobsForOrderService;
 use App\Services\Design\MarkDesignReadyService;
+use App\Services\Design\StartDesignJobService;
 use App\Models\ArtworkVersion;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
