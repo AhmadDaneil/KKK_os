@@ -6,6 +6,7 @@ use App\Http\Controllers\Staff\StaffPrintingWorkflowController;
 use App\Http\Controllers\Staff\StaffOrderController;
 use App\Http\Controllers\Staff\StaffJobAssignmentController;
 use App\Http\Controllers\Staff\StaffDesignWorkflowController;
+use App\Http\Controllers\Staff\StaffPackingWorkflowController;
 use App\Http\Controllers\CustomerArtworkReviewController;
 use App\Http\Controllers\CustomerDashboardController;
 use App\Http\Controllers\CustomerOrderConfirmController;
@@ -140,48 +141,75 @@ Route::middleware(['auth', 'active.staff'])
         |
         */
 
-    Route::middleware('staff.role:DESIGNER')->group(function () {
-    Route::post(
-        '/design-jobs/{designJob}/start',
-        [StaffDesignWorkflowController::class, 'start']
-    )->name('design-jobs.start');
+            Route::middleware('staff.role:DESIGNER')->group(function () {
+            Route::post(
+                '/design-jobs/{designJob}/start',
+                [StaffDesignWorkflowController::class, 'start']
+            )->name('design-jobs.start');
 
-    Route::post(
-        '/design-jobs/{designJob}/resume-correction',
-        [StaffDesignWorkflowController::class, 'resumeCorrection']
-    )->name('design-jobs.resume-correction');
+            Route::post(
+                '/design-jobs/{designJob}/resume-correction',
+                [StaffDesignWorkflowController::class, 'resumeCorrection']
+            )->name('design-jobs.resume-correction');
 
-    Route::post(
-        '/design-jobs/{designJob}/artwork',
-        [StaffDesignWorkflowController::class, 'uploadArtwork']
-    )->name('design-jobs.artwork.store');
-    });
-    Route::post(
-    '/design-jobs/{designJob}/mark-ready',
-    [StaffDesignWorkflowController::class, 'markReady']
-    )->name('design-jobs.mark-ready');
+            Route::post(
+                '/design-jobs/{designJob}/artwork',
+                [StaffDesignWorkflowController::class, 'uploadArtwork']
+            )->name('design-jobs.artwork.store');
+            });
+            Route::post(
+            '/design-jobs/{designJob}/mark-ready',
+            [StaffDesignWorkflowController::class, 'markReady']
+            )->name('design-jobs.mark-ready');
 
-    /*
-|--------------------------------------------------------------------------
-| Printing Actions
-|--------------------------------------------------------------------------
-|
-| PRINTING staff may operate only on print jobs assigned to them.
-| Job ownership is additionally enforced by the production controller.
-|
-*/
+            /*
+            |--------------------------------------------------------------------------
+            | Printing Actions
+            |--------------------------------------------------------------------------
+            |
+            | PRINTING staff may operate only on print jobs assigned to them.
+            | Job ownership is additionally enforced by the production controller.
+            |
+            */
 
-Route::middleware('staff.role:PRINTING')->group(function () {
-    Route::post(
-        '/print-jobs/{printJob}/start',
-        [StaffPrintingWorkflowController::class, 'start']
-    )->name('print-jobs.start');
+            Route::middleware('staff.role:PRINTING')->group(function () {
+                Route::post(
+                    '/print-jobs/{printJob}/start',
+                    [StaffPrintingWorkflowController::class, 'start']
+                )->name('print-jobs.start');
 
-    Route::post(
-        '/print-jobs/{printJob}/mark-printed',
-        [StaffPrintingWorkflowController::class, 'markPrinted']
-    )->name('print-jobs.mark-printed');
-    });
+                Route::post(
+                    '/print-jobs/{printJob}/mark-printed',
+                    [StaffPrintingWorkflowController::class, 'markPrinted']
+                )->name('print-jobs.mark-printed');
+                });
+
+                /*
+            |--------------------------------------------------------------------------
+            | Packing Actions
+            |--------------------------------------------------------------------------
+            |
+            | PACKING staff may operate only on packing jobs assigned to them.
+            | Item ownership is additionally enforced by the controller.
+            |
+            */
+
+            Route::middleware('staff.role:PACKING')->group(function () {
+                Route::post(
+                    '/packing-jobs/{packingJob}/start',
+                    [StaffPackingWorkflowController::class, 'start']
+                )->name('packing-jobs.start');
+
+                Route::post(
+                    '/packing-jobs/{packingJob}/items/{packingItem}/verify',
+                    [StaffPackingWorkflowController::class, 'verifyItem']
+                )->name('packing-jobs.items.verify');
+
+                Route::post(
+                    '/packing-jobs/{packingJob}/mark-packed',
+                    [StaffPackingWorkflowController::class, 'markPacked']
+                )->name('packing-jobs.mark-packed');
+            });
 
 });
 

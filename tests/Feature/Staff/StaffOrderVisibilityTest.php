@@ -690,6 +690,75 @@ public function test_two_package_designer_ui_only_contains_operational_controls_
     );
     }
 
+        public function test_admin_can_filter_orders_by_design_workstream(): void
+    {
+        $admin = $this->staff(User::ROLE_ADMIN);
+
+        $designOrder = $this->confirmedOrder(
+            1,
+            'LELAKI',
+            'Admin Design Filter'
+        );
+
+        $plainOrder = $this->confirmedOrder(
+            1,
+            'PEREMPUAN',
+            'Admin No Design Filter'
+        );
+
+        $this->initializeDesignJobs($designOrder);
+
+        $this->actingAs($admin)
+            ->get(route('staff.orders.index', ['workstream' => 'design']))
+            ->assertOk()
+            ->assertSee($designOrder->order_id)
+            ->assertDontSee($plainOrder->order_id);
+    }
+
+    public function test_admin_can_filter_orders_by_printing_workstream(): void
+    {
+        $admin = $this->staff(User::ROLE_ADMIN);
+
+        $printingOrder = $this->paidOrder('Admin Printing Filter');
+
+        $plainOrder = $this->confirmedOrder(
+            1,
+            'LELAKI',
+            'Admin No Printing Filter'
+        );
+
+        app(InitializePrintJobsForOrderService::class)
+            ->initialize($printingOrder);
+
+        $this->actingAs($admin)
+            ->get(route('staff.orders.index', ['workstream' => 'printing']))
+            ->assertOk()
+            ->assertSee($printingOrder->order_id)
+            ->assertDontSee($plainOrder->order_id);
+    }
+
+    public function test_admin_can_filter_orders_by_packing_workstream(): void
+    {
+        $admin = $this->staff(User::ROLE_ADMIN);
+
+        $packingOrder = $this->printedOrder('Admin Packing Filter');
+
+        $plainOrder = $this->confirmedOrder(
+            1,
+            'LELAKI',
+            'Admin No Packing Filter'
+        );
+
+        app(InitializePackingJobForOrderService::class)
+            ->initialize($packingOrder);
+
+        $this->actingAs($admin)
+            ->get(route('staff.orders.index', ['workstream' => 'packing']))
+            ->assertOk()
+            ->assertSee($packingOrder->order_id)
+            ->assertDontSee($plainOrder->order_id);
+    }
+
     private function staff(string $role): User
     {
         return User::factory()->create([
