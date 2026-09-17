@@ -1,0 +1,723 @@
+<?php
+
+namespace Tests\Feature\Staff;
+
+use App\Models\Order;
+use App\Models\User;
+use App\Services\Design\ApproveArtworkService;
+use App\Services\Design\AssignDesignJobService;
+use App\Services\Design\CreateArtworkVersionService;
+use App\Services\Design\InitializeDesignJobsForOrderService;
+use App\Services\Design\MarkDesignReadyService;
+use App\Services\Design\StartDesignJobService;
+use App\Services\Merge\GenerateMergeJobsForOrderService;
+use App\Services\Orders\ConfirmOrderDetailsService;
+use App\Services\Orders\CreateOrderService;
+use App\Services\Orders\SaveOrderDraftService;
+use App\Services\Packing\AssignPackingJobService;
+use App\Services\Packing\InitializePackingJobForOrderService;
+use App\Services\Payments\CreateBalancePaymentService;
+use App\Services\Payments\HandlePaymentCallbackService;
+use App\Services\Printing\AssignPrintJobService;
+use App\Services\Printing\InitializePrintJobsForOrderService;
+use App\Services\Printing\MarkPrintJobPrintedService;
+use App\Services\Printing\StartPrintingService;
+use App\Services\Printing\SyncOrderPrintStatusService;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\TestCase;
+
+class StaffOrderVisibilityTest extends TestCase
+{
+    use RefreshDatabase;
+
+    public function test_admin_can_see_all_orders(): void
+    {
+        $admin = $this->staff(User::ROLE_ADMIN);
+
+        $first = $this->confirmedOrder(
+            1,
+            'LELAKI',
+            'Admin Visible One'
+        );
+
+        $second = $this->confirmedOrder(
+            1,
+            'PEREMPUAN',
+            'Admin Visible Two'
+        );
+
+        $response = $this
+            ->actingAs($admin)
+            ->get(route('staff.orders.index'));
+
+        $response->assertOk();
+        
+        $response->assertSee($first->order_id);
+        $response->assertSee($second->order_id);
+    }
+
+    public function test_designer_only_sees_orders_assigned_to_them(): void
+    {
+        $designer = $this->staff(User::ROLE_DESIGNER);
+        $otherDesigner = $this->staff(User::ROLE_DESIGNER);
+        $admin = $this->staff(User::ROLE_ADMIN);
+
+        $mine = $this->confirmedOrder(
+            1,
+            'LELAKI',
+            'Designer Mine'
+        );
+
+        $other = $this->confirmedOrder(
+            1,
+            'PEREMPUAN',
+            'Designer Other'
+        );
+
+        $mineJob = $this->initializeDesignJobs($mine)->first();
+        $otherJob = $this->initializeDesignJobs($other)->first();
+
+        app(AssignDesignJobService::class)
+            ->assign($mineJob, $designer, $admin);
+
+        app(AssignDesignJobService::class)
+            ->assign($otherJob, $otherDesigner, $admin);
+
+        $response = $this
+            ->actingAs($designer)
+            ->get(route('staff.orders.index'));
+
+        $response->assertOk();
+        $response->assertSee($mine->order_id);
+        $response->assertDontSee($other->order_id);
+    }
+
+    public function test_printing_only_sees_orders_assigned_to_them(): void
+    {
+        $printing = $this->staff(User::ROLE_PRINTING);
+        $otherPrinting = $this->staff(User::ROLE_PRINTING);
+        $admin = $this->staff(User::ROLE_ADMIN);
+
+        $mine = $this->paidOrder('Printing Mine');
+        $other = $this->paidOrder('Printing Other');
+
+        $mineJob = app(InitializePrintJobsForOrderService::class)
+            ->initialize($mine)
+            ->first();
+
+        $otherJob = app(InitializePrintJobsForOrderService::class)
+            ->initialize($other)
+            ->first();
+
+        app(AssignPrintJobService::class)
+            ->assign($mineJob, $printing, $admin);
+
+        app(AssignPrintJobService::class)
+            ->assign($otherJob, $otherPrinting, $admin);
+
+        $response = $this
+            ->actingAs($printing)
+            ->get(route('staff.orders.index'));
+
+        $response->assertOk();
+        $response->assertSee($mine->order_id);
+        $response->assertDontSee($other->order_id);
+    }
+
+    public function test_packing_only_sees_orders_assigned_to_them(): void
+    {
+        $packing = $this->staff(User::ROLE_PACKING);
+        $otherPacking = $this->staff(User::ROLE_PACKING);
+        $admin = $this->staff(User::ROLE_ADMIN);
+
+        $mine = $this->printedOrder('Packing Mine');
+        $other = $this->printedOrder('Packing Other');
+
+        $mineJob = app(InitializePackingJobForOrderService::class)
+            ->initialize($mine);
+
+        $otherJob = app(InitializePackingJobForOrderService::class)
+            ->initialize($other);
+
+        app(AssignPackingJobService::class)
+            ->assign($mineJob, $packing, $admin);
+
+        app(AssignPackingJobService::class)
+            ->assign($otherJob, $otherPacking, $admin);
+
+        $response = $this
+            ->actingAs($packing)
+            ->get(route('staff.orders.index'));
+
+        $response->assertOk();
+        $response->assertSee($mine->order_id);
+        $response->assertDontSee($other->order_id);
+    }
+
+    public function test_unassigned_work_is_not_visible_to_operational_staff(): void
+    {
+        $designer = $this->staff(User::ROLE_DESIGNER);
+
+        $order = $this->confirmedOrder(
+            1,
+            'LELAKI',
+            'Unassigned Design'
+        );
+
+        $this->initializeDesignJobs($order);
+
+        $response = $this
+            ->actingAs($designer)
+            ->get(route('staff.orders.index'));
+
+        $response->assertOk();
+        $response->assertDontSee($order->order_id);
+    }
+
+    public function test_two_package_order_appears_only_once_for_assigned_designer(): void
+    {
+        $designer = $this->staff(User::ROLE_DESIGNER);
+        $admin = $this->staff(User::ROLE_ADMIN);
+
+        $order = $this->confirmedOrder(
+            2,
+            null,
+            'Two Package Designer'
+        );
+
+        $jobs = $this->initializeDesignJobs($order);
+
+        $this->assertCount(2, $jobs);
+
+        foreach ($jobs as $job) {
+            app(AssignDesignJobService::class)
+                ->assign($job, $designer, $admin);
+        }
+
+        $response = $this
+            ->actingAs($designer)
+            ->get(route('staff.orders.index'));
+
+        $response->assertOk();
+        file_put_contents(
+    storage_path('logs/staff-order-visibility-debug.html'),
+    $response->getContent()
+);
+
+$response->assertSee($order->order_id);
+$response->assertSee(
+    route('staff.orders.show', $order->order_id),
+    false
+);
+
+$this->assertSame(
+    1,
+    substr_count(
+        $response->getContent(),
+        'class="staff-order-card"'
+    )
+);
+    }
+
+    public function test_admin_can_open_any_order_detail(): void
+    {
+        $admin = $this->staff(User::ROLE_ADMIN);
+
+        $order = $this->confirmedOrder(
+            1,
+            'LELAKI',
+            'Admin Detail'
+        );
+
+        $this->actingAs($admin)
+            ->get(route('staff.orders.show', $order->order_id))
+            ->assertOk()
+            ->assertSee($order->order_id);
+    }
+
+    public function test_designer_can_open_order_assigned_to_them(): void
+    {
+        $designer = $this->staff(User::ROLE_DESIGNER);
+        $admin = $this->staff(User::ROLE_ADMIN);
+
+        $order = $this->confirmedOrder(
+            1,
+            'LELAKI',
+            'Designer Detail Mine'
+        );
+
+        $job = $this->initializeDesignJobs($order)->first();
+
+        app(AssignDesignJobService::class)
+            ->assign($job, $designer, $admin);
+
+        $this->actingAs($designer)
+            ->get(route('staff.orders.show', $order->order_id))
+            ->assertOk()
+            ->assertSee($order->order_id);
+    }
+
+    public function test_designer_gets_404_for_order_assigned_to_another_designer(): void
+    {
+        $designer = $this->staff(User::ROLE_DESIGNER);
+        $otherDesigner = $this->staff(User::ROLE_DESIGNER);
+        $admin = $this->staff(User::ROLE_ADMIN);
+
+        $order = $this->confirmedOrder(
+            1,
+            'LELAKI',
+            'Designer Detail Other'
+        );
+
+        $job = $this->initializeDesignJobs($order)->first();
+
+        app(AssignDesignJobService::class)
+            ->assign($job, $otherDesigner, $admin);
+
+        $this->actingAs($designer)
+            ->get(route('staff.orders.show', $order->order_id))
+            ->assertNotFound();
+    }
+
+    public function test_designer_can_open_two_package_order_when_only_one_side_is_assigned_to_them(): void
+    {
+        $designer = $this->staff(User::ROLE_DESIGNER);
+        $otherDesigner = $this->staff(User::ROLE_DESIGNER);
+        $admin = $this->staff(User::ROLE_ADMIN);
+
+        $order = $this->confirmedOrder(
+            2,
+            null,
+            'Two Package Detail'
+        );
+
+        $jobs = $this->initializeDesignJobs($order);
+
+        $this->assertCount(2, $jobs);
+
+        $lelakiJob = $jobs->firstWhere('side', 'LELAKI');
+        $perempuanJob = $jobs->firstWhere('side', 'PEREMPUAN');
+
+        $this->assertNotNull($lelakiJob);
+        $this->assertNotNull($perempuanJob);
+
+        app(AssignDesignJobService::class)
+            ->assign($lelakiJob, $designer, $admin);
+
+        app(AssignDesignJobService::class)
+            ->assign($perempuanJob, $otherDesigner, $admin);
+
+        $this->actingAs($designer)
+            ->get(route('staff.orders.show', $order->order_id))
+            ->assertOk()
+            ->assertSee($order->order_id);
+    }
+
+    public function test_printing_can_open_order_assigned_to_them(): void
+{
+    $printing = $this->staff(User::ROLE_PRINTING);
+    $admin = $this->staff(User::ROLE_ADMIN);
+
+    $order = $this->paidOrder('Printing Detail Mine');
+
+    $job = app(InitializePrintJobsForOrderService::class)
+        ->initialize($order)
+        ->first();
+
+    app(AssignPrintJobService::class)
+        ->assign($job, $printing, $admin);
+
+    $this->actingAs($printing)
+        ->get(route('staff.orders.show', $order->order_id))
+        ->assertOk()
+        ->assertSee($order->order_id);
+}
+
+public function test_printing_gets_404_for_order_assigned_to_another_printing_staff(): void
+{
+    $printing = $this->staff(User::ROLE_PRINTING);
+    $otherPrinting = $this->staff(User::ROLE_PRINTING);
+    $admin = $this->staff(User::ROLE_ADMIN);
+
+    $order = $this->paidOrder('Printing Detail Other');
+
+    $job = app(InitializePrintJobsForOrderService::class)
+        ->initialize($order)
+        ->first();
+
+    app(AssignPrintJobService::class)
+        ->assign($job, $otherPrinting, $admin);
+
+    $this->actingAs($printing)
+        ->get(route('staff.orders.show', $order->order_id))
+        ->assertNotFound();
+}
+
+public function test_packing_can_open_order_assigned_to_them(): void
+{
+    $packing = $this->staff(User::ROLE_PACKING);
+    $admin = $this->staff(User::ROLE_ADMIN);
+
+    $order = $this->printedOrder('Packing Detail Mine');
+
+    $job = app(InitializePackingJobForOrderService::class)
+        ->initialize($order);
+
+    app(AssignPackingJobService::class)
+        ->assign($job, $packing, $admin);
+
+    $this->actingAs($packing)
+        ->get(route('staff.orders.show', $order->order_id))
+        ->assertOk()
+        ->assertSee($order->order_id);
+}
+
+    public function test_packing_gets_404_for_order_assigned_to_another_packing_staff(): void
+    {
+        $packing = $this->staff(User::ROLE_PACKING);
+        $otherPacking = $this->staff(User::ROLE_PACKING);
+        $admin = $this->staff(User::ROLE_ADMIN);
+
+        $order = $this->printedOrder('Packing Detail Other');
+
+        $job = app(InitializePackingJobForOrderService::class)
+            ->initialize($order);
+
+        app(AssignPackingJobService::class)
+            ->assign($job, $otherPacking, $admin);
+
+        $this->actingAs($packing)
+            ->get(route('staff.orders.show', $order->order_id))
+            ->assertNotFound();
+    }
+
+    public function test_guest_cannot_open_order_detail(): void
+{
+    $order = $this->confirmedOrder(
+        1,
+        'LELAKI',
+        'Guest Detail Blocked'
+    );
+
+    $this->get(route('staff.orders.show', $order->order_id))
+        ->assertRedirect(route('staff.login'));
+}
+
+    public function test_designer_only_receives_their_assigned_side_on_two_package_order_detail(): void
+{
+    $designer = $this->staff(User::ROLE_DESIGNER);
+    $otherDesigner = $this->staff(User::ROLE_DESIGNER);
+    $admin = $this->staff(User::ROLE_ADMIN);
+
+    $order = $this->confirmedOrder(
+        2,
+        null,
+        'Designer Side Isolation'
+    );
+
+    $jobs = $this->initializeDesignJobs($order)
+    ->keyBy('side');
+
+    $lelakiJob = $jobs->get('LELAKI');
+    $perempuanJob = $jobs->get('PEREMPUAN');
+
+    $this->assertNotNull($lelakiJob);
+    $this->assertNotNull($perempuanJob);
+
+    app(AssignDesignJobService::class)
+        ->assign($lelakiJob, $designer, $admin);
+
+    app(AssignDesignJobService::class)
+        ->assign($perempuanJob, $otherDesigner, $admin);
+
+    $this->actingAs($designer)
+        ->get(route('staff.orders.show', $order->order_id))
+        ->assertOk()
+        ->assertViewHas('order', function (Order $viewOrder) use ($designer): bool {
+            return $viewOrder->designJobs->count() === 1
+                && $viewOrder->designJobs->first()->side === 'LELAKI'
+                && $viewOrder->designJobs->first()->assigned_user_id === $designer->id;
+        });
+}   
+
+    public function test_admin_receives_both_sides_on_two_package_order_detail(): void
+{
+    $admin = $this->staff(User::ROLE_ADMIN);
+    $designerLelaki = $this->staff(User::ROLE_DESIGNER);
+    $designerPerempuan = $this->staff(User::ROLE_DESIGNER);
+
+    $order = $this->confirmedOrder(
+        2,
+        null,
+        'Admin Both Sides'
+    );
+
+    $jobs = $this->initializeDesignJobs($order)
+        ->keyBy('side');
+
+    $lelakiJob = $jobs->get('LELAKI');
+    $perempuanJob = $jobs->get('PEREMPUAN');
+
+    $this->assertNotNull($lelakiJob);
+    $this->assertNotNull($perempuanJob);
+
+    app(AssignDesignJobService::class)
+        ->assign($lelakiJob, $designerLelaki, $admin);
+
+    app(AssignDesignJobService::class)
+        ->assign($perempuanJob, $designerPerempuan, $admin);
+
+    $this->actingAs($admin)
+        ->get(route('staff.orders.show', $order->order_id))
+        ->assertOk()
+        ->assertViewHas('order', function (Order $viewOrder): bool {
+            return $viewOrder->designJobs->count() === 2
+                && $viewOrder->designJobs
+                    ->pluck('side')
+                    ->sort()
+                    ->values()
+                    ->all() === ['LELAKI', 'PEREMPUAN'];
+        });
+}
+
+public function test_designer_detail_renders_design_work_but_not_printing_or_packing_work(): void
+{
+    $designer = $this->staff(User::ROLE_DESIGNER);
+    $admin = $this->staff(User::ROLE_ADMIN);
+
+    $order = $this->confirmedOrder(
+        1,
+        'LELAKI',
+        'Designer Render Contract'
+    );
+
+    $job = $this->initializeDesignJobs($order)->first();
+
+    app(AssignDesignJobService::class)
+        ->assign($job, $designer, $admin);
+
+    $this->actingAs($designer)
+        ->get(route('staff.orders.show', $order->order_id))
+        ->assertOk()
+        ->assertSee('Design Work')
+        ->assertDontSee('Printing')
+        ->assertDontSee('Packing');
+}
+
+public function test_printing_detail_renders_printing_work_but_not_design_or_packing_work(): void
+{
+    $printing = $this->staff(User::ROLE_PRINTING);
+    $admin = $this->staff(User::ROLE_ADMIN);
+
+    $order = $this->paidOrder('Printing Render Contract');
+
+    $job = app(InitializePrintJobsForOrderService::class)
+        ->initialize($order)
+        ->first();
+
+    app(AssignPrintJobService::class)
+        ->assign($job, $printing, $admin);
+
+    $this->actingAs($printing)
+        ->get(route('staff.orders.show', $order->order_id))
+        ->assertOk()
+        ->assertSee('Printing')
+        ->assertDontSee('Design Work')
+        ->assertDontSee('Packing');
+}
+
+public function test_packing_detail_renders_packing_work_but_not_design_or_printing_work(): void
+{
+    $packing = $this->staff(User::ROLE_PACKING);
+    $admin = $this->staff(User::ROLE_ADMIN);
+
+    $order = $this->printedOrder('Packing Render Contract');
+
+    $job = app(InitializePackingJobForOrderService::class)
+        ->initialize($order);
+
+    app(AssignPackingJobService::class)
+        ->assign($job, $packing, $admin);
+
+    $this->actingAs($packing)
+        ->get(route('staff.orders.show', $order->order_id))
+        ->assertOk()
+        ->assertSee('Packing')
+        ->assertDontSee('Design Work')
+        ->assertDontSee('Printing');
+}
+
+    private function staff(string $role): User
+    {
+        return User::factory()->create([
+            'role' => $role,
+            'is_active' => true,
+        ]);
+    }
+
+    private function initializeDesignJobs($order)
+    {
+        app(GenerateMergeJobsForOrderService::class)
+            ->generate($order);
+
+        return app(InitializeDesignJobsForOrderService::class)
+            ->initialize($order->fresh());
+    }
+
+    private function confirmedOrder(
+        int $packageCount = 1,
+        ?string $singleSide = 'LELAKI',
+        string $customerName = 'Staff Visibility Test'
+    ) {
+        $data = [
+            'package_count' => $packageCount,
+            'customer_name' => $customerName,
+        ];
+
+        if ($packageCount === 1) {
+            $data['side'] = $singleSide;
+        }
+
+        $order = app(CreateOrderService::class)->create($data);
+
+        $sides = [];
+
+        foreach ($order->packageSides()->get() as $side) {
+            $sides[$side->side] = [
+                'design' => [
+                    'design_code' => $side->side === 'LELAKI'
+                        ? 'L101'
+                        : 'P202',
+                ],
+                'parents' => [
+                    'father_name' => 'Bapa ' . $side->side,
+                    'mother_name' => 'Ibu ' . $side->side,
+                ],
+                'event' => [
+                    'event_date' => '2026-12-20',
+                    'meal_time' => '12:00',
+                    'venue_name' => 'Dewan ' . $side->side,
+                    'full_address' => 'Alamat ' . $side->side,
+                    'contacts' => [
+                        1 => [
+                            'contact_name' => 'Contact 1',
+                            'contact_phone' => '0111111111',
+                        ],
+                        2 => [
+                            'contact_name' => 'Contact 2',
+                            'contact_phone' => '0122222222',
+                        ],
+                        3 => [
+                            'contact_name' => 'Contact 3',
+                            'contact_phone' => '0133333333',
+                        ],
+                    ],
+                ],
+            ];
+        }
+
+        app(SaveOrderDraftService::class)->save($order, [
+            'couple' => [
+                'groom_name' => 'Muhammad Syafiq',
+                'bride_name' => 'Nur Awanis',
+            ],
+            'sides' => $sides,
+            'fulfilment' => [
+                'method' => 'PICKUP',
+            ],
+        ]);
+
+        return app(ConfirmOrderDetailsService::class)
+            ->confirm($order->fresh());
+    }
+
+    private function approvedOrder(
+        string $customerName = 'Approved Visibility Test'
+    ) {
+        $order = $this->confirmedOrder(
+            1,
+            'LELAKI',
+            $customerName
+        );
+
+        $designJobs = $this->initializeDesignJobs($order);
+
+        foreach ($designJobs as $designJob) {
+            $designJob = app(StartDesignJobService::class)
+                ->start($designJob);
+
+            app(CreateArtworkVersionService::class)->create(
+                $designJob,
+                [
+                    'storage_path' =>
+                        "artworks/{$designJob->side}/v1.pdf",
+                    'preview_storage_path' =>
+                        "artworks/{$designJob->side}/v1-preview.png",
+                    'original_filename' =>
+                        "{$designJob->side}-v1.pdf",
+                    'mime_type' => 'application/pdf',
+                ]
+            );
+
+            $designJob = app(MarkDesignReadyService::class)
+                ->markReady($designJob->fresh());
+
+            app(ApproveArtworkService::class)
+                ->approve($designJob);
+        }
+
+        $order->update([
+            'status' => 'DESIGN_APPROVED',
+        ]);
+
+        return $order->fresh();
+    }
+
+    private function paidOrder(
+        string $customerName = 'Paid Visibility Test'
+    ) {
+        $order = $this->approvedOrder($customerName);
+
+        $payment = app(CreateBalancePaymentService::class)
+            ->create($order->fresh(), '250.00');
+
+        $payment->update([
+            'provider' => 'TEST',
+            'provider_reference' =>
+                'VISIBILITY-REF-' . $payment->id,
+        ]);
+
+        app(HandlePaymentCallbackService::class)->handle([
+            'provider' => 'TEST',
+            'provider_reference' =>
+                $payment->provider_reference,
+            'provider_event_id' =>
+                'VISIBILITY-EVENT-' . $payment->id,
+            'status' => 'PAID',
+        ]);
+
+        return $order->fresh();
+    }
+
+    private function printedOrder(
+        string $customerName = 'Printed Visibility Test'
+    ) {
+        $order = $this->paidOrder($customerName);
+
+        $printJobs = app(InitializePrintJobsForOrderService::class)
+            ->initialize($order);
+
+        foreach ($printJobs as $printJob) {
+            $printJob = app(StartPrintingService::class)
+                ->start($printJob);
+
+            app(MarkPrintJobPrintedService::class)
+                ->markPrinted($printJob);
+        }
+
+        app(SyncOrderPrintStatusService::class)
+            ->sync($order->fresh());
+
+        return $order->fresh();
+    }
+}
