@@ -7,6 +7,8 @@ use App\Services\Orders\CreateOrderService;
 use App\Services\Orders\GenerateOrderAccessLinkService;
 use App\Services\Orders\SaveOrderDraftService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
 class CustomerThankYouPageTest extends TestCase
@@ -41,13 +43,23 @@ class CustomerThankYouPageTest extends TestCase
 
     public function test_successful_confirmation_redirects_to_thank_you_page(): void
     {
+        Storage::fake('local');
         $order = $this->completeOrder();
         $this->establishCustomerSession($order);
+
+        $this->get(route('orders.review.show', ['orderId' => $order->order_id]))
+            ->assertOk()
+            ->assertSee('Bayaran Deposit')
+            ->assertSee('Ini hanyalah bayaran deposit.')
+            ->assertSee('deposit_receipt', false)
+            ->assertSee('post_confirmation_liability_acknowledged', false);
 
         $response = $this->post(route('orders.confirm.store', [
             'orderId' => $order->order_id,
         ]), [
             'responsibility_acknowledged' => '1',
+            'post_confirmation_liability_acknowledged' => '1',
+            'deposit_receipt' => UploadedFile::fake()->image('resit-deposit.jpg'),
         ]);
 
         $response->assertRedirect(route('orders.thank-you.show', [
@@ -68,6 +80,31 @@ class CustomerThankYouPageTest extends TestCase
             ->assertSee(route('orders.dashboard', [
                 'orderId' => $order->order_id,
             ]), false);
+
+        $payment = $order->fresh()->payments()->where('payment_type', 'BOOKING_DEPOSIT')->firstOrFail();
+        $this->assertSame('PENDING', $payment->status);
+        $this->assertSame('MANUAL_QR', $payment->provider);
+        $this->assertSame('RECEIPT_SUBMITTED', $order->fresh()->booking_payment_status);
+        $this->assertTrue($order->fresh()->confirmation->confirmed_snapshot['post_confirmation_liability_acknowledged']);
+        Storage::disk('local')->assertExists($payment->metadata['receipt_path']);
+    }
+
+    public function test_confirmation_requires_deposit_receipt_and_both_acknowledgements(): void
+    {
+        $order = $this->completeOrder();
+        $this->establishCustomerSession($order);
+
+        $this->from(route('orders.review.show', ['orderId' => $order->order_id]))
+            ->post(route('orders.confirm.store', ['orderId' => $order->order_id]), [])
+            ->assertRedirect(route('orders.review.show', ['orderId' => $order->order_id]))
+            ->assertSessionHasErrors([
+                'responsibility_acknowledged',
+                'post_confirmation_liability_acknowledged',
+                'deposit_receipt',
+            ]);
+
+        $this->assertSame('DETAILS_INCOMPLETE', $order->fresh()->status);
+        $this->assertDatabaseCount('payment_transactions', 0);
     }
 
     public function test_unconfirmed_order_is_redirected_away_from_thank_you_page(): void

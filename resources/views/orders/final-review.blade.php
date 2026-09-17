@@ -264,6 +264,46 @@
             </div>
         </section>
 
+        <section class="review-card payment-card">
+            <div class="payment-heading">
+                <div>
+                    <p class="eyebrow">Pembayaran Tempahan</p>
+                    <h2>Bayaran Deposit</h2>
+                </div>
+                @php($depositAmount = (float) config('kingkadkahwin.deposit.amount'))
+                <span class="deposit-amount">
+                    {{ $depositAmount > 0 ? 'RM '.number_format($depositAmount, 2) : 'Deposit' }}
+                </span>
+            </div>
+
+            <div class="deposit-notice">
+                <strong>Ini hanyalah bayaran deposit.</strong>
+                <p>Pembayaran penuh atau baki hanya perlu dibuat selepas anda menerima, menyemak dan meluluskan artwork daripada pihak KingKadKahwin.</p>
+            </div>
+
+            <div class="payment-layout">
+                <div class="qr-panel">
+                    @php($depositQrPath = config('kingkadkahwin.deposit.qr_image'))
+                    @if ($depositQrPath && file_exists(public_path($depositQrPath)))
+                        <img src="{{ asset($depositQrPath) }}" alt="QR code pembayaran deposit KingKadKahwin">
+                    @else
+                        <div class="qr-placeholder">
+                            <span>QR</span>
+                            <small>QR pembayaran akan dipaparkan di sini</small>
+                        </div>
+                    @endif
+                    <p>Scan QR ini menggunakan aplikasi bank atau e-wallet anda.</p>
+                </div>
+
+                <div class="receipt-panel">
+                    <label for="deposit_receipt">Lampirkan resit pembayaran <span aria-hidden="true">*</span></label>
+                    <p>Format JPG, JPEG, PNG, WEBP atau PDF. Maksimum 10 MB.</p>
+                    <input id="deposit_receipt" type="file" name="deposit_receipt" accept=".jpg,.jpeg,.png,.webp,.pdf,image/jpeg,image/png,image/webp,application/pdf" required form="final-confirmation-form">
+                    @error('deposit_receipt')<p class="field-error" role="alert">{{ $message }}</p>@enderror
+                </div>
+            </div>
+        </section>
+
         <section class="review-card confirmation-card">
             <h2>Pengesahan Akhir</h2>
 
@@ -272,7 +312,7 @@
                 Pastikan semua nama, tarikh, masa, alamat, design dan nombor telefon adalah betul.
             </p>
 
-            <form method="POST" action="{{ route('orders.confirm.store', ['orderId' => $review['order_id']]) }}">
+            <form id="final-confirmation-form" method="POST" enctype="multipart/form-data" action="{{ route('orders.confirm.store', ['orderId' => $review['order_id']]) }}">
                 @csrf
 
                 <label class="confirmation-checkbox">
@@ -287,6 +327,21 @@
                         Saya telah menyemak semua maklumat di atas dan mengesahkan bahawa maklumat tersebut adalah betul.
                     </span>
                 </label>
+                @error('responsibility_acknowledged')<p class="field-error" role="alert">{{ $message }}</p>@enderror
+
+                <label class="confirmation-checkbox liability-checkbox">
+                    <input
+                        type="checkbox"
+                        name="post_confirmation_liability_acknowledged"
+                        value="1"
+                        required
+                        @checked(old('post_confirmation_liability_acknowledged'))
+                    >
+                    <span>
+                        Saya memahami dan bersetuju bahawa sebarang kesalahan pada maklumat yang berlaku atau ditemukan selepas pengesahan akhir ini tidak akan ditanggung oleh pihak KingKadKahwin.
+                    </span>
+                </label>
+                @error('post_confirmation_liability_acknowledged')<p class="field-error" role="alert">{{ $message }}</p>@enderror
 
                 <div class="review-actions">
                     <a class="back-link" href="{{ route('orders.dashboard', ['orderId' => $review['order_id']]) }}">

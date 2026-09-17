@@ -177,6 +177,26 @@ body {
     border-color: #dbe4f0;
 }
 
+.payment-card { border-color: #d6e5dc; }
+.payment-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; }
+.payment-heading h2 { margin-top: 0.2rem; }
+.deposit-amount { padding: 0.55rem 0.8rem; border-radius: 999px; background: #e9f6ee; color: #17653a; font-weight: 800; white-space: nowrap; }
+.deposit-notice { margin: 0.5rem 0 1.25rem; padding: 1rem; border-left: 4px solid #d39a2c; border-radius: 8px; background: #fff8e7; }
+.deposit-notice strong { color: #7a4d00; }
+.deposit-notice p { margin: 0.25rem 0 0; color: #5f5138; }
+.payment-layout { display: grid; grid-template-columns: minmax(190px, 0.75fr) minmax(0, 1.25fr); gap: 1.25rem; align-items: stretch; }
+.qr-panel, .receipt-panel { padding: 1rem; border: 1px solid #e5e7eb; border-radius: 10px; background: #f8fafc; }
+.qr-panel { text-align: center; }
+.qr-panel img { display: block; width: min(100%, 220px); aspect-ratio: 1; margin: 0 auto; object-fit: contain; background: #fff; }
+.qr-panel>p, .receipt-panel>p { margin: 0.65rem 0; color: #6b7280; font-size: 0.84rem; }
+.qr-placeholder { display: grid; width: min(100%, 220px); aspect-ratio: 1; margin: 0 auto; padding: 1rem; place-content: center; border: 2px dashed #9ca3af; border-radius: 8px; background: #fff; color: #6b7280; }
+.qr-placeholder span { font-size: 2.4rem; font-weight: 900; }.qr-placeholder small { display: block; max-width: 140px; }
+.receipt-panel { display: flex; flex-direction: column; justify-content: center; }
+.receipt-panel label { font-weight: 800; }.receipt-panel label span { color: #b91c1c; }
+.receipt-panel input { width: 100%; padding: 0.8rem; border: 1px solid #cbd5e1; border-radius: 8px; background: #fff; }
+.liability-checkbox { padding: 1rem; border: 1px solid #efc8c8; border-radius: 10px; background: #fff7f7; }
+.field-error { margin: 0.45rem 0; color: #b91c1c; font-size: 0.875rem; font-weight: 600; }
+
 .confirmation-note {
     margin: 0 0 1rem;
     padding: 1rem;
@@ -247,6 +267,9 @@ body {
     .review-grid {
         grid-template-columns: 1fr;
     }
+
+    .payment-layout { grid-template-columns: 1fr; }
+    .payment-heading { flex-direction: column; }
 
     .review-item.full-width {
         grid-column: auto;
