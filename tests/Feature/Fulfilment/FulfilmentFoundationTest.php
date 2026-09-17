@@ -122,7 +122,7 @@ class FulfilmentFoundationTest extends TestCase
         );
 
         $this->assertSame('SHIPPED', $job->status);
-        $this->assertSame('PACKED', $order->fresh()->status);
+        $this->assertSame('SHIPPED', $order->fresh()->status);
 
         $job = app(MarkCourierDeliveredService::class)->deliver(
             $job,

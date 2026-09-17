@@ -16,7 +16,11 @@ class MarkCourierShippedService
         ?User $actor = null,
     ): FulfilmentJob {
         return DB::transaction(function () use ($job, $courierProvider, $trackingNumber, $actor) {
-            $job->refresh();
+            $job->refresh()->load('order');
+
+            if (! filled($courierProvider) || ! filled($trackingNumber)) {
+                throw new RuntimeException('Courier provider and tracking number are required before shipment.');
+            }
 
             if ($job->method !== 'COURIER') {
                 throw new RuntimeException(
@@ -52,6 +56,8 @@ class MarkCourierShippedService
                     'tracking_number' => $trackingNumber,
                 ],
             ]);
+
+            $job->order()->update(['status' => 'SHIPPED']);
 
             return $job->fresh();
         });

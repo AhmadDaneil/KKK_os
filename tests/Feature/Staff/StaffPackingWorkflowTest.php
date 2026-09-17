@@ -21,6 +21,7 @@ use App\Services\Printing\MarkPrintJobPrintedService;
 use App\Services\Printing\StartPrintingService;
 use App\Services\Printing\SyncOrderPrintStatusService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
 use Tests\TestCase;
 
 class StaffPackingWorkflowTest extends TestCase
@@ -130,7 +131,8 @@ class StaffPackingWorkflowTest extends TestCase
         );
 
         $response = $this->actingAs($packing)->post(
-            route('staff.packing-jobs.mark-packed', $job)
+            route('staff.packing-jobs.mark-packed', $job),
+            ['packing_proof' => UploadedFile::fake()->image('packing.jpg')]
         );
 
         $response->assertRedirect();
@@ -165,7 +167,8 @@ class StaffPackingWorkflowTest extends TestCase
         );
 
         $response = $this->actingAs($packing)->post(
-            route('staff.packing-jobs.mark-packed', $job)
+            route('staff.packing-jobs.mark-packed', $job),
+            ['packing_proof' => UploadedFile::fake()->image('packing.jpg')]
         );
 
         $response->assertRedirect();
@@ -175,7 +178,14 @@ class StaffPackingWorkflowTest extends TestCase
 
         $this->assertSame('PACKED', $job->status);
         $this->assertNotNull($job->packed_at);
+        $this->assertNotNull($job->proof_storage_path);
+        $this->assertSame('packing.jpg', $job->proof_original_name);
         $this->assertSame('PACKED', $order->status);
+        $this->assertDatabaseHas('fulfilment_jobs', [
+            'order_id' => $order->id,
+            'method' => 'PICKUP',
+            'status' => 'READY',
+        ]);
 
         $event = $job->events()
             ->where('event_type', 'PACKING_COMPLETED')
@@ -222,7 +232,9 @@ class StaffPackingWorkflowTest extends TestCase
         }
 
         $this->actingAs($packing)
-            ->post(route('staff.packing-jobs.mark-packed', $job))
+            ->post(route('staff.packing-jobs.mark-packed', $job), [
+                'packing_proof' => UploadedFile::fake()->image('packing.jpg'),
+            ])
             ->assertRedirect();
 
         $job->refresh();

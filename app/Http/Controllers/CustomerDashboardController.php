@@ -37,6 +37,7 @@ class CustomerDashboardController extends Controller
             'packageSides.parents',
             'packageSides.event.contacts',
             'fulfilment',
+            'fulfilmentJob',
         ]);
 
         return view('orders.dashboard', [

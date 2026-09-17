@@ -90,6 +90,9 @@
     <div class="order-status-message">
         {{ $progress['message'] }}
     </div>
+    @if ($order->fulfilmentJob?->method === 'COURIER' && $order->fulfilmentJob?->tracking_number)
+        <div class="customer-tracking-card"><span>Maklumat Penghantaran</span><strong>{{ $order->fulfilmentJob->courier_provider ?: 'Courier' }}</strong><code>{{ $order->fulfilmentJob->tracking_number }}</code></div>
+    @endif
 </header>
 
     @if (in_array($order->status, [

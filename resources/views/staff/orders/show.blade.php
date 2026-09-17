@@ -653,6 +653,35 @@
                                 </div>
                             </div>
                         @endif
+
+                        @if ($order->packingJob->proof_storage_path)
+                            <p class="staff-proof-status"><strong>Bukti packing:</strong> {{ $order->packingJob->proof_original_name ?? 'Telah dimuat naik' }}</p>
+                        @endif
+
+                        @if (auth()->user()->hasStaffRole(\App\Models\User::ROLE_PACKING) && $order->packingJob->assigned_user_id === auth()->id())
+                            @if ($order->packingJob->status === 'READY_FOR_PACKING')
+                                <form method="POST" action="{{ route('staff.packing-jobs.start', $order->packingJob) }}" class="staff-workflow-form">@csrf<button type="submit" class="staff-button staff-button-primary">Start Packing</button></form>
+                            @endif
+                            @if ($order->packingJob->status === 'PACKING')
+                                @foreach ($order->packingJob->items as $item)
+                                    @unless ($item->verified_present)
+                                        <form method="POST" action="{{ route('staff.packing-jobs.items.verify', ['packingJob' => $order->packingJob, 'packingItem' => $item]) }}" class="staff-workflow-form">@csrf<button type="submit" class="staff-button staff-button-small">Verify {{ ucfirst(strtolower($item->side)) }}</button></form>
+                                    @endunless
+                                @endforeach
+                                @if ($order->packingJob->items->every(fn ($item) => $item->verified_present))
+                                    <form method="POST" enctype="multipart/form-data" action="{{ route('staff.packing-jobs.mark-packed', $order->packingJob) }}" class="staff-packing-complete-form">
+                                        @csrf
+                                        <label for="packing-proof">Bukti gambar barang telah dipack</label>
+                                        <input id="packing-proof" type="file" name="packing_proof" accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp" required>
+                                        @if ($order->fulfilment?->method === 'COURIER')
+                                            <label for="courier-provider">Nama courier</label><input id="courier-provider" name="courier_provider" value="{{ old('courier_provider') }}" placeholder="Contoh: Pos Laju" required>
+                                            <label for="tracking-number">Tracking number</label><input id="tracking-number" name="tracking_number" value="{{ old('tracking_number') }}" required>
+                                        @endif
+                                        <button type="submit" class="staff-button staff-button-primary">Upload Bukti & Mark Packed</button>
+                                    </form>
+                                @endif
+                            @endif
+                        @endif
                     </article>
                 </section>
             @endif

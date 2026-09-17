@@ -64,9 +64,18 @@ class PublicOrderController extends Controller
                 ->withErrors(['order_id' => 'Order ID tidak ditemui. Sila semak dan cuba lagi.']);
         }
 
+        $order->load('fulfilmentJob');
+
         return view('public.order-progress', [
             'orderId' => $order->order_id,
             'progress' => $customerProgress->build($order),
+            'shipment' => $order->fulfilmentJob && $order->fulfilmentJob->method === 'COURIER'
+                ? [
+                    'courier_provider' => $order->fulfilmentJob->courier_provider,
+                    'tracking_number' => $order->fulfilmentJob->tracking_number,
+                    'shipped_at' => $order->fulfilmentJob->shipped_at,
+                ]
+                : null,
         ]);
     }
 }

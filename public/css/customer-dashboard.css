@@ -652,3 +652,7 @@ button {
         text-align: center;
     }
 }
+
+.customer-tracking-card { display:grid; margin-top:1rem; padding:1rem; border:1px solid #bcdcc8; border-radius:10px; background:#eff8f2; gap:.2rem; }
+.customer-tracking-card span { color:#47705a; font-size:.75rem; font-weight:800; letter-spacing:.08em; text-transform:uppercase; }
+.customer-tracking-card code { margin-top:.25rem; color:#174b31; font-size:1rem; font-weight:800; letter-spacing:.05em; overflow-wrap:anywhere; }

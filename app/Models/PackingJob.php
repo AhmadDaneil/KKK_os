@@ -13,6 +13,9 @@ class PackingJob extends Model
         'assigned_at',
         'started_at',
         'packed_at',
+        'proof_storage_path',
+        'proof_original_name',
+        'proof_mime_type',
     ];
 
     protected $casts = [

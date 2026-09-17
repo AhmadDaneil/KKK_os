@@ -31,6 +31,14 @@
                 <div class="public-progress-track" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="{{ $progress['percentage'] }}"><span style="width: {{ $progress['percentage'] }}%"></span></div>
                 <h3>{{ $progress['label'] }}</h3>
                 <p>{{ $progress['message'] }}</p>
+                @if (! empty($shipment['tracking_number']))
+                    <div class="tracking-card">
+                        <small>MAKLUMAT PENGHANTARAN</small>
+                        <div><span>Courier</span><strong>{{ $shipment['courier_provider'] ?: '-' }}</strong></div>
+                        <div><span>Tracking Number</span><strong class="tracking-number">{{ $shipment['tracking_number'] }}</strong></div>
+                        @if ($shipment['shipped_at'])<p>Dihantar pada {{ $shipment['shipped_at']->format('d/m/Y, h:i A') }}</p>@endif
+                    </div>
+                @endif
                 <div class="public-stages">
                     @foreach ($progress['stages'] as $stage)
                         <div class="@if ($stage['complete']) complete @endif"><i>✓</i><span>{{ $stage['label'] }}</span></div>
