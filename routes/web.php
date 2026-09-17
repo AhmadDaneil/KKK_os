@@ -19,7 +19,24 @@ use App\Http\Controllers\DevMergeJobController;
 use App\Http\Controllers\DevOrderController;
 use App\Http\Controllers\DevPackingJobController;
 use App\Http\Controllers\DevPrintJobController;
+use App\Http\Controllers\PublicOrderController;
 use Illuminate\Support\Facades\Route;
+
+Route::view('/', 'public.landing')->name('home');
+
+Route::get('/tempah', [PublicOrderController::class, 'create'])
+    ->name('public.orders.create');
+
+Route::post('/tempah', [PublicOrderController::class, 'store'])
+    ->middleware('throttle:10,1')
+    ->name('public.orders.store');
+
+Route::get('/semak-progress', [PublicOrderController::class, 'progress'])
+    ->name('public.orders.progress');
+
+Route::post('/semak-progress', [PublicOrderController::class, 'lookupProgress'])
+    ->middleware('throttle:10,1')
+    ->name('public.orders.progress.lookup');
 
 /*
 |--------------------------------------------------------------------------
