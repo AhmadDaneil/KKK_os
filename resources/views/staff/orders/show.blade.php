@@ -14,6 +14,7 @@
         <div class="staff-workspace">
             <header class="staff-topbar">
                 <div><p class="staff-kicker">Order Detail</p><h1>{{ $order->order_id }}</h1></div>
+                <form method="POST" action="{{ route('staff.logout') }}">@csrf<button type="submit" class="staff-button staff-button-small">Log Keluar</button></form>
             </header>
 
         <main class="staff-main">

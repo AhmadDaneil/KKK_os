@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Staff\StaffDashboardController;
+use App\Http\Controllers\Staff\StaffAuthController;
 use App\Http\Controllers\Staff\StaffPrintingWorkflowController;
 use App\Http\Controllers\Staff\StaffOrderController;
 use App\Http\Controllers\Staff\StaffJobAssignmentController;
@@ -74,19 +75,28 @@ Route::post(
 | Staff Production Routes
 |--------------------------------------------------------------------------
 |
-| Staff routes open directly without a login screen. A default active ADMIN
-| is resolved per request so operational actions remain attributable.
+| Staff routes require an authenticated, active staff identity so every
+| operational action remains attributable to the staff member who performed it.
 |
 | Role-specific actions receive an additional staff.role middleware.
 |
 */
 
-Route::middleware('staff.context')
+Route::get('/staff/login', [StaffAuthController::class, 'create'])
+    ->name('staff.login');
+
+Route::post('/staff/login', [StaffAuthController::class, 'store'])
+    ->name('staff.login.store');
+
+Route::middleware(['auth', 'active.staff'])
     ->prefix('staff')
     ->name('staff.')
     ->group(function () {
         Route::get('/', [StaffDashboardController::class, 'index'])
             ->name('dashboard');
+
+        Route::post('/logout', [StaffAuthController::class, 'destroy'])
+            ->name('logout');
 
         Route::get('/orders', [StaffOrderController::class, 'index'])
             ->name('orders.index');

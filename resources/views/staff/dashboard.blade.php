@@ -13,12 +13,13 @@
         <div class="staff-workspace">
             <header class="staff-topbar">
                 <div><p class="staff-kicker">Operation Management</p><h1>Staff Dashboard</h1></div>
+                <form method="POST" action="{{ route('staff.logout') }}">@csrf<button type="submit" class="staff-button staff-button-small">Log Keluar</button></form>
             </header>
 
             <main class="staff-main staff-dashboard-main">
                 <section class="staff-hero">
                     <div>
-                        <p class="staff-kicker">Staff Operations Overview</p>
+                        <p class="staff-kicker">Selamat datang, {{ auth()->user()->name }}</p>
                         <h2>Operasi yang jelas, daripada order hingga siap.</h2>
                         <p>Pantau tugasan mengikut role anda tanpa mengubah aliran kerja yang ditetapkan dalam Master Blueprint.</p>
                     </div>

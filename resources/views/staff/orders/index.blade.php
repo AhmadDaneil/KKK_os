@@ -14,6 +14,7 @@
         <div class="staff-workspace">
             <header class="staff-topbar">
                 <div><p class="staff-kicker">{{ $workstream ? ucfirst($workstream) : 'Operation Management' }}</p><h1>{{ $workstream ? ucfirst($workstream).' Queue' : 'Semua Orders' }}</h1></div>
+                <form method="POST" action="{{ route('staff.logout') }}">@csrf<button type="submit" class="staff-button staff-button-small">Log Keluar</button></form>
             </header>
 
         <main class="staff-main">

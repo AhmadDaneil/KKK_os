@@ -2,7 +2,6 @@
 
 use App\Http\Middleware\EnsureActiveStaff;
 use App\Http\Middleware\EnsureStaffRole;
-use App\Http\Middleware\UseDefaultStaffContext;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -19,8 +18,11 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
         'active.staff' => EnsureActiveStaff::class,
         'staff.role' => EnsureStaffRole::class,
-        'staff.context' => UseDefaultStaffContext::class,
     ]);
+
+        $middleware->redirectGuestsTo(
+            fn (Request $request) => route('staff.login')
+        );
 
         /*
         |--------------------------------------------------------------------------
