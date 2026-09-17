@@ -954,6 +954,7 @@ a.staff-pagination-link:hover {
 .staff-packing-complete-form { display:grid; max-width:560px; margin-top:1.25rem; padding:1rem; border:1px solid #dce5df; border-radius:10px; background:#f8fbf9; gap:.65rem; }
 .staff-packing-complete-form label { font-size:.82rem; font-weight:800; }
 .staff-packing-complete-form input { width:100%; min-height:42px; padding:.6rem .75rem; border:1px solid #cbd5e1; border-radius:7px; background:#fff; }
+.staff-payment-actions { display:flex; margin-top:1rem; flex-wrap:wrap; align-items:flex-start; gap:.65rem; }.staff-payment-actions form { margin:0; }.staff-reject-payment-form { display:grid; width:100%; padding-top:.5rem; gap:.45rem; }.staff-reject-payment-form label { font-size:.8rem; font-weight:800; }.staff-reject-payment-form textarea { width:100%; padding:.65rem; border:1px solid #cbd5e1; border-radius:7px; }.staff-button-danger { background:#b42323; color:#fff; }.staff-payment-rejection { width:100%; margin:.4rem 0 0; padding:.75rem; border-radius:7px; background:#fff0f0; color:#8f2424; }
 
 .staff-assignment-controls {
     display: flex;

@@ -35,6 +35,15 @@ class StaffRoleAuthorizationTest extends TestCase
         $this->assertForbidden($user, User::ROLE_PACKING);
     }
 
+    public function test_operation_management_is_a_valid_staff_role(): void
+    {
+        $user = $this->staffUser(User::ROLE_OM);
+
+        $this->assertTrue($user->isActiveStaff());
+        $this->assertAllowed($user, User::ROLE_OM);
+        $this->assertForbidden($user, User::ROLE_DESIGNER);
+    }
+
     public function test_printing_can_access_printing_role_only(): void
     {
         $user = $this->staffUser(User::ROLE_PRINTING);

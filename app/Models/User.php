@@ -24,12 +24,14 @@ class User extends Authenticatable
     use HasFactory, Notifiable;
 
     public const ROLE_ADMIN = 'ADMIN';
+    public const ROLE_OM = 'OPERATION_MANAGEMENT';
     public const ROLE_DESIGNER = 'DESIGNER';
     public const ROLE_PRINTING = 'PRINTING';
     public const ROLE_PACKING = 'PACKING';
 
     public const STAFF_ROLES = [
         self::ROLE_ADMIN,
+        self::ROLE_OM,
         self::ROLE_DESIGNER,
         self::ROLE_PRINTING,
         self::ROLE_PACKING,
@@ -51,6 +53,11 @@ class User extends Authenticatable
     {
         return $this->isActiveStaff()
             && $this->role === $role;
+    }
+
+    public function isOperationManagement(): bool
+    {
+        return $this->isActiveStaff() && in_array($this->role, [self::ROLE_ADMIN, self::ROLE_OM], true);
     }
 
     /**

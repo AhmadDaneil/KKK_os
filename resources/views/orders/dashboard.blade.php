@@ -95,6 +95,25 @@
     @endif
 </header>
 
+@php($depositPayment = $order->payments->firstWhere('payment_type', 'BOOKING_DEPOSIT'))
+@if ($depositPayment)
+    <section class="deposit-status-card" data-deposit-status="{{ strtolower($depositPayment->status) }}">
+        <div><span>Status Deposit</span><strong>{{ match ($depositPayment->status) { 'PAID' => 'Deposit Disahkan', 'FAILED' => 'Resit Ditolak', default => 'Menunggu Semakan' } }}</strong></div>
+        @if ($depositPayment->status === 'PENDING')<p>Resit deposit anda telah diterima dan sedang disemak oleh Operation Management.</p>@endif
+        @if ($depositPayment->status === 'PAID')<p>Bayaran deposit telah disahkan. Tempahan boleh diteruskan ke proses design.</p>@endif
+        @if ($depositPayment->status === 'FAILED')
+            <p><strong>Sebab penolakan:</strong> {{ $depositPayment->metadata['rejection_reason'] ?? 'Resit tidak dapat disahkan.' }}</p>
+            @if (session('deposit_status'))<p class="deposit-success">{{ session('deposit_status') }}</p>@endif
+            <form method="POST" enctype="multipart/form-data" action="{{ route('orders.deposit-receipt.update', ['orderId' => $order->order_id]) }}">
+                @csrf
+                <label for="replacement-deposit-receipt">Muat naik resit baharu</label>
+                <input id="replacement-deposit-receipt" type="file" name="deposit_receipt" accept=".jpg,.jpeg,.png,.webp,.pdf,image/jpeg,image/png,image/webp,application/pdf" required>
+                <button type="submit">Hantar Semula Resit</button>
+            </form>
+        @endif
+    </section>
+@endif
+
     @if (in_array($order->status, [
     'DETAILS_CONFIRMED',
     'READY_FOR_DESIGN',

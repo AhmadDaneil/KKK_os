@@ -473,6 +473,24 @@
                                     <dd>{{ $payment->paid_at?->format('Y-m-d H:i') ?? '-' }}</dd>
                                 </div>
                             </dl>
+
+                            @if ($payment->payment_type === 'BOOKING_DEPOSIT' && ! empty($payment->metadata['receipt_path']))
+                                <div class="staff-payment-actions">
+                                    <a class="staff-button staff-button-small" target="_blank" rel="noopener" href="{{ route('staff.payments.receipt', $payment) }}">Lihat Resit</a>
+                                    @if (auth()->user()->isOperationManagement() && $payment->status === 'PENDING')
+                                        <form method="POST" action="{{ route('staff.payments.deposit.approve', $payment) }}">@csrf<button class="staff-button staff-button-primary" type="submit">Sahkan Deposit</button></form>
+                                        <form method="POST" action="{{ route('staff.payments.deposit.reject', $payment) }}" class="staff-reject-payment-form">
+                                            @csrf
+                                            <label for="rejection-reason-{{ $payment->id }}">Sebab penolakan</label>
+                                            <textarea id="rejection-reason-{{ $payment->id }}" name="rejection_reason" rows="2" required>{{ old('rejection_reason') }}</textarea>
+                                            <button class="staff-button staff-button-danger" type="submit">Tolak Deposit</button>
+                                        </form>
+                                    @endif
+                                    @if ($payment->status === 'FAILED' && ! empty($payment->metadata['rejection_reason']))
+                                        <p class="staff-payment-rejection"><strong>Sebab ditolak:</strong> {{ $payment->metadata['rejection_reason'] }}</p>
+                                    @endif
+                                </div>
+                            @endif
                         </article>
                     @empty
                         <div class="staff-empty">

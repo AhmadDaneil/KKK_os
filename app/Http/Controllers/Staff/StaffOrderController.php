@@ -130,7 +130,7 @@ if ($user->isAdmin() && ! $request->attributes->get('staff_overview_mode', false
     {
         $query = Order::query();
 
-        if ($user->isAdmin()) {
+        if ($user->isOperationManagement()) {
             return $query;
         }
 

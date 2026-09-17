@@ -7,8 +7,10 @@ use App\Http\Controllers\Staff\StaffOrderController;
 use App\Http\Controllers\Staff\StaffJobAssignmentController;
 use App\Http\Controllers\Staff\StaffDesignWorkflowController;
 use App\Http\Controllers\Staff\StaffPackingWorkflowController;
+use App\Http\Controllers\Staff\StaffDepositPaymentController;
 use App\Http\Controllers\CustomerArtworkReviewController;
 use App\Http\Controllers\CustomerDashboardController;
+use App\Http\Controllers\CustomerDepositReceiptController;
 use App\Http\Controllers\CustomerOrderConfirmController;
 use App\Http\Controllers\CustomerOrderDraftController;
 use App\Http\Controllers\CustomerOrderReviewController;
@@ -52,6 +54,9 @@ Route::post(
     '/order/{orderId}/draft',
     [CustomerOrderDraftController::class, 'update']
 )->name('orders.draft.update');
+
+Route::post('/order/{orderId}/deposit-receipt', [CustomerDepositReceiptController::class, 'update'])
+    ->name('orders.deposit-receipt.update');
 
 Route::get(
     '/order/{orderId}/review',
@@ -130,6 +135,15 @@ Route::middleware(['auth', 'active.staff'])
         | ADMIN may assign/reassign operational jobs.
         |
         */
+
+        Route::middleware('staff.role:ADMIN,' . \App\Models\User::ROLE_OM)->group(function () {
+            Route::get('/payments/{payment}/receipt', [StaffDepositPaymentController::class, 'receipt'])
+                ->name('payments.receipt');
+            Route::post('/payments/{payment}/approve-deposit', [StaffDepositPaymentController::class, 'approve'])
+                ->name('payments.deposit.approve');
+            Route::post('/payments/{payment}/reject-deposit', [StaffDepositPaymentController::class, 'reject'])
+                ->name('payments.deposit.reject');
+        });
 
         Route::middleware('staff.role:ADMIN')->group(function () {
             Route::post(

@@ -31,6 +31,13 @@
                 <div class="public-progress-track" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="{{ $progress['percentage'] }}"><span style="width: {{ $progress['percentage'] }}%"></span></div>
                 <h3>{{ $progress['label'] }}</h3>
                 <p>{{ $progress['message'] }}</p>
+                @if ($deposit)
+                    <div class="deposit-public-status" data-status="{{ strtolower($deposit['status']) }}">
+                        <span>Deposit</span>
+                        <strong>{{ match ($deposit['status']) { 'PAID' => 'Disahkan', 'FAILED' => 'Resit Ditolak', default => 'Menunggu Semakan' } }}</strong>
+                        @if ($deposit['status'] === 'FAILED' && $deposit['reason'])<p>Sebab: {{ $deposit['reason'] }}</p>@endif
+                    </div>
+                @endif
                 @if (! empty($shipment['tracking_number']))
                     <div class="tracking-card">
                         <small>MAKLUMAT PENGHANTARAN</small>

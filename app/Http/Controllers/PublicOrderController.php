@@ -64,7 +64,8 @@ class PublicOrderController extends Controller
                 ->withErrors(['order_id' => 'Order ID tidak ditemui. Sila semak dan cuba lagi.']);
         }
 
-        $order->load('fulfilmentJob');
+        $order->load(['fulfilmentJob', 'payments']);
+        $deposit = $order->payments->firstWhere('payment_type', 'BOOKING_DEPOSIT');
 
         return view('public.order-progress', [
             'orderId' => $order->order_id,
@@ -76,6 +77,10 @@ class PublicOrderController extends Controller
                     'shipped_at' => $order->fulfilmentJob->shipped_at,
                 ]
                 : null,
+            'deposit' => $deposit ? [
+                'status' => $deposit->status,
+                'reason' => $deposit->metadata['rejection_reason'] ?? null,
+            ] : null,
         ]);
     }
 }
