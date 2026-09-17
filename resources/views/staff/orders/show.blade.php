@@ -9,30 +9,12 @@
     <link rel="stylesheet" href="{{ asset('css/staff.css') }}">
 </head>
 <body>
-    <div class="staff-shell">
-        <header class="staff-header">
-            <div class="staff-header-inner">
-                <a href="{{ route('staff.dashboard') }}" class="staff-brand staff-brand-link">
-                    <strong>KKK OS</strong>
-                    <span>Staff Operations</span>
-                </a>
-
-                <div class="staff-user">
-                    <div class="staff-user-meta">
-                        <span class="staff-user-name">{{ auth()->user()->name }}</span>
-                        <span class="staff-role">{{ auth()->user()->role }}</span>
-                    </div>
-
-                    <form method="POST" action="{{ route('staff.logout') }}">
-                        @csrf
-
-                        <button type="submit" class="staff-button staff-button-small">
-                            Log Keluar
-                        </button>
-                    </form>
-                </div>
-            </div>
-        </header>
+    <div class="staff-app-shell">
+        @include('staff.partials.sidebar')
+        <div class="staff-workspace">
+            <header class="staff-topbar">
+                <div><p class="staff-kicker">Order Detail</p><h1>{{ $order->order_id }}</h1></div>
+            </header>
 
         <main class="staff-main">
             @if (session('status'))
@@ -411,7 +393,7 @@
                                         @endif
                                     </div>
                                 @endif
-                                @if (auth()->user()->isAdmin())
+                                @if (auth()->user()->isAdmin() && ! request()->attributes->get('staff_overview_mode', false))
     <form
         method="POST"
         action="{{ route('staff.design-jobs.assign', $job) }}"
@@ -535,7 +517,7 @@
                                         <dd>{{ $job->printed_at?->format('Y-m-d H:i') ?? '-' }}</dd>
                                     </div>
                                 </dl>
-                                @if (auth()->user()->isAdmin())
+                                @if (auth()->user()->isAdmin() && ! request()->attributes->get('staff_overview_mode', false))
     <form
         method="POST"
         action="{{ route('staff.print-jobs.assign', $job) }}"
@@ -613,7 +595,7 @@
                                 <dd>{{ $order->packingJob->packed_at?->format('Y-m-d H:i') ?? '-' }}</dd>
                             </div>
                         </dl>
-                        @if (auth()->user()->isAdmin())
+                        @if (auth()->user()->isAdmin() && ! request()->attributes->get('staff_overview_mode', false))
     <form
         method="POST"
         action="{{ route('staff.packing-jobs.assign', $order->packingJob) }}"
@@ -736,6 +718,7 @@
                 </article>
             </section>
         </main>
+        </div>
     </div>
 </body>
 </html>

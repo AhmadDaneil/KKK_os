@@ -391,8 +391,10 @@ public function test_packing_can_open_order_assigned_to_them(): void
             ->assertNotFound();
     }
 
-    public function test_guest_cannot_open_order_detail(): void
+    public function test_guest_can_open_order_detail_through_default_admin_context(): void
 {
+    $this->staff(User::ROLE_ADMIN);
+
     $order = $this->confirmedOrder(
         1,
         'LELAKI',
@@ -400,7 +402,8 @@ public function test_packing_can_open_order_assigned_to_them(): void
     );
 
     $this->get(route('staff.orders.show', $order->order_id))
-        ->assertRedirect(route('staff.login'));
+        ->assertOk()
+        ->assertSee($order->order_id);
 }
 
     public function test_designer_only_receives_their_assigned_side_on_two_package_order_detail(): void

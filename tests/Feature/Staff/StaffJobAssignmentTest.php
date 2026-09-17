@@ -221,7 +221,7 @@ class StaffJobAssignmentTest extends TestCase
         $this->post(
             route('staff.design-jobs.assign', $job),
             ['assigned_user_id' => $designer->id]
-        )->assertRedirect(route('staff.login'));
+        )->assertForbidden();
 
         $this->assertNull($job->fresh()->assigned_user_id);
     }

@@ -1,6 +1,5 @@
 <?php
 
-use App\Http\Controllers\Staff\StaffAuthController;
 use App\Http\Controllers\Staff\StaffDashboardController;
 use App\Http\Controllers\Staff\StaffOrderController;
 use App\Http\Controllers\Staff\StaffJobAssignmentController;
@@ -71,38 +70,22 @@ Route::post(
 
 /*
 |--------------------------------------------------------------------------
-| Staff Authentication
-|--------------------------------------------------------------------------
-*/
-
-Route::get('/staff/login', [StaffAuthController::class, 'create'])
-    ->name('staff.login');
-
-Route::post('/staff/login', [StaffAuthController::class, 'store'])
-    ->name('staff.login.store');
-
-/*
-|--------------------------------------------------------------------------
 | Staff Production Routes
 |--------------------------------------------------------------------------
 |
-| All operational staff routes require:
-| - authenticated Laravel web session
-| - active staff identity
+| Staff routes open directly without a login screen. A default active ADMIN
+| is resolved per request so operational actions remain attributable.
 |
 | Role-specific actions receive an additional staff.role middleware.
 |
 */
 
-Route::middleware(['auth', 'active.staff'])
+Route::middleware('staff.context')
     ->prefix('staff')
     ->name('staff.')
     ->group(function () {
         Route::get('/', [StaffDashboardController::class, 'index'])
             ->name('dashboard');
-
-        Route::post('/logout', [StaffAuthController::class, 'destroy'])
-            ->name('logout');
 
         Route::get('/orders', [StaffOrderController::class, 'index'])
             ->name('orders.index');

@@ -16,17 +16,24 @@ class StaffOrderController extends Controller
         /** @var User $user */
         $user = $request->user();
 
-        $orders = $this->visibleOrdersFor($user)
+        $workstream = $this->allowedWorkstream($user, $request->string('workstream')->toString());
+
+        $query = $this->visibleOrdersFor($user);
+        $this->applyWorkstream($query, $workstream);
+
+        $orders = $query
             ->with([
                 'designJobs.assignedUser',
                 'printJobs.assignedUser',
                 'packingJob.assignedUser',
             ])
             ->latest('id')
-            ->paginate(25);
+            ->paginate(25)
+            ->withQueryString();
 
         return view('staff.orders.index', [
             'orders' => $orders,
+            'workstream' => $workstream,
         ]);
     }
 
@@ -91,7 +98,7 @@ class StaffOrderController extends Controller
     'packingStaff' => collect(),
 ];
 
-if ($user->isAdmin()) {
+if ($user->isAdmin() && ! $request->attributes->get('staff_overview_mode', false)) {
     $assignmentOptions = [
         'designers' => User::query()
             ->where('role', User::ROLE_DESIGNER)
@@ -147,6 +154,31 @@ if ($user->isAdmin()) {
             ),
 
             default => $query->whereRaw('1 = 0'),
+        };
+    }
+
+    private function allowedWorkstream(User $user, string $requested): ?string
+    {
+        $allowed = $user->isAdmin()
+            ? ['design', 'printing', 'packing', 'fulfilment']
+            : match ($user->role) {
+                User::ROLE_DESIGNER => ['design'],
+                User::ROLE_PRINTING => ['printing'],
+                User::ROLE_PACKING => ['packing'],
+                default => [],
+            };
+
+        return in_array($requested, $allowed, true) ? $requested : null;
+    }
+
+    private function applyWorkstream(Builder $query, ?string $workstream): void
+    {
+        match ($workstream) {
+            'design' => $query->whereHas('designJobs'),
+            'printing' => $query->whereHas('printJobs'),
+            'packing' => $query->whereHas('packingJob'),
+            'fulfilment' => $query->whereHas('fulfilmentJob'),
+            default => null,
         };
     }
 }

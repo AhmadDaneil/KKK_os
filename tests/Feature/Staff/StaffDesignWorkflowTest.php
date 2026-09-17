@@ -11,6 +11,7 @@ use App\Models\ArtworkVersion;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use App\Services\Design\RequestArtworkCorrectionService;
+use App\Services\Design\StartDesignJobService;
 use App\Services\Merge\GenerateMergeJobsForOrderService;
 use App\Services\Orders\ConfirmOrderDetailsService;
 use App\Services\Orders\CreateOrderService;
@@ -116,7 +117,7 @@ class StaffDesignWorkflowTest extends TestCase
         }
     }
 
-    public function test_guest_is_redirected_to_staff_login_when_starting_design_job(): void
+    public function test_guest_cannot_start_design_job_without_staff_context(): void
     {
         $designer = $this->designer();
         $job = $this->designJob();
@@ -125,7 +126,7 @@ class StaffDesignWorkflowTest extends TestCase
 
         $this->post(
             route('staff.design-jobs.start', $job)
-        )->assertRedirect(route('staff.login'));
+        )->assertForbidden();
 
         $this->assertSame(
             'READY_FOR_DESIGN',
