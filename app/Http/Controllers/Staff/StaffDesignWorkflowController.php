@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Staff;
 use App\Http\Controllers\Controller;
 use App\Models\DesignJob;
 use App\Services\Design\CreateArtworkVersionService;
+use App\Services\Design\MarkDesignReadyService;
 use App\Services\Design\ResumeDesignAfterCorrectionService;
 use App\Services\Design\StartDesignJobService;
 use Illuminate\Http\RedirectResponse;
@@ -63,6 +64,30 @@ class StaffDesignWorkflowController extends Controller
             'status',
             'Correction work resumed successfully.'
         );
+    }
+
+    public function markReady(
+    Request $request,
+    DesignJob $designJob,
+    MarkDesignReadyService $service
+): RedirectResponse {
+    $this->authorizeAssignedDesigner($request, $designJob);
+
+    try {
+        $service->markReady(
+            $designJob,
+            $request->user()
+        );
+    } catch (RuntimeException $exception) {
+        return back()->withErrors([
+            'design_job' => $exception->getMessage(),
+        ]);
+    }
+
+    return back()->with(
+        'status',
+        'Artwork marked ready for customer review.'
+    );
     }
 
     public function uploadArtwork(

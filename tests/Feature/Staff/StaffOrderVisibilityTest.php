@@ -547,6 +547,147 @@ public function test_packing_detail_renders_packing_work_but_not_design_or_print
         ->assertDontSee('Printing');
 }
 
+    public function test_assigned_designer_sees_start_design_action_when_job_is_ready(): void
+{
+    $designer = $this->staff(User::ROLE_DESIGNER);
+    $admin = $this->staff(User::ROLE_ADMIN);
+
+    $order = $this->confirmedOrder(
+        1,
+        'LELAKI',
+        'Designer Start UI'
+    );
+
+    $job = $this->initializeDesignJobs($order)->first();
+
+    app(AssignDesignJobService::class)
+        ->assign($job, $designer, $admin);
+
+    $this->actingAs($designer)
+        ->get(route('staff.orders.show', $order->order_id))
+        ->assertOk()
+        ->assertSee('Start Design')
+        ->assertSee(
+            route('staff.design-jobs.start', $job),
+            false
+        )
+        ->assertDontSee('Upload Artwork Version')
+        ->assertDontSee('Resume Correction');
+}
+
+public function test_assigned_designer_sees_artwork_upload_form_when_design_is_in_progress(): void
+{
+    $designer = $this->staff(User::ROLE_DESIGNER);
+    $admin = $this->staff(User::ROLE_ADMIN);
+
+    $order = $this->confirmedOrder(
+        1,
+        'LELAKI',
+        'Designer Upload UI'
+    );
+
+    $job = $this->initializeDesignJobs($order)->first();
+
+    app(AssignDesignJobService::class)
+        ->assign($job, $designer, $admin);
+
+    app(StartDesignJobService::class)
+        ->start($job, $designer);
+
+    $this->actingAs($designer)
+        ->get(route('staff.orders.show', $order->order_id))
+        ->assertOk()
+        ->assertSee('Upload Artwork Version')
+        ->assertSee('Source Artwork')
+        ->assertSee('Customer Preview')
+        ->assertSee('Internal Note')
+        ->assertSee(
+            route('staff.design-jobs.artwork.store', $job),
+            false
+        )
+        ->assertSee('name="source_artwork"', false)
+        ->assertSee('name="customer_preview"', false)
+        ->assertDontSee('Start Design')
+        ->assertDontSee('Resume Correction');
+}
+
+public function test_admin_does_not_receive_designer_operational_controls(): void
+{
+    $admin = $this->staff(User::ROLE_ADMIN);
+    $designer = $this->staff(User::ROLE_DESIGNER);
+
+    $order = $this->confirmedOrder(
+        1,
+        'LELAKI',
+        'Admin Monitor Only UI'
+    );
+
+    $job = $this->initializeDesignJobs($order)->first();
+
+    app(AssignDesignJobService::class)
+        ->assign($job, $designer, $admin);
+
+    $this->actingAs($admin)
+        ->get(route('staff.orders.show', $order->order_id))
+        ->assertOk()
+        ->assertSee('Assign')
+        ->assertDontSee('Start Design')
+        ->assertDontSee('Upload Artwork Version')
+        ->assertDontSee('Resume Correction');
+}
+
+public function test_two_package_designer_ui_only_contains_operational_controls_for_assigned_side(): void
+{
+    $designer = $this->staff(User::ROLE_DESIGNER);
+    $otherDesigner = $this->staff(User::ROLE_DESIGNER);
+    $admin = $this->staff(User::ROLE_ADMIN);
+
+    $order = $this->confirmedOrder(
+        2,
+        null,
+        'Designer UI Side Isolation'
+    );
+
+    $jobs = $this->initializeDesignJobs($order)
+        ->keyBy('side');
+
+    $lelakiJob = $jobs->get('LELAKI');
+    $perempuanJob = $jobs->get('PEREMPUAN');
+
+    $this->assertNotNull($lelakiJob);
+    $this->assertNotNull($perempuanJob);
+
+    app(AssignDesignJobService::class)
+        ->assign($lelakiJob, $designer, $admin);
+
+    app(AssignDesignJobService::class)
+        ->assign($perempuanJob, $otherDesigner, $admin);
+
+    $response = $this
+        ->actingAs($designer)
+        ->get(route('staff.orders.show', $order->order_id));
+
+    $response
+        ->assertOk()
+        ->assertSee('LELAKI')
+        ->assertSee(
+            route('staff.design-jobs.start', $lelakiJob),
+            false
+        )
+        ->assertDontSee(
+            route('staff.design-jobs.start', $perempuanJob),
+            false
+        );
+
+    $this->assertSame(
+    1,
+    substr_count(
+        $response->getContent(),
+        'Start Design'
+        )
+    );
+    }
+
     private function staff(string $role): User
     {
         return User::factory()->create([

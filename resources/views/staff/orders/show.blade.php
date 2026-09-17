@@ -294,6 +294,123 @@
                                         <dd>{{ $job->artworkVersions->count() }}</dd>
                                     </div>
                                 </dl>
+                                @if (auth()->user()->hasStaffRole(\App\Models\User::ROLE_DESIGNER)
+                                    && ! auth()->user()->isAdmin()
+                                    && $job->assigned_user_id === auth()->id()
+                                    )
+                                    <div class="staff-design-actions">
+                                        @if ($job->status === 'READY_FOR_DESIGN')
+                                            <form
+                                                method="POST"
+                                                action="{{ route('staff.design-jobs.start', $job) }}"
+                                            >
+                                                @csrf
+
+                                                <button
+                                                    type="submit"
+                                                    class="staff-button staff-button-primary"
+                                                >
+                                                    Start Design
+                                                </button>
+                                            </form>
+                                        @elseif ($job->status === 'CORRECTION_REQUESTED')
+                                            <form
+                                                method="POST"
+                                                action="{{ route('staff.design-jobs.resume-correction', $job) }}"
+                                            >
+                                                @csrf
+
+                                                <button
+                                                    type="submit"
+                                                    class="staff-button staff-button-primary"
+                                                >
+                                                    Resume Correction
+                                                </button>
+                                            </form>
+                                        @elseif ($job->status === 'DESIGN_IN_PROGRESS')
+                                            <div class="staff-design-upload">
+                                                <div class="staff-design-upload-heading">
+                                                    <h4>Upload Artwork Version</h4>
+
+                                                    <p>
+                                                        Upload the editable source artwork and a separate
+                                                        customer preview.
+                                                    </p>
+                                                </div>
+
+                                                <form
+                                                    method="POST"
+                                                    action="{{ route('staff.design-jobs.artwork.store', $job) }}"
+                                                    enctype="multipart/form-data"
+                                                    class="staff-artwork-form"
+                                                >
+                                                    @csrf
+
+                                                    <div class="staff-field">
+                                                        <label for="source-artwork-{{ $job->id }}">
+                                                            Source Artwork
+                                                        </label>
+
+                                                        <input
+                                                            id="source-artwork-{{ $job->id }}"
+                                                            type="file"
+                                                            name="source_artwork"
+                                                            accept=".psd,.pdf"
+                                                            required
+                                                        >
+
+                                                        <span class="staff-field-help">
+                                                            PSD or PDF. Maximum 100 MB.
+                                                        </span>
+                                                    </div>
+
+                                                    <div class="staff-field">
+                                                        <label for="customer-preview-{{ $job->id }}">
+                                                            Customer Preview
+                                                        </label>
+
+                                                        <input
+                                                            id="customer-preview-{{ $job->id }}"
+                                                            type="file"
+                                                            name="customer_preview"
+                                                            accept=".jpg,.jpeg,.png,.pdf"
+                                                            required
+                                                        >
+
+                                                        <span class="staff-field-help">
+                                                            JPG, PNG or PDF. Maximum 20 MB.
+                                                        </span>
+                                                    </div>
+
+                                                    <div class="staff-field">
+                                                        <label for="internal-note-{{ $job->id }}">
+                                                            Internal Note
+                                                            <span class="staff-optional">(optional)</span>
+                                                        </label>
+
+                                                        <textarea
+                                                            id="internal-note-{{ $job->id }}"
+                                                            name="internal_note"
+                                                            rows="3"
+                                                            maxlength="5000"
+                                                        >{{ old('internal_note') }}</textarea>
+                                                    </div>
+
+                                                    <button
+                                                        type="submit"
+                                                        class="staff-button staff-button-primary"
+                                                    >
+                                                        Upload Artwork
+                                                    </button>
+                                                </form>
+                                            </div>
+                                        @elseif ($job->status === 'DESIGN_READY')
+                                            <p class="staff-work-message">
+                                                Artwork is ready for customer review.
+                                            </p>
+                                        @endif
+                                    </div>
+                                @endif
                                 @if (auth()->user()->isAdmin())
     <form
         method="POST"

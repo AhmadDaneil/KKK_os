@@ -1,286 +1,1309 @@
 <?php
 
-namespace App\Http\Controllers\Staff;
+namespace Tests\Feature\Staff;
 
-use App\Http\Controllers\Controller;
-use App\Models\DesignJob;
+use App\Models\User;
+use App\Services\Design\AssignDesignJobService;
 use App\Services\Design\CreateArtworkVersionService;
-use App\Services\Design\ResumeDesignAfterCorrectionService;
-use App\Services\Design\StartDesignJobService;
-use Illuminate\Http\RedirectResponse;
-use Illuminate\Http\Request;
+use App\Services\Design\InitializeDesignJobsForOrderService;
+use App\Services\Design\MarkDesignReadyService;
+use App\Models\ArtworkVersion;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Str;
+use App\Services\Design\RequestArtworkCorrectionService;
+use App\Services\Merge\GenerateMergeJobsForOrderService;
+use App\Services\Orders\ConfirmOrderDetailsService;
+use App\Services\Orders\CreateOrderService;
+use App\Services\Orders\SaveOrderDraftService;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\TestCase;
 use RuntimeException;
-use Throwable;
 
-class StaffDesignWorkflowController extends Controller
+class StaffDesignWorkflowTest extends TestCase
 {
-    public function start(
-        Request $request,
-        DesignJob $designJob,
-        StartDesignJobService $service
-    ): RedirectResponse {
-        $this->authorizeAssignedDesigner($request, $designJob);
+    use RefreshDatabase;
 
-        try {
-            $service->start(
-                $designJob,
-                $request->user()
-            );
-        } catch (RuntimeException $exception) {
-            return back()->withErrors([
-                'design_job' => $exception->getMessage(),
-            ]);
-        }
-
-        return back()->with(
-            'status',
-            'Design work started successfully.'
-        );
-    }
-
-    public function resumeCorrection(
-        Request $request,
-        DesignJob $designJob,
-        ResumeDesignAfterCorrectionService $service
-    ): RedirectResponse {
-        $this->authorizeAssignedDesigner($request, $designJob);
-
-        try {
-            $service->resume(
-                $designJob,
-                $request->user()
-            );
-        } catch (RuntimeException $exception) {
-            return back()->withErrors([
-                'design_job' => $exception->getMessage(),
-            ]);
-        }
-
-        return back()->with(
-            'status',
-            'Correction work resumed successfully.'
-        );
-    }
-
-    public function uploadArtwork(
-        Request $request,
-        DesignJob $designJob,
-        CreateArtworkVersionService $service
-    ): RedirectResponse {
-        $this->authorizeAssignedDesigner($request, $designJob);
-
-        $validated = $request->validate([
-            'source_artwork' => [
-                'required',
-                'file',
-                'mimes:psd,pdf',
-                'max:102400',
-            ],
-            'customer_preview' => [
-                'required',
-                'file',
-                'mimes:jpg,jpeg,png,pdf',
-                'max:20480',
-            ],
-            'internal_note' => [
-                'nullable',
-                'string',
-                'max:5000',
-            ],
-        ]);
-
-        /*
-         * Reject invalid lifecycle state before writing anything
-         * to private storage.
-         */
-        $designJob->refresh();
-
-        if ($designJob->status !== 'DESIGN_IN_PROGRESS') {
-            return back()->withErrors([
-                'design_job' =>
-                    "Artwork can only be added while design job {$designJob->id} is DESIGN_IN_PROGRESS.",
-            ]);
-        }
-
-        /** @var UploadedFile $source */
-        $source = $validated['source_artwork'];
-
-        /** @var UploadedFile $preview */
-        $preview = $validated['customer_preview'];
-
-        $diskName = 'local';
-        $disk = Storage::disk($diskName);
-
-        /*
-         * A UUID directory prevents overwrite/race conditions.
-         * Version number remains controlled exclusively by
-         * CreateArtworkVersionService.
-         */
-        $directory = implode('/', [
-            'artworks',
-            (string) $designJob->order_id,
-            $this->safeSide($designJob->side),
-            (string) Str::uuid(),
-        ]);
-
-        $sourceExtension = strtolower(
-            $source->getClientOriginalExtension()
-        );
-
-        $previewExtension = strtolower(
-            $preview->getClientOriginalExtension()
-        );
-
-        $sourcePath = $directory . '/source.' . $sourceExtension;
-        $previewPath = $directory . '/preview.' . $previewExtension;
-
-        $storedSource = false;
-        $storedPreview = false;
-
-        try {
-            $sourceStream = fopen(
-                $source->getRealPath(),
-                'rb'
-            );
-
-            if ($sourceStream === false) {
-                throw new RuntimeException(
-                    'Unable to read uploaded source artwork.'
-                );
-            }
-
-            try {
-                $storedSource = $disk->put(
-                    $sourcePath,
-                    $sourceStream
-                );
-            } finally {
-                if (is_resource($sourceStream)) {
-                    fclose($sourceStream);
-                }
-            }
-
-            if (! $storedSource) {
-                throw new RuntimeException(
-                    'Unable to store source artwork.'
-                );
-            }
-
-            $previewStream = fopen(
-                $preview->getRealPath(),
-                'rb'
-            );
-
-            if ($previewStream === false) {
-                throw new RuntimeException(
-                    'Unable to read uploaded customer preview.'
-                );
-            }
-
-            try {
-                $storedPreview = $disk->put(
-                    $previewPath,
-                    $previewStream
-                );
-            } finally {
-                if (is_resource($previewStream)) {
-                    fclose($previewStream);
-                }
-            }
-
-            if (! $storedPreview) {
-                throw new RuntimeException(
-                    'Unable to store customer preview.'
-                );
-            }
-
-            $checksum = hash_file(
-                'sha256',
-                $source->getRealPath()
-            );
-
-            if ($checksum === false) {
-                throw new RuntimeException(
-                    'Unable to calculate artwork checksum.'
-                );
-            }
-
-            $artwork = $service->create(
-                $designJob,
-                [
-                    'storage_disk' => $diskName,
-                    'storage_path' => $sourcePath,
-                    'original_filename' =>
-                        $source->getClientOriginalName(),
-                    'mime_type' =>
-                        $source->getMimeType()
-                        ?: 'application/octet-stream',
-                    'file_size_bytes' =>
-                        $source->getSize(),
-                    'checksum_sha256' => $checksum,
-                    'preview_storage_path' => $previewPath,
-                    'internal_note' =>
-                        $validated['internal_note'] ?? null,
-                ],
-                $request->user()
-            );
-        } catch (Throwable $exception) {
-            /*
-             * Filesystem is outside the database transaction.
-             * Remove anything written by this request if DB/service
-             * creation fails.
-             */
-            if ($storedPreview) {
-                $disk->delete($previewPath);
-            }
-
-            if ($storedSource) {
-                $disk->delete($sourcePath);
-            }
-
-            if ($exception instanceof RuntimeException) {
-                return back()->withErrors([
-                    'design_job' => $exception->getMessage(),
-                ]);
-            }
-
-            report($exception);
-
-            return back()->withErrors([
-                'design_job' =>
-                    'Artwork could not be uploaded. Please try again.',
-            ]);
-        }
-
-        return back()->with(
-            'status',
-            "Artwork version {$artwork->version_number} uploaded successfully."
-        );
-    }
-
-    private function authorizeAssignedDesigner(
-        Request $request,
-        DesignJob $designJob
-    ): void {
-        abort_unless(
-            $designJob->assigned_user_id === $request->user()->id,
-            404
-        );
-    }
-
-    private function safeSide(?string $side): string
+    public function test_assigned_active_designer_can_start_design_job(): void
     {
-        $side = strtoupper(trim((string) $side));
+        $designer = $this->designer();
+        $job = $this->designJob();
 
-        return in_array(
-            $side,
-            ['LELAKI', 'PEREMPUAN'],
-            true
+        $this->assign($job, $designer);
+
+        $response = $this->actingAs($designer)->post(
+            route('staff.design-jobs.start', $job)
+        );
+
+        $response
+            ->assertRedirect()
+            ->assertSessionHasNoErrors();
+
+        $job->refresh();
+
+        $this->assertSame(
+            'DESIGN_IN_PROGRESS',
+            $job->status
+        );
+
+        $event = $job->events()
+            ->where('event_type', 'DESIGN_STARTED')
+            ->latest('id')
+            ->firstOrFail();
+
+        $this->assertSame(
+            $designer->id,
+            $event->actor_user_id
+        );
+    }
+
+    public function test_other_designer_cannot_start_job_assigned_to_someone_else(): void
+    {
+        $assignedDesigner = $this->designer();
+        $otherDesigner = $this->designer();
+        $job = $this->designJob();
+
+        $this->assign($job, $assignedDesigner);
+
+        $this->actingAs($otherDesigner)
+            ->post(route('staff.design-jobs.start', $job))
+            ->assertNotFound();
+
+        $this->assertSame(
+            'READY_FOR_DESIGN',
+            $job->fresh()->status
+        );
+    }
+
+    public function test_admin_cannot_start_job_assigned_to_designer(): void
+    {
+        $admin = $this->admin();
+        $designer = $this->designer();
+        $job = $this->designJob();
+
+        $this->assign($job, $designer, $admin);
+
+        $this->actingAs($admin)
+            ->post(route('staff.design-jobs.start', $job))
+            ->assertNotFound();
+
+        $this->assertSame(
+            'READY_FOR_DESIGN',
+            $job->fresh()->status
+        );
+    }
+
+    public function test_printing_and_packing_staff_cannot_start_design_job(): void
+    {
+        $designer = $this->designer();
+        $job = $this->designJob();
+
+        $this->assign($job, $designer);
+
+        foreach ([
+            User::ROLE_PRINTING,
+            User::ROLE_PACKING,
+        ] as $role) {
+            $staff = $this->staff($role);
+
+            $this->actingAs($staff)
+                ->post(route('staff.design-jobs.start', $job))
+                ->assertForbidden();
+
+            $this->assertSame(
+                'READY_FOR_DESIGN',
+                $job->fresh()->status
+            );
+        }
+    }
+
+    public function test_guest_is_redirected_to_staff_login_when_starting_design_job(): void
+    {
+        $designer = $this->designer();
+        $job = $this->designJob();
+
+        $this->assign($job, $designer);
+
+        $this->post(
+            route('staff.design-jobs.start', $job)
+        )->assertRedirect(route('staff.login'));
+
+        $this->assertSame(
+            'READY_FOR_DESIGN',
+            $job->fresh()->status
+        );
+    }
+
+    public function test_assigned_designer_can_resume_correction_work(): void
+    {
+        $designer = $this->designer();
+        $job = $this->correctionRequestedJob($designer);
+
+        $response = $this->actingAs($designer)->post(
+            route(
+                'staff.design-jobs.resume-correction',
+                $job
+            )
+        );
+
+        $response
+            ->assertRedirect()
+            ->assertSessionHasNoErrors();
+
+        $job->refresh();
+
+        $this->assertSame(
+            'DESIGN_IN_PROGRESS',
+            $job->status
+        );
+
+        $event = $job->events()
+            ->where(
+                'event_type',
+                'CORRECTION_WORK_STARTED'
+            )
+            ->latest('id')
+            ->firstOrFail();
+
+        $this->assertSame(
+            $designer->id,
+            $event->actor_user_id
+        );
+    }
+
+    public function test_other_designer_cannot_resume_correction_job(): void
+    {
+        $assignedDesigner = $this->designer();
+        $otherDesigner = $this->designer();
+
+        $job = $this->correctionRequestedJob(
+            $assignedDesigner
+        );
+
+        $this->actingAs($otherDesigner)
+            ->post(
+                route(
+                    'staff.design-jobs.resume-correction',
+                    $job
+                )
+            )
+            ->assertNotFound();
+
+        $this->assertSame(
+            'CORRECTION_REQUESTED',
+            $job->fresh()->status
+        );
+    }
+
+    public function test_invalid_design_status_returns_safe_session_error_instead_of_500(): void
+    {
+        $designer = $this->designer();
+        $job = $this->designJob();
+
+        $this->assign($job, $designer);
+
+        $job->update([
+            'status' => 'DESIGN_READY',
+        ]);
+
+        $response = $this
+            ->from(route('staff.orders.index'))
+            ->actingAs($designer)
+            ->post(
+                route(
+                    'staff.design-jobs.start',
+                    $job
+                )
+            );
+
+        $response
+            ->assertRedirect(
+                route('staff.orders.index')
+            )
+            ->assertSessionHasErrors('design_job');
+
+        $this->assertSame(
+            'DESIGN_READY',
+            $job->fresh()->status
+        );
+    }
+
+    public function test_two_package_design_sides_remain_independently_authorized(): void
+    {
+        $lelakiDesigner = $this->designer();
+        $perempuanDesigner = $this->designer();
+
+        $order = $this->confirmedOrder(2);
+
+        app(GenerateMergeJobsForOrderService::class)
+            ->generate($order);
+
+        $jobs = app(
+            InitializeDesignJobsForOrderService::class
+        )->initialize($order->fresh());
+
+        $this->assertCount(2, $jobs);
+
+        $lelaki = $jobs->firstWhere(
+            'side',
+            'LELAKI'
+        );
+
+        $perempuan = $jobs->firstWhere(
+            'side',
+            'PEREMPUAN'
+        );
+
+        $this->assertNotNull($lelaki);
+        $this->assertNotNull($perempuan);
+
+        $this->assign(
+            $lelaki,
+            $lelakiDesigner
+        );
+
+        $this->assign(
+            $perempuan,
+            $perempuanDesigner
+        );
+
+        $this->actingAs($lelakiDesigner)
+            ->post(
+                route(
+                    'staff.design-jobs.start',
+                    $lelaki
+                )
+            )
+            ->assertRedirect();
+
+        $this->actingAs($lelakiDesigner)
+            ->post(
+                route(
+                    'staff.design-jobs.start',
+                    $perempuan
+                )
+            )
+            ->assertNotFound();
+
+        $this->assertSame(
+            'DESIGN_IN_PROGRESS',
+            $lelaki->fresh()->status
+        );
+
+        $this->assertSame(
+            'READY_FOR_DESIGN',
+            $perempuan->fresh()->status
+        );
+
+        $this->actingAs($perempuanDesigner)
+            ->post(
+                route(
+                    'staff.design-jobs.start',
+                    $perempuan
+                )
+            )
+            ->assertRedirect();
+
+        $this->assertSame(
+            'DESIGN_IN_PROGRESS',
+            $perempuan->fresh()->status
+        );
+    }
+
+    public function test_assigned_designer_can_upload_private_source_and_customer_preview(): void
+{
+    Storage::fake('local');
+
+    $designer = $this->designer();
+    $job = $this->designJob();
+
+    $this->assign($job, $designer);
+
+    $this->actingAs($designer)
+        ->post(
+            route('staff.design-jobs.start', $job)
         )
-            ? $side
-            : 'UNKNOWN';
+        ->assertRedirect();
+
+    $job->refresh();
+
+    $source = UploadedFile::fake()->create(
+        'kad-kahwin.pdf',
+        1024,
+        'application/pdf'
+    );
+
+    $preview = UploadedFile::fake()->image(
+        'preview.jpg',
+        1200,
+        800
+    );
+
+    $response = $this->actingAs($designer)->post(
+        route('staff.design-jobs.artwork.store', $job),
+        [
+            'source_artwork' => $source,
+            'customer_preview' => $preview,
+            'internal_note' => 'Artwork pertama.',
+        ]
+    );
+
+    $response
+        ->assertRedirect()
+        ->assertSessionHasNoErrors()
+        ->assertSessionHas(
+            'status',
+            'Artwork version 1 uploaded successfully.'
+        );
+
+    $artwork = ArtworkVersion::query()
+        ->where('design_job_id', $job->id)
+        ->sole();
+
+    $this->assertSame(1, $artwork->version_number);
+    $this->assertSame('local', $artwork->storage_disk);
+    $this->assertSame(
+        'kad-kahwin.pdf',
+        $artwork->original_filename
+    );
+    $this->assertSame(
+        $designer->id,
+        $artwork->created_by_user_id
+    );
+    $this->assertSame(
+        'Artwork pertama.',
+        $artwork->internal_note
+    );
+
+    $this->assertMatchesRegularExpression(
+        '#^artworks/' .
+        preg_quote((string) $job->order_id, '#') .
+        '/LELAKI/[0-9a-f-]+/source\.pdf$#',
+        $artwork->storage_path
+    );
+
+    $this->assertMatchesRegularExpression(
+        '#^artworks/' .
+        preg_quote((string) $job->order_id, '#') .
+        '/LELAKI/[0-9a-f-]+/preview\.jpg$#',
+        $artwork->preview_storage_path
+    );
+
+    $this->assertSame(
+        64,
+        strlen($artwork->checksum_sha256)
+    );
+
+    Storage::disk('local')->assertExists(
+        $artwork->storage_path
+    );
+
+    Storage::disk('local')->assertExists(
+        $artwork->preview_storage_path
+    );
+
+    $event = $job->events()
+        ->where(
+            'event_type',
+            'ARTWORK_VERSION_CREATED'
+        )
+        ->latest('id')
+        ->firstOrFail();
+
+    $this->assertSame(
+        $designer->id,
+        $event->actor_user_id
+    );
+
+    $this->assertSame(
+        $artwork->id,
+        $event->metadata['artwork_version_id']
+    );
+
+    $this->assertSame(
+        1,
+        $event->metadata['version_number']
+    );
+}
+
+public function test_other_designer_cannot_upload_artwork_to_assigned_job(): void
+{
+    Storage::fake('local');
+
+    $assignedDesigner = $this->designer();
+    $otherDesigner = $this->designer();
+    $job = $this->designJob();
+
+    $this->assign($job, $assignedDesigner);
+
+    $this->actingAs($assignedDesigner)
+        ->post(
+            route('staff.design-jobs.start', $job)
+        )
+        ->assertRedirect();
+
+    $response = $this->actingAs($otherDesigner)->post(
+        route('staff.design-jobs.artwork.store', $job),
+        [
+            'source_artwork' =>
+                UploadedFile::fake()->create(
+                    'kad-kahwin.pdf',
+                    1024,
+                    'application/pdf'
+                ),
+            'customer_preview' =>
+                UploadedFile::fake()->image(
+                    'preview.jpg'
+                ),
+        ]
+    );
+
+    $response->assertNotFound();
+
+    $this->assertSame(
+        0,
+        ArtworkVersion::query()
+            ->where('design_job_id', $job->id)
+            ->count()
+    );
+
+    $this->assertSame(
+        [],
+        Storage::disk('local')->allFiles()
+    );
+}
+
+public function test_artwork_upload_is_rejected_before_design_is_in_progress(): void
+{
+    Storage::fake('local');
+
+    $designer = $this->designer();
+    $job = $this->designJob();
+
+    $this->assign($job, $designer);
+
+    $response = $this
+        ->from(route('staff.orders.index'))
+        ->actingAs($designer)
+        ->post(
+            route(
+                'staff.design-jobs.artwork.store',
+                $job
+            ),
+            [
+                'source_artwork' =>
+                    UploadedFile::fake()->create(
+                        'kad-kahwin.pdf',
+                        1024,
+                        'application/pdf'
+                    ),
+                'customer_preview' =>
+                    UploadedFile::fake()->image(
+                        'preview.jpg'
+                    ),
+            ]
+        );
+
+    $response
+        ->assertRedirect(
+            route('staff.orders.index')
+        )
+        ->assertSessionHasErrors('design_job');
+
+    $this->assertSame(
+        'READY_FOR_DESIGN',
+        $job->fresh()->status
+    );
+
+    $this->assertSame(
+        0,
+        ArtworkVersion::query()
+            ->where('design_job_id', $job->id)
+            ->count()
+    );
+
+    $this->assertSame(
+        [],
+        Storage::disk('local')->allFiles()
+    );
+}
+
+public function test_artwork_upload_requires_source_and_customer_preview(): void
+{
+    Storage::fake('local');
+
+    $designer = $this->designer();
+    $job = $this->designJob();
+
+    $this->assign($job, $designer);
+
+    $this->actingAs($designer)
+        ->post(
+            route('staff.design-jobs.start', $job)
+        )
+        ->assertRedirect();
+
+    $response = $this
+        ->from(route('staff.orders.index'))
+        ->actingAs($designer)
+        ->post(
+            route(
+                'staff.design-jobs.artwork.store',
+                $job
+            ),
+            []
+        );
+
+    $response
+        ->assertRedirect(
+            route('staff.orders.index')
+        )
+        ->assertSessionHasErrors([
+            'source_artwork',
+            'customer_preview',
+        ]);
+
+    $this->assertSame(
+        0,
+        ArtworkVersion::query()
+            ->where('design_job_id', $job->id)
+            ->count()
+    );
+
+    $this->assertSame(
+        [],
+        Storage::disk('local')->allFiles()
+    );
+    }
+
+    public function test_second_artwork_upload_creates_version_two_without_overwriting_version_one(): void
+{
+    Storage::fake('local');
+
+    $designer = $this->designer();
+    $job = $this->designJob();
+
+    $this->assign($job, $designer);
+
+    $this->actingAs($designer)
+        ->post(route('staff.design-jobs.start', $job))
+        ->assertRedirect();
+
+    $this->actingAs($designer)->post(
+        route('staff.design-jobs.artwork.store', $job),
+        [
+            'source_artwork' => UploadedFile::fake()->create(
+                'version-1.pdf',
+                1024,
+                'application/pdf'
+            ),
+            'customer_preview' => UploadedFile::fake()->image(
+                'preview-1.jpg'
+            ),
+        ]
+    )
+        ->assertRedirect()
+        ->assertSessionHasNoErrors();
+
+    $versionOne = ArtworkVersion::query()
+        ->where('design_job_id', $job->id)
+        ->where('version_number', 1)
+        ->sole();
+
+    $this->actingAs($designer)->post(
+        route('staff.design-jobs.artwork.store', $job),
+        [
+            'source_artwork' => UploadedFile::fake()->create(
+                'version-2.pdf',
+                2048,
+                'application/pdf'
+            ),
+            'customer_preview' => UploadedFile::fake()->image(
+                'preview-2.jpg'
+            ),
+        ]
+    )
+        ->assertRedirect()
+        ->assertSessionHasNoErrors()
+        ->assertSessionHas(
+            'status',
+            'Artwork version 2 uploaded successfully.'
+        );
+
+    $versions = ArtworkVersion::query()
+        ->where('design_job_id', $job->id)
+        ->orderBy('version_number')
+        ->get();
+
+    $this->assertCount(2, $versions);
+    $this->assertSame(
+        [1, 2],
+        $versions->pluck('version_number')->all()
+    );
+
+    $versionTwo = $versions->last();
+
+    $this->assertNotSame(
+        $versionOne->storage_path,
+        $versionTwo->storage_path
+    );
+
+    $this->assertNotSame(
+        $versionOne->preview_storage_path,
+        $versionTwo->preview_storage_path
+    );
+
+    Storage::disk('local')->assertExists(
+        $versionOne->storage_path
+    );
+
+    Storage::disk('local')->assertExists(
+        $versionOne->preview_storage_path
+    );
+
+    Storage::disk('local')->assertExists(
+        $versionTwo->storage_path
+    );
+
+    Storage::disk('local')->assertExists(
+        $versionTwo->preview_storage_path
+    );
+}
+
+public function test_two_package_artwork_uploads_keep_sides_and_versions_independent(): void
+{
+    Storage::fake('local');
+
+    $lelakiDesigner = $this->designer();
+    $perempuanDesigner = $this->designer();
+
+    $order = $this->confirmedOrder(2);
+
+    app(GenerateMergeJobsForOrderService::class)
+        ->generate($order);
+
+    $jobs = app(InitializeDesignJobsForOrderService::class)
+        ->initialize($order->fresh());
+
+    $this->assertCount(2, $jobs);
+
+    $lelaki = $jobs->firstWhere('side', 'LELAKI');
+    $perempuan = $jobs->firstWhere('side', 'PEREMPUAN');
+
+    $this->assertNotNull($lelaki);
+    $this->assertNotNull($perempuan);
+
+    $this->assign($lelaki, $lelakiDesigner);
+    $this->assign($perempuan, $perempuanDesigner);
+
+    $this->actingAs($lelakiDesigner)
+        ->post(route('staff.design-jobs.start', $lelaki))
+        ->assertRedirect();
+
+    $this->actingAs($perempuanDesigner)
+        ->post(route('staff.design-jobs.start', $perempuan))
+        ->assertRedirect();
+
+    $this->actingAs($lelakiDesigner)->post(
+        route('staff.design-jobs.artwork.store', $lelaki),
+        [
+            'source_artwork' => UploadedFile::fake()->create(
+                'lelaki.pdf',
+                1024,
+                'application/pdf'
+            ),
+            'customer_preview' => UploadedFile::fake()->image(
+                'lelaki-preview.jpg'
+            ),
+        ]
+    )
+        ->assertRedirect()
+        ->assertSessionHasNoErrors();
+
+    $this->actingAs($perempuanDesigner)->post(
+        route('staff.design-jobs.artwork.store', $perempuan),
+        [
+            'source_artwork' => UploadedFile::fake()->create(
+                'perempuan.pdf',
+                1024,
+                'application/pdf'
+            ),
+            'customer_preview' => UploadedFile::fake()->image(
+                'perempuan-preview.jpg'
+            ),
+        ]
+    )
+        ->assertRedirect()
+        ->assertSessionHasNoErrors();
+
+    $lelakiArtwork = ArtworkVersion::query()
+        ->where('design_job_id', $lelaki->id)
+        ->sole();
+
+    $perempuanArtwork = ArtworkVersion::query()
+        ->where('design_job_id', $perempuan->id)
+        ->sole();
+
+    $this->assertSame(1, $lelakiArtwork->version_number);
+    $this->assertSame(1, $perempuanArtwork->version_number);
+
+    $this->assertStringContainsString(
+        '/LELAKI/',
+        $lelakiArtwork->storage_path
+    );
+
+    $this->assertStringContainsString(
+        '/PEREMPUAN/',
+        $perempuanArtwork->storage_path
+    );
+
+    $this->assertNotSame(
+        $lelakiArtwork->storage_path,
+        $perempuanArtwork->storage_path
+    );
+
+    $this->assertNotSame(
+        $lelakiArtwork->preview_storage_path,
+        $perempuanArtwork->preview_storage_path
+    );
+
+    Storage::disk('local')->assertExists(
+        $lelakiArtwork->storage_path
+    );
+
+    Storage::disk('local')->assertExists(
+        $lelakiArtwork->preview_storage_path
+    );
+
+    Storage::disk('local')->assertExists(
+        $perempuanArtwork->storage_path
+    );
+
+    Storage::disk('local')->assertExists(
+        $perempuanArtwork->preview_storage_path
+    );
+}
+
+public function test_uploaded_files_are_cleaned_up_when_artwork_creation_service_fails(): void
+{
+    Storage::fake('local');
+
+    $designer = $this->designer();
+    $job = $this->designJob();
+
+    $this->assign($job, $designer);
+
+    $this->actingAs($designer)
+        ->post(route('staff.design-jobs.start', $job))
+        ->assertRedirect();
+
+    $this->mock(
+        CreateArtworkVersionService::class,
+        function ($mock): void {
+            $mock->shouldReceive('create')
+                ->once()
+                ->andThrow(
+                    new RuntimeException(
+                        'Simulated artwork creation failure.'
+                    )
+                );
+        }
+    );
+
+    $response = $this
+        ->from(route('staff.orders.index'))
+        ->actingAs($designer)
+        ->post(
+            route('staff.design-jobs.artwork.store', $job),
+            [
+                'source_artwork' => UploadedFile::fake()->create(
+                    'failed.pdf',
+                    1024,
+                    'application/pdf'
+                ),
+                'customer_preview' => UploadedFile::fake()->image(
+                    'failed-preview.jpg'
+                ),
+            ]
+        );
+
+    $response
+        ->assertRedirect(route('staff.orders.index'))
+        ->assertSessionHasErrors('design_job');
+
+    $this->assertSame(
+        0,
+        ArtworkVersion::query()
+            ->where('design_job_id', $job->id)
+            ->count()
+    );
+
+    $this->assertSame(
+        [],
+        Storage::disk('local')->allFiles()
+    );
+
+    $this->assertSame(
+        'DESIGN_IN_PROGRESS',
+        $job->fresh()->status
+    );
+    }
+    public function test_assigned_designer_can_mark_uploaded_artwork_ready(): void
+{
+    Storage::fake('local');
+
+    $designer = $this->designer();
+    $job = $this->designJob();
+
+    $this->assign($job, $designer);
+
+    $this->actingAs($designer)
+        ->post(route('staff.design-jobs.start', $job))
+        ->assertRedirect();
+
+    $this->actingAs($designer)->post(
+        route('staff.design-jobs.artwork.store', $job),
+        [
+            'source_artwork' => UploadedFile::fake()->create(
+                'ready.pdf',
+                1024,
+                'application/pdf'
+            ),
+            'customer_preview' => UploadedFile::fake()->image(
+                'ready-preview.jpg'
+            ),
+        ]
+    )
+        ->assertRedirect()
+        ->assertSessionHasNoErrors();
+
+    $response = $this
+        ->from(route('staff.orders.index'))
+        ->actingAs($designer)
+        ->post(
+            route('staff.design-jobs.mark-ready', $job)
+        );
+
+    $response
+        ->assertRedirect(route('staff.orders.index'))
+        ->assertSessionHasNoErrors()
+        ->assertSessionHas(
+            'status',
+            'Artwork marked ready for customer review.'
+        );
+
+    $job->refresh();
+
+    $this->assertSame('DESIGN_READY', $job->status);
+    $this->assertNotNull($job->design_ready_at);
+
+    $event = $job->events()
+        ->where('event_type', 'DESIGN_READY')
+        ->latest('id')
+        ->firstOrFail();
+
+    $this->assertSame(
+        $designer->id,
+        $event->actor_user_id
+    );
+
+    $reviewAction = $job->reviewActions()
+        ->where('action', 'DESIGN_READY')
+        ->latest('id')
+        ->firstOrFail();
+
+    $this->assertSame(
+        $designer->id,
+        $reviewAction->actor_user_id
+    );
+}
+
+public function test_mark_ready_requires_an_artwork_version(): void
+{
+    $designer = $this->designer();
+    $job = $this->designJob();
+
+    $this->assign($job, $designer);
+
+    $this->actingAs($designer)
+        ->post(route('staff.design-jobs.start', $job))
+        ->assertRedirect();
+
+    $response = $this
+        ->from(route('staff.orders.index'))
+        ->actingAs($designer)
+        ->post(
+            route('staff.design-jobs.mark-ready', $job)
+        );
+
+    $response
+        ->assertRedirect(route('staff.orders.index'))
+        ->assertSessionHasErrors('design_job');
+
+    $this->assertSame(
+        'DESIGN_IN_PROGRESS',
+        $job->fresh()->status
+    );
+}
+
+public function test_other_designer_cannot_mark_assigned_job_ready(): void
+{
+    $assignedDesigner = $this->designer();
+    $otherDesigner = $this->designer();
+    $job = $this->designJob();
+
+    $this->assign($job, $assignedDesigner);
+
+    app(StartDesignJobService::class)
+        ->start($job, $assignedDesigner);
+
+    app(CreateArtworkVersionService::class)->create(
+        $job->fresh(),
+        [
+            'storage_path' => 'artworks/test/source.pdf',
+            'preview_storage_path' =>
+                'artworks/test/preview.jpg',
+            'original_filename' => 'source.pdf',
+            'mime_type' => 'application/pdf',
+        ],
+        $assignedDesigner
+    );
+
+    $this->actingAs($otherDesigner)
+        ->post(
+            route('staff.design-jobs.mark-ready', $job)
+        )
+        ->assertNotFound();
+
+    $this->assertSame(
+        'DESIGN_IN_PROGRESS',
+        $job->fresh()->status
+    );
+}
+
+public function test_admin_cannot_mark_designer_job_ready(): void
+{
+    $admin = $this->admin();
+    $designer = $this->designer();
+    $job = $this->designJob();
+
+    $this->assign($job, $designer, $admin);
+
+    app(StartDesignJobService::class)
+        ->start($job, $designer);
+
+    app(CreateArtworkVersionService::class)->create(
+        $job->fresh(),
+        [
+            'storage_path' => 'artworks/test/source.pdf',
+            'preview_storage_path' =>
+                'artworks/test/preview.jpg',
+            'original_filename' => 'source.pdf',
+            'mime_type' => 'application/pdf',
+        ],
+        $designer
+    );
+
+    $this->actingAs($admin)
+        ->post(
+            route('staff.design-jobs.mark-ready', $job)
+        )
+        ->assertNotFound();
+
+    $this->assertSame(
+        'DESIGN_IN_PROGRESS',
+        $job->fresh()->status
+    );
+}
+
+public function test_two_package_design_sides_can_be_marked_ready_independently(): void
+{
+    $lelakiDesigner = $this->designer();
+    $perempuanDesigner = $this->designer();
+
+    $order = $this->confirmedOrder(2);
+
+    app(GenerateMergeJobsForOrderService::class)
+        ->generate($order);
+
+    $jobs = app(
+        InitializeDesignJobsForOrderService::class
+    )->initialize($order->fresh());
+
+    $lelaki = $jobs->firstWhere('side', 'LELAKI');
+    $perempuan = $jobs->firstWhere('side', 'PEREMPUAN');
+
+    $this->assertNotNull($lelaki);
+    $this->assertNotNull($perempuan);
+
+    $this->assign($lelaki, $lelakiDesigner);
+    $this->assign($perempuan, $perempuanDesigner);
+
+    foreach ([
+        [$lelaki, $lelakiDesigner],
+        [$perempuan, $perempuanDesigner],
+    ] as [$job, $designer]) {
+        app(StartDesignJobService::class)
+            ->start($job, $designer);
+
+        app(CreateArtworkVersionService::class)->create(
+            $job->fresh(),
+            [
+                'storage_path' =>
+                    "artworks/{$job->side}/source.pdf",
+                'preview_storage_path' =>
+                    "artworks/{$job->side}/preview.jpg",
+                'original_filename' =>
+                    "{$job->side}.pdf",
+                'mime_type' => 'application/pdf',
+            ],
+            $designer
+        );
+    }
+
+    $this->actingAs($lelakiDesigner)
+        ->post(
+            route('staff.design-jobs.mark-ready', $lelaki)
+        )
+        ->assertRedirect()
+        ->assertSessionHasNoErrors();
+
+    $this->assertSame(
+        'DESIGN_READY',
+        $lelaki->fresh()->status
+    );
+
+    $this->assertSame(
+        'DESIGN_IN_PROGRESS',
+        $perempuan->fresh()->status
+    );
+
+    $this->actingAs($lelakiDesigner)
+        ->post(
+            route(
+                'staff.design-jobs.mark-ready',
+                $perempuan
+            )
+        )
+        ->assertNotFound();
+
+    $this->assertSame(
+        'DESIGN_IN_PROGRESS',
+        $perempuan->fresh()->status
+    );
+
+    $this->actingAs($perempuanDesigner)
+        ->post(
+            route(
+                'staff.design-jobs.mark-ready',
+                $perempuan
+            )
+        )
+        ->assertRedirect()
+        ->assertSessionHasNoErrors();
+
+    $this->assertSame(
+        'DESIGN_READY',
+        $perempuan->fresh()->status
+    );
+    }
+
+    private function admin(): User
+    {
+        return User::factory()->create([
+            'role' => User::ROLE_ADMIN,
+            'is_active' => true,
+        ]);
+    }
+
+    private function designer(): User
+    {
+        return $this->staff(
+            User::ROLE_DESIGNER
+        );
+    }
+
+    private function staff(string $role): User
+    {
+        return User::factory()->create([
+            'role' => $role,
+            'is_active' => true,
+        ]);
+    }
+
+    private function assign(
+        $job,
+        User $designer,
+        ?User $actor = null
+    ) {
+        return app(
+            AssignDesignJobService::class
+        )->assign(
+            $job,
+            $designer,
+            $actor ?? $designer
+        );
+    }
+
+    private function designJob()
+    {
+        $order = $this->confirmedOrder();
+
+        app(GenerateMergeJobsForOrderService::class)
+            ->generate($order);
+
+        return app(
+            InitializeDesignJobsForOrderService::class
+        )
+            ->initialize($order->fresh())
+            ->first();
+    }
+
+    private function correctionRequestedJob(
+        User $designer
+    ) {
+        $job = $this->designJob();
+
+        $job = $this->assign(
+            $job,
+            $designer
+        );
+
+        $job = app(
+            \App\Services\Design\StartDesignJobService::class
+        )->start(
+            $job,
+            $designer
+        );
+
+        app(CreateArtworkVersionService::class)
+            ->create(
+                $job,
+                [
+                    'storage_path' =>
+                        "artworks/{$job->side}/v1.psd",
+                    'preview_storage_path' =>
+                        "artworks/{$job->side}/v1-preview.jpg",
+                    'original_filename' =>
+                        "{$job->side}-v1.psd",
+                    'mime_type' =>
+                        'image/vnd.adobe.photoshop',
+                ],
+                $designer
+            );
+
+        $job = app(
+            MarkDesignReadyService::class
+        )->markReady(
+            $job->fresh(),
+            $designer
+        );
+
+        return app(
+            RequestArtworkCorrectionService::class
+        )->request(
+            $job->fresh(),
+            'Sila betulkan maklumat artwork.'
+        );
+    }
+
+    private function confirmedOrder(
+        int $packageCount = 1
+    ) {
+        $order = app(
+            CreateOrderService::class
+        )->create([
+            'package_count' => $packageCount,
+            'side' =>
+                $packageCount === 1
+                    ? 'LELAKI'
+                    : null,
+            'customer_name' =>
+                'Staff Design Workflow Test',
+        ]);
+
+        $sides = [
+            'LELAKI' => $this->sidePayload(
+                'L101',
+                'Bapa Lelaki',
+                'Ibu Lelaki',
+                'Dewan Lelaki'
+            ),
+        ];
+
+        if ($packageCount === 2) {
+            $sides['PEREMPUAN'] =
+                $this->sidePayload(
+                    'P101',
+                    'Bapa Perempuan',
+                    'Ibu Perempuan',
+                    'Dewan Perempuan'
+                );
+        }
+
+        app(SaveOrderDraftService::class)
+            ->save(
+                $order,
+                [
+                    'couple' => [
+                        'groom_name' =>
+                            'Muhammad Syafiq',
+                        'bride_name' =>
+                            'Nur Awanis',
+                    ],
+                    'sides' => $sides,
+                    'fulfilment' => [
+                        'method' => 'PICKUP',
+                    ],
+                ]
+            );
+
+        return app(
+            ConfirmOrderDetailsService::class
+        )->confirm(
+            $order->fresh()
+        );
+    }
+
+    private function sidePayload(
+        string $designCode,
+        string $father,
+        string $mother,
+        string $venue
+    ): array {
+        return [
+            'design' => [
+                'design_code' => $designCode,
+            ],
+            'parents' => [
+                'father_name' => $father,
+                'mother_name' => $mother,
+            ],
+            'event' => [
+                'event_date' => '2026-12-20',
+                'meal_time' => '12:00',
+                'venue_name' => $venue,
+                'full_address' => 'Alamat Test',
+                'contacts' => [
+                    1 => [
+                        'contact_name' =>
+                            'Contact 1',
+                        'contact_phone' =>
+                            '0111111111',
+                    ],
+                    2 => [
+                        'contact_name' =>
+                            'Contact 2',
+                        'contact_phone' =>
+                            '0122222222',
+                    ],
+                    3 => [
+                        'contact_name' =>
+                            'Contact 3',
+                        'contact_phone' =>
+                            '0133333333',
+                    ],
+                ],
+            ],
+        ];
     }
 }

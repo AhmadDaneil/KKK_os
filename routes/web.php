@@ -10,7 +10,6 @@ use App\Http\Controllers\CustomerDashboardController;
 use App\Http\Controllers\CustomerOrderConfirmController;
 use App\Http\Controllers\CustomerOrderDraftController;
 use App\Http\Controllers\CustomerOrderReviewController;
-use App\Http\Controllers\CustomerOrderThankYouController;
 use App\Http\Controllers\DevBalancePaymentController;
 use App\Http\Controllers\DevDesignJobController;
 use App\Http\Controllers\DevFulfilmentJobController;
@@ -43,11 +42,6 @@ Route::post(
     '/order/{orderId}/confirm',
     [CustomerOrderConfirmController::class, 'store']
 )->name('orders.confirm.store');
-
-Route::get(
-    '/order/{orderId}/thank-you',
-    [CustomerOrderThankYouController::class, 'show']
-)->name('orders.thank-you.show');
 
 Route::get(
     '/order/{orderId}/artwork',
@@ -146,7 +140,7 @@ Route::middleware(['auth', 'active.staff'])
         |
         */
 
-        Route::middleware('staff.role:DESIGNER')->group(function () {
+    Route::middleware('staff.role:DESIGNER')->group(function () {
     Route::post(
         '/design-jobs/{designJob}/start',
         [StaffDesignWorkflowController::class, 'start']
@@ -162,6 +156,10 @@ Route::middleware(['auth', 'active.staff'])
         [StaffDesignWorkflowController::class, 'uploadArtwork']
     )->name('design-jobs.artwork.store');
     });
+    Route::post(
+    '/design-jobs/{designJob}/mark-ready',
+    [StaffDesignWorkflowController::class, 'markReady']
+    )->name('design-jobs.mark-ready');
 });
 
 /*

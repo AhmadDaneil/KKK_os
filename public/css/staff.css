@@ -817,6 +817,79 @@ a.staff-pagination-link:hover {
     padding-left: 1.25rem;
 }
 
+.staff-design-actions {
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--staff-border);
+}
+
+.staff-design-upload {
+    display: grid;
+    gap: 16px;
+}
+
+.staff-design-upload-heading h4 {
+    margin: 0;
+    font-size: 15px;
+}
+
+.staff-design-upload-heading p {
+    margin: 5px 0 0;
+    color: var(--staff-muted);
+    font-size: 13px;
+    line-height: 1.5;
+}
+
+.staff-artwork-form {
+    display: grid;
+    gap: 16px;
+}
+
+.staff-artwork-form .staff-field {
+    margin-bottom: 0;
+}
+
+.staff-artwork-form input[type="file"] {
+    height: auto;
+    min-height: 44px;
+    padding: 8px;
+}
+
+.staff-artwork-form textarea {
+    resize: vertical;
+}
+
+.staff-field-help {
+    display: block;
+    margin-top: 6px;
+    color: var(--staff-muted);
+    font-size: 12px;
+    line-height: 1.45;
+}
+
+.staff-optional {
+    color: var(--staff-muted);
+    font-size: 12px;
+    font-weight: 400;
+}
+
+.staff-work-message {
+    margin: 0;
+    padding: 12px 14px;
+    border: 1px solid var(--staff-border);
+    border-radius: 8px;
+    color: var(--staff-muted);
+    background: #f8f9fa;
+    font-size: 13px;
+    line-height: 1.5;
+}
+
+@media (max-width: 560px) {
+    .staff-artwork-form .staff-button {
+        width: 100%;
+    }
+}
+
 @media (max-width: 640px) {
     .staff-assignment-controls {
         align-items: stretch;
