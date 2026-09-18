@@ -203,6 +203,8 @@
     @php($couple = $order->couples->firstWhere('couple_number', 1))
     @php($secondCouple = $order->couples->firstWhere('couple_number', 2))
     @php($isEditable = $order->status === 'DETAILS_INCOMPLETE')
+    @php($firstEventSide = old('first_event_side', $order->first_event_side ?: 'LELAKI'))
+    @php($orderedPackageSides = $order->packageSides->sortBy(fn ($item) => $item->side === $firstEventSide ? 0 : 1)->values())
 
     @if (! $isEditable)
         <div class="notice readonly-notice">
@@ -227,6 +229,29 @@
             <div class="order-form-fields">
 
         <fieldset class="customer-data-lock" @disabled(! $isEditable)>
+
+        @if ((int) $order->package_count === 2)
+            <fieldset class="two-package-settings">
+                <legend>Tetapan Dua Pakej</legend>
+                <p class="field-help">Kedua-dua majlis mempunyai maklumat dan pilihan design masing-masing.</p>
+                <div class="grid">
+                    <div>
+                        <label for="package-format">Jenis Pakej</label>
+                        <select id="package-format" name="package_format">
+                            <option value="SEPARATE" @selected(old('package_format', $order->package_format) === 'SEPARATE')>Pakej Berasingan</option>
+                            <option value="FOLDED" @selected(old('package_format', $order->package_format) === 'FOLDED')>Pakej Gabungan – Kad Lipatan</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="first-event-side">Majlis Pertama</label>
+                        <select id="first-event-side" name="first_event_side">
+                            <option value="LELAKI" @selected($firstEventSide === 'LELAKI')>Pihak Lelaki</option>
+                            <option value="PEREMPUAN" @selected($firstEventSide === 'PEREMPUAN')>Pihak Perempuan</option>
+                        </select>
+                    </div>
+                </div>
+            </fieldset>
+        @endif
 
         <fieldset>
             <legend>Maklumat Pasangan</legend>
@@ -280,11 +305,11 @@
     </div>
 </fieldset>
 
-        @foreach ($order->packageSides->sortBy('side') as $packageSide)
+        @foreach ($orderedPackageSides as $packageSide)
             @php($side = $packageSide->side)
             @php($event = $packageSide->event)
             <fieldset data-package-side="{{ $side }}">
-                <legend>Pakej {{ ucfirst(strtolower($side)) }}</legend>
+                <legend data-package-legend>{{ $order->package_count === 2 ? 'Majlis '.$loop->iteration.' – ' : 'Pakej ' }}Pihak {{ ucfirst(strtolower($side)) }}</legend>
                 <h3>Design</h3>
 
 <div class="grid">
@@ -370,7 +395,8 @@
         <p class="field-error">{{ $message }}</p>
     @enderror
 </div>
-                <h3>Ibu Bapa</h3>
+                <h3>Ibu Bapa Pengantin {{ ucfirst(strtolower($side)) }}</h3>
+                <p class="field-help">Masukkan nama ibu bapa bagi pihak yang menjadi tuan rumah majlis ini.</p>
                 <div class="grid">
                     <div><label>Nama Bapa</label><input name="sides[{{ $side }}][parents][father_name]" value="{{ old("sides.$side.parents.father_name", $packageSide->parents?->father_name) }}"></div>
                     <div><label>Nama Ibu</label><input name="sides[{{ $side }}][parents][mother_name]" value="{{ old("sides.$side.parents.mother_name", $packageSide->parents?->mother_name) }}"></div>
@@ -911,6 +937,44 @@ document.addEventListener('DOMContentLoaded', function () {
             });
         }
 
+        function updateTwoPackageOrder() {
+            const firstSideControl = field('first_event_side');
+
+            if (!firstSideControl) {
+                return;
+            }
+
+            const order = [firstSideControl.value, firstSideControl.value === 'LELAKI' ? 'PEREMPUAN' : 'LELAKI'];
+            const sections = Array.from(form.querySelectorAll('[data-package-side]'));
+            const reference = sections[sections.length - 1]?.nextElementSibling;
+            const parent = sections[0]?.parentNode;
+
+            order.forEach(function (side, index) {
+                const section = form.querySelector('[data-package-side="' + side + '"]');
+                if (section && parent) {
+                    parent.insertBefore(section, reference);
+                    const legend = section.querySelector('[data-package-legend]');
+                    if (legend) legend.textContent = 'Majlis ' + (index + 1) + ' – Pihak ' + (side === 'LELAKI' ? 'Lelaki' : 'Perempuan');
+                }
+            });
+
+            const tabs = preview.querySelector('.preview-side-tabs');
+            order.forEach(function (side, index) {
+                const tab = preview.querySelector('[data-preview-side-target="' + side + '"]');
+                if (tab && tabs) {
+                    tabs.appendChild(tab);
+                    const label = tab.querySelector('[data-preview-tab-label]');
+                    if (label) label.textContent = 'Majlis ' + (index + 1) + ' – ' + (side === 'LELAKI' ? 'Lelaki' : 'Perempuan');
+                }
+            });
+
+            activeSide = order[0];
+            preview.querySelectorAll('[data-preview-side-target]').forEach(function (tab) {
+                tab.classList.toggle('is-active', tab.dataset.previewSideTarget === activeSide);
+            });
+            showSelection();
+        }
+
         preview.querySelectorAll('[data-preview-side-target]').forEach(function (button) {
             button.addEventListener('click', function () {
                 activeSide = button.dataset.previewSideTarget;
@@ -937,15 +1001,19 @@ document.addEventListener('DOMContentLoaded', function () {
             });
         });
 
-        form.addEventListener('change', function () {
+        form.addEventListener('change', function (event) {
             preview.querySelectorAll('[data-card-preview]').forEach(function (card) {
                 syncCard(card.dataset.cardPreview);
             });
+            if (event.target.name === 'first_event_side') {
+                updateTwoPackageOrder();
+            }
         });
 
         preview.querySelectorAll('[data-card-preview]').forEach(function (card) {
             syncCard(card.dataset.cardPreview);
         });
+        updateTwoPackageOrder();
         showSelection();
     });
 </script>

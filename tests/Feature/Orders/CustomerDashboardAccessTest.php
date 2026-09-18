@@ -86,6 +86,27 @@ public function test_invalid_token_is_rejected(): void
         ]), false);
 }
 
+public function test_two_package_dashboard_orders_majlis_and_keeps_designs_separate(): void
+{
+    $order = app(CreateOrderService::class)->create([
+        'package_count' => 2,
+        'package_format' => 'SEPARATE',
+        'first_event_side' => 'PEREMPUAN',
+        'customer_name' => 'Two Events',
+    ]);
+    $this->get(app(GenerateOrderAccessLinkService::class)->generate($order));
+
+    $this->get(route('orders.dashboard', ['orderId' => $order->order_id]))
+        ->assertOk()
+        ->assertSee('Pakej Berasingan')
+        ->assertSee('Pakej Gabungan – Kad Lipatan')
+        ->assertSee('Majlis 1 – Pihak Perempuan')
+        ->assertSee('Majlis 2 – Pihak Lelaki')
+        ->assertSee('Ibu Bapa Pengantin Perempuan')
+        ->assertSee('Ibu Bapa Pengantin Lelaki')
+        ->assertSee('data-preview-field="card_title_jawi"', false);
+}
+
 public function test_design_in_progress_dashboard_does_not_show_artwork_review_cta(): void
 {
     $order = app(CreateOrderService::class)->create([

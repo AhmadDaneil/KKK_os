@@ -48,6 +48,13 @@ class SaveOrderDraftService
                     ])->save();
                 }
 
+                if ((int) $order->package_count === 2) {
+                    $order->forceFill([
+                        'package_format' => $data['package_format'] ?? $order->package_format ?? 'SEPARATE',
+                        'first_event_side' => $data['first_event_side'] ?? $order->first_event_side ?? 'LELAKI',
+                    ])->save();
+                }
+
                 if (array_key_exists('couple', $data)) {
                     $couple = $order->couples->firstWhere('couple_number', 1);
 

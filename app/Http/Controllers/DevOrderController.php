@@ -28,6 +28,9 @@ class DevOrderController extends Controller
             'required_if:package_count,1',
         ],
 
+        'package_format' => ['nullable', 'string', 'in:SEPARATE,FOLDED', 'required_if:package_count,2'],
+        'first_event_side' => ['nullable', 'string', 'in:LELAKI,PEREMPUAN', 'required_if:package_count,2'],
+
         'customer_name' => [
             'nullable',
             'string',

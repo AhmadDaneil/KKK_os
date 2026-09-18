@@ -17,6 +17,10 @@ class PublicOrderJourneyTest extends TestCase
             ->assertOk()
             ->assertSee('KingKadKahwin')
             ->assertSee('Tempah Sekarang')
+            ->assertSee('Ikuti kami')
+            ->assertSee('Instagram')
+            ->assertSee('Facebook')
+            ->assertSee('WhatsApp')
             ->assertSee(route('public.orders.create'))
             ->assertSee(route('public.orders.progress'));
     }
@@ -38,6 +42,25 @@ class PublicOrderJourneyTest extends TestCase
         $this->assertStringContainsString('token=', $response->headers->get('Location'));
         $this->assertSame('Pelanggan Baharu', $order->customer_name);
         $this->assertCount(1, $order->packageSides);
+    }
+
+    public function test_customer_can_create_folded_two_package_order_with_bride_side_first(): void
+    {
+        $response = $this->post(route('public.orders.store'), [
+            'package_count' => 2,
+            'package_format' => 'FOLDED',
+            'first_event_side' => 'PEREMPUAN',
+            'customer_name' => 'Dua Majlis',
+            'customer_email' => 'dua@example.com',
+            'customer_phone' => '0122222222',
+        ]);
+
+        $order = Order::query()->firstOrFail();
+        $response->assertRedirect();
+        $this->assertSame(2, $order->package_count);
+        $this->assertSame('FOLDED', $order->package_format);
+        $this->assertSame('PEREMPUAN', $order->first_event_side);
+        $this->assertEqualsCanonicalizing(['LELAKI', 'PEREMPUAN'], $order->packageSides->pluck('side')->all());
     }
 
     public function test_progress_lookup_shows_public_status_without_customer_details(): void

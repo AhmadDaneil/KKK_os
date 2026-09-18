@@ -32,6 +32,8 @@ class CustomerOrderDraftController extends Controller
             'second_couple.bride_abbreviation' => ['nullable', 'string', 'max:100'],
 
             'sides' => ['sometimes', 'array'],
+            'package_format' => ['sometimes', 'string', 'in:SEPARATE,FOLDED'],
+            'first_event_side' => ['sometimes', 'string', 'in:LELAKI,PEREMPUAN'],
 
             'sides.LELAKI.design.theme' => ['nullable', 'string', 'max:255'],
             'sides.LELAKI.design.design_code' => ['nullable', 'string', 'max:100'],

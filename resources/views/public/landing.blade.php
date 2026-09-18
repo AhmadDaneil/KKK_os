@@ -84,6 +84,36 @@
         </section>
     </main>
 
-    <footer><a class="brand footer-brand" href="{{ route('home') }}"><span class="brand-mark">K</span><b>KingKadKahwin</b></a><p>Design yang indah. Proses yang tenang.</p></footer>
+    <footer class="site-footer">
+        <div class="footer-main">
+            <div>
+                <a class="brand footer-brand" href="{{ route('home') }}"><span class="brand-mark">K</span><b>KingKadKahwin</b></a>
+                <p>Design yang indah. Proses yang tenang.</p>
+            </div>
+
+            <div class="footer-social">
+                <p>Ikuti kami</p>
+                <div class="social-links">
+                    @foreach ([
+                        ['key' => 'instagram', 'label' => 'Instagram', 'mark' => 'IG'],
+                        ['key' => 'facebook', 'label' => 'Facebook', 'mark' => 'f'],
+                        ['key' => 'tiktok', 'label' => 'TikTok', 'mark' => '♪'],
+                        ['key' => 'whatsapp', 'label' => 'WhatsApp', 'mark' => 'WA'],
+                    ] as $social)
+                        @if (config('kingkadkahwin.social.'.$social['key']))
+                            <a href="{{ config('kingkadkahwin.social.'.$social['key']) }}" target="_blank" rel="noopener noreferrer" aria-label="KingKadKahwin di {{ $social['label'] }}">
+                                <span aria-hidden="true">{{ $social['mark'] }}</span>
+                                {{ $social['label'] }}
+                            </a>
+                        @endif
+                    @endforeach
+                </div>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <span>© {{ date('Y') }} KingKadKahwin</span>
+            <span>Kad indah untuk hari yang bermakna.</span>
+        </div>
+    </footer>
 </body>
 </html>

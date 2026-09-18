@@ -18,6 +18,12 @@ class CreateOrderService
             $order = Order::create([
                 'order_id' => $this->orderIdGenerator->generate(),
                 'package_count' => $data['package_count'],
+                'package_format' => (int) $data['package_count'] === 2
+                    ? ($data['package_format'] ?? 'SEPARATE')
+                    : null,
+                'first_event_side' => (int) $data['package_count'] === 2
+                    ? ($data['first_event_side'] ?? 'LELAKI')
+                    : null,
                 'customer_name' => $data['customer_name'] ?? null,
                 'customer_email' => isset($data['customer_email'])
                     ? strtolower(trim($data['customer_email']))

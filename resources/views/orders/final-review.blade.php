@@ -60,6 +60,10 @@
                     <span class="review-label">Jumlah Pakej</span>
                     <span class="review-value">{{ $review['package_count'] }}</span>
                 </div>
+                @if ($review['package_count'] === 2)
+                    <div class="review-item"><span class="review-label">Jenis Pakej</span><span class="review-value">{{ $review['package_format'] === 'FOLDED' ? 'Pakej Gabungan – Kad Lipatan' : 'Pakej Berasingan' }}</span></div>
+                    <div class="review-item"><span class="review-label">Majlis Pertama</span><span class="review-value">Pihak {{ ucfirst(strtolower($review['first_event_side'])) }}</span></div>
+                @endif
             </div>
         </section>
 
@@ -120,7 +124,7 @@
             </section>
         @endif
 
-        @foreach ($review['package_sides'] as $side)
+            @foreach ($review['package_sides'] as $side)
             @php
                 $sideLabel = $side['side'] === 'LELAKI' ? 'Lelaki' : 'Perempuan';
                 $event = $side['event'];
@@ -130,7 +134,7 @@
 
             <section class="review-card package-card">
                 <div class="package-heading">
-                    <h2>Pakej {{ $sideLabel }}</h2>
+                    <h2>{{ $review['package_count'] === 2 ? 'Majlis '.$loop->iteration.' – ' : 'Pakej ' }}Pihak {{ $sideLabel }}</h2>
                     <span class="side-badge">{{ $side['side'] }}</span>
                 </div>
 
