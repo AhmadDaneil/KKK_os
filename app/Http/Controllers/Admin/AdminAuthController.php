@@ -13,7 +13,7 @@ class AdminAuthController extends Controller
 {
     public function create(Request $request): View|RedirectResponse
     {
-        if ($request->user()?->isAdmin()) {
+        if (Auth::guard('admin')->user()?->isAdmin()) {
             return redirect()->route('admin.dashboard');
         }
 
@@ -27,15 +27,14 @@ class AdminAuthController extends Controller
             'password' => ['required', 'string'],
         ]);
 
-        if (! Auth::attempt($credentials)) {
+        if (! Auth::guard('admin')->attempt($credentials)) {
             throw ValidationException::withMessages([
                 'email' => 'Email atau kata laluan admin tidak sah.',
             ]);
         }
 
-        if (! $request->user()?->isAdmin()) {
-            Auth::logout();
-            $request->session()->invalidate();
+        if (! Auth::guard('admin')->user()?->isAdmin()) {
+            Auth::guard('admin')->logout();
             $request->session()->regenerateToken();
 
             throw ValidationException::withMessages([
@@ -50,8 +49,7 @@ class AdminAuthController extends Controller
 
     public function destroy(Request $request): RedirectResponse
     {
-        Auth::logout();
-        $request->session()->invalidate();
+        Auth::guard('admin')->logout();
         $request->session()->regenerateToken();
 
         return redirect()->route('admin.login');

@@ -13,7 +13,7 @@ class StaffAuthController extends Controller
 {
     public function create(Request $request): View|RedirectResponse
     {
-        if ($request->user()?->isActiveStaff()) {
+        if (Auth::guard('staff')->user()?->isActiveStaff()) {
             return redirect()->route('staff.dashboard');
         }
 
@@ -27,14 +27,14 @@ class StaffAuthController extends Controller
             'password' => ['required', 'string'],
         ]);
 
-        if (! Auth::attempt($credentials)) {
+        if (! Auth::guard('staff')->attempt($credentials)) {
             throw ValidationException::withMessages([
                 'email' => 'Email atau kata laluan tidak sah.',
             ]);
         }
 
-        if (! $request->user()?->isActiveStaff()) {
-            Auth::logout();
+        if (! Auth::guard('staff')->user()?->isActiveStaff()) {
+            Auth::guard('staff')->logout();
 
             throw ValidationException::withMessages([
                 'email' => 'Akaun ini tidak mempunyai akses staff aktif.',
@@ -48,8 +48,7 @@ class StaffAuthController extends Controller
 
     public function destroy(Request $request): RedirectResponse
     {
-        Auth::logout();
-        $request->session()->invalidate();
+        Auth::guard('staff')->logout();
         $request->session()->regenerateToken();
 
         return redirect()->route('staff.login');

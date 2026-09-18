@@ -93,6 +93,34 @@ class AdminStaffController extends Controller
         return back()->with('admin_success', "Kata laluan {$user->name} berjaya ditetapkan semula.");
     }
 
+    public function destroy(Request $request, User $user): RedirectResponse
+    {
+        $this->ensureStaffUser($user);
+
+        if ($request->user()->is($user)) {
+            throw ValidationException::withMessages([
+                'delete_staff' => 'Anda tidak boleh memadam akaun admin yang sedang digunakan.',
+            ]);
+        }
+
+        if ($user->role === User::ROLE_ADMIN) {
+            $adminCount = User::where('role', User::ROLE_ADMIN)->count();
+
+            if ($adminCount <= 1) {
+                throw ValidationException::withMessages([
+                    'delete_staff' => 'Sekurang-kurangnya satu akaun admin mesti dikekalkan.',
+                ]);
+            }
+        }
+
+        $staffName = $user->name;
+        $user->delete();
+
+        return redirect()
+            ->route('admin.staff.index')
+            ->with('admin_success', "Akaun {$staffName} berjaya dipadam. Tugasan aktifnya kini belum di-assign.");
+    }
+
     private function ensureStaffUser(User $user): void
     {
         abort_unless(in_array($user->role, User::STAFF_ROLES, true), 404);

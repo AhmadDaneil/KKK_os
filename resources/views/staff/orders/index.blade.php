@@ -43,6 +43,22 @@
                 </div>
             </div>
 
+            <form class="staff-order-filter" method="GET" action="{{ route('staff.orders.index') }}">
+                @if ($workstream)<input type="hidden" name="workstream" value="{{ $workstream }}">@endif
+                @if (request('attention'))<input type="hidden" name="attention" value="{{ request('attention') }}">@endif
+                <label><span>Cari order/customer</span><input name="search" value="{{ request('search') }}" placeholder="Order ID, nama, email atau telefon"></label>
+                <label><span>Status order</span><select name="status"><option value="">Semua status</option>@foreach ($statusOptions as $status)<option value="{{ $status }}" @selected(request('status') === $status)>{{ str_replace('_', ' ', $status) }}</option>@endforeach</select></label>
+                <button class="staff-button staff-button-primary" type="submit">Tapis</button>
+                @if (request()->hasAny(['search', 'status']))<a class="staff-button" href="{{ route('staff.orders.index', array_filter(['workstream' => $workstream, 'attention' => request('attention')])) }}">Reset</a>@endif
+            </form>
+
+            @if (auth()->user()->isAdmin() && request('attention'))
+                <div class="staff-filter-notice">
+                    Memaparkan order untuk tindakan: <strong>{{ str_replace('_', ' ', request('attention')) }}</strong>
+                    <a href="{{ route('staff.orders.index', array_filter(['workstream' => $workstream])) }}">Buang penapis</a>
+                </div>
+            @endif
+
             <div class="staff-order-list">
                 @forelse ($orders as $order)
                     <article class="staff-order-card">

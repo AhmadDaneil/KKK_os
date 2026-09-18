@@ -13,7 +13,18 @@
         <article><span>Jumlah Order</span><strong>{{ number_format($statistics['orders_total']) }}</strong><small>Semua rekod tempahan</small></article>
         <article><span>Order Aktif</span><strong>{{ number_format($statistics['orders_active']) }}</strong><small>Belum selesai atau diarkib</small></article>
         <article class="is-warning"><span>Deposit Belum Semak</span><strong>{{ number_format($statistics['pending_deposits']) }}</strong><small>Memerlukan tindakan OM</small></article>
+        <article class="is-warning"><span>Baki Belum Semak</span><strong>{{ number_format($statistics['pending_balances']) }}</strong><small>Bukti bayaran penuh customer</small></article>
         <article class="is-success"><span>Order Selesai</span><strong>{{ number_format($statistics['orders_completed']) }}</strong><small>Keseluruhan fulfilment selesai</small></article>
+    </section>
+
+    <section class="admin-panel admin-attention-panel">
+        <div class="admin-panel-heading"><div><p class="admin-eyebrow">Tindakan Admin</p><h2>Memerlukan Perhatian</h2></div><span class="admin-attention-total">{{ array_sum($attention) }} tindakan</span></div>
+        <div class="admin-action-grid">
+            <a href="{{ route('staff.orders.index', ['attention' => 'pending_payment']) }}"><span class="action-icon is-payment">RM</span><div><strong>Semakan Pembayaran</strong><small>Deposit atau bayaran penuh yang masih pending</small></div><b>{{ $attention['pending_payments'] }}</b></a>
+            <a href="{{ route('staff.orders.index', ['workstream' => 'design', 'attention' => 'unassigned_design']) }}"><span class="action-icon is-design">DE</span><div><strong>Design Belum Assign</strong><small>Assign designer supaya artwork boleh dimulakan</small></div><b>{{ $attention['unassigned_design'] }}</b></a>
+            <a href="{{ route('staff.orders.index', ['workstream' => 'printing', 'attention' => 'unassigned_printing']) }}"><span class="action-icon is-printing">PR</span><div><strong>Printing Belum Assign</strong><small>Assign staf printing untuk order yang telah dibayar</small></div><b>{{ $attention['unassigned_printing'] }}</b></a>
+            <a href="{{ route('staff.orders.index', ['workstream' => 'packing', 'attention' => 'unassigned_packing']) }}"><span class="action-icon is-packing">PA</span><div><strong>Packing Belum Assign</strong><small>Assign packing atau kendalikan terus sebagai admin</small></div><b>{{ $attention['unassigned_packing'] }}</b></a>
+        </div>
     </section>
 
     <div class="admin-content-grid">

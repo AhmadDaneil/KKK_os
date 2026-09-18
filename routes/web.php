@@ -63,7 +63,7 @@ Route::post('/admin/login', [AdminAuthController::class, 'store'])
     ->middleware('throttle:10,1')
     ->name('admin.login.store');
 
-Route::middleware(['auth', 'active.staff', 'staff.role:ADMIN'])
+Route::middleware(['auth:admin', 'active.staff', 'staff.role:ADMIN'])
     ->prefix('admin')
     ->name('admin.')
     ->group(function () {
@@ -74,6 +74,7 @@ Route::middleware(['auth', 'active.staff', 'staff.role:ADMIN'])
         Route::post('/staff', [AdminStaffController::class, 'store'])->name('staff.store');
         Route::put('/staff/{user}', [AdminStaffController::class, 'update'])->name('staff.update');
         Route::put('/staff/{user}/password', [AdminStaffController::class, 'updatePassword'])->name('staff.password.update');
+        Route::delete('/staff/{user}', [AdminStaffController::class, 'destroy'])->name('staff.destroy');
     });
 
 /*
@@ -146,7 +147,7 @@ Route::get('/staff/login', [StaffAuthController::class, 'create'])
 Route::post('/staff/login', [StaffAuthController::class, 'store'])
     ->name('staff.login.store');
 
-Route::middleware(['auth', 'active.staff'])
+Route::middleware(['auth:staff,admin', 'active.staff'])
     ->prefix('staff')
     ->name('staff.')
     ->group(function () {

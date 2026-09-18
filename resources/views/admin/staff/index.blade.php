@@ -15,7 +15,7 @@
     @endphp
 
     <section class="admin-page-intro">
-        <div><p class="admin-eyebrow">Access Control</p><h2>Urus akaun dan jabatan staff</h2><p>Setiap tindakan operasi akan menggunakan identiti staff yang log masuk. Nyahaktifkan akaun yang tidak lagi digunakan tanpa memadam rekod lama.</p></div>
+        <div><p class="admin-eyebrow">Access Control</p><h2>Urus akaun dan jabatan staff</h2><p>Nyahaktifkan akaun untuk akses sementara, atau padam akaun yang tidak lagi diperlukan. Rekod kerja lama kekal disimpan.</p></div>
         <a href="#create-staff" class="admin-button admin-button-primary">+ Tambah Staff</a>
     </section>
 
@@ -64,6 +64,14 @@
                             <input type="password" name="password_confirmation" placeholder="Ulang kata laluan baharu" minlength="8" required>
                             <button class="admin-button admin-button-secondary" type="submit">Tetapkan Semula</button>
                         </form>
+
+                        @unless (auth()->user()->is($staff))
+                            <form class="admin-delete-form" method="POST" action="{{ route('admin.staff.destroy', $staff) }}" onsubmit="return confirm('Padam akaun {{ addslashes($staff->name) }}? Tindakan ini tidak boleh dibatalkan. Tugasan aktif akan menjadi belum di-assign.');">
+                                @csrf @method('DELETE')
+                                <div><strong>Padam akaun</strong><small>Rekod operasi dikekalkan, tetapi pengguna ini tidak boleh log masuk semula.</small></div>
+                                <button class="admin-button admin-button-danger" type="submit">Padam Akaun</button>
+                            </form>
+                        @endunless
                     </details>
                 </article>
             @empty

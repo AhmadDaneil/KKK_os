@@ -20,6 +20,7 @@
             <a href="{{ route('admin.staff.index') }}" @class(['is-active' => request()->routeIs('admin.staff.*')])><span>ST</span>Staff & Akses</a>
             <p>Operations</p>
             <a href="{{ route('staff.orders.index') }}"><span>OR</span>Semua Orders</a>
+            <a href="{{ route('staff.orders.index', ['attention' => 'pending_payment']) }}"><span>RM</span>Semakan Bayaran</a>
             <a href="{{ route('staff.orders.index', ['workstream' => 'design']) }}"><span>DE</span>Design Queue</a>
             <a href="{{ route('staff.orders.index', ['workstream' => 'printing']) }}"><span>PR</span>Printing Queue</a>
             <a href="{{ route('staff.orders.index', ['workstream' => 'packing']) }}"><span>PA</span>Packing Queue</a>

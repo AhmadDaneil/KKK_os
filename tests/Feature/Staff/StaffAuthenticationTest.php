@@ -26,7 +26,7 @@ class StaffAuthenticationTest extends TestCase
             'password' => 'temporary-password',
         ])->assertRedirect(route('staff.dashboard'));
 
-        $this->assertAuthenticatedAs($staff);
+        $this->assertAuthenticatedAs($staff, 'staff');
     }
 
     public function test_guest_is_redirected_to_staff_login(): void
@@ -49,7 +49,7 @@ class StaffAuthenticationTest extends TestCase
             'password' => 'secret-password',
         ])->assertRedirect(route('staff.dashboard'));
 
-        $this->assertAuthenticatedAs($staff);
+        $this->assertAuthenticatedAs($staff, 'staff');
     }
 
     public function test_inactive_or_non_staff_user_cannot_log_in(): void
@@ -69,7 +69,7 @@ class StaffAuthenticationTest extends TestCase
             ->assertRedirect(route('staff.login'))
             ->assertSessionHasErrors('email');
 
-        $this->assertGuest();
+        $this->assertGuest('staff');
     }
 
     public function test_staff_can_log_out(): void
@@ -83,6 +83,6 @@ class StaffAuthenticationTest extends TestCase
             ->post(route('staff.logout'))
             ->assertRedirect(route('staff.login'));
 
-        $this->assertGuest();
+        $this->assertGuest('staff');
     }
 }

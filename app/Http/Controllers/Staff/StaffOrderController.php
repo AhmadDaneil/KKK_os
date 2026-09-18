@@ -20,6 +20,7 @@ class StaffOrderController extends Controller
 
         $query = $this->visibleOrdersFor($user);
         $this->applyWorkstream($query, $workstream);
+        $this->applyFilters($query, $request, $user);
 
         $orders = $query
             ->with([
@@ -34,6 +35,11 @@ class StaffOrderController extends Controller
         return view('staff.orders.index', [
             'orders' => $orders,
             'workstream' => $workstream,
+            'statusOptions' => Order::query()
+                ->whereNotNull('status')
+                ->distinct()
+                ->orderBy('status')
+                ->pluck('status'),
         ]);
     }
 
@@ -184,6 +190,52 @@ if ($user->isAdmin() && ! $request->attributes->get('staff_overview_mode', false
             'printing' => $query->whereHas('printJobs'),
             'packing' => $query->whereHas('packingJob'),
             'fulfilment' => $query->whereHas('fulfilmentJob'),
+            default => null,
+        };
+    }
+
+    private function applyFilters(Builder $query, Request $request, User $user): void
+    {
+        if ($request->filled('search')) {
+            $search = $request->string('search')->trim()->toString();
+            $query->where(fn (Builder $builder) => $builder
+                ->where('order_id', 'like', "%{$search}%")
+                ->orWhere('customer_name', 'like', "%{$search}%")
+                ->orWhere('customer_email', 'like', "%{$search}%")
+                ->orWhere('customer_phone', 'like', "%{$search}%"));
+        }
+
+        if ($request->filled('status')) {
+            $query->where('status', $request->string('status')->toString());
+        }
+
+        if (! $user->isAdmin()) {
+            return;
+        }
+
+        match ($request->string('attention')->toString()) {
+            'pending_payment' => $query->whereHas(
+                'payments',
+                fn (Builder $payment) => $payment->where('status', 'PENDING')
+            ),
+            'unassigned_design' => $query->whereHas(
+                'designJobs',
+                fn (Builder $job) => $job
+                    ->whereNull('assigned_user_id')
+                    ->whereIn('status', ['READY_FOR_DESIGN', 'CORRECTION_REQUESTED'])
+            ),
+            'unassigned_printing' => $query->whereHas(
+                'printJobs',
+                fn (Builder $job) => $job
+                    ->whereNull('assigned_user_id')
+                    ->where('status', 'READY_FOR_PRINT')
+            ),
+            'unassigned_packing' => $query->whereHas(
+                'packingJob',
+                fn (Builder $job) => $job
+                    ->whereNull('assigned_user_id')
+                    ->where('status', 'READY_FOR_PACKING')
+            ),
             default => null,
         };
     }

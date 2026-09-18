@@ -56,6 +56,19 @@ class StaffOrderVisibilityTest extends TestCase
         $response->assertSee($second->order_id);
     }
 
+    public function test_admin_can_search_orders_by_customer(): void
+    {
+        $admin = $this->staff(User::ROLE_ADMIN);
+        $matching = $this->confirmedOrder(1, 'LELAKI', 'Nur Aisyah Searchable');
+        $other = $this->confirmedOrder(1, 'PEREMPUAN', 'Customer Lain');
+
+        $this->actingAs($admin)
+            ->get(route('staff.orders.index', ['search' => 'Nur Aisyah']))
+            ->assertOk()
+            ->assertSee($matching->order_id)
+            ->assertDontSee($other->order_id);
+    }
+
     public function test_designer_only_sees_orders_assigned_to_them(): void
     {
         $designer = $this->staff(User::ROLE_DESIGNER);
