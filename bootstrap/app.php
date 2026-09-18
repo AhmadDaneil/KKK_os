@@ -45,8 +45,6 @@ return Application::configure(basePath: dirname(__DIR__))
                 'dev/orders/*/print-jobs',
                 'dev/orders/*/packing-job',
                 'dev/orders/*/fulfilment-job',
-                'dev/fulfilment-jobs/*/ship',
-                'dev/fulfilment-jobs/*/deliver',
                 'dev/fulfilment-jobs/*/collect',
             ]);
         }
