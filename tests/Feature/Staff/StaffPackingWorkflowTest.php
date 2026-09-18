@@ -22,6 +22,7 @@ use App\Services\Printing\StartPrintingService;
 use App\Services\Printing\SyncOrderPrintStatusService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
 class StaffPackingWorkflowTest extends TestCase
@@ -132,7 +133,10 @@ class StaffPackingWorkflowTest extends TestCase
 
         $response = $this->actingAs($packing)->post(
             route('staff.packing-jobs.mark-packed', $job),
-            ['packing_proof' => UploadedFile::fake()->image('packing.jpg')]
+            [
+                'packing_proof' =>
+                    UploadedFile::fake()->image('packing.jpg'),
+            ]
         );
 
         $response->assertRedirect();
@@ -168,7 +172,10 @@ class StaffPackingWorkflowTest extends TestCase
 
         $response = $this->actingAs($packing)->post(
             route('staff.packing-jobs.mark-packed', $job),
-            ['packing_proof' => UploadedFile::fake()->image('packing.jpg')]
+            [
+                'packing_proof' =>
+                    UploadedFile::fake()->image('packing.jpg'),
+            ]
         );
 
         $response->assertRedirect();
@@ -181,6 +188,7 @@ class StaffPackingWorkflowTest extends TestCase
         $this->assertNotNull($job->proof_storage_path);
         $this->assertSame('packing.jpg', $job->proof_original_name);
         $this->assertSame('PACKED', $order->status);
+
         $this->assertDatabaseHas('fulfilment_jobs', [
             'order_id' => $order->id,
             'method' => 'PICKUP',
@@ -195,7 +203,10 @@ class StaffPackingWorkflowTest extends TestCase
         $this->assertSame($packing->id, $event->actor_user_id);
         $this->assertSame('PACKING', $event->from_status);
         $this->assertSame('PACKED', $event->to_status);
-        $this->assertSame(1, $event->metadata['verified_item_count']);
+        $this->assertSame(
+            1,
+            $event->metadata['verified_item_count']
+        );
     }
 
     public function test_two_package_order_becomes_packed_only_after_both_items_verified(): void
@@ -217,6 +228,7 @@ class StaffPackingWorkflowTest extends TestCase
             ->get();
 
         $this->assertCount(2, $items);
+
         $this->assertEqualsCanonicalizing(
             ['LELAKI', 'PEREMPUAN'],
             $items->pluck('side')->all()
@@ -232,9 +244,13 @@ class StaffPackingWorkflowTest extends TestCase
         }
 
         $this->actingAs($packing)
-            ->post(route('staff.packing-jobs.mark-packed', $job), [
-                'packing_proof' => UploadedFile::fake()->image('packing.jpg'),
-            ])
+            ->post(
+                route('staff.packing-jobs.mark-packed', $job),
+                [
+                    'packing_proof' =>
+                        UploadedFile::fake()->image('packing.jpg'),
+                ]
+            )
             ->assertRedirect();
 
         $job->refresh();
@@ -242,6 +258,7 @@ class StaffPackingWorkflowTest extends TestCase
 
         $this->assertSame('PACKED', $job->status);
         $this->assertSame('PACKED', $order->status);
+
         $this->assertTrue(
             $job->items()->get()->every(
                 fn ($item) => $item->verified_present
@@ -253,7 +270,153 @@ class StaffPackingWorkflowTest extends TestCase
             ->latest('id')
             ->firstOrFail();
 
-        $this->assertSame(2, $event->metadata['verified_item_count']);
+        $this->assertSame(
+            2,
+            $event->metadata['verified_item_count']
+        );
+    }
+
+        public function test_one_package_courier_order_can_be_completed_by_assigned_packing_staff(): void
+    {
+        Storage::fake('local');
+
+        $admin = $this->admin();
+        $packing = $this->staff(User::ROLE_PACKING);
+
+        [$order, $job] = $this->packingJob(
+            1,
+            'Courier One Package Test',
+            'COURIER'
+        );
+
+        app(AssignPackingJobService::class)
+            ->assign($job, $packing, $admin);
+
+        $this->actingAs($packing)
+            ->post(route('staff.packing-jobs.start', $job))
+            ->assertRedirect();
+
+        $item = $job->items()->firstOrFail();
+
+        $this->actingAs($packing)
+            ->post(
+                route('staff.packing-jobs.items.verify', [
+                    'packingJob' => $job,
+                    'packingItem' => $item,
+                ])
+            )
+            ->assertRedirect();
+
+        /*
+        * COURIER:
+        * Packing completion itself does not require the final
+        * courier proof/tracking information.
+        */
+        $this->actingAs($packing)
+            ->post(
+                route('staff.packing-jobs.mark-packed', $job)
+            )
+            ->assertRedirect();
+
+        $job->refresh();
+        $order->refresh();
+
+        $this->assertSame('PACKED', $job->status);
+        $this->assertSame('PACKED', $order->status);
+        $this->assertNull($job->proof_storage_path);
+
+        $fulfilmentJob = $order->fulfilmentJob()
+            ->firstOrFail();
+
+        $this->assertSame('COURIER', $fulfilmentJob->method);
+        $this->assertSame('READY', $fulfilmentJob->status);
+        $this->assertNull($fulfilmentJob->tracking_number);
+        $this->assertNull($fulfilmentJob->shipped_at);
+        $this->assertNull($fulfilmentJob->delivered_at);
+
+        /*
+        * Courier has arrived and parcel is handed over.
+        * Staff records final parcel/label proof + tracking,
+        * then explicitly marks COMPLETE.
+        */
+        $response = $this->actingAs($packing)->post(
+            route('staff.packing-jobs.complete-courier', $job),
+            [
+                'packing_proof' =>
+                    UploadedFile::fake()->image('parcel-with-label.jpg'),
+                'courier_provider' => 'Pos Laju',
+                'tracking_number' => 'PL123456789MY',
+                'complete' => '1',
+            ]
+        );
+
+        $response->assertRedirect();
+        $response->assertSessionHasNoErrors();
+
+        $job->refresh();
+        $order->refresh();
+        $fulfilmentJob->refresh();
+
+        $this->assertSame('PACKED', $job->status);
+        $this->assertSame('COMPLETED', $fulfilmentJob->status);
+        $this->assertSame('COMPLETED', $order->status);
+
+        $this->assertSame(
+            'Pos Laju',
+            $fulfilmentJob->courier_provider
+        );
+
+        $this->assertSame(
+            'PL123456789MY',
+            $fulfilmentJob->tracking_number
+        );
+
+        $this->assertNotNull($fulfilmentJob->shipped_at);
+        $this->assertNull($fulfilmentJob->delivered_at);
+
+        $this->assertNotNull($job->proof_storage_path);
+
+        Storage::disk('local')->assertExists(
+            $job->proof_storage_path
+        );
+
+        $this->assertSame(
+            'parcel-with-label.jpg',
+            $job->proof_original_name
+        );
+
+        $event = $fulfilmentJob->events()
+            ->where('event_type', 'COURIER_COMPLETED')
+            ->latest('id')
+            ->firstOrFail();
+
+        $this->assertSame($packing->id, $event->actor_user_id);
+        $this->assertSame('READY', $event->from_status);
+        $this->assertSame('COMPLETED', $event->to_status);
+
+        $this->assertSame(
+            'Pos Laju',
+            $event->metadata['courier_provider']
+        );
+
+        $this->assertSame(
+            'PL123456789MY',
+            $event->metadata['tracking_number']
+        );
+
+        $this->assertSame(
+            $job->proof_storage_path,
+            $event->metadata['packing_proof_storage_path']
+        );
+
+        /*
+        * One business order must still have exactly
+        * one fulfilment job.
+        */
+        $this->assertSame(
+            1,
+            $order->fulfilmentJob()->count()
+        );
     }
 
     public function test_other_packing_staff_cannot_operate_assigned_job(): void
@@ -390,11 +553,13 @@ class StaffPackingWorkflowTest extends TestCase
 
     private function packingJob(
         int $packageCount = 1,
-        string $customerName = 'Staff Packing Workflow Test'
+        string $customerName = 'Staff Packing Workflow Test',
+        string $fulfilmentMethod = 'PICKUP'
     ): array {
         $order = $this->printedOrder(
             $packageCount,
-            $customerName
+            $customerName,
+            $fulfilmentMethod
         );
 
         $job = app(InitializePackingJobForOrderService::class)
@@ -405,11 +570,13 @@ class StaffPackingWorkflowTest extends TestCase
 
     private function printedOrder(
         int $packageCount = 1,
-        string $customerName = 'Staff Packing Workflow Test'
+        string $customerName = 'Staff Packing Workflow Test',
+        string $fulfilmentMethod = 'PICKUP'
     ) {
         $order = $this->paidOrder(
             $packageCount,
-            $customerName
+            $customerName,
+            $fulfilmentMethod
         );
 
         $printJobs = app(InitializePrintJobsForOrderService::class)
@@ -431,11 +598,13 @@ class StaffPackingWorkflowTest extends TestCase
 
     private function paidOrder(
         int $packageCount,
-        string $customerName
+        string $customerName,
+        string $fulfilmentMethod = 'PICKUP'
     ) {
         $order = $this->approvedOrder(
             $packageCount,
-            $customerName
+            $customerName,
+            $fulfilmentMethod
         );
 
         $payment = app(CreateBalancePaymentService::class)
@@ -446,13 +615,16 @@ class StaffPackingWorkflowTest extends TestCase
 
         $payment->update([
             'provider' => 'TEST',
-            'provider_reference' => 'STAFF-PACK-' . $payment->id,
+            'provider_reference' =>
+                'STAFF-PACK-' . $payment->id,
         ]);
 
         app(HandlePaymentCallbackService::class)->handle([
             'provider' => 'TEST',
-            'provider_reference' => $payment->provider_reference,
-            'provider_event_id' => 'STAFF-PACK-EVENT-' . $payment->id,
+            'provider_reference' =>
+                $payment->provider_reference,
+            'provider_event_id' =>
+                'STAFF-PACK-EVENT-' . $payment->id,
             'status' => 'PAID',
         ]);
 
@@ -461,18 +633,21 @@ class StaffPackingWorkflowTest extends TestCase
 
     private function approvedOrder(
         int $packageCount,
-        string $customerName
+        string $customerName,
+        string $fulfilmentMethod = 'PICKUP'
     ) {
         $order = $this->confirmedOrder(
             $packageCount,
-            $customerName
+            $customerName,
+            $fulfilmentMethod
         );
 
         app(GenerateMergeJobsForOrderService::class)
             ->generate($order);
 
-        $designJobs = app(InitializeDesignJobsForOrderService::class)
-            ->initialize($order->fresh());
+        $designJobs =
+            app(InitializeDesignJobsForOrderService::class)
+                ->initialize($order->fresh());
 
         foreach ($designJobs as $designJob) {
             $designJob = app(StartDesignJobService::class)
@@ -481,9 +656,12 @@ class StaffPackingWorkflowTest extends TestCase
             app(CreateArtworkVersionService::class)->create(
                 $designJob,
                 [
-                    'storage_path' => "artworks/{$designJob->side}/v1.pdf",
-                    'preview_storage_path' => "artworks/{$designJob->side}/v1-preview.png",
-                    'original_filename' => "{$designJob->side}-v1.pdf",
+                    'storage_path' =>
+                        "artworks/{$designJob->side}/v1.pdf",
+                    'preview_storage_path' =>
+                        "artworks/{$designJob->side}/v1-preview.png",
+                    'original_filename' =>
+                        "{$designJob->side}-v1.pdf",
                     'mime_type' => 'application/pdf',
                 ]
             );
@@ -502,9 +680,10 @@ class StaffPackingWorkflowTest extends TestCase
         return $order->fresh();
     }
 
-    private function confirmedOrder(
+        private function confirmedOrder(
         int $packageCount,
-        string $customerName
+        string $customerName,
+        string $fulfilmentMethod = 'PICKUP'
     ) {
         $order = app(CreateOrderService::class)->create([
             'package_count' => $packageCount,
@@ -530,20 +709,433 @@ class StaffPackingWorkflowTest extends TestCase
             );
         }
 
+        $fulfilment = [
+            'method' => $fulfilmentMethod,
+        ];
+
+        if ($fulfilmentMethod === 'COURIER') {
+            $fulfilment += [
+                'recipient_name' => $customerName,
+                'recipient_phone' => '0123456789',
+                'shipping_address' => 'No. 1, Jalan Test, 70000 Seremban, Negeri Sembilan',
+            ];
+        }
+
         app(SaveOrderDraftService::class)->save($order, [
             'couple' => [
                 'groom_name' => 'Muhammad Syafiq',
                 'bride_name' => 'Nur Awanis',
             ],
             'sides' => $sides,
-            'fulfilment' => [
-                'method' => 'PICKUP',
-            ],
+            'fulfilment' => $fulfilment,
         ]);
 
         return app(ConfirmOrderDetailsService::class)
             ->confirm($order->fresh());
     }
+
+        public function test_two_package_courier_order_uses_one_business_fulfilment_and_can_be_completed(): void
+    {
+        Storage::fake('local');
+
+        $admin = $this->admin();
+        $packing = $this->staff(User::ROLE_PACKING);
+
+        [$order, $job] = $this->packingJob(
+            2,
+            'Courier Two Package Test',
+            'COURIER'
+        );
+
+        app(AssignPackingJobService::class)
+            ->assign($job, $packing, $admin);
+
+        $this->actingAs($packing)
+            ->post(route('staff.packing-jobs.start', $job))
+            ->assertRedirect();
+
+        $items = $job->items()
+            ->orderBy('id')
+            ->get();
+
+        $this->assertCount(2, $items);
+
+        $this->assertEqualsCanonicalizing(
+            ['LELAKI', 'PEREMPUAN'],
+            $items->pluck('side')->all()
+        );
+
+        foreach ($items as $item) {
+            $this->actingAs($packing)
+                ->post(
+                    route('staff.packing-jobs.items.verify', [
+                        'packingJob' => $job,
+                        'packingItem' => $item,
+                    ])
+                )
+                ->assertRedirect();
+        }
+
+        $this->actingAs($packing)
+            ->post(route('staff.packing-jobs.mark-packed', $job))
+            ->assertRedirect();
+
+        $job->refresh();
+        $order->refresh();
+
+        $this->assertSame('PACKED', $job->status);
+        $this->assertSame('PACKED', $order->status);
+        $this->assertNull($job->proof_storage_path);
+
+        $this->assertTrue(
+            $job->items()->get()->every(
+                fn ($item) => $item->verified_present
+            )
+        );
+
+        /*
+        * 2-package is still one business order,
+        * one packing job and one courier fulfilment.
+        */
+        $this->assertSame(
+            1,
+            $order->fulfilmentJob()->count()
+        );
+
+        $fulfilmentJob = $order->fulfilmentJob()
+            ->firstOrFail();
+
+        $this->assertSame('COURIER', $fulfilmentJob->method);
+        $this->assertSame('READY', $fulfilmentJob->status);
+        $this->assertNull($fulfilmentJob->tracking_number);
+
+        $response = $this->actingAs($packing)->post(
+            route('staff.packing-jobs.complete-courier', $job),
+            [
+                'packing_proof' =>
+                    UploadedFile::fake()->image(
+                        'two-package-parcel-with-label.jpg'
+                    ),
+                'courier_provider' => 'Pos Laju',
+                'tracking_number' => 'PL987654321MY',
+                'complete' => '1',
+            ]
+        );
+
+        $response->assertRedirect();
+        $response->assertSessionHasNoErrors();
+
+        $job->refresh();
+        $order->refresh();
+        $fulfilmentJob->refresh();
+
+        $this->assertSame('PACKED', $job->status);
+        $this->assertSame('COMPLETED', $fulfilmentJob->status);
+        $this->assertSame('COMPLETED', $order->status);
+
+        $this->assertSame(
+            'Pos Laju',
+            $fulfilmentJob->courier_provider
+        );
+
+        $this->assertSame(
+            'PL987654321MY',
+            $fulfilmentJob->tracking_number
+        );
+
+        $this->assertNotNull($fulfilmentJob->shipped_at);
+        $this->assertNull($fulfilmentJob->delivered_at);
+
+        $this->assertNotNull($job->proof_storage_path);
+
+        Storage::disk('local')->assertExists(
+            $job->proof_storage_path
+        );
+
+        $this->assertSame(
+            'two-package-parcel-with-label.jpg',
+            $job->proof_original_name
+        );
+
+        /*
+        * Completion must not create another fulfilment job.
+        */
+        $this->assertSame(
+            1,
+            $order->fulfilmentJob()->count()
+        );
+
+        $event = $fulfilmentJob->events()
+            ->where('event_type', 'COURIER_COMPLETED')
+            ->latest('id')
+            ->firstOrFail();
+
+        $this->assertSame($packing->id, $event->actor_user_id);
+        $this->assertSame('READY', $event->from_status);
+        $this->assertSame('COMPLETED', $event->to_status);
+
+        $this->assertSame(
+            'Pos Laju',
+            $event->metadata['courier_provider']
+        );
+
+        $this->assertSame(
+            'PL987654321MY',
+            $event->metadata['tracking_number']
+        );
+
+        $this->assertSame(
+            $job->proof_storage_path,
+            $event->metadata['packing_proof_storage_path']
+        );
+
+        $this->assertSame(
+            1,
+            $fulfilmentJob->events()
+                ->where('event_type', 'COURIER_COMPLETED')
+                ->count()
+        );
+    }
+
+        public function test_courier_completion_requires_proof_courier_tracking_and_explicit_complete(): void
+    {
+        Storage::fake('local');
+
+        $admin = $this->admin();
+        $packing = $this->staff(User::ROLE_PACKING);
+
+        [$order, $job] = $this->packingJob(
+            1,
+            'Courier Validation Test',
+            'COURIER'
+        );
+
+        app(AssignPackingJobService::class)
+            ->assign($job, $packing, $admin);
+
+        $this->actingAs($packing)
+            ->post(route('staff.packing-jobs.start', $job))
+            ->assertRedirect();
+
+        $item = $job->items()->firstOrFail();
+
+        $this->actingAs($packing)
+            ->post(
+                route('staff.packing-jobs.items.verify', [
+                    'packingJob' => $job,
+                    'packingItem' => $item,
+                ])
+            )
+            ->assertRedirect();
+
+        $this->actingAs($packing)
+            ->post(route('staff.packing-jobs.mark-packed', $job))
+            ->assertRedirect();
+
+        $job->refresh();
+        $order->refresh();
+
+        $this->assertSame('PACKED', $job->status);
+        $this->assertSame('PACKED', $order->status);
+        $this->assertNull($job->proof_storage_path);
+
+        $fulfilmentJob = $order->fulfilmentJob()
+            ->firstOrFail();
+
+        $this->assertSame('COURIER', $fulfilmentJob->method);
+        $this->assertSame('READY', $fulfilmentJob->status);
+
+        /*
+        * No proof, courier provider, tracking number,
+        * or explicit COMPLETE confirmation.
+        */
+        $response = $this->actingAs($packing)->post(
+            route('staff.packing-jobs.complete-courier', $job),
+            []
+        );
+
+        $response->assertRedirect();
+
+        $response->assertSessionHasErrors([
+            'packing_proof',
+            'courier_provider',
+            'tracking_number',
+            'complete',
+        ]);
+
+        $job->refresh();
+        $order->refresh();
+        $fulfilmentJob->refresh();
+
+        /*
+        * Failed validation must not change operational state.
+        */
+        $this->assertSame('PACKED', $job->status);
+        $this->assertSame('PACKED', $order->status);
+        $this->assertSame('READY', $fulfilmentJob->status);
+
+        $this->assertNull($job->proof_storage_path);
+        $this->assertNull($fulfilmentJob->courier_provider);
+        $this->assertNull($fulfilmentJob->tracking_number);
+        $this->assertNull($fulfilmentJob->shipped_at);
+        $this->assertNull($fulfilmentJob->delivered_at);
+
+        $this->assertSame(
+            0,
+            $fulfilmentJob->events()
+                ->where('event_type', 'COURIER_COMPLETED')
+                ->count()
+        );
+    }
+
+        public function test_other_packing_staff_cannot_complete_courier_job_assigned_to_another_packing_staff(): void
+    {
+        Storage::fake('local');
+
+        $admin = $this->admin();
+        $assignedPacking = $this->staff(User::ROLE_PACKING);
+        $otherPacking = $this->staff(User::ROLE_PACKING);
+
+        [$order, $job] = $this->packingJob(
+            1,
+            'Courier Other Packing Authorization Test',
+            'COURIER'
+        );
+
+        app(AssignPackingJobService::class)
+            ->assign($job, $assignedPacking, $admin);
+
+        $this->actingAs($assignedPacking)
+            ->post(route('staff.packing-jobs.start', $job))
+            ->assertRedirect();
+
+        $item = $job->items()->firstOrFail();
+
+        $this->actingAs($assignedPacking)
+            ->post(
+                route('staff.packing-jobs.items.verify', [
+                    'packingJob' => $job,
+                    'packingItem' => $item,
+                ])
+            )
+            ->assertRedirect();
+
+        $this->actingAs($assignedPacking)
+            ->post(route('staff.packing-jobs.mark-packed', $job))
+            ->assertRedirect();
+
+        $fulfilmentJob = $order->fulfilmentJob()
+            ->firstOrFail();
+
+        $this->assertSame('READY', $fulfilmentJob->status);
+
+        $response = $this->actingAs($otherPacking)->post(
+            route('staff.packing-jobs.complete-courier', $job),
+            [
+                'packing_proof' =>
+                    UploadedFile::fake()->image('unauthorized-proof.jpg'),
+                'courier_provider' => 'Pos Laju',
+                'tracking_number' => 'UNAUTHORIZED123',
+                'complete' => '1',
+            ]
+        );
+
+        $response->assertNotFound();
+
+        $job->refresh();
+        $order->refresh();
+        $fulfilmentJob->refresh();
+
+        $this->assertSame('PACKED', $job->status);
+        $this->assertSame('PACKED', $order->status);
+        $this->assertSame('READY', $fulfilmentJob->status);
+
+        $this->assertNull($job->proof_storage_path);
+        $this->assertNull($fulfilmentJob->courier_provider);
+        $this->assertNull($fulfilmentJob->tracking_number);
+        $this->assertNull($fulfilmentJob->shipped_at);
+
+        $this->assertSame(
+            0,
+            $fulfilmentJob->events()
+                ->where('event_type', 'COURIER_COMPLETED')
+                ->count()
+        );
+    }
+
+public function test_admin_cannot_complete_courier_job_assigned_to_packing_staff(): void
+{
+    Storage::fake('local');
+
+    $admin = $this->admin();
+    $packing = $this->staff(User::ROLE_PACKING);
+
+    [$order, $job] = $this->packingJob(
+        1,
+        'Courier Admin Authorization Test',
+        'COURIER'
+    );
+
+    app(AssignPackingJobService::class)
+        ->assign($job, $packing, $admin);
+
+    $this->actingAs($packing)
+        ->post(route('staff.packing-jobs.start', $job))
+        ->assertRedirect();
+
+    $item = $job->items()->firstOrFail();
+
+    $this->actingAs($packing)
+        ->post(
+            route('staff.packing-jobs.items.verify', [
+                'packingJob' => $job,
+                'packingItem' => $item,
+            ])
+        )
+        ->assertRedirect();
+
+    $this->actingAs($packing)
+        ->post(route('staff.packing-jobs.mark-packed', $job))
+        ->assertRedirect();
+
+    $fulfilmentJob = $order->fulfilmentJob()
+        ->firstOrFail();
+
+    $this->assertSame('READY', $fulfilmentJob->status);
+
+    $response = $this->actingAs($admin)->post(
+        route('staff.packing-jobs.complete-courier', $job),
+        [
+            'packing_proof' =>
+                UploadedFile::fake()->image('admin-proof.jpg'),
+            'courier_provider' => 'Pos Laju',
+            'tracking_number' => 'ADMIN123',
+            'complete' => '1',
+        ]
+    );
+
+    $response->assertNotFound();
+
+    $job->refresh();
+    $order->refresh();
+    $fulfilmentJob->refresh();
+
+    $this->assertSame('PACKED', $job->status);
+    $this->assertSame('PACKED', $order->status);
+    $this->assertSame('READY', $fulfilmentJob->status);
+
+    $this->assertNull($job->proof_storage_path);
+    $this->assertNull($fulfilmentJob->courier_provider);
+    $this->assertNull($fulfilmentJob->tracking_number);
+    $this->assertNull($fulfilmentJob->shipped_at);
+
+    $this->assertSame(
+        0,
+        $fulfilmentJob->events()
+            ->where('event_type', 'COURIER_COMPLETED')
+            ->count()
+    );
+}
 
     private function sidePayload(
         string $designCode,
