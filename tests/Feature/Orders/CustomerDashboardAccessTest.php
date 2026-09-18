@@ -6,6 +6,8 @@ use App\Services\Orders\CreateOrderService;
 use App\Services\Orders\GenerateOrderAccessLinkService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
+use App\Models\FulfilmentJob;
+use App\Models\PackingJob;
 
 class CustomerDashboardAccessTest extends TestCase
 {
@@ -186,32 +188,90 @@ public function test_correction_requested_dashboard_shows_artwork_status_cta(): 
         ]), false);
     }
 
-    public function test_ready_for_design_dashboard_shows_waiting_state_without_review_cta(): void
-{
-    $order = app(CreateOrderService::class)->create([
-        'package_count' => 1,
-        'side' => 'LELAKI',
-        'customer_name' => 'Test Customer',
-    ]);
 
-    $order->update(['status' => 'READY_FOR_DESIGN']);
+        public function test_completed_courier_tracking_is_available_to_authorized_customer_dashboard(): void
+    {
+        $order = app(CreateOrderService::class)->create([
+            'package_count' => 1,
+            'side' => 'LELAKI',
+            'customer_name' => 'Courier Customer',
+        ]);
 
-    $url = app(GenerateOrderAccessLinkService::class)->generate($order);
+        $order->update(['status' => 'COMPLETED']);
 
-    $this->get($url)->assertRedirect();
+        $packingJob = PackingJob::query()->create([
+            'order_id' => $order->id,
+            'status' => 'PACKED',
+        ]);
 
-    $this->get(route('orders.dashboard', [
-        'orderId' => $order->order_id,
-    ]))
-        ->assertOk()
-        ->assertSee('Artwork Tempahan')
-        ->assertSee('Menunggu designer')
-        ->assertSee('40%')
-        ->assertSee('data-progress-tone="yellow"', false)
-        ->assertDontSee('Semak Artwork')
-        ->assertDontSee(route('orders.artwork.review', [
+        $fulfilmentJob = FulfilmentJob::query()->create([
+            'order_id' => $order->id,
+            'order_fulfilment_id' => $order->fulfilment->id,
+            'packing_job_id' => $packingJob->id,
+            'method' => 'COURIER',
+            'status' => 'COMPLETED',
+            'courier_provider' => 'Pos Laju',
+            'tracking_number' => 'PL123456789MY',
+            'shipped_at' => now(),
+        ]);
+
+        $url = app(GenerateOrderAccessLinkService::class)->generate($order);
+
+        $this->get($url)->assertRedirect(route('orders.dashboard', [
             'orderId' => $order->order_id,
-        ]), false);
-}
+        ]));
+
+        $this->get(route('orders.dashboard', [
+            'orderId' => $order->order_id,
+        ]))
+            ->assertOk()
+            ->assertViewHas('order', function ($dashboardOrder) use ($order, $fulfilmentJob) {
+                return $dashboardOrder->order_id === $order->order_id
+                    && $dashboardOrder->status === 'COMPLETED'
+                    && $dashboardOrder->relationLoaded('fulfilmentJob')
+                    && $dashboardOrder->fulfilmentJob !== null
+                    && $dashboardOrder->fulfilmentJob->id === $fulfilmentJob->id
+                    && $dashboardOrder->fulfilmentJob->method === 'COURIER'
+                    && $dashboardOrder->fulfilmentJob->status === 'COMPLETED'
+                    && $dashboardOrder->fulfilmentJob->courier_provider === 'Pos Laju'
+                    && $dashboardOrder->fulfilmentJob->tracking_number === 'PL123456789MY'
+                    && $dashboardOrder->fulfilmentJob->shipped_at !== null;
+            })
+            ->assertViewHas('progress', function ($progress) {
+                return $progress['percentage'] === 100
+                    && $progress['label'] === 'Tempahan Selesai';
+            })
+            ->assertSee('Maklumat Penghantaran')
+            ->assertSee('Pos Laju')
+            ->assertSee('PL123456789MY');
+    }
+
+        public function test_ready_for_design_dashboard_shows_waiting_state_without_review_cta(): void
+    {
+        $order = app(CreateOrderService::class)->create([
+            'package_count' => 1,
+            'side' => 'LELAKI',
+            'customer_name' => 'Test Customer',
+        ]);
+
+        $order->update(['status' => 'READY_FOR_DESIGN']);
+
+        $url = app(GenerateOrderAccessLinkService::class)->generate($order);
+
+        $this->get($url)->assertRedirect();
+
+        $this->get(route('orders.dashboard', [
+            'orderId' => $order->order_id,
+        ]))
+            ->assertOk()
+            ->assertSee('Artwork Tempahan')
+            ->assertSee('Menunggu designer')
+            ->assertSee('40%')
+            ->assertSee('data-progress-tone="yellow"', false)
+            ->assertDontSee('Semak Artwork')
+            ->assertDontSee(route('orders.artwork.review', [
+                'orderId' => $order->order_id,
+            ]), false);
+    }
 
 }
