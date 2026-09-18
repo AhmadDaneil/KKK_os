@@ -299,15 +299,6 @@ if (app()->environment('local')) {
         [DevFulfilmentJobController::class, 'store']
     )->name('dev.orders.fulfilment-job.store');
 
-    Route::post(
-        '/dev/fulfilment-jobs/{fulfilmentJobId}/ship',
-        [DevFulfilmentJobController::class, 'ship']
-    )->name('dev.fulfilment-jobs.ship');
-
-    Route::post(
-        '/dev/fulfilment-jobs/{fulfilmentJobId}/deliver',
-        [DevFulfilmentJobController::class, 'deliver']
-    )->name('dev.fulfilment-jobs.deliver');
 
     Route::post(
         '/dev/fulfilment-jobs/{fulfilmentJobId}/collect',
