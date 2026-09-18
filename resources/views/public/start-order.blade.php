@@ -40,32 +40,32 @@
             </div>
 
             <div id="two-package-options" hidden>
-                <fieldset>
-                    <legend>Jenis dua pakej</legend>
-                    <div class="choice-grid">
-                        <label class="choice-card"><input type="radio" name="package_format" value="SEPARATE" @checked(old('package_format', 'SEPARATE') === 'SEPARATE')><span><b>Pakej Berasingan</b><small>Dua kad berasingan untuk dua majlis</small></span></label>
-                        <label class="choice-card"><input type="radio" name="package_format" value="FOLDED" @checked(old('package_format') === 'FOLDED')><span><b>Pakej Gabungan – Kad Lipatan</b><small>Dua majlis dalam format kad lipatan</small></span></label>
-                    </div>
+                <div class="dropdown-field">
+                    <label for="package-format">Jenis pakej</label>
+                    <select id="package-format" name="package_format">
+                        <option value="SEPARATE" @selected(old('package_format', 'SEPARATE') === 'SEPARATE')>Pakej Berasingan</option>
+                        <option value="FOLDED" @selected(old('package_format') === 'FOLDED')>Pakej Gabungan – Kad Lipatan</option>
+                    </select>
                     @error('package_format')<p class="field-error">{{ $message }}</p>@enderror
-                </fieldset>
+                </div>
 
-                <fieldset>
-                    <legend>Majlis pertama untuk pihak</legend>
-                    <div class="choice-grid">
-                        <label class="choice-card"><input type="radio" name="first_event_side" value="LELAKI" @checked(old('first_event_side', 'LELAKI') === 'LELAKI')><span><b>Pihak Lelaki</b><small>Nama pengantin lelaki dipaparkan di atas</small></span></label>
-                        <label class="choice-card"><input type="radio" name="first_event_side" value="PEREMPUAN" @checked(old('first_event_side') === 'PEREMPUAN')><span><b>Pihak Perempuan</b><small>Nama pengantin perempuan dipaparkan di atas</small></span></label>
-                    </div>
+                <div class="dropdown-field">
+                    <label for="first-event-side">Majlis pertama untuk?</label>
+                    <select id="first-event-side" name="first_event_side">
+                        <option value="LELAKI" @selected(old('first_event_side', 'LELAKI') === 'LELAKI')>Pihak Lelaki</option>
+                        <option value="PEREMPUAN" @selected(old('first_event_side') === 'PEREMPUAN')>Pihak Perempuan</option>
+                    </select>
                     @error('first_event_side')<p class="field-error">{{ $message }}</p>@enderror
-                </fieldset>
+                </div>
             </div>
 
             <label for="customer_name">Nama anda</label>
-            <input id="customer_name" name="customer_name" value="{{ old('customer_name') }}" autocomplete="name" required>
+            <input id="customer_name" name="customer_name" placeholder="e.g. Muhammad Syafiq Bin Rahim" value="{{ old('customer_name') }}" autocomplete="name" required>
             @error('customer_name')<p class="field-error">{{ $message }}</p>@enderror
 
             <div class="two-columns">
-                <div><label for="customer_email">Email</label><input id="customer_email" type="email" name="customer_email" value="{{ old('customer_email') }}" autocomplete="email" required>@error('customer_email')<p class="field-error">{{ $message }}</p>@enderror</div>
-                <div><label for="customer_phone">Nombor telefon</label><input id="customer_phone" type="tel" name="customer_phone" value="{{ old('customer_phone') }}" autocomplete="tel" required>@error('customer_phone')<p class="field-error">{{ $message }}</p>@enderror</div>
+                <div><label for="customer_email">Email</label><input id="customer_email" type="email" name="customer_email" placeholder="e.g. syafiq@email.com" value="{{ old('customer_email') }}" autocomplete="email" required>@error('customer_email')<p class="field-error">{{ $message }}</p>@enderror</div>
+                <div><label for="customer_phone">Nombor telefon</label><input id="customer_phone" type="tel" name="customer_phone" placeholder="e.g. 012-3456789" value="{{ old('customer_phone') }}" autocomplete="tel" required>@error('customer_phone')<p class="field-error">{{ $message }}</p>@enderror</div>
             </div>
             <button class="button button-primary submit-button" type="submit">Cipta Tempahan & Teruskan →</button>
             <p class="privacy-note">Maklumat ini digunakan untuk mengurus tempahan anda sahaja.</p>
@@ -80,7 +80,7 @@
             sideField.hidden = selected && selected.value === '2';
             sideField.querySelector('select').disabled = sideField.hidden;
             twoPackageOptions.hidden = !selected || selected.value !== '2';
-            twoPackageOptions.querySelectorAll('input').forEach((input) => input.disabled = twoPackageOptions.hidden);
+            twoPackageOptions.querySelectorAll('select').forEach((select) => select.disabled = twoPackageOptions.hidden);
         }
         packageInputs.forEach((input) => input.addEventListener('change', updateSideField));
         updateSideField();

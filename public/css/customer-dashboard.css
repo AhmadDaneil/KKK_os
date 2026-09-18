@@ -123,6 +123,12 @@ select:focus {
     outline: 3px solid rgba(36, 120, 76, 0.14);
 }
 
+input::placeholder,
+textarea::placeholder {
+    color: #8a948e;
+    opacity: 1;
+}
+
 .grid {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));

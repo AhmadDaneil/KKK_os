@@ -194,7 +194,6 @@ body {
 .receipt-panel { display: flex; flex-direction: column; justify-content: center; }
 .receipt-panel label { font-weight: 800; }.receipt-panel label span { color: #b91c1c; }
 .receipt-panel input { width: 100%; padding: 0.8rem; border: 1px solid #cbd5e1; border-radius: 8px; background: #fff; }
-.liability-checkbox { padding: 1rem; border: 1px solid #efc8c8; border-radius: 10px; background: #fff7f7; }
 .field-error { margin: 0.45rem 0; color: #b91c1c; font-size: 0.875rem; font-weight: 600; }
 
 .confirmation-note {
@@ -207,14 +206,34 @@ body {
 .confirmation-checkbox {
     display: flex;
     align-items: flex-start;
-    gap: 0.75rem;
-    margin: 1rem 0;
+    gap: 0.85rem;
+    margin: 0.75rem 0;
+    padding: 1rem;
+    border: 1px solid #d9e2dc;
+    border-radius: 10px;
+    background: #f8fbf9;
     font-weight: 600;
+    line-height: 1.55;
+    cursor: pointer;
 }
 
 .confirmation-checkbox input {
-    width: auto;
-    margin-top: 0.25rem;
+    flex: 0 0 auto;
+    width: 1.2rem;
+    height: 1.2rem;
+    margin: 0.15rem 0 0;
+    accent-color: #24784c;
+    cursor: pointer;
+}
+
+.confirmation-checkbox:has(input:checked) {
+    border-color: #24784c;
+    background: #eef8f1;
+}
+
+.confirmation-checkbox:focus-within {
+    outline: 3px solid rgba(36, 120, 76, 0.14);
+    outline-offset: 2px;
 }
 
 .review-actions {

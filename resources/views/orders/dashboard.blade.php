@@ -256,10 +256,10 @@
         <fieldset>
             <legend>Maklumat Pasangan</legend>
             <div class="grid">
-                <div><label>Nama Pengantin Lelaki</label><input name="couple[groom_name]" value="{{ old('couple.groom_name', $couple?->groom_name) }}"></div>
-                <div><label>Singkatan Pengantin Lelaki</label><input name="couple[groom_abbreviation]" value="{{ old('couple.groom_abbreviation', $couple?->groom_abbreviation) }}"></div>
-                <div><label>Nama Pengantin Perempuan</label><input name="couple[bride_name]" value="{{ old('couple.bride_name', $couple?->bride_name) }}"></div>
-                <div><label>Singkatan Pengantin Perempuan</label><input name="couple[bride_abbreviation]" value="{{ old('couple.bride_abbreviation', $couple?->bride_abbreviation) }}"></div>
+                <div><label>Nama Pengantin Lelaki</label><input name="couple[groom_name]" placeholder="e.g. Muhammad Syafiq Bin Rahim" value="{{ old('couple.groom_name', $couple?->groom_name) }}"></div>
+                <div><label>Singkatan Pengantin Lelaki</label><input name="couple[groom_abbreviation]" placeholder="e.g. Syafiq" value="{{ old('couple.groom_abbreviation', $couple?->groom_abbreviation) }}"></div>
+                <div><label>Nama Pengantin Perempuan</label><input name="couple[bride_name]" placeholder="e.g. Nur Awanis Binti Azman" value="{{ old('couple.bride_name', $couple?->bride_name) }}"></div>
+                <div><label>Singkatan Pengantin Perempuan</label><input name="couple[bride_abbreviation]" placeholder="e.g. Awanis" value="{{ old('couple.bride_abbreviation', $couple?->bride_abbreviation) }}"></div>
             </div>
         </fieldset>
         <fieldset>
@@ -275,6 +275,7 @@
             <label>Nama Pengantin Lelaki Kedua</label>
             <input
                 name="second_couple[groom_name]"
+                placeholder="e.g. Ahmad Danial Bin Zulkifli"
                 value="{{ old('second_couple.groom_name', $secondCouple?->groom_name) }}"
             >
         </div>
@@ -283,6 +284,7 @@
             <label>Singkatan Pengantin Lelaki Kedua</label>
             <input
                 name="second_couple[groom_abbreviation]"
+                placeholder="e.g. Danial"
                 value="{{ old('second_couple.groom_abbreviation', $secondCouple?->groom_abbreviation) }}"
             >
         </div>
@@ -291,6 +293,7 @@
             <label>Nama Pengantin Perempuan Kedua</label>
             <input
                 name="second_couple[bride_name]"
+                placeholder="e.g. Siti Hajar Binti Hamid"
                 value="{{ old('second_couple.bride_name', $secondCouple?->bride_name) }}"
             >
         </div>
@@ -299,6 +302,7 @@
             <label>Singkatan Pengantin Perempuan Kedua</label>
             <input
                 name="second_couple[bride_abbreviation]"
+                placeholder="e.g. Hajar"
                 value="{{ old('second_couple.bride_abbreviation', $secondCouple?->bride_abbreviation) }}"
             >
         </div>
@@ -343,6 +347,7 @@
         <label>Kod Design</label>
         <input
             name="sides[{{ $side }}][design][design_code]"
+            placeholder="e.g. KKK-001"
             value="{{ old("sides.$side.design.design_code", $packageSide->design?->design_code) }}"
         >
     </div>
@@ -398,8 +403,8 @@
                 <h3>Ibu Bapa Pengantin {{ ucfirst(strtolower($side)) }}</h3>
                 <p class="field-help">Masukkan nama ibu bapa bagi pihak yang menjadi tuan rumah majlis ini.</p>
                 <div class="grid">
-                    <div><label>Nama Bapa</label><input name="sides[{{ $side }}][parents][father_name]" value="{{ old("sides.$side.parents.father_name", $packageSide->parents?->father_name) }}"></div>
-                    <div><label>Nama Ibu</label><input name="sides[{{ $side }}][parents][mother_name]" value="{{ old("sides.$side.parents.mother_name", $packageSide->parents?->mother_name) }}"></div>
+                    <div><label>Nama Bapa</label><input name="sides[{{ $side }}][parents][father_name]" placeholder="e.g. Encik Rahim Bin Abdullah" value="{{ old("sides.$side.parents.father_name", $packageSide->parents?->father_name) }}"></div>
+                    <div><label>Nama Ibu</label><input name="sides[{{ $side }}][parents][mother_name]" placeholder="e.g. Puan Aminah Binti Ismail" value="{{ old("sides.$side.parents.mother_name", $packageSide->parents?->mother_name) }}"></div>
                 </div>
                 <h3>Majlis</h3>
                 <div class="grid">
@@ -427,15 +432,15 @@
     </select>
 </div>
                     <div><label>Tarikh</label><input type="date" name="sides[{{ $side }}][event][event_date]" value="{{ old("sides.$side.event.event_date", $event?->event_date?->format('Y-m-d')) }}"></div>
-                    <div><label>Tarikh Hijri</label><input name="sides[{{ $side }}][event][hijri_date]" value="{{ old("sides.$side.event.hijri_date", $event?->hijri_date) }}"></div>
+                    <div><label>Tarikh Hijri</label><input name="sides[{{ $side }}][event][hijri_date]" placeholder="e.g. 4 Zulhijjah 1446H" value="{{ old("sides.$side.event.hijri_date", $event?->hijri_date) }}"></div>
                     <div><label>Masa Makan</label><input type="time" name="sides[{{ $side }}][event][meal_time]" value="{{ old("sides.$side.event.meal_time", $event?->meal_time ? substr($event->meal_time, 0, 5) : '') }}"></div>
                     <div><label>Masa Bersanding</label><input type="time" name="sides[{{ $side }}][event][bersanding_time]" value="{{ old("sides.$side.event.bersanding_time", $event?->bersanding_time ? substr($event->bersanding_time, 0, 5) : '') }}"></div>
-                    <div><label>Nama Tempat</label><input name="sides[{{ $side }}][event][venue_name]" value="{{ old("sides.$side.event.venue_name", $event?->venue_name) }}"></div>
+                    <div><label>Nama Tempat</label><input name="sides[{{ $side }}][event][venue_name]" placeholder="e.g. Dewan Seri Impian" value="{{ old("sides.$side.event.venue_name", $event?->venue_name) }}"></div>
                 </div>
                 <label>Alamat Penuh</label>
-                <textarea rows="4" name="sides[{{ $side }}][event][full_address]">{{ old("sides.$side.event.full_address", $event?->full_address) }}</textarea>
+                <textarea rows="4" name="sides[{{ $side }}][event][full_address]" placeholder="e.g. No. 87, Laluan Taman Meru 8, Taman Meru 2B, 30020 Ipoh, Perak">{{ old("sides.$side.event.full_address", $event?->full_address) }}</textarea>
                 <label>Google Maps URL</label>
-                <input type="url" name="sides[{{ $side }}][event][google_maps_url]" value="{{ old("sides.$side.event.google_maps_url", $event?->google_maps_url) }}">
+                <input type="url" name="sides[{{ $side }}][event][google_maps_url]" placeholder="e.g. https://maps.app.goo.gl/..." value="{{ old("sides.$side.event.google_maps_url", $event?->google_maps_url) }}">
                 <h3>Contact Person</h3>
 
 @for ($contactNumber = 1; $contactNumber <= 3; $contactNumber++)
@@ -446,6 +451,7 @@
             <label>Contact {{ $contactNumber }} - Nama</label>
             <input
                 name="sides[{{ $side }}][event][contacts][{{ $contactNumber }}][contact_name]"
+                placeholder="e.g. Ahmad"
                 value="{{ old("sides.$side.event.contacts.$contactNumber.contact_name", $contact?->contact_name) }}"
             >
         </div>
@@ -454,6 +460,7 @@
             <label>Contact {{ $contactNumber }} - Telefon</label>
             <input
                 name="sides[{{ $side }}][event][contacts][{{ $contactNumber }}][contact_phone]"
+                placeholder="e.g. 012-3456789"
                 value="{{ old("sides.$side.event.contacts.$contactNumber.contact_phone", $contact?->contact_phone) }}"
             >
         </div>
@@ -512,6 +519,7 @@
             <input
                 id="courier-recipient-name"
                 name="fulfilment[recipient_name]"
+                placeholder="e.g. Muhammad Syafiq Bin Rahim"
                 value="{{ old('fulfilment.recipient_name', $order->fulfilment?->recipient_name) }}"
             >
         </div>
@@ -521,6 +529,7 @@
             <input
                 id="courier-recipient-phone"
                 name="fulfilment[recipient_phone]"
+                placeholder="e.g. 012-3456789"
                 value="{{ old('fulfilment.recipient_phone', $order->fulfilment?->recipient_phone) }}"
             >
         </div>
@@ -531,6 +540,7 @@
         id="courier-shipping-address"
         rows="4"
         name="fulfilment[shipping_address]"
+        placeholder="e.g. No. 12, Jalan Melur 3, Taman Melur, 43000 Kajang, Selangor"
     >{{ old('fulfilment.shipping_address', $order->fulfilment?->shipping_address) }}</textarea>
 </div>
 </fieldset>

@@ -333,7 +333,7 @@
                 </label>
                 @error('responsibility_acknowledged')<p class="field-error" role="alert">{{ $message }}</p>@enderror
 
-                <label class="confirmation-checkbox liability-checkbox">
+                <label class="confirmation-checkbox">
                     <input
                         type="checkbox"
                         name="post_confirmation_liability_acknowledged"
