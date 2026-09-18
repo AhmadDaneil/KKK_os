@@ -1,8 +1,11 @@
 <?php
 
 use App\Providers\AppServiceProvider;
+use App\Providers\BackupServiceProvider;
+use App\Providers\PhotoshopExportServiceProvider;
 
 return [
     AppServiceProvider::class,
-    App\Providers\PhotoshopExportServiceProvider::class,
+    BackupServiceProvider::class,
+    PhotoshopExportServiceProvider::class,
 ];
