@@ -8,6 +8,9 @@ use App\Http\Controllers\Staff\StaffJobAssignmentController;
 use App\Http\Controllers\Staff\StaffDesignWorkflowController;
 use App\Http\Controllers\Staff\StaffPackingWorkflowController;
 use App\Http\Controllers\Staff\StaffDepositPaymentController;
+use App\Http\Controllers\Admin\AdminAuthController;
+use App\Http\Controllers\Admin\AdminDashboardController;
+use App\Http\Controllers\Admin\AdminStaffController;
 use App\Http\Controllers\CustomerArtworkReviewController;
 use App\Http\Controllers\CustomerDashboardController;
 use App\Http\Controllers\CustomerDepositReceiptController;
@@ -40,6 +43,32 @@ Route::get('/semak-progress', [PublicOrderController::class, 'progress'])
 Route::post('/semak-progress', [PublicOrderController::class, 'lookupProgress'])
     ->middleware('throttle:10,1')
     ->name('public.orders.progress.lookup');
+
+/*
+|--------------------------------------------------------------------------
+| Admin Routes
+|--------------------------------------------------------------------------
+*/
+
+Route::get('/admin/login', [AdminAuthController::class, 'create'])
+    ->name('admin.login');
+
+Route::post('/admin/login', [AdminAuthController::class, 'store'])
+    ->middleware('throttle:10,1')
+    ->name('admin.login.store');
+
+Route::middleware(['auth', 'active.staff', 'staff.role:ADMIN'])
+    ->prefix('admin')
+    ->name('admin.')
+    ->group(function () {
+        Route::get('/', [AdminDashboardController::class, 'index'])->name('dashboard');
+        Route::post('/logout', [AdminAuthController::class, 'destroy'])->name('logout');
+
+        Route::get('/staff', [AdminStaffController::class, 'index'])->name('staff.index');
+        Route::post('/staff', [AdminStaffController::class, 'store'])->name('staff.store');
+        Route::put('/staff/{user}', [AdminStaffController::class, 'update'])->name('staff.update');
+        Route::put('/staff/{user}/password', [AdminStaffController::class, 'updatePassword'])->name('staff.password.update');
+    });
 
 /*
 |--------------------------------------------------------------------------
