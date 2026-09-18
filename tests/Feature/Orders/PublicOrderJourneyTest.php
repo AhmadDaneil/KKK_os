@@ -4,6 +4,7 @@ namespace Tests\Feature\Orders;
 
 use App\Models\Order;
 use App\Services\Orders\CreateOrderService;
+use App\Services\Orders\GenerateOrderAccessLinkService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -95,5 +96,48 @@ class PublicOrderJourneyTest extends TestCase
             ])
             ->assertRedirect(route('public.orders.progress'))
             ->assertSessionHasErrors('order_id');
+    }
+
+    public function test_progress_page_links_to_artwork_review_for_authorized_customer(): void
+    {
+        $order = app(CreateOrderService::class)->create([
+            'package_count' => 1,
+            'side' => 'LELAKI',
+            'customer_name' => 'Customer Artwork',
+            'customer_email' => 'artwork@example.com',
+            'customer_phone' => '0123456789',
+        ]);
+        $order->update(['status' => 'DESIGN_READY']);
+
+        $secureLink = app(GenerateOrderAccessLinkService::class)->generate($order);
+        $this->get($secureLink)->assertRedirect(route('orders.dashboard', $order->order_id));
+
+        $this->post(route('public.orders.progress.lookup'), [
+            'order_id' => $order->order_id,
+        ])
+            ->assertOk()
+            ->assertSee('Buka Semakan Penuh')
+            ->assertSee(route('orders.artwork.review', $order->order_id));
+    }
+
+    public function test_order_id_lookup_grants_direct_artwork_review_access(): void
+    {
+        $order = app(CreateOrderService::class)->create([
+            'package_count' => 1,
+            'side' => 'LELAKI',
+            'customer_name' => 'Customer Artwork',
+            'customer_email' => 'artwork@example.com',
+            'customer_phone' => '0123456789',
+        ]);
+        $order->update(['status' => 'DESIGN_READY']);
+
+        $this->post(route('public.orders.progress.lookup'), [
+            'order_id' => $order->order_id,
+        ])
+            ->assertOk()
+            ->assertSee('Buka Semakan Penuh')
+            ->assertSee(route('orders.artwork.review', $order->order_id));
+
+        $this->get(route('orders.artwork.review', $order->order_id))->assertOk();
     }
 }

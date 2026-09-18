@@ -23,7 +23,11 @@
             <input id="password" type="password" name="password" required autocomplete="current-password">
             <button class="admin-button admin-button-primary admin-login-submit" type="submit">Log Masuk</button>
         </form>
-        <a class="admin-login-alt" href="{{ route('staff.login') }}">Pergi ke Staff Login</a>
+        <div class="admin-portal-note">
+            <strong>Anda staff Operation, Designer atau Production?</strong>
+            <span>Akaun staff perlu menggunakan portal staff.</span>
+            <a href="{{ route('staff.login') }}">Pergi ke Staff Login →</a>
+        </div>
     </main>
 </body>
 </html>

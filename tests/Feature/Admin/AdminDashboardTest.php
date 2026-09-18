@@ -44,7 +44,8 @@ class AdminDashboardTest extends TestCase
         $this->from(route('admin.login'))->post(route('admin.login.store'), [
             'email' => $designer->email,
             'password' => 'secure-password',
-        ])->assertRedirect(route('admin.login'))->assertSessionHasErrors('email');
+        ])->assertRedirect(route('admin.login'))
+            ->assertSessionHasErrors(['email' => 'Akaun ini ialah akaun staff. Sila log masuk melalui halaman Staff Login.']);
 
         $this->assertGuest();
     }

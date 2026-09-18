@@ -8,12 +8,14 @@ use App\Http\Controllers\Staff\StaffJobAssignmentController;
 use App\Http\Controllers\Staff\StaffDesignWorkflowController;
 use App\Http\Controllers\Staff\StaffPackingWorkflowController;
 use App\Http\Controllers\Staff\StaffDepositPaymentController;
+use App\Http\Controllers\Staff\StaffBalancePaymentController;
 use App\Http\Controllers\Admin\AdminAuthController;
 use App\Http\Controllers\Admin\AdminDashboardController;
 use App\Http\Controllers\Admin\AdminStaffController;
 use App\Http\Controllers\CustomerArtworkReviewController;
 use App\Http\Controllers\CustomerDashboardController;
 use App\Http\Controllers\CustomerDepositReceiptController;
+use App\Http\Controllers\CustomerBalanceReceiptController;
 use App\Http\Controllers\CustomerOrderConfirmController;
 use App\Http\Controllers\CustomerOrderDraftController;
 use App\Http\Controllers\CustomerOrderReviewController;
@@ -43,6 +45,10 @@ Route::get('/semak-progress', [PublicOrderController::class, 'progress'])
 Route::post('/semak-progress', [PublicOrderController::class, 'lookupProgress'])
     ->middleware('throttle:10,1')
     ->name('public.orders.progress.lookup');
+
+Route::post('/order/{orderId}/balance-receipt', [CustomerBalanceReceiptController::class, 'store'])
+    ->middleware('throttle:10,1')
+    ->name('orders.balance-receipt.store');
 
 /*
 |--------------------------------------------------------------------------
@@ -172,6 +178,10 @@ Route::middleware(['auth', 'active.staff'])
                 ->name('payments.deposit.approve');
             Route::post('/payments/{payment}/reject-deposit', [StaffDepositPaymentController::class, 'reject'])
                 ->name('payments.deposit.reject');
+            Route::post('/payments/{payment}/approve-balance', [StaffBalancePaymentController::class, 'approve'])
+                ->name('payments.balance.approve');
+            Route::post('/payments/{payment}/reject-balance', [StaffBalancePaymentController::class, 'reject'])
+                ->name('payments.balance.reject');
         });
 
         Route::middleware('staff.role:ADMIN')->group(function () {

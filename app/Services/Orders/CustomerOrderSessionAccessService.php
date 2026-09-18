@@ -52,6 +52,33 @@ class CustomerOrderSessionAccessService
         return $order;
     }
 
+    public function hasAccess(Request $request, Order $order): bool
+    {
+        $grant = $request->session()->get($this->sessionKey($order->order_id));
+
+        if (! is_array($grant) || (int) ($grant['order_fk'] ?? 0) !== (int) $order->id) {
+            return false;
+        }
+
+        $expiresAt = $grant['expires_at'] ?? null;
+
+        if ($expiresAt !== null && CarbonImmutable::parse($expiresAt)->isPast()) {
+            $request->session()->forget($this->sessionKey($order->order_id));
+
+            return false;
+        }
+
+        return true;
+    }
+
+    public function establishFromProgressLookup(Request $request, Order $order): void
+    {
+        $request->session()->put($this->sessionKey($order->order_id), [
+            'order_fk' => $order->id,
+            'expires_at' => now()->addHours(2)->toIso8601String(),
+        ]);
+    }
+
     private function sessionKey(string $orderId): string
     {
         return self::SESSION_PREFIX.$orderId;

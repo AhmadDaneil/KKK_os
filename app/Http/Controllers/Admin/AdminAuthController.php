@@ -27,11 +27,19 @@ class AdminAuthController extends Controller
             'password' => ['required', 'string'],
         ]);
 
-        if (! Auth::attempt($credentials) || ! $request->user()?->isAdmin()) {
-            Auth::logout();
-
+        if (! Auth::attempt($credentials)) {
             throw ValidationException::withMessages([
                 'email' => 'Email atau kata laluan admin tidak sah.',
+            ]);
+        }
+
+        if (! $request->user()?->isAdmin()) {
+            Auth::logout();
+            $request->session()->invalidate();
+            $request->session()->regenerateToken();
+
+            throw ValidationException::withMessages([
+                'email' => 'Akaun ini ialah akaun staff. Sila log masuk melalui halaman Staff Login.',
             ]);
         }
 

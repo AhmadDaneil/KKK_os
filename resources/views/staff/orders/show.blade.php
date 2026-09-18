@@ -386,6 +386,36 @@
                                                         Upload Artwork
                                                     </button>
                                                 </form>
+
+                                                @if ($job->artworkVersions->isNotEmpty())
+                                                    <div class="staff-artwork-ready-panel">
+                                                        <div>
+                                                            <strong>Artwork telah dimuat naik</strong>
+                                                            <p>
+                                                                Versi {{ $job->artworkVersions->max('version_number') }} ialah versi terkini.
+                                                                Hantar kepada customer apabila preview sudah diperiksa.
+                                                            </p>
+                                                        </div>
+
+                                                        <form
+                                                            method="POST"
+                                                            action="{{ route('staff.design-jobs.mark-ready', $job) }}"
+                                                        >
+                                                            @csrf
+                                                            <button
+                                                                type="submit"
+                                                                class="staff-button staff-button-primary"
+                                                            >
+                                                                Hantar Untuk Semakan Customer
+                                                            </button>
+                                                        </form>
+                                                    </div>
+                                                @else
+                                                    <p class="staff-work-message">
+                                                        Muat naik source artwork dan customer preview terlebih dahulu.
+                                                        Selepas itu, butang untuk menghantar artwork kepada customer akan dipaparkan.
+                                                    </p>
+                                                @endif
                                             </div>
                                         @elseif ($job->status === 'DESIGN_READY')
                                             <p class="staff-work-message">
@@ -474,16 +504,25 @@
                                 </div>
                             </dl>
 
-                            @if ($payment->payment_type === 'BOOKING_DEPOSIT' && ! empty($payment->metadata['receipt_path']))
+                            @if (in_array($payment->payment_type, ['BOOKING_DEPOSIT', 'BALANCE'], true) && ! empty($payment->metadata['receipt_path']))
                                 <div class="staff-payment-actions">
                                     <a class="staff-button staff-button-small" target="_blank" rel="noopener" href="{{ route('staff.payments.receipt', $payment) }}">Lihat Resit</a>
-                                    @if (auth()->user()->isOperationManagement() && $payment->status === 'PENDING')
+                                    @if ($payment->payment_type === 'BOOKING_DEPOSIT' && auth()->user()->isOperationManagement() && $payment->status === 'PENDING')
                                         <form method="POST" action="{{ route('staff.payments.deposit.approve', $payment) }}">@csrf<button class="staff-button staff-button-primary" type="submit">Sahkan Deposit</button></form>
                                         <form method="POST" action="{{ route('staff.payments.deposit.reject', $payment) }}" class="staff-reject-payment-form">
                                             @csrf
                                             <label for="rejection-reason-{{ $payment->id }}">Sebab penolakan</label>
                                             <textarea id="rejection-reason-{{ $payment->id }}" name="rejection_reason" rows="2" required>{{ old('rejection_reason') }}</textarea>
                                             <button class="staff-button staff-button-danger" type="submit">Tolak Deposit</button>
+                                        </form>
+                                    @endif
+                                    @if ($payment->payment_type === 'BALANCE' && auth()->user()->isOperationManagement() && $payment->status === 'PENDING')
+                                        <form method="POST" action="{{ route('staff.payments.balance.approve', $payment) }}">@csrf<button class="staff-button staff-button-primary" type="submit">Sahkan Bayaran Penuh</button></form>
+                                        <form method="POST" action="{{ route('staff.payments.balance.reject', $payment) }}" class="staff-reject-payment-form">
+                                            @csrf
+                                            <label for="balance-rejection-reason-{{ $payment->id }}">Sebab penolakan</label>
+                                            <textarea id="balance-rejection-reason-{{ $payment->id }}" name="rejection_reason" rows="2" required>{{ old('rejection_reason') }}</textarea>
+                                            <button class="staff-button staff-button-danger" type="submit">Tolak Bayaran</button>
                                         </form>
                                     @endif
                                     @if ($payment->status === 'FAILED' && ! empty($payment->metadata['rejection_reason']))

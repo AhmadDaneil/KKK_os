@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Order;
 use App\Services\Orders\BuildCustomerProgressService;
 use App\Services\Orders\CreateOrderService;
+use App\Services\Orders\CustomerOrderSessionAccessService;
 use App\Services\Orders\GenerateOrderAccessLinkService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -37,14 +38,23 @@ class PublicOrderController extends Controller
         return redirect()->away($accessLink->generate($order));
     }
 
-    public function progress(): View
+    public function progress(
+        Request $request,
+        BuildCustomerProgressService $customerProgress,
+        CustomerOrderSessionAccessService $sessionAccess,
+    ): View|RedirectResponse
     {
+        if ($request->filled('order_id')) {
+            return $this->lookupProgress($request, $customerProgress, $sessionAccess);
+        }
+
         return view('public.order-progress');
     }
 
     public function lookupProgress(
         Request $request,
         BuildCustomerProgressService $customerProgress,
+        CustomerOrderSessionAccessService $sessionAccess,
     ): View|RedirectResponse {
         $request->merge([
             'order_id' => strtoupper(trim((string) $request->input('order_id'))),
@@ -66,11 +76,48 @@ class PublicOrderController extends Controller
                 ->withErrors(['order_id' => 'Order ID tidak ditemui. Sila semak dan cuba lagi.']);
         }
 
-        $order->load(['fulfilmentJob', 'payments']);
+        $order->load(['fulfilmentJob', 'payments', 'designJobs.artworkVersions']);
         $deposit = $order->payments->firstWhere('payment_type', 'BOOKING_DEPOSIT');
+        $balance = $order->payments->where('payment_type', 'BALANCE')->sortByDesc('id')->first();
+        $artworkReady = in_array($order->status, [
+            'DESIGN_READY',
+            'CORRECTION_REQUESTED',
+            'DESIGN_APPROVED',
+            'BALANCE_PENDING',
+            'PAID',
+            'READY_FOR_PRINT',
+            'PRINTING',
+            'PRINTED',
+            'READY_FOR_PACKING',
+            'PACKING',
+            'PACKED',
+            'READY_FOR_FULFILMENT',
+            'COMPLETED',
+        ], true);
+
+        if ($artworkReady) {
+            $sessionAccess->establishFromProgressLookup($request, $order);
+        }
+
+        $artworkPreviews = $artworkReady
+            ? $order->designJobs
+                ->filter(fn ($job) => in_array($job->status, [
+                    'DESIGN_READY',
+                    'CORRECTION_REQUESTED',
+                    'DESIGN_APPROVED',
+                ], true) && $job->artworkVersions->isNotEmpty())
+                ->map(fn ($job) => [
+                    'design_job_id' => $job->id,
+                    'side' => $job->side,
+                    'status' => $job->status,
+                    'version' => $job->artworkVersions->max('version_number'),
+                ])
+                ->values()
+            : collect();
 
         return view('public.order-progress', [
             'orderId' => $order->order_id,
+            'orderStatus' => $order->status,
             'progress' => $customerProgress->build($order),
             'shipment' => $order->fulfilmentJob && $order->fulfilmentJob->method === 'COURIER'
                 ? [
@@ -83,6 +130,16 @@ class PublicOrderController extends Controller
                 'status' => $deposit->status,
                 'reason' => $deposit->metadata['rejection_reason'] ?? null,
             ] : null,
+            'balance' => $balance ? [
+                'status' => $balance->status,
+                'amount' => $balance->amount,
+                'reason' => $balance->metadata['rejection_reason'] ?? null,
+            ] : null,
+            'balanceAmount' => (string) config('kingkadkahwin.balance.amount', '0.00'),
+            'balanceQrImage' => (string) config('kingkadkahwin.balance.qr_image'),
+            'artworkReady' => $artworkReady,
+            'canAccessArtwork' => $sessionAccess->hasAccess($request, $order),
+            'artworkPreviews' => $artworkPreviews,
         ]);
     }
 }

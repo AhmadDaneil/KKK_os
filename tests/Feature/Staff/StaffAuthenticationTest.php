@@ -11,6 +11,24 @@ class StaffAuthenticationTest extends TestCase
 {
     use RefreshDatabase;
 
+    public function test_staff_created_with_hashed_model_cast_can_log_in(): void
+    {
+        $staff = User::create([
+            'name' => 'Designer Baharu',
+            'email' => 'designer.baharu@kkk.local',
+            'password' => 'temporary-password',
+            'role' => User::ROLE_DESIGNER,
+            'is_active' => true,
+        ]);
+
+        $this->post(route('staff.login.store'), [
+            'email' => 'designer.baharu@kkk.local',
+            'password' => 'temporary-password',
+        ])->assertRedirect(route('staff.dashboard'));
+
+        $this->assertAuthenticatedAs($staff);
+    }
+
     public function test_guest_is_redirected_to_staff_login(): void
     {
         $this->get(route('staff.dashboard'))

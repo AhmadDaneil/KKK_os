@@ -3,7 +3,12 @@
 return [
     'deposit' => [
         'amount' => env('KKK_DEPOSIT_AMOUNT', '0.00'),
-        'qr_image' => env('KKK_DEPOSIT_QR_IMAGE', 'images/payment/deposit-qr.png'),
+        'qr_image' => env('KKK_DEPOSIT_QR_IMAGE', 'images/payment/maybank-qr.jpg'),
+    ],
+
+    'balance' => [
+        'amount' => env('KKK_BALANCE_AMOUNT', '0.00'),
+        'qr_image' => env('KKK_BALANCE_QR_IMAGE', env('KKK_DEPOSIT_QR_IMAGE', 'images/payment/maybank-qr.jpg')),
     ],
 
     'social' => [

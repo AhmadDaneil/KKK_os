@@ -8,6 +8,7 @@ use App\Services\Design\CreateArtworkVersionService;
 use App\Services\Design\MarkDesignReadyService;
 use App\Services\Design\ResumeDesignAfterCorrectionService;
 use App\Services\Design\StartDesignJobService;
+use App\Services\Design\SyncOrderDesignStatusService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
@@ -21,7 +22,8 @@ class StaffDesignWorkflowController extends Controller
     public function start(
         Request $request,
         DesignJob $designJob,
-        StartDesignJobService $service
+        StartDesignJobService $service,
+        SyncOrderDesignStatusService $sync
     ): RedirectResponse {
         $this->authorizeAssignedDesigner($request, $designJob);
 
@@ -30,6 +32,7 @@ class StaffDesignWorkflowController extends Controller
                 $designJob,
                 $request->user()
             );
+            $sync->sync($designJob->order);
         } catch (RuntimeException $exception) {
             return back()->withErrors([
                 'design_job' => $exception->getMessage(),
@@ -45,7 +48,8 @@ class StaffDesignWorkflowController extends Controller
     public function resumeCorrection(
         Request $request,
         DesignJob $designJob,
-        ResumeDesignAfterCorrectionService $service
+        ResumeDesignAfterCorrectionService $service,
+        SyncOrderDesignStatusService $sync
     ): RedirectResponse {
         $this->authorizeAssignedDesigner($request, $designJob);
 
@@ -54,6 +58,7 @@ class StaffDesignWorkflowController extends Controller
                 $designJob,
                 $request->user()
             );
+            $sync->sync($designJob->order);
         } catch (RuntimeException $exception) {
             return back()->withErrors([
                 'design_job' => $exception->getMessage(),
@@ -69,7 +74,8 @@ class StaffDesignWorkflowController extends Controller
     public function markReady(
     Request $request,
     DesignJob $designJob,
-    MarkDesignReadyService $service
+    MarkDesignReadyService $service,
+    SyncOrderDesignStatusService $sync
 ): RedirectResponse {
     $this->authorizeAssignedDesigner($request, $designJob);
 
@@ -78,6 +84,7 @@ class StaffDesignWorkflowController extends Controller
             $designJob,
             $request->user()
         );
+        $sync->sync($designJob->order);
     } catch (RuntimeException $exception) {
         return back()->withErrors([
             'design_job' => $exception->getMessage(),
