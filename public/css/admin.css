@@ -33,6 +33,46 @@
 .admin-staff-card[data-inactive]{border-left-color:#9aa49f;background:#f3f4f3}
 .admin-button-danger{border-color:#bd4b4b;color:#fff;background:#a83232}.admin-delete-form{display:flex;padding:14px 16px;align-items:center;justify-content:space-between;gap:16px;border-top:1px solid #ecd0d0;background:#fff8f8}.admin-delete-form strong,.admin-delete-form small{display:block}.admin-delete-form strong{color:#8f2929;font-size:12px}.admin-delete-form small{margin-top:3px;color:#806767;font-size:11px}
 .admin-sidebar{width:270px;padding:24px 18px 18px}.admin-workspace{margin-left:270px}.admin-brand{padding:2px 8px 24px}.admin-brand strong{font-size:17px}.admin-brand small{font-size:12px}@media(max-width:760px){.admin-sidebar{position:static;width:auto;padding:16px}.admin-workspace{margin-left:0}.admin-delete-form{align-items:stretch;flex-direction:column}}
-.admin-staff-card details{border-top-color:#d2dbd5}
-.admin-create-form{padding:16px;border:1px solid #ccd7d0;border-radius:10px;background:#f7faf8}
-.admin-filter{padding:13px;border:1px solid #d0dad4;border-radius:10px;background:#f4f7f5}
+
+/* Match native Admin Management pages with the brown/gold Admin Operations theme. */
+:root{--admin-bg:#f4efe3;--admin-ink:#2f291d;--admin-muted:#746b59;--admin-green:#7a5a1e;--admin-green-2:#9a7126;--admin-gold:#e0b95c;--admin-line:#d8cba9;--admin-shadow:0 5px 18px rgba(63,47,17,.10)}
+body{background:linear-gradient(180deg,#f4efe3 0,#f3f4f1 380px)}
+.admin-sidebar{background:#302817;border-right:3px solid #d1ab52}
+.admin-brand-mark,.admin-profile>span{color:#302817;background:#e0b95c}
+.admin-brand small,.admin-profile small{color:#c3b793}
+.admin-nav p{color:#ad9d73;border-top-color:rgba(224,185,92,.18)}
+.admin-nav a{color:#ddd4bb}
+.admin-nav a:hover,.admin-nav a.is-active{color:#fff;background:rgba(224,185,92,.14)}
+.admin-nav a.is-active{background:rgba(224,185,92,.22)}
+.admin-nav a span{border-color:rgba(224,185,92,.25)}
+.admin-profile{border-top-color:rgba(224,185,92,.20)}
+.admin-topbar{border-bottom:2px solid #d6bf83;background:rgba(255,252,245,.96)}
+.admin-topbar p,.admin-eyebrow{color:#8a6720}
+.admin-welcome,.admin-page-intro{background:linear-gradient(135deg,#46391f,#755b26);box-shadow:0 15px 40px rgba(70,53,20,.18)}
+.admin-welcome .admin-eyebrow,.admin-page-intro .admin-eyebrow{color:#ead7a3}
+.admin-welcome>div>p:last-child,.admin-page-intro>div>p:last-child{color:#eee5cf}
+.admin-button-primary{border-color:#7a5a1e;background:#7a5a1e}
+.admin-button-gold{border-color:#d1a846;background:#e0b95c}
+.admin-panel{border-color:#d8cba9;border-top-color:#b9852c}
+.admin-content-grid .admin-panel:nth-child(1){border-top-color:#a87828}
+.admin-content-grid .admin-panel:nth-child(2){border-top-color:#cfaa4e}
+.admin-panel-heading{border-bottom-color:#e1d7be}
+.admin-queue-list a{border-color:#ded2b6;border-left-color:#b9852c;background:#fffdf8}
+.admin-queue-list a:nth-child(2){border-left-color:#c59a3a}
+.admin-queue-list a:nth-child(3){border-left-color:#8b6b35}
+.queue-icon{color:#72541d;background:#f7eac9}
+.admin-action-grid a{border-color:#ded2b6;border-left-color:#b9852c;background:#fffdf8}
+.admin-action-grid a:hover{border-color:#c8b581;background:#fff9ea}
+.admin-stat-grid article{border-color:#d8cba9;background:#fffdf8}
+.admin-stat-grid article:nth-child(1){border-top-color:#9a7126;background:#fffdf8}
+.admin-stat-grid article:nth-child(2){border-top-color:#b9852c;background:#fffcf5}
+.admin-stat-grid article:nth-child(3),.admin-stat-grid article:nth-child(4){border-top-color:#d29732;background:#fffbf2}
+.admin-table{border-color:#d8cba9}.admin-table th{border-bottom-color:#cdbd94;color:#665839;background:#f1ead8}.admin-table td{border-bottom-color:#e5dcc6}.admin-table tbody tr:nth-child(even){background:#fcfaf4}.admin-table tbody tr:hover{background:#f8efd9}
+.admin-status{border:1px solid #dcc991;color:#70531e;background:#f8edcf}
+.admin-create-form,.admin-filter{border-color:#d8cba9;background:#faf6ec}
+.admin-form input,.admin-form select,.admin-filter input,.admin-filter select,.admin-password-form input{border-color:#d1c4a3}
+.admin-form input:focus,.admin-form select:focus,.admin-filter input:focus,.admin-filter select:focus,.admin-password-form input:focus{border-color:#a77b27;outline-color:rgba(185,133,44,.15)}
+.admin-staff-card{border-color:#d8cba9;border-left-color:#b9852c}.admin-staff-identity>span{background:#9a7126}.admin-staff-card details{border-top-color:#e3dac3}.admin-staff-card summary,.admin-filter>a,.admin-panel-heading>a,.admin-table a{color:#89631d}.admin-edit-form{background:#fcfaf4}
+.admin-staff-card details{border-top-color:#e3dac3}
+.admin-create-form{padding:16px;border:1px solid #d8cba9;border-radius:10px;background:#faf6ec}
+.admin-filter{padding:13px;border:1px solid #d8cba9;border-radius:10px;background:#faf6ec}
