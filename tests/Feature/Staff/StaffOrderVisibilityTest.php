@@ -613,7 +613,7 @@ public function test_assigned_designer_sees_artwork_upload_form_when_design_is_i
         ->assertDontSee('Resume Correction');
 }
 
-public function test_admin_does_not_receive_designer_operational_controls(): void
+public function test_admin_receives_designer_operational_controls_in_distinct_admin_layout(): void
 {
     $admin = $this->staff(User::ROLE_ADMIN);
     $designer = $this->staff(User::ROLE_DESIGNER);
@@ -633,7 +633,9 @@ public function test_admin_does_not_receive_designer_operational_controls(): voi
         ->get(route('staff.orders.show', $order->order_id))
         ->assertOk()
         ->assertSee('Assign')
-        ->assertDontSee('Start Design')
+        ->assertSee('Start Design')
+        ->assertSee('Admin Operations')
+        ->assertSee('admin-operations-mode', false)
         ->assertDontSee('Upload Artwork Version')
         ->assertDontSee('Resume Correction');
 }

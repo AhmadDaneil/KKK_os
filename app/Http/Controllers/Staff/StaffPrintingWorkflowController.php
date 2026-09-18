@@ -7,6 +7,7 @@ use App\Models\PrintJob;
 use App\Services\Printing\MarkPrintJobPrintedService;
 use App\Services\Printing\StartPrintingService;
 use App\Services\Printing\SyncOrderPrintStatusService;
+use App\Services\Packing\InitializePackingJobForOrderService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use RuntimeException;
@@ -46,7 +47,8 @@ class StaffPrintingWorkflowController extends Controller
         Request $request,
         PrintJob $printJob,
         MarkPrintJobPrintedService $service,
-        SyncOrderPrintStatusService $syncService
+        SyncOrderPrintStatusService $syncService,
+        InitializePackingJobForOrderService $initializePacking
     ): RedirectResponse {
         $this->authorizeAssignedPrintingStaff($request, $printJob);
 
@@ -56,9 +58,13 @@ class StaffPrintingWorkflowController extends Controller
                 $request->user()
             );
 
-            $syncService->sync(
+            $order = $syncService->sync(
                 $printJob->order
             );
+
+            if ($order->status === 'PRINTED') {
+                $initializePacking->initialize($order);
+            }
         } catch (RuntimeException $exception) {
             return back()->withErrors([
                 'print_job' => $exception->getMessage(),
@@ -76,7 +82,8 @@ class StaffPrintingWorkflowController extends Controller
         PrintJob $printJob
     ): void {
         abort_unless(
-            $printJob->assigned_user_id === $request->user()->id,
+            $request->user()->isAdmin()
+                || $printJob->assigned_user_id === $request->user()->id,
             404
         );
     }

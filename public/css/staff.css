@@ -1165,3 +1165,11 @@ a.staff-pagination-link:hover {
 .staff-card-heading { padding-bottom:13px; border-bottom:1px solid #d6ded9; }
 .staff-detail-group { border-top-width:2px; }
 .staff-assignment-form { padding:15px; border:1px solid #c8d8cf; border-left:4px solid #426fa3; border-radius:9px; background:#f3f7fa; }
+.admin-operations-mode { background:linear-gradient(180deg,#f4efe3 0,#f3f4f1 380px); }
+.admin-operations-mode .staff-sidebar { background:#302817; border-right:3px solid #d1ab52; }
+.admin-operations-mode .staff-brand-mark,.admin-operations-mode .staff-user-avatar { background:#e0b95c; }
+.admin-operations-mode .staff-nav-link.is-active { background:rgba(224,185,92,.2); }
+.admin-operations-mode .staff-topbar { border-bottom-color:#d6bf83; background:rgba(255,252,245,.96); }
+.admin-operations-mode .staff-kicker { color:#8a6720; }
+.admin-operations-mode .staff-section-title { border-left-color:#b9852c; background:#f4ead1; }
+.admin-operations-mode .staff-assignment-form { border-left-color:#b9852c; background:#fcf8ee; }

@@ -285,7 +285,8 @@ class StaffPackingWorkflowController extends Controller
         PackingJob $packingJob
     ): void {
         abort_unless(
-            $packingJob->assigned_user_id === $request->user()->id,
+            $request->user()->isOperationManagement()
+                || $packingJob->assigned_user_id === $request->user()->id,
             404
         );
     }

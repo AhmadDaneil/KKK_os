@@ -75,7 +75,7 @@ class StaffDesignWorkflowTest extends TestCase
         );
     }
 
-    public function test_admin_cannot_start_job_assigned_to_designer(): void
+    public function test_admin_can_start_job_assigned_to_designer(): void
     {
         $admin = $this->admin();
         $designer = $this->designer();
@@ -85,10 +85,10 @@ class StaffDesignWorkflowTest extends TestCase
 
         $this->actingAs($admin)
             ->post(route('staff.design-jobs.start', $job))
-            ->assertNotFound();
+            ->assertRedirect();
 
         $this->assertSame(
-            'READY_FOR_DESIGN',
+            'DESIGN_IN_PROGRESS',
             $job->fresh()->status
         );
     }
@@ -981,7 +981,7 @@ public function test_other_designer_cannot_mark_assigned_job_ready(): void
     );
 }
 
-public function test_admin_cannot_mark_designer_job_ready(): void
+public function test_admin_can_mark_designer_job_ready(): void
 {
     $admin = $this->admin();
     $designer = $this->designer();
@@ -1008,10 +1008,10 @@ public function test_admin_cannot_mark_designer_job_ready(): void
         ->post(
             route('staff.design-jobs.mark-ready', $job)
         )
-        ->assertNotFound();
+        ->assertRedirect();
 
     $this->assertSame(
-        'DESIGN_IN_PROGRESS',
+        'DESIGN_READY',
         $job->fresh()->status
     );
 }

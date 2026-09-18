@@ -8,12 +8,12 @@
 
     <link rel="stylesheet" href="{{ asset('css/staff.css') }}">
 </head>
-<body>
+<body @class(['admin-operations-mode' => auth()->user()->isAdmin()])>
     <div class="staff-app-shell">
         @include('staff.partials.sidebar')
         <div class="staff-workspace">
             <header class="staff-topbar">
-                <div><p class="staff-kicker">Order Detail</p><h1>{{ $order->order_id }}</h1></div>
+                <div><p class="staff-kicker">{{ auth()->user()->isAdmin() ? 'Admin Operations' : 'Staff Operations' }} · Order Detail</p><h1>{{ $order->order_id }}</h1></div>
                 <form method="POST" action="{{ route('staff.logout') }}">@csrf<button type="submit" class="staff-button staff-button-small">Log Keluar</button></form>
             </header>
 
@@ -277,9 +277,9 @@
                                         <dd>{{ $job->artworkVersions->count() }}</dd>
                                     </div>
                                 </dl>
-                                @if (auth()->user()->hasStaffRole(\App\Models\User::ROLE_DESIGNER)
-                                    && ! auth()->user()->isAdmin()
-                                    && $job->assigned_user_id === auth()->id()
+                                @if (auth()->user()->isAdmin()
+                                    || (auth()->user()->hasStaffRole(\App\Models\User::ROLE_DESIGNER)
+                                    && $job->assigned_user_id === auth()->id())
                                     )
                                     <div class="staff-design-actions">
                                         @if ($job->status === 'READY_FOR_DESIGN')
@@ -575,6 +575,15 @@
                                         <dd>{{ $job->printed_at?->format('Y-m-d H:i') ?? '-' }}</dd>
                                     </div>
                                 </dl>
+                                @if (auth()->user()->isAdmin() || (auth()->user()->hasStaffRole(\App\Models\User::ROLE_PRINTING) && $job->assigned_user_id === auth()->id()))
+                                    @if ($job->status === 'READY_FOR_PRINT')
+                                        <form method="POST" action="{{ route('staff.print-jobs.start', $job) }}" class="staff-workflow-form">@csrf<button type="submit" class="staff-button staff-button-primary">Start Printing</button></form>
+                                    @elseif ($job->status === 'PRINTING')
+                                        <form method="POST" action="{{ route('staff.print-jobs.mark-printed', $job) }}" class="staff-workflow-form">@csrf<button type="submit" class="staff-button staff-button-primary">Mark Printed</button></form>
+                                    @elseif ($job->status === 'PRINTED')
+                                        <p class="staff-work-message">Cetakan untuk pakej ini telah siap.</p>
+                                    @endif
+                                @endif
                                 @if (auth()->user()->isAdmin() && ! request()->attributes->get('staff_overview_mode', false))
     <form
         method="POST"
@@ -715,7 +724,7 @@
                             <p class="staff-proof-status"><strong>Bukti packing:</strong> {{ $order->packingJob->proof_original_name ?? 'Telah dimuat naik' }}</p>
                         @endif
 
-                        @if (auth()->user()->hasStaffRole(\App\Models\User::ROLE_PACKING) && $order->packingJob->assigned_user_id === auth()->id())
+                        @if (auth()->user()->isOperationManagement() || (auth()->user()->hasStaffRole(\App\Models\User::ROLE_PACKING) && $order->packingJob->assigned_user_id === auth()->id()))
                             @if ($order->packingJob->status === 'READY_FOR_PACKING')
                                 <form method="POST" action="{{ route('staff.packing-jobs.start', $order->packingJob) }}" class="staff-workflow-form">@csrf<button type="submit" class="staff-button staff-button-primary">Start Packing</button></form>
                             @endif

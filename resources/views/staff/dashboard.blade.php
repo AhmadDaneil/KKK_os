@@ -6,13 +6,13 @@
     <title>Staff Dashboard - KKK OS</title>
     <link rel="stylesheet" href="{{ asset('css/staff.css') }}">
 </head>
-<body>
+<body @class(['admin-operations-mode' => auth()->user()->isAdmin()])>
     <div class="staff-app-shell">
         @include('staff.partials.sidebar')
 
         <div class="staff-workspace">
             <header class="staff-topbar">
-                <div><p class="staff-kicker">Operation Management</p><h1>Staff Dashboard</h1></div>
+                <div><p class="staff-kicker">{{ auth()->user()->isAdmin() ? 'Admin Operations' : 'Operation Management' }}</p><h1>{{ auth()->user()->isAdmin() ? 'Admin Operations Dashboard' : 'Staff Dashboard' }}</h1></div>
                 <form method="POST" action="{{ route('staff.logout') }}">@csrf<button type="submit" class="staff-button staff-button-small">Log Keluar</button></form>
             </header>
 
@@ -47,7 +47,7 @@
                             @if (auth()->user()->isAdmin() || auth()->user()->hasStaffRole(\App\Models\User::ROLE_PRINTING))
                                 <a href="{{ route('staff.orders.index', ['workstream' => 'printing']) }}" class="staff-feature-card"><span class="staff-feature-icon">PR</span><div><h3>Printing</h3><p>Order berbayar yang menunggu atau sedang dicetak.</p></div><span class="staff-card-arrow">→</span></a>
                             @endif
-                            @if (auth()->user()->isAdmin() || auth()->user()->hasStaffRole(\App\Models\User::ROLE_PACKING))
+                            @if (auth()->user()->isOperationManagement() || auth()->user()->hasStaffRole(\App\Models\User::ROLE_PACKING))
                                 <a href="{{ route('staff.orders.index', ['workstream' => 'packing']) }}" class="staff-feature-card"><span class="staff-feature-icon">PA</span><div><h3>Packing</h3><p>Semak item dan kemajuan pembungkusan setiap order.</p></div><span class="staff-card-arrow">→</span></a>
                             @endif
                         </div>

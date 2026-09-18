@@ -8,12 +8,12 @@
 
     <link rel="stylesheet" href="{{ asset('css/staff.css') }}">
 </head>
-<body>
+<body @class(['admin-operations-mode' => auth()->user()->isAdmin()])>
     <div class="staff-app-shell">
         @include('staff.partials.sidebar')
         <div class="staff-workspace">
             <header class="staff-topbar">
-                <div><p class="staff-kicker">{{ $workstream ? ucfirst($workstream) : 'Operation Management' }}</p><h1>{{ $workstream ? ucfirst($workstream).' Queue' : 'Semua Orders' }}</h1></div>
+                <div><p class="staff-kicker">{{ auth()->user()->isAdmin() ? 'Admin Operations' : ($workstream ? ucfirst($workstream) : 'Operation Management') }}</p><h1>{{ $workstream ? ucfirst($workstream).' Queue' : 'Semua Orders' }}</h1></div>
                 <form method="POST" action="{{ route('staff.logout') }}">@csrf<button type="submit" class="staff-button staff-button-small">Log Keluar</button></form>
             </header>
 

@@ -60,6 +60,34 @@ class StaffPackingWorkflowTest extends TestCase
         $this->assertSame('PACKING', $event->to_status);
     }
 
+    public function test_operation_management_can_start_any_packing_job(): void
+    {
+        $admin = $this->admin();
+        $operationManagement = $this->staff(User::ROLE_OM);
+        $assignedPackingStaff = $this->staff(User::ROLE_PACKING);
+
+        [, $job] = $this->packingJob();
+
+        app(AssignPackingJobService::class)
+            ->assign($job, $assignedPackingStaff, $admin);
+
+        $this->actingAs($operationManagement)
+            ->post(route('staff.packing-jobs.start', $job))
+            ->assertRedirect();
+
+        $job->refresh();
+
+        $this->assertSame('PACKING', $job->status);
+        $this->assertSame(
+            $operationManagement->id,
+            $job->events()
+                ->where('event_type', 'PACKING_STARTED')
+                ->latest('id')
+                ->firstOrFail()
+                ->actor_user_id
+        );
+    }
+
     public function test_assigned_packing_staff_can_verify_item(): void
     {
         $admin = $this->admin();
@@ -440,7 +468,7 @@ class StaffPackingWorkflowTest extends TestCase
         );
     }
 
-    public function test_admin_cannot_operate_job_assigned_to_packing_staff(): void
+    public function test_admin_can_operate_job_assigned_to_packing_staff(): void
     {
         $admin = $this->admin();
         $packing = $this->staff(User::ROLE_PACKING);
@@ -452,10 +480,10 @@ class StaffPackingWorkflowTest extends TestCase
 
         $this->actingAs($admin)
             ->post(route('staff.packing-jobs.start', $job))
-            ->assertNotFound();
+            ->assertRedirect();
 
         $this->assertSame(
-            'READY_FOR_PACKING',
+            'PACKING',
             $job->fresh()->status
         );
     }
@@ -1063,7 +1091,7 @@ class StaffPackingWorkflowTest extends TestCase
         );
     }
 
-public function test_admin_cannot_complete_courier_job_assigned_to_packing_staff(): void
+public function test_admin_can_complete_courier_job_assigned_to_packing_staff(): void
 {
     Storage::fake('local');
 
@@ -1114,23 +1142,23 @@ public function test_admin_cannot_complete_courier_job_assigned_to_packing_staff
         ]
     );
 
-    $response->assertNotFound();
+    $response->assertRedirect();
 
     $job->refresh();
     $order->refresh();
     $fulfilmentJob->refresh();
 
     $this->assertSame('PACKED', $job->status);
-    $this->assertSame('PACKED', $order->status);
-    $this->assertSame('READY', $fulfilmentJob->status);
+    $this->assertSame('COMPLETED', $order->status);
+    $this->assertSame('COMPLETED', $fulfilmentJob->status);
 
-    $this->assertNull($job->proof_storage_path);
-    $this->assertNull($fulfilmentJob->courier_provider);
-    $this->assertNull($fulfilmentJob->tracking_number);
-    $this->assertNull($fulfilmentJob->shipped_at);
+    $this->assertNotNull($job->proof_storage_path);
+    $this->assertSame('Pos Laju', $fulfilmentJob->courier_provider);
+    $this->assertSame('ADMIN123', $fulfilmentJob->tracking_number);
+    $this->assertNotNull($fulfilmentJob->shipped_at);
 
     $this->assertSame(
-        0,
+        1,
         $fulfilmentJob->events()
             ->where('event_type', 'COURIER_COMPLETED')
             ->count()

@@ -41,6 +41,11 @@ class StaffRoleAuthorizationTest extends TestCase
 
         $this->assertTrue($user->isActiveStaff());
         $this->assertAllowed($user, User::ROLE_OM);
+        $this->assertAllowed(
+            $user,
+            User::ROLE_PACKING,
+            User::ROLE_OM
+        );
         $this->assertForbidden($user, User::ROLE_DESIGNER);
     }
 

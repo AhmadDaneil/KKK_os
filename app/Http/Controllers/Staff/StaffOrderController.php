@@ -66,6 +66,11 @@ class StaffOrderController extends Controller
                 'packingJob.assignedUser',
                 'packingJob.items',
             ]);
+        } elseif ($user->hasStaffRole(User::ROLE_OM)) {
+            $order->load([
+                'packingJob.assignedUser',
+                'packingJob.items',
+            ]);
         } elseif ($user->hasStaffRole(User::ROLE_DESIGNER)) {
             $order->load([
                 'designJobs' => fn ($query) => $query
@@ -165,6 +170,7 @@ if ($user->isAdmin() && ! $request->attributes->get('staff_overview_mode', false
                 User::ROLE_DESIGNER => ['design'],
                 User::ROLE_PRINTING => ['printing'],
                 User::ROLE_PACKING => ['packing'],
+                User::ROLE_OM => ['packing'],
                 default => [],
             };
 

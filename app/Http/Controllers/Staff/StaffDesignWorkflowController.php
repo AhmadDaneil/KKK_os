@@ -298,7 +298,8 @@ class StaffDesignWorkflowController extends Controller
         DesignJob $designJob
     ): void {
         abort_unless(
-            $designJob->assigned_user_id === $request->user()->id,
+            $request->user()->isAdmin()
+                || $designJob->assigned_user_id === $request->user()->id,
             404
         );
     }

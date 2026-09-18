@@ -5,15 +5,15 @@
 @endphp
 
 <aside class="staff-sidebar" id="staff-sidebar">
-    <a href="{{ route('staff.dashboard') }}" class="staff-sidebar-brand">
+    <a href="{{ $staffUser->isAdmin() ? route('admin.dashboard') : route('staff.dashboard') }}" class="staff-sidebar-brand">
         <span class="staff-brand-mark">KKK</span>
-        <span><strong>KKK OS</strong><small>Staff Operations</small></span>
+        <span><strong>KKK OS</strong><small>{{ $staffUser->isAdmin() ? 'Admin Operations' : 'Staff Operations' }}</small></span>
     </a>
 
     <nav class="staff-nav" aria-label="Staff navigation">
         <section class="staff-nav-section">
             <h2>Operation Management</h2>
-            <a href="{{ route('staff.dashboard') }}" @class(['staff-nav-link', 'is-active' => request()->routeIs('staff.dashboard')])><span class="staff-nav-icon" aria-hidden="true">OV</span>Overview</a>
+            <a href="{{ $staffUser->isAdmin() ? route('admin.dashboard') : route('staff.dashboard') }}" @class(['staff-nav-link', 'is-active' => request()->routeIs('staff.dashboard')])><span class="staff-nav-icon" aria-hidden="true">OV</span>Overview</a>
             <a href="{{ route('staff.orders.index') }}" @class(['staff-nav-link', 'is-active' => request()->routeIs('staff.orders.*') && ! $activeWorkstream])><span class="staff-nav-icon" aria-hidden="true">OR</span>Semua Orders</a>
         </section>
 
@@ -30,7 +30,7 @@
                 <a href="{{ route('staff.orders.index', ['workstream' => 'printing']) }}" @class(['staff-nav-link', 'is-active' => $activeWorkstream === 'printing'])><span class="staff-nav-icon" aria-hidden="true">PR</span>Printing Queue</a>
             @endif
 
-            @if ($isOverview || $staffUser->isAdmin() || $staffUser->hasStaffRole(\App\Models\User::ROLE_PACKING))
+            @if ($isOverview || $staffUser->isOperationManagement() || $staffUser->hasStaffRole(\App\Models\User::ROLE_PACKING))
                 <a href="{{ route('staff.orders.index', ['workstream' => 'packing']) }}" @class(['staff-nav-link', 'is-active' => $activeWorkstream === 'packing'])><span class="staff-nav-icon" aria-hidden="true">PA</span>Packing Queue</a>
             @endif
 

@@ -259,12 +259,12 @@ Route::middleware(['auth', 'active.staff'])
             | Packing Actions
             |--------------------------------------------------------------------------
             |
-            | PACKING staff may operate only on packing jobs assigned to them.
-            | Item ownership is additionally enforced by the controller.
+            | OM may operate every packing job because packing is handled by OM.
+            | PACKING staff remain limited to jobs assigned to them.
             |
             */
 
-            Route::middleware('staff.role:PACKING')->group(function () {
+            Route::middleware('staff.role:PACKING,OPERATION_MANAGEMENT')->group(function () {
                 Route::post(
                     '/packing-jobs/{packingJob}/start',
                     [StaffPackingWorkflowController::class, 'start']
