@@ -159,11 +159,11 @@ class StaffDesignWorkflowController extends Controller
         ]);
 
         $sourceExtension = strtolower(
-            $source->getClientOriginalExtension()
+            $source->extension()
         );
 
         $previewExtension = strtolower(
-            $preview->getClientOriginalExtension()
+            $preview->extension()
         );
 
         $sourcePath = $directory . '/source.' . $sourceExtension;
