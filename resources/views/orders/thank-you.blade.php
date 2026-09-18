@@ -68,7 +68,7 @@
                         $sideLabel = $side['side'] === 'LELAKI' ? 'Lelaki' : 'Perempuan';
                     @endphp
                     <article class="package-summary">
-                        <h3>Pakej {{ $sideLabel }}</h3>
+                        <h3>{{ $review['package_count'] === 2 ? 'Majlis '.$loop->iteration.' – ' : 'Pakej ' }}Pihak {{ $sideLabel }}</h3>
                         <dl>
                             <div>
                                 <dt>Kod Design</dt>

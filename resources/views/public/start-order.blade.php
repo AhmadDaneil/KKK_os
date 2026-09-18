@@ -39,6 +39,26 @@
                 @error('side')<p class="field-error">{{ $message }}</p>@enderror
             </div>
 
+            <div id="two-package-options" hidden>
+                <fieldset>
+                    <legend>Jenis dua pakej</legend>
+                    <div class="choice-grid">
+                        <label class="choice-card"><input type="radio" name="package_format" value="SEPARATE" @checked(old('package_format', 'SEPARATE') === 'SEPARATE')><span><b>Pakej Berasingan</b><small>Dua kad berasingan untuk dua majlis</small></span></label>
+                        <label class="choice-card"><input type="radio" name="package_format" value="FOLDED" @checked(old('package_format') === 'FOLDED')><span><b>Pakej Gabungan – Kad Lipatan</b><small>Dua majlis dalam format kad lipatan</small></span></label>
+                    </div>
+                    @error('package_format')<p class="field-error">{{ $message }}</p>@enderror
+                </fieldset>
+
+                <fieldset>
+                    <legend>Majlis pertama untuk pihak</legend>
+                    <div class="choice-grid">
+                        <label class="choice-card"><input type="radio" name="first_event_side" value="LELAKI" @checked(old('first_event_side', 'LELAKI') === 'LELAKI')><span><b>Pihak Lelaki</b><small>Nama pengantin lelaki dipaparkan di atas</small></span></label>
+                        <label class="choice-card"><input type="radio" name="first_event_side" value="PEREMPUAN" @checked(old('first_event_side') === 'PEREMPUAN')><span><b>Pihak Perempuan</b><small>Nama pengantin perempuan dipaparkan di atas</small></span></label>
+                    </div>
+                    @error('first_event_side')<p class="field-error">{{ $message }}</p>@enderror
+                </fieldset>
+            </div>
+
             <label for="customer_name">Nama anda</label>
             <input id="customer_name" name="customer_name" value="{{ old('customer_name') }}" autocomplete="name" required>
             @error('customer_name')<p class="field-error">{{ $message }}</p>@enderror
@@ -54,10 +74,13 @@
     <script>
         const packageInputs = document.querySelectorAll('input[name="package_count"]');
         const sideField = document.getElementById('side-field');
+        const twoPackageOptions = document.getElementById('two-package-options');
         function updateSideField() {
             const selected = document.querySelector('input[name="package_count"]:checked');
             sideField.hidden = selected && selected.value === '2';
             sideField.querySelector('select').disabled = sideField.hidden;
+            twoPackageOptions.hidden = !selected || selected.value !== '2';
+            twoPackageOptions.querySelectorAll('input').forEach((input) => input.disabled = twoPackageOptions.hidden);
         }
         packageInputs.forEach((input) => input.addEventListener('change', updateSideField));
         updateSideField();

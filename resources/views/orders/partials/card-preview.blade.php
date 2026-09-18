@@ -9,9 +9,9 @@
 
     @if ($order->packageSides->count() > 1)
         <div class="preview-side-tabs" role="tablist" aria-label="Pilih pakej untuk preview">
-            @foreach ($order->packageSides->sortBy('side') as $packageSide)
+            @foreach ($orderedPackageSides as $packageSide)
                 <button type="button" class="preview-side-tab @if ($loop->first) is-active @endif" data-preview-side-target="{{ $packageSide->side }}">
-                    {{ $packageSide->side === 'LELAKI' ? 'Pakej Lelaki' : 'Pakej Perempuan' }}
+                    <span data-preview-tab-label>Majlis {{ $loop->iteration }} – {{ $packageSide->side === 'LELAKI' ? 'Lelaki' : 'Perempuan' }}</span>
                 </button>
             @endforeach
         </div>
@@ -22,7 +22,7 @@
         <button type="button" class="preview-face-tab" data-preview-face-target="back">Belakang</button>
     </div>
 
-    @foreach ($order->packageSides->sortBy('side') as $packageSide)
+    @foreach ($orderedPackageSides as $packageSide)
         @php
             $jawiCardTitle = match ($packageSide->design?->card_title) {
                 'Majlis Perkahwinan' => 'مجليس ڤركهوينن',
@@ -36,9 +36,10 @@
                 <div class="card-front-copy">
                     <p class="card-title" data-preview-field="card_title">{{ $packageSide->design?->card_title ?: 'Walimatul Urus' }}</p>
                     <div class="card-couple-names">
-                        <span data-preview-field="groom_display">{{ $couple?->groom_abbreviation ?: $couple?->groom_name ?: 'Nama Pengantin' }}</span>
+                        @php($hostIsGroom = $packageSide->side === 'LELAKI')
+                        <span data-preview-field="{{ $hostIsGroom ? 'groom_display' : 'bride_display' }}">{{ $hostIsGroom ? ($couple?->groom_abbreviation ?: $couple?->groom_name ?: 'Nama Pengantin') : ($couple?->bride_abbreviation ?: $couple?->bride_name ?: 'Nama Pengantin') }}</span>
                         <b>&amp;</b>
-                        <span data-preview-field="bride_display">{{ $couple?->bride_abbreviation ?: $couple?->bride_name ?: 'Pasangan' }}</span>
+                        <span data-preview-field="{{ $hostIsGroom ? 'bride_display' : 'groom_display' }}">{{ $hostIsGroom ? ($couple?->bride_abbreviation ?: $couple?->bride_name ?: 'Pasangan') : ($couple?->groom_abbreviation ?: $couple?->groom_name ?: 'Pasangan') }}</span>
                     </div>
                     <div class="card-date-lockup">
                         <span class="calendar-symbol" aria-hidden="true">▣</span>
@@ -57,9 +58,9 @@
                     <span>&amp;</span>
                     <strong data-preview-field="mother_name">{{ $packageSide->parents?->mother_name ?: 'NAMA IBU' }}</strong>
                     <p>menjemput Dato’ / Datin / Tuan / Puan / Encik / Cik ke majlis perkahwinan anakanda kami</p>
-                    <strong data-preview-field="groom_name">{{ $couple?->groom_name ?: 'NAMA PENGANTIN' }}</strong>
+                    <strong data-preview-field="{{ $hostIsGroom ? 'groom_name' : 'bride_name' }}">{{ $hostIsGroom ? ($couple?->groom_name ?: 'NAMA PENGANTIN') : ($couple?->bride_name ?: 'NAMA PENGANTIN') }}</strong>
                     <span>&amp;</span>
-                    <strong data-preview-field="bride_name">{{ $couple?->bride_name ?: 'NAMA PASANGAN' }}</strong>
+                    <strong data-preview-field="{{ $hostIsGroom ? 'bride_name' : 'groom_name' }}">{{ $hostIsGroom ? ($couple?->bride_name ?: 'NAMA PASANGAN') : ($couple?->groom_name ?: 'NAMA PASANGAN') }}</strong>
                 </header>
 
                 <div class="card-info-grid">
