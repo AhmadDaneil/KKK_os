@@ -24,7 +24,7 @@ class StaffPackingWorkflowController extends Controller
         PackingJob $packingJob,
         StartPackingService $service
     ): RedirectResponse {
-        $this->authorizeAssignedPackingStaff($request, $packingJob);
+        $this->authorizePackingOperation($request, $packingJob);
 
         try {
             $service->start(
@@ -49,7 +49,7 @@ class StaffPackingWorkflowController extends Controller
         PackingJobItem $packingItem,
         VerifyPackingItemService $service
     ): RedirectResponse {
-        $this->authorizeAssignedPackingStaff($request, $packingJob);
+        $this->authorizePackingOperation($request, $packingJob);
 
         abort_unless(
             $packingItem->packing_job_id === $packingJob->id,
@@ -79,8 +79,7 @@ class StaffPackingWorkflowController extends Controller
         MarkPackingJobPackedService $service,
         InitializeFulfilmentJobForOrderService $initializeFulfilment,
     ): RedirectResponse {
-        $this->authorizeAssignedPackingStaff($request, $packingJob);
-
+        $this->authorizePackingOperation($request, $packingJob);
         $packingJob->load('order.fulfilment');
 
         $isCourier = $packingJob->order->fulfilment?->method === 'COURIER';
@@ -280,13 +279,23 @@ class StaffPackingWorkflowController extends Controller
         );
     }
 
+    private function authorizePackingOperation(
+    Request $request,
+    PackingJob $packingJob
+    ): void {
+    abort_unless(
+        $request->user()->role === \App\Models\User::ROLE_OM
+            || $packingJob->assigned_user_id === $request->user()->id,
+        404
+        );
+    }
+
     private function authorizeAssignedPackingStaff(
         Request $request,
         PackingJob $packingJob
     ): void {
         abort_unless(
-            $request->user()->isOperationManagement()
-                || $packingJob->assigned_user_id === $request->user()->id,
+            $packingJob->assigned_user_id === $request->user()->id,
             404
         );
     }

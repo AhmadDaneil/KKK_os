@@ -56,6 +56,31 @@ class StaffOrderVisibilityTest extends TestCase
         $response->assertSee($second->order_id);
     }
 
+    public function test_operation_management_can_see_all_orders(): void
+    {
+        $operationManagement = $this->staff(User::ROLE_OM);
+
+        $first = $this->confirmedOrder(
+            1,
+            'LELAKI',
+            'OM Visible One'
+        );
+
+        $second = $this->confirmedOrder(
+            1,
+            'PEREMPUAN',
+            'OM Visible Two'
+        );
+
+        $response = $this
+            ->actingAs($operationManagement)
+            ->get(route('staff.orders.index'));
+
+        $response->assertOk();
+        $response->assertSee($first->order_id);
+        $response->assertSee($second->order_id);
+    }
+
     public function test_admin_can_search_orders_by_customer(): void
     {
         $admin = $this->staff(User::ROLE_ADMIN);
@@ -243,6 +268,22 @@ $this->assertSame(
         );
 
         $this->actingAs($admin)
+            ->get(route('staff.orders.show', $order->order_id))
+            ->assertOk()
+            ->assertSee($order->order_id);
+    }
+
+    public function test_operation_management_can_open_any_order_detail(): void
+    {
+        $operationManagement = $this->staff(User::ROLE_OM);
+
+        $order = $this->confirmedOrder(
+            1,
+            'LELAKI',
+            'OM Detail'
+        );
+
+        $this->actingAs($operationManagement)
             ->get(route('staff.orders.show', $order->order_id))
             ->assertOk()
             ->assertSee($order->order_id);
