@@ -60,9 +60,12 @@ class StaffJobAssignmentController extends Controller
         AssignPackingJobService $service
     ): RedirectResponse {
         $assignee = $this->validatedAssignee(
-            $request,
-            User::ROLE_PACKING
-        );
+        $request,
+        [
+            User::ROLE_PACKING,
+            User::ROLE_OM,
+        ]
+    );
 
         $service->assign(
             $packingJob,
@@ -73,20 +76,26 @@ class StaffJobAssignmentController extends Controller
         return back()->with('status', 'Packing job assigned successfully.');
     }
 
-    private function validatedAssignee(Request $request, string $role): User
-    {
+    private function validatedAssignee(
+        Request $request,
+        string|array $roles
+    ): User {
+        $roles = (array) $roles;
+
         $validated = $request->validate([
             'assigned_user_id' => [
                 'required',
                 'integer',
                 Rule::exists('users', 'id')->where(
                     fn ($query) => $query
-                        ->where('role', $role)
+                        ->whereIn('role', $roles)
                         ->where('is_active', true)
                 ),
             ],
         ]);
 
-        return User::query()->findOrFail($validated['assigned_user_id']);
+        return User::query()->findOrFail(
+            $validated['assigned_user_id']
+        );
     }
 }

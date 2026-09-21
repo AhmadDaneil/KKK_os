@@ -57,6 +57,24 @@ class StaffDesignWorkflowTest extends TestCase
         );
     }
 
+    public function test_operation_management_cannot_start_job_assigned_to_designer(): void
+    {
+        $designer = $this->designer();
+        $operationManagement = $this->staff(User::ROLE_OM);
+        $job = $this->designJob();
+
+        $this->assign($job, $designer);
+
+        $this->actingAs($operationManagement)
+            ->post(route('staff.design-jobs.start', $job))
+            ->assertForbidden();
+
+        $this->assertSame(
+            'READY_FOR_DESIGN',
+            $job->fresh()->status
+        );
+    }
+
     public function test_other_designer_cannot_start_job_assigned_to_someone_else(): void
     {
         $assignedDesigner = $this->designer();
@@ -75,22 +93,14 @@ class StaffDesignWorkflowTest extends TestCase
         );
     }
 
-    public function test_admin_can_start_job_assigned_to_designer(): void
-    {
-        $admin = $this->admin();
-        $designer = $this->designer();
-        $job = $this->designJob();
-
-        $this->assign($job, $designer, $admin);
-
-        $this->actingAs($admin)
-            ->post(route('staff.design-jobs.start', $job))
-            ->assertRedirect();
-
-        $this->assertSame(
-            'DESIGN_IN_PROGRESS',
-            $job->fresh()->status
-        );
+    private function authorizeAssignedPrintingStaff(
+    Request $request,
+    PrintJob $printJob
+    ): void {
+    abort_unless(
+        $printJob->assigned_user_id === $request->user()->id,
+        404
+    );
     }
 
     public function test_printing_and_packing_staff_cannot_start_design_job(): void
@@ -981,131 +991,131 @@ public function test_other_designer_cannot_mark_assigned_job_ready(): void
     );
 }
 
-public function test_admin_can_mark_designer_job_ready(): void
-{
-    $admin = $this->admin();
-    $designer = $this->designer();
-    $job = $this->designJob();
+    public function test_admin_cannot_mark_designer_job_ready(): void
+    {
+        $admin = $this->admin();
+        $designer = $this->designer();
+        $job = $this->designJob();
 
-    $this->assign($job, $designer, $admin);
+        $this->assign($job, $designer, $admin);
 
-    app(StartDesignJobService::class)
-        ->start($job, $designer);
-
-    app(CreateArtworkVersionService::class)->create(
-        $job->fresh(),
-        [
-            'storage_path' => 'artworks/test/source.pdf',
-            'preview_storage_path' =>
-                'artworks/test/preview.jpg',
-            'original_filename' => 'source.pdf',
-            'mime_type' => 'application/pdf',
-        ],
-        $designer
-    );
-
-    $this->actingAs($admin)
-        ->post(
-            route('staff.design-jobs.mark-ready', $job)
-        )
-        ->assertRedirect();
-
-    $this->assertSame(
-        'DESIGN_READY',
-        $job->fresh()->status
-    );
-}
-
-public function test_two_package_design_sides_can_be_marked_ready_independently(): void
-{
-    $lelakiDesigner = $this->designer();
-    $perempuanDesigner = $this->designer();
-
-    $order = $this->confirmedOrder(2);
-
-    app(GenerateMergeJobsForOrderService::class)
-        ->generate($order);
-
-    $jobs = app(
-        InitializeDesignJobsForOrderService::class
-    )->initialize($order->fresh());
-
-    $lelaki = $jobs->firstWhere('side', 'LELAKI');
-    $perempuan = $jobs->firstWhere('side', 'PEREMPUAN');
-
-    $this->assertNotNull($lelaki);
-    $this->assertNotNull($perempuan);
-
-    $this->assign($lelaki, $lelakiDesigner);
-    $this->assign($perempuan, $perempuanDesigner);
-
-    foreach ([
-        [$lelaki, $lelakiDesigner],
-        [$perempuan, $perempuanDesigner],
-    ] as [$job, $designer]) {
         app(StartDesignJobService::class)
             ->start($job, $designer);
 
         app(CreateArtworkVersionService::class)->create(
             $job->fresh(),
             [
-                'storage_path' =>
-                    "artworks/{$job->side}/source.pdf",
+                'storage_path' => 'artworks/test/source.pdf',
                 'preview_storage_path' =>
-                    "artworks/{$job->side}/preview.jpg",
-                'original_filename' =>
-                    "{$job->side}.pdf",
+                    'artworks/test/preview.jpg',
+                'original_filename' => 'source.pdf',
                 'mime_type' => 'application/pdf',
             ],
             $designer
         );
+
+        $this->actingAs($admin)
+            ->post(
+                route('staff.design-jobs.mark-ready', $job)
+            )
+            ->assertNotFound();
+
+        $this->assertSame(
+            'DESIGN_IN_PROGRESS',
+            $job->fresh()->status
+        );
     }
 
-    $this->actingAs($lelakiDesigner)
-        ->post(
-            route('staff.design-jobs.mark-ready', $lelaki)
-        )
-        ->assertRedirect()
-        ->assertSessionHasNoErrors();
+    public function test_two_package_design_sides_can_be_marked_ready_independently(): void
+    {
+        $lelakiDesigner = $this->designer();
+        $perempuanDesigner = $this->designer();
 
-    $this->assertSame(
-        'DESIGN_READY',
-        $lelaki->fresh()->status
-    );
+        $order = $this->confirmedOrder(2);
 
-    $this->assertSame(
-        'DESIGN_IN_PROGRESS',
-        $perempuan->fresh()->status
-    );
+        app(GenerateMergeJobsForOrderService::class)
+            ->generate($order);
 
-    $this->actingAs($lelakiDesigner)
-        ->post(
-            route(
-                'staff.design-jobs.mark-ready',
-                $perempuan
+        $jobs = app(
+            InitializeDesignJobsForOrderService::class
+        )->initialize($order->fresh());
+
+        $lelaki = $jobs->firstWhere('side', 'LELAKI');
+        $perempuan = $jobs->firstWhere('side', 'PEREMPUAN');
+
+        $this->assertNotNull($lelaki);
+        $this->assertNotNull($perempuan);
+
+        $this->assign($lelaki, $lelakiDesigner);
+        $this->assign($perempuan, $perempuanDesigner);
+
+        foreach ([
+            [$lelaki, $lelakiDesigner],
+            [$perempuan, $perempuanDesigner],
+        ] as [$job, $designer]) {
+            app(StartDesignJobService::class)
+                ->start($job, $designer);
+
+            app(CreateArtworkVersionService::class)->create(
+                $job->fresh(),
+                [
+                    'storage_path' =>
+                        "artworks/{$job->side}/source.pdf",
+                    'preview_storage_path' =>
+                        "artworks/{$job->side}/preview.jpg",
+                    'original_filename' =>
+                        "{$job->side}.pdf",
+                    'mime_type' => 'application/pdf',
+                ],
+                $designer
+            );
+        }
+
+        $this->actingAs($lelakiDesigner)
+            ->post(
+                route('staff.design-jobs.mark-ready', $lelaki)
             )
-        )
-        ->assertNotFound();
+            ->assertRedirect()
+            ->assertSessionHasNoErrors();
 
-    $this->assertSame(
-        'DESIGN_IN_PROGRESS',
-        $perempuan->fresh()->status
-    );
+        $this->assertSame(
+            'DESIGN_READY',
+            $lelaki->fresh()->status
+        );
 
-    $this->actingAs($perempuanDesigner)
-        ->post(
-            route(
-                'staff.design-jobs.mark-ready',
-                $perempuan
+        $this->assertSame(
+            'DESIGN_IN_PROGRESS',
+            $perempuan->fresh()->status
+        );
+
+        $this->actingAs($lelakiDesigner)
+            ->post(
+                route(
+                    'staff.design-jobs.mark-ready',
+                    $perempuan
+                )
             )
-        )
-        ->assertRedirect()
-        ->assertSessionHasNoErrors();
+            ->assertNotFound();
 
-    $this->assertSame(
-        'DESIGN_READY',
-        $perempuan->fresh()->status
-    );
+        $this->assertSame(
+            'DESIGN_IN_PROGRESS',
+            $perempuan->fresh()->status
+        );
+
+        $this->actingAs($perempuanDesigner)
+            ->post(
+                route(
+                    'staff.design-jobs.mark-ready',
+                    $perempuan
+                )
+            )
+            ->assertRedirect()
+            ->assertSessionHasNoErrors();
+
+        $this->assertSame(
+            'DESIGN_READY',
+            $perempuan->fresh()->status
+        );
     }
 
     private function admin(): User

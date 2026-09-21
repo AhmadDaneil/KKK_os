@@ -143,7 +143,7 @@ class StaffPrintingWorkflowTest extends TestCase
         );
     }
 
-    public function test_admin_can_operate_print_job_assigned_to_printing_staff(): void
+    public function test_admin_cannot_operate_print_job_assigned_to_printing_staff(): void
     {
         $admin = $this->admin();
         $printing = $this->staff(User::ROLE_PRINTING);
@@ -156,10 +156,32 @@ class StaffPrintingWorkflowTest extends TestCase
 
         $this->actingAs($admin)
             ->post(route('staff.print-jobs.start', $job))
-            ->assertRedirect();
+            ->assertNotFound();
 
         $this->assertSame(
-            'PRINTING',
+            'READY_FOR_PRINT',
+            $job->fresh()->status
+        );
+    }
+
+    public function test_operation_management_cannot_operate_print_job_assigned_to_printing_staff(): void
+    {
+        $admin = $this->admin();
+        $operationManagement = $this->staff(User::ROLE_OM);
+        $printing = $this->staff(User::ROLE_PRINTING);
+
+        [, $jobs] = $this->printJobs();
+        $job = $jobs->first();
+
+        app(AssignPrintJobService::class)
+            ->assign($job, $printing, $admin);
+
+        $this->actingAs($operationManagement)
+            ->post(route('staff.print-jobs.start', $job))
+            ->assertForbidden();
+
+        $this->assertSame(
+            'READY_FOR_PRINT',
             $job->fresh()->status
         );
     }

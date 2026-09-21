@@ -82,8 +82,7 @@ class StaffPrintingWorkflowController extends Controller
         PrintJob $printJob
     ): void {
         abort_unless(
-            $request->user()->isAdmin()
-                || $printJob->assigned_user_id === $request->user()->id,
+            $printJob->assigned_user_id === $request->user()->id,
             404
         );
     }
