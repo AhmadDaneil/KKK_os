@@ -19,6 +19,7 @@ class CustomerOrderDraftController extends Controller
         $order = $access->resolve($request, $orderId);
 
         $validated = $request->validate([
+	    'card_quantity' => ['sometimes', 'nullable', 'integer', 'min:1'],
             'couple' => ['sometimes', 'array'],
             'couple.groom_name' => ['nullable', 'string', 'max:255'],
             'couple.groom_abbreviation' => ['nullable', 'string', 'max:100'],

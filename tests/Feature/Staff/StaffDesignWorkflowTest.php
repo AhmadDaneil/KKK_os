@@ -1255,6 +1255,7 @@ public function test_other_designer_cannot_mark_assigned_job_ready(): void
             ->save(
                 $order,
                 [
+                    'card_quantity' => 200,
                     'couple' => [
                         'groom_name' =>
                             'Muhammad Syafiq',

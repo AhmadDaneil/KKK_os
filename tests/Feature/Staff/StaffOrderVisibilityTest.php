@@ -885,6 +885,7 @@ public function test_two_package_designer_ui_only_contains_operational_controls_
         }
 
         app(SaveOrderDraftService::class)->save($order, [
+            'card_quantity' => 200,
             'couple' => [
                 'groom_name' => 'Muhammad Syafiq',
                 'bride_name' => 'Nur Awanis',

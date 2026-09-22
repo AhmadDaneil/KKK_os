@@ -60,6 +60,12 @@
                     <span class="review-label">Jumlah Pakej</span>
                     <span class="review-value">{{ $review['package_count'] }}</span>
                 </div>
+
+                <div class="review-item">
+                    <span class="review-label">Kuantiti Kad</span>
+                    <span class="review-value">{{ $review['card_quantity'] ?? '-' }}</span>
+                </div>
+
                 @if ($review['package_count'] === 2)
                     <div class="review-item"><span class="review-label">Jenis Pakej</span><span class="review-value">{{ $review['package_format'] === 'FOLDED' ? 'Pakej Gabungan – Kad Lipatan' : 'Pakej Berasingan' }}</span></div>
                     <div class="review-item"><span class="review-label">Majlis Pertama</span><span class="review-value">Pihak {{ ucfirst(strtolower($review['first_event_side'])) }}</span></div>

@@ -253,6 +253,34 @@
             </fieldset>
         @endif
 
+<fieldset>
+    <legend>Kuantiti Kad</legend>
+
+    <p class="field-help">
+        Masukkan jumlah kad untuk tempahan ini.
+        Bagi tempahan dua pakej, kuantiti yang sama digunakan untuk kedua-dua pakej.
+    </p>
+
+    <div class="grid">
+        <div>
+            <label for="card_quantity">Jumlah Kad</label>
+            <input
+                id="card_quantity"
+                type="number"
+                name="card_quantity"
+                min="1"
+                step="1"
+                inputmode="numeric"
+                value="{{ old('card_quantity', $order->card_quantity) }}"
+            >
+
+            @error('card_quantity')
+                <p class="field-error">{{ $message }}</p>
+            @enderror
+        </div>
+    </div>
+</fieldset>
+
         <fieldset>
             <legend>Maklumat Pasangan</legend>
             <div class="grid">

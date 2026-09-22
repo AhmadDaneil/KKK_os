@@ -188,6 +188,7 @@ class PrintingFoundationTest extends TestCase
         }
 
         app(SaveOrderDraftService::class)->save($order, [
+            'card_quantity' => 200,
             'couple' => [
                 'groom_name' => 'Muhammad Syafiq',
                 'bride_name' => 'Nur Awanis',
