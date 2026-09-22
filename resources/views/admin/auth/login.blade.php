@@ -1,33 +1,52 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="ms">
 <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Login — KKK OS</title>
-    <link rel="stylesheet" href="{{ asset('css/admin.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/login.css') }}">
 </head>
-<body class="admin-login-page">
-    <main class="admin-login-card">
-        <div class="admin-login-mark">KKK</div>
-        <p class="admin-eyebrow">KingKadKahwin</p>
-        <h1>Admin Login</h1>
-        <p class="admin-login-copy">Log masuk untuk mengurus akaun staff dan memantau keseluruhan operasi.</p>
-
-        @if ($errors->any())<div class="admin-alert admin-alert-error">{{ $errors->first() }}</div>@endif
-
-        <form method="POST" action="{{ route('admin.login.store') }}">
-            @csrf
-            <label for="email">Email Admin</label>
-            <input id="email" type="email" name="email" value="{{ old('email') }}" required autofocus autocomplete="email">
-            <label for="password">Kata Laluan</label>
-            <input id="password" type="password" name="password" required autocomplete="current-password">
-            <button class="admin-button admin-button-primary admin-login-submit" type="submit">Log Masuk</button>
-        </form>
-        <div class="admin-portal-note">
-            <strong>Anda staff Operation, Designer atau Production?</strong>
-            <span>Akaun staff perlu menggunakan portal staff.</span>
-            <a href="{{ route('staff.login') }}">Pergi ke Staff Login →</a>
-        </div>
+<body class="login-page login-page--admin">
+    <main class="login-shell">
+        <section class="login-story" aria-label="King Kad Kahwin">
+            <div class="login-brand">
+                <span class="login-mark">KKK</span>
+                <div><strong>King Kad Kahwin</strong><span>OPERATIONS SYSTEM</span></div>
+            </div>
+            <div class="login-story-content">
+                <span class="login-eyebrow">PANDANGAN MENYELURUH</span>
+                <h2>Urus pasukan. <br>Gerakkan operasi.</h2>
+                <p>Satukan pengurusan staff dan pantau perjalanan operasi dalam satu ruang yang teratur.</p>
+                <div class="login-tags"><span>Pengurusan staff</span><span>Pemantauan operasi</span></div>
+            </div>
+            <div class="login-story-footer"><span class="login-dot"></span> Satu pasukan. Satu tujuan.</div>
+            <div class="login-orbit login-orbit--one" aria-hidden="true"></div>
+            <div class="login-orbit login-orbit--two" aria-hidden="true"></div>
+        </section>
+        <section class="login-panel" aria-labelledby="login-title">
+            <div class="login-heading">
+                <span class="login-eyebrow">SELAMAT KEMBALI</span>
+                <h1 id="login-title">Admin Login<span>.</span></h1>
+                <p>Log masuk untuk mengurus akaun staff dan memantau keseluruhan operasi.</p>
+            </div>
+            @if ($errors->any())
+                <div class="login-alert" role="alert">{{ $errors->first() }}</div>
+            @endif
+            <form method="POST" action="{{ route('admin.login.store') }}" class="login-form">
+                @csrf
+                <div class="login-field">
+                    <label for="email">Email Admin</label>
+                    <input id="email" type="email" name="email" value="{{ old('email') }}" placeholder="nama@kingkadkahwin.com" required autofocus autocomplete="email">
+                </div>
+                <div class="login-field">
+                    <label for="password">Kata Laluan</label>
+                    <input id="password" type="password" name="password" placeholder="Masukkan kata laluan anda" required autocomplete="current-password">
+                </div>
+                <button type="submit" class="login-submit">Log Masuk <span aria-hidden="true">→</span></button>
+            </form>
+            <p class="login-help">Masalah untuk log masuk? Hubungi pentadbir sistem.</p>
+        </section>
     </main>
+    <footer class="login-footer">KING KAD KAHWIN <span>·</span> Ruang kerja pasukan anda</footer>
 </body>
 </html>
