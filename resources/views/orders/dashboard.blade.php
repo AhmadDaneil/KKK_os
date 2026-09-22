@@ -417,12 +417,15 @@
         </p>
     @endif
 
+    <div class="card-image-picker">
     <input
         id="card-image-{{ strtolower($side) }}"
         type="file"
         name="sides[{{ $side }}][design][card_image]"
         accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp"
     >
+    <button type="button" class="cancel-card-image" hidden aria-controls="card-image-{{ strtolower($side) }}">Batal</button>
+    </div>
 
     @error("sides.$side.design.card_image")
         <p class="field-error">{{ $message }}</p>
@@ -1079,6 +1082,27 @@ document.addEventListener('DOMContentLoaded', function () {
         });
 
         updateFulfilmentFields();
+    });
+</script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        document.querySelectorAll('.card-image-picker').forEach(function (picker) {
+            const input = picker.querySelector('input[type="file"]');
+            const cancelButton = picker.querySelector('.cancel-card-image');
+
+            function updateCancelButton() {
+                cancelButton.hidden = input.files.length === 0;
+            }
+
+            input.addEventListener('change', updateCancelButton);
+            cancelButton.addEventListener('click', function () {
+                input.value = '';
+                updateCancelButton();
+                input.focus();
+            });
+
+            updateCancelButton();
+        });
     });
 </script>
 </body>

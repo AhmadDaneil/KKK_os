@@ -50,6 +50,35 @@ label {
     margin-top: 1rem;
 }
 
+.card-image-picker {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.card-image-picker input {
+    flex: 1;
+    min-width: 0;
+}
+
+.card-image-picker .cancel-card-image {
+    flex-shrink: 0;
+    padding: 10px 14px;
+    border: 1px solid #e3bdb8;
+    border-radius: 8px;
+    color: #a33428;
+    background: #fff5f3;
+    font: inherit;
+}
+
+.card-image-picker .cancel-card-image:hover {
+    background: #fce8e4;
+}
+
+.card-image-picker .cancel-card-image[hidden] {
+    display: none;
+}
+
 .field-help {
     margin: 0.35rem 0 0.75rem;
     font-size: 0.9rem;
