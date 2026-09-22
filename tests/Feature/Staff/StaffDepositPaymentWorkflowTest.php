@@ -78,6 +78,56 @@ class StaffDepositPaymentWorkflowTest extends TestCase
         $this->assertSame('DETAILS_CONFIRMED', $order->fresh()->status);
     }
 
+    public function test_only_authorized_payment_staff_can_access_private_receipt(): void
+    {
+        Storage::fake('local');
+
+        [, $payment] = $this->depositOrder();
+
+        $operationManagement = User::factory()->create([
+            'role' => User::ROLE_OM,
+            'is_active' => true,
+        ]);
+
+        $designer = User::factory()->create([
+            'role' => User::ROLE_DESIGNER,
+            'is_active' => true,
+        ]);
+
+        $printing = User::factory()->create([
+            'role' => User::ROLE_PRINTING,
+            'is_active' => true,
+        ]);
+
+        $packing = User::factory()->create([
+            'role' => User::ROLE_PACKING,
+            'is_active' => true,
+        ]);
+
+        // Guest must not be able to retrieve a private receipt.
+        $this->get(route('staff.payments.receipt', $payment))
+            ->assertRedirect();
+
+        // Operational roles outside payment review must be denied.
+        $this->actingAs($designer)
+            ->get(route('staff.payments.receipt', $payment))
+            ->assertForbidden();
+
+        $this->actingAs($printing)
+            ->get(route('staff.payments.receipt', $payment))
+            ->assertForbidden();
+
+        $this->actingAs($packing)
+            ->get(route('staff.payments.receipt', $payment))
+            ->assertForbidden();
+
+        // Operation Management is authorized to retrieve the receipt.
+        $this->actingAs($operationManagement)
+            ->get(route('staff.payments.receipt', $payment))
+            ->assertOk()
+            ->assertHeader('Content-Type', 'image/jpeg');
+    }
+
     private function depositOrder(): array
     {
         Storage::disk('local')->put('deposit-receipts/test/resit.jpg', 'receipt');
