@@ -18,6 +18,10 @@ class ValidateOrderCompletionService
 
         $missing = [];
 
+        if (! $order->card_quantity || (int) $order->card_quantity < 1) {
+            $missing[] = 'Kuantiti kad';
+        }
+
         $couple = $order->couples->firstWhere('couple_number', 1);
 
         if (! $couple?->groom_name) {

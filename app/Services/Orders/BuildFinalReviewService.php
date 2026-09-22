@@ -23,6 +23,7 @@ class BuildFinalReviewService
             'order_id' => $order->order_id,
             'customer_name' => $order->customer_name,
             'package_count' => $order->package_count,
+	    'card_quantity' => $order->card_quantity,
             'package_format' => $order->package_format,
             'first_event_side' => $order->first_event_side,
             'status' => $order->status,

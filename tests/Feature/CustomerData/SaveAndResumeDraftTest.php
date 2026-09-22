@@ -453,6 +453,102 @@ public function test_dashboard_rejects_card_image_larger_than_ten_megabytes(): v
         ->assertSee('P500')
         ->assertDontSee('token=');
     }
+
+    public function test_dashboard_can_save_and_resume_order_level_card_quantity(): void
+    {
+    $order = app(CreateOrderService::class)->create([
+        'package_count' => 1,
+        'side' => 'PEREMPUAN',
+        'customer_name' => 'Card Quantity HTTP Test',
+    ]);
+
+    $url = app(GenerateOrderAccessLinkService::class)->generate($order);
+
+    $path = (string) parse_url($url, PHP_URL_PATH);
+    $query = (string) parse_url($url, PHP_URL_QUERY);
+
+    $magicLinkRequest = $query === ''
+        ? $path
+        : $path.'?'.$query;
+
+    $this->get($magicLinkRequest)
+        ->assertRedirect(route('orders.dashboard', [
+            'orderId' => $order->order_id,
+        ]));
+
+    $response = $this->post(route('orders.draft.update', [
+        'orderId' => $order->order_id,
+    ]), [
+        'card_quantity' => 500,
+    ]);
+
+    $response->assertRedirect(route('orders.dashboard', [
+        'orderId' => $order->order_id,
+    ]));
+
+    $order->refresh();
+
+    $this->assertSame(500, $order->card_quantity);
+
+    $this->assertDatabaseHas('orders', [
+        'id' => $order->id,
+        'card_quantity' => 500,
+    ]);
+
+    $this->get(route('orders.dashboard', [
+        'orderId' => $order->order_id,
+    ]))
+        ->assertOk()
+        ->assertSee('Kuantiti Kad')
+        ->assertSee('name="card_quantity"', false)
+        ->assertSee('value="500"', false);
+    }
+
+    public function test_dashboard_rejects_invalid_card_quantity(): void
+    {
+        $order = app(CreateOrderService::class)->create([
+        'package_count' => 1,
+        'side' => 'LELAKI',
+        'customer_name' => 'Invalid Card Quantity Test',
+    ]);
+
+    $url = app(GenerateOrderAccessLinkService::class)->generate($order);
+
+    $path = (string) parse_url($url, PHP_URL_PATH);
+    $query = (string) parse_url($url, PHP_URL_QUERY);
+
+    $magicLinkRequest = $query === ''
+        ? $path
+        : $path.'?'.$query;
+
+    $this->get($magicLinkRequest)
+        ->assertRedirect(route('orders.dashboard', [
+            'orderId' => $order->order_id,
+        ]));
+
+    $response = $this
+        ->from(route('orders.dashboard', [
+            'orderId' => $order->order_id,
+        ]))
+        ->post(route('orders.draft.update', [
+            'orderId' => $order->order_id,
+        ]), [
+            'card_quantity' => 0,
+        ]);
+
+    $response
+        ->assertRedirect(route('orders.dashboard', [
+            'orderId' => $order->order_id,
+        ]))
+        ->assertSessionHasErrors([
+            'card_quantity',
+        ]);
+
+    $this->assertNull(
+        $order->fresh()->card_quantity
+    );
+    }
+
     public function test_confirmed_order_cannot_be_changed_by_save_draft(): void
 {
     $order = app(CreateOrderService::class)->create([

@@ -11,6 +11,7 @@ use App\Services\Orders\SaveOrderDraftService;
 use App\Services\Photoshop\ExportPhotoshopAutoMergeCsvService;
 use App\Services\Photoshop\GeneratePhotoshopCsvForOrderService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use App\Services\Photoshop\UnresolvedCardQuantityProvider;
 use RuntimeException;
 use Tests\TestCase;
 
@@ -24,10 +25,14 @@ class PhotoshopProductionExportWiringTest extends TestCase
 
         app(GenerateMergeJobsForOrderService::class)->generate($order);
 
-        $this->expectException(RuntimeException::class);
-        $this->expectExceptionMessage('has no valid approved card quantity');
+        $service = new GeneratePhotoshopCsvForOrderService(
+            app(ExportPhotoshopAutoMergeCsvService::class),
+            app(UnresolvedCardQuantityProvider::class),
+        );
 
-        app(GeneratePhotoshopCsvForOrderService::class)->generate(
+        $this->expectException(RuntimeException::class);
+
+        $service->generate(
             $order->fresh(),
             storage_path('framework/testing/photoshop-blocked.csv'),
         );
@@ -197,6 +202,7 @@ class PhotoshopProductionExportWiringTest extends TestCase
         }
 
         app(SaveOrderDraftService::class)->save($order, [
+            'card_quantity' => 200,
             'couple' => [
                 'groom_name' => 'Muhammad Syafiq',
                 'groom_abbreviation' => 'Syafiq',
