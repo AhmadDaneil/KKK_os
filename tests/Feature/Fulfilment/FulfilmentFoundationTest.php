@@ -249,6 +249,127 @@ class FulfilmentFoundationTest extends TestCase
         );
     }
 
+    public function test_t01_one_package_lelaki_courier_acceptance(): void
+    {
+        Storage::fake('local');
+
+        $order = $this->packedOrder(1, 'COURIER', 'LELAKI');
+
+        $this->assertSame(1, $order->package_count);
+        $this->assertSame(
+            ['LELAKI'],
+            $order->packageSides()->pluck('side')->all()
+        );
+
+        $job = app(InitializeFulfilmentJobForOrderService::class)
+            ->initialize($order);
+
+        $this->assertSame('COURIER', $job->method);
+
+        $this->completeCourier($job, 'T01');
+
+        $this->assertSame('COMPLETED', $order->fresh()->status);
+    }
+
+    public function test_t02_one_package_perempuan_pickup_acceptance(): void
+    {
+        $order = $this->packedOrder(1, 'PICKUP', 'PEREMPUAN');
+
+        $this->assertSame(1, $order->package_count);
+        $this->assertSame(
+            ['PEREMPUAN'],
+            $order->packageSides()->pluck('side')->all()
+        );
+
+        $job = app(InitializeFulfilmentJobForOrderService::class)
+            ->initialize($order);
+
+        $this->assertSame('PICKUP', $job->method);
+
+        $job = app(MarkPickupCollectedService::class)->collect(
+            $job,
+            'T02-PICKUP'
+        );
+
+        $this->assertSame('COLLECTED', $job->status);
+        $this->assertSame('COMPLETED', $order->fresh()->status);
+    }
+
+    public function test_t03_two_packages_courier_acceptance(): void
+    {
+        Storage::fake('local');
+
+        $order = $this->packedOrder(2, 'COURIER');
+
+        $this->assertSame(2, $order->package_count);
+        $this->assertEqualsCanonicalizing(
+            ['LELAKI', 'PEREMPUAN'],
+            $order->packageSides()->pluck('side')->all()
+        );
+        $this->assertSame(2, $order->packingJob->items()->count());
+
+        $job = app(InitializeFulfilmentJobForOrderService::class)
+            ->initialize($order);
+
+        $this->assertSame('COURIER', $job->method);
+
+        $this->completeCourier($job, 'T03');
+
+        $this->assertSame('COMPLETED', $order->fresh()->status);
+    }
+
+    public function test_t04_two_packages_pickup_acceptance(): void
+    {
+        $order = $this->packedOrder(2, 'PICKUP');
+
+        $this->assertSame(2, $order->package_count);
+        $this->assertEqualsCanonicalizing(
+            ['LELAKI', 'PEREMPUAN'],
+            $order->packageSides()->pluck('side')->all()
+        );
+        $this->assertSame(2, $order->packingJob->items()->count());
+
+        $job = app(InitializeFulfilmentJobForOrderService::class)
+            ->initialize($order);
+
+        $this->assertSame('PICKUP', $job->method);
+
+        $job = app(MarkPickupCollectedService::class)->collect(
+            $job,
+            'T04-PICKUP'
+        );
+
+        $this->assertSame('COLLECTED', $job->status);
+        $this->assertSame('COMPLETED', $order->fresh()->status);
+    }
+
+    private function completeCourier($job, string $reference): void
+    {
+        $proofPath = "packing-proofs/{$job->packing_job_id}/{$reference}.jpg";
+
+        Storage::disk('local')->put($proofPath, 'acceptance-proof');
+
+        $job->packingJob()->update([
+            'proof_storage_path' => $proofPath,
+            'proof_original_name' => "{$reference}.jpg",
+            'proof_mime_type' => 'image/jpeg',
+        ]);
+
+        $job = app(CompleteCourierFulfilmentService::class)->complete(
+            $job,
+            'POS LAJU',
+            "{$reference}-TRACKING"
+        );
+
+        $this->assertSame('COMPLETED', $job->status);
+        $this->assertSame('POS LAJU', $job->courier_provider);
+        $this->assertSame(
+            "{$reference}-TRACKING",
+            $job->tracking_number
+        );
+    }
+
+
     private function packedOrder(
         int $packageCount,
         string $fulfilmentMethod,
