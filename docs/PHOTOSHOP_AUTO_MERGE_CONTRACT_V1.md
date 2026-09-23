@@ -125,10 +125,10 @@ They belong to an AliveCard/downstream export contract if KKK OS later automates
 | CSV field | Canonical source | Rule |
 |---|---|---|
 | noinvoice | `source.order_id` | Exact order ID |
-| qtykad | **UNRESOLVED DB SOURCE** | Export numeric quantity only; see blocker below |
+| qtykad | `source.card_quantity` ← `orders.card_quantity` | One approved order-level quantity; export numeric quantity only; both rows of a 2-package order inherit the same value |
 | tema | `design.theme` | Trim; preserve approved theme naming |
 | designcode | `design.design_code` | Trim + uppercase |
-| gambar | **UNRESOLVED / NOT CONSUMED BY JSX** | Empty until source meaning is verified |
+| gambar | Compatibility-only | Intentionally empty in V1; not consumed by the approved side-aware JSX |
 | majlis | `source.side` | `LELAKI` or `PEREMPUAN`; compatibility only, JSX does not consume it |
 | namapengantinlelaki | `couple.groom_name` | Preserve approved spelling/case |
 | namapengantinperempuan | `couple.bride_name` | Preserve approved spelling/case |
@@ -151,7 +151,7 @@ They belong to an AliveCard/downstream export contract if KKK OS later automates
 | notel2 | `event.contacts[2].contact_phone` | Normalized phone |
 | nama3 | `event.contacts[3].contact_name` | Empty if missing |
 | notel3 | `event.contacts[3].contact_phone` | Normalized phone |
-| flaggambar | **UNRESOLVED / NOT CONSUMED BY JSX** | Empty until semantics are verified |
+| flaggambar | Compatibility-only | Intentionally empty in V1; not consumed by the approved side-aware JSX |
 
 ## 7. Verified PSD/JSX layer contract
 
@@ -282,17 +282,18 @@ For special template names the JSX overrides quantity:
 - sticker → 150
 - hanger → 1
 
-## 12. Current blocker: qtykad source
+## 12. Approved qtykad source
 
-`kkk_merge_internal_v1` does not currently contain a card quantity field.
+Project Owner subsequently locked Stage 3C Option A:
 
-Photoshop export cannot be considered fully production-ready until the approved order/database
-source for `qtykad` is identified or added.
+- `qtykad` is one card quantity per business order;
+- database source of truth is `orders.card_quantity`;
+- canonical merge payload exposes it as `source.card_quantity`;
+- a 1-package order exports that quantity on its single Photoshop row;
+- a 2-package order exports the same approved quantity on both independent Photoshop rows.
 
-This document does NOT invent a database field or business rule.
-
-Technical adapter code therefore requires `qtykad` to be supplied explicitly until the
-database source is approved and wired into the canonical payload.
+The production `CardQuantityProviderContract` binding uses the DB-backed provider.
+No separate quantity is stored on `order_package_sides`.
 
 ## 13. CSV encoding and escaping
 
@@ -332,9 +333,9 @@ VERIFIED and safe to lock now:
 - JPEG/PSD output behavior
 - one-row-per-merge-job rule
 
-Still pending business/data-source confirmation:
-- database source of `qtykad`
-- semantics/source of `gambar`
-- semantics/source of `flaggambar`
+V1 field status:
+- `qtykad`: RESOLVED / LOCKED — source is `orders.card_quantity` via `source.card_quantity`.
+- `gambar`: compatibility-only — intentionally empty in V1 and not consumed by the approved side-aware JSX.
+- `flaggambar`: compatibility-only — intentionally empty in V1 and not consumed by the approved side-aware JSX.
 
-No final business rule has been invented for those unresolved fields.
+No additional V1 business semantics are assigned to `gambar` or `flaggambar`.
