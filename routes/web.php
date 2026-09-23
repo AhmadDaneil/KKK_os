@@ -286,6 +286,11 @@ Route::middleware(['auth:staff,admin', 'active.staff'])
                 [StaffPackingWorkflowController::class, 'completeCourier']
                 )->name('packing-jobs.complete-courier');
 
+                Route::post(
+                '/packing-jobs/{packingJob}/collect-pickup',
+                [StaffPackingWorkflowController::class, 'collectPickup']
+                )->name('packing-jobs.collect-pickup');
+
             });
 
 });
