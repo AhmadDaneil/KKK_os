@@ -334,7 +334,7 @@
                                                             Source Artwork
                                                         </label>
 
-                                                        <div class="staff-artwork-picker">
+                                                        <div class="staff-file-picker">
                                                         <input
                                                             id="source-artwork-{{ $job->id }}"
                                                             type="file"
@@ -342,7 +342,7 @@
                                                             accept=".psd,.pdf"
                                                             required
                                                         >
-                                                            <button type="button" class="staff-artwork-cancel" hidden aria-controls="source-artwork-{{ $job->id }}">Batal</button>
+                                                            <button type="button" class="staff-file-cancel" hidden aria-controls="source-artwork-{{ $job->id }}">Batal</button>
                                                         </div>
 
                                                         <span class="staff-field-help">
@@ -355,7 +355,7 @@
                                                             Customer Preview
                                                         </label>
 
-                                                        <div class="staff-artwork-picker">
+                                                        <div class="staff-file-picker">
                                                         <input
                                                             id="customer-preview-{{ $job->id }}"
                                                             type="file"
@@ -363,7 +363,7 @@
                                                             accept=".jpg,.jpeg,.png,.pdf"
                                                             required
                                                         >
-                                                            <button type="button" class="staff-artwork-cancel" hidden aria-controls="customer-preview-{{ $job->id }}">Batal</button>
+                                                            <button type="button" class="staff-file-cancel" hidden aria-controls="customer-preview-{{ $job->id }}">Batal</button>
                                                         </div>
 
                                                         <span class="staff-field-help">
@@ -744,7 +744,10 @@
                                     <form method="POST" enctype="multipart/form-data" action="{{ route('staff.packing-jobs.mark-packed', $order->packingJob) }}" class="staff-packing-complete-form">
                                         @csrf
                                         <label for="packing-proof">Bukti gambar barang telah dipack</label>
-                                        <input id="packing-proof" type="file" name="packing_proof" accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp" required>
+                                        <div class="staff-file-picker">
+                                            <input id="packing-proof" type="file" name="packing_proof" accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp" required>
+                                            <button type="button" class="staff-file-cancel" hidden aria-controls="packing-proof">Batal</button>
+                                        </div>
                                         @if ($order->fulfilment?->method === 'COURIER')
                                             <label for="courier-provider">Nama courier</label><input id="courier-provider" name="courier_provider" value="{{ old('courier_provider') }}" placeholder="Contoh: Pos Laju" required>
                                             <label for="tracking-number">Tracking number</label><input id="tracking-number" name="tracking_number" value="{{ old('tracking_number') }}" required>
@@ -824,9 +827,9 @@
     </div>
 <script>
     document.addEventListener('DOMContentLoaded', function () {
-        document.querySelectorAll('.staff-artwork-picker').forEach(function (picker) {
+        document.querySelectorAll('.staff-file-picker').forEach(function (picker) {
             const input = picker.querySelector('input[type="file"]');
-            const cancelButton = picker.querySelector('.staff-artwork-cancel');
+            const cancelButton = picker.querySelector('.staff-file-cancel');
 
             function updateCancelButton() {
                 cancelButton.hidden = input.files.length === 0;

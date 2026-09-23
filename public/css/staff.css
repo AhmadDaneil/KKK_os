@@ -1084,18 +1084,18 @@ a.staff-pagination-link:hover {
     resize: vertical;
 }
 
-.staff-artwork-picker {
+.staff-file-picker {
     display: flex;
     align-items: center;
     gap: 10px;
 }
 
-.staff-artwork-picker input[type="file"] {
+.staff-file-picker input[type="file"] {
     flex: 1;
     min-width: 0;
 }
 
-.staff-artwork-cancel {
+.staff-file-cancel {
     flex-shrink: 0;
     padding: 10px 14px;
     border: 1px solid #e3bdb8;
@@ -1106,11 +1106,11 @@ a.staff-pagination-link:hover {
     cursor: pointer;
 }
 
-.staff-artwork-cancel:hover {
+.staff-file-cancel:hover {
     background: #fce8e4;
 }
 
-.staff-artwork-cancel[hidden] {
+.staff-file-cancel[hidden] {
     display: none;
 }
 
