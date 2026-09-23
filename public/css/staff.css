@@ -1084,6 +1084,36 @@ a.staff-pagination-link:hover {
     resize: vertical;
 }
 
+.staff-file-picker {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.staff-file-picker input[type="file"] {
+    flex: 1;
+    min-width: 0;
+}
+
+.staff-file-cancel {
+    flex-shrink: 0;
+    padding: 10px 14px;
+    border: 1px solid #e3bdb8;
+    border-radius: 8px;
+    color: #a33428;
+    background: #fff5f3;
+    font: inherit;
+    cursor: pointer;
+}
+
+.staff-file-cancel:hover {
+    background: #fce8e4;
+}
+
+.staff-file-cancel[hidden] {
+    display: none;
+}
+
 .staff-field-help {
     display: block;
     margin-top: 6px;

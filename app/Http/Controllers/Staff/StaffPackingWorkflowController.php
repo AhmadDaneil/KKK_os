@@ -5,12 +5,18 @@ namespace App\Http\Controllers\Staff;
 use App\Http\Controllers\Controller;
 use App\Models\PackingJob;
 use App\Models\PackingJobItem;
+use App\Models\User;
+use App\Services\Fulfilment\CompleteCourierFulfilmentService;
+use App\Services\Fulfilment\InitializeFulfilmentJobForOrderService;
 use App\Services\Packing\MarkPackingJobPackedService;
 use App\Services\Packing\StartPackingService;
 use App\Services\Packing\VerifyPackingItemService;
+<<<<<<< HEAD
 use App\Services\Fulfilment\InitializeFulfilmentJobForOrderService;
 use App\Services\Fulfilment\CompleteCourierFulfilmentService;
 use App\Services\Fulfilment\MarkPickupCollectedService;
+=======
+>>>>>>> main
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -86,6 +92,8 @@ class StaffPackingWorkflowController extends Controller
         $isCourier = $packingJob->order->fulfilment?->method === 'COURIER';
 
         $validated = $request->validate([
+            'courier_provider' => [$isCourier ? 'nullable' : 'exclude', 'required_with:tracking_number', 'string', 'max:255'],
+            'tracking_number' => [$isCourier ? 'nullable' : 'exclude', 'required_with:courier_provider', 'string', 'max:255'],
             'packing_proof' => [
                 $isCourier ? 'nullable' : 'required',
                 'image',
@@ -93,12 +101,9 @@ class StaffPackingWorkflowController extends Controller
                 'max:10240',
             ],
         ], [
-            'packing_proof.required' =>
-                'Bukti gambar barang yang telah dipack wajib dimuat naik.',
-            'packing_proof.image' =>
-                'Bukti packing mestilah fail gambar.',
-            'packing_proof.max' =>
-                'Saiz bukti packing tidak boleh melebihi 10 MB.',
+            'packing_proof.required' => 'Bukti gambar barang yang telah dipack wajib dimuat naik.',
+            'packing_proof.image' => 'Bukti packing mestilah fail gambar.',
+            'packing_proof.max' => 'Saiz bukti packing tidak boleh melebihi 10 MB.',
         ]);
 
         $proof = $validated['packing_proof'] ?? null;
@@ -118,7 +123,9 @@ class StaffPackingWorkflowController extends Controller
                 $initializeFulfilment,
                 $request,
                 $proof,
-                $proofPath
+                $proofPath,
+                $validated,
+                $isCourier
             ) {
                 if ($proof && $proofPath) {
                     $packingJob->update([
@@ -135,9 +142,16 @@ class StaffPackingWorkflowController extends Controller
                     $request->user()
                 );
 
-                $initializeFulfilment->initialize(
+                $fulfilmentJob = $initializeFulfilment->initialize(
                     $packedJob->order()->firstOrFail()
                 );
+
+                if ($isCourier && filled($validated['courier_provider'] ?? null)) {
+                    $fulfilmentJob->update([
+                        'courier_provider' => $validated['courier_provider'],
+                        'tracking_number' => $validated['tracking_number'],
+                    ]);
+                }
             });
         } catch (RuntimeException $exception) {
             if ($proofPath) {
@@ -192,35 +206,26 @@ class StaffPackingWorkflowController extends Controller
                 'accepted',
             ],
         ], [
-            'packing_proof.required' =>
-                'Bukti gambar parcel bersama label tracking wajib dimuat naik.',
-            'packing_proof.image' =>
-                'Bukti courier mestilah fail gambar.',
-            'packing_proof.max' =>
-                'Saiz bukti courier tidak boleh melebihi 10 MB.',
-            'courier_provider.required' =>
-                'Sila masukkan nama courier.',
-            'tracking_number.required' =>
-                'Sila masukkan tracking number.',
-            'complete.required' =>
-                'Sila tandakan COMPLETE sebelum menamatkan order.',
-            'complete.accepted' =>
-                'Sila tandakan COMPLETE sebelum menamatkan order.',
+            'packing_proof.required' => 'Bukti gambar parcel bersama label tracking wajib dimuat naik.',
+            'packing_proof.image' => 'Bukti courier mestilah fail gambar.',
+            'packing_proof.max' => 'Saiz bukti courier tidak boleh melebihi 10 MB.',
+            'courier_provider.required' => 'Sila masukkan nama courier.',
+            'tracking_number.required' => 'Sila masukkan tracking number.',
+            'complete.required' => 'Sila tandakan COMPLETE sebelum menamatkan order.',
+            'complete.accepted' => 'Sila tandakan COMPLETE sebelum menamatkan order.',
         ]);
 
         $fulfilmentJob = $packingJob->order->fulfilmentJob;
 
         if (! $fulfilmentJob) {
             return back()->withErrors([
-                'packing_job' =>
-                    'Fulfilment job belum tersedia untuk order ini.',
+                'packing_job' => 'Fulfilment job belum tersedia untuk order ini.',
             ]);
         }
 
         if ($fulfilmentJob->method !== 'COURIER') {
             return back()->withErrors([
-                'packing_job' =>
-                    'Courier completion hanya dibenarkan untuk order COURIER.',
+                'packing_job' => 'Courier completion hanya dibenarkan untuk order COURIER.',
             ]);
         }
 
@@ -341,13 +346,13 @@ class StaffPackingWorkflowController extends Controller
     }
 
     private function authorizePackingOperation(
-    Request $request,
-    PackingJob $packingJob
+        Request $request,
+        PackingJob $packingJob
     ): void {
-    abort_unless(
-        $request->user()->role === \App\Models\User::ROLE_OM
-            || $packingJob->assigned_user_id === $request->user()->id,
-        404
+        abort_unless(
+            $request->user()->role === User::ROLE_OM
+                || $packingJob->assigned_user_id === $request->user()->id,
+            404
         );
     }
 

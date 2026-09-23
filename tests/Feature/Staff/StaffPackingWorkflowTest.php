@@ -162,8 +162,7 @@ class StaffPackingWorkflowTest extends TestCase
         $response = $this->actingAs($packing)->post(
             route('staff.packing-jobs.mark-packed', $job),
             [
-                'packing_proof' =>
-                    UploadedFile::fake()->image('packing.jpg'),
+                'packing_proof' => UploadedFile::fake()->image('packing.jpg'),
             ]
         );
 
@@ -201,8 +200,7 @@ class StaffPackingWorkflowTest extends TestCase
         $response = $this->actingAs($packing)->post(
             route('staff.packing-jobs.mark-packed', $job),
             [
-                'packing_proof' =>
-                    UploadedFile::fake()->image('packing.jpg'),
+                'packing_proof' => UploadedFile::fake()->image('packing.jpg'),
             ]
         );
 
@@ -275,8 +273,7 @@ class StaffPackingWorkflowTest extends TestCase
             ->post(
                 route('staff.packing-jobs.mark-packed', $job),
                 [
-                    'packing_proof' =>
-                        UploadedFile::fake()->image('packing.jpg'),
+                    'packing_proof' => UploadedFile::fake()->image('packing.jpg'),
                 ]
             )
             ->assertRedirect();
@@ -304,7 +301,7 @@ class StaffPackingWorkflowTest extends TestCase
         );
     }
 
-        public function test_one_package_courier_order_can_be_completed_by_assigned_packing_staff(): void
+    public function test_one_package_courier_order_can_be_completed_by_assigned_packing_staff(): void
     {
         Storage::fake('local');
 
@@ -370,8 +367,7 @@ class StaffPackingWorkflowTest extends TestCase
         $response = $this->actingAs($packing)->post(
             route('staff.packing-jobs.complete-courier', $job),
             [
-                'packing_proof' =>
-                    UploadedFile::fake()->image('parcel-with-label.jpg'),
+                'packing_proof' => UploadedFile::fake()->image('parcel-with-label.jpg'),
                 'courier_provider' => 'Pos Laju',
                 'tracking_number' => 'PL123456789MY',
                 'complete' => '1',
@@ -643,16 +639,13 @@ class StaffPackingWorkflowTest extends TestCase
 
         $payment->update([
             'provider' => 'TEST',
-            'provider_reference' =>
-                'STAFF-PACK-' . $payment->id,
+            'provider_reference' => 'STAFF-PACK-'.$payment->id,
         ]);
 
         app(HandlePaymentCallbackService::class)->handle([
             'provider' => 'TEST',
-            'provider_reference' =>
-                $payment->provider_reference,
-            'provider_event_id' =>
-                'STAFF-PACK-EVENT-' . $payment->id,
+            'provider_reference' => $payment->provider_reference,
+            'provider_event_id' => 'STAFF-PACK-EVENT-'.$payment->id,
             'status' => 'PAID',
         ]);
 
@@ -684,12 +677,9 @@ class StaffPackingWorkflowTest extends TestCase
             app(CreateArtworkVersionService::class)->create(
                 $designJob,
                 [
-                    'storage_path' =>
-                        "artworks/{$designJob->side}/v1.pdf",
-                    'preview_storage_path' =>
-                        "artworks/{$designJob->side}/v1-preview.png",
-                    'original_filename' =>
-                        "{$designJob->side}-v1.pdf",
+                    'storage_path' => "artworks/{$designJob->side}/v1.pdf",
+                    'preview_storage_path' => "artworks/{$designJob->side}/v1-preview.png",
+                    'original_filename' => "{$designJob->side}-v1.pdf",
                     'mime_type' => 'application/pdf',
                 ]
             );
@@ -708,7 +698,7 @@ class StaffPackingWorkflowTest extends TestCase
         return $order->fresh();
     }
 
-        private function confirmedOrder(
+    private function confirmedOrder(
         int $packageCount,
         string $customerName,
         string $fulfilmentMethod = 'PICKUP'
@@ -763,7 +753,7 @@ class StaffPackingWorkflowTest extends TestCase
             ->confirm($order->fresh());
     }
 
-        public function test_two_package_courier_order_uses_one_business_fulfilment_and_can_be_completed(): void
+    public function test_two_package_courier_order_uses_one_business_fulfilment_and_can_be_completed(): void
     {
         Storage::fake('local');
 
@@ -841,10 +831,9 @@ class StaffPackingWorkflowTest extends TestCase
         $response = $this->actingAs($packing)->post(
             route('staff.packing-jobs.complete-courier', $job),
             [
-                'packing_proof' =>
-                    UploadedFile::fake()->image(
-                        'two-package-parcel-with-label.jpg'
-                    ),
+                'packing_proof' => UploadedFile::fake()->image(
+                    'two-package-parcel-with-label.jpg'
+                ),
                 'courier_provider' => 'Pos Laju',
                 'tracking_number' => 'PL987654321MY',
                 'complete' => '1',
@@ -926,7 +915,7 @@ class StaffPackingWorkflowTest extends TestCase
         );
     }
 
-        public function test_courier_completion_requires_proof_courier_tracking_and_explicit_complete(): void
+    public function test_courier_completion_requires_proof_courier_tracking_and_explicit_complete(): void
     {
         Storage::fake('local');
 
@@ -1017,7 +1006,7 @@ class StaffPackingWorkflowTest extends TestCase
         );
     }
 
-        public function test_other_packing_staff_cannot_complete_courier_job_assigned_to_another_packing_staff(): void
+    public function test_other_packing_staff_cannot_complete_courier_job_assigned_to_another_packing_staff(): void
     {
         Storage::fake('local');
 
@@ -1061,8 +1050,7 @@ class StaffPackingWorkflowTest extends TestCase
         $response = $this->actingAs($otherPacking)->post(
             route('staff.packing-jobs.complete-courier', $job),
             [
-                'packing_proof' =>
-                    UploadedFile::fake()->image('unauthorized-proof.jpg'),
+                'packing_proof' => UploadedFile::fake()->image('unauthorized-proof.jpg'),
                 'courier_provider' => 'Pos Laju',
                 'tracking_number' => 'UNAUTHORIZED123',
                 'complete' => '1',
@@ -1142,8 +1130,7 @@ class StaffPackingWorkflowTest extends TestCase
         $response = $this->actingAs($operationManagement)->post(
             route('staff.packing-jobs.complete-courier', $job),
             [
-                'packing_proof' =>
-                    UploadedFile::fake()->image('om-proof.jpg'),
+                'packing_proof' => UploadedFile::fake()->image('om-proof.jpg'),
                 'courier_provider' => 'Pos Laju',
                 'tracking_number' => 'OM123',
                 'complete' => '1',
@@ -1216,8 +1203,7 @@ class StaffPackingWorkflowTest extends TestCase
         $response = $this->actingAs($operationManagement)->post(
             route('staff.packing-jobs.complete-courier', $job),
             [
-                'packing_proof' =>
-                    UploadedFile::fake()->image('om-own-proof.jpg'),
+                'packing_proof' => UploadedFile::fake()->image('om-own-proof.jpg'),
                 'courier_provider' => 'Pos Laju',
                 'tracking_number' => 'OMOWN123',
                 'complete' => '1',
@@ -1335,8 +1321,7 @@ class StaffPackingWorkflowTest extends TestCase
         $response = $this->actingAs($admin)->post(
             route('staff.packing-jobs.complete-courier', $job),
             [
-                'packing_proof' =>
-                    UploadedFile::fake()->image('admin-proof.jpg'),
+                'packing_proof' => UploadedFile::fake()->image('admin-proof.jpg'),
                 'courier_provider' => 'Pos Laju',
                 'tracking_number' => 'ADMIN123',
                 'complete' => '1',
@@ -1364,6 +1349,39 @@ class StaffPackingWorkflowTest extends TestCase
                 ->where('event_type', 'COURIER_COMPLETED')
                 ->count()
         );
+    }
+
+    public function test_packing_saves_courier_details_without_marking_parcel_shipped(): void
+    {
+        $admin = $this->admin();
+        $packing = $this->staff(User::ROLE_PACKING);
+        [$order, $job] = $this->packingJob(1, 'Tracking During Packing', 'COURIER');
+        app(AssignPackingJobService::class)->assign($job, $packing, $admin);
+        $this->actingAs($packing)->post(route('staff.packing-jobs.start', $job))->assertRedirect();
+        $this->post(route('staff.packing-jobs.items.verify', [
+            'packingJob' => $job,
+            'packingItem' => $job->items()->firstOrFail(),
+        ]))->assertRedirect();
+
+        $this->post(route('staff.packing-jobs.mark-packed', $job), [
+            'courier_provider' => 'Pos Laju',
+        ])->assertSessionHasErrors('tracking_number');
+        $this->assertSame('PACKING', $job->fresh()->status);
+
+        $this->post(route('staff.packing-jobs.mark-packed', $job), [
+            'courier_provider' => 'Pos Laju',
+            'tracking_number' => 'PL001234567MY',
+        ])->assertSessionHasNoErrors()->assertRedirect();
+
+        $fulfilment = $order->fulfilmentJob()->firstOrFail();
+        $this->assertSame('Pos Laju', $fulfilment->courier_provider);
+        $this->assertSame('PL001234567MY', $fulfilment->tracking_number);
+        $this->assertSame('READY', $fulfilment->status);
+        $this->assertNull($fulfilment->shipped_at);
+        $this->get(route('staff.orders.show', $order->order_id))
+            ->assertSee('Pos Laju')->assertSee('PL001234567MY');
+        $this->post(route('public.orders.progress.lookup'), ['order_id' => $order->order_id])
+            ->assertSee('Pos Laju')->assertSee('PL001234567MY');
     }
 
     private function sidePayload(

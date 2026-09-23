@@ -228,8 +228,8 @@
                                         <div class="staff-contact-list">
                                             @foreach ($packageSide->event->contacts as $contact)
                                                 <div class="staff-contact-row">
-                                                    <span>{{ $contact->name ?? '-' }}</span>
-                                                    <strong>{{ $contact->phone ?? '-' }}</strong>
+                                                    <span>{{ $contact->contact_name ?? '-' }}</span>
+                                                    <strong>{{ $contact->contact_phone ?? '-' }}</strong>
                                                 </div>
                                             @endforeach
                                         </div>
@@ -334,6 +334,7 @@
                                                             Source Artwork
                                                         </label>
 
+                                                        <div class="staff-file-picker">
                                                         <input
                                                             id="source-artwork-{{ $job->id }}"
                                                             type="file"
@@ -341,6 +342,8 @@
                                                             accept=".psd,.pdf"
                                                             required
                                                         >
+                                                            <button type="button" class="staff-file-cancel" hidden aria-controls="source-artwork-{{ $job->id }}">Batal</button>
+                                                        </div>
 
                                                         <span class="staff-field-help">
                                                             PSD or PDF. Maximum 100 MB.
@@ -352,6 +355,7 @@
                                                             Customer Preview
                                                         </label>
 
+                                                        <div class="staff-file-picker">
                                                         <input
                                                             id="customer-preview-{{ $job->id }}"
                                                             type="file"
@@ -359,6 +363,8 @@
                                                             accept=".jpg,.jpeg,.png,.pdf"
                                                             required
                                                         >
+                                                            <button type="button" class="staff-file-cancel" hidden aria-controls="customer-preview-{{ $job->id }}">Batal</button>
+                                                        </div>
 
                                                         <span class="staff-field-help">
                                                             JPG, PNG or PDF. Maximum 20 MB.
@@ -738,6 +744,7 @@
                                     <form method="POST" enctype="multipart/form-data" action="{{ route('staff.packing-jobs.mark-packed', $order->packingJob) }}" class="staff-packing-complete-form">
                                         @csrf
                                         <label for="packing-proof">Bukti gambar barang telah dipack</label>
+<<<<<<< HEAD
 
                                         <input
                                             id="packing-proof"
@@ -750,6 +757,17 @@
                                         <button type="submit" class="staff-button staff-button-primary">
                                             {{ $order->fulfilment?->method === 'COURIER' ? 'Mark Packed' : 'Upload Bukti & Mark Packed' }}
                                         </button>
+=======
+                                        <div class="staff-file-picker">
+                                            <input id="packing-proof" type="file" name="packing_proof" accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp" required>
+                                            <button type="button" class="staff-file-cancel" hidden aria-controls="packing-proof">Batal</button>
+                                        </div>
+                                        @if ($order->fulfilment?->method === 'COURIER')
+                                            <label for="courier-provider">Nama courier</label><input id="courier-provider" name="courier_provider" value="{{ old('courier_provider') }}" placeholder="Contoh: Pos Laju" required>
+                                            <label for="tracking-number">Tracking number</label><input id="tracking-number" name="tracking_number" value="{{ old('tracking_number') }}" required>
+                                        @endif
+                                        <button type="submit" class="staff-button staff-button-primary">Upload Bukti & Mark Packed</button>
+>>>>>>> main
                                     </form>
                                 @endif
                             @endif
@@ -937,5 +955,26 @@
         </main>
         </div>
     </div>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        document.querySelectorAll('.staff-file-picker').forEach(function (picker) {
+            const input = picker.querySelector('input[type="file"]');
+            const cancelButton = picker.querySelector('.staff-file-cancel');
+
+            function updateCancelButton() {
+                cancelButton.hidden = input.files.length === 0;
+            }
+
+            input.addEventListener('change', updateCancelButton);
+            cancelButton.addEventListener('click', function () {
+                input.value = '';
+                updateCancelButton();
+                input.focus();
+            });
+
+            updateCancelButton();
+        });
+    });
+</script>
 </body>
 </html>

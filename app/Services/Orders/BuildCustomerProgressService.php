@@ -24,6 +24,7 @@ class BuildCustomerProgressService
             'PAID' => [80, 'Bayaran Selesai', 'Bayaran tempahan anda telah selesai.'],
             'READY_FOR_PRINT' => [82, 'Menunggu Proses Cetakan', 'Tempahan anda berada dalam giliran cetakan.'],
             'PRINTING' => [86, 'Dalam Proses Cetakan', 'Tempahan anda sedang dicetak.'],
+            'PRINTED' => [88, 'Cetakan Selesai', 'Cetakan tempahan anda telah siap dan akan diteruskan ke proses pembungkusan.'],
             'READY_FOR_PACKING' => [90, 'Menunggu Pembungkusan', 'Tempahan anda sedang menunggu proses pembungkusan.'],
             'PACKING' => [92, 'Dalam Proses Pembungkusan', 'Tempahan anda sedang dibungkus.'],
             'PACKED' => [95, 'Pembungkusan Selesai', 'Tempahan anda telah siap dibungkus.'],
