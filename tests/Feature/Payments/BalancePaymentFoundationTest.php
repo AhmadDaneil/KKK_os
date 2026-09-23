@@ -122,4 +122,56 @@ class BalancePaymentFoundationTest extends TestCase
         $this->assertDatabaseCount('payment_events', 2);
         $this->assertSame('PAID', PaymentTransaction::first()->status);
     }
+
+    public function test_balance_payment_callback_updates_only_the_correct_order(): void
+    {
+        $orderA = app(CreateOrderService::class)->create([
+            'package_count' => 1,
+            'side' => 'LELAKI',
+            'customer_name' => 'T11 Order A',
+        ]);
+
+        $orderB = app(CreateOrderService::class)->create([
+            'package_count' => 1,
+            'side' => 'PEREMPUAN',
+            'customer_name' => 'T11 Order B',
+        ]);
+
+        $orderA->update(['status' => 'DESIGN_APPROVED']);
+        $orderB->update(['status' => 'DESIGN_APPROVED']);
+
+        $paymentA = app(CreateBalancePaymentService::class)->create(
+            $orderA->fresh(),
+            '300.00'
+        );
+
+        $paymentB = app(CreateBalancePaymentService::class)->create(
+            $orderB->fresh(),
+            '400.00'
+        );
+
+        $paymentA->update([
+            'provider' => 'TEST',
+            'provider_reference' => 'T11-ORDER-A',
+        ]);
+
+        $paymentB->update([
+            'provider' => 'TEST',
+            'provider_reference' => 'T11-ORDER-B',
+        ]);
+
+        app(HandlePaymentCallbackService::class)->handle([
+            'provider' => 'TEST',
+            'provider_reference' => 'T11-ORDER-A',
+            'provider_event_id' => 'T11-EVENT-A',
+            'status' => 'PAID',
+        ]);
+
+        $this->assertSame('PAID', $paymentA->fresh()->status);
+        $this->assertSame('PAID', $orderA->fresh()->status);
+
+        $this->assertSame('PENDING', $paymentB->fresh()->status);
+        $this->assertSame('BALANCE_PENDING', $orderB->fresh()->status);
+    }
+
 }
