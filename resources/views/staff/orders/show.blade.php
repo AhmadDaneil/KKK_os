@@ -738,12 +738,18 @@
                                     <form method="POST" enctype="multipart/form-data" action="{{ route('staff.packing-jobs.mark-packed', $order->packingJob) }}" class="staff-packing-complete-form">
                                         @csrf
                                         <label for="packing-proof">Bukti gambar barang telah dipack</label>
-                                        <input id="packing-proof" type="file" name="packing_proof" accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp" required>
-                                        @if ($order->fulfilment?->method === 'COURIER')
-                                            <label for="courier-provider">Nama courier</label><input id="courier-provider" name="courier_provider" value="{{ old('courier_provider') }}" placeholder="Contoh: Pos Laju" required>
-                                            <label for="tracking-number">Tracking number</label><input id="tracking-number" name="tracking_number" value="{{ old('tracking_number') }}" required>
-                                        @endif
-                                        <button type="submit" class="staff-button staff-button-primary">Upload Bukti & Mark Packed</button>
+
+                                        <input
+                                            id="packing-proof"
+                                            type="file"
+                                            name="packing_proof"
+                                            accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp"
+                                            @required($order->fulfilment?->method !== 'COURIER')
+                                        >
+
+                                        <button type="submit" class="staff-button staff-button-primary">
+                                            {{ $order->fulfilment?->method === 'COURIER' ? 'Mark Packed' : 'Upload Bukti & Mark Packed' }}
+                                        </button>
                                     </form>
                                 @endif
                             @endif
@@ -809,6 +815,121 @@
                                     <dd>{{ $order->fulfilmentJob->completion_reference ?? '-' }}</dd>
                                 </div>
                             </dl>
+                            @if (
+                                $order->packingJob
+                                && $order->packingJob->assigned_user_id === auth()->id()
+                                && $order->fulfilmentJob->status === 'READY'
+                            )
+                                <div class="staff-detail-group">
+                                    @if ($order->fulfilmentJob->method === 'PICKUP')
+                                        <h4>Pickup Completion</h4>
+
+                                        <form
+                                            method="POST"
+                                            action="{{ route('staff.packing-jobs.collect-pickup', $order->packingJob) }}"
+                                            class="staff-workflow-form"
+                                        >
+                                            @csrf
+
+                                            <label for="completion-reference">
+                                                Completion Reference
+                                            </label>
+
+                                            <input
+                                                id="completion-reference"
+                                                type="text"
+                                                name="completion_reference"
+                                                value="{{ old('completion_reference') }}"
+                                                maxlength="255"
+                                                placeholder="Contoh: PICKUP-001"
+                                            >
+
+                                            <label>
+                                                <input
+                                                    type="checkbox"
+                                                    name="complete"
+                                                    value="1"
+                                                    required
+                                                >
+                                                COMPLETE - Kad telah diambil oleh customer
+                                            </label>
+
+                                            <button
+                                                type="submit"
+                                                class="staff-button staff-button-primary"
+                                            >
+                                                Mark Pickup Collected
+                                            </button>
+                                        </form>
+
+                                    @elseif ($order->fulfilmentJob->method === 'COURIER')
+                                        <h4>Courier Completion</h4>
+
+                                        <form
+                                            method="POST"
+                                            enctype="multipart/form-data"
+                                            action="{{ route('staff.packing-jobs.complete-courier', $order->packingJob) }}"
+                                            class="staff-workflow-form"
+                                        >
+                                            @csrf
+
+                                            <label for="courier-packing-proof">
+                                                Bukti parcel bersama label tracking
+                                            </label>
+
+                                            <input
+                                                id="courier-packing-proof"
+                                                type="file"
+                                                name="packing_proof"
+                                                accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp"
+                                                required
+                                            >
+
+                                            <label for="courier-provider">
+                                                Nama courier
+                                            </label>
+
+                                            <input
+                                                id="courier-provider"
+                                                type="text"
+                                                name="courier_provider"
+                                                value="{{ old('courier_provider') }}"
+                                                placeholder="Contoh: Pos Laju"
+                                                required
+                                            >
+
+                                            <label for="tracking-number">
+                                                Tracking number
+                                            </label>
+
+                                            <input
+                                                id="tracking-number"
+                                                type="text"
+                                                name="tracking_number"
+                                                value="{{ old('tracking_number') }}"
+                                                required
+                                            >
+
+                                            <label>
+                                                <input
+                                                    type="checkbox"
+                                                    name="complete"
+                                                    value="1"
+                                                    required
+                                                >
+                                                COMPLETE - Parcel telah diserahkan kepada courier
+                                            </label>
+
+                                            <button
+                                                type="submit"
+                                                class="staff-button staff-button-primary"
+                                            >
+                                                Complete Courier Fulfilment
+                                            </button>
+                                        </form>
+                                    @endif
+                                </div>
+                            @endif
                         </div>
                     @endif
                 </article>

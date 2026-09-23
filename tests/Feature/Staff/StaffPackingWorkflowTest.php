@@ -1402,4 +1402,335 @@ class StaffPackingWorkflowTest extends TestCase
             ],
         ];
     }
+
+    public function test_two_package_pickup_order_can_be_collected_by_assigned_packing_staff(): void
+    {
+        $admin = $this->admin();
+        $packing = $this->staff(User::ROLE_PACKING);
+
+        [$order, $job] = $this->packingJob(
+            2,
+            'Pickup Two Package Test',
+            'PICKUP'
+        );
+
+        app(AssignPackingJobService::class)
+            ->assign($job, $packing, $admin);
+
+        $this->actingAs($packing)
+            ->post(route('staff.packing-jobs.start', $job))
+            ->assertRedirect();
+
+        $items = $job->items()
+            ->orderBy('id')
+            ->get();
+
+        $this->assertCount(2, $items);
+
+        $this->assertEqualsCanonicalizing(
+            ['LELAKI', 'PEREMPUAN'],
+            $items->pluck('side')->all()
+        );
+
+        foreach ($items as $item) {
+            $this->actingAs($packing)
+                ->post(
+                    route('staff.packing-jobs.items.verify', [
+                        'packingJob' => $job,
+                        'packingItem' => $item,
+                    ])
+                )
+                ->assertRedirect();
+        }
+
+        $this->actingAs($packing)
+            ->post(
+                route('staff.packing-jobs.mark-packed', $job),
+                [
+                    'packing_proof' => UploadedFile::fake()->image('pickup-packed.jpg'),
+                ]
+            )
+            ->assertRedirect();
+
+        $fulfilmentJob = $order->fulfilmentJob()
+            ->firstOrFail();
+
+        $this->assertSame('PICKUP', $fulfilmentJob->method);
+        $this->assertSame('READY', $fulfilmentJob->status);
+
+        $response = $this->actingAs($packing)->post(
+            route('staff.packing-jobs.collect-pickup', $job),
+            [
+                'completion_reference' => 'PICKUP-TWO-001',
+                'complete' => '1',
+            ]
+        );
+
+        $response->assertRedirect();
+        $response->assertSessionHasNoErrors();
+
+        $job->refresh();
+        $order->refresh();
+        $fulfilmentJob->refresh();
+
+        $this->assertSame('PACKED', $job->status);
+        $this->assertSame('COLLECTED', $fulfilmentJob->status);
+        $this->assertSame('COMPLETED', $order->status);
+        $this->assertSame(
+            'PICKUP-TWO-001',
+            $fulfilmentJob->completion_reference
+        );
+        $this->assertNotNull($fulfilmentJob->collected_at);
+
+        $this->assertSame(
+            1,
+            $order->fulfilmentJob()->count()
+        );
+
+        $event = $fulfilmentJob->events()
+            ->where('event_type', 'PICKUP_COLLECTED')
+            ->latest('id')
+            ->firstOrFail();
+
+        $this->assertSame($packing->id, $event->actor_user_id);
+        $this->assertSame('READY', $event->from_status);
+        $this->assertSame('COLLECTED', $event->to_status);
+    }
+    public function test_other_packing_staff_cannot_collect_pickup_assigned_to_another_packing_staff(): void
+    {
+        $admin = $this->admin();
+        $assignedPacking = $this->staff(User::ROLE_PACKING);
+        $otherPacking = $this->staff(User::ROLE_PACKING);
+
+        [$order, $job] = $this->packingJob(
+            1,
+            'Pickup Authorization Test',
+            'PICKUP'
+        );
+
+        app(AssignPackingJobService::class)
+            ->assign($job, $assignedPacking, $admin);
+
+        $this->actingAs($assignedPacking)
+            ->post(route('staff.packing-jobs.start', $job))
+            ->assertRedirect();
+
+        $item = $job->items()->firstOrFail();
+
+        $this->actingAs($assignedPacking)
+            ->post(
+                route('staff.packing-jobs.items.verify', [
+                    'packingJob' => $job,
+                    'packingItem' => $item,
+                ])
+            )
+            ->assertRedirect();
+
+        $this->actingAs($assignedPacking)
+            ->post(
+                route('staff.packing-jobs.mark-packed', $job),
+                [
+                    'packing_proof' => UploadedFile::fake()->image('pickup-packed.jpg'),
+                ]
+            )
+            ->assertRedirect();
+
+        $fulfilmentJob = $order->fulfilmentJob()
+            ->firstOrFail();
+
+        $this->assertSame('READY', $fulfilmentJob->status);
+
+        $this->app['auth']->forgetGuards();
+
+        $response = $this->actingAs($otherPacking)->post(
+            route('staff.packing-jobs.collect-pickup', $job),
+            [
+                'completion_reference' => 'UNAUTHORIZED-PICKUP',
+                'complete' => '1',
+            ]
+        );
+
+        $response->assertNotFound();
+
+        $order->refresh();
+        $fulfilmentJob->refresh();
+
+        $this->assertSame('PACKED', $order->status);
+        $this->assertSame('READY', $fulfilmentJob->status);
+        $this->assertNull($fulfilmentJob->completion_reference);
+        $this->assertNull($fulfilmentJob->collected_at);
+
+        $this->assertSame(
+            0,
+            $fulfilmentJob->events()
+                ->where('event_type', 'PICKUP_COLLECTED')
+                ->count()
+        );
+    }
+    public function test_operation_management_cannot_collect_pickup_job_assigned_to_packing_staff(): void
+    {
+        $admin = $this->admin();
+        $operationManagement = $this->staff(User::ROLE_OM);
+        $packing = $this->staff(User::ROLE_PACKING);
+
+        [$order, $job] = $this->packingJob(
+            1,
+            'Pickup Operation Management Authorization Test',
+            'PICKUP'
+        );
+
+        app(AssignPackingJobService::class)
+            ->assign($job, $packing, $admin);
+
+        $this->actingAs($packing)
+            ->post(route('staff.packing-jobs.start', $job))
+            ->assertRedirect();
+
+        $item = $job->items()->firstOrFail();
+
+        $this->actingAs($packing)
+            ->post(
+                route('staff.packing-jobs.items.verify', [
+                    'packingJob' => $job,
+                    'packingItem' => $item,
+                ])
+            )
+            ->assertRedirect();
+
+        $this->actingAs($packing)
+            ->post(
+                route('staff.packing-jobs.mark-packed', $job),
+                [
+                    'packing_proof' => UploadedFile::fake()->image('pickup-om-denied.jpg'),
+                ]
+            )
+            ->assertRedirect();
+
+        $fulfilmentJob = $order->fulfilmentJob()
+            ->firstOrFail();
+
+        $this->assertSame('READY', $fulfilmentJob->status);
+
+        $this->app['auth']->forgetGuards();
+
+        $response = $this->actingAs($operationManagement)->post(
+            route('staff.packing-jobs.collect-pickup', $job),
+            [
+                'completion_reference' => 'OM-UNAUTHORIZED-PICKUP',
+                'complete' => '1',
+            ]
+        );
+
+        $response->assertNotFound();
+
+        $job->refresh();
+        $order->refresh();
+        $fulfilmentJob->refresh();
+
+        $this->assertSame('PACKED', $job->status);
+        $this->assertSame('PACKED', $order->status);
+        $this->assertSame('READY', $fulfilmentJob->status);
+        $this->assertNull($fulfilmentJob->completion_reference);
+        $this->assertNull($fulfilmentJob->collected_at);
+
+        $this->assertSame(
+            0,
+            $fulfilmentJob->events()
+                ->where('event_type', 'PICKUP_COLLECTED')
+                ->count()
+        );
+    }
+
+    public function test_operation_management_can_collect_pickup_job_assigned_to_them(): void
+    {
+        $admin = $this->admin();
+        $operationManagement = $this->staff(User::ROLE_OM);
+
+        [$order, $job] = $this->packingJob(
+            1,
+            'Pickup OM Own Assignment Test',
+            'PICKUP'
+        );
+
+        app(AssignPackingJobService::class)
+            ->assign($job, $operationManagement, $admin);
+
+        $this->actingAs($operationManagement)
+            ->post(route('staff.packing-jobs.start', $job))
+            ->assertRedirect();
+
+        $item = $job->items()->firstOrFail();
+
+        $this->actingAs($operationManagement)
+            ->post(
+                route('staff.packing-jobs.items.verify', [
+                    'packingJob' => $job,
+                    'packingItem' => $item,
+                ])
+            )
+            ->assertRedirect();
+
+        $this->actingAs($operationManagement)
+            ->post(
+                route('staff.packing-jobs.mark-packed', $job),
+                [
+                    'packing_proof' => UploadedFile::fake()->image('pickup-om-own.jpg'),
+                ]
+            )
+            ->assertRedirect();
+
+        $fulfilmentJob = $order->fulfilmentJob()
+            ->firstOrFail();
+
+        $this->assertSame('READY', $fulfilmentJob->status);
+
+        $response = $this->actingAs($operationManagement)->post(
+            route('staff.packing-jobs.collect-pickup', $job),
+            [
+                'completion_reference' => 'OM-PICKUP-001',
+                'complete' => '1',
+            ]
+        );
+
+        $response->assertRedirect();
+        $response->assertSessionHasNoErrors();
+
+        $job->refresh();
+        $order->refresh();
+        $fulfilmentJob->refresh();
+
+        $this->assertSame('PACKED', $job->status);
+        $this->assertSame('COMPLETED', $order->status);
+        $this->assertSame('COLLECTED', $fulfilmentJob->status);
+        $this->assertSame(
+            'OM-PICKUP-001',
+            $fulfilmentJob->completion_reference
+        );
+        $this->assertNotNull($fulfilmentJob->collected_at);
+
+        $event = $fulfilmentJob->events()
+            ->where('event_type', 'PICKUP_COLLECTED')
+            ->latest('id')
+            ->firstOrFail();
+
+        $this->assertSame(
+            $operationManagement->id,
+            $event->actor_user_id
+        );
+        $this->assertSame('READY', $event->from_status);
+        $this->assertSame('COLLECTED', $event->to_status);
+
+        $this->assertSame(
+            1,
+            $fulfilmentJob->events()
+                ->where('event_type', 'PICKUP_COLLECTED')
+                ->count()
+        );
+
+        $this->assertSame(
+            1,
+            $order->fulfilmentJob()->count()
+        );
+    }
+
 }
