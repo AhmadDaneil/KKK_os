@@ -145,6 +145,40 @@ class SaveAndResumeDraftTest extends TestCase
     $this->assertSame('Syafiqah', $resumedSecondCouple->bride_abbreviation);
 }
 
+    public function test_special_name_formatting_is_preserved_while_whitespace_is_normalized(): void
+    {
+        $order = app(CreateOrderService::class)->create([
+            'package_count' => 1,
+            'side' => 'LELAKI',
+            'customer_name' => 'T07 Special Names',
+        ]);
+
+        $saved = app(SaveOrderDraftService::class)->save($order, [
+            'couple' => [
+                'groom_name' => '  Muhammad   A/L   Abdullah  ',
+                'bride_name' => "  Nur   A’Qila   Binti   O'Connor-Smith  ",
+            ],
+            'sides' => [
+                'LELAKI' => [
+                    'parents' => [
+                        'father_name' => "  Ahmad   bin   O'Rahman  ",
+                        'mother_name' => '  Siti   A/P   Abdullah-Samy  ',
+                    ],
+                ],
+            ],
+        ]);
+
+        $couple = $saved->couples->firstWhere('couple_number', 1);
+        $parents = $saved->packageSides
+            ->firstWhere('side', 'LELAKI')
+            ->parents;
+
+        $this->assertSame('Muhammad A/L Abdullah', $couple->groom_name);
+        $this->assertSame("Nur A’Qila Binti O'Connor-Smith", $couple->bride_name);
+        $this->assertSame("Ahmad bin O'Rahman", $parents->father_name);
+        $this->assertSame('Siti A/P Abdullah-Samy', $parents->mother_name);
+    }
+
 public function test_one_package_card_image_is_stored_privately_and_path_is_persisted(): void
 {
     Storage::fake('local');
