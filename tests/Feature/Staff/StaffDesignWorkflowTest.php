@@ -17,6 +17,7 @@ use App\Services\Orders\ConfirmOrderDetailsService;
 use App\Services\Orders\CreateOrderService;
 use App\Services\Orders\SaveOrderDraftService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Exceptions;
 use Tests\TestCase;
 use RuntimeException;
 
@@ -858,6 +859,74 @@ public function test_uploaded_files_are_cleaned_up_when_artwork_creation_service
         $job->fresh()->status
     );
     }
+    public function test_unexpected_artwork_creation_failure_is_reported(): void
+{
+    Storage::fake('local');
+
+    Exceptions::fake();
+
+    $designer = $this->designer();
+    $job = $this->designJob();
+
+    $this->assign($job, $designer);
+
+    $this->actingAs($designer)
+        ->post(route('staff.design-jobs.start', $job))
+        ->assertRedirect();
+
+    $this->mock(
+        CreateArtworkVersionService::class,
+        function ($mock): void {
+            $mock->shouldReceive('create')
+                ->once()
+                ->andThrow(
+                    new \Exception(
+                        'Simulated unexpected artwork creation failure.'
+                    )
+                );
+        }
+    );
+
+    $response = $this
+        ->from(route('staff.orders.index'))
+        ->actingAs($designer)
+        ->post(
+            route('staff.design-jobs.artwork.store', $job),
+            [
+                'source_artwork' => UploadedFile::fake()->create(
+                    'failed.pdf',
+                    1024,
+                    'application/pdf'
+                ),
+                'customer_preview' => UploadedFile::fake()->image(
+                    'failed-preview.jpg'
+                ),
+            ]
+        );
+
+    $response
+        ->assertRedirect(route('staff.orders.index'))
+        ->assertSessionHasErrors([
+            'design_job' =>
+                'Artwork could not be uploaded. Please try again.',
+        ]);
+
+    Exceptions::assertReported(
+        function (\Exception $exception): bool {
+            return $exception->getMessage()
+                === 'Simulated unexpected artwork creation failure.';
+        }
+    );
+
+    Exceptions::assertReportedCount(1);
+
+    $this->assertSame(
+        0,
+        ArtworkVersion::query()
+            ->where('design_job_id', $job->id)
+            ->count()
+    );
+}
     public function test_assigned_designer_can_mark_uploaded_artwork_ready(): void
 {
     Storage::fake('local');
