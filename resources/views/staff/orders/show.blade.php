@@ -228,8 +228,8 @@
                                         <div class="staff-contact-list">
                                             @foreach ($packageSide->event->contacts as $contact)
                                                 <div class="staff-contact-row">
-                                                    <span>{{ $contact->name ?? '-' }}</span>
-                                                    <strong>{{ $contact->phone ?? '-' }}</strong>
+                                                    <span>{{ $contact->contact_name ?? '-' }}</span>
+                                                    <strong>{{ $contact->contact_phone ?? '-' }}</strong>
                                                 </div>
                                             @endforeach
                                         </div>
