@@ -334,6 +334,7 @@
                                                             Source Artwork
                                                         </label>
 
+                                                        <div class="staff-artwork-picker">
                                                         <input
                                                             id="source-artwork-{{ $job->id }}"
                                                             type="file"
@@ -341,6 +342,8 @@
                                                             accept=".psd,.pdf"
                                                             required
                                                         >
+                                                            <button type="button" class="staff-artwork-cancel" hidden aria-controls="source-artwork-{{ $job->id }}">Batal</button>
+                                                        </div>
 
                                                         <span class="staff-field-help">
                                                             PSD or PDF. Maximum 100 MB.
@@ -352,6 +355,7 @@
                                                             Customer Preview
                                                         </label>
 
+                                                        <div class="staff-artwork-picker">
                                                         <input
                                                             id="customer-preview-{{ $job->id }}"
                                                             type="file"
@@ -359,6 +363,8 @@
                                                             accept=".jpg,.jpeg,.png,.pdf"
                                                             required
                                                         >
+                                                            <button type="button" class="staff-artwork-cancel" hidden aria-controls="customer-preview-{{ $job->id }}">Batal</button>
+                                                        </div>
 
                                                         <span class="staff-field-help">
                                                             JPG, PNG or PDF. Maximum 20 MB.
@@ -816,5 +822,26 @@
         </main>
         </div>
     </div>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        document.querySelectorAll('.staff-artwork-picker').forEach(function (picker) {
+            const input = picker.querySelector('input[type="file"]');
+            const cancelButton = picker.querySelector('.staff-artwork-cancel');
+
+            function updateCancelButton() {
+                cancelButton.hidden = input.files.length === 0;
+            }
+
+            input.addEventListener('change', updateCancelButton);
+            cancelButton.addEventListener('click', function () {
+                input.value = '';
+                updateCancelButton();
+                input.focus();
+            });
+
+            updateCancelButton();
+        });
+    });
+</script>
 </body>
 </html>

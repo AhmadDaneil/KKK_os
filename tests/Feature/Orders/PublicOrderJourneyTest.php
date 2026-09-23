@@ -88,6 +88,21 @@ class PublicOrderJourneyTest extends TestCase
             ->assertDontSee('0199999999');
     }
 
+    public function test_printed_order_shows_completed_printing_progress(): void
+    {
+        $order = app(CreateOrderService::class)->create([
+            'package_count' => 1,
+            'side' => 'LELAKI',
+        ]);
+        $order->update(['status' => 'PRINTED']);
+
+        $this->post(route('public.orders.progress.lookup'), ['order_id' => $order->order_id])
+            ->assertOk()
+            ->assertSee('88%')
+            ->assertSee('Cetakan Selesai')
+            ->assertSee('Cetakan tempahan anda telah siap dan akan diteruskan ke proses pembungkusan.');
+    }
+
     public function test_unknown_order_id_returns_a_clear_error(): void
     {
         $this->from(route('public.orders.progress'))

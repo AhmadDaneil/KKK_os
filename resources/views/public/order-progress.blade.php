@@ -90,7 +90,10 @@
                                     @csrf
                                     <label for="balance-receipt">Bukti pembayaran penuh</label>
                                     <p>JPG, JPEG, PNG, WEBP atau PDF. Maksimum 10 MB.</p>
-                                    <input id="balance-receipt" type="file" name="balance_receipt" accept=".jpg,.jpeg,.png,.webp,.pdf,image/jpeg,image/png,image/webp,application/pdf" required>
+                                    <div class="balance-receipt-picker">
+                                        <input id="balance-receipt" type="file" name="balance_receipt" accept=".jpg,.jpeg,.png,.webp,.pdf,image/jpeg,image/png,image/webp,application/pdf" required>
+                                        <button id="cancel-balance-receipt" type="button" hidden aria-controls="balance-receipt">Batal</button>
+                                    </div>
                                     @error('balance_receipt')<p class="field-error">{{ $message }}</p>@enderror
                                     <button class="button button-primary" type="submit">Hantar Bukti Pembayaran</button>
                                 </form>
@@ -114,5 +117,28 @@
             </section>
         @endisset
     </main>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const input = document.getElementById('balance-receipt');
+            const cancelButton = document.getElementById('cancel-balance-receipt');
+
+            if (!input || !cancelButton) {
+                return;
+            }
+
+            function updateCancelButton() {
+                cancelButton.hidden = input.files.length === 0;
+            }
+
+            input.addEventListener('change', updateCancelButton);
+            cancelButton.addEventListener('click', function () {
+                input.value = '';
+                updateCancelButton();
+                input.focus();
+            });
+
+            updateCancelButton();
+        });
+    </script>
 </body>
 </html>
