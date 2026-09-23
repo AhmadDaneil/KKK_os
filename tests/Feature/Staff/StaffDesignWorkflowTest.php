@@ -1026,6 +1026,42 @@ public function test_other_designer_cannot_mark_assigned_job_ready(): void
         );
     }
 
+        public function test_operation_management_cannot_mark_designer_job_ready(): void
+    {
+        $admin = $this->admin();
+        $operationManagement = $this->staff(User::ROLE_OM);
+        $designer = $this->designer();
+        $job = $this->designJob();
+
+        $this->assign($job, $designer, $admin);
+
+        app(StartDesignJobService::class)
+            ->start($job, $designer);
+
+        app(CreateArtworkVersionService::class)->create(
+            $job->fresh(),
+            [
+                'storage_path' => 'artworks/test/source.pdf',
+                'preview_storage_path' =>
+                    'artworks/test/preview.jpg',
+                'original_filename' => 'source.pdf',
+                'mime_type' => 'application/pdf',
+            ],
+            $designer
+        );
+
+        $this->actingAs($operationManagement)
+            ->post(
+                route('staff.design-jobs.mark-ready', $job)
+            )
+            ->assertForbidden();
+
+        $this->assertSame(
+            'DESIGN_IN_PROGRESS',
+            $job->fresh()->status
+        );
+    }
+
     public function test_two_package_design_sides_can_be_marked_ready_independently(): void
     {
         $lelakiDesigner = $this->designer();
