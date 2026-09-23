@@ -194,6 +194,11 @@ body {
 .receipt-panel { display: flex; flex-direction: column; justify-content: center; }
 .receipt-panel label { font-weight: 800; }.receipt-panel label span { color: #b91c1c; }
 .receipt-panel input { width: 100%; padding: 0.8rem; border: 1px solid #cbd5e1; border-radius: 8px; background: #fff; }
+.receipt-picker { display: flex; align-items: center; gap: 10px; min-width: 0; }
+.receipt-picker input { flex: 1; min-width: 0; }
+.receipt-picker button { flex-shrink: 0; padding: 10px 14px; border: 1px solid #e3bdb8; border-radius: 8px; color: #a33428; background: #fff5f3; font: inherit; cursor: pointer; }
+.receipt-picker button:hover { background: #fce8e4; }
+.receipt-picker button[hidden] { display: none; }
 .field-error { margin: 0.45rem 0; color: #b91c1c; font-size: 0.875rem; font-weight: 600; }
 
 .confirmation-note {

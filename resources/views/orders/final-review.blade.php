@@ -308,7 +308,10 @@
                 <div class="receipt-panel">
                     <label for="deposit_receipt">Lampirkan resit pembayaran <span aria-hidden="true">*</span></label>
                     <p>Format JPG, JPEG, PNG, WEBP atau PDF. Maksimum 10 MB.</p>
-                    <input id="deposit_receipt" type="file" name="deposit_receipt" accept=".jpg,.jpeg,.png,.webp,.pdf,image/jpeg,image/png,image/webp,application/pdf" required form="final-confirmation-form">
+                    <div class="receipt-picker">
+                        <input id="deposit_receipt" type="file" name="deposit_receipt" accept=".jpg,.jpeg,.png,.webp,.pdf,image/jpeg,image/png,image/webp,application/pdf" required form="final-confirmation-form">
+                        <button id="cancel-deposit-receipt" type="button" hidden aria-controls="deposit_receipt">Batal</button>
+                    </div>
                     @error('deposit_receipt')<p class="field-error" role="alert">{{ $message }}</p>@enderror
                 </div>
             </div>
@@ -365,5 +368,24 @@
             </form>
         </section>
     </main>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const input = document.getElementById('deposit_receipt');
+            const cancelButton = document.getElementById('cancel-deposit-receipt');
+
+            function updateCancelButton() {
+                cancelButton.hidden = input.files.length === 0;
+            }
+
+            input.addEventListener('change', updateCancelButton);
+            cancelButton.addEventListener('click', function () {
+                input.value = '';
+                updateCancelButton();
+                input.focus();
+            });
+
+            updateCancelButton();
+        });
+    </script>
 </body>
 </html>
