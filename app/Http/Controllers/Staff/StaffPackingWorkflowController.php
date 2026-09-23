@@ -12,11 +12,19 @@ use App\Services\Packing\MarkPackingJobPackedService;
 use App\Services\Packing\StartPackingService;
 use App\Services\Packing\VerifyPackingItemService;
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
 use App\Services\Fulfilment\InitializeFulfilmentJobForOrderService;
 use App\Services\Fulfilment\CompleteCourierFulfilmentService;
 use App\Services\Fulfilment\MarkPickupCollectedService;
 >>>>>>> 8ba681e (feat: add production pickup completion workflow)
+=======
+use App\Services\Fulfilment\InitializeFulfilmentJobForOrderService;
+use App\Services\Fulfilment\CompleteCourierFulfilmentService;
+use App\Services\Fulfilment\MarkPickupCollectedService;
+=======
+>>>>>>> main
+>>>>>>> 07c873d8e7973d8d4427ce71c1ecf116b2d131bd
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
