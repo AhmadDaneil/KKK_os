@@ -11,6 +11,20 @@ use App\Services\Fulfilment\InitializeFulfilmentJobForOrderService;
 use App\Services\Packing\MarkPackingJobPackedService;
 use App\Services\Packing\StartPackingService;
 use App\Services\Packing\VerifyPackingItemService;
+<<<<<<< HEAD
+<<<<<<< HEAD
+=======
+use App\Services\Fulfilment\InitializeFulfilmentJobForOrderService;
+use App\Services\Fulfilment\CompleteCourierFulfilmentService;
+use App\Services\Fulfilment\MarkPickupCollectedService;
+>>>>>>> 8ba681e (feat: add production pickup completion workflow)
+=======
+use App\Services\Fulfilment\InitializeFulfilmentJobForOrderService;
+use App\Services\Fulfilment\CompleteCourierFulfilmentService;
+use App\Services\Fulfilment\MarkPickupCollectedService;
+=======
+>>>>>>> main
+>>>>>>> 07c873d8e7973d8d4427ce71c1ecf116b2d131bd
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -276,6 +290,66 @@ class StaffPackingWorkflowController extends Controller
         return back()->with(
             'status',
             'Courier fulfilment completed successfully.'
+        );
+    }
+
+    public function collectPickup(
+        Request $request,
+        PackingJob $packingJob,
+        MarkPickupCollectedService $service,
+    ): RedirectResponse {
+        $this->authorizeAssignedPackingStaff($request, $packingJob);
+
+        $packingJob->load(['order.fulfilment', 'order.fulfilmentJob']);
+
+        $validated = $request->validate([
+            'completion_reference' => [
+                'nullable',
+                'string',
+                'max:255',
+            ],
+            'complete' => [
+                'required',
+                'accepted',
+            ],
+        ], [
+            'complete.required' =>
+                'Sila tandakan COMPLETE sebelum menamatkan order.',
+            'complete.accepted' =>
+                'Sila tandakan COMPLETE sebelum menamatkan order.',
+        ]);
+
+        $fulfilmentJob = $packingJob->order->fulfilmentJob;
+
+        if (! $fulfilmentJob) {
+            return back()->withErrors([
+                'packing_job' =>
+                    'Fulfilment job belum tersedia untuk order ini.',
+            ]);
+        }
+
+        if ($fulfilmentJob->method !== 'PICKUP') {
+            return back()->withErrors([
+                'packing_job' =>
+                    'Pickup completion hanya dibenarkan untuk order PICKUP.',
+            ]);
+        }
+
+        try {
+            $service->collect(
+                $fulfilmentJob,
+                $validated['completion_reference'] ?? null,
+                $request->user()
+            );
+        } catch (RuntimeException $exception) {
+            return back()->withErrors([
+                'packing_job' => $exception->getMessage(),
+            ]);
+        }
+
+        return back()->with(
+            'status',
+            'Pickup fulfilment completed successfully.'
         );
     }
 

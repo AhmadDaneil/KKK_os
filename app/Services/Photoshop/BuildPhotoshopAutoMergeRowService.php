@@ -41,8 +41,8 @@ class BuildPhotoshopAutoMergeRowService
     /**
      * Build one exact 28-column Photoshop compatibility row.
      *
-     * qtyKad is explicit because the current canonical payload does not
-     * contain an approved quantity source yet.
+     * qtyKad is supplied explicitly by the export orchestration.
+     * The approved V1 source is orders.card_quantity (Option A).
      */
     public function build(MergeJob $mergeJob, int|string $qtyKad): array
     {

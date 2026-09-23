@@ -213,26 +213,26 @@ Route::middleware(['auth:staff,admin', 'active.staff'])
         */
 
             Route::middleware('staff.role:DESIGNER')->group(function () {
-            Route::post(
-                '/design-jobs/{designJob}/start',
-                [StaffDesignWorkflowController::class, 'start']
-            )->name('design-jobs.start');
+                Route::post(
+                    '/design-jobs/{designJob}/start',
+                    [StaffDesignWorkflowController::class, 'start']
+                )->name('design-jobs.start');
 
-            Route::post(
-                '/design-jobs/{designJob}/resume-correction',
-                [StaffDesignWorkflowController::class, 'resumeCorrection']
-            )->name('design-jobs.resume-correction');
+                Route::post(
+                    '/design-jobs/{designJob}/resume-correction',
+                    [StaffDesignWorkflowController::class, 'resumeCorrection']
+                )->name('design-jobs.resume-correction');
 
-            Route::post(
-                '/design-jobs/{designJob}/artwork',
-                [StaffDesignWorkflowController::class, 'uploadArtwork']
-            )->name('design-jobs.artwork.store');
+                Route::post(
+                    '/design-jobs/{designJob}/artwork',
+                    [StaffDesignWorkflowController::class, 'uploadArtwork']
+                )->name('design-jobs.artwork.store');
+
+                Route::post(
+                    '/design-jobs/{designJob}/mark-ready',
+                    [StaffDesignWorkflowController::class, 'markReady']
+                )->name('design-jobs.mark-ready');
             });
-            Route::post(
-            '/design-jobs/{designJob}/mark-ready',
-            [StaffDesignWorkflowController::class, 'markReady']
-            )->name('design-jobs.mark-ready');
-
             /*
             |--------------------------------------------------------------------------
             | Printing Actions
@@ -285,6 +285,11 @@ Route::middleware(['auth:staff,admin', 'active.staff'])
                 '/packing-jobs/{packingJob}/complete-courier',
                 [StaffPackingWorkflowController::class, 'completeCourier']
                 )->name('packing-jobs.complete-courier');
+
+                Route::post(
+                '/packing-jobs/{packingJob}/collect-pickup',
+                [StaffPackingWorkflowController::class, 'collectPickup']
+                )->name('packing-jobs.collect-pickup');
 
             });
 

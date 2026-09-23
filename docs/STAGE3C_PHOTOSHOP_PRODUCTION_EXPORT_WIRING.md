@@ -1,6 +1,16 @@
 # KKK OS V1 — Stage 3C Photoshop Production Export Wiring
 
-Status: PARTIALLY IMPLEMENTED — BUSINESS DATA-SOURCE DECISION REQUIRED
+> HISTORICAL / SUPERSEDED STATUS NOTE
+>
+> This document records the state before the Project Owner approved the
+> `qtykad` ownership rule. The later approved decision is documented in
+> `STAGE3C_OPTION_A_IMPLEMENTATION.md`: one card quantity per business order,
+> stored in `orders.card_quantity`. Current production wiring uses the
+> DB-backed `DatabaseCardQuantityProvider`.
+>
+> The original pre-decision content below is retained as implementation history.
+
+Status at time of document: PARTIALLY IMPLEMENTED — BUSINESS DATA-SOURCE DECISION REQUIRED
 
 ## What is completed safely
 
