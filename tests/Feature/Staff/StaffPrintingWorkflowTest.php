@@ -334,7 +334,7 @@ class StaffPrintingWorkflowTest extends TestCase
 
         $this->actingAs($admin, 'staff')->get(route('staff.orders.show', $order->order_id))
             ->assertOk()
-            ->assertSee('Reassign Printing Staff')
+            ->assertDontSee(route('staff.print-jobs.assign', $job))
             ->assertDontSee('Mark Printed');
         $this->actingAs($admin, 'staff')->post(route('staff.print-jobs.mark-printed', $job))
             ->assertNotFound();

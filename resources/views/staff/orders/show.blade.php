@@ -749,45 +749,6 @@
                                         <p class="staff-work-message">Cetakan untuk pakej ini telah siap.</p>
                                     @endif
                                 @endif
-                                @if (auth()->user()->isOperationManagement() && ! request()->attributes->get('staff_overview_mode', false))
-    <form
-        method="POST"
-        action="{{ route($operationRoutePrefix.'print-jobs.assign', $job) }}"
-        class="staff-assignment-form"
-    >
-        @csrf
-
-        <label for="printing-assignee-{{ $job->id }}">
-            {{ $job->assigned_user_id ? 'Reassign Printing Staff' : 'Assign Printing Staff' }}
-        </label>
-
-        <div class="staff-assignment-controls">
-            <select
-                id="printing-assignee-{{ $job->id }}"
-                name="assigned_user_id"
-                required
-            >
-                <option value="">Select printing staff</option>
-
-                @foreach ($printingStaff as $staff)
-                    <option
-                        value="{{ $staff->id }}"
-                        @selected($job->assigned_user_id === $staff->id)
-                    >
-                        {{ $staff->name }}
-                    </option>
-                @endforeach
-            </select>
-
-            <button
-                type="submit"
-                class="staff-button staff-button-small"
-            >
-                {{ $job->assigned_user_id ? 'Reassign' : 'Assign' }}
-            </button>
-        </div>
-    </form>
-@endif
                             </article>
                         @empty
                             <div class="staff-empty">
@@ -827,46 +788,6 @@
                                 <dd>{{ $order->packingJob->packed_at?->format('Y-m-d H:i') ?? '-' }}</dd>
                             </div>
                         </dl>
-                        @if (auth()->user()->isAdmin() && ! request()->attributes->get('staff_overview_mode', false))
-    <form
-        method="POST"
-        action="{{ route($operationRoutePrefix.'packing-jobs.assign', $order->packingJob) }}"
-        class="staff-assignment-form"
-    >
-        @csrf
-
-        <label for="packing-assignee-{{ $order->packingJob->id }}">
-            {{ $order->packingJob->assigned_user_id ? 'Reassign Packing Staff' : 'Assign Packing Staff' }}
-        </label>
-
-        <div class="staff-assignment-controls">
-            <select
-                id="packing-assignee-{{ $order->packingJob->id }}"
-                name="assigned_user_id"
-                required
-            >
-                <option value="">Select packing staff</option>
-
-                @foreach ($packingStaff as $staff)
-                    <option
-                        value="{{ $staff->id }}"
-                        @selected($order->packingJob->assigned_user_id === $staff->id)
-                    >
-                        {{ $staff->name }}
-                    </option>
-                @endforeach
-            </select>
-
-            <button
-                type="submit"
-                class="staff-button staff-button-small"
-            >
-                {{ $order->packingJob->assigned_user_id ? 'Reassign' : 'Assign' }}
-            </button>
-        </div>
-    </form>
-@endif
-
                         @if ($order->packingJob->items->isNotEmpty())
                             <div class="staff-detail-group">
                                 <h4>Items</h4>

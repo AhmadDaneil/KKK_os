@@ -52,6 +52,13 @@ class OrderProductionAssignmentTest extends TestCase
         $this->assertSame($printing->id, $order->fresh()->printing_assigned_user_id);
         $this->assertSame($packing->id, $order->fresh()->packing_assigned_user_id);
 
+        $managementView = $this->actingAs($operationManagement)
+            ->get(route('staff.orders.show', $order->order_id));
+        $managementView->assertOk()
+            ->assertSee('Reassign Printing Staff')
+            ->assertSee('Reassign Packing &amp; Fulfilment Staff', false)
+            ->assertDontSee(route('staff.print-jobs.assign', $order->printJobs->first()));
+
         $this->actingAs($printing)
             ->get(route('staff.orders.index', ['workstream' => 'printing']))
             ->assertOk()

@@ -1371,6 +1371,7 @@ class StaffPackingWorkflowTest extends TestCase
         $response->assertOk()
             ->assertDontSee('<<<<<<<', false)
             ->assertDontSee('>>>>>>>', false)
+            ->assertDontSee(route('staff.packing-jobs.assign', $job))
             ->assertSee('aria-controls="packing-proof"', false);
         $this->assertSame(1, substr_count($response->getContent(), 'id="packing-proof"'));
         $this->assertSame(1, substr_count($response->getContent(), 'Upload Bukti &amp; Mark Packed') + substr_count($response->getContent(), 'Upload Bukti & Mark Packed'));
