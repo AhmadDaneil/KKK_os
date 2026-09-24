@@ -2,7 +2,10 @@
 
 namespace Tests\Feature\Staff;
 
+use App\Models\FulfilmentJob;
 use App\Models\Order;
+use App\Models\OrderFulfilment;
+use App\Models\PackingJob;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -50,12 +53,80 @@ class OrderStatusFilterTest extends TestCase
             ->assertDontSee($completedOrder->order_id);
     }
 
+    public function test_admin_packing_queue_only_lists_orders_with_active_packing_work(): void
+    {
+        $admin = User::factory()->create([
+            'role' => User::ROLE_ADMIN,
+            'is_active' => true,
+        ]);
+
+        $activeOrder = $this->order('KKK-PACKING-ACTIVE', 'PACKING', 'Active Packing Customer');
+        $packedOrder = $this->order('KKK-PACKING-DONE', 'PACKED', 'Packed Customer');
+
+        PackingJob::query()->create([
+            'order_id' => $activeOrder->id,
+            'status' => 'READY_FOR_PACKING',
+        ]);
+        PackingJob::query()->create([
+            'order_id' => $packedOrder->id,
+            'status' => 'PACKED',
+        ]);
+
+        $this->actingAs($admin, 'admin')
+            ->get(route('admin.orders.index', ['workstream' => 'packing']))
+            ->assertOk()
+            ->assertSee('Packing Queue')
+            ->assertSee($activeOrder->order_id)
+            ->assertDontSee($packedOrder->order_id);
+    }
+
+    public function test_admin_fulfilment_queue_only_lists_orders_with_active_fulfilment_work(): void
+    {
+        $admin = User::factory()->create([
+            'role' => User::ROLE_ADMIN,
+            'is_active' => true,
+        ]);
+
+        $activeOrder = $this->order('KKK-FULFIL-ACTIVE', 'PACKED', 'Active Fulfilment Customer');
+        $collectedOrder = $this->order('KKK-FULFIL-DONE', 'PACKED', 'Collected Customer');
+
+        $this->fulfilmentJob($activeOrder, 'READY');
+        $this->fulfilmentJob($collectedOrder, 'COLLECTED');
+
+        $this->actingAs($admin, 'admin')
+            ->get(route('admin.orders.index', ['workstream' => 'fulfilment']))
+            ->assertOk()
+            ->assertSee('Fulfilment Queue')
+            ->assertSee($activeOrder->order_id)
+            ->assertDontSee($collectedOrder->order_id);
+    }
+
     private function order(string $orderId, string $status, string $customerName): Order
     {
         return Order::query()->create([
             'order_id' => $orderId,
             'package_count' => 1,
             'customer_name' => $customerName,
+            'status' => $status,
+        ]);
+    }
+
+    private function fulfilmentJob(Order $order, string $status): FulfilmentJob
+    {
+        $fulfilment = OrderFulfilment::query()->create([
+            'order_id' => $order->id,
+            'method' => 'PICKUP',
+        ]);
+        $packingJob = PackingJob::query()->create([
+            'order_id' => $order->id,
+            'status' => 'PACKED',
+        ]);
+
+        return FulfilmentJob::query()->create([
+            'order_id' => $order->id,
+            'order_fulfilment_id' => $fulfilment->id,
+            'packing_job_id' => $packingJob->id,
+            'method' => 'PICKUP',
             'status' => $status,
         ]);
     }
