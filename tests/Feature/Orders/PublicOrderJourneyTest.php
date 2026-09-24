@@ -26,6 +26,14 @@ class PublicOrderJourneyTest extends TestCase
             ->assertSee(route('public.orders.progress'));
     }
 
+    public function test_progress_page_has_a_back_button_to_the_landing_page(): void
+    {
+        $this->get(route('public.orders.progress'))
+            ->assertOk()
+            ->assertSee('Kembali')
+            ->assertSee('href="'.route('home').'"', false);
+    }
+
     public function test_customer_can_start_an_order_and_reach_full_form(): void
     {
         $response = $this->post(route('public.orders.store'), [

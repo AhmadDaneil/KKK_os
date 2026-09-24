@@ -522,18 +522,13 @@
                                     <a class="staff-button staff-button-small" target="_blank" rel="noopener" href="{{ route($operationRoutePrefix.'payments.receipt', $payment) }}">Lihat Resit</a>
                                     @endif
                                     @if ($payment->payment_type === 'BOOKING_DEPOSIT' && auth()->user()->isOperationManagement() && $payment->status === 'PENDING')
-<<<<<<< HEAD
-                                        <form method="POST" action="{{ route($operationRoutePrefix.'payments.deposit.approve', $payment) }}">@csrf<button class="staff-button staff-button-primary" type="submit">Sahkan Deposit</button></form>
-                                        <form method="POST" action="{{ route($operationRoutePrefix.'payments.deposit.reject', $payment) }}" class="staff-reject-payment-form">
-=======
-                                        <form method="POST" action="{{ route('staff.payments.deposit.approve', $payment) }}" class="staff-field">
+                                        <form method="POST" action="{{ route($operationRoutePrefix.'payments.deposit.approve', $payment) }}" class="staff-field">
                                             @csrf
                                             <label for="payment-amount-{{ $payment->id }}">Jumlah bayaran pada resit (RM)</label>
                                             <input id="payment-amount-{{ $payment->id }}" name="amount" type="number" min="0.01" max="9999999999.99" step="0.01" placeholder="Contoh: 100.00" required>
                                             <button class="staff-button staff-button-primary" type="submit">Sahkan Deposit</button>
                                         </form>
-                                        <form method="POST" action="{{ route('staff.payments.deposit.reject', $payment) }}" class="staff-reject-payment-form">
->>>>>>> main
+                                        <form method="POST" action="{{ route($operationRoutePrefix.'payments.deposit.reject', $payment) }}" class="staff-reject-payment-form">
                                             @csrf
                                             <label for="rejection-reason-{{ $payment->id }}">Sebab penolakan</label>
                                             <textarea id="rejection-reason-{{ $payment->id }}" name="rejection_reason" rows="2" required>{{ old('rejection_reason') }}</textarea>
@@ -541,18 +536,13 @@
                                         </form>
                                     @endif
                                     @if ($payment->payment_type === 'BALANCE' && auth()->user()->isOperationManagement() && $payment->status === 'PENDING')
-<<<<<<< HEAD
-                                        <form method="POST" action="{{ route($operationRoutePrefix.'payments.balance.approve', $payment) }}">@csrf<button class="staff-button staff-button-primary" type="submit">Sahkan Bayaran Penuh</button></form>
-                                        <form method="POST" action="{{ route($operationRoutePrefix.'payments.balance.reject', $payment) }}" class="staff-reject-payment-form">
-=======
-                                        <form method="POST" action="{{ route('staff.payments.balance.approve', $payment) }}" class="staff-field">
+                                        <form method="POST" action="{{ route($operationRoutePrefix.'payments.balance.approve', $payment) }}" class="staff-field">
                                             @csrf
                                             <label for="payment-amount-{{ $payment->id }}">Jumlah bayaran pada resit (RM)</label>
                                             <input id="payment-amount-{{ $payment->id }}" name="amount" type="number" min="0.01" max="9999999999.99" step="0.01" placeholder="Contoh: 100.00" required>
                                             <button class="staff-button staff-button-primary" type="submit">Sahkan Bayaran Penuh</button>
                                         </form>
-                                        <form method="POST" action="{{ route('staff.payments.balance.reject', $payment) }}" class="staff-reject-payment-form">
->>>>>>> main
+                                        <form method="POST" action="{{ route($operationRoutePrefix.'payments.balance.reject', $payment) }}" class="staff-reject-payment-form">
                                             @csrf
                                             <label for="balance-rejection-reason-{{ $payment->id }}">Sebab penolakan</label>
                                             <textarea id="balance-rejection-reason-{{ $payment->id }}" name="rejection_reason" rows="2" required>{{ old('rejection_reason') }}</textarea>
