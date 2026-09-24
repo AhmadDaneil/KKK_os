@@ -79,6 +79,48 @@ Route::middleware(['auth:admin', 'active.staff', 'staff.role:ADMIN'])
 
         Route::get('/orders', [StaffOrderController::class, 'index'])->name('orders.index');
         Route::get('/orders/{orderId}', [StaffOrderController::class, 'show'])->name('orders.show');
+
+        Route::get('/payments/{payment}/receipt', [StaffDepositPaymentController::class, 'receipt'])
+            ->name('payments.receipt');
+        Route::post('/payments/{payment}/approve-deposit', [StaffDepositPaymentController::class, 'approve'])
+            ->name('payments.deposit.approve');
+        Route::post('/payments/{payment}/reject-deposit', [StaffDepositPaymentController::class, 'reject'])
+            ->name('payments.deposit.reject');
+        Route::post('/payments/{payment}/approve-balance', [StaffBalancePaymentController::class, 'approve'])
+            ->name('payments.balance.approve');
+        Route::post('/payments/{payment}/reject-balance', [StaffBalancePaymentController::class, 'reject'])
+            ->name('payments.balance.reject');
+
+        Route::post('/design-jobs/{designJob}/assign', [StaffJobAssignmentController::class, 'assignDesign'])
+            ->name('design-jobs.assign');
+        Route::post('/design-jobs/{designJob}/start', [StaffDesignWorkflowController::class, 'start'])
+            ->name('design-jobs.start');
+        Route::post('/design-jobs/{designJob}/resume-correction', [StaffDesignWorkflowController::class, 'resumeCorrection'])
+            ->name('design-jobs.resume-correction');
+        Route::post('/design-jobs/{designJob}/artwork', [StaffDesignWorkflowController::class, 'uploadArtwork'])
+            ->name('design-jobs.artwork.store');
+        Route::post('/design-jobs/{designJob}/mark-ready', [StaffDesignWorkflowController::class, 'markReady'])
+            ->name('design-jobs.mark-ready');
+
+        Route::post('/print-jobs/{printJob}/assign', [StaffJobAssignmentController::class, 'assignPrinting'])
+            ->name('print-jobs.assign');
+        Route::post('/print-jobs/{printJob}/start', [StaffPrintingWorkflowController::class, 'start'])
+            ->name('print-jobs.start');
+        Route::post('/print-jobs/{printJob}/mark-printed', [StaffPrintingWorkflowController::class, 'markPrinted'])
+            ->name('print-jobs.mark-printed');
+
+        Route::post('/packing-jobs/{packingJob}/assign', [StaffJobAssignmentController::class, 'assignPacking'])
+            ->name('packing-jobs.assign');
+        Route::post('/packing-jobs/{packingJob}/start', [StaffPackingWorkflowController::class, 'start'])
+            ->name('packing-jobs.start');
+        Route::post('/packing-jobs/{packingJob}/items/{packingItem}/verify', [StaffPackingWorkflowController::class, 'verifyItem'])
+            ->name('packing-jobs.items.verify');
+        Route::post('/packing-jobs/{packingJob}/mark-packed', [StaffPackingWorkflowController::class, 'markPacked'])
+            ->name('packing-jobs.mark-packed');
+        Route::post('/packing-jobs/{packingJob}/complete-courier', [StaffPackingWorkflowController::class, 'completeCourier'])
+            ->name('packing-jobs.complete-courier');
+        Route::post('/packing-jobs/{packingJob}/collect-pickup', [StaffPackingWorkflowController::class, 'collectPickup'])
+            ->name('packing-jobs.collect-pickup');
     });
 
 /*
@@ -151,7 +193,7 @@ Route::get('/staff/login', [StaffAuthController::class, 'create'])
 Route::post('/staff/login', [StaffAuthController::class, 'store'])
     ->name('staff.login.store');
 
-Route::middleware(['auth:staff,admin', 'active.staff'])
+Route::middleware(['auth:staff', 'active.staff'])
     ->prefix('staff')
     ->name('staff.')
     ->group(function () {
