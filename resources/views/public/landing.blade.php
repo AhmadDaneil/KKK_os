@@ -27,8 +27,8 @@
                 <h1>Raikan hari istimewa dengan kad yang terasa <em>benar-benar milik anda.</em></h1>
                 <p class="hero-text">Pilih tema, lengkapkan maklumat majlis dan lihat preview kad secara langsung. Kami uruskan perjalanan daripada design hingga kad siap dihantar.</p>
                 <div class="hero-actions">
-                    <a class="button button-primary" href="{{ route('public.orders.create') }}">Tempah Sekarang <span>→</span></a>
-                    <a class="button button-secondary" href="{{ route('public.orders.progress') }}">Semak Progress</a>
+                    <a class="button button-primary" href="{{ route('public.orders.create') }}"><span>Tempah Sekarang</span><span class="button-arrow" aria-hidden="true">→</span></a>
+                    <a class="button button-secondary" href="{{ route('public.orders.progress') }}"><span>Semak Progress</span></a>
                 </div>
                 <ul class="trust-list" aria-label="Kelebihan utama">
                     <li><span>✓</span> Live preview</li>
@@ -39,22 +39,26 @@
 
             <div class="hero-art" aria-label="Contoh kad kahwin KingKadKahwin">
                 <div class="botanical botanical-one">✦</div>
-                <article class="sample-card sample-card-back">
-                    <small>WALIMATUL URUS</small>
-                    <strong>Syafiq<br><i>&amp;</i><br>Awanis</strong>
-                    <span>SABTU</span>
-                    <b>16 SEPTEMBER 2026</b>
-                </article>
-                <article class="sample-card sample-card-front">
-                    <div class="card-pattern"></div>
-                    <small>Dengan penuh kesyukuran</small>
-                    <h2>Syafiq <i>&amp;</i> Awanis</h2>
-                    <div class="mini-details">
-                        <b>16</b>
-                        <span>SEPTEMBER<br>2026</span>
-                    </div>
-                    <p>Raikan cinta, abadikan kenangan.</p>
-                </article>
+                <div class="card-runner card-runner-back">
+                    <article class="sample-card sample-card-back">
+                        <small>WALIMATUL URUS</small>
+                        <strong>Syafiq<br><i>&amp;</i><br>Awanis</strong>
+                        <span>SABTU</span>
+                        <b>16 SEPTEMBER 2026</b>
+                    </article>
+                </div>
+                <div class="card-runner card-runner-front">
+                    <article class="sample-card sample-card-front">
+                        <div class="card-pattern"></div>
+                        <small>Dengan penuh kesyukuran</small>
+                        <h2>Syafiq <i>&amp;</i> Awanis</h2>
+                        <div class="mini-details">
+                            <b>16</b>
+                            <span>SEPTEMBER<br>2026</span>
+                        </div>
+                        <p>Raikan cinta, abadikan kenangan.</p>
+                    </article>
+                </div>
                 <div class="botanical botanical-two">✦</div>
             </div>
         </section>
@@ -80,7 +84,7 @@
 
         <section class="final-cta">
             <div><p class="eyebrow">Hari bahagia bermula di sini</p><h2>Sedia mencipta kad kahwin anda?</h2></div>
-            <a class="button button-light" href="{{ route('public.orders.create') }}">Mulakan Tempahan →</a>
+            <a class="button button-light" href="{{ route('public.orders.create') }}"><span>Mulakan Tempahan</span><span class="button-arrow" aria-hidden="true">→</span></a>
         </section>
     </main>
 
