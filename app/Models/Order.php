@@ -11,6 +11,8 @@ class Order extends Model
 {
     use HasFactory;
 
+    public const STATUS_FILTER_NOT_COMPLETED = 'NOT_COMPLETED';
+
     public const TERMINAL_OPERATIONAL_STATUSES = [
         'CANCELLED',
         'ARCHIVED',
