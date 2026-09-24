@@ -64,11 +64,17 @@ class BalanceReceiptWorkflowTest extends TestCase
         $this->assertSame('BALANCE_PENDING', $order->fresh()->status);
 
         $om = User::factory()->create(['role' => User::ROLE_OM, 'is_active' => true]);
-        $this->actingAs($om)->post(route('staff.payments.balance.approve', $payment))
+        foreach ([null, '0', '-5', '12.345', 'abc', '10000000000'] as $invalidAmount) {
+            $this->actingAs($om)->post(route('staff.payments.balance.approve', $payment), ['amount' => $invalidAmount])
+                ->assertSessionHasErrors('amount');
+            $this->assertSame('PENDING', $payment->fresh()->status);
+        }
+        $this->actingAs($om)->post(route('staff.payments.balance.approve', $payment), ['amount' => '125.50'])
             ->assertRedirect()
             ->assertSessionHasNoErrors();
 
         $this->assertSame('PAID', $payment->fresh()->status);
+        $this->assertSame('125.50', $payment->fresh()->amount);
         $this->assertSame('READY_FOR_PRINT', $order->fresh()->status);
         $this->assertCount(1, $order->printJobs()->get());
     }
