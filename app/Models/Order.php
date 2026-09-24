@@ -26,6 +26,8 @@ class Order extends Model
         'customer_phone',
         'booking_payment_status',
         'status',
+        'printing_assigned_user_id',
+        'packing_assigned_user_id',
         'details_confirmed_at',
     ];
 
@@ -73,51 +75,61 @@ class Order extends Model
 
     public function couples()
     {
-        return $this->hasMany(\App\Models\OrderCouple::class);
+        return $this->hasMany(OrderCouple::class);
     }
 
     public function packageSides()
     {
-        return $this->hasMany(\App\Models\OrderPackageSide::class);
+        return $this->hasMany(OrderPackageSide::class);
     }
 
     public function fulfilment()
     {
-        return $this->hasOne(\App\Models\OrderFulfilment::class);
+        return $this->hasOne(OrderFulfilment::class);
     }
 
     public function confirmation()
     {
-        return $this->hasOne(\App\Models\OrderConfirmation::class);
+        return $this->hasOne(OrderConfirmation::class);
     }
 
     public function mergeJobs()
     {
-        return $this->hasMany(\App\Models\MergeJob::class);
+        return $this->hasMany(MergeJob::class);
     }
 
     public function designJobs()
     {
-        return $this->hasMany(\App\Models\DesignJob::class);
+        return $this->hasMany(DesignJob::class);
     }
 
     public function payments()
     {
-        return $this->hasMany(\App\Models\PaymentTransaction::class);
+        return $this->hasMany(PaymentTransaction::class);
     }
 
     public function printJobs()
     {
-        return $this->hasMany(\App\Models\PrintJob::class);
+        return $this->hasMany(PrintJob::class);
+    }
+
+    public function printingAssignedUser()
+    {
+        return $this->belongsTo(User::class, 'printing_assigned_user_id');
+    }
+
+    public function packingAssignedUser()
+    {
+        return $this->belongsTo(User::class, 'packing_assigned_user_id');
     }
 
     public function packingJob()
     {
-        return $this->hasOne(\App\Models\PackingJob::class);
+        return $this->hasOne(PackingJob::class);
     }
 
     public function fulfilmentJob()
     {
-        return $this->hasOne(\App\Models\FulfilmentJob::class);
+        return $this->hasOne(FulfilmentJob::class);
     }
 }

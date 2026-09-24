@@ -35,7 +35,11 @@ class InitializePackingJobForOrderService
 
             $packingJob = PackingJob::firstOrCreate(
                 ['order_id' => $order->id],
-                ['status' => 'READY_FOR_PACKING']
+                [
+                    'status' => 'READY_FOR_PACKING',
+                    'assigned_user_id' => $order->packing_assigned_user_id,
+                    'assigned_at' => $order->packing_assigned_user_id ? now() : null,
+                ]
             );
 
             if ($packingJob->wasRecentlyCreated) {

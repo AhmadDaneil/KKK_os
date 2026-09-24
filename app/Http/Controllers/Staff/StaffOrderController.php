@@ -57,6 +57,8 @@ class StaffOrderController extends Controller
                 'fulfilment',
                 'payments',
                 'fulfilmentJob',
+                'printingAssignedUser',
+                'packingAssignedUser',
             ])
             ->firstOrFail();
 
@@ -74,6 +76,9 @@ class StaffOrderController extends Controller
             ]);
         } elseif ($user->hasStaffRole(User::ROLE_OM)) {
             $order->load([
+                'designJobs.assignedUser',
+                'designJobs.artworkVersions',
+                'printJobs.assignedUser',
                 'packingJob.assignedUser',
                 'packingJob.items',
             ]);
@@ -104,37 +109,41 @@ class StaffOrderController extends Controller
         }
 
         $assignmentOptions = [
-    'designers' => collect(),
-    'printingStaff' => collect(),
-    'packingStaff' => collect(),
-];
+            'designers' => collect(),
+            'printingStaff' => collect(),
+            'packingStaff' => collect(),
+        ];
 
-if ($user->isAdmin() && ! $request->attributes->get('staff_overview_mode', false)) {
-    $assignmentOptions = [
-        'designers' => User::query()
-            ->where('role', User::ROLE_DESIGNER)
-            ->where('is_active', true)
-            ->orderBy('name')
-            ->get(['id', 'name']),
+        if ($user->isOperationManagement() && ! $request->attributes->get('staff_overview_mode', false)) {
+            $assignmentOptions = [
+                'designers' => User::query()
+                    ->where('role', User::ROLE_DESIGNER)
+                    ->where('is_active', true)
+                    ->orderBy('name')
+                    ->get(['id', 'name']),
 
-        'printingStaff' => User::query()
-            ->where('role', User::ROLE_PRINTING)
-            ->where('is_active', true)
-            ->orderBy('name')
-            ->get(['id', 'name']),
+                'printingStaff' => User::query()
+                    ->where('role', User::ROLE_PRINTING)
+                    ->where('is_active', true)
+                    ->orderBy('name')
+                    ->get(['id', 'name']),
 
-        'packingStaff' => User::query()
-            ->where('role', User::ROLE_PACKING)
-            ->where('is_active', true)
-            ->orderBy('name')
-            ->get(['id', 'name']),
-    ];
-}
-        
+                'packingStaff' => User::query()
+                    ->where('role', User::ROLE_PACKING)
+                    ->where('is_active', true)
+                    ->orderBy('name')
+                    ->get(['id', 'name']),
+            ];
+        }
+
         return view('staff.orders.show', [
-    'order' => $order,
-    ...$assignmentOptions,
-]);
+            'order' => $order,
+            'canAssignProduction' => $order->designJobs()->exists()
+                && $order->designJobs()
+                    ->where('status', '!=', 'DESIGN_APPROVED')
+                    ->doesntExist(),
+            ...$assignmentOptions,
+        ]);
     }
 
     private function visibleOrdersFor(User $user): Builder
@@ -152,16 +161,24 @@ if ($user->isAdmin() && ! $request->attributes->get('staff_overview_mode', false
                     ->where('assigned_user_id', $user->id)
             ),
 
-            User::ROLE_PRINTING => $query->whereHas(
-                'printJobs',
-                fn (Builder $jobQuery) => $jobQuery
-                    ->where('assigned_user_id', $user->id)
+            User::ROLE_PRINTING => $query->where(
+                fn (Builder $printingQuery) => $printingQuery
+                    ->where('printing_assigned_user_id', $user->id)
+                    ->orWhereHas(
+                        'printJobs',
+                        fn (Builder $jobQuery) => $jobQuery
+                            ->where('assigned_user_id', $user->id)
+                    )
             ),
 
-            User::ROLE_PACKING => $query->whereHas(
-                'packingJob',
-                fn (Builder $jobQuery) => $jobQuery
-                    ->where('assigned_user_id', $user->id)
+            User::ROLE_PACKING => $query->where(
+                fn (Builder $packingQuery) => $packingQuery
+                    ->where('packing_assigned_user_id', $user->id)
+                    ->orWhereHas(
+                        'packingJob',
+                        fn (Builder $jobQuery) => $jobQuery
+                            ->where('assigned_user_id', $user->id)
+                    )
             ),
 
             default => $query->whereRaw('1 = 0'),
@@ -187,8 +204,16 @@ if ($user->isAdmin() && ! $request->attributes->get('staff_overview_mode', false
     {
         match ($workstream) {
             'design' => $query->whereHas('designJobs'),
-            'printing' => $query->whereHas('printJobs'),
-            'packing' => $query->whereHas('packingJob'),
+            'printing' => $query->where(
+                fn (Builder $printingQuery) => $printingQuery
+                    ->whereNotNull('printing_assigned_user_id')
+                    ->orWhereHas('printJobs')
+            ),
+            'packing' => $query->where(
+                fn (Builder $packingQuery) => $packingQuery
+                    ->whereNotNull('packing_assigned_user_id')
+                    ->orWhereHas('packingJob')
+            ),
             'fulfilment' => $query->whereHas('fulfilmentJob'),
             default => null,
         };

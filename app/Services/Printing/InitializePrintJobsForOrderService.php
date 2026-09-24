@@ -18,11 +18,15 @@ class InitializePrintJobsForOrderService
                 'designJobs.artworkVersions',
             ]);
 
-            if ($order->status !== 'PAID') {
+            if (! in_array($order->status, ['DESIGN_APPROVED', 'BALANCE_PENDING', 'PAID'], true)) {
                 throw new RuntimeException(
-                    "Order {$order->order_id} must be PAID before print jobs can be initialized."
+                    "Order {$order->order_id} must have approved artwork before print jobs can be initialized."
                 );
             }
+
+            $initialStatus = $order->status === 'PAID'
+                ? 'READY_FOR_PRINT'
+                : 'WAITING_FOR_PAYMENT';
 
             if ($order->designJobs->count() !== (int) $order->package_count) {
                 throw new RuntimeException(
@@ -58,8 +62,10 @@ class InitializePrintJobsForOrderService
                         'order_package_side_id' => $designJob->order_package_side_id,
                         'artwork_version_id' => $latestArtwork->id,
                         'side' => $designJob->side,
-                        'status' => 'READY_FOR_PRINT',
+                        'status' => $initialStatus,
                         'quantity' => $order->card_quantity,
+                        'assigned_user_id' => $order->printing_assigned_user_id,
+                        'assigned_at' => $order->printing_assigned_user_id ? now() : null,
                     ]
                 );
 
@@ -67,13 +73,21 @@ class InitializePrintJobsForOrderService
                     $printJob->events()->create([
                         'event_type' => 'PRINT_JOB_CREATED',
                         'from_status' => null,
-                        'to_status' => 'READY_FOR_PRINT',
+                        'to_status' => $initialStatus,
                         'occurred_at' => now(),
                         'metadata' => [
                             'design_job_id' => $designJob->id,
                             'artwork_version_id' => $latestArtwork->id,
                             'artwork_version_number' => $latestArtwork->version_number,
                         ],
+                    ]);
+                } elseif ($order->status === 'PAID' && $printJob->status === 'WAITING_FOR_PAYMENT') {
+                    $printJob->update(['status' => 'READY_FOR_PRINT']);
+                    $printJob->events()->create([
+                        'event_type' => 'PAYMENT_CLEARED_FOR_PRINTING',
+                        'from_status' => 'WAITING_FOR_PAYMENT',
+                        'to_status' => 'READY_FOR_PRINT',
+                        'occurred_at' => now(),
                     ]);
                 }
 

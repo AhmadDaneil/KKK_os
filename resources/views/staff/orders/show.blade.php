@@ -74,6 +74,10 @@
                 </div>
             </div>
 
+            @if (! auth()->user()->isOperationManagement())
+                <p class="staff-work-message">Read-only order details.</p>
+            @endif
+
             <div class="staff-detail-grid">
                 <section class="staff-card">
                     <h2>Order Summary</h2>
@@ -457,7 +461,7 @@
                                         @endif
                                     </div>
                                 @endif
-                                @if (auth()->user()->isAdmin() && ! request()->attributes->get('staff_overview_mode', false))
+                                @if (auth()->user()->isOperationManagement() && ! request()->attributes->get('staff_overview_mode', false))
     <form
         method="POST"
         action="{{ route($operationRoutePrefix.'design-jobs.assign', $job) }}"
@@ -599,6 +603,50 @@
                 </div>
             </section>
 
+            @if (($canAssignProduction ?? false) && auth()->user()->isOperationManagement() && ! request()->attributes->get('staff_overview_mode', false))
+                <section class="staff-section">
+                    <h2 class="staff-section-title">Assign Production Staff</h2>
+
+                    <div class="staff-work-grid">
+                        <form method="POST" action="{{ route($operationRoutePrefix.'orders.assign-printing', $order) }}" class="staff-card staff-assignment-form">
+                            @csrf
+                            <div class="staff-card-heading">
+                                <h3>Printing</h3>
+                                <span class="staff-status">{{ $order->printingAssignedUser ? 'ASSIGNED' : 'UNASSIGNED' }}</span>
+                            </div>
+                            <label for="order-printing-assignee">{{ $order->printing_assigned_user_id ? 'Reassign Printing Staff' : 'Assign Printing Staff' }}</label>
+                            <div class="staff-assignment-controls">
+                                <select id="order-printing-assignee" name="assigned_user_id" required>
+                                    <option value="">Select printing staff</option>
+                                    @foreach ($printingStaff as $staff)
+                                        <option value="{{ $staff->id }}" @selected($order->printing_assigned_user_id === $staff->id)>{{ $staff->name }}</option>
+                                    @endforeach
+                                </select>
+                                <button type="submit" class="staff-button staff-button-small">{{ $order->printing_assigned_user_id ? 'Reassign' : 'Assign' }}</button>
+                            </div>
+                        </form>
+
+                        <form method="POST" action="{{ route($operationRoutePrefix.'orders.assign-packing-fulfilment', $order) }}" class="staff-card staff-assignment-form">
+                            @csrf
+                            <div class="staff-card-heading">
+                                <h3>Packing &amp; Fulfilment</h3>
+                                <span class="staff-status">{{ $order->packingAssignedUser ? 'ASSIGNED' : 'UNASSIGNED' }}</span>
+                            </div>
+                            <label for="order-packing-assignee">{{ $order->packing_assigned_user_id ? 'Reassign Packing & Fulfilment Staff' : 'Assign Packing & Fulfilment Staff' }}</label>
+                            <div class="staff-assignment-controls">
+                                <select id="order-packing-assignee" name="assigned_user_id" required>
+                                    <option value="">Select packing &amp; fulfilment staff</option>
+                                    @foreach ($packingStaff as $staff)
+                                        <option value="{{ $staff->id }}" @selected($order->packing_assigned_user_id === $staff->id)>{{ $staff->name }}</option>
+                                    @endforeach
+                                </select>
+                                <button type="submit" class="staff-button staff-button-small">{{ $order->packing_assigned_user_id ? 'Reassign' : 'Assign' }}</button>
+                            </div>
+                        </form>
+                    </div>
+                </section>
+            @endif
+
             @if ($order->relationLoaded('printJobs'))
                 <section class="staff-section">
                     <h2 class="staff-section-title">Printing</h2>
@@ -638,13 +686,15 @@
                                 @if (auth()->user()->hasStaffRole(\App\Models\User::ROLE_PRINTING) && $job->assigned_user_id === auth()->id())
                                     @if ($job->status === 'READY_FOR_PRINT')
                                         <form method="POST" action="{{ route($operationRoutePrefix.'print-jobs.start', $job) }}" class="staff-workflow-form">@csrf<button type="submit" class="staff-button staff-button-primary">Start Printing</button></form>
+                                    @elseif ($job->status === 'WAITING_FOR_PAYMENT')
+                                        <p class="staff-work-message">Menunggu pengesahan bayaran penuh sebelum cetakan boleh dimulakan.</p>
                                     @elseif ($job->status === 'PRINTING')
                                         <form method="POST" action="{{ route($operationRoutePrefix.'print-jobs.mark-printed', $job) }}" class="staff-workflow-form">@csrf<button type="submit" class="staff-button staff-button-primary">Mark Printed</button></form>
                                     @elseif ($job->status === 'PRINTED')
                                         <p class="staff-work-message">Cetakan untuk pakej ini telah siap.</p>
                                     @endif
                                 @endif
-                                @if (auth()->user()->isAdmin() && ! request()->attributes->get('staff_overview_mode', false))
+                                @if (auth()->user()->isOperationManagement() && ! request()->attributes->get('staff_overview_mode', false))
     <form
         method="POST"
         action="{{ route($operationRoutePrefix.'print-jobs.assign', $job) }}"
@@ -812,6 +862,13 @@
                             @endif
                         @endif
                     </article>
+                </section>
+            @elseif (auth()->user()->hasStaffRole(\App\Models\User::ROLE_PACKING) && $order->packing_assigned_user_id === auth()->id())
+                <section class="staff-section">
+                    <h2 class="staff-section-title">Packing</h2>
+                    <div class="staff-empty">
+                        Packing job akan diwujudkan secara automatik selepas semua kerja cetakan selesai.
+                    </div>
                 </section>
             @endif
 

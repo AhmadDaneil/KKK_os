@@ -52,6 +52,18 @@ class OrderProductionAssignmentTest extends TestCase
         $this->assertSame($printing->id, $order->fresh()->printing_assigned_user_id);
         $this->assertSame($packing->id, $order->fresh()->packing_assigned_user_id);
 
+        $this->actingAs($printing)
+            ->get(route('staff.orders.index', ['workstream' => 'printing']))
+            ->assertOk()
+            ->assertSee($order->order_id)
+            ->assertSee('WAITING_FOR_PAYMENT');
+
+        $this->actingAs($packing)
+            ->get(route('staff.orders.index', ['workstream' => 'packing']))
+            ->assertOk()
+            ->assertSee($order->order_id)
+            ->assertSee('WAITING FOR PACKING JOB');
+
         foreach ([$designer, $printing, $packing] as $assignee) {
             $this->actingAs($assignee)
                 ->get(route('staff.orders.index'))
@@ -88,6 +100,7 @@ class OrderProductionAssignmentTest extends TestCase
         $printJobs = app(InitializePrintJobsForOrderService::class)->initialize($order->fresh());
 
         $this->assertTrue($printJobs->every(fn ($job) => $job->assigned_user_id === $printing->id));
+        $this->assertTrue($printJobs->every(fn ($job) => $job->status === 'READY_FOR_PRINT'));
 
         $printJobs->each(fn ($job) => $job->update(['status' => 'PRINTED']));
         $order->update(['status' => 'PRINTED']);
@@ -113,6 +126,21 @@ class OrderProductionAssignmentTest extends TestCase
         $this->actingAs($operationManagement)
             ->post(route('staff.orders.assign-packing-fulfilment', $unapprovedOrder), ['assigned_user_id' => $designer->id])
             ->assertUnprocessable();
+    }
+
+    public function test_specialist_staff_cannot_assign_an_order_to_printing(): void
+    {
+        $designer = $this->staff(User::ROLE_DESIGNER);
+        $printing = $this->staff(User::ROLE_PRINTING);
+        $order = $this->approvedOrder();
+
+        $this->actingAs($designer)
+            ->post(route('staff.orders.assign-printing', $order), [
+                'assigned_user_id' => $printing->id,
+            ])
+            ->assertForbidden();
+
+        $this->assertNull($order->fresh()->printing_assigned_user_id);
     }
 
     private function staff(string $role): User
