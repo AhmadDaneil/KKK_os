@@ -231,7 +231,13 @@ class StaffOrderController extends Controller
         }
 
         if ($request->filled('status')) {
-            $query->where('status', $request->string('status')->toString());
+            $status = $request->string('status')->toString();
+
+            if ($status === Order::STATUS_FILTER_NOT_COMPLETED) {
+                $query->where('status', '!=', 'COMPLETED');
+            } else {
+                $query->where('status', $status);
+            }
         }
 
         if (! $user->isAdmin()) {
