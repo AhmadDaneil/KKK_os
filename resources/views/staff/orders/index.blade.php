@@ -4,6 +4,12 @@
     $logoutRoute = $isAdminPortal ? 'admin.logout' : 'staff.logout';
     $ordersIndexRoute = $isAdminPortal ? 'admin.orders.index' : 'staff.orders.index';
     $ordersShowRoute = $isAdminPortal ? 'admin.orders.show' : 'staff.orders.show';
+    $workstreamDescriptions = [
+        'design' => 'Order yang masih memerlukan design, semakan artwork atau pembetulan.',
+        'printing' => 'Order yang sedang menunggu bayaran, menunggu cetakan atau sedang dicetak.',
+        'packing' => 'Order yang telah dicetak dan masih memerlukan pembungkusan.',
+        'fulfilment' => 'Order yang telah dibungkus dan masih menunggu serahan atau kutipan.',
+    ];
 @endphp
 <!DOCTYPE html>
 <html lang="ms">
@@ -46,7 +52,7 @@
 
                     <p>
                         @if (auth()->user()->isAdmin())
-                            Pantau semua order dan kerja operasi KKK OS.
+                            {{ $workstreamDescriptions[$workstream] ?? 'Pantau semua order dan kerja operasi KKK OS.' }}
                         @else
                             Lihat order yang mempunyai kerja assigned kepada anda.
                         @endif
@@ -108,7 +114,7 @@
 
                         <div class="staff-order-work">
                             @if (auth()->user()->isAdmin())
-                                @if ($order->relationLoaded('designJobs') && $order->designJobs->isNotEmpty())
+                                @if ((! $workstream || $workstream === 'design') && $order->relationLoaded('designJobs') && $order->designJobs->isNotEmpty())
                                     <div class="staff-work-row">
                                         <span>Design</span>
                                         <strong>
@@ -117,7 +123,7 @@
                                     </div>
                                 @endif
 
-                                @if ($order->relationLoaded('printJobs') && $order->printJobs->isNotEmpty())
+                                @if ((! $workstream || $workstream === 'printing') && $order->relationLoaded('printJobs') && $order->printJobs->isNotEmpty())
                                     <div class="staff-work-row">
                                         <span>Printing</span>
                                         <strong>
@@ -126,12 +132,19 @@
                                     </div>
                                 @endif
 
-                                @if ($order->relationLoaded('packingJob') && $order->packingJob)
+                                @if ((! $workstream || $workstream === 'packing') && $order->relationLoaded('packingJob') && $order->packingJob)
                                     <div class="staff-work-row">
                                         <span>Packing</span>
                                         <strong>
                                             {{ $order->packingJob->status }}
                                         </strong>
+                                    </div>
+                                @endif
+
+                                @if ((! $workstream || $workstream === 'fulfilment') && $order->relationLoaded('fulfilmentJob') && $order->fulfilmentJob)
+                                    <div class="staff-work-row">
+                                        <span>Fulfilment</span>
+                                        <strong>{{ $order->fulfilmentJob->status }}</strong>
                                     </div>
                                 @endif
                             @elseif (auth()->user()->hasStaffRole(\App\Models\User::ROLE_DESIGNER))
@@ -198,7 +211,9 @@
                     </article>
                 @empty
                     <div class="staff-empty">
-                        @if (auth()->user()->isAdmin())
+                        @if ($workstream)
+                            Tiada order aktif dalam {{ ucfirst($workstream) }} Queue.
+                        @elseif (auth()->user()->isAdmin())
                             Tiada order tersedia.
                         @else
                             Tiada order assigned kepada anda.

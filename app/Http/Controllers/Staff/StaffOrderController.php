@@ -27,6 +27,7 @@ class StaffOrderController extends Controller
                 'designJobs.assignedUser',
                 'printJobs.assignedUser',
                 'packingJob.assignedUser',
+                'fulfilmentJob',
             ])
             ->latest('id')
             ->paginate(25)
@@ -202,19 +203,46 @@ class StaffOrderController extends Controller
 
     private function applyWorkstream(Builder $query, ?string $workstream): void
     {
+        if ($workstream !== null) {
+            $query->whereNotIn('status', [
+                'COMPLETED',
+                ...Order::TERMINAL_OPERATIONAL_STATUSES,
+            ]);
+        }
+
         match ($workstream) {
-            'design' => $query->whereHas('designJobs'),
+            'design' => $query->whereHas(
+                'designJobs',
+                fn (Builder $jobQuery) => $jobQuery
+                    ->where('status', '!=', 'DESIGN_APPROVED')
+            ),
             'printing' => $query->where(
                 fn (Builder $printingQuery) => $printingQuery
-                    ->whereNotNull('printing_assigned_user_id')
-                    ->orWhereHas('printJobs')
+                    ->where(fn (Builder $assignedQuery) => $assignedQuery
+                        ->whereNotNull('printing_assigned_user_id')
+                        ->whereDoesntHave('printJobs'))
+                    ->orWhereHas(
+                        'printJobs',
+                        fn (Builder $jobQuery) => $jobQuery
+                            ->where('status', '!=', 'PRINTED')
+                    )
             ),
             'packing' => $query->where(
                 fn (Builder $packingQuery) => $packingQuery
-                    ->whereNotNull('packing_assigned_user_id')
-                    ->orWhereHas('packingJob')
+                    ->where(fn (Builder $assignedQuery) => $assignedQuery
+                        ->whereNotNull('packing_assigned_user_id')
+                        ->whereDoesntHave('packingJob'))
+                    ->orWhereHas(
+                        'packingJob',
+                        fn (Builder $jobQuery) => $jobQuery
+                            ->where('status', '!=', 'PACKED')
+                    )
             ),
-            'fulfilment' => $query->whereHas('fulfilmentJob'),
+            'fulfilment' => $query->whereHas(
+                'fulfilmentJob',
+                fn (Builder $jobQuery) => $jobQuery
+                    ->whereNotIn('status', ['COMPLETED', 'COLLECTED'])
+            ),
             default => null,
         };
     }
