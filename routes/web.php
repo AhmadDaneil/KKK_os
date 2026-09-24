@@ -21,6 +21,7 @@ use App\Http\Controllers\DevPrintJobController;
 use App\Http\Controllers\PublicOrderController;
 use App\Http\Controllers\Staff\StaffAuthController;
 use App\Http\Controllers\Staff\StaffBalancePaymentController;
+use App\Http\Controllers\Staff\StaffBatchArtworkController;
 use App\Http\Controllers\Staff\StaffDashboardController;
 use App\Http\Controllers\Staff\StaffDepositPaymentController;
 use App\Http\Controllers\Staff\StaffDesignWorkflowController;
@@ -273,6 +274,11 @@ Route::middleware(['auth:staff', 'active.staff'])
                 '/design-jobs/{designJob}/artwork',
                 [StaffDesignWorkflowController::class, 'uploadArtwork']
             )->name('design-jobs.artwork.store');
+
+            Route::post(
+                '/orders/{order}/design-artworks',
+                [StaffBatchArtworkController::class, 'store']
+            )->name('orders.design-artworks.store');
 
             Route::post(
                 '/design-jobs/{designJob}/mark-ready',

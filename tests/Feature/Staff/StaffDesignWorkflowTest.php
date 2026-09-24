@@ -795,6 +795,75 @@ public function test_two_package_artwork_uploads_keep_sides_and_versions_indepen
     );
 }
 
+public function test_designer_can_upload_both_artworks_with_one_batch_submission(): void
+{
+    Storage::fake('local');
+
+    $designer = $this->designer();
+    $order = $this->confirmedOrder(2);
+
+    app(GenerateMergeJobsForOrderService::class)->generate($order);
+
+    $jobs = app(InitializeDesignJobsForOrderService::class)
+        ->initialize($order->fresh());
+
+    foreach ($jobs as $job) {
+        $this->assign($job, $designer);
+
+        $this->actingAs($designer)
+            ->post(route('staff.design-jobs.start', $job))
+            ->assertRedirect();
+    }
+
+    $page = $this->actingAs($designer)
+        ->get(route('staff.orders.show', $order->order_id));
+
+    $page->assertOk()
+        ->assertSee('Upload Both Artwork')
+        ->assertSee(route('staff.orders.design-artworks.store', $order), false);
+
+    $this->assertSame(
+        1,
+        substr_count($page->getContent(), 'Upload Both Artwork')
+    );
+
+    $payload = [];
+
+    foreach ($jobs as $job) {
+        $side = strtolower($job->side);
+        $payload[$job->id] = [
+            'source_artwork' => UploadedFile::fake()->create(
+                $side.'.pdf',
+                1024,
+                'application/pdf'
+            ),
+            'customer_preview' => UploadedFile::fake()->image(
+                $side.'-preview.jpg'
+            ),
+            'internal_note' => 'Artwork '.$job->side,
+        ];
+    }
+
+    $this->actingAs($designer)
+        ->post(
+            route('staff.orders.design-artworks.store', $order),
+            ['artworks' => $payload]
+        )
+        ->assertRedirect()
+        ->assertSessionHasNoErrors();
+
+    $this->assertDatabaseCount('artwork_versions', 2);
+
+    foreach ($jobs as $job) {
+        $artwork = ArtworkVersion::query()
+            ->where('design_job_id', $job->id)
+            ->sole();
+
+        Storage::disk('local')->assertExists($artwork->storage_path);
+        Storage::disk('local')->assertExists($artwork->preview_storage_path);
+    }
+}
+
 public function test_uploaded_files_are_cleaned_up_when_artwork_creation_service_fails(): void
 {
     Storage::fake('local');
