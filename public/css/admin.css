@@ -76,3 +76,13 @@ body{background:linear-gradient(180deg,#f4efe3 0,#f3f4f1 380px)}
 .admin-staff-card details{border-top-color:#e3dac3}
 .admin-create-form{padding:16px;border:1px solid #d8cba9;border-radius:10px;background:#faf6ec}
 .admin-filter{padding:13px;border:1px solid #d8cba9;border-radius:10px;background:#faf6ec}
+
+/* Dashboard statistic motion */
+.admin-stat-grid article{transition:transform .22s ease,box-shadow .22s ease,border-color .22s ease}
+.admin-stat-grid article:hover{transform:translateY(-5px);box-shadow:0 14px 30px rgba(63,47,17,.16)}
+.admin-stat-grid.is-animated article{animation:admin-stat-enter .55s cubic-bezier(.2,.75,.3,1) both;animation-delay:calc(var(--stat-index) * 80ms)}
+.admin-stat-grid.is-floating article{animation:admin-stat-float 3.6s ease-in-out infinite;animation-delay:calc(var(--stat-index) * -420ms)}
+.admin-stat-grid.is-floating article:hover{animation:none;transform:translateY(-5px)}
+@keyframes admin-stat-enter{from{opacity:0;transform:translateY(18px) scale(.98)}to{opacity:1;transform:translateY(0) scale(1)}}
+@keyframes admin-stat-float{0%,100%{transform:translateY(0)}50%{transform:translateY(-3px)}}
+@media(prefers-reduced-motion:reduce){.admin-stat-grid article{transition:none}.admin-stat-grid article:hover{transform:none}.admin-stat-grid.is-animated article,.admin-stat-grid.is-floating article{animation:none}}

@@ -10,11 +10,11 @@
     </section>
 
     <section class="admin-stat-grid" aria-label="Ringkasan operasi">
-        <article><span>Jumlah Order</span><strong>{{ number_format($statistics['orders_total']) }}</strong><small>Semua rekod tempahan</small></article>
-        <article><span>Order Aktif</span><strong>{{ number_format($statistics['orders_active']) }}</strong><small>Belum selesai atau diarkib</small></article>
-        <article class="is-warning"><span>Deposit Belum Semak</span><strong>{{ number_format($statistics['pending_deposits']) }}</strong><small>Memerlukan tindakan OM</small></article>
-        <article class="is-warning"><span>Baki Belum Semak</span><strong>{{ number_format($statistics['pending_balances']) }}</strong><small>Bukti bayaran penuh customer</small></article>
-        <article class="is-success"><span>Order Selesai</span><strong>{{ number_format($statistics['orders_completed']) }}</strong><small>Keseluruhan fulfilment selesai</small></article>
+        <article><span>Jumlah Order</span><strong data-stat-value="{{ $statistics['orders_total'] }}">{{ number_format($statistics['orders_total']) }}</strong><small>Semua rekod tempahan</small></article>
+        <article><span>Order Aktif</span><strong data-stat-value="{{ $statistics['orders_active'] }}">{{ number_format($statistics['orders_active']) }}</strong><small>Belum selesai atau diarkib</small></article>
+        <article class="is-warning"><span>Deposit Belum Semak</span><strong data-stat-value="{{ $statistics['pending_deposits'] }}">{{ number_format($statistics['pending_deposits']) }}</strong><small>Memerlukan tindakan OM</small></article>
+        <article class="is-warning"><span>Baki Belum Semak</span><strong data-stat-value="{{ $statistics['pending_balances'] }}">{{ number_format($statistics['pending_balances']) }}</strong><small>Bukti bayaran penuh customer</small></article>
+        <article class="is-success"><span>Order Selesai</span><strong data-stat-value="{{ $statistics['orders_completed'] }}">{{ number_format($statistics['orders_completed']) }}</strong><small>Keseluruhan fulfilment selesai</small></article>
     </section>
 
     <section class="admin-panel admin-attention-panel">
@@ -65,3 +65,58 @@
         </div>
     </section>
 @endsection
+
+@push('scripts')
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const grid = document.querySelector('.admin-stat-grid');
+
+        if (! grid) {
+            return;
+        }
+
+        const cards = grid.querySelectorAll('article');
+        const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        const formatter = new Intl.NumberFormat('ms-MY');
+
+        cards.forEach(function (card, index) {
+            card.style.setProperty('--stat-index', index);
+        });
+
+        grid.classList.add('is-animated');
+
+        if (! reduceMotion) {
+            window.setTimeout(function () {
+                grid.classList.remove('is-animated');
+                grid.classList.add('is-floating');
+            }, 950);
+        }
+
+        grid.querySelectorAll('[data-stat-value]').forEach(function (counter) {
+            const target = Number(counter.dataset.statValue);
+
+            if (reduceMotion || ! Number.isFinite(target) || target <= 0) {
+                counter.textContent = formatter.format(Math.max(0, target || 0));
+
+                return;
+            }
+
+            const duration = 850;
+            const startTime = performance.now();
+            counter.textContent = '0';
+
+            function updateCounter(currentTime) {
+                const progress = Math.min((currentTime - startTime) / duration, 1);
+                const easedProgress = 1 - Math.pow(1 - progress, 3);
+                counter.textContent = formatter.format(Math.round(target * easedProgress));
+
+                if (progress < 1) {
+                    requestAnimationFrame(updateCounter);
+                }
+            }
+
+            requestAnimationFrame(updateCounter);
+        });
+    });
+</script>
+@endpush
