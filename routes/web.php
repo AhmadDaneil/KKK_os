@@ -30,6 +30,7 @@ use App\Http\Controllers\Staff\StaffOrderController;
 use App\Http\Controllers\Staff\StaffOrderDeletionController;
 use App\Http\Controllers\Staff\StaffOrderProductionAssignmentController;
 use App\Http\Controllers\Staff\StaffPackingWorkflowController;
+use App\Http\Controllers\Staff\StaffPhotoshopController;
 use App\Http\Controllers\Staff\StaffPrintingWorkflowController;
 use App\Models\User;
 use Illuminate\Support\Facades\Route;
@@ -272,6 +273,16 @@ Route::middleware(['auth:staff', 'active.staff'])
         */
 
         Route::middleware('staff.role:DESIGNER')->group(function () {
+            Route::get(
+                '/orders/{order}/photoshop/csv',
+                [StaffPhotoshopController::class, 'downloadCsv']
+            )->name('orders.photoshop.csv');
+
+            Route::post(
+                '/orders/{order}/photoshop/launch',
+                [StaffPhotoshopController::class, 'launch']
+            )->name('orders.photoshop.launch');
+
             Route::post(
                 '/design-jobs/{designJob}/start',
                 [StaffDesignWorkflowController::class, 'start']
