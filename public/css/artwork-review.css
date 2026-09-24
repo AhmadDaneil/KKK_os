@@ -373,6 +373,15 @@ textarea {
     margin: 0;
 }
 
+.correction-panel .correction-fee-warning { color: #b91c1c; font-weight: 600; }
+.correction-fee-consent { display: flex; gap: 10px; align-items: flex-start; margin: 16px 0; }
+.correction-fee-consent input { width: auto; flex-shrink: 0; margin-top: 4px; }
+.correction-payment-details { padding: 16px; border: 1px solid #d1d5db; border-radius: 12px; margin-bottom: 16px; }
+.correction-qr { display: block; width: 200px; max-width: 100%; margin: 16px auto; }
+.correction-payment-details input[type="file"] { max-width: 100%; margin-bottom: 12px; }
+.correction-payment-form [hidden] { display: none; }
+.correction-payment-form button:disabled { opacity: .5; cursor: not-allowed; }
+
 @media (max-width: 760px) {
     .page-shell {
         width: min(100% - 24px, 960px);

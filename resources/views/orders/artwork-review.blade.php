@@ -91,6 +91,10 @@
         @forelse ($order->designJobs->sortBy('side') as $designJob)
             @php
                 $latestArtwork = $designJob->artworkVersions->sortByDesc('version_number')->first();
+                $correctionPayment = $order->payments->where('payment_type', 'ARTWORK_CORRECTION')
+                    ->filter(fn ($payment) => ($payment->metadata['design_job_id'] ?? null) === $designJob->id
+                        && ($payment->metadata['artwork_version_id'] ?? null) === $latestArtwork?->id)
+                    ->sortByDesc('id')->first();
                 $correctionHistory = $designJob->reviewActions
                     ->where('action', 'CORRECTION_REQUESTED')
                     ->sortByDesc('acted_at');
@@ -139,7 +143,13 @@
                     </div>
                 @endif
 
-                @if ($designJob->status === 'DESIGN_READY' && ! $isTerminalOrder)
+                @if ($correctionPayment?->status === 'PENDING')
+                    <div class="state-panel state-warning">
+                        <h3>Menunggu pengesahan bayaran RM10</h3>
+                        <p>Permintaan diterima. Pembetulan akan dimulakan selepas bayaran disahkan.</p>
+                        <p>{{ $correctionPayment->metadata['correction_comment'] }}</p>
+                    </div>
+                @elseif ($designJob->status === 'DESIGN_READY' && ! $isTerminalOrder)
                     <div class="review-actions">
                         <div class="action-panel approve-panel">
                             <h3>Artwork sudah betul?</h3>
@@ -165,8 +175,14 @@
                         <div class="action-panel correction-panel">
                             <h3>Perlu pembetulan?</h3>
                             <p>Nyatakan pembetulan dengan jelas supaya designer boleh membuat perubahan dengan tepat.</p>
+                            <p class="correction-fee-warning">Setiap permintaan pembetulan dikenakan caj RM10. Nyatakan semua perubahan dalam satu permintaan.</p>
+                            @if ($correctionPayment?->status === 'FAILED')
+                                <div class="alert alert-error">Resit ditolak: {{ $correctionPayment->metadata['rejection_reason'] ?? '' }}. Sila hantar semula resit yang betul.</div>
+                            @endif
 
                             <form
+                                class="correction-payment-form"
+                                enctype="multipart/form-data"
                                 method="POST"
                                 action="{{ route('orders.artwork.correction', [
                                     'orderId' => $order->order_id,
@@ -174,6 +190,7 @@
                                 ]) }}"
                             >
                                 @csrf
+                                <input type="hidden" name="correction_job_id" value="{{ $designJob->id }}">
                                 <label for="correction-{{ $designJob->id }}">Maklumat pembetulan</label>
                                 <textarea
                                     id="correction-{{ $designJob->id }}"
@@ -182,11 +199,24 @@
                                     maxlength="5000"
                                     required
                                     placeholder="Contoh: Sila betulkan ejaan nama pengantin perempuan daripada ... kepada ..."
-                                ></textarea>
+                                >{{ (int) old('correction_job_id') === $designJob->id ? old('correction_comment') : ($correctionPayment?->status === 'FAILED' ? $correctionPayment->metadata['correction_comment'] : '') }}</textarea>
                                 <p class="field-help">Maksimum 5,000 aksara.</p>
 
+                                <label class="correction-fee-consent">
+                                    <input type="checkbox" name="correction_fee_agreed" value="1" required aria-controls="correction-payment-{{ $designJob->id }}" @checked((int) old('correction_job_id') === $designJob->id && old('correction_fee_agreed'))>
+                                    <span>Saya bersetuju dengan caj pembetulan RM10.</span>
+                                </label>
+                                <div class="correction-payment-details" id="correction-payment-{{ $designJob->id }}">
+                                    <strong>Bayaran pembetulan: RM10</strong>
+                                    <img class="correction-qr" src="{{ asset(config('kingkadkahwin.deposit.qr_image')) }}" alt="QR pembayaran pembetulan RM10">
+                                    <label for="correction-receipt-{{ $designJob->id }}">Lampirkan resit pembayaran</label>
+                                    <p class="field-help">JPG, JPEG, PNG, WEBP atau PDF. Maksimum 10 MB.</p>
+                                    <input id="correction-receipt-{{ $designJob->id }}" type="file" name="correction_receipt" accept=".jpg,.jpeg,.png,.webp,.pdf" required>
+                                    <button type="button" class="button button-secondary correction-file-cancel" aria-controls="correction-receipt-{{ $designJob->id }}" hidden>Batal</button>
+                                </div>
+
                                 <button type="submit" class="button button-danger-outline">
-                                    Minta Pembetulan
+                                    Hantar Permintaan Pembetulan
                                 </button>
                             </form>
                         </div>
@@ -255,5 +285,28 @@
         </a>
     </div>
 </div>
+<script>
+    document.querySelectorAll('.correction-payment-form').forEach(function (form) {
+        const consent = form.querySelector('[name="correction_fee_agreed"]');
+        const details = form.querySelector('.correction-payment-details');
+        const receipt = form.querySelector('[name="correction_receipt"]');
+        const cancel = form.querySelector('.correction-file-cancel');
+        const submit = form.querySelector('[type="submit"]');
+        function update() {
+            details.hidden = !consent.checked;
+            receipt.disabled = !consent.checked;
+            submit.disabled = !consent.checked;
+            cancel.hidden = receipt.files.length === 0;
+        }
+        consent.addEventListener('change', update);
+        receipt.addEventListener('change', update);
+        cancel.addEventListener('click', function () {
+            receipt.value = '';
+            update();
+            receipt.focus();
+        });
+        update();
+    });
+</script>
 </body>
 </html>

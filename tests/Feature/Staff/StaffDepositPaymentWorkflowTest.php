@@ -136,8 +136,8 @@ class StaffDepositPaymentWorkflowTest extends TestCase
         $admin = User::factory()->create(['role' => User::ROLE_ADMIN, 'is_active' => true]);
 
         foreach ([null, '0', '-5', '12.345', 'abc', '10000000000'] as $amount) {
-            $this->actingAs($admin)
-                ->post(route('staff.payments.deposit.approve', $payment), ['amount' => $amount])
+            $this->actingAs($admin, 'admin')
+                ->post(route('admin.payments.deposit.approve', $payment), ['amount' => $amount])
                 ->assertSessionHasErrors('amount');
             $this->assertSame('PENDING', $payment->fresh()->status);
             $this->assertSame('100.00', $payment->fresh()->amount);

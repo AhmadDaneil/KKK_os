@@ -556,8 +556,23 @@
                                 </div>
                             </dl>
 
-                            @if (in_array($payment->payment_type, ['BOOKING_DEPOSIT', 'BALANCE'], true) && ! empty($payment->metadata['receipt_path']))
+                            @if (in_array($payment->payment_type, ['BOOKING_DEPOSIT', 'BALANCE', 'ARTWORK_CORRECTION'], true) && ! empty($payment->metadata['receipt_path']))
                                 <div class="staff-payment-actions">
+                                    @if ($payment->payment_type === 'ARTWORK_CORRECTION')
+                                        <p><strong>Caj pembetulan RM10</strong>: {{ $payment->metadata['correction_comment'] ?? '' }}</p>
+                                        @if (auth()->user()->isOperationManagement() && $payment->status === 'PENDING')
+                                            <form method="POST" action="{{ route($operationRoutePrefix.'payments.correction.approve', $payment) }}">
+                                                @csrf
+                                                <button class="staff-button staff-button-primary" type="submit">Sahkan Bayaran Pembetulan RM10</button>
+                                            </form>
+                                            <form method="POST" action="{{ route($operationRoutePrefix.'payments.correction.reject', $payment) }}" class="staff-reject-payment-form">
+                                                @csrf
+                                                <label for="correction-rejection-{{ $payment->id }}">Sebab penolakan</label>
+                                                <textarea id="correction-rejection-{{ $payment->id }}" name="rejection_reason" maxlength="1000" required></textarea>
+                                                <button class="staff-button staff-button-danger" type="submit">Tolak Resit Pembetulan</button>
+                                            </form>
+                                        @endif
+                                    @endif
                                     @if (auth()->user()->isOperationManagement())
                                     <a class="staff-button staff-button-small" target="_blank" rel="noopener" href="{{ route($operationRoutePrefix.'payments.receipt', $payment) }}">Lihat Resit</a>
                                     @endif

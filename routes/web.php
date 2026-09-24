@@ -22,6 +22,7 @@ use App\Http\Controllers\PublicOrderController;
 use App\Http\Controllers\Staff\StaffAuthController;
 use App\Http\Controllers\Staff\StaffBalancePaymentController;
 use App\Http\Controllers\Staff\StaffBatchArtworkController;
+use App\Http\Controllers\Staff\StaffCorrectionPaymentController;
 use App\Http\Controllers\Staff\StaffDashboardController;
 use App\Http\Controllers\Staff\StaffDepositPaymentController;
 use App\Http\Controllers\Staff\StaffDesignWorkflowController;
@@ -92,6 +93,8 @@ Route::middleware(['auth:admin', 'active.staff', 'staff.role:ADMIN'])
             ->name('payments.deposit.approve');
         Route::post('/payments/{payment}/reject-deposit', [StaffDepositPaymentController::class, 'reject'])
             ->name('payments.deposit.reject');
+        Route::post('/payments/{payment}/approve-correction', [StaffCorrectionPaymentController::class, 'approve'])->name('payments.correction.approve');
+        Route::post('/payments/{payment}/reject-correction', [StaffCorrectionPaymentController::class, 'reject'])->name('payments.correction.reject');
         Route::post('/payments/{payment}/approve-balance', [StaffBalancePaymentController::class, 'approve'])
             ->name('payments.balance.approve');
         Route::post('/payments/{payment}/reject-balance', [StaffBalancePaymentController::class, 'reject'])
@@ -243,6 +246,8 @@ Route::middleware(['auth:staff', 'active.staff'])
                 ->name('payments.deposit.approve');
             Route::post('/payments/{payment}/reject-deposit', [StaffDepositPaymentController::class, 'reject'])
                 ->name('payments.deposit.reject');
+            Route::post('/payments/{payment}/approve-correction', [StaffCorrectionPaymentController::class, 'approve'])->name('payments.correction.approve');
+            Route::post('/payments/{payment}/reject-correction', [StaffCorrectionPaymentController::class, 'reject'])->name('payments.correction.reject');
             Route::post('/payments/{payment}/approve-balance', [StaffBalancePaymentController::class, 'approve'])
                 ->name('payments.balance.approve');
             Route::post('/payments/{payment}/reject-balance', [StaffBalancePaymentController::class, 'reject'])

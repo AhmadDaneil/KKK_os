@@ -16,7 +16,7 @@ class StaffDepositPaymentController extends Controller
 {
     public function receipt(PaymentTransaction $payment): StreamedResponse
     {
-        abort_unless(in_array($payment->payment_type, ['BOOKING_DEPOSIT', 'BALANCE'], true), 404);
+        abort_unless(in_array($payment->payment_type, ['BOOKING_DEPOSIT', 'BALANCE', 'ARTWORK_CORRECTION'], true), 404);
         $metadata = $payment->metadata ?? [];
         $path = $metadata['receipt_path'] ?? null;
         abort_unless($path && Storage::disk('local')->exists($path), 404);
