@@ -512,7 +512,9 @@
 
                             @if (in_array($payment->payment_type, ['BOOKING_DEPOSIT', 'BALANCE'], true) && ! empty($payment->metadata['receipt_path']))
                                 <div class="staff-payment-actions">
-                                    <a class="staff-button staff-button-small" target="_blank" rel="noopener" href="{{ route('staff.payments.receipt', $payment) }}">Lihat Resit</a>
+                                    @if (auth()->user()->isOperationManagement())
+                                        <a class="staff-button staff-button-small" target="_blank" rel="noopener" href="{{ route('staff.payments.receipt', $payment) }}">Lihat Resit</a>
+                                    @endif
                                     @if ($payment->payment_type === 'BOOKING_DEPOSIT' && auth()->user()->isOperationManagement() && $payment->status === 'PENDING')
                                         <form method="POST" action="{{ route('staff.payments.deposit.approve', $payment) }}">@csrf<button class="staff-button staff-button-primary" type="submit">Sahkan Deposit</button></form>
                                         <form method="POST" action="{{ route('staff.payments.deposit.reject', $payment) }}" class="staff-reject-payment-form">

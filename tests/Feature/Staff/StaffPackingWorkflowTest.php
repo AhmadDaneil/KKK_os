@@ -1393,6 +1393,32 @@ class StaffPackingWorkflowTest extends TestCase
             ->assertSee('Pos Laju')->assertSee('PL001234567MY');
     }
 
+    public function test_receipt_links_are_hidden_from_packing_but_visible_to_admin(): void
+    {
+        $admin = $this->admin();
+        $packing = $this->staff(User::ROLE_PACKING);
+        [$order, $job] = $this->packingJob(1, 'Receipt Link Access', 'COURIER');
+        app(AssignPackingJobService::class)->assign($job, $packing, $admin);
+        $payment = $order->payments()->create([
+            'payment_type' => 'BOOKING_DEPOSIT',
+            'provider' => 'MANUAL_QR',
+            'amount' => '100.00',
+            'currency' => 'MYR',
+            'status' => 'PAID',
+            'metadata' => ['receipt_path' => 'deposit-receipts/test.jpg'],
+        ]);
+
+        $this->actingAs($packing)->get(route('staff.orders.show', $order->order_id))
+            ->assertOk()
+            ->assertDontSee(route('staff.payments.receipt', $payment))
+            ->assertDontSee('Lihat Resit');
+
+        $this->app['auth']->forgetGuards();
+        $this->actingAs($admin)->get(route('staff.orders.show', $order->order_id))
+            ->assertOk()
+            ->assertSee(route('staff.payments.receipt', $payment));
+    }
+
     private function sidePayload(
         string $designCode,
         string $father,
