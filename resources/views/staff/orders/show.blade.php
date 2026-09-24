@@ -3,6 +3,14 @@
     $logoutRoute = $isAdminPortal ? 'admin.logout' : 'staff.logout';
     $ordersIndexRoute = $isAdminPortal ? 'admin.orders.index' : 'staff.orders.index';
     $operationRoutePrefix = $isAdminPortal ? 'admin.' : 'staff.';
+    $batchArtworkJobs = $order->relationLoaded('designJobs')
+        ? $order->designJobs->filter(fn ($job) =>
+            auth()->user()->hasStaffRole(\App\Models\User::ROLE_DESIGNER)
+            && $job->assigned_user_id === auth()->id()
+            && $job->status === 'DESIGN_IN_PROGRESS'
+        )
+        : collect();
+    $usesBatchArtworkUpload = $batchArtworkJobs->count() > 1;
 @endphp
 <!DOCTYPE html>
 <html lang="ms">
@@ -283,10 +291,8 @@
                                         <dd>{{ $job->artworkVersions->count() }}</dd>
                                     </div>
                                 </dl>
-                                @if (auth()->user()->isAdmin()
-                                    || (auth()->user()->hasStaffRole(\App\Models\User::ROLE_DESIGNER)
+                                @if (auth()->user()->hasStaffRole(\App\Models\User::ROLE_DESIGNER)
                                     && $job->assigned_user_id === auth()->id())
-                                    )
                                     <div class="staff-design-actions">
                                         @if ($job->status === 'READY_FOR_DESIGN')
                                             <form
@@ -317,6 +323,10 @@
                                                 </button>
                                             </form>
                                         @elseif ($job->status === 'DESIGN_IN_PROGRESS')
+                                            @php
+                                                $isBatchArtworkJob = $usesBatchArtworkUpload
+                                                    && $batchArtworkJobs->contains('id', $job->id);
+                                            @endphp
                                             <div class="staff-design-upload">
                                                 <div class="staff-design-upload-heading">
                                                     <h4>Upload Artwork Version</h4>
@@ -327,13 +337,17 @@
                                                     </p>
                                                 </div>
 
-                                                <form
-                                                    method="POST"
-                                                    action="{{ route($operationRoutePrefix.'design-jobs.artwork.store', $job) }}"
-                                                    enctype="multipart/form-data"
-                                                    class="staff-artwork-form"
-                                                >
-                                                    @csrf
+                                                @if ($isBatchArtworkJob)
+                                                    <div class="staff-artwork-form">
+                                                @else
+                                                    <form
+                                                        method="POST"
+                                                        action="{{ route($operationRoutePrefix.'design-jobs.artwork.store', $job) }}"
+                                                        enctype="multipart/form-data"
+                                                        class="staff-artwork-form"
+                                                    >
+                                                        @csrf
+                                                @endif
 
                                                     <div class="staff-field">
                                                         <label for="source-artwork-{{ $job->id }}">
@@ -344,7 +358,8 @@
                                                         <input
                                                             id="source-artwork-{{ $job->id }}"
                                                             type="file"
-                                                            name="source_artwork"
+                                                            name="{{ $isBatchArtworkJob ? 'artworks['.$job->id.'][source_artwork]' : 'source_artwork' }}"
+                                                            @if ($isBatchArtworkJob) form="batch-artwork-upload" @endif
                                                             accept=".psd,.pdf"
                                                             required
                                                         >
@@ -365,7 +380,8 @@
                                                         <input
                                                             id="customer-preview-{{ $job->id }}"
                                                             type="file"
-                                                            name="customer_preview"
+                                                            name="{{ $isBatchArtworkJob ? 'artworks['.$job->id.'][customer_preview]' : 'customer_preview' }}"
+                                                            @if ($isBatchArtworkJob) form="batch-artwork-upload" @endif
                                                             accept=".jpg,.jpeg,.png,.pdf"
                                                             required
                                                         >
@@ -385,19 +401,24 @@
 
                                                         <textarea
                                                             id="internal-note-{{ $job->id }}"
-                                                            name="internal_note"
+                                                            name="{{ $isBatchArtworkJob ? 'artworks['.$job->id.'][internal_note]' : 'internal_note' }}"
+                                                            @if ($isBatchArtworkJob) form="batch-artwork-upload" @endif
                                                             rows="3"
                                                             maxlength="5000"
-                                                        >{{ old('internal_note') }}</textarea>
+                                                        >{{ old($isBatchArtworkJob ? 'artworks.'.$job->id.'.internal_note' : 'internal_note') }}</textarea>
                                                     </div>
 
-                                                    <button
-                                                        type="submit"
-                                                        class="staff-button staff-button-primary"
-                                                    >
-                                                        Upload Artwork
-                                                    </button>
-                                                </form>
+                                                    @if ($isBatchArtworkJob)
+                                                        </div>
+                                                    @else
+                                                        <button
+                                                            type="submit"
+                                                            class="staff-button staff-button-primary"
+                                                        >
+                                                            Upload Artwork
+                                                        </button>
+                                                        </form>
+                                                    @endif
 
                                                 @if ($job->artworkVersions->isNotEmpty())
                                                     <div class="staff-artwork-ready-panel">
@@ -482,6 +503,21 @@
                             </div>
                         @endforelse
                     </div>
+
+                    @if ($usesBatchArtworkUpload)
+                        <form
+                            id="batch-artwork-upload"
+                            method="POST"
+                            action="{{ route('staff.orders.design-artworks.store', $order) }}"
+                            enctype="multipart/form-data"
+                            class="staff-batch-artwork-form"
+                        >
+                            @csrf
+                            <button type="submit" class="staff-button staff-button-primary">
+                                Upload Both Artwork
+                            </button>
+                        </form>
+                    @endif
                 </section>
             @endif
 

@@ -1084,6 +1084,14 @@ a.staff-pagination-link:hover {
     resize: vertical;
 }
 
+.staff-batch-artwork-form {
+    margin-top: 18px;
+}
+
+.staff-batch-artwork-form .staff-button {
+    width: 100%;
+}
+
 .staff-file-picker {
     display: flex;
     align-items: center;
