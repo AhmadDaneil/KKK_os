@@ -756,23 +756,6 @@
                                     <form method="POST" enctype="multipart/form-data" action="{{ route('staff.packing-jobs.mark-packed', $order->packingJob) }}" class="staff-packing-complete-form">
                                         @csrf
                                         <label for="packing-proof">Bukti gambar barang telah dipack</label>
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
-
-                                        <input
-                                            id="packing-proof"
-                                            type="file"
-                                            name="packing_proof"
-                                            accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp"
-                                            @required($order->fulfilment?->method !== 'COURIER')
-                                        >
-
-                                        <button type="submit" class="staff-button staff-button-primary">
-                                            {{ $order->fulfilment?->method === 'COURIER' ? 'Mark Packed' : 'Upload Bukti & Mark Packed' }}
-                                        </button>
-=======
->>>>>>> 07c873d8e7973d8d4427ce71c1ecf116b2d131bd
                                         <div class="staff-file-picker">
                                             <input id="packing-proof" type="file" name="packing_proof" accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp" required>
                                             <button type="button" class="staff-file-cancel" hidden aria-controls="packing-proof">Batal</button>
@@ -782,24 +765,6 @@
                                             <label for="tracking-number">Tracking number</label><input id="tracking-number" name="tracking_number" value="{{ old('tracking_number') }}" required>
                                         @endif
                                         <button type="submit" class="staff-button staff-button-primary">Upload Bukti & Mark Packed</button>
-<<<<<<< HEAD
-=======
-
-                                        <input
-                                            id="packing-proof"
-                                            type="file"
-                                            name="packing_proof"
-                                            accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp"
-                                            @required($order->fulfilment?->method !== 'COURIER')
-                                        >
-
-                                        <button type="submit" class="staff-button staff-button-primary">
-                                            {{ $order->fulfilment?->method === 'COURIER' ? 'Mark Packed' : 'Upload Bukti & Mark Packed' }}
-                                        </button>
->>>>>>> 8ba681e (feat: add production pickup completion workflow)
-=======
->>>>>>> main
->>>>>>> 07c873d8e7973d8d4427ce71c1ecf116b2d131bd
                                     </form>
                                 @endif
                             @endif
