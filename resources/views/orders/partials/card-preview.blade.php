@@ -1,11 +1,29 @@
-<aside class="live-preview" aria-labelledby="live-preview-title">
-    <div class="live-preview-heading">
+<aside class="live-preview is-collapsed" aria-labelledby="live-preview-title" data-live-preview>
+    <button
+        type="button"
+        class="live-preview-toggle"
+        aria-expanded="false"
+        aria-controls="live-preview-panel"
+        data-live-preview-toggle
+    >
+        <span class="live-preview-avatar" aria-hidden="true">K</span>
+
         <div>
-            <p class="eyebrow">Live Preview</p>
-            <h2 id="live-preview-title">Kad 4 × 6</h2>
+            <strong id="live-preview-title">Live Card Preview</strong>
+            <small><span aria-hidden="true"></span> Kad 4 × 6 · dikemas kini secara langsung</small>
         </div>
-        <span>Anggaran paparan</span>
-    </div>
+
+        <span class="live-preview-chevron" aria-hidden="true"></span>
+    </button>
+
+    <div class="live-preview-body" id="live-preview-panel" data-live-preview-body hidden>
+        <div class="live-preview-heading">
+            <div>
+                <p class="eyebrow">Live Preview</p>
+                <h2>Preview Kad Kahwin</h2>
+            </div>
+            <span>Anggaran paparan</span>
+        </div>
 
     @if ($order->packageSides->count() > 1)
         <div class="preview-side-tabs" role="tablist" aria-label="Pilih pakej untuk preview">
@@ -78,5 +96,6 @@
         </div>
     @endforeach
 
-    <p class="preview-note">Preview ini membantu semakan susun atur. Hasil cetakan sebenar mungkin berbeza sedikit mengikut design yang dipilih.</p>
+        <p class="preview-note">Preview ini membantu semakan susun atur. Hasil cetakan sebenar mungkin berbeza sedikit mengikut design yang dipilih.</p>
+    </div>
 </aside>
