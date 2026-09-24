@@ -11,6 +11,9 @@
         )
         : collect();
     $usesBatchArtworkUpload = $batchArtworkJobs->count() > 1;
+    $canUsePhotoshop = auth()->user()->hasStaffRole(\App\Models\User::ROLE_DESIGNER)
+        && $order->relationLoaded('designJobs')
+        && $order->designJobs->contains('assigned_user_id', auth()->id());
 @endphp
 <!DOCTYPE html>
 <html lang="ms">
@@ -40,7 +43,7 @@
 
 @if ($errors->any())
     <div class="staff-alert staff-alert-error">
-        <strong>Assignment could not be saved.</strong>
+        <strong>Action could not be completed.</strong>
 
         <ul>
             @foreach ($errors->all() as $error)
@@ -262,6 +265,43 @@
             @if ($order->relationLoaded('designJobs'))
                 <section class="staff-section">
                     <h2 class="staff-section-title">Design Work</h2>
+
+                    @if ($canUsePhotoshop)
+                        <div class="staff-design-tools">
+                            <div>
+                                <p class="staff-kicker">Photoshop Auto Merge V11</p>
+                                <h3>Prepare this customer order in Photoshop</h3>
+                                <ol>
+                                    <li>Download the customer order CSV.</li>
+                                    <li>Open Photoshop with the approved JavaScript.</li>
+                                    <li>Select the ROOT folder, then select the downloaded CSV file.</li>
+                                </ol>
+                                <p class="staff-design-tools-note">
+                                    Photoshop opens on the Windows workstation running KKK OS.
+                                </p>
+                            </div>
+
+                            <div class="staff-design-tools-actions">
+                                <a
+                                    href="{{ route('staff.orders.photoshop.csv', $order) }}"
+                                    class="staff-button"
+                                >
+                                    Download Customer CSV
+                                </a>
+
+                                <form
+                                    method="POST"
+                                    action="{{ route('staff.orders.photoshop.launch', $order) }}"
+                                >
+                                    @csrf
+
+                                    <button type="submit" class="staff-button staff-button-primary">
+                                        Open Photoshop
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    @endif
 
                     <div class="staff-work-grid">
                         @forelse ($order->designJobs as $job)

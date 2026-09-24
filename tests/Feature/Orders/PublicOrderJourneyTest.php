@@ -26,6 +26,20 @@ class PublicOrderJourneyTest extends TestCase
             ->assertSee(route('public.orders.progress'));
     }
 
+    public function test_landing_page_renders_branded_social_icons(): void
+    {
+        config()->set('kingkadkahwin.social.instagram', 'https://instagram.example/kkk');
+        config()->set('kingkadkahwin.social.facebook', 'https://facebook.example/kkk');
+        config()->set('kingkadkahwin.social.whatsapp', 'https://wa.example/kkk');
+
+        $this->get(route('home'))
+            ->assertOk()
+            ->assertSee('social-instagram', false)
+            ->assertSee('social-facebook', false)
+            ->assertSee('social-whatsapp', false)
+            ->assertSee('<svg', false);
+    }
+
     public function test_progress_page_has_a_back_button_to_the_landing_page(): void
     {
         $this->get(route('public.orders.progress'))

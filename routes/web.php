@@ -28,8 +28,10 @@ use App\Http\Controllers\Staff\StaffDepositPaymentController;
 use App\Http\Controllers\Staff\StaffDesignWorkflowController;
 use App\Http\Controllers\Staff\StaffJobAssignmentController;
 use App\Http\Controllers\Staff\StaffOrderController;
+use App\Http\Controllers\Staff\StaffOrderDeletionController;
 use App\Http\Controllers\Staff\StaffOrderProductionAssignmentController;
 use App\Http\Controllers\Staff\StaffPackingWorkflowController;
+use App\Http\Controllers\Staff\StaffPhotoshopController;
 use App\Http\Controllers\Staff\StaffPrintingWorkflowController;
 use App\Models\User;
 use Illuminate\Support\Facades\Route;
@@ -82,6 +84,8 @@ Route::middleware(['auth:admin', 'active.staff', 'staff.role:ADMIN'])
 
         Route::get('/orders', [StaffOrderController::class, 'index'])->name('orders.index');
         Route::get('/orders/{orderId}', [StaffOrderController::class, 'show'])->name('orders.show');
+        Route::delete('/orders/{order}', [StaffOrderDeletionController::class, 'destroy'])
+            ->name('orders.destroy');
         Route::post('/orders/{order}/assign-printing', [StaffOrderProductionAssignmentController::class, 'assignPrinting'])
             ->name('orders.assign-printing');
         Route::post('/orders/{order}/assign-packing-fulfilment', [StaffOrderProductionAssignmentController::class, 'assignPackingAndFulfilment'])
@@ -228,6 +232,8 @@ Route::middleware(['auth:staff', 'active.staff'])
         */
 
         Route::middleware('staff.role:ADMIN,'.User::ROLE_OM)->group(function () {
+            Route::delete('/orders/{order}', [StaffOrderDeletionController::class, 'destroy'])
+                ->name('orders.destroy');
             Route::post('/orders/{order}/assign-printing', [StaffOrderProductionAssignmentController::class, 'assignPrinting'])
                 ->name('orders.assign-printing');
             Route::post('/orders/{order}/assign-packing-fulfilment', [StaffOrderProductionAssignmentController::class, 'assignPackingAndFulfilment'])
@@ -272,6 +278,16 @@ Route::middleware(['auth:staff', 'active.staff'])
         */
 
         Route::middleware('staff.role:DESIGNER')->group(function () {
+            Route::get(
+                '/orders/{order}/photoshop/csv',
+                [StaffPhotoshopController::class, 'downloadCsv']
+            )->name('orders.photoshop.csv');
+
+            Route::post(
+                '/orders/{order}/photoshop/launch',
+                [StaffPhotoshopController::class, 'launch']
+            )->name('orders.photoshop.launch');
+
             Route::post(
                 '/design-jobs/{designJob}/start',
                 [StaffDesignWorkflowController::class, 'start']

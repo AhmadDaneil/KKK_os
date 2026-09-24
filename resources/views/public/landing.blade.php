@@ -99,14 +99,24 @@
                 <p>Ikuti kami</p>
                 <div class="social-links">
                     @foreach ([
-                        ['key' => 'instagram', 'label' => 'Instagram', 'mark' => 'IG'],
-                        ['key' => 'facebook', 'label' => 'Facebook', 'mark' => 'f'],
-                        ['key' => 'tiktok', 'label' => 'TikTok', 'mark' => '♪'],
-                        ['key' => 'whatsapp', 'label' => 'WhatsApp', 'mark' => 'WA'],
+                        ['key' => 'instagram', 'label' => 'Instagram'],
+                        ['key' => 'facebook', 'label' => 'Facebook'],
+                        ['key' => 'tiktok', 'label' => 'TikTok'],
+                        ['key' => 'whatsapp', 'label' => 'WhatsApp'],
                     ] as $social)
                         @if (config('kingkadkahwin.social.'.$social['key']))
-                            <a href="{{ config('kingkadkahwin.social.'.$social['key']) }}" target="_blank" rel="noopener noreferrer" aria-label="KingKadKahwin di {{ $social['label'] }}">
-                                <span aria-hidden="true">{{ $social['mark'] }}</span>
+                            <a class="social-link social-{{ $social['key'] }}" href="{{ config('kingkadkahwin.social.'.$social['key']) }}" target="_blank" rel="noopener noreferrer" aria-label="KingKadKahwin di {{ $social['label'] }}">
+                                <span aria-hidden="true">
+                                    @if ($social['key'] === 'instagram')
+                                        <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="5"></rect><circle cx="12" cy="12" r="4"></circle><circle cx="17.5" cy="6.5" r="1" class="social-icon-fill"></circle></svg>
+                                    @elseif ($social['key'] === 'facebook')
+                                        <svg viewBox="0 0 24 24"><path class="social-icon-fill" d="M14 8h3V4.3c-.5-.1-2.2-.3-4.1-.3C9 4 6.3 6.4 6.3 10.8V14H3v4h3.3v6h4V18h3.4l.6-4h-4v-2.8C10.3 9.3 10.8 8 14 8Z"></path></svg>
+                                    @elseif ($social['key'] === 'whatsapp')
+                                        <svg viewBox="0 0 24 24"><path d="M20 11.7a8 8 0 0 1-11.8 7l-4.2 1.1 1.1-4.1A8 8 0 1 1 20 11.7Z"></path><path d="M8.4 7.8c.2-.5.5-.5.8-.5h.5c.2 0 .4.1.5.4l.8 1.9c.1.3.1.5-.1.7l-.6.8c-.2.2-.1.4 0 .6.7 1.3 1.7 2.3 3 2.9.2.1.4.1.6-.1l.9-1.1c.2-.2.4-.3.7-.2l1.9.9c.3.1.5.3.5.5 0 .3-.2 1.6-1.1 2.2-.8.6-1.8.8-3 .4-1.1-.3-2.5-1-4.2-2.5-1.4-1.3-2.4-2.8-2.8-3.9-.4-1-.1-2.2.3-2.7l.3-.3Z"></path></svg>
+                                    @else
+                                        <svg viewBox="0 0 24 24"><path class="social-icon-fill" d="M14.5 3c.4 2.4 1.8 3.9 4.5 4.1v3.1a8.3 8.3 0 0 1-4.5-1.3v6.2a6.1 6.1 0 1 1-5.3-6v3.3a2.9 2.9 0 1 0 2.1 2.8V3h3.2Z"></path></svg>
+                                    @endif
+                                </span>
                                 {{ $social['label'] }}
                             </a>
                         @endif

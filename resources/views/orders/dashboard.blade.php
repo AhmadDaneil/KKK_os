@@ -16,9 +16,16 @@
             <h1>Tempahan Anda</h1>
         </div>
 
-        <span class="status-badge">
-            {{ $progress['label'] }}
-        </span>
+        <div class="order-summary-actions">
+            <a href="{{ route('home') }}" class="back-home-button">
+                <span aria-hidden="true">&larr;</span>
+                Kembali
+            </a>
+
+            <span class="status-badge">
+                {{ $progress['label'] }}
+            </span>
+        </div>
     </div>
 
     <div class="order-summary-grid">
@@ -887,6 +894,29 @@ document.addEventListener('DOMContentLoaded', function () {
         if (!form || !preview) {
             return;
         }
+
+        const previewToggle = preview.querySelector('[data-live-preview-toggle]');
+        const previewBody = preview.querySelector('[data-live-preview-body]');
+
+        function setPreviewOpen(isOpen) {
+            preview.classList.toggle('is-collapsed', !isOpen);
+            previewToggle?.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+
+            if (previewBody) {
+                previewBody.hidden = !isOpen;
+            }
+        }
+
+        previewToggle?.addEventListener('click', function () {
+            setPreviewOpen(preview.classList.contains('is-collapsed'));
+        });
+
+        document.addEventListener('keydown', function (event) {
+            if (event.key === 'Escape' && !preview.classList.contains('is-collapsed')) {
+                setPreviewOpen(false);
+                previewToggle?.focus();
+            }
+        });
 
         let activeSide = preview.querySelector('[data-card-preview]:not(.is-hidden)')?.dataset.cardPreview;
         let activeFace = 'front';

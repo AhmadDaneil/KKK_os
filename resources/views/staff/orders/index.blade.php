@@ -25,6 +25,14 @@
             </header>
 
         <main class="staff-main">
+            @if (session('status'))
+                <div class="staff-alert staff-alert-success">{{ session('status') }}</div>
+            @endif
+
+            @if ($errors->has('order_delete'))
+                <div class="staff-alert staff-alert-error">{{ $errors->first('order_delete') }}</div>
+            @endif
+
             <div class="staff-page-header">
                 <div>
                     <a
@@ -167,12 +175,26 @@
                             @endif
                         </div>
 
-                        <a
-                            href="{{ route($ordersShowRoute, $order->order_id) }}"
-                            class="staff-order-open"
-                        >
-                            View order &rarr;
-                        </a>
+                        <div class="staff-order-actions">
+                            <a
+                                href="{{ route($ordersShowRoute, $order->order_id) }}"
+                                class="staff-order-open"
+                            >
+                                View order &rarr;
+                            </a>
+
+                            @if (auth()->user()->isOperationManagement() && $order->status === 'DETAILS_INCOMPLETE')
+                                <form
+                                    method="POST"
+                                    action="{{ route($isAdminPortal ? 'admin.orders.destroy' : 'staff.orders.destroy', $order) }}"
+                                    onsubmit="return confirm('Delete order {{ $order->order_id }}? This incomplete order and its entered information will be permanently removed.');"
+                                >
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="staff-order-delete">Delete</button>
+                                </form>
+                            @endif
+                        </div>
                     </article>
                 @empty
                     <div class="staff-empty">
