@@ -385,6 +385,12 @@ class StaffPackingWorkflowTest extends TestCase
         $this->assertSame('COMPLETED', $fulfilmentJob->status);
         $this->assertSame('COMPLETED', $order->status);
 
+        $this->get(route('staff.orders.show', $order->order_id))
+            ->assertDontSee('Sahkan Serahan kepada Courier');
+        $this->post(route('public.orders.progress.lookup'), ['order_id' => $order->order_id])
+            ->assertSee('100%')
+            ->assertSee('Tempahan Selesai');
+
         $this->assertSame(
             'Pos Laju',
             $fulfilmentJob->courier_provider
@@ -1379,7 +1385,10 @@ class StaffPackingWorkflowTest extends TestCase
         $this->assertSame('READY', $fulfilment->status);
         $this->assertNull($fulfilment->shipped_at);
         $this->get(route('staff.orders.show', $order->order_id))
-            ->assertSee('Pos Laju')->assertSee('PL001234567MY');
+            ->assertSee('Sahkan Serahan kepada Courier')
+            ->assertSee('value="Pos Laju"', false)
+            ->assertSee('value="PL001234567MY"', false)
+            ->assertSee('aria-controls="courier-packing-proof"', false);
         $this->post(route('public.orders.progress.lookup'), ['order_id' => $order->order_id])
             ->assertSee('Pos Laju')->assertSee('PL001234567MY');
     }
@@ -1514,6 +1523,7 @@ class StaffPackingWorkflowTest extends TestCase
         $this->assertSame('READY', $event->from_status);
         $this->assertSame('COLLECTED', $event->to_status);
     }
+
     public function test_other_packing_staff_cannot_collect_pickup_assigned_to_another_packing_staff(): void
     {
         $admin = $this->admin();
@@ -1585,6 +1595,7 @@ class StaffPackingWorkflowTest extends TestCase
                 ->count()
         );
     }
+
     public function test_operation_management_cannot_collect_pickup_job_assigned_to_packing_staff(): void
     {
         $admin = $this->admin();
@@ -1750,5 +1761,4 @@ class StaffPackingWorkflowTest extends TestCase
             $order->fulfilmentJob()->count()
         );
     }
-
 }

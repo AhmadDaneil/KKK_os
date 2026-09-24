@@ -901,13 +901,13 @@
                                         </form>
 
                                     @elseif ($order->fulfilmentJob->method === 'COURIER')
-                                        <h4>Courier Completion</h4>
+                                        <h4>Serahan kepada Courier</h4>
 
                                         <form
                                             method="POST"
                                             enctype="multipart/form-data"
                                             action="{{ route('staff.packing-jobs.complete-courier', $order->packingJob) }}"
-                                            class="staff-workflow-form"
+                                            class="staff-packing-complete-form"
                                         >
                                             @csrf
 
@@ -915,6 +915,7 @@
                                                 Bukti parcel bersama label tracking
                                             </label>
 
+                                            <div class="staff-file-picker">
                                             <input
                                                 id="courier-packing-proof"
                                                 type="file"
@@ -922,6 +923,8 @@
                                                 accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp"
                                                 required
                                             >
+                                                <button type="button" class="staff-file-cancel" hidden aria-controls="courier-packing-proof">Batal</button>
+                                            </div>
 
                                             <label for="courier-provider">
                                                 Nama courier
@@ -931,7 +934,7 @@
                                                 id="courier-provider"
                                                 type="text"
                                                 name="courier_provider"
-                                                value="{{ old('courier_provider') }}"
+                                                value="{{ old('courier_provider', $order->fulfilmentJob->courier_provider) }}"
                                                 placeholder="Contoh: Pos Laju"
                                                 required
                                             >
@@ -944,11 +947,11 @@
                                                 id="tracking-number"
                                                 type="text"
                                                 name="tracking_number"
-                                                value="{{ old('tracking_number') }}"
+                                                value="{{ old('tracking_number', $order->fulfilmentJob->tracking_number) }}"
                                                 required
                                             >
 
-                                            <label>
+                                            <label class="staff-courier-confirmation">
                                                 <input
                                                     type="checkbox"
                                                     name="complete"
@@ -962,7 +965,7 @@
                                                 type="submit"
                                                 class="staff-button staff-button-primary"
                                             >
-                                                Complete Courier Fulfilment
+                                                Sahkan Serahan kepada Courier
                                             </button>
                                         </form>
                                     @endif

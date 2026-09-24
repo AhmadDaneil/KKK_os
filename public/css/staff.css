@@ -1114,6 +1114,19 @@ a.staff-pagination-link:hover {
     display: none;
 }
 
+.staff-packing-complete-form .staff-courier-confirmation {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+}
+
+.staff-packing-complete-form .staff-courier-confirmation input {
+    width: 18px;
+    min-height: 18px;
+    flex-shrink: 0;
+    margin: 2px 0 0;
+}
+
 .staff-field-help {
     display: block;
     margin-top: 6px;
