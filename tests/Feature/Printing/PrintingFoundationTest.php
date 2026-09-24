@@ -46,6 +46,10 @@ class PrintingFoundationTest extends TestCase
         $this->assertDatabaseCount('print_jobs', 1);
         $this->assertSame('LELAKI', $jobs->first()->side);
         $this->assertSame('READY_FOR_PRINT', $jobs->first()->status);
+        $this->assertDatabaseHas('print_jobs', [
+            'id' => $jobs->first()->id,
+            'quantity' => 200,
+        ]);
     }
 
     public function test_two_package_paid_order_creates_two_independent_print_jobs(): void
@@ -136,13 +140,13 @@ class PrintingFoundationTest extends TestCase
 
         $payment->update([
             'provider' => 'TEST',
-            'provider_reference' => 'PRINT-REF-' . $payment->id,
+            'provider_reference' => 'PRINT-REF-'.$payment->id,
         ]);
 
         app(HandlePaymentCallbackService::class)->handle([
             'provider' => 'TEST',
             'provider_reference' => $payment->provider_reference,
-            'provider_event_id' => 'PRINT-EVENT-' . $payment->id,
+            'provider_event_id' => 'PRINT-EVENT-'.$payment->id,
             'status' => 'PAID',
         ]);
 
@@ -170,14 +174,14 @@ class PrintingFoundationTest extends TestCase
                     'design_code' => $side->side === 'LELAKI' ? 'L101' : 'P202',
                 ],
                 'parents' => [
-                    'father_name' => 'Bapa ' . $side->side,
-                    'mother_name' => 'Ibu ' . $side->side,
+                    'father_name' => 'Bapa '.$side->side,
+                    'mother_name' => 'Ibu '.$side->side,
                 ],
                 'event' => [
                     'event_date' => '2026-12-20',
                     'meal_time' => '12:00',
-                    'venue_name' => 'Dewan ' . $side->side,
-                    'full_address' => 'Alamat ' . $side->side,
+                    'venue_name' => 'Dewan '.$side->side,
+                    'full_address' => 'Alamat '.$side->side,
                     'contacts' => [
                         1 => ['contact_name' => 'Contact 1', 'contact_phone' => '0111111111'],
                         2 => ['contact_name' => 'Contact 2', 'contact_phone' => '0122222222'],
@@ -206,11 +210,11 @@ class PrintingFoundationTest extends TestCase
             $designJob = app(StartDesignJobService::class)->start($designJob);
 
             app(CreateArtworkVersionService::class)->create($designJob, [
-            'storage_path' => "artworks/{$designJob->side}/v1.pdf",
-            'preview_storage_path' => "artworks/{$designJob->side}/v1-preview.png",
-            'original_filename' => "{$designJob->side}-v1.pdf",
-            'mime_type' => 'application/pdf',
-        ]);
+                'storage_path' => "artworks/{$designJob->side}/v1.pdf",
+                'preview_storage_path' => "artworks/{$designJob->side}/v1-preview.png",
+                'original_filename' => "{$designJob->side}-v1.pdf",
+                'mime_type' => 'application/pdf',
+            ]);
 
             $designJob = app(MarkDesignReadyService::class)->markReady($designJob->fresh());
 

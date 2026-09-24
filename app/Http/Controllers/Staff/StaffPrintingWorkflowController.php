@@ -4,10 +4,11 @@ namespace App\Http\Controllers\Staff;
 
 use App\Http\Controllers\Controller;
 use App\Models\PrintJob;
+use App\Models\User;
+use App\Services\Packing\InitializePackingJobForOrderService;
 use App\Services\Printing\MarkPrintJobPrintedService;
 use App\Services\Printing\StartPrintingService;
 use App\Services\Printing\SyncOrderPrintStatusService;
-use App\Services\Packing\InitializePackingJobForOrderService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use RuntimeException;
@@ -82,7 +83,8 @@ class StaffPrintingWorkflowController extends Controller
         PrintJob $printJob
     ): void {
         abort_unless(
-            $printJob->assigned_user_id === $request->user()->id,
+            $request->user()->hasStaffRole(User::ROLE_PRINTING)
+                && $printJob->assigned_user_id === $request->user()->id,
             404
         );
     }

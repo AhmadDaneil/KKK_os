@@ -516,7 +516,12 @@
                                         <a class="staff-button staff-button-small" target="_blank" rel="noopener" href="{{ route('staff.payments.receipt', $payment) }}">Lihat Resit</a>
                                     @endif
                                     @if ($payment->payment_type === 'BOOKING_DEPOSIT' && auth()->user()->isOperationManagement() && $payment->status === 'PENDING')
-                                        <form method="POST" action="{{ route('staff.payments.deposit.approve', $payment) }}">@csrf<button class="staff-button staff-button-primary" type="submit">Sahkan Deposit</button></form>
+                                        <form method="POST" action="{{ route('staff.payments.deposit.approve', $payment) }}" class="staff-field">
+                                            @csrf
+                                            <label for="payment-amount-{{ $payment->id }}">Jumlah bayaran pada resit (RM)</label>
+                                            <input id="payment-amount-{{ $payment->id }}" name="amount" type="number" min="0.01" max="9999999999.99" step="0.01" placeholder="Contoh: 100.00" required>
+                                            <button class="staff-button staff-button-primary" type="submit">Sahkan Deposit</button>
+                                        </form>
                                         <form method="POST" action="{{ route('staff.payments.deposit.reject', $payment) }}" class="staff-reject-payment-form">
                                             @csrf
                                             <label for="rejection-reason-{{ $payment->id }}">Sebab penolakan</label>
@@ -525,7 +530,12 @@
                                         </form>
                                     @endif
                                     @if ($payment->payment_type === 'BALANCE' && auth()->user()->isOperationManagement() && $payment->status === 'PENDING')
-                                        <form method="POST" action="{{ route('staff.payments.balance.approve', $payment) }}">@csrf<button class="staff-button staff-button-primary" type="submit">Sahkan Bayaran Penuh</button></form>
+                                        <form method="POST" action="{{ route('staff.payments.balance.approve', $payment) }}" class="staff-field">
+                                            @csrf
+                                            <label for="payment-amount-{{ $payment->id }}">Jumlah bayaran pada resit (RM)</label>
+                                            <input id="payment-amount-{{ $payment->id }}" name="amount" type="number" min="0.01" max="9999999999.99" step="0.01" placeholder="Contoh: 100.00" required>
+                                            <button class="staff-button staff-button-primary" type="submit">Sahkan Bayaran Penuh</button>
+                                        </form>
                                         <form method="POST" action="{{ route('staff.payments.balance.reject', $payment) }}" class="staff-reject-payment-form">
                                             @csrf
                                             <label for="balance-rejection-reason-{{ $payment->id }}">Sebab penolakan</label>
@@ -565,7 +575,7 @@
                                 <dl class="staff-detail-list">
                                     <div>
                                         <dt>Quantity</dt>
-                                        <dd>{{ $job->quantity }}</dd>
+                                        <dd>{{ $job->quantity ?? $order->card_quantity ?? '-' }}</dd>
                                     </div>
 
                                     <div>
@@ -583,7 +593,7 @@
                                         <dd>{{ $job->printed_at?->format('Y-m-d H:i') ?? '-' }}</dd>
                                     </div>
                                 </dl>
-                                @if (auth()->user()->isAdmin() || (auth()->user()->hasStaffRole(\App\Models\User::ROLE_PRINTING) && $job->assigned_user_id === auth()->id()))
+                                @if (auth()->user()->hasStaffRole(\App\Models\User::ROLE_PRINTING) && $job->assigned_user_id === auth()->id())
                                     @if ($job->status === 'READY_FOR_PRINT')
                                         <form method="POST" action="{{ route('staff.print-jobs.start', $job) }}" class="staff-workflow-form">@csrf<button type="submit" class="staff-button staff-button-primary">Start Printing</button></form>
                                     @elseif ($job->status === 'PRINTING')

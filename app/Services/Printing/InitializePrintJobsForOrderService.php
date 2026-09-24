@@ -59,6 +59,7 @@ class InitializePrintJobsForOrderService
                         'artwork_version_id' => $latestArtwork->id,
                         'side' => $designJob->side,
                         'status' => 'READY_FOR_PRINT',
+                        'quantity' => $order->card_quantity,
                     ]
                 );
 

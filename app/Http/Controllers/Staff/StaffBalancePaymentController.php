@@ -15,15 +15,22 @@ class StaffBalancePaymentController extends Controller
     public function approve(Request $request, PaymentTransaction $payment, InitializePrintJobsForOrderService $initializePrint, SyncOrderPrintStatusService $syncPrint): RedirectResponse
     {
         $this->ensureBalance($payment);
+        $validated = $request->validate([
+            'amount' => ['required', 'numeric', 'decimal:0,2', 'min:0.01', 'max:9999999999.99'],
+        ], [
+            'amount.required' => 'Sila masukkan jumlah bayaran pada resit.',
+            'amount.min' => 'Jumlah bayaran mestilah sekurang-kurangnya RM0.01.',
+            'amount.decimal' => 'Jumlah bayaran hanya boleh mempunyai sehingga dua tempat perpuluhan.',
+        ]);
 
-        DB::transaction(function () use ($request, $payment, $initializePrint, $syncPrint) {
+        DB::transaction(function () use ($request, $payment, $initializePrint, $syncPrint, $validated) {
             $payment->refresh()->load('order');
             abort_unless($payment->status === 'PENDING' && $payment->order->status === 'BALANCE_PENDING', 422);
             $metadata = $payment->metadata ?? [];
             $metadata['reviewed_by_user_id'] = $request->user()->id;
             $metadata['reviewed_at'] = now()->toIso8601String();
             unset($metadata['rejection_reason']);
-            $payment->update(['status' => 'PAID', 'paid_at' => now(), 'metadata' => $metadata]);
+            $payment->update(['amount' => $validated['amount'], 'status' => 'PAID', 'paid_at' => now(), 'metadata' => $metadata]);
             $payment->events()->create(['event_type' => 'BALANCE_APPROVED', 'payload' => ['actor_user_id' => $request->user()->id], 'occurred_at' => now()]);
 
             $order = $payment->order;

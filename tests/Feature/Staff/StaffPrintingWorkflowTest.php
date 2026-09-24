@@ -34,7 +34,7 @@ class StaffPrintingWorkflowTest extends TestCase
         app(AssignPrintJobService::class)
             ->assign($job, $printing, $admin);
 
-        $response = $this->actingAs($printing)->post(
+        $response = $this->actingAs($printing, 'staff')->post(
             route('staff.print-jobs.start', $job)
         );
 
@@ -68,11 +68,11 @@ class StaffPrintingWorkflowTest extends TestCase
         app(AssignPrintJobService::class)
             ->assign($job, $printing, $admin);
 
-        $this->actingAs($printing)->post(
+        $this->actingAs($printing, 'staff')->post(
             route('staff.print-jobs.start', $job)
         );
 
-        $response = $this->actingAs($printing)->post(
+        $response = $this->actingAs($printing, 'staff')->post(
             route('staff.print-jobs.mark-printed', $job)
         );
 
@@ -154,7 +154,7 @@ class StaffPrintingWorkflowTest extends TestCase
         app(AssignPrintJobService::class)
             ->assign($job, $printing, $admin);
 
-        $this->actingAs($admin)
+        $this->actingAs($admin, 'staff')
             ->post(route('staff.print-jobs.start', $job))
             ->assertNotFound();
 
@@ -197,7 +197,7 @@ class StaffPrintingWorkflowTest extends TestCase
         app(AssignPrintJobService::class)
             ->assign($job, $printing, $admin);
 
-        $response = $this->actingAs($printing)->post(
+        $response = $this->actingAs($printing, 'staff')->post(
             route('staff.print-jobs.mark-printed', $job)
         );
 
@@ -311,6 +311,72 @@ class StaffPrintingWorkflowTest extends TestCase
         );
     }
 
+    public function test_admin_sees_assignment_without_printing_actions(): void
+    {
+        $admin = $this->admin();
+        $printing = $this->staff(User::ROLE_PRINTING);
+        [$order, $jobs] = $this->printJobs();
+        $job = $jobs->first();
+
+        $this->actingAs($admin, 'staff')->get(route('staff.orders.show', $order->order_id))
+            ->assertOk()
+            ->assertSee('Assign Printing Staff')
+            ->assertDontSee('Start Printing');
+
+        app(AssignPrintJobService::class)->assign($job, $printing, $admin);
+
+        $this->actingAs($printing, 'staff')->get(route('staff.orders.show', $order->order_id))
+            ->assertOk()->assertSee('Start Printing');
+        $this->actingAs($printing, 'staff')->post(route('staff.print-jobs.start', $job))
+            ->assertRedirect();
+        $this->actingAs($printing, 'staff')->get(route('staff.orders.show', $order->order_id))
+            ->assertOk()->assertSee('Mark Printed');
+
+        $this->actingAs($admin, 'staff')->get(route('staff.orders.show', $order->order_id))
+            ->assertOk()
+            ->assertSee('Reassign Printing Staff')
+            ->assertDontSee('Mark Printed');
+        $this->actingAs($admin, 'staff')->post(route('staff.print-jobs.mark-printed', $job))
+            ->assertNotFound();
+        $this->assertSame('PRINTING', $job->fresh()->status);
+    }
+
+    public function test_admin_cannot_operate_even_when_recorded_as_assignee(): void
+    {
+        $admin = $this->admin();
+        [, $jobs] = $this->printJobs();
+        $job = $jobs->first();
+        $job->update(['assigned_user_id' => $admin->id]);
+
+        $this->actingAs($admin, 'staff')->post(route('staff.print-jobs.start', $job))
+            ->assertNotFound();
+        $this->assertSame('READY_FOR_PRINT', $job->fresh()->status);
+
+        $job->update(['status' => 'PRINTING']);
+        $this->actingAs($admin, 'staff')->post(route('staff.print-jobs.mark-printed', $job))
+            ->assertNotFound();
+        $this->assertSame('PRINTING', $job->fresh()->status);
+        $this->assertNull($job->fresh()->printed_at);
+    }
+
+    public function test_printing_quantity_uses_order_quantity_only_when_job_quantity_is_missing(): void
+    {
+        $admin = $this->admin();
+        [$order, $jobs] = $this->printJobs();
+        $job = $jobs->first();
+        $job->update(['quantity' => null]);
+
+        $this->actingAs($admin, 'staff')->get(route('staff.orders.show', $order->order_id))
+            ->assertOk()
+            ->assertSeeInOrder(['Quantity</dt>', '<dd>200</dd>'], false);
+
+        $job->update(['quantity' => 150]);
+
+        $this->get(route('staff.orders.show', $order->order_id))
+            ->assertOk()
+            ->assertSeeInOrder(['Quantity</dt>', '<dd>150</dd>'], false);
+    }
+
     private function admin(): User
     {
         return $this->staff(User::ROLE_ADMIN);
@@ -346,13 +412,13 @@ class StaffPrintingWorkflowTest extends TestCase
 
         $payment->update([
             'provider' => 'TEST',
-            'provider_reference' => 'STAFF-PRINT-' . $payment->id,
+            'provider_reference' => 'STAFF-PRINT-'.$payment->id,
         ]);
 
         app(HandlePaymentCallbackService::class)->handle([
             'provider' => 'TEST',
             'provider_reference' => $payment->provider_reference,
-            'provider_event_id' => 'STAFF-PRINT-EVENT-' . $payment->id,
+            'provider_event_id' => 'STAFF-PRINT-EVENT-'.$payment->id,
             'status' => 'PAID',
         ]);
 

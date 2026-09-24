@@ -55,10 +55,11 @@ class StaffDepositPaymentWorkflowTest extends TestCase
         $this->assertSame('RECEIPT_SUBMITTED', $order->fresh()->booking_payment_status);
 
         $this->actingAs($admin)
-            ->post(route('staff.payments.deposit.approve', $payment))
+            ->post(route('staff.payments.deposit.approve', $payment), ['amount' => '125.50'])
             ->assertRedirect();
 
         $this->assertSame('PAID', $payment->fresh()->status);
+        $this->assertSame('125.50', $payment->fresh()->amount);
         $this->assertSame('READY_FOR_DESIGN', $order->fresh()->status);
         $this->assertSame('PAID', $order->fresh()->booking_payment_status);
         $this->assertDatabaseCount('design_jobs', 1);
@@ -71,7 +72,7 @@ class StaffDepositPaymentWorkflowTest extends TestCase
         $designer = User::factory()->create(['role' => User::ROLE_DESIGNER, 'is_active' => true]);
 
         $this->actingAs($designer)
-            ->post(route('staff.payments.deposit.approve', $payment))
+            ->post(route('staff.payments.deposit.approve', $payment), ['amount' => '125.50'])
             ->assertForbidden();
 
         $this->assertSame('PENDING', $payment->fresh()->status);
@@ -126,6 +127,22 @@ class StaffDepositPaymentWorkflowTest extends TestCase
             ->get(route('staff.payments.receipt', $payment))
             ->assertOk()
             ->assertHeader('Content-Type', 'image/jpeg');
+    }
+
+    public function test_invalid_amount_does_not_approve_deposit(): void
+    {
+        Storage::fake('local');
+        [$order, $payment] = $this->depositOrder();
+        $admin = User::factory()->create(['role' => User::ROLE_ADMIN, 'is_active' => true]);
+
+        foreach ([null, '0', '-5', '12.345', 'abc', '10000000000'] as $amount) {
+            $this->actingAs($admin)
+                ->post(route('staff.payments.deposit.approve', $payment), ['amount' => $amount])
+                ->assertSessionHasErrors('amount');
+            $this->assertSame('PENDING', $payment->fresh()->status);
+            $this->assertSame('100.00', $payment->fresh()->amount);
+            $this->assertSame('DETAILS_CONFIRMED', $order->fresh()->status);
+        }
     }
 
     private function depositOrder(): array
