@@ -737,6 +737,35 @@ a.staff-card:hover {
     background: #f8f9fa;
 }
 
+.staff-order-actions {
+    display: grid;
+    justify-items: end;
+    gap: 8px;
+}
+
+.staff-order-actions form {
+    margin: 0;
+}
+
+.staff-order-delete {
+    min-height: 34px;
+    padding: 6px 11px;
+    border: 1px solid #dc9a9a;
+    border-radius: 8px;
+    background: #fff7f7;
+    color: #a32626;
+    font: inherit;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.staff-order-delete:hover {
+    border-color: #a32626;
+    background: #a32626;
+    color: #fff;
+}
+
 .staff-pagination {
     display: flex;
     align-items: center;
