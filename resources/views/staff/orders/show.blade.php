@@ -1,3 +1,9 @@
+@php
+    $isAdminPortal = request()->routeIs('admin.orders.*');
+    $logoutRoute = $isAdminPortal ? 'admin.logout' : 'staff.logout';
+    $ordersIndexRoute = $isAdminPortal ? 'admin.orders.index' : 'staff.orders.index';
+    $operationRoutePrefix = $isAdminPortal ? 'admin.' : 'staff.';
+@endphp
 <!DOCTYPE html>
 <html lang="ms">
 <head>
@@ -14,7 +20,7 @@
         <div class="staff-workspace">
             <header class="staff-topbar">
                 <div><p class="staff-kicker">{{ auth()->user()->isAdmin() ? 'Admin Operations' : 'Staff Operations' }} · Order Detail</p><h1>{{ $order->order_id }}</h1></div>
-                <form method="POST" action="{{ route('staff.logout') }}">@csrf<button type="submit" class="staff-button staff-button-small">Log Keluar</button></form>
+                <form method="POST" action="{{ route($logoutRoute) }}">@csrf<button type="submit" class="staff-button staff-button-small">Log Keluar</button></form>
             </header>
 
         <main class="staff-main">
@@ -37,7 +43,7 @@
 @endif
             <div class="staff-page-header">
                 <div>
-                    <a href="{{ route('staff.orders.index') }}" class="staff-back-link">
+                    <a href="{{ route($ordersIndexRoute) }}" class="staff-back-link">
                         &larr; Orders
                     </a>
 
@@ -285,7 +291,7 @@
                                         @if ($job->status === 'READY_FOR_DESIGN')
                                             <form
                                                 method="POST"
-                                                action="{{ route('staff.design-jobs.start', $job) }}"
+                                                action="{{ route($operationRoutePrefix.'design-jobs.start', $job) }}"
                                             >
                                                 @csrf
 
@@ -299,7 +305,7 @@
                                         @elseif ($job->status === 'CORRECTION_REQUESTED')
                                             <form
                                                 method="POST"
-                                                action="{{ route('staff.design-jobs.resume-correction', $job) }}"
+                                                action="{{ route($operationRoutePrefix.'design-jobs.resume-correction', $job) }}"
                                             >
                                                 @csrf
 
@@ -323,7 +329,7 @@
 
                                                 <form
                                                     method="POST"
-                                                    action="{{ route('staff.design-jobs.artwork.store', $job) }}"
+                                                    action="{{ route($operationRoutePrefix.'design-jobs.artwork.store', $job) }}"
                                                     enctype="multipart/form-data"
                                                     class="staff-artwork-form"
                                                 >
@@ -405,7 +411,7 @@
 
                                                         <form
                                                             method="POST"
-                                                            action="{{ route('staff.design-jobs.mark-ready', $job) }}"
+                                                            action="{{ route($operationRoutePrefix.'design-jobs.mark-ready', $job) }}"
                                                         >
                                                             @csrf
                                                             <button
@@ -433,7 +439,7 @@
                                 @if (auth()->user()->isAdmin() && ! request()->attributes->get('staff_overview_mode', false))
     <form
         method="POST"
-        action="{{ route('staff.design-jobs.assign', $job) }}"
+        action="{{ route($operationRoutePrefix.'design-jobs.assign', $job) }}"
         class="staff-assignment-form"
     >
         @csrf
@@ -513,9 +519,13 @@
                             @if (in_array($payment->payment_type, ['BOOKING_DEPOSIT', 'BALANCE'], true) && ! empty($payment->metadata['receipt_path']))
                                 <div class="staff-payment-actions">
                                     @if (auth()->user()->isOperationManagement())
-                                        <a class="staff-button staff-button-small" target="_blank" rel="noopener" href="{{ route('staff.payments.receipt', $payment) }}">Lihat Resit</a>
+                                    <a class="staff-button staff-button-small" target="_blank" rel="noopener" href="{{ route($operationRoutePrefix.'payments.receipt', $payment) }}">Lihat Resit</a>
                                     @endif
                                     @if ($payment->payment_type === 'BOOKING_DEPOSIT' && auth()->user()->isOperationManagement() && $payment->status === 'PENDING')
+<<<<<<< HEAD
+                                        <form method="POST" action="{{ route($operationRoutePrefix.'payments.deposit.approve', $payment) }}">@csrf<button class="staff-button staff-button-primary" type="submit">Sahkan Deposit</button></form>
+                                        <form method="POST" action="{{ route($operationRoutePrefix.'payments.deposit.reject', $payment) }}" class="staff-reject-payment-form">
+=======
                                         <form method="POST" action="{{ route('staff.payments.deposit.approve', $payment) }}" class="staff-field">
                                             @csrf
                                             <label for="payment-amount-{{ $payment->id }}">Jumlah bayaran pada resit (RM)</label>
@@ -523,6 +533,7 @@
                                             <button class="staff-button staff-button-primary" type="submit">Sahkan Deposit</button>
                                         </form>
                                         <form method="POST" action="{{ route('staff.payments.deposit.reject', $payment) }}" class="staff-reject-payment-form">
+>>>>>>> main
                                             @csrf
                                             <label for="rejection-reason-{{ $payment->id }}">Sebab penolakan</label>
                                             <textarea id="rejection-reason-{{ $payment->id }}" name="rejection_reason" rows="2" required>{{ old('rejection_reason') }}</textarea>
@@ -530,6 +541,10 @@
                                         </form>
                                     @endif
                                     @if ($payment->payment_type === 'BALANCE' && auth()->user()->isOperationManagement() && $payment->status === 'PENDING')
+<<<<<<< HEAD
+                                        <form method="POST" action="{{ route($operationRoutePrefix.'payments.balance.approve', $payment) }}">@csrf<button class="staff-button staff-button-primary" type="submit">Sahkan Bayaran Penuh</button></form>
+                                        <form method="POST" action="{{ route($operationRoutePrefix.'payments.balance.reject', $payment) }}" class="staff-reject-payment-form">
+=======
                                         <form method="POST" action="{{ route('staff.payments.balance.approve', $payment) }}" class="staff-field">
                                             @csrf
                                             <label for="payment-amount-{{ $payment->id }}">Jumlah bayaran pada resit (RM)</label>
@@ -537,6 +552,7 @@
                                             <button class="staff-button staff-button-primary" type="submit">Sahkan Bayaran Penuh</button>
                                         </form>
                                         <form method="POST" action="{{ route('staff.payments.balance.reject', $payment) }}" class="staff-reject-payment-form">
+>>>>>>> main
                                             @csrf
                                             <label for="balance-rejection-reason-{{ $payment->id }}">Sebab penolakan</label>
                                             <textarea id="balance-rejection-reason-{{ $payment->id }}" name="rejection_reason" rows="2" required>{{ old('rejection_reason') }}</textarea>
@@ -595,9 +611,9 @@
                                 </dl>
                                 @if (auth()->user()->hasStaffRole(\App\Models\User::ROLE_PRINTING) && $job->assigned_user_id === auth()->id())
                                     @if ($job->status === 'READY_FOR_PRINT')
-                                        <form method="POST" action="{{ route('staff.print-jobs.start', $job) }}" class="staff-workflow-form">@csrf<button type="submit" class="staff-button staff-button-primary">Start Printing</button></form>
+                                        <form method="POST" action="{{ route($operationRoutePrefix.'print-jobs.start', $job) }}" class="staff-workflow-form">@csrf<button type="submit" class="staff-button staff-button-primary">Start Printing</button></form>
                                     @elseif ($job->status === 'PRINTING')
-                                        <form method="POST" action="{{ route('staff.print-jobs.mark-printed', $job) }}" class="staff-workflow-form">@csrf<button type="submit" class="staff-button staff-button-primary">Mark Printed</button></form>
+                                        <form method="POST" action="{{ route($operationRoutePrefix.'print-jobs.mark-printed', $job) }}" class="staff-workflow-form">@csrf<button type="submit" class="staff-button staff-button-primary">Mark Printed</button></form>
                                     @elseif ($job->status === 'PRINTED')
                                         <p class="staff-work-message">Cetakan untuk pakej ini telah siap.</p>
                                     @endif
@@ -605,7 +621,7 @@
                                 @if (auth()->user()->isAdmin() && ! request()->attributes->get('staff_overview_mode', false))
     <form
         method="POST"
-        action="{{ route('staff.print-jobs.assign', $job) }}"
+        action="{{ route($operationRoutePrefix.'print-jobs.assign', $job) }}"
         class="staff-assignment-form"
     >
         @csrf
@@ -683,7 +699,7 @@
                         @if (auth()->user()->isAdmin() && ! request()->attributes->get('staff_overview_mode', false))
     <form
         method="POST"
-        action="{{ route('staff.packing-jobs.assign', $order->packingJob) }}"
+        action="{{ route($operationRoutePrefix.'packing-jobs.assign', $order->packingJob) }}"
         class="staff-assignment-form"
     >
         @csrf
@@ -744,16 +760,16 @@
 
                         @if (auth()->user()->isOperationManagement() || (auth()->user()->hasStaffRole(\App\Models\User::ROLE_PACKING) && $order->packingJob->assigned_user_id === auth()->id()))
                             @if ($order->packingJob->status === 'READY_FOR_PACKING')
-                                <form method="POST" action="{{ route('staff.packing-jobs.start', $order->packingJob) }}" class="staff-workflow-form">@csrf<button type="submit" class="staff-button staff-button-primary">Start Packing</button></form>
+                                <form method="POST" action="{{ route($operationRoutePrefix.'packing-jobs.start', $order->packingJob) }}" class="staff-workflow-form">@csrf<button type="submit" class="staff-button staff-button-primary">Start Packing</button></form>
                             @endif
                             @if ($order->packingJob->status === 'PACKING')
                                 @foreach ($order->packingJob->items as $item)
                                     @unless ($item->verified_present)
-                                        <form method="POST" action="{{ route('staff.packing-jobs.items.verify', ['packingJob' => $order->packingJob, 'packingItem' => $item]) }}" class="staff-workflow-form">@csrf<button type="submit" class="staff-button staff-button-small">Verify {{ ucfirst(strtolower($item->side)) }}</button></form>
+                                        <form method="POST" action="{{ route($operationRoutePrefix.'packing-jobs.items.verify', ['packingJob' => $order->packingJob, 'packingItem' => $item]) }}" class="staff-workflow-form">@csrf<button type="submit" class="staff-button staff-button-small">Verify {{ ucfirst(strtolower($item->side)) }}</button></form>
                                     @endunless
                                 @endforeach
                                 @if ($order->packingJob->items->every(fn ($item) => $item->verified_present))
-                                    <form method="POST" enctype="multipart/form-data" action="{{ route('staff.packing-jobs.mark-packed', $order->packingJob) }}" class="staff-packing-complete-form">
+                                    <form method="POST" enctype="multipart/form-data" action="{{ route($operationRoutePrefix.'packing-jobs.mark-packed', $order->packingJob) }}" class="staff-packing-complete-form">
                                         @csrf
                                         <label for="packing-proof">Bukti gambar barang telah dipack</label>
                                         <div class="staff-file-picker">
@@ -841,7 +857,7 @@
 
                                         <form
                                             method="POST"
-                                            action="{{ route('staff.packing-jobs.collect-pickup', $order->packingJob) }}"
+                                            action="{{ route($operationRoutePrefix.'packing-jobs.collect-pickup', $order->packingJob) }}"
                                             class="staff-workflow-form"
                                         >
                                             @csrf
@@ -883,7 +899,7 @@
                                         <form
                                             method="POST"
                                             enctype="multipart/form-data"
-                                            action="{{ route('staff.packing-jobs.complete-courier', $order->packingJob) }}"
+                                            action="{{ route($operationRoutePrefix.'packing-jobs.complete-courier', $order->packingJob) }}"
                                             class="staff-packing-complete-form"
                                         >
                                             @csrf

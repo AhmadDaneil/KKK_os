@@ -39,7 +39,57 @@ class AdminDashboardTest extends TestCase
             ->assertSee('Semakan Pembayaran')
             ->assertSee('Design Belum Assign')
             ->assertSee('Printing Belum Assign')
-            ->assertSee('Packing Belum Assign');
+            ->assertSee('Packing Belum Assign')
+            ->assertSee(route('admin.orders.index'), false);
+    }
+
+    public function test_admin_operations_keep_using_admin_session_when_staff_session_also_exists(): void
+    {
+        $admin = $this->staff(User::ROLE_ADMIN);
+        $designer = $this->staff(User::ROLE_DESIGNER);
+        $this->actingAs($designer, 'staff');
+        $this->actingAs($admin, 'admin');
+
+        $this->get(route('admin.orders.index'))
+            ->assertOk()
+            ->assertSee('Admin Operations')
+            ->assertSee(route('admin.dashboard'), false)
+            ->assertSee('Staff &amp; Akses', false)
+            ->assertSee(route('admin.staff.index'), false)
+            ->assertSee(route('admin.logout'), false)
+            ->assertDontSee(route('staff.logout'), false);
+
+        $this->assertAuthenticatedAs($admin, 'admin');
+        $this->assertAuthenticatedAs($designer, 'staff');
+    }
+
+    public function test_staff_operations_do_not_fall_back_to_an_admin_session(): void
+    {
+        $admin = $this->staff(User::ROLE_ADMIN);
+        $this->actingAs($admin, 'admin');
+
+        $this->get(route('staff.orders.index'))
+            ->assertRedirect(route('staff.login'));
+
+        $this->assertAuthenticatedAs($admin, 'admin');
+        $this->assertGuest('staff');
+    }
+
+    public function test_staff_operations_keep_using_staff_session_when_admin_session_also_exists(): void
+    {
+        $admin = $this->staff(User::ROLE_ADMIN);
+        $designer = $this->staff(User::ROLE_DESIGNER);
+        $this->actingAs($admin, 'admin');
+        $this->actingAs($designer, 'staff');
+
+        $this->get(route('staff.orders.index'))
+            ->assertOk()
+            ->assertSee('Staff Operations')
+            ->assertSee(route('staff.logout'), false)
+            ->assertDontSee('Admin Operations');
+
+        $this->assertAuthenticatedAs($admin, 'admin');
+        $this->assertAuthenticatedAs($designer, 'staff');
     }
 
     public function test_admin_can_log_in_through_admin_portal(): void

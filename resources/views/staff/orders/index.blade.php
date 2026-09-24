@@ -1,3 +1,10 @@
+@php
+    $isAdminPortal = request()->routeIs('admin.orders.*');
+    $dashboardRoute = $isAdminPortal ? 'admin.dashboard' : 'staff.dashboard';
+    $logoutRoute = $isAdminPortal ? 'admin.logout' : 'staff.logout';
+    $ordersIndexRoute = $isAdminPortal ? 'admin.orders.index' : 'staff.orders.index';
+    $ordersShowRoute = $isAdminPortal ? 'admin.orders.show' : 'staff.orders.show';
+@endphp
 <!DOCTYPE html>
 <html lang="ms">
 <head>
@@ -14,14 +21,14 @@
         <div class="staff-workspace">
             <header class="staff-topbar">
                 <div><p class="staff-kicker">{{ auth()->user()->isAdmin() ? 'Admin Operations' : ($workstream ? ucfirst($workstream) : 'Operation Management') }}</p><h1>{{ $workstream ? ucfirst($workstream).' Queue' : 'Semua Orders' }}</h1></div>
-                <form method="POST" action="{{ route('staff.logout') }}">@csrf<button type="submit" class="staff-button staff-button-small">Log Keluar</button></form>
+                <form method="POST" action="{{ route($logoutRoute) }}">@csrf<button type="submit" class="staff-button staff-button-small">Log Keluar</button></form>
             </header>
 
         <main class="staff-main">
             <div class="staff-page-header">
                 <div>
                     <a
-                        href="{{ route('staff.dashboard') }}"
+                        href="{{ route($dashboardRoute) }}"
                         class="staff-back-link"
                     >
                         &larr; Dashboard
@@ -43,19 +50,19 @@
                 </div>
             </div>
 
-            <form class="staff-order-filter" method="GET" action="{{ route('staff.orders.index') }}">
+            <form class="staff-order-filter" method="GET" action="{{ route($ordersIndexRoute) }}">
                 @if ($workstream)<input type="hidden" name="workstream" value="{{ $workstream }}">@endif
                 @if (request('attention'))<input type="hidden" name="attention" value="{{ request('attention') }}">@endif
                 <label><span>Cari order/customer</span><input name="search" value="{{ request('search') }}" placeholder="Order ID, nama, email atau telefon"></label>
                 <label><span>Status order</span><select name="status"><option value="">Semua status</option>@foreach ($statusOptions as $status)<option value="{{ $status }}" @selected(request('status') === $status)>{{ str_replace('_', ' ', $status) }}</option>@endforeach</select></label>
                 <button class="staff-button staff-button-primary" type="submit">Tapis</button>
-                @if (request()->hasAny(['search', 'status']))<a class="staff-button" href="{{ route('staff.orders.index', array_filter(['workstream' => $workstream, 'attention' => request('attention')])) }}">Reset</a>@endif
+                @if (request()->hasAny(['search', 'status']))<a class="staff-button" href="{{ route($ordersIndexRoute, array_filter(['workstream' => $workstream, 'attention' => request('attention')])) }}">Reset</a>@endif
             </form>
 
             @if (auth()->user()->isAdmin() && request('attention'))
                 <div class="staff-filter-notice">
                     Memaparkan order untuk tindakan: <strong>{{ str_replace('_', ' ', request('attention')) }}</strong>
-                    <a href="{{ route('staff.orders.index', array_filter(['workstream' => $workstream])) }}">Buang penapis</a>
+                    <a href="{{ route($ordersIndexRoute, array_filter(['workstream' => $workstream])) }}">Buang penapis</a>
                 </div>
             @endif
 
@@ -151,7 +158,7 @@
                         </div>
 
                         <a
-                            href="{{ route('staff.orders.show', $order->order_id) }}"
+                            href="{{ route($ordersShowRoute, $order->order_id) }}"
                             class="staff-order-open"
                         >
                             View order &rarr;
