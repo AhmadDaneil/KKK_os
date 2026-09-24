@@ -23,7 +23,10 @@
                         <h2>Operasi yang jelas, daripada order hingga siap.</h2>
                         <p>Pantau tugasan mengikut role anda tanpa mengubah aliran kerja yang ditetapkan dalam Master Blueprint.</p>
                     </div>
-                    <a href="{{ route('staff.orders.index') }}" class="staff-button staff-button-primary">Buka senarai order</a>
+                    <a href="{{ route('staff.orders.index') }}" class="staff-button staff-button-primary staff-hero-cta">
+                        <span>Buka senarai order</span>
+                        <span class="staff-hero-cta-arrow" aria-hidden="true">&rarr;</span>
+                    </a>
                 </section>
 
                 <div class="staff-dashboard-sections">
