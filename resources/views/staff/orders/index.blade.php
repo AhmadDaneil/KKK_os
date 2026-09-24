@@ -136,14 +136,19 @@
                                     @endif
                                 @endforeach
                             @elseif (auth()->user()->hasStaffRole(\App\Models\User::ROLE_PRINTING))
-                                @foreach ($order->printJobs as $job)
-                                    @if ($job->assigned_user_id === auth()->id())
-                                        <div class="staff-work-row">
-                                            <span>Printing {{ $job->side }}</span>
-                                            <strong>{{ $job->status }}</strong>
-                                        </div>
-                                    @endif
-                                @endforeach
+                                @if ($order->printJobs->where('assigned_user_id', auth()->id())->isNotEmpty())
+                                    @foreach ($order->printJobs->where('assigned_user_id', auth()->id()) as $job)
+                                            <div class="staff-work-row">
+                                                <span>Printing {{ $job->side }}</span>
+                                                <strong>{{ $job->status }}</strong>
+                                            </div>
+                                    @endforeach
+                                @elseif ($order->printing_assigned_user_id === auth()->id())
+                                    <div class="staff-work-row">
+                                        <span>Printing</span>
+                                        <strong>ASSIGNED · WAITING FOR ARTWORK APPROVAL</strong>
+                                    </div>
+                                @endif
                             @elseif (auth()->user()->hasStaffRole(\App\Models\User::ROLE_PACKING))
                                 @if (
                                     $order->packingJob &&
@@ -152,6 +157,11 @@
                                     <div class="staff-work-row">
                                         <span>Packing</span>
                                         <strong>{{ $order->packingJob->status }}</strong>
+                                    </div>
+                                @elseif ($order->packing_assigned_user_id === auth()->id())
+                                    <div class="staff-work-row">
+                                        <span>Packing</span>
+                                        <strong>ASSIGNED · WAITING FOR PACKING JOB</strong>
                                     </div>
                                 @endif
                             @endif

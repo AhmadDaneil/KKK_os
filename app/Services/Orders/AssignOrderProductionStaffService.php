@@ -6,13 +6,15 @@ use App\Models\Order;
 use App\Models\User;
 use App\Services\Packing\AssignPackingJobService;
 use App\Services\Printing\AssignPrintJobService;
+use App\Services\Printing\InitializePrintJobsForOrderService;
 use Illuminate\Support\Facades\DB;
 
 class AssignOrderProductionStaffService
 {
     public function __construct(
         private AssignPrintJobService $assignPrintJob,
-        private AssignPackingJobService $assignPackingJob
+        private AssignPackingJobService $assignPackingJob,
+        private InitializePrintJobsForOrderService $initializePrintJobs,
     ) {}
 
     public function assignPrinting(Order $order, User $assignee, User $actor): Order
@@ -22,6 +24,13 @@ class AssignOrderProductionStaffService
             $previousUserId = $order->printing_assigned_user_id;
 
             $order->update(['printing_assigned_user_id' => $assignee->id]);
+
+            if ($order->designJobs()->exists()
+                && $order->designJobs()->where('status', '!=', 'DESIGN_APPROVED')->doesntExist()
+                && in_array($order->status, ['DESIGN_APPROVED', 'BALANCE_PENDING', 'PAID'], true)) {
+                $this->initializePrintJobs->initialize($order->fresh());
+                $order->refresh();
+            }
 
             foreach ($order->printJobs as $printJob) {
                 $this->assignPrintJob->assign($printJob, $assignee, $actor);

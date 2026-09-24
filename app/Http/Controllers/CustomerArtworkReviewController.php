@@ -7,6 +7,7 @@ use App\Services\Design\ApproveArtworkService;
 use App\Services\Design\RequestArtworkCorrectionService;
 use App\Services\Design\SyncOrderDesignStatusService;
 use App\Services\Orders\CustomerOrderSessionAccessService;
+use App\Services\Printing\InitializePrintJobsForOrderService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Symfony\Component\HttpFoundation\StreamedResponse;
@@ -87,7 +88,7 @@ class CustomerArtworkReviewController extends Controller
             200,
             [
                 'Content-Type' => $mimeType,
-                'Content-Disposition' => 'inline; filename="' . addslashes($filename) . '"',
+                'Content-Disposition' => 'inline; filename="'.addslashes($filename).'"',
                 'Cache-Control' => 'private, no-store, max-age=0',
                 'Pragma' => 'no-cache',
                 'X-Content-Type-Options' => 'nosniff',
@@ -141,7 +142,8 @@ class CustomerArtworkReviewController extends Controller
         int $designJobId,
         CustomerOrderSessionAccessService $access,
         ApproveArtworkService $approve,
-        SyncOrderDesignStatusService $sync
+        SyncOrderDesignStatusService $sync,
+        InitializePrintJobsForOrderService $initializePrintJobs
     ) {
         $order = $access->resolve($request, $orderId);
 
@@ -152,7 +154,11 @@ class CustomerArtworkReviewController extends Controller
 
         $approve->approve($designJob);
 
-        $sync->sync($order);
+        $order = $sync->sync($order);
+
+        if ($order->status === 'DESIGN_APPROVED') {
+            $initializePrintJobs->initialize($order);
+        }
 
         return redirect()
             ->route('orders.artwork.review', [

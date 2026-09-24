@@ -86,6 +86,35 @@ class ArtworkReviewApprovalTest extends TestCase
         $this->assertSame('DESIGN_APPROVED', $syncedOrder->status);
     }
 
+    public function test_customer_approval_creates_a_print_job_waiting_for_payment(): void
+    {
+        [$order, $job, $designer] = $this->preparedDesignJob();
+
+        app(CreateArtworkVersionService::class)->create($job, [
+            'storage_path' => 'artworks/customer-approved-v1.pdf',
+            'preview_storage_path' => 'artworks/customer-approved-v1-preview.png',
+            'original_filename' => 'customer-approved-v1.pdf',
+        ], $designer);
+
+        $job = app(MarkDesignReadyService::class)->markReady($job->fresh(), $designer);
+        app(SyncOrderDesignStatusService::class)->sync($order->fresh());
+
+        $link = app(GenerateOrderAccessLinkService::class)->generate($order->fresh());
+        $this->get($this->requestUri($link))->assertRedirect();
+
+        $this->post(route('orders.artwork.approve', [
+            'orderId' => $order->order_id,
+            'designJobId' => $job->id,
+        ]))->assertRedirect();
+
+        $this->assertSame('DESIGN_APPROVED', $order->fresh()->status);
+        $this->assertDatabaseHas('print_jobs', [
+            'order_id' => $order->id,
+            'design_job_id' => $job->id,
+            'status' => 'WAITING_FOR_PAYMENT',
+        ]);
+    }
+
     public function test_two_package_order_is_not_fully_approved_until_both_jobs_are_approved(): void
     {
         $order = $this->confirmedOrder(2);
@@ -155,6 +184,14 @@ class ArtworkReviewApprovalTest extends TestCase
             route('orders.dashboard', [
                 'orderId' => $order->order_id,
             ])
+        );
+
+    $this->get(route('orders.artwork.review', ['orderId' => $order->order_id]))
+        ->assertOk()
+        ->assertSee('Kembali ke Semak Progress')
+        ->assertSee(
+            route('public.orders.progress', ['order_id' => $order->order_id]),
+            false
         );
 
     $response = $this->get(

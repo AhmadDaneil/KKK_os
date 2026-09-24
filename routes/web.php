@@ -27,6 +27,7 @@ use App\Http\Controllers\Staff\StaffDepositPaymentController;
 use App\Http\Controllers\Staff\StaffDesignWorkflowController;
 use App\Http\Controllers\Staff\StaffJobAssignmentController;
 use App\Http\Controllers\Staff\StaffOrderController;
+use App\Http\Controllers\Staff\StaffOrderProductionAssignmentController;
 use App\Http\Controllers\Staff\StaffPackingWorkflowController;
 use App\Http\Controllers\Staff\StaffPrintingWorkflowController;
 use App\Models\User;
@@ -80,6 +81,10 @@ Route::middleware(['auth:admin', 'active.staff', 'staff.role:ADMIN'])
 
         Route::get('/orders', [StaffOrderController::class, 'index'])->name('orders.index');
         Route::get('/orders/{orderId}', [StaffOrderController::class, 'show'])->name('orders.show');
+        Route::post('/orders/{order}/assign-printing', [StaffOrderProductionAssignmentController::class, 'assignPrinting'])
+            ->name('orders.assign-printing');
+        Route::post('/orders/{order}/assign-packing-fulfilment', [StaffOrderProductionAssignmentController::class, 'assignPackingAndFulfilment'])
+            ->name('orders.assign-packing-fulfilment');
 
         Route::get('/payments/{payment}/receipt', [StaffDepositPaymentController::class, 'receipt'])
             ->name('payments.receipt');
@@ -220,6 +225,18 @@ Route::middleware(['auth:staff', 'active.staff'])
         */
 
         Route::middleware('staff.role:ADMIN,'.User::ROLE_OM)->group(function () {
+            Route::post('/orders/{order}/assign-printing', [StaffOrderProductionAssignmentController::class, 'assignPrinting'])
+                ->name('orders.assign-printing');
+            Route::post('/orders/{order}/assign-packing-fulfilment', [StaffOrderProductionAssignmentController::class, 'assignPackingAndFulfilment'])
+                ->name('orders.assign-packing-fulfilment');
+            Route::post(
+                '/design-jobs/{designJob}/assign',
+                [StaffJobAssignmentController::class, 'assignDesign']
+            )->name('design-jobs.assign');
+            Route::post(
+                '/print-jobs/{printJob}/assign',
+                [StaffJobAssignmentController::class, 'assignPrinting']
+            )->name('print-jobs.assign');
             Route::get('/payments/{payment}/receipt', [StaffDepositPaymentController::class, 'receipt'])
                 ->name('payments.receipt');
             Route::post('/payments/{payment}/approve-deposit', [StaffDepositPaymentController::class, 'approve'])
@@ -233,16 +250,6 @@ Route::middleware(['auth:staff', 'active.staff'])
         });
 
         Route::middleware('staff.role:ADMIN')->group(function () {
-            Route::post(
-                '/design-jobs/{designJob}/assign',
-                [StaffJobAssignmentController::class, 'assignDesign']
-            )->name('design-jobs.assign');
-
-            Route::post(
-                '/print-jobs/{printJob}/assign',
-                [StaffJobAssignmentController::class, 'assignPrinting']
-            )->name('print-jobs.assign');
-
             Route::post(
                 '/packing-jobs/{packingJob}/assign',
                 [StaffJobAssignmentController::class, 'assignPacking']

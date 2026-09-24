@@ -27,13 +27,17 @@ class PrintingFoundationTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_unpaid_order_cannot_initialize_print_jobs(): void
+    public function test_approved_order_creates_print_jobs_waiting_for_full_payment(): void
     {
         $order = $this->approvedOrder(1, 'LELAKI');
 
-        $this->expectException(RuntimeException::class);
+        $jobs = app(InitializePrintJobsForOrderService::class)->initialize($order);
 
-        app(InitializePrintJobsForOrderService::class)->initialize($order);
+        $this->assertCount(1, $jobs);
+        $this->assertSame('WAITING_FOR_PAYMENT', $jobs->first()->status);
+
+        $this->expectException(RuntimeException::class);
+        app(StartPrintingService::class)->start($jobs->first());
     }
 
     public function test_one_package_paid_order_creates_one_print_job(): void

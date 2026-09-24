@@ -147,6 +147,12 @@ textarea {
     gap: 24px;
 }
 
+.page-actions {
+    display: flex;
+    margin-top: 24px;
+    justify-content: flex-start;
+}
+
 .artwork-card {
     overflow: hidden;
     border: 1px solid #e5e7eb;
