@@ -1357,6 +1357,25 @@ class StaffPackingWorkflowTest extends TestCase
         );
     }
 
+    public function test_operation_management_sees_one_packing_upload_form_without_merge_markers(): void
+    {
+        $manager = $this->staff(User::ROLE_OM);
+        [$order, $job] = $this->packingJob(1, 'Packing Form');
+        $this->actingAs($manager, 'staff')->post(route('staff.packing-jobs.start', $job))->assertRedirect();
+        $this->post(route('staff.packing-jobs.items.verify', [
+            'packingJob' => $job,
+            'packingItem' => $job->items()->firstOrFail(),
+        ]))->assertRedirect();
+
+        $response = $this->get(route('staff.orders.show', $order->order_id));
+        $response->assertOk()
+            ->assertDontSee('<<<<<<<', false)
+            ->assertDontSee('>>>>>>>', false)
+            ->assertSee('aria-controls="packing-proof"', false);
+        $this->assertSame(1, substr_count($response->getContent(), 'id="packing-proof"'));
+        $this->assertSame(1, substr_count($response->getContent(), 'Upload Bukti &amp; Mark Packed') + substr_count($response->getContent(), 'Upload Bukti & Mark Packed'));
+    }
+
     public function test_packing_saves_courier_details_without_marking_parcel_shipped(): void
     {
         $admin = $this->admin();
