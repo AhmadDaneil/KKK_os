@@ -1,21 +1,12 @@
 <?php
 
-use App\Http\Controllers\Staff\StaffDashboardController;
-use App\Http\Controllers\Staff\StaffAuthController;
-use App\Http\Controllers\Staff\StaffPrintingWorkflowController;
-use App\Http\Controllers\Staff\StaffOrderController;
-use App\Http\Controllers\Staff\StaffJobAssignmentController;
-use App\Http\Controllers\Staff\StaffDesignWorkflowController;
-use App\Http\Controllers\Staff\StaffPackingWorkflowController;
-use App\Http\Controllers\Staff\StaffDepositPaymentController;
-use App\Http\Controllers\Staff\StaffBalancePaymentController;
 use App\Http\Controllers\Admin\AdminAuthController;
 use App\Http\Controllers\Admin\AdminDashboardController;
 use App\Http\Controllers\Admin\AdminStaffController;
 use App\Http\Controllers\CustomerArtworkReviewController;
+use App\Http\Controllers\CustomerBalanceReceiptController;
 use App\Http\Controllers\CustomerDashboardController;
 use App\Http\Controllers\CustomerDepositReceiptController;
-use App\Http\Controllers\CustomerBalanceReceiptController;
 use App\Http\Controllers\CustomerOrderConfirmController;
 use App\Http\Controllers\CustomerOrderDraftController;
 use App\Http\Controllers\CustomerOrderReviewController;
@@ -28,6 +19,16 @@ use App\Http\Controllers\DevOrderController;
 use App\Http\Controllers\DevPackingJobController;
 use App\Http\Controllers\DevPrintJobController;
 use App\Http\Controllers\PublicOrderController;
+use App\Http\Controllers\Staff\StaffAuthController;
+use App\Http\Controllers\Staff\StaffBalancePaymentController;
+use App\Http\Controllers\Staff\StaffDashboardController;
+use App\Http\Controllers\Staff\StaffDepositPaymentController;
+use App\Http\Controllers\Staff\StaffDesignWorkflowController;
+use App\Http\Controllers\Staff\StaffJobAssignmentController;
+use App\Http\Controllers\Staff\StaffOrderController;
+use App\Http\Controllers\Staff\StaffPackingWorkflowController;
+use App\Http\Controllers\Staff\StaffPrintingWorkflowController;
+use App\Models\User;
 use Illuminate\Support\Facades\Route;
 
 Route::view('/', 'public.landing')->name('home');
@@ -75,6 +76,9 @@ Route::middleware(['auth:admin', 'active.staff', 'staff.role:ADMIN'])
         Route::put('/staff/{user}', [AdminStaffController::class, 'update'])->name('staff.update');
         Route::put('/staff/{user}/password', [AdminStaffController::class, 'updatePassword'])->name('staff.password.update');
         Route::delete('/staff/{user}', [AdminStaffController::class, 'destroy'])->name('staff.destroy');
+
+        Route::get('/orders', [StaffOrderController::class, 'index'])->name('orders.index');
+        Route::get('/orders/{orderId}', [StaffOrderController::class, 'show'])->name('orders.show');
     });
 
 /*
@@ -172,7 +176,7 @@ Route::middleware(['auth:staff,admin', 'active.staff'])
         |
         */
 
-        Route::middleware('staff.role:ADMIN,' . \App\Models\User::ROLE_OM)->group(function () {
+        Route::middleware('staff.role:ADMIN,'.User::ROLE_OM)->group(function () {
             Route::get('/payments/{payment}/receipt', [StaffDepositPaymentController::class, 'receipt'])
                 ->name('payments.receipt');
             Route::post('/payments/{payment}/approve-deposit', [StaffDepositPaymentController::class, 'approve'])
@@ -212,50 +216,50 @@ Route::middleware(['auth:staff,admin', 'active.staff'])
         |
         */
 
-            Route::middleware('staff.role:DESIGNER')->group(function () {
-                Route::post(
-                    '/design-jobs/{designJob}/start',
-                    [StaffDesignWorkflowController::class, 'start']
-                )->name('design-jobs.start');
+        Route::middleware('staff.role:DESIGNER')->group(function () {
+            Route::post(
+                '/design-jobs/{designJob}/start',
+                [StaffDesignWorkflowController::class, 'start']
+            )->name('design-jobs.start');
 
-                Route::post(
-                    '/design-jobs/{designJob}/resume-correction',
-                    [StaffDesignWorkflowController::class, 'resumeCorrection']
-                )->name('design-jobs.resume-correction');
+            Route::post(
+                '/design-jobs/{designJob}/resume-correction',
+                [StaffDesignWorkflowController::class, 'resumeCorrection']
+            )->name('design-jobs.resume-correction');
 
-                Route::post(
-                    '/design-jobs/{designJob}/artwork',
-                    [StaffDesignWorkflowController::class, 'uploadArtwork']
-                )->name('design-jobs.artwork.store');
+            Route::post(
+                '/design-jobs/{designJob}/artwork',
+                [StaffDesignWorkflowController::class, 'uploadArtwork']
+            )->name('design-jobs.artwork.store');
 
-                Route::post(
-                    '/design-jobs/{designJob}/mark-ready',
-                    [StaffDesignWorkflowController::class, 'markReady']
-                )->name('design-jobs.mark-ready');
-            });
-            /*
-            |--------------------------------------------------------------------------
-            | Printing Actions
-            |--------------------------------------------------------------------------
-            |
-            | PRINTING staff may operate only on print jobs assigned to them.
-            | Job ownership is additionally enforced by the production controller.
-            |
-            */
+            Route::post(
+                '/design-jobs/{designJob}/mark-ready',
+                [StaffDesignWorkflowController::class, 'markReady']
+            )->name('design-jobs.mark-ready');
+        });
+        /*
+        |--------------------------------------------------------------------------
+        | Printing Actions
+        |--------------------------------------------------------------------------
+        |
+        | PRINTING staff may operate only on print jobs assigned to them.
+        | Job ownership is additionally enforced by the production controller.
+        |
+        */
 
-            Route::middleware('staff.role:PRINTING')->group(function () {
-                Route::post(
-                    '/print-jobs/{printJob}/start',
-                    [StaffPrintingWorkflowController::class, 'start']
-                )->name('print-jobs.start');
+        Route::middleware('staff.role:PRINTING')->group(function () {
+            Route::post(
+                '/print-jobs/{printJob}/start',
+                [StaffPrintingWorkflowController::class, 'start']
+            )->name('print-jobs.start');
 
-                Route::post(
-                    '/print-jobs/{printJob}/mark-printed',
-                    [StaffPrintingWorkflowController::class, 'markPrinted']
-                )->name('print-jobs.mark-printed');
-                });
+            Route::post(
+                '/print-jobs/{printJob}/mark-printed',
+                [StaffPrintingWorkflowController::class, 'markPrinted']
+            )->name('print-jobs.mark-printed');
+        });
 
-                /*
+        /*
             |--------------------------------------------------------------------------
             | Packing Actions
             |--------------------------------------------------------------------------
@@ -265,35 +269,35 @@ Route::middleware(['auth:staff,admin', 'active.staff'])
             |
             */
 
-            Route::middleware('staff.role:PACKING,OPERATION_MANAGEMENT')->group(function () {
-                Route::post(
-                    '/packing-jobs/{packingJob}/start',
-                    [StaffPackingWorkflowController::class, 'start']
-                )->name('packing-jobs.start');
+        Route::middleware('staff.role:PACKING,OPERATION_MANAGEMENT')->group(function () {
+            Route::post(
+                '/packing-jobs/{packingJob}/start',
+                [StaffPackingWorkflowController::class, 'start']
+            )->name('packing-jobs.start');
 
-                Route::post(
-                    '/packing-jobs/{packingJob}/items/{packingItem}/verify',
-                    [StaffPackingWorkflowController::class, 'verifyItem']
-                )->name('packing-jobs.items.verify');
+            Route::post(
+                '/packing-jobs/{packingJob}/items/{packingItem}/verify',
+                [StaffPackingWorkflowController::class, 'verifyItem']
+            )->name('packing-jobs.items.verify');
 
-                Route::post(
-                    '/packing-jobs/{packingJob}/mark-packed',
-                    [StaffPackingWorkflowController::class, 'markPacked']
-                )->name('packing-jobs.mark-packed');
+            Route::post(
+                '/packing-jobs/{packingJob}/mark-packed',
+                [StaffPackingWorkflowController::class, 'markPacked']
+            )->name('packing-jobs.mark-packed');
 
-                Route::post(
+            Route::post(
                 '/packing-jobs/{packingJob}/complete-courier',
                 [StaffPackingWorkflowController::class, 'completeCourier']
-                )->name('packing-jobs.complete-courier');
+            )->name('packing-jobs.complete-courier');
 
-                Route::post(
+            Route::post(
                 '/packing-jobs/{packingJob}/collect-pickup',
                 [StaffPackingWorkflowController::class, 'collectPickup']
-                )->name('packing-jobs.collect-pickup');
+            )->name('packing-jobs.collect-pickup');
 
-            });
+        });
 
-});
+    });
 
 /*
 |--------------------------------------------------------------------------
@@ -343,7 +347,6 @@ if (app()->environment('local')) {
         '/dev/orders/{orderId}/fulfilment-job',
         [DevFulfilmentJobController::class, 'store']
     )->name('dev.orders.fulfilment-job.store');
-
 
     Route::post(
         '/dev/fulfilment-jobs/{fulfilmentJobId}/collect',

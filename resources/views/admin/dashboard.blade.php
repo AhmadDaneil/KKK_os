@@ -20,20 +20,20 @@
     <section class="admin-panel admin-attention-panel">
         <div class="admin-panel-heading"><div><p class="admin-eyebrow">Tindakan Admin</p><h2>Memerlukan Perhatian</h2></div><span class="admin-attention-total">{{ array_sum($attention) }} tindakan</span></div>
         <div class="admin-action-grid">
-            <a href="{{ route('staff.orders.index', ['attention' => 'pending_payment']) }}"><span class="action-icon is-payment">RM</span><div><strong>Semakan Pembayaran</strong><small>Deposit atau bayaran penuh yang masih pending</small></div><b>{{ $attention['pending_payments'] }}</b></a>
-            <a href="{{ route('staff.orders.index', ['workstream' => 'design', 'attention' => 'unassigned_design']) }}"><span class="action-icon is-design">DE</span><div><strong>Design Belum Assign</strong><small>Assign designer supaya artwork boleh dimulakan</small></div><b>{{ $attention['unassigned_design'] }}</b></a>
-            <a href="{{ route('staff.orders.index', ['workstream' => 'printing', 'attention' => 'unassigned_printing']) }}"><span class="action-icon is-printing">PR</span><div><strong>Printing Belum Assign</strong><small>Assign staf printing untuk order yang telah dibayar</small></div><b>{{ $attention['unassigned_printing'] }}</b></a>
-            <a href="{{ route('staff.orders.index', ['workstream' => 'packing', 'attention' => 'unassigned_packing']) }}"><span class="action-icon is-packing">PA</span><div><strong>Packing Belum Assign</strong><small>Assign packing atau kendalikan terus sebagai admin</small></div><b>{{ $attention['unassigned_packing'] }}</b></a>
+            <a href="{{ route('admin.orders.index', ['attention' => 'pending_payment']) }}"><span class="action-icon is-payment">RM</span><div><strong>Semakan Pembayaran</strong><small>Deposit atau bayaran penuh yang masih pending</small></div><b>{{ $attention['pending_payments'] }}</b></a>
+            <a href="{{ route('admin.orders.index', ['workstream' => 'design', 'attention' => 'unassigned_design']) }}"><span class="action-icon is-design">DE</span><div><strong>Design Belum Assign</strong><small>Assign designer supaya artwork boleh dimulakan</small></div><b>{{ $attention['unassigned_design'] }}</b></a>
+            <a href="{{ route('admin.orders.index', ['workstream' => 'printing', 'attention' => 'unassigned_printing']) }}"><span class="action-icon is-printing">PR</span><div><strong>Printing Belum Assign</strong><small>Assign staf printing untuk order yang telah dibayar</small></div><b>{{ $attention['unassigned_printing'] }}</b></a>
+            <a href="{{ route('admin.orders.index', ['workstream' => 'packing', 'attention' => 'unassigned_packing']) }}"><span class="action-icon is-packing">PA</span><div><strong>Packing Belum Assign</strong><small>Assign packing atau kendalikan terus sebagai admin</small></div><b>{{ $attention['unassigned_packing'] }}</b></a>
         </div>
     </section>
 
     <div class="admin-content-grid">
         <section class="admin-panel">
-            <div class="admin-panel-heading"><div><p class="admin-eyebrow">Workload</p><h2>Queue Semasa</h2></div><a href="{{ route('staff.orders.index') }}">Lihat semua →</a></div>
+            <div class="admin-panel-heading"><div><p class="admin-eyebrow">Workload</p><h2>Queue Semasa</h2></div><a href="{{ route('admin.orders.index') }}">Lihat semua →</a></div>
             <div class="admin-queue-list">
-                <a href="{{ route('staff.orders.index', ['workstream' => 'design']) }}"><span class="queue-icon">DE</span><div><strong>Design</strong><small>Ready, sedang design atau pembetulan</small></div><b>{{ $queues['design'] }}</b></a>
-                <a href="{{ route('staff.orders.index', ['workstream' => 'printing']) }}"><span class="queue-icon">PR</span><div><strong>Printing</strong><small>Menunggu atau sedang dicetak</small></div><b>{{ $queues['printing'] }}</b></a>
-                <a href="{{ route('staff.orders.index', ['workstream' => 'packing']) }}"><span class="queue-icon">PA</span><div><strong>Packing</strong><small>Menunggu atau sedang dibungkus</small></div><b>{{ $queues['packing'] }}</b></a>
+                <a href="{{ route('admin.orders.index', ['workstream' => 'design']) }}"><span class="queue-icon">DE</span><div><strong>Design</strong><small>Ready, sedang design atau pembetulan</small></div><b>{{ $queues['design'] }}</b></a>
+                <a href="{{ route('admin.orders.index', ['workstream' => 'printing']) }}"><span class="queue-icon">PR</span><div><strong>Printing</strong><small>Menunggu atau sedang dicetak</small></div><b>{{ $queues['printing'] }}</b></a>
+                <a href="{{ route('admin.orders.index', ['workstream' => 'packing']) }}"><span class="queue-icon">PA</span><div><strong>Packing</strong><small>Menunggu atau sedang dibungkus</small></div><b>{{ $queues['packing'] }}</b></a>
             </div>
         </section>
 
@@ -50,13 +50,13 @@
     </div>
 
     <section class="admin-panel admin-orders-panel">
-        <div class="admin-panel-heading"><div><p class="admin-eyebrow">Latest</p><h2>Order Terkini</h2></div><a href="{{ route('staff.orders.index') }}">Semua order →</a></div>
+        <div class="admin-panel-heading"><div><p class="admin-eyebrow">Latest</p><h2>Order Terkini</h2></div><a href="{{ route('admin.orders.index') }}">Semua order →</a></div>
         <div class="admin-table-wrap">
             <table class="admin-table">
                 <thead><tr><th>Order ID</th><th>Customer</th><th>Pakej</th><th>Status</th><th>Tarikh</th><th></th></tr></thead>
                 <tbody>
                 @forelse ($recentOrders as $order)
-                    <tr><td><strong>{{ $order->order_id }}</strong></td><td>{{ $order->customer_name ?: 'Belum diisi' }}</td><td>{{ $order->package_count }} pakej</td><td><span class="admin-status">{{ str_replace('_', ' ', $order->status) }}</span></td><td>{{ $order->created_at->format('d M Y') }}</td><td><a href="{{ route('staff.orders.show', $order->order_id) }}">Buka</a></td></tr>
+                    <tr><td><strong>{{ $order->order_id }}</strong></td><td>{{ $order->customer_name ?: 'Belum diisi' }}</td><td>{{ $order->package_count }} pakej</td><td><span class="admin-status">{{ str_replace('_', ' ', $order->status) }}</span></td><td>{{ $order->created_at->format('d M Y') }}</td><td><a href="{{ route('admin.orders.show', $order->order_id) }}">Buka</a></td></tr>
                 @empty
                     <tr><td colspan="6" class="admin-empty">Belum ada tempahan.</td></tr>
                 @endforelse

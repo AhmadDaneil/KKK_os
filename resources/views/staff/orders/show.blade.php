@@ -1,3 +1,8 @@
+@php
+    $isAdminPortal = request()->routeIs('admin.orders.*');
+    $logoutRoute = $isAdminPortal ? 'admin.logout' : 'staff.logout';
+    $ordersIndexRoute = $isAdminPortal ? 'admin.orders.index' : 'staff.orders.index';
+@endphp
 <!DOCTYPE html>
 <html lang="ms">
 <head>
@@ -14,7 +19,7 @@
         <div class="staff-workspace">
             <header class="staff-topbar">
                 <div><p class="staff-kicker">{{ auth()->user()->isAdmin() ? 'Admin Operations' : 'Staff Operations' }} · Order Detail</p><h1>{{ $order->order_id }}</h1></div>
-                <form method="POST" action="{{ route('staff.logout') }}">@csrf<button type="submit" class="staff-button staff-button-small">Log Keluar</button></form>
+                <form method="POST" action="{{ route($logoutRoute) }}">@csrf<button type="submit" class="staff-button staff-button-small">Log Keluar</button></form>
             </header>
 
         <main class="staff-main">
@@ -37,7 +42,7 @@
 @endif
             <div class="staff-page-header">
                 <div>
-                    <a href="{{ route('staff.orders.index') }}" class="staff-back-link">
+                    <a href="{{ route($ordersIndexRoute) }}" class="staff-back-link">
                         &larr; Orders
                     </a>
 
