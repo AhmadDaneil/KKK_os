@@ -683,16 +683,16 @@
                     <h2 class="staff-section-title">Assign Production Staff</h2>
 
                     <div class="staff-work-grid">
-                        <form method="POST" action="{{ route($operationRoutePrefix.'orders.assign-printing', $order) }}" class="staff-card staff-assignment-form js-staff-confirmation-form" data-confirm-assignment="Printing" data-confirm-mode="{{ $order->printing_assigned_user_id ? 'reassign' : 'assign' }}">
+                        <form method="POST" action="{{ route($operationRoutePrefix.'orders.assign-printing', $order) }}" class="staff-card staff-assignment-form js-staff-confirmation-form" data-confirm-assignment="Production" data-confirm-mode="{{ $order->printing_assigned_user_id ? 'reassign' : 'assign' }}">
                             @csrf
                             <div class="staff-card-heading">
-                                <h3>Printing</h3>
+                                <h3>Production</h3>
                                 <span class="staff-status">{{ $order->printingAssignedUser ? 'ASSIGNED' : 'UNASSIGNED' }}</span>
                             </div>
-                            <label for="order-printing-assignee">{{ $order->printing_assigned_user_id ? 'Reassign Printing Staff' : 'Assign Printing Staff' }}</label>
+                            <label for="order-printing-assignee">{{ $order->printing_assigned_user_id ? 'Reassign Production Staff' : 'Assign Production Staff' }}</label>
                             <div class="staff-assignment-controls">
                                 <select id="order-printing-assignee" name="assigned_user_id" required>
-                                    <option value="">Select printing staff</option>
+                                    <option value="">Select production staff</option>
                                     @foreach ($printingStaff as $staff)
                                         <option value="{{ $staff->id }}" @selected($order->printing_assigned_user_id === $staff->id)>{{ $staff->name }}</option>
                                     @endforeach
@@ -701,16 +701,16 @@
                             </div>
                         </form>
 
-                        <form method="POST" action="{{ route($operationRoutePrefix.'orders.assign-packing-fulfilment', $order) }}" class="staff-card staff-assignment-form js-staff-confirmation-form" data-confirm-assignment="Packing & Fulfilment" data-confirm-mode="{{ $order->packing_assigned_user_id ? 'reassign' : 'assign' }}">
+                        <form method="POST" action="{{ route($operationRoutePrefix.'orders.assign-packing-fulfilment', $order) }}" class="staff-card staff-assignment-form js-staff-confirmation-form" data-confirm-assignment="OM (Packing & Fulfilment)" data-confirm-mode="{{ $order->packing_assigned_user_id ? 'reassign' : 'assign' }}">
                             @csrf
                             <div class="staff-card-heading">
-                                <h3>Packing &amp; Fulfilment</h3>
+                                <h3>OM: Packing &amp; Fulfilment</h3>
                                 <span class="staff-status">{{ $order->packingAssignedUser ? 'ASSIGNED' : 'UNASSIGNED' }}</span>
                             </div>
-                            <label for="order-packing-assignee">{{ $order->packing_assigned_user_id ? 'Reassign Packing & Fulfilment Staff' : 'Assign Packing & Fulfilment Staff' }}</label>
+                            <label for="order-packing-assignee">{{ $order->packing_assigned_user_id ? 'Reassign OM' : 'Assign OM' }}</label>
                             <div class="staff-assignment-controls">
                                 <select id="order-packing-assignee" name="assigned_user_id" required>
-                                    <option value="">Select packing &amp; fulfilment staff</option>
+                                    <option value="">Select OM (Packing &amp; Fulfilment)</option>
                                     @foreach ($packingStaff as $staff)
                                         <option value="{{ $staff->id }}" @selected($order->packing_assigned_user_id === $staff->id)>{{ $staff->name }}</option>
                                     @endforeach
@@ -724,7 +724,7 @@
 
             @if ($order->relationLoaded('printJobs'))
                 <section class="staff-section">
-                    <h2 class="staff-section-title">Printing</h2>
+                    <h2 class="staff-section-title">Production</h2>
 
                     <div class="staff-work-grid">
                         @forelse ($order->printJobs as $job)
@@ -741,6 +741,11 @@
                                     <div>
                                         <dt>Quantity</dt>
                                         <dd>{{ $job->quantity ?? $order->card_quantity ?? '-' }}</dd>
+                                    </div>
+
+                                    <div>
+                                        <dt>Hanger Label</dt>
+                                        <dd>{{ $job->side === 'LELAKI' ? 'Pengantin Lelaki' : 'Pengantin Perempuan' }}</dd>
                                     </div>
 
                                     <div>
@@ -766,7 +771,7 @@
 
                                 @if (filled($job->progress_files))
                                     <div class="staff-detail-group">
-                                        <h4>Printing Progress Files</h4>
+                                        <h4>Production Progress Files</h4>
 
                                         <div class="staff-contact-list">
                                             @foreach ($job->progress_files as $file)
@@ -780,7 +785,7 @@
                                         </div>
                                     </div>
                                 @endif
-                                @if (auth()->user()->hasStaffRole(\App\Models\User::ROLE_PRINTING) && $job->assigned_user_id === auth()->id())
+                                @if (auth()->user()->hasStaffRole(\App\Models\User::ROLE_PRODUCTION) && $job->assigned_user_id === auth()->id())
                                     @if ($job->status === 'READY_FOR_PRINT')
                                         <form
                                             method="POST"
@@ -798,12 +803,12 @@
                                     @elseif ($job->status === 'PRINTING')
                                         <form method="POST" enctype="multipart/form-data" action="{{ route('staff.print-jobs.progress-files.store', $job) }}" class="staff-packing-complete-form js-staff-confirmation-form" data-confirm-title="Upload progress cetakan {{ ucfirst(strtolower($job->side)) }}?" data-confirm-message="Gambar atau PDF yang dipilih akan disimpan sebagai bukti progress cetakan semasa." data-confirm-button="Ya, upload progress">
                                             @csrf
-                                            <label for="print-progress-{{ $job->id }}">Upload printing progress</label>
+                                            <label for="print-progress-{{ $job->id }}">Upload production progress</label>
                                             <div class="staff-file-picker">
                                                 <input id="print-progress-{{ $job->id }}" type="file" name="progress_files[]" accept=".jpg,.jpeg,.png,.webp,.pdf,image/jpeg,image/png,image/webp,application/pdf" multiple required>
                                                 <button type="button" class="staff-file-cancel" hidden aria-controls="print-progress-{{ $job->id }}">Batal</button>
                                             </div>
-                                            <p class="staff-muted-text">Upload photos or PDFs that show the current printing progress. Maximum 10 files, 20 MB each.</p>
+                                            <p class="staff-muted-text">Upload photos or PDFs showing hanger production progress. Maximum 10 files, 20 MB each.</p>
                                             <button type="submit" class="staff-button staff-button-secondary">Upload Progress</button>
                                         </form>
                                         <form method="POST" action="{{ route($operationRoutePrefix.'print-jobs.mark-printed', $job) }}" class="staff-workflow-form js-staff-confirmation-form" data-confirm-title="Tandakan cetakan {{ ucfirst(strtolower($job->side)) }} sebagai siap?" data-confirm-message="Pastikan semua {{ $job->quantity ?? $order->card_quantity ?? '-' }} keping kad telah selesai dicetak dan diperiksa sebelum meneruskan." data-confirm-button="Ya, tandakan siap" data-confirm-tone="danger">@csrf<button type="submit" class="staff-button staff-button-primary">Mark Printed</button></form>
@@ -872,13 +877,13 @@
                             <div class="staff-proof-status">
                                 <strong>Bukti packing:</strong> {{ $order->packingJob->proof_original_name ?? 'Telah dimuat naik' }}
 
-                                @if (auth()->user()->isOperationManagement() || (auth()->user()->hasStaffRole(\App\Models\User::ROLE_PACKING) && $order->packingJob->assigned_user_id === auth()->id()))
+                                @if (auth()->user()->isOperationManagement())
                                     <a href="{{ route($operationRoutePrefix.'packing-jobs.proof.show', $order->packingJob) }}" class="staff-button staff-button-small" target="_blank" rel="noopener">View</a>
                                 @endif
                             </div>
                         @endif
 
-                        @if (auth()->user()->isOperationManagement() || (auth()->user()->hasStaffRole(\App\Models\User::ROLE_PACKING) && $order->packingJob->assigned_user_id === auth()->id()))
+                        @if (auth()->user()->isOperationManagement())
                             @if ($order->packingJob->status === 'READY_FOR_PACKING')
                                 <form method="POST" action="{{ route($operationRoutePrefix.'packing-jobs.start', $order->packingJob) }}" class="staff-workflow-form js-staff-confirmation-form" data-confirm-title="Mulakan proses packing?" data-confirm-message="Masa mula packing akan direkodkan. Pastikan semua barang yang telah dicetak tersedia untuk diperiksa dan dibungkus." data-confirm-button="Ya, mula packing">@csrf<button type="submit" class="staff-button staff-button-primary">Start Packing</button></form>
                             @endif
@@ -907,7 +912,7 @@
                         @endif
                     </article>
                 </section>
-            @elseif (auth()->user()->hasStaffRole(\App\Models\User::ROLE_PACKING) && $order->packing_assigned_user_id === auth()->id())
+            @elseif (auth()->user()->hasStaffRole(\App\Models\User::ROLE_OM) && $order->packing_assigned_user_id === auth()->id())
                 <section class="staff-section">
                     <h2 class="staff-section-title">Packing</h2>
                     <div class="staff-empty">

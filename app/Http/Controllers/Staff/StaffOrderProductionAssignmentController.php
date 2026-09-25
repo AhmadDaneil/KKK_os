@@ -19,11 +19,11 @@ class StaffOrderProductionAssignmentController extends Controller
     ): RedirectResponse {
         $this->authorizeManager($request);
         $this->ensureDesignIsApproved($order);
-        $assignee = $this->validatedAssignee($request, User::ROLE_PRINTING);
+        $assignee = $this->validatedAssignee($request, User::ROLE_PRODUCTION);
 
         $service->assignPrinting($order, $assignee, $request->user());
 
-        return back()->with('status', 'Printing staff assigned successfully.');
+        return back()->with('status', 'Production staff assigned successfully.');
     }
 
     public function assignPackingAndFulfilment(
@@ -33,11 +33,11 @@ class StaffOrderProductionAssignmentController extends Controller
     ): RedirectResponse {
         $this->authorizeManager($request);
         $this->ensureDesignIsApproved($order);
-        $assignee = $this->validatedAssignee($request, User::ROLE_PACKING);
+        $assignee = $this->validatedAssignee($request, User::ROLE_OM);
 
         $service->assignPackingAndFulfilment($order, $assignee, $request->user());
 
-        return back()->with('status', 'Packing and fulfilment staff assigned successfully.');
+        return back()->with('status', 'OM (packing and fulfilment) assigned successfully.');
     }
 
     private function authorizeManager(Request $request): void

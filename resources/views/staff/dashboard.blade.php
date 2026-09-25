@@ -47,11 +47,11 @@
                     <section class="staff-dashboard-group">
                         <div class="staff-dashboard-group-heading"><span class="staff-group-number">03</span><div><h2>Production</h2><p>Cetakan, pembungkusan dan serahan kepada pelanggan.</p></div></div>
                         <div class="staff-feature-grid">
-                            @if (auth()->user()->isAdmin() || auth()->user()->hasStaffRole(\App\Models\User::ROLE_PRINTING))
-                                <a href="{{ route('staff.orders.index', ['workstream' => 'printing']) }}" class="staff-feature-card"><span class="staff-feature-icon">PR</span><div><h3>Printing</h3><p>Order berbayar yang menunggu atau sedang dicetak.</p></div><span class="staff-card-arrow">→</span></a>
+                            @if (auth()->user()->isAdmin() || auth()->user()->hasStaffRole(\App\Models\User::ROLE_PRODUCTION))
+                                <a href="{{ route('staff.orders.index', ['workstream' => 'printing']) }}" class="staff-feature-card"><span class="staff-feature-icon">PR</span><div><h3>Production</h3><p>Sediakan hanger Pengantin Lelaki/Perempuan dan muat naik kemajuan kerja.</p></div><span class="staff-card-arrow">→</span></a>
                             @endif
-                            @if (auth()->user()->isOperationManagement() || auth()->user()->hasStaffRole(\App\Models\User::ROLE_PACKING))
-                                <a href="{{ route('staff.orders.index', ['workstream' => 'packing']) }}" class="staff-feature-card"><span class="staff-feature-icon">PA</span><div><h3>Packing</h3><p>Semak item dan kemajuan pembungkusan setiap order.</p></div><span class="staff-card-arrow">→</span></a>
+                            @if (auth()->user()->isOperationManagement())
+                                <a href="{{ route('staff.orders.index', ['workstream' => 'packing']) }}" class="staff-feature-card"><span class="staff-feature-icon">PA</span><div><h3>OM Packing</h3><p>Semak item dan kemajuan pembungkusan setiap order.</p></div><span class="staff-card-arrow">→</span></a>
                             @endif
                         </div>
                     </section>

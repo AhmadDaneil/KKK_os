@@ -328,12 +328,12 @@ Route::middleware(['auth:staff', 'active.staff'])
         | Printing Actions
         |--------------------------------------------------------------------------
         |
-        | PRINTING staff may operate only on print jobs assigned to them.
+        | PRODUCTION staff may operate only on production jobs assigned to them.
         | Job ownership is additionally enforced by the production controller.
         |
         */
 
-        Route::middleware('staff.role:PRINTING')->group(function () {
+        Route::middleware('staff.role:PRODUCTION')->group(function () {
             Route::get(
                 '/print-jobs/{printJob}/progress-files/{file}',
                 [StaffPrintingWorkflowController::class, 'showProgressFile']
@@ -365,7 +365,7 @@ Route::middleware(['auth:staff', 'active.staff'])
             |
             */
 
-        Route::middleware('staff.role:PACKING,OPERATION_MANAGEMENT')->group(function () {
+        Route::middleware('staff.role:OPERATION_MANAGEMENT')->group(function () {
             Route::get(
                 '/packing-jobs/{packingJob}/proof',
                 [StaffPackingWorkflowController::class, 'showProof']
