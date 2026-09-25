@@ -31,7 +31,7 @@
         <div class="staff-workspace">
             <header class="staff-topbar">
                 <div><p class="staff-kicker">{{ auth()->user()->isAdmin() ? 'Admin Operations' : 'Staff Operations' }} · Order Detail</p><h1>{{ $order->order_id }}</h1></div>
-                <form method="POST" action="{{ route($logoutRoute) }}">@csrf<button type="submit" class="staff-button staff-button-small">Log Keluar</button></form>
+                <form class="js-logout-form" method="POST" action="{{ route($logoutRoute) }}">@csrf<button type="submit" class="staff-button staff-button-small">Log Keluar</button></form>
             </header>
 
         <main class="staff-main">
@@ -342,6 +342,10 @@
                                             <form
                                                 method="POST"
                                                 action="{{ route($operationRoutePrefix.'design-jobs.start', $job) }}"
+                                                class="js-staff-confirmation-form"
+                                                data-confirm-title="Mulakan kerja design {{ ucfirst(strtolower($job->side)) }}?"
+                                                data-confirm-message="Status pakej ini akan ditukar kepada sedang design dan masa mula akan direkodkan."
+                                                data-confirm-button="Ya, mula design"
                                             >
                                                 @csrf
 
@@ -388,7 +392,10 @@
                                                         method="POST"
                                                         action="{{ route($operationRoutePrefix.'design-jobs.artwork.store', $job) }}"
                                                         enctype="multipart/form-data"
-                                                        class="staff-artwork-form"
+                                                        class="staff-artwork-form js-staff-confirmation-form"
+                                                        data-confirm-title="Upload artwork {{ ucfirst(strtolower($job->side)) }}?"
+                                                        data-confirm-message="Pastikan fail source artwork dan customer preview yang dipilih adalah betul. Fail ini akan disimpan sebagai versi artwork baharu."
+                                                        data-confirm-button="Ya, upload artwork"
                                                     >
                                                         @csrf
                                                 @endif
@@ -481,6 +488,10 @@
                                                         <form
                                                             method="POST"
                                                             action="{{ route($operationRoutePrefix.'design-jobs.mark-ready', $job) }}"
+                                                            class="js-staff-confirmation-form"
+                                                            data-confirm-title="Hantar artwork {{ ucfirst(strtolower($job->side)) }} kepada customer?"
+                                                            data-confirm-message="Versi {{ $job->artworkVersions->max('version_number') }} akan dihantar untuk semakan customer. Pastikan preview telah diperiksa dan merupakan versi yang betul."
+                                                            data-confirm-button="Ya, hantar untuk semakan"
                                                         >
                                                             @csrf
                                                             <button
@@ -509,7 +520,9 @@
     <form
         method="POST"
         action="{{ route($operationRoutePrefix.'design-jobs.assign', $job) }}"
-        class="staff-assignment-form"
+        class="staff-assignment-form js-staff-confirmation-form"
+        data-confirm-assignment="Designer"
+        data-confirm-mode="{{ $job->assigned_user_id ? 'reassign' : 'assign' }}"
     >
         @csrf
 
@@ -558,7 +571,10 @@
                             method="POST"
                             action="{{ route('staff.orders.design-artworks.store', $order) }}"
                             enctype="multipart/form-data"
-                            class="staff-batch-artwork-form"
+                            class="staff-batch-artwork-form js-staff-confirmation-form"
+                            data-confirm-title="Upload kedua-dua artwork?"
+                            data-confirm-message="Pastikan fail source dan customer preview untuk pakej Lelaki serta Perempuan adalah betul. Kedua-duanya akan disimpan sebagai versi artwork baharu."
+                            data-confirm-button="Ya, upload kedua-duanya"
                         >
                             @csrf
                             <button type="submit" class="staff-button staff-button-primary">
@@ -621,13 +637,13 @@
                                     <a class="staff-button staff-button-small" target="_blank" rel="noopener" href="{{ route($operationRoutePrefix.'payments.receipt', $payment) }}">Lihat Resit</a>
                                     @endif
                                     @if ($payment->payment_type === 'BOOKING_DEPOSIT' && auth()->user()->isOperationManagement() && $payment->status === 'PENDING')
-                                        <form method="POST" action="{{ route($operationRoutePrefix.'payments.deposit.approve', $payment) }}" class="staff-field">
+                                        <form method="POST" action="{{ route($operationRoutePrefix.'payments.deposit.approve', $payment) }}" class="staff-field js-staff-confirmation-form" data-confirm-title="Sahkan bayaran deposit?" data-confirm-message="Pastikan jumlah bayaran pada resit telah dimasukkan dengan betul. Selepas disahkan, tempahan akan diteruskan ke proses seterusnya." data-confirm-button="Ya, sahkan deposit">
                                             @csrf
                                             <label for="payment-amount-{{ $payment->id }}">Jumlah bayaran pada resit (RM)</label>
                                             <input id="payment-amount-{{ $payment->id }}" name="amount" type="number" min="0.01" max="9999999999.99" step="0.01" placeholder="Contoh: 100.00" required>
                                             <button class="staff-button staff-button-primary" type="submit">Sahkan Deposit</button>
                                         </form>
-                                        <form method="POST" action="{{ route($operationRoutePrefix.'payments.deposit.reject', $payment) }}" class="staff-reject-payment-form">
+                                        <form method="POST" action="{{ route($operationRoutePrefix.'payments.deposit.reject', $payment) }}" class="staff-reject-payment-form js-staff-confirmation-form" data-confirm-title="Tolak bayaran deposit?" data-confirm-message="Customer perlu menghantar semula bukti pembayaran selepas deposit ditolak. Pastikan sebab penolakan telah ditulis dengan jelas." data-confirm-button="Ya, tolak deposit" data-confirm-tone="danger">
                                             @csrf
                                             <label for="rejection-reason-{{ $payment->id }}">Sebab penolakan</label>
                                             <textarea id="rejection-reason-{{ $payment->id }}" name="rejection_reason" rows="2" required>{{ old('rejection_reason') }}</textarea>
@@ -635,13 +651,13 @@
                                         </form>
                                     @endif
                                     @if ($payment->payment_type === 'BALANCE' && auth()->user()->isOperationManagement() && $payment->status === 'PENDING')
-                                        <form method="POST" action="{{ route($operationRoutePrefix.'payments.balance.approve', $payment) }}" class="staff-field">
+                                        <form method="POST" action="{{ route($operationRoutePrefix.'payments.balance.approve', $payment) }}" class="staff-field js-staff-confirmation-form" data-confirm-title="Sahkan bayaran penuh?" data-confirm-message="Pastikan jumlah pada resit telah dimasukkan dengan betul. Selepas disahkan, tempahan akan diteruskan ke proses cetakan." data-confirm-button="Ya, sahkan bayaran">
                                             @csrf
                                             <label for="payment-amount-{{ $payment->id }}">Jumlah bayaran pada resit (RM)</label>
                                             <input id="payment-amount-{{ $payment->id }}" name="amount" type="number" min="0.01" max="9999999999.99" step="0.01" placeholder="Contoh: 100.00" required>
                                             <button class="staff-button staff-button-primary" type="submit">Sahkan Bayaran Penuh</button>
                                         </form>
-                                        <form method="POST" action="{{ route($operationRoutePrefix.'payments.balance.reject', $payment) }}" class="staff-reject-payment-form">
+                                        <form method="POST" action="{{ route($operationRoutePrefix.'payments.balance.reject', $payment) }}" class="staff-reject-payment-form js-staff-confirmation-form" data-confirm-title="Tolak bayaran penuh?" data-confirm-message="Customer perlu menghantar semula bukti pembayaran. Pastikan sebab penolakan telah ditulis dengan jelas." data-confirm-button="Ya, tolak bayaran" data-confirm-tone="danger">
                                             @csrf
                                             <label for="balance-rejection-reason-{{ $payment->id }}">Sebab penolakan</label>
                                             <textarea id="balance-rejection-reason-{{ $payment->id }}" name="rejection_reason" rows="2" required>{{ old('rejection_reason') }}</textarea>
@@ -667,7 +683,7 @@
                     <h2 class="staff-section-title">Assign Production Staff</h2>
 
                     <div class="staff-work-grid">
-                        <form method="POST" action="{{ route($operationRoutePrefix.'orders.assign-printing', $order) }}" class="staff-card staff-assignment-form">
+                        <form method="POST" action="{{ route($operationRoutePrefix.'orders.assign-printing', $order) }}" class="staff-card staff-assignment-form js-staff-confirmation-form" data-confirm-assignment="Printing" data-confirm-mode="{{ $order->printing_assigned_user_id ? 'reassign' : 'assign' }}">
                             @csrf
                             <div class="staff-card-heading">
                                 <h3>Printing</h3>
@@ -685,7 +701,7 @@
                             </div>
                         </form>
 
-                        <form method="POST" action="{{ route($operationRoutePrefix.'orders.assign-packing-fulfilment', $order) }}" class="staff-card staff-assignment-form">
+                        <form method="POST" action="{{ route($operationRoutePrefix.'orders.assign-packing-fulfilment', $order) }}" class="staff-card staff-assignment-form js-staff-confirmation-form" data-confirm-assignment="Packing & Fulfilment" data-confirm-mode="{{ $order->packing_assigned_user_id ? 'reassign' : 'assign' }}">
                             @csrf
                             <div class="staff-card-heading">
                                 <h3>Packing &amp; Fulfilment</h3>
@@ -1160,6 +1176,72 @@
             });
 
             updateCancelButton();
+        });
+    });
+</script>
+@include('staff.partials.logout-confirmation')
+<dialog id="staff-action-confirmation-dialog" class="logout-confirmation-dialog" aria-labelledby="staff-action-confirmation-title">
+    <div class="logout-confirmation-icon" aria-hidden="true">?</div>
+    <h2 id="staff-action-confirmation-title">Sahkan tindakan?</h2>
+    <p id="staff-action-confirmation-message"></p>
+    <div class="logout-confirmation-actions">
+        <button id="cancel-staff-action" type="button">Tidak, kembali</button>
+        <button id="confirm-staff-action" type="button">Ya, teruskan</button>
+    </div>
+</dialog>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const forms = document.querySelectorAll('.js-staff-confirmation-form');
+        const dialog = document.getElementById('staff-action-confirmation-dialog');
+        const title = document.getElementById('staff-action-confirmation-title');
+        const message = document.getElementById('staff-action-confirmation-message');
+        const confirmButton = document.getElementById('confirm-staff-action');
+        const cancelButton = document.getElementById('cancel-staff-action');
+        let pendingForm = null;
+
+        if (!forms.length || !dialog || !title || !message || !confirmButton || !cancelButton) {
+            return;
+        }
+
+        forms.forEach(function (form) {
+            form.addEventListener('submit', function (event) {
+                event.preventDefault();
+                pendingForm = form;
+
+                if (form.dataset.confirmAssignment) {
+                    const assignee = form.querySelector('[name="assigned_user_id"]');
+                    const assigneeName = assignee.options[assignee.selectedIndex].text.trim();
+                    const isReassignment = form.dataset.confirmMode === 'reassign';
+                    const actionLabel = isReassignment ? 'Tukar' : 'Assign';
+
+                    title.textContent = actionLabel + ' staff ' + form.dataset.confirmAssignment + '?';
+                    message.textContent = 'Tugasan ini akan diberikan kepada ' + assigneeName + '. Pastikan staff yang dipilih adalah betul.';
+                    confirmButton.textContent = 'Ya, ' + actionLabel.toLowerCase() + ' staff';
+                } else {
+                    title.textContent = form.dataset.confirmTitle;
+                    message.textContent = form.dataset.confirmMessage;
+                    confirmButton.textContent = form.dataset.confirmButton;
+                }
+
+                confirmButton.classList.toggle('is-danger', form.dataset.confirmTone === 'danger');
+                confirmButton.classList.toggle('is-primary', form.dataset.confirmTone !== 'danger');
+                dialog.showModal();
+            });
+        });
+
+        cancelButton.addEventListener('click', function () {
+            pendingForm = null;
+            dialog.close();
+        });
+
+        confirmButton.addEventListener('click', function () {
+            if (!pendingForm) {
+                return;
+            }
+
+            confirmButton.disabled = true;
+            confirmButton.textContent = 'Memproses...';
+            pendingForm.submit();
         });
     });
 </script>

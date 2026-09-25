@@ -88,6 +88,7 @@ Route::middleware(['auth:admin', 'active.staff', 'staff.role:ADMIN'])
         Route::delete('/staff/{user}', [AdminStaffController::class, 'destroy'])->name('staff.destroy');
 
         Route::get('/orders', [StaffOrderController::class, 'index'])->name('orders.index');
+        Route::get('/orders/find', [AdminDashboardController::class, 'findOrder'])->name('orders.find');
         Route::get('/orders/{orderId}', [StaffOrderController::class, 'show'])->name('orders.show');
         Route::delete('/orders/{order}', [StaffOrderDeletionController::class, 'destroy'])
             ->name('orders.destroy');

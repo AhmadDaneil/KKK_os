@@ -13,7 +13,7 @@
         <div class="staff-workspace">
             <header class="staff-topbar">
                 <div><p class="staff-kicker">{{ auth()->user()->isAdmin() ? 'Admin Operations' : 'Operation Management' }}</p><h1>{{ auth()->user()->isAdmin() ? 'Admin Operations Dashboard' : 'Staff Dashboard' }}</h1></div>
-                <form method="POST" action="{{ route('staff.logout') }}">@csrf<button type="submit" class="staff-button staff-button-small">Log Keluar</button></form>
+                <form class="js-logout-form" method="POST" action="{{ route('staff.logout') }}">@csrf<button type="submit" class="staff-button staff-button-small">Log Keluar</button></form>
             </header>
 
             <main class="staff-main staff-dashboard-main">
@@ -59,5 +59,6 @@
             </main>
         </div>
     </div>
+    @include('staff.partials.logout-confirmation')
 </body>
 </html>

@@ -37,7 +37,7 @@
             <div><p>KingKadKahwin</p><h1>@yield('heading', 'Admin Dashboard')</h1></div>
             <div class="admin-topbar-actions">
                 <a href="{{ route('staff.dashboard') }}" class="admin-button admin-button-secondary">Staff Dashboard</a>
-                <form method="POST" action="{{ route('admin.logout') }}">@csrf<button class="admin-button" type="submit">Log Keluar</button></form>
+                <form class="js-logout-form" method="POST" action="{{ route('admin.logout') }}">@csrf<button class="admin-button" type="submit">Log Keluar</button></form>
             </div>
         </header>
 
@@ -52,6 +52,7 @@
         </main>
     </div>
 </div>
+@include('staff.partials.logout-confirmation')
 @stack('scripts')
 </body>
 </html>

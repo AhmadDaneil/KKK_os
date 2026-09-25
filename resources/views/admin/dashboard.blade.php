@@ -4,26 +4,42 @@
 @section('heading', 'Overview')
 
 @section('content')
+    @php($attentionTotal = array_sum($attention))
+
     <section class="admin-welcome">
-        <div><p class="admin-eyebrow">Selamat datang, {{ auth()->user()->name }}</p><h2>Semua operasi dalam satu paparan.</h2><p>Pantau tempahan, pembayaran dan beban kerja setiap jabatan sebelum membuka butiran operasi.</p></div>
+        <div>
+            <p class="admin-eyebrow">Selamat datang, {{ auth()->user()->name }}</p>
+            <h2>Semua operasi dalam satu paparan.</h2>
+            <p>Pantau tempahan, pembayaran dan beban kerja setiap jabatan sebelum membuka butiran operasi.</p>
+            <form class="admin-quick-order-search" method="GET" action="{{ route('admin.orders.find') }}">
+                <label for="dashboard-order-id">Cari pantas Order ID</label>
+                <div>
+                    <input id="dashboard-order-id" name="order_id" value="{{ old('order_id') }}" placeholder="Contoh: KKK-260924-0003" maxlength="32" required>
+                    <button class="admin-button admin-button-gold" type="submit">Buka Order</button>
+                </div>
+                @error('order_id')
+                    <span class="admin-quick-search-error">{{ $message }}</span>
+                @enderror
+            </form>
+        </div>
         <a class="admin-button admin-button-gold" href="{{ route('admin.staff.index') }}">Urus Staff</a>
     </section>
 
     <section class="admin-stat-grid" aria-label="Ringkasan operasi">
         <article><span>Jumlah Order</span><strong data-stat-value="{{ $statistics['orders_total'] }}">{{ number_format($statistics['orders_total']) }}</strong><small>Semua rekod tempahan</small></article>
         <article><span>Order Aktif</span><strong data-stat-value="{{ $statistics['orders_active'] }}">{{ number_format($statistics['orders_active']) }}</strong><small>Belum selesai atau diarkib</small></article>
-        <article class="is-warning"><span>Deposit Belum Semak</span><strong data-stat-value="{{ $statistics['pending_deposits'] }}">{{ number_format($statistics['pending_deposits']) }}</strong><small>Memerlukan tindakan OM</small></article>
-        <article class="is-warning"><span>Baki Belum Semak</span><strong data-stat-value="{{ $statistics['pending_balances'] }}">{{ number_format($statistics['pending_balances']) }}</strong><small>Bukti bayaran penuh customer</small></article>
+        <article @class(['is-warning', 'has-alert' => $statistics['pending_deposits'] > 0, 'is-clear' => $statistics['pending_deposits'] === 0])><span>Deposit Belum Semak</span><strong data-stat-value="{{ $statistics['pending_deposits'] }}">{{ number_format($statistics['pending_deposits']) }}</strong><small>{{ $statistics['pending_deposits'] > 0 ? 'Perlu disemak segera' : 'Tiada semakan tertunggak' }}</small></article>
+        <article @class(['is-warning', 'has-alert' => $statistics['pending_balances'] > 0, 'is-clear' => $statistics['pending_balances'] === 0])><span>Baki Belum Semak</span><strong data-stat-value="{{ $statistics['pending_balances'] }}">{{ number_format($statistics['pending_balances']) }}</strong><small>{{ $statistics['pending_balances'] > 0 ? 'Perlu disemak segera' : 'Tiada semakan tertunggak' }}</small></article>
         <article class="is-success"><span>Order Selesai</span><strong data-stat-value="{{ $statistics['orders_completed'] }}">{{ number_format($statistics['orders_completed']) }}</strong><small>Keseluruhan fulfilment selesai</small></article>
     </section>
 
     <section class="admin-panel admin-attention-panel">
-        <div class="admin-panel-heading"><div><p class="admin-eyebrow">Tindakan Admin</p><h2>Memerlukan Perhatian</h2></div><span class="admin-attention-total">{{ array_sum($attention) }} tindakan</span></div>
+        <div class="admin-panel-heading"><div><p class="admin-eyebrow">Tindakan Admin</p><h2>Memerlukan Perhatian</h2></div><span @class(['admin-attention-total', 'has-alert' => $attentionTotal > 0, 'is-clear' => $attentionTotal === 0])>{{ $attentionTotal > 0 ? $attentionTotal.' tindakan' : 'Semua selesai' }}</span></div>
         <div class="admin-action-grid">
-            <a href="{{ route('admin.orders.index', ['attention' => 'pending_payment']) }}"><span class="action-icon is-payment">RM</span><div><strong>Semakan Pembayaran</strong><small>Deposit atau bayaran penuh yang masih pending</small></div><b>{{ $attention['pending_payments'] }}</b></a>
-            <a href="{{ route('admin.orders.index', ['workstream' => 'design', 'attention' => 'unassigned_design']) }}"><span class="action-icon is-design">DE</span><div><strong>Design Belum Assign</strong><small>Assign designer supaya artwork boleh dimulakan</small></div><b>{{ $attention['unassigned_design'] }}</b></a>
-            <a href="{{ route('admin.orders.index', ['workstream' => 'printing', 'attention' => 'unassigned_printing']) }}"><span class="action-icon is-printing">PR</span><div><strong>Printing Belum Assign</strong><small>Assign staf printing untuk order yang telah dibayar</small></div><b>{{ $attention['unassigned_printing'] }}</b></a>
-            <a href="{{ route('admin.orders.index', ['workstream' => 'packing', 'attention' => 'unassigned_packing']) }}"><span class="action-icon is-packing">PA</span><div><strong>Packing Belum Assign</strong><small>Assign packing atau kendalikan terus sebagai admin</small></div><b>{{ $attention['unassigned_packing'] }}</b></a>
+            <a href="{{ route('admin.orders.index', ['attention' => 'pending_payment']) }}" @class(['has-alert' => $attention['pending_payments'] > 0, 'is-clear' => $attention['pending_payments'] === 0])><span class="action-icon is-payment">RM</span><div><strong>Semakan Pembayaran</strong><small>Deposit atau bayaran penuh yang masih pending</small></div><b>{{ $attention['pending_payments'] }}</b></a>
+            <a href="{{ route('admin.orders.index', ['workstream' => 'design', 'attention' => 'unassigned_design']) }}" @class(['has-alert' => $attention['unassigned_design'] > 0, 'is-clear' => $attention['unassigned_design'] === 0])><span class="action-icon is-design">DE</span><div><strong>Design Belum Assign</strong><small>Assign designer supaya artwork boleh dimulakan</small></div><b>{{ $attention['unassigned_design'] }}</b></a>
+            <a href="{{ route('admin.orders.index', ['workstream' => 'printing', 'attention' => 'unassigned_printing']) }}" @class(['has-alert' => $attention['unassigned_printing'] > 0, 'is-clear' => $attention['unassigned_printing'] === 0])><span class="action-icon is-printing">PR</span><div><strong>Printing Belum Assign</strong><small>Assign staf printing untuk order yang telah dibayar</small></div><b>{{ $attention['unassigned_printing'] }}</b></a>
+            <a href="{{ route('admin.orders.index', ['workstream' => 'packing', 'attention' => 'unassigned_packing']) }}" @class(['has-alert' => $attention['unassigned_packing'] > 0, 'is-clear' => $attention['unassigned_packing'] === 0])><span class="action-icon is-packing">PA</span><div><strong>Packing Belum Assign</strong><small>Assign packing atau kendalikan terus sebagai admin</small></div><b>{{ $attention['unassigned_packing'] }}</b></a>
         </div>
     </section>
 

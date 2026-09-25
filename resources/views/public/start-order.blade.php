@@ -20,7 +20,7 @@
             <h1>Mulakan tempahan anda</h1>
             <p>Beritahu kami jenis pakej yang diperlukan. Selepas ini anda akan terus dibawa ke borang lengkap dan menerima Order ID.</p>
         </section>
-        <form class="public-form" method="POST" action="{{ route('public.orders.store') }}">
+        <form id="start-order-form" class="public-form" method="POST" action="{{ route('public.orders.store') }}">
             @csrf
             @if ($errors->any())<div class="form-alert" role="alert">Sila semak semula maklumat yang ditandakan.</div>@endif
 
@@ -70,14 +70,32 @@
                 <div><label for="customer_email">Email</label><input id="customer_email" type="email" name="customer_email" placeholder="e.g. syafiq@email.com" value="{{ old('customer_email') }}" autocomplete="email" required>@error('customer_email')<p class="field-error">{{ $message }}</p>@enderror</div>
                 <div><label for="customer_phone">Nombor telefon</label><input id="customer_phone" type="tel" name="customer_phone" placeholder="e.g. 012-3456789" value="{{ old('customer_phone') }}" autocomplete="tel" required>@error('customer_phone')<p class="field-error">{{ $message }}</p>@enderror</div>
             </div>
-            <button class="button button-primary submit-button" type="submit">Cipta Tempahan & Teruskan →</button>
+            <button id="start-order-submit" class="button button-primary submit-button" type="submit">Cipta Tempahan & Teruskan →</button>
             <p class="privacy-note">Maklumat ini digunakan untuk mengurus tempahan anda sahaja.</p>
         </form>
     </main>
+
+    <dialog id="start-order-confirmation" class="confirmation-dialog" aria-labelledby="start-order-confirmation-title">
+        <div class="confirmation-dialog-icon" aria-hidden="true">?</div>
+        <h2 id="start-order-confirmation-title">Cipta tempahan ini?</h2>
+        <p>Pastikan nama, email, nombor telefon dan pilihan pakej anda betul sebelum meneruskan.</p>
+        <div class="confirmation-dialog-actions">
+            <button id="cancel-start-order" class="button button-secondary" type="button">Tidak, semak semula</button>
+            <button id="confirm-start-order" class="button button-primary" type="button">Ya, cipta tempahan</button>
+        </div>
+    </dialog>
+
     <script>
         const packageInputs = document.querySelectorAll('input[name="package_count"]');
         const sideField = document.getElementById('side-field');
         const twoPackageOptions = document.getElementById('two-package-options');
+        const startOrderForm = document.getElementById('start-order-form');
+        const startOrderSubmit = document.getElementById('start-order-submit');
+        const confirmationDialog = document.getElementById('start-order-confirmation');
+        const confirmStartOrder = document.getElementById('confirm-start-order');
+        const cancelStartOrder = document.getElementById('cancel-start-order');
+        let orderConfirmed = false;
+
         function updateSideField() {
             const selected = document.querySelector('input[name="package_count"]:checked');
             sideField.hidden = selected && selected.value === '2';
@@ -87,6 +105,28 @@
         }
         packageInputs.forEach((input) => input.addEventListener('change', updateSideField));
         updateSideField();
+
+        startOrderForm.addEventListener('submit', function (event) {
+            if (orderConfirmed) {
+                startOrderSubmit.disabled = true;
+                startOrderSubmit.textContent = 'Mencipta tempahan...';
+
+                return;
+            }
+
+            event.preventDefault();
+            confirmationDialog.showModal();
+        });
+
+        cancelStartOrder.addEventListener('click', function () {
+            confirmationDialog.close();
+        });
+
+        confirmStartOrder.addEventListener('click', function () {
+            orderConfirmed = true;
+            confirmationDialog.close();
+            startOrderForm.requestSubmit(startOrderSubmit);
+        });
     </script>
 </body>
 </html>

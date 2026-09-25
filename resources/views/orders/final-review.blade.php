@@ -361,17 +361,34 @@
                         Kembali & Betulkan Maklumat
                     </a>
 
-                    <button class="confirm-button" type="submit">
+                    <button id="final-confirmation-submit" class="confirm-button" type="submit">
                         Sahkan Maklumat Tempahan
                     </button>
                 </div>
             </form>
         </section>
     </main>
+
+    <dialog id="final-confirmation-dialog" class="final-confirmation-dialog" aria-labelledby="final-confirmation-dialog-title">
+        <div class="final-confirmation-dialog-icon" aria-hidden="true">!</div>
+        <h2 id="final-confirmation-dialog-title">Sahkan dan kunci maklumat?</h2>
+        <p>Selepas disahkan, maklumat tempahan tidak boleh disunting semula oleh customer. Pastikan semua maklumat dan resit pembayaran adalah betul.</p>
+        <div class="final-confirmation-dialog-actions">
+            <button id="cancel-final-confirmation" type="button">Tidak, semak semula</button>
+            <button id="confirm-final-confirmation" class="is-primary" type="button">Ya, sahkan tempahan</button>
+        </div>
+    </dialog>
+
     <script>
         document.addEventListener('DOMContentLoaded', function () {
             const input = document.getElementById('deposit_receipt');
             const cancelButton = document.getElementById('cancel-deposit-receipt');
+            const confirmationForm = document.getElementById('final-confirmation-form');
+            const submitButton = document.getElementById('final-confirmation-submit');
+            const confirmationDialog = document.getElementById('final-confirmation-dialog');
+            const confirmButton = document.getElementById('confirm-final-confirmation');
+            const cancelConfirmationButton = document.getElementById('cancel-final-confirmation');
+            let finalConfirmationApproved = false;
 
             function updateCancelButton() {
                 cancelButton.hidden = input.files.length === 0;
@@ -385,6 +402,28 @@
             });
 
             updateCancelButton();
+
+            confirmationForm.addEventListener('submit', function (event) {
+                if (finalConfirmationApproved) {
+                    submitButton.disabled = true;
+                    submitButton.textContent = 'Mengesahkan...';
+
+                    return;
+                }
+
+                event.preventDefault();
+                confirmationDialog.showModal();
+            });
+
+            cancelConfirmationButton.addEventListener('click', function () {
+                confirmationDialog.close();
+            });
+
+            confirmButton.addEventListener('click', function () {
+                finalConfirmationApproved = true;
+                confirmationDialog.close();
+                confirmationForm.requestSubmit(submitButton);
+            });
         });
     </script>
 </body>
