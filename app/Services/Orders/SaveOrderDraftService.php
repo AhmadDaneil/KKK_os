@@ -5,6 +5,7 @@ namespace App\Services\Orders;
 use App\Models\Order;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
@@ -15,15 +16,15 @@ use Throwable;
 class SaveOrderDraftService
 {
     public function save(Order $order, array $data): Order
-{
-    if ($order->status !== 'DETAILS_INCOMPLETE') {
-        throw ValidationException::withMessages([
-            'order' => 'Maklumat tempahan yang telah disahkan tidak boleh diubah.',
-        ]);
-    }
+    {
+        if ($order->status !== 'DETAILS_INCOMPLETE') {
+            throw ValidationException::withMessages([
+                'order' => 'Maklumat tempahan yang telah disahkan tidak boleh diubah.',
+            ]);
+        }
 
-    $newUploadedPaths = [];
-    $oldPathsToDelete = [];
+        $newUploadedPaths = [];
+        $oldPathsToDelete = [];
 
         try {
             $savedOrder = DB::transaction(function () use (
@@ -141,10 +142,13 @@ class SaveOrderDraftService
 
                     if (array_key_exists('event', $sideData)) {
                         $event = $packageSide->event;
+                        $eventDate = $this->emptyToNull(Arr::get($sideData, 'event.event_date'));
 
                         $event->update([
-                            'day_name' => $this->cleanString(Arr::get($sideData, 'event.day_name')),
-                            'event_date' => $this->emptyToNull(Arr::get($sideData, 'event.event_date')),
+                            'day_name' => $eventDate
+                                ? $this->malayDayName($eventDate)
+                                : $this->cleanString(Arr::get($sideData, 'event.day_name')),
+                            'event_date' => $eventDate,
                             'hijri_date' => $this->cleanString(Arr::get($sideData, 'event.hijri_date')),
                             'meal_time' => $this->emptyToNull(Arr::get($sideData, 'event.meal_time')),
                             'bersanding_time' => $this->emptyToNull(Arr::get($sideData, 'event.bersanding_time')),
@@ -235,6 +239,19 @@ class SaveOrderDraftService
         return $savedOrder;
     }
 
+    private function malayDayName(string $date): string
+    {
+        return [
+            'Ahad',
+            'Isnin',
+            'Selasa',
+            'Rabu',
+            'Khamis',
+            'Jumaat',
+            'Sabtu',
+        ][Carbon::parse($date)->dayOfWeek];
+    }
+
     private function storeCardImage(
         string $orderId,
         string $sideName,
@@ -242,7 +259,7 @@ class SaveOrderDraftService
     ): string {
         $directory = "orders/{$orderId}/{$sideName}";
         $extension = strtolower($image->extension() ?: 'jpg');
-        $filename = 'card-image-' . Str::uuid() . '.' . $extension;
+        $filename = 'card-image-'.Str::uuid().'.'.$extension;
 
         $storedPath = Storage::disk('local')->putFileAs(
             $directory,

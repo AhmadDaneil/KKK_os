@@ -6,13 +6,14 @@ use App\Models\DesignJob;
 use App\Models\Order;
 use App\Services\Design\ApproveArtworkService;
 use App\Services\Design\SyncOrderDesignStatusService;
+use App\Services\Design\WatermarkArtworkPreviewService;
 use App\Services\Orders\CustomerOrderSessionAccessService;
 use App\Services\Printing\InitializePrintJobsForOrderService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\ValidationException;
-use Symfony\Component\HttpFoundation\StreamedResponse;
+use Symfony\Component\HttpFoundation\Response;
 use Throwable;
 
 class CustomerArtworkReviewController extends Controller
@@ -39,8 +40,9 @@ class CustomerArtworkReviewController extends Controller
         Request $request,
         string $orderId,
         int $designJobId,
-        CustomerOrderSessionAccessService $access
-    ): StreamedResponse {
+        CustomerOrderSessionAccessService $access,
+        WatermarkArtworkPreviewService $watermark
+    ): Response {
         $order = $access->resolve($request, $orderId);
 
         $designJob = DesignJob::query()
@@ -62,7 +64,17 @@ class CustomerArtworkReviewController extends Controller
 
         $disk = $artwork->storage_disk ?: 'local';
 
-        $path = $artwork->preview_storage_path;
+        $previewFiles = $artwork->preview_files ?: array_filter([
+            $artwork->preview_storage_path ? ['path' => $artwork->preview_storage_path] : null,
+        ]);
+        $previewIndex = $request->integer('file', 0);
+        $previewFile = data_get($previewFiles, $previewIndex);
+        $path = $this->upgradeImagePreviewWatermark(
+            $artwork,
+            $previewFiles,
+            $previewIndex,
+            $watermark
+        ) ?: data_get($previewFile, 'watermarked_path') ?: data_get($previewFile, 'path');
 
         abort_unless(
             filled($path)
@@ -71,13 +83,22 @@ class CustomerArtworkReviewController extends Controller
         );
 
         $storage = Storage::disk($disk);
+        $mimeType = $storage->mimeType($path) ?: 'application/octet-stream';
+
+        if ($mimeType === 'application/pdf') {
+            return response()->view('orders.artwork-pdf-preview', [
+                'pdf' => base64_encode($storage->get($path)),
+                'filename' => basename($path),
+            ], 200, [
+                'Cache-Control' => 'private, no-store, max-age=0',
+                'Pragma' => 'no-cache',
+                'X-Content-Type-Options' => 'nosniff',
+            ]);
+        }
 
         $stream = $storage->readStream($path);
 
         abort_if($stream === false, 404);
-
-        $mimeType = $storage->mimeType($path)
-            ?: 'application/octet-stream';
 
         $filename = basename($path);
 
@@ -98,6 +119,51 @@ class CustomerArtworkReviewController extends Controller
                 'X-Content-Type-Options' => 'nosniff',
             ]
         );
+    }
+
+    /**
+     * Regenerate previews produced before the strengthened watermark policy the
+     * first time they are viewed. Source artwork is never used for this.
+     *
+     * @param  array<int, array<string, mixed>>  $previewFiles
+     */
+    private function upgradeImagePreviewWatermark(
+        $artwork,
+        array $previewFiles,
+        int $previewIndex,
+        WatermarkArtworkPreviewService $watermark
+    ): ?string {
+        $previewFile = data_get($previewFiles, $previewIndex);
+        $sourcePath = data_get($previewFile, 'path');
+
+        if (
+            ! filled($sourcePath)
+            || data_get($previewFile, 'watermark_version') === 2
+            || ! in_array(strtolower(pathinfo($sourcePath, PATHINFO_EXTENSION)), ['jpg', 'jpeg', 'png'], true)
+        ) {
+            return data_get($previewFile, 'watermarked_path');
+        }
+
+        $watermarkedPath = data_get($previewFile, 'watermarked_path')
+            ?: dirname($sourcePath).'/customer-preview-watermarked-'.($previewIndex + 1).'.jpg';
+
+        try {
+            $path = $watermark->create($sourcePath, $watermarkedPath);
+        } catch (\RuntimeException) {
+            // Preserve access to legacy test/corrupt files instead of exposing
+            // an error page. A valid image is upgraded on its next request.
+            return data_get($previewFile, 'watermarked_path');
+        }
+
+        if ($path === null) {
+            return data_get($previewFile, 'watermarked_path');
+        }
+
+        $previewFiles[$previewIndex]['watermarked_path'] = $path;
+        $previewFiles[$previewIndex]['watermark_version'] = 2;
+        $artwork->update(['preview_files' => $previewFiles]);
+
+        return $path;
     }
 
     public function correction(

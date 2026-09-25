@@ -17,10 +17,35 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use RuntimeException;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 use Throwable;
 
 class StaffPackingWorkflowController extends Controller
 {
+    public function showProof(
+        Request $request,
+        PackingJob $packingJob
+    ): StreamedResponse {
+        $user = $request->user();
+
+        abort_unless(
+            $user->isOperationManagement()
+                || ($user->hasStaffRole(User::ROLE_PACKING)
+                    && $packingJob->assigned_user_id === $user->id),
+            404
+        );
+
+        $path = $packingJob->proof_storage_path;
+
+        abort_unless(filled($path) && Storage::disk('local')->exists($path), 404);
+
+        return Storage::disk('local')->response(
+            $path,
+            $packingJob->proof_original_name ?? 'packing-proof',
+            ['Content-Type' => $packingJob->proof_mime_type ?? 'application/octet-stream']
+        );
+    }
+
     public function start(
         Request $request,
         PackingJob $packingJob,

@@ -17,6 +17,8 @@ use App\Services\Payments\HandlePaymentCallbackService;
 use App\Services\Printing\AssignPrintJobService;
 use App\Services\Printing\InitializePrintJobsForOrderService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
 class StaffPrintingWorkflowTest extends TestCase
@@ -93,6 +95,56 @@ class StaffPrintingWorkflowTest extends TestCase
         $this->assertSame($printing->id, $event->actor_user_id);
         $this->assertSame('PRINTING', $event->from_status);
         $this->assertSame('PRINTED', $event->to_status);
+    }
+
+    public function test_assigned_printing_staff_can_upload_printing_progress_files(): void
+    {
+        Storage::fake('local');
+
+        $admin = $this->admin();
+        $printing = $this->staff(User::ROLE_PRINTING);
+        [, $jobs] = $this->printJobs();
+        $job = $jobs->first();
+
+        app(AssignPrintJobService::class)->assign($job, $printing, $admin);
+
+        $this->actingAs($printing, 'staff')
+            ->post(route('staff.print-jobs.start', $job))
+            ->assertRedirect();
+
+        $this->actingAs($printing, 'staff')
+            ->post(route('staff.print-jobs.progress-files.store', $job), [
+                'progress_files' => [
+                    UploadedFile::fake()->image('printing-stage-1.jpg'),
+                    UploadedFile::fake()->create('machine-log.pdf', 100, 'application/pdf'),
+                ],
+            ])
+            ->assertRedirect()
+            ->assertSessionHasNoErrors()
+            ->assertSessionHas('status', 'Printing progress uploaded successfully.');
+
+        $job->refresh();
+
+        $this->assertCount(2, $job->progress_files);
+        $this->assertNotNull($job->progress_updated_at);
+
+        foreach ($job->progress_files as $file) {
+            Storage::disk('local')->assertExists($file['path']);
+        }
+
+        $this->assertDatabaseHas('print_job_events', [
+            'print_job_id' => $job->id,
+            'event_type' => 'PRINT_PROGRESS_UPLOADED',
+            'actor_user_id' => $printing->id,
+        ]);
+
+        $this->actingAs($printing, 'staff')
+            ->get(route('staff.print-jobs.progress-files.show', [
+                'printJob' => $job,
+                'file' => 0,
+            ]))
+            ->assertOk()
+            ->assertHeader('Content-Type', 'image/jpeg');
     }
 
     public function test_other_printing_staff_cannot_start_assigned_print_job(): void

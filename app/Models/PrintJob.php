@@ -18,12 +18,16 @@ class PrintJob extends Model
         'assigned_at',
         'started_at',
         'printed_at',
+        'progress_files',
+        'progress_updated_at',
     ];
 
     protected $casts = [
         'assigned_at' => 'datetime',
         'started_at' => 'datetime',
         'printed_at' => 'datetime',
+        'progress_files' => 'array',
+        'progress_updated_at' => 'datetime',
     ];
 
     public function order()
@@ -55,8 +59,9 @@ class PrintJob extends Model
     {
         return $this->hasMany(PrintJobEvent::class);
     }
+
     public function packingItem()
     {
-        return $this->hasOne(\App\Models\PackingJobItem::class);
+        return $this->hasOne(PackingJobItem::class);
     }
 }

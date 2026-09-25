@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\DesignJob;
 use App\Models\Order;
 use App\Services\Design\CreateArtworkVersionService;
+use App\Services\Design\WatermarkArtworkPreviewService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
@@ -20,13 +21,18 @@ class StaffBatchArtworkController extends Controller
     public function store(
         Request $request,
         Order $order,
-        CreateArtworkVersionService $service
+        CreateArtworkVersionService $service,
+        WatermarkArtworkPreviewService $watermark
     ): RedirectResponse {
+        $this->normalizeArtworkFiles($request);
+
         $validated = $request->validate([
             'artworks' => ['required', 'array', 'min:2'],
             'artworks.*' => ['required', 'array:source_artwork,customer_preview,internal_note'],
-            'artworks.*.source_artwork' => ['required', 'file', 'mimes:psd,pdf', 'max:102400'],
-            'artworks.*.customer_preview' => ['required', 'file', 'mimes:jpg,jpeg,png,pdf', 'max:20480'],
+            'artworks.*.source_artwork' => ['required', 'array', 'min:1', 'max:20'],
+            'artworks.*.source_artwork.*' => ['required', 'file', 'mimes:psd,pdf', 'max:102400'],
+            'artworks.*.customer_preview' => ['required', 'array', 'min:1', 'max:20'],
+            'artworks.*.customer_preview.*' => ['required', 'file', 'mimes:jpg,jpeg,png', 'max:20480'],
             'artworks.*.internal_note' => ['nullable', 'string', 'max:5000'],
         ]);
 
@@ -55,7 +61,7 @@ class StaffBatchArtworkController extends Controller
         $storedPaths = [];
 
         try {
-            DB::transaction(function () use ($validated, $jobs, $request, $service, &$storedPaths): void {
+            DB::transaction(function () use ($validated, $jobs, $request, $service, $watermark, &$storedPaths): void {
                 foreach ($validated['artworks'] as $jobId => $files) {
                     $this->storeArtworkVersion(
                         $jobs->get((int) $jobId),
@@ -64,6 +70,7 @@ class StaffBatchArtworkController extends Controller
                         $files['internal_note'] ?? null,
                         $request,
                         $service,
+                        $watermark,
                         $storedPaths
                     );
                 }
@@ -95,11 +102,12 @@ class StaffBatchArtworkController extends Controller
      */
     private function storeArtworkVersion(
         DesignJob $job,
-        UploadedFile $source,
-        UploadedFile $preview,
+        array $sources,
+        array $previews,
         ?string $internalNote,
         Request $request,
         CreateArtworkVersionService $service,
+        WatermarkArtworkPreviewService $watermark,
         array &$storedPaths
     ): void {
         $disk = Storage::disk('local');
@@ -110,45 +118,100 @@ class StaffBatchArtworkController extends Controller
             (string) Str::uuid(),
         ]);
 
-        $sourcePath = $disk->putFileAs(
-            $directory,
-            $source,
-            'source.'.strtolower($source->extension())
-        );
-
-        if ($sourcePath === false) {
-            throw new RuntimeException('Unable to store source artwork.');
-        }
-
-        $storedPaths[] = $sourcePath;
-
-        $previewPath = $disk->putFileAs(
-            $directory,
-            $preview,
-            'preview.'.strtolower($preview->extension())
-        );
-
-        if ($previewPath === false) {
-            throw new RuntimeException('Unable to store customer preview.');
-        }
-
-        $storedPaths[] = $previewPath;
-        $checksum = hash_file('sha256', $source->getRealPath());
-
-        if ($checksum === false) {
-            throw new RuntimeException('Unable to calculate artwork checksum.');
-        }
+        $sourceFiles = $this->storeFileCollection($sources, $directory, 'source', $storedPaths);
+        $previewFiles = $this->storeFileCollection($previews, $directory, 'preview', $storedPaths, $watermark);
+        $primarySource = $sourceFiles[0];
+        $primaryPreview = $previewFiles[0];
 
         $service->create($job, [
             'storage_disk' => 'local',
-            'storage_path' => $sourcePath,
-            'original_filename' => $source->getClientOriginalName(),
-            'mime_type' => $source->getMimeType() ?: 'application/octet-stream',
-            'file_size_bytes' => $source->getSize(),
-            'checksum_sha256' => $checksum,
-            'preview_storage_path' => $previewPath,
+            'storage_path' => $primarySource['path'],
+            'original_filename' => $primarySource['original_name'],
+            'mime_type' => $primarySource['mime_type'],
+            'file_size_bytes' => $primarySource['size'],
+            'checksum_sha256' => $primarySource['checksum_sha256'],
+            'source_files' => $sourceFiles,
+            'preview_storage_path' => $primaryPreview['path'],
+            'preview_files' => $previewFiles,
             'internal_note' => $internalNote,
         ], $request->user());
+    }
+
+    private function normalizeArtworkFiles(Request $request): void
+    {
+        $artworks = $request->files->get('artworks', []);
+
+        foreach ($artworks as $jobId => $files) {
+            foreach (['source_artwork', 'customer_preview'] as $field) {
+                if (($files[$field] ?? null) instanceof UploadedFile) {
+                    $artworks[$jobId][$field] = [$files[$field]];
+                }
+            }
+        }
+
+        $request->files->set('artworks', $artworks);
+    }
+
+    /**
+     * @param  array<int, UploadedFile>  $files
+     * @param  array<int, string>  $storedPaths
+     * @return array<int, array<string, int|string>>
+     */
+    private function storeFileCollection(
+        array $files,
+        string $directory,
+        string $prefix,
+        array &$storedPaths,
+        ?WatermarkArtworkPreviewService $watermark = null
+    ): array {
+        $disk = Storage::disk('local');
+        $storedFiles = [];
+
+        foreach (array_values($files) as $index => $file) {
+            $filename = $prefix.($index === 0 ? '' : '-'.($index + 1))
+                .'.'.strtolower($file->extension());
+            $path = $disk->putFileAs(
+                $directory,
+                $file,
+                $filename
+            );
+
+            if ($path === false) {
+                throw new RuntimeException("Unable to store {$prefix} artwork file.");
+            }
+
+            $checksum = hash_file('sha256', $file->getRealPath());
+
+            if ($checksum === false) {
+                throw new RuntimeException("Unable to calculate {$prefix} artwork checksum.");
+            }
+
+            $storedPaths[] = $path;
+            $watermarkedPath = null;
+
+            if ($watermark !== null) {
+                $watermarkedPath = $watermark->create(
+                    $path,
+                    $directory.'/preview-watermarked-'.($index + 1).'.jpg'
+                );
+
+                if ($watermarkedPath !== null) {
+                    $storedPaths[] = $watermarkedPath;
+                }
+            }
+
+            $storedFiles[] = [
+                'path' => $path,
+                'original_name' => $file->getClientOriginalName(),
+                'mime_type' => $file->getMimeType() ?: 'application/octet-stream',
+                'size' => $file->getSize(),
+                'checksum_sha256' => $checksum,
+                'watermarked_path' => $watermarkedPath,
+                'watermark_version' => $watermarkedPath === null ? null : 2,
+            ];
+        }
+
+        return $storedFiles;
     }
 
     private function safeSide(?string $side): string

@@ -10,16 +10,16 @@ use App\Services\Design\MarkDesignReadyService;
 use App\Services\Design\RequestArtworkCorrectionService;
 use App\Services\Design\ResumeDesignAfterCorrectionService;
 use App\Services\Design\StartDesignJobService;
-use App\Services\Orders\GenerateOrderAccessLinkService;
-use App\Services\Orders\OrderLifecycleService;
-use Illuminate\Support\Facades\Storage;
-use RuntimeException;
 use App\Services\Design\SyncOrderDesignStatusService;
 use App\Services\Merge\GenerateMergeJobsForOrderService;
 use App\Services\Orders\ConfirmOrderDetailsService;
 use App\Services\Orders\CreateOrderService;
+use App\Services\Orders\GenerateOrderAccessLinkService;
+use App\Services\Orders\OrderLifecycleService;
 use App\Services\Orders\SaveOrderDraftService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Storage;
+use RuntimeException;
 use Tests\TestCase;
 
 class ArtworkReviewApprovalTest extends TestCase
@@ -30,7 +30,7 @@ class ArtworkReviewApprovalTest extends TestCase
     {
         [$order, $job, $designer] = $this->preparedDesignJob();
 
-        $this->expectException(\RuntimeException::class);
+        $this->expectException(RuntimeException::class);
 
         app(MarkDesignReadyService::class)->markReady($job, $designer);
     }
@@ -136,13 +136,13 @@ class ArtworkReviewApprovalTest extends TestCase
         app(ApproveArtworkService::class)->approve($jobs->firstWhere('side', 'LELAKI')->fresh());
 
         $partiallyApproved = app(SyncOrderDesignStatusService::class)
-        ->sync($order->fresh());
+            ->sync($order->fresh());
 
         $this->assertSame('DESIGN_READY', $partiallyApproved->status);
 
         $this->assertNotSame(
-        'DESIGN_APPROVED',
-        $partiallyApproved->status
+            'DESIGN_APPROVED',
+            $partiallyApproved->status
         );
 
         app(ApproveArtworkService::class)->approve($jobs->firstWhere('side', 'PEREMPUAN')->fresh());
@@ -153,301 +153,348 @@ class ArtworkReviewApprovalTest extends TestCase
     }
 
     public function test_customer_can_preview_latest_artwork_through_authorized_order_session(): void
-{
-    Storage::fake('local');
+    {
+        Storage::fake('local');
 
-    [$order, $job, $designer] = $this->preparedDesignJob();
+        [$order, $job, $designer] = $this->preparedDesignJob();
 
-    Storage::disk('local')->put(
-        'artworks/test/latest-preview.png',
-        'latest-preview-content'
-    );
+        Storage::disk('local')->put(
+            'artworks/test/latest-preview.png',
+            'latest-preview-content'
+        );
 
-    app(CreateArtworkVersionService::class)->create($job, [
-        'storage_path' => 'artworks/test/latest-source.psd',
-        'preview_storage_path' => 'artworks/test/latest-preview.png',
-        'original_filename' => 'latest-source.psd',
-        'mime_type' => 'application/octet-stream',
-    ], $designer);
+        app(CreateArtworkVersionService::class)->create($job, [
+            'storage_path' => 'artworks/test/latest-source.psd',
+            'preview_storage_path' => 'artworks/test/latest-preview.png',
+            'original_filename' => 'latest-source.psd',
+            'mime_type' => 'application/octet-stream',
+        ], $designer);
 
-    $job = app(MarkDesignReadyService::class)
-        ->markReady($job->fresh(), $designer);
+        $job = app(MarkDesignReadyService::class)
+            ->markReady($job->fresh(), $designer);
 
-    app(SyncOrderDesignStatusService::class)
-        ->sync($order->fresh());
+        app(SyncOrderDesignStatusService::class)
+            ->sync($order->fresh());
 
-    $link = app(GenerateOrderAccessLinkService::class)
-        ->generate($order->fresh());
+        $link = app(GenerateOrderAccessLinkService::class)
+            ->generate($order->fresh());
 
-    $this->get($this->requestUri($link))
-        ->assertRedirect(
-            route('orders.dashboard', [
+        $this->get($this->requestUri($link))
+            ->assertRedirect(
+                route('orders.dashboard', [
+                    'orderId' => $order->order_id,
+                ])
+            );
+
+        $this->get(route('orders.artwork.review', ['orderId' => $order->order_id]))
+            ->assertOk()
+            ->assertSee('Kembali ke Semak Progress')
+            ->assertSee(
+                route('public.orders.progress', ['order_id' => $order->order_id]),
+                false
+            );
+
+        $response = $this->get(
+            route('orders.artwork.preview', [
                 'orderId' => $order->order_id,
+                'designJobId' => $job->id,
             ])
         );
 
-    $this->get(route('orders.artwork.review', ['orderId' => $order->order_id]))
-        ->assertOk()
-        ->assertSee('Kembali ke Semak Progress')
-        ->assertSee(
-            route('public.orders.progress', ['order_id' => $order->order_id]),
-            false
+        $response->assertOk();
+
+        $this->assertSame(
+            'latest-preview-content',
+            $response->streamedContent()
+        );
+    }
+
+    public function test_artwork_preview_requires_authorized_customer_session(): void
+    {
+        Storage::fake('local');
+
+        [$order, $job, $designer] = $this->preparedDesignJob();
+
+        Storage::disk('local')->put(
+            'artworks/test/session-required.png',
+            'session-required-content'
         );
 
-    $response = $this->get(
-        route('orders.artwork.preview', [
-            'orderId' => $order->order_id,
-            'designJobId' => $job->id,
-        ])
-    );
+        app(CreateArtworkVersionService::class)->create($job, [
+            'storage_path' => 'artworks/test/session-required-source.psd',
+            'preview_storage_path' => 'artworks/test/session-required.png',
+            'original_filename' => 'session-required-source.psd',
+            'mime_type' => 'application/octet-stream',
+        ], $designer);
 
-    $response->assertOk();
+        $job = app(MarkDesignReadyService::class)
+            ->markReady($job->fresh(), $designer);
 
-    $this->assertSame(
-        'latest-preview-content',
-        $response->streamedContent()
-    );
-}
+        $this->get(
+            route('orders.artwork.preview', [
+                'orderId' => $order->order_id,
+                'designJobId' => $job->id,
+            ])
+        )->assertNotFound();
+    }
 
-public function test_artwork_preview_requires_authorized_customer_session(): void
-{
-    Storage::fake('local');
+    public function test_customer_cannot_preview_design_job_from_another_order(): void
+    {
+        Storage::fake('local');
 
-    [$order, $job, $designer] = $this->preparedDesignJob();
+        [$orderA, $jobA, $designerA] = $this->preparedDesignJob();
+        [$orderB, $jobB, $designerB] = $this->preparedDesignJob();
 
-    Storage::disk('local')->put(
-        'artworks/test/session-required.png',
-        'session-required-content'
-    );
+        Storage::disk('local')->put(
+            'artworks/test/order-b-preview.png',
+            'order-b-preview-content'
+        );
 
-    app(CreateArtworkVersionService::class)->create($job, [
-        'storage_path' => 'artworks/test/session-required-source.psd',
-        'preview_storage_path' => 'artworks/test/session-required.png',
-        'original_filename' => 'session-required-source.psd',
-        'mime_type' => 'application/octet-stream',
-    ], $designer);
+        app(CreateArtworkVersionService::class)->create($jobB, [
+            'storage_path' => 'artworks/test/order-b-source.psd',
+            'preview_storage_path' => 'artworks/test/order-b-preview.png',
+            'original_filename' => 'order-b-source.psd',
+            'mime_type' => 'application/octet-stream',
+        ], $designerB);
 
-    $job = app(MarkDesignReadyService::class)
-        ->markReady($job->fresh(), $designer);
+        $jobB = app(MarkDesignReadyService::class)
+            ->markReady($jobB->fresh(), $designerB);
 
-    $this->get(
-        route('orders.artwork.preview', [
-            'orderId' => $order->order_id,
-            'designJobId' => $job->id,
-        ])
-    )->assertNotFound();
-}
+        $link = app(GenerateOrderAccessLinkService::class)
+            ->generate($orderA->fresh());
 
-public function test_customer_cannot_preview_design_job_from_another_order(): void
-{
-    Storage::fake('local');
+        $this->get($this->requestUri($link))
+            ->assertRedirect(
+                route('orders.dashboard', [
+                    'orderId' => $orderA->order_id,
+                ])
+            );
 
-    [$orderA, $jobA, $designerA] = $this->preparedDesignJob();
-    [$orderB, $jobB, $designerB] = $this->preparedDesignJob();
-
-    Storage::disk('local')->put(
-        'artworks/test/order-b-preview.png',
-        'order-b-preview-content'
-    );
-
-    app(CreateArtworkVersionService::class)->create($jobB, [
-        'storage_path' => 'artworks/test/order-b-source.psd',
-        'preview_storage_path' => 'artworks/test/order-b-preview.png',
-        'original_filename' => 'order-b-source.psd',
-        'mime_type' => 'application/octet-stream',
-    ], $designerB);
-
-    $jobB = app(MarkDesignReadyService::class)
-        ->markReady($jobB->fresh(), $designerB);
-
-    $link = app(GenerateOrderAccessLinkService::class)
-        ->generate($orderA->fresh());
-
-    $this->get($this->requestUri($link))
-        ->assertRedirect(
-            route('orders.dashboard', [
+        $this->get(
+            route('orders.artwork.preview', [
                 'orderId' => $orderA->order_id,
+                'designJobId' => $jobB->id,
             ])
+        )->assertNotFound();
+    }
+
+    public function test_artwork_preview_uses_the_watermarked_customer_preview(): void
+    {
+        Storage::fake('local');
+
+        [$order, $job, $designer] = $this->preparedDesignJob();
+
+        Storage::disk('local')->put(
+            'artworks/test/original.pdf',
+            'original-file-content'
         );
 
-    $this->get(
-        route('orders.artwork.preview', [
-            'orderId' => $orderA->order_id,
-            'designJobId' => $jobB->id,
-        ])
-    )->assertNotFound();
-}
+        Storage::disk('local')->put(
+            'artworks/test/preview.png',
+            'preview-file-content'
+        );
 
-public function test_artwork_preview_prefers_preview_file_over_original_file(): void
-{
-    Storage::fake('local');
+        Storage::disk('local')->put(
+            'artworks/test/preview-watermarked.png',
+            'watermarked-preview-content'
+        );
 
-    [$order, $job, $designer] = $this->preparedDesignJob();
+        app(CreateArtworkVersionService::class)->create($job, [
+            'storage_path' => 'artworks/test/original.pdf',
+            'preview_storage_path' => 'artworks/test/preview.png',
+            'original_filename' => 'original.pdf',
+            'mime_type' => 'application/pdf',
+            'preview_files' => [[
+                'path' => 'artworks/test/preview.png',
+                'watermarked_path' => 'artworks/test/preview-watermarked.png',
+            ]],
+        ], $designer);
 
-    Storage::disk('local')->put(
-        'artworks/test/original.pdf',
-        'original-file-content'
-    );
+        $job = app(MarkDesignReadyService::class)
+            ->markReady($job->fresh(), $designer);
 
-    Storage::disk('local')->put(
-        'artworks/test/preview.png',
-        'preview-file-content'
-    );
+        $link = app(GenerateOrderAccessLinkService::class)
+            ->generate($order->fresh());
 
-    app(CreateArtworkVersionService::class)->create($job, [
-        'storage_path' => 'artworks/test/original.pdf',
-        'preview_storage_path' => 'artworks/test/preview.png',
-        'original_filename' => 'original.pdf',
-        'mime_type' => 'application/pdf',
-    ], $designer);
+        $this->get($this->requestUri($link));
 
-    $job = app(MarkDesignReadyService::class)
-        ->markReady($job->fresh(), $designer);
-
-    $link = app(GenerateOrderAccessLinkService::class)
-        ->generate($order->fresh());
-
-    $this->get($this->requestUri($link));
-
-    $response = $this->get(
-        route('orders.artwork.preview', [
-            'orderId' => $order->order_id,
-            'designJobId' => $job->id,
-        ])
-    );
-
-    $response->assertOk();
-
-    $this->assertSame(
-        'preview-file-content',
-        $response->streamedContent()
-    );
-
-    $this->assertSame(
-    'image/png',
-    $response->headers->get('Content-Type')
-);
-
-    $this->assertSame(
-        'inline; filename="preview.png"',
-        $response->headers->get('Content-Disposition')
-    );
-
-    $this->assertNotSame(
-        'application/pdf',
-        $response->headers->get('Content-Type')
-    );
-
-    $this->assertStringNotContainsString(
-        'original.pdf',
-        (string) $response->headers->get('Content-Disposition')
-    );
-}
-
-public function test_customer_preview_never_falls_back_to_source_artwork(): void
-{
-    Storage::fake('local');
-
-    [$order, $job, $designer] = $this->preparedDesignJob();
-
-    Storage::disk('local')->put(
-        'artworks/test/private-source.psd',
-        'private-source-content'
-    );
-
-    $artwork = app(CreateArtworkVersionService::class)->create($job, [
-        'storage_path' => 'artworks/test/private-source.psd',
-        'original_filename' => 'private-source.psd',
-        'mime_type' => 'application/octet-stream',
-    ], $designer);
-
-    /*
-     * Simulate legacy/inconsistent persisted data.
-     * New production flow cannot reach DESIGN_READY without a
-     * customer preview, but the HTTP boundary must still never
-     * expose storage_path.
-     */
-    $job->update([
-        'status' => 'DESIGN_READY',
-        'design_ready_at' => now(),
-    ]);
-
-    $this->assertNull(
-        $artwork->fresh()->preview_storage_path
-    );
-
-    $link = app(GenerateOrderAccessLinkService::class)
-        ->generate($order->fresh());
-
-    $this->get($this->requestUri($link))
-        ->assertRedirect(
-            route('orders.dashboard', [
+        $response = $this->get(
+            route('orders.artwork.preview', [
                 'orderId' => $order->order_id,
+                'designJobId' => $job->id,
             ])
         );
 
-    $this->get(
-        route('orders.artwork.preview', [
+        $response->assertOk();
+
+        $this->assertSame(
+            'watermarked-preview-content',
+            $response->streamedContent()
+        );
+
+        $this->assertSame(
+            'image/png',
+            $response->headers->get('Content-Type')
+        );
+
+        $this->assertSame(
+            'inline; filename="preview-watermarked.png"',
+            $response->headers->get('Content-Disposition')
+        );
+
+        $this->assertNotSame(
+            'application/pdf',
+            $response->headers->get('Content-Type')
+        );
+
+        $this->assertStringNotContainsString(
+            'original.pdf',
+            (string) $response->headers->get('Content-Disposition')
+        );
+    }
+
+    public function test_pdf_customer_preview_is_served_with_a_watermark_overlay(): void
+    {
+        Storage::fake('local');
+
+        [$order, $job, $designer] = $this->preparedDesignJob();
+
+        Storage::disk('local')->put(
+            'artworks/test/customer-preview.pdf',
+            "%PDF-1.4\n% customer artwork preview"
+        );
+
+        app(CreateArtworkVersionService::class)->create($job, [
+            'storage_path' => 'artworks/test/source.psd',
+            'preview_storage_path' => 'artworks/test/customer-preview.pdf',
+            'original_filename' => 'source.psd',
+            'mime_type' => 'application/octet-stream',
+            'preview_files' => [[
+                'path' => 'artworks/test/customer-preview.pdf',
+            ]],
+        ], $designer);
+
+        $job = app(MarkDesignReadyService::class)
+            ->markReady($job->fresh(), $designer);
+
+        $link = app(GenerateOrderAccessLinkService::class)
+            ->generate($order->fresh());
+
+        $this->get($this->requestUri($link));
+
+        $this->get(route('orders.artwork.preview', [
             'orderId' => $order->order_id,
             'designJobId' => $job->id,
-        ])
-    )->assertNotFound();
-}
+        ]))
+            ->assertOk()
+        ->assertSee('King Kad Kahwin')
+            ->assertHeader('Content-Type', 'text/html; charset=UTF-8');
+    }
 
-public function test_cancelled_order_cannot_approve_artwork(): void
-{
-    [$order, $job, $designer] = $this->preparedDesignJob();
+    public function test_customer_preview_never_falls_back_to_source_artwork(): void
+    {
+        Storage::fake('local');
 
-    app(CreateArtworkVersionService::class)->create($job, [
-        'storage_path' => 'artworks/test/archived-v1.pdf',
-        'preview_storage_path' => 'artworks/test/archived-v1-preview.png',
-        'original_filename' => 'archived-v1.pdf',
-    ], $designer);
+        [$order, $job, $designer] = $this->preparedDesignJob();
 
-    $job = app(MarkDesignReadyService::class)
-        ->markReady($job->fresh(), $designer);
+        Storage::disk('local')->put(
+            'artworks/test/private-source.psd',
+            'private-source-content'
+        );
 
-    app(OrderLifecycleService::class)->cancel(
-        $order->fresh(),
-        'Artwork approval terminal guard test',
-        null,
-        'TEST'
-    );
+        $artwork = app(CreateArtworkVersionService::class)->create($job, [
+            'storage_path' => 'artworks/test/private-source.psd',
+            'original_filename' => 'private-source.psd',
+            'mime_type' => 'application/octet-stream',
+        ], $designer);
 
-    $this->expectException(RuntimeException::class);
+        /*
+         * Simulate legacy/inconsistent persisted data.
+         * New production flow cannot reach DESIGN_READY without a
+         * customer preview, but the HTTP boundary must still never
+         * expose storage_path.
+         */
+        $job->update([
+            'status' => 'DESIGN_READY',
+            'design_ready_at' => now(),
+        ]);
 
-    app(ApproveArtworkService::class)
-        ->approve($job->fresh());
-}
+        $this->assertNull(
+            $artwork->fresh()->preview_storage_path
+        );
 
-public function test_archived_order_cannot_request_artwork_correction(): void
-{
-    [$order, $job, $designer] = $this->preparedDesignJob();
+        $link = app(GenerateOrderAccessLinkService::class)
+            ->generate($order->fresh());
 
-    app(CreateArtworkVersionService::class)->create($job, [
-    'storage_path' => 'artworks/test/archived-v1.pdf',
-    'preview_storage_path' => 'artworks/test/archived-v1-preview.png',
-    'original_filename' => 'archived-v1.pdf',
-    ], $designer);
+        $this->get($this->requestUri($link))
+            ->assertRedirect(
+                route('orders.dashboard', [
+                    'orderId' => $order->order_id,
+                ])
+            );
 
-    $job = app(MarkDesignReadyService::class)
-        ->markReady($job->fresh(), $designer);
+        $this->get(
+            route('orders.artwork.preview', [
+                'orderId' => $order->order_id,
+                'designJobId' => $job->id,
+            ])
+        )->assertNotFound();
+    }
 
-    app(OrderLifecycleService::class)->archive(
-        $order->fresh(),
-        'Artwork correction terminal guard test',
-        null,
-        'TEST'
-    );
+    public function test_cancelled_order_cannot_approve_artwork(): void
+    {
+        [$order, $job, $designer] = $this->preparedDesignJob();
 
-    $this->expectException(RuntimeException::class);
+        app(CreateArtworkVersionService::class)->create($job, [
+            'storage_path' => 'artworks/test/archived-v1.pdf',
+            'preview_storage_path' => 'artworks/test/archived-v1-preview.png',
+            'original_filename' => 'archived-v1.pdf',
+        ], $designer);
 
-    app(RequestArtworkCorrectionService::class)->request(
-        $job->fresh(),
-        'Pembetulan tidak sepatutnya dibenarkan.'
-    );
-}
-    
+        $job = app(MarkDesignReadyService::class)
+            ->markReady($job->fresh(), $designer);
+
+        app(OrderLifecycleService::class)->cancel(
+            $order->fresh(),
+            'Artwork approval terminal guard test',
+            null,
+            'TEST'
+        );
+
+        $this->expectException(RuntimeException::class);
+
+        app(ApproveArtworkService::class)
+            ->approve($job->fresh());
+    }
+
+    public function test_archived_order_cannot_request_artwork_correction(): void
+    {
+        [$order, $job, $designer] = $this->preparedDesignJob();
+
+        app(CreateArtworkVersionService::class)->create($job, [
+            'storage_path' => 'artworks/test/archived-v1.pdf',
+            'preview_storage_path' => 'artworks/test/archived-v1-preview.png',
+            'original_filename' => 'archived-v1.pdf',
+        ], $designer);
+
+        $job = app(MarkDesignReadyService::class)
+            ->markReady($job->fresh(), $designer);
+
+        app(OrderLifecycleService::class)->archive(
+            $order->fresh(),
+            'Artwork correction terminal guard test',
+            null,
+            'TEST'
+        );
+
+        $this->expectException(RuntimeException::class);
+
+        app(RequestArtworkCorrectionService::class)->request(
+            $job->fresh(),
+            'Pembetulan tidak sepatutnya dibenarkan.'
+        );
+    }
+
     private function preparedDesignJob(): array
     {
         $order = $this->confirmedOrder(1, 'LELAKI');
@@ -486,14 +533,14 @@ public function test_archived_order_cannot_request_artwork_correction(): void
                     'design_code' => $side->side === 'LELAKI' ? 'L101' : 'P202',
                 ],
                 'parents' => [
-                    'father_name' => 'Bapa ' . $side->side,
-                    'mother_name' => 'Ibu ' . $side->side,
+                    'father_name' => 'Bapa '.$side->side,
+                    'mother_name' => 'Ibu '.$side->side,
                 ],
                 'event' => [
                     'event_date' => '2026-12-20',
                     'meal_time' => '12:00',
-                    'venue_name' => 'Dewan ' . $side->side,
-                    'full_address' => 'Alamat ' . $side->side,
+                    'venue_name' => 'Dewan '.$side->side,
+                    'full_address' => 'Alamat '.$side->side,
                     'contacts' => [
                         1 => ['contact_name' => 'Contact 1', 'contact_phone' => '0111111111'],
                         2 => ['contact_name' => 'Contact 2', 'contact_phone' => '0122222222'],
@@ -516,97 +563,97 @@ public function test_archived_order_cannot_request_artwork_correction(): void
         return app(ConfirmOrderDetailsService::class)->confirm($order->fresh());
     }
 
-        public function test_customer_cannot_preview_artwork_while_design_is_still_in_progress(): void
-{
-    Storage::fake('local');
+    public function test_customer_cannot_preview_artwork_while_design_is_still_in_progress(): void
+    {
+        Storage::fake('local');
 
-    [$order, $job, $designer] = $this->preparedDesignJob();
+        [$order, $job, $designer] = $this->preparedDesignJob();
 
-    Storage::disk('local')->put(
-        'artworks/test/in-progress-preview.png',
-        'unreleased-artwork-content'
-    );
-
-    app(CreateArtworkVersionService::class)->create($job, [
-        'storage_path' => 'artworks/test/in-progress-preview.png',
-        'original_filename' => 'in-progress-preview.png',
-        'mime_type' => 'image/png',
-    ], $designer);
-
-    // Jangan panggil MarkDesignReadyService.
-    // Job mesti kekal DESIGN_IN_PROGRESS.
-    $this->assertSame(
-        'DESIGN_IN_PROGRESS',
-        $job->fresh()->status
-    );
-
-    $link = app(GenerateOrderAccessLinkService::class)
-        ->generate($order->fresh());
-
-    $this->get($this->requestUri($link))
-        ->assertRedirect(
-            route('orders.dashboard', [
-                'orderId' => $order->order_id,
-            ])
+        Storage::disk('local')->put(
+            'artworks/test/in-progress-preview.png',
+            'unreleased-artwork-content'
         );
 
-    $this->get(
-        route('orders.artwork.preview', [
-            'orderId' => $order->order_id,
-            'designJobId' => $job->id,
-        ])
-    )->assertNotFound();
-}
+        app(CreateArtworkVersionService::class)->create($job, [
+            'storage_path' => 'artworks/test/in-progress-preview.png',
+            'original_filename' => 'in-progress-preview.png',
+            'mime_type' => 'image/png',
+        ], $designer);
+
+        // Jangan panggil MarkDesignReadyService.
+        // Job mesti kekal DESIGN_IN_PROGRESS.
+        $this->assertSame(
+            'DESIGN_IN_PROGRESS',
+            $job->fresh()->status
+        );
+
+        $link = app(GenerateOrderAccessLinkService::class)
+            ->generate($order->fresh());
+
+        $this->get($this->requestUri($link))
+            ->assertRedirect(
+                route('orders.dashboard', [
+                    'orderId' => $order->order_id,
+                ])
+            );
+
+        $this->get(
+            route('orders.artwork.preview', [
+                'orderId' => $order->order_id,
+                'designJobId' => $job->id,
+            ])
+        )->assertNotFound();
+    }
 
     public function test_design_cannot_be_marked_ready_without_customer_preview(): void
-{
-    [$order, $job, $designer] = $this->preparedDesignJob();
+    {
+        [$order, $job, $designer] = $this->preparedDesignJob();
 
-    app(CreateArtworkVersionService::class)->create($job, [
-        'storage_path' => 'artworks/test/source-only.psd',
-        'original_filename' => 'source-only.psd',
-        'mime_type' => 'application/octet-stream',
-    ], $designer);
+        app(CreateArtworkVersionService::class)->create($job, [
+            'storage_path' => 'artworks/test/source-only.psd',
+            'original_filename' => 'source-only.psd',
+            'mime_type' => 'application/octet-stream',
+        ], $designer);
 
-    $this->expectException(RuntimeException::class);
-    $this->expectExceptionMessage('customer preview');
+        $this->expectException(RuntimeException::class);
+        $this->expectExceptionMessage('customer preview');
 
-    app(MarkDesignReadyService::class)
-        ->markReady($job->fresh(), $designer);
+        app(MarkDesignReadyService::class)
+            ->markReady($job->fresh(), $designer);
     }
 
     public function test_design_can_be_marked_ready_when_customer_preview_exists(): void
-{
-    [$order, $job, $designer] = $this->preparedDesignJob();
+    {
+        [$order, $job, $designer] = $this->preparedDesignJob();
 
-    $artwork = app(CreateArtworkVersionService::class)->create($job, [
-        'storage_path' => 'artworks/test/source.psd',
-        'preview_storage_path' => 'artworks/test/customer-preview.png',
-        'original_filename' => 'source.psd',
-        'mime_type' => 'application/octet-stream',
-    ], $designer);
+        $artwork = app(CreateArtworkVersionService::class)->create($job, [
+            'storage_path' => 'artworks/test/source.psd',
+            'preview_storage_path' => 'artworks/test/customer-preview.png',
+            'original_filename' => 'source.psd',
+            'mime_type' => 'application/octet-stream',
+        ], $designer);
 
-    $this->assertSame(
-        'artworks/test/customer-preview.png',
-        $artwork->preview_storage_path
-    );
+        $this->assertSame(
+            'artworks/test/customer-preview.png',
+            $artwork->preview_storage_path
+        );
 
-    $job = app(MarkDesignReadyService::class)
-        ->markReady($job->fresh(), $designer);
+        $job = app(MarkDesignReadyService::class)
+            ->markReady($job->fresh(), $designer);
 
-    $this->assertSame(
-        'DESIGN_READY',
-        $job->status
-    );
+        $this->assertSame(
+            'DESIGN_READY',
+            $job->status
+        );
     }
 
     private function requestUri(string $url): string
     {
-    $path = (string) parse_url($url, PHP_URL_PATH);
-    $query = (string) parse_url($url, PHP_URL_QUERY);
+        $path = (string) parse_url($url, PHP_URL_PATH);
+        $query = (string) parse_url($url, PHP_URL_QUERY);
 
-    return $query === ''
-        ? $path
-        : $path . '?' . $query;
+        return $query === ''
+            ? $path
+            : $path.'?'.$query;
     }
 }

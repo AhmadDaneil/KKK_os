@@ -101,6 +101,9 @@
 
                 $canPreview = $latestArtwork
                     && in_array($designJob->status, ['DESIGN_READY', 'CORRECTION_REQUESTED', 'DESIGN_APPROVED'], true);
+                $previewFiles = $latestArtwork?->preview_files ?: array_filter([
+                    $latestArtwork?->preview_storage_path ? ['path' => $latestArtwork->preview_storage_path] : null,
+                ]);
             @endphp
 
             <section class="artwork-card">
@@ -123,17 +126,22 @@
                         </div>
 
                         @if ($canPreview)
-                            <a
-                                class="button button-secondary"
-                                href="{{ route('orders.artwork.preview', [
-                                    'orderId' => $order->order_id,
-                                    'designJobId' => $designJob->id,
-                                ]) }}"
-                                target="_blank"
-                                rel="noopener noreferrer"
-                            >
-                                Lihat Artwork
-                            </a>
+                            <div class="artwork-preview-links">
+                                @foreach ($previewFiles as $previewIndex => $previewFile)
+                                    <a
+                                        class="button button-secondary"
+                                        href="{{ route('orders.artwork.preview', [
+                                            'orderId' => $order->order_id,
+                                            'designJobId' => $designJob->id,
+                                            'file' => $previewIndex,
+                                        ]) }}"
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                    >
+                                        {{ count($previewFiles) > 1 ? 'Lihat Artwork '.($previewIndex + 1) : 'Lihat Artwork' }}
+                                    </a>
+                                @endforeach
+                            </div>
                         @endif
                     </div>
                 @else
