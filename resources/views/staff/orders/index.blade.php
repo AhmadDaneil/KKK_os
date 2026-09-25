@@ -6,10 +6,17 @@
     $ordersShowRoute = $isAdminPortal ? 'admin.orders.show' : 'staff.orders.show';
     $workstreamDescriptions = [
         'design' => 'Order yang masih memerlukan design, semakan artwork atau pembetulan.',
-        'printing' => 'Order yang sedang menunggu bayaran, menunggu cetakan atau sedang dicetak.',
-        'packing' => 'Order yang telah dicetak dan masih memerlukan pembungkusan.',
+        'printing' => 'Order yang menunggu atau sedang dalam proses production.',
+        'packing' => 'Order yang telah siap production dan masih memerlukan pembungkusan oleh OM.',
         'fulfilment' => 'Order yang telah dibungkus dan masih menunggu serahan atau kutipan.',
     ];
+    $workstreamLabels = [
+        'design' => 'Design',
+        'printing' => 'Production',
+        'packing' => 'OM Packing',
+        'fulfilment' => 'Fulfilment',
+    ];
+    $workstreamLabel = $workstreamLabels[$workstream] ?? null;
 @endphp
 <!DOCTYPE html>
 <html lang="ms">
@@ -17,7 +24,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>{{ $workstream ? ucfirst($workstream).' Queue' : 'Staff Orders' }} - KKK OS</title>
+    <title>{{ $workstreamLabel ? $workstreamLabel.' Queue' : 'Staff Orders' }} - KKK OS</title>
 
     <link rel="stylesheet" href="{{ asset('css/staff.css') }}">
 </head>
@@ -26,7 +33,7 @@
         @include('staff.partials.sidebar')
         <div class="staff-workspace">
             <header class="staff-topbar">
-                <div><p class="staff-kicker">{{ auth()->user()->isAdmin() ? 'Admin Operations' : ($workstream ? ucfirst($workstream) : 'Operation Management') }}</p><h1>{{ $workstream ? ucfirst($workstream).' Queue' : 'Semua Orders' }}</h1></div>
+                <div><p class="staff-kicker">{{ auth()->user()->isAdmin() ? 'Admin Operations' : ($workstreamLabel ?? 'Operation Management') }}</p><h1>{{ $workstreamLabel ? $workstreamLabel.' Queue' : 'Semua Orders' }}</h1></div>
                 <form class="js-logout-form" method="POST" action="{{ route($logoutRoute) }}">@csrf<button type="submit" class="staff-button staff-button-small">Log Keluar</button></form>
             </header>
 
@@ -125,7 +132,7 @@
 
                                 @if ((! $workstream || $workstream === 'printing') && $order->relationLoaded('printJobs') && $order->printJobs->isNotEmpty())
                                     <div class="staff-work-row">
-                                        <span>Printing</span>
+                                        <span>Production</span>
                                         <strong>
                                             {{ $order->printJobs->pluck('status')->unique()->implode(', ') }}
                                         </strong>
@@ -156,21 +163,21 @@
                                         </div>
                                     @endif
                                 @endforeach
-                            @elseif (auth()->user()->hasStaffRole(\App\Models\User::ROLE_PRINTING))
+                            @elseif (auth()->user()->hasStaffRole(\App\Models\User::ROLE_PRODUCTION))
                                 @if ($order->printJobs->where('assigned_user_id', auth()->id())->isNotEmpty())
                                     @foreach ($order->printJobs->where('assigned_user_id', auth()->id()) as $job)
                                             <div class="staff-work-row">
-                                                <span>Printing {{ $job->side }}</span>
+                                        <span>Production {{ $job->side }}</span>
                                                 <strong>{{ $job->status }}</strong>
                                             </div>
                                     @endforeach
                                 @elseif ($order->printing_assigned_user_id === auth()->id())
                                     <div class="staff-work-row">
-                                        <span>Printing</span>
+                                        <span>Production</span>
                                         <strong>ASSIGNED · WAITING FOR ARTWORK APPROVAL</strong>
                                     </div>
                                 @endif
-                            @elseif (auth()->user()->hasStaffRole(\App\Models\User::ROLE_PACKING))
+                            @elseif (auth()->user()->hasStaffRole(\App\Models\User::ROLE_OM))
                                 @if (
                                     $order->packingJob &&
                                     $order->packingJob->assigned_user_id === auth()->id()

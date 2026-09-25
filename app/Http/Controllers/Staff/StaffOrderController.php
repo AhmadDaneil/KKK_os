@@ -92,13 +92,13 @@ class StaffOrderController extends Controller
                         'artworkVersions',
                     ]),
             ]);
-        } elseif ($user->hasStaffRole(User::ROLE_PRINTING)) {
+        } elseif ($user->hasStaffRole(User::ROLE_PRODUCTION)) {
             $order->load([
                 'printJobs' => fn ($query) => $query
                     ->where('assigned_user_id', $user->id)
                     ->with('assignedUser'),
             ]);
-        } elseif ($user->hasStaffRole(User::ROLE_PACKING)) {
+        } elseif ($user->hasStaffRole(User::ROLE_OM)) {
             $order->load([
                 'packingJob' => fn ($query) => $query
                     ->where('assigned_user_id', $user->id)
@@ -124,13 +124,13 @@ class StaffOrderController extends Controller
                     ->get(['id', 'name']),
 
                 'printingStaff' => User::query()
-                    ->where('role', User::ROLE_PRINTING)
+                    ->where('role', User::ROLE_PRODUCTION)
                     ->where('is_active', true)
                     ->orderBy('name')
                     ->get(['id', 'name']),
 
                 'packingStaff' => User::query()
-                    ->where('role', User::ROLE_PACKING)
+                    ->where('role', User::ROLE_OM)
                     ->where('is_active', true)
                     ->orderBy('name')
                     ->get(['id', 'name']),
@@ -162,7 +162,7 @@ class StaffOrderController extends Controller
                     ->where('assigned_user_id', $user->id)
             ),
 
-            User::ROLE_PRINTING => $query->where(
+            User::ROLE_PRODUCTION => $query->where(
                 fn (Builder $printingQuery) => $printingQuery
                     ->where('printing_assigned_user_id', $user->id)
                     ->orWhereHas(
@@ -172,7 +172,7 @@ class StaffOrderController extends Controller
                     )
             ),
 
-            User::ROLE_PACKING => $query->where(
+            User::ROLE_OM => $query->where(
                 fn (Builder $packingQuery) => $packingQuery
                     ->where('packing_assigned_user_id', $user->id)
                     ->orWhereHas(
@@ -192,8 +192,8 @@ class StaffOrderController extends Controller
             ? ['design', 'printing', 'packing', 'fulfilment']
             : match ($user->role) {
                 User::ROLE_DESIGNER => ['design'],
-                User::ROLE_PRINTING => ['printing'],
-                User::ROLE_PACKING => ['packing'],
+                User::ROLE_PRODUCTION => ['printing'],
+                User::ROLE_OM => ['packing'],
                 User::ROLE_OM => ['packing'],
                 default => [],
             };

@@ -121,7 +121,7 @@ class StaffPrintingWorkflowTest extends TestCase
             ])
             ->assertRedirect()
             ->assertSessionHasNoErrors()
-            ->assertSessionHas('status', 'Printing progress uploaded successfully.');
+            ->assertSessionHas('status', 'Production progress uploaded successfully.');
 
         $job->refresh();
 
@@ -372,22 +372,22 @@ class StaffPrintingWorkflowTest extends TestCase
 
         $this->actingAs($admin, 'staff')->get(route('staff.orders.show', $order->order_id))
             ->assertOk()
-            ->assertSee('Assign Printing Staff')
-            ->assertDontSee('Start Printing');
+            ->assertSee('Assign Production Staff')
+            ->assertDontSee('Start Production');
 
         app(AssignPrintJobService::class)->assign($job, $printing, $admin);
 
         $this->actingAs($printing, 'staff')->get(route('staff.orders.show', $order->order_id))
-            ->assertOk()->assertSee('Start Printing');
+            ->assertOk()->assertSee('Start Production');
         $this->actingAs($printing, 'staff')->post(route('staff.print-jobs.start', $job))
             ->assertRedirect();
         $this->actingAs($printing, 'staff')->get(route('staff.orders.show', $order->order_id))
-            ->assertOk()->assertSee('Mark Printed');
+            ->assertOk()->assertSee('Mark Production Complete');
 
         $this->actingAs($admin, 'staff')->get(route('staff.orders.show', $order->order_id))
             ->assertOk()
             ->assertDontSee(route('staff.print-jobs.assign', $job))
-            ->assertDontSee('Mark Printed');
+            ->assertDontSee('Mark Production Complete');
         $this->actingAs($admin, 'staff')->post(route('staff.print-jobs.mark-printed', $job))
             ->assertNotFound();
         $this->assertSame('PRINTING', $job->fresh()->status);

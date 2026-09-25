@@ -7,10 +7,10 @@
     @php
         $roleLabels = [
             'ADMIN' => 'Admin',
-            'OPERATION_MANAGEMENT' => 'Operation Management',
+            'OPERATION_MANAGEMENT' => 'OM (Packing & Fulfilment)',
+            'CUSTOMER_SERVICE' => 'Customer Service',
             'DESIGNER' => 'Designer',
-            'PRINTING' => 'Printing',
-            'PACKING' => 'Packing',
+            'PRODUCTION' => 'Production',
         ];
     @endphp
 

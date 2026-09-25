@@ -30,7 +30,7 @@ class StaffPackingWorkflowController extends Controller
 
         abort_unless(
             $user->isOperationManagement()
-                || ($user->hasStaffRole(User::ROLE_PACKING)
+                || ($user->hasStaffRole(User::ROLE_OM)
                     && $packingJob->assigned_user_id === $user->id),
             404
         );
