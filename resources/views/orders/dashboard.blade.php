@@ -6,6 +6,7 @@
     <meta name="referrer" content="no-referrer">
     <title>KKK OS - {{ $order->order_id }}</title>
     <link rel="stylesheet" href="{{ asset('css/customer-dashboard.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/customer-theme.css') }}?v={{ filemtime(public_path('css/customer-theme.css')) }}">
 </head>
 <body>
 <main>
@@ -1175,5 +1176,6 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     });
 </script>
+@include('public.partials.theme-toggle')
 </body>
 </html>

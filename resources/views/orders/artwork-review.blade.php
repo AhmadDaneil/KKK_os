@@ -6,6 +6,7 @@
     <meta name="referrer" content="no-referrer">
     <title>Semakan Artwork - {{ $order->order_id }}</title>
     <link rel="stylesheet" href="{{ asset('css/artwork-review.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/customer-theme.css') }}?v={{ filemtime(public_path('css/customer-theme.css')) }}">
 </head>
 <body>
 @php
@@ -368,5 +369,6 @@
         pendingArtworkForm.submit();
     });
 </script>
+@include('public.partials.theme-toggle')
 </body>
 </html>

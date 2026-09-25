@@ -6,6 +6,7 @@
     <meta name="referrer" content="no-referrer">
     <title>Semakan Akhir - {{ $review['order_id'] }}</title>
     <link rel="stylesheet" href="{{ asset('css/final-review.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/customer-theme.css') }}?v={{ filemtime(public_path('css/customer-theme.css')) }}">
 </head>
 <body>
     @php
@@ -426,5 +427,6 @@
             });
         });
     </script>
+    @include('public.partials.theme-toggle')
 </body>
 </html>

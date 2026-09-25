@@ -1,0 +1,57 @@
+html { color-scheme:light; }
+.customer-theme-toggle { position:fixed; z-index:100; right:22px; bottom:22px; display:grid; width:42px; height:42px; padding:0; border:1px solid rgba(36,91,70,.3); border-radius:50%; place-items:center; color:#173228; background:#fffdf8; box-shadow:0 10px 28px rgba(23,50,40,.18); cursor:pointer; transition:transform .2s ease,background-color .2s ease,color .2s ease,border-color .2s ease; }
+.customer-theme-toggle:hover { transform:translateY(-3px) rotate(10deg); }
+.customer-theme-toggle:focus-visible { outline:3px solid rgba(200,154,75,.55); outline-offset:3px; }
+.customer-theme-toggle-moon { display:none; font-size:1.35rem; line-height:1; }.customer-theme-toggle-sun { color:#a56f14; font-size:1.1rem; line-height:1; }
+html[data-customer-theme="dark"] { color-scheme:dark; background:#111a16!important; }
+html[data-customer-theme="dark"] body { color:#e5ece7!important; background:#111a16!important; }
+html[data-customer-theme="dark"] body.utility-page { background:linear-gradient(135deg,#111a16,#17251e)!important; }
+html[data-customer-theme="dark"] :is(.feature-strip,.journey li,.public-form,.progress-search,.public-progress-card,.tracking-card,.deposit-public-status,.public-artwork-action,.public-artwork-previews article,.order-summary,.order-summary-card,fieldset,.success-card,.review-card,.review-section,.artwork-review-card,.artwork-card,.customer-tracking-card) { border-color:#40554a!important; background-color:#1c2923!important; color:#e5ece7!important; }
+html[data-customer-theme="dark"] .site-header { background:transparent!important; }
+html[data-customer-theme="dark"] .site-footer { width:calc(100% - 48px); padding:42px 0 25px; border-color:#40554a!important; color:#e5ece7!important; background:transparent!important; }
+html[data-customer-theme="dark"] .footer-bottom { margin-top:30px; padding-top:18px; border-color:#40554a!important; }
+html[data-customer-theme="dark"] :is(h1,h2,h3,h4,strong,legend,.brand,.brand b,.header-link,.nav-progress,.back-home-button,.review-value) { color:#f4f1e9!important; }
+html[data-customer-theme="dark"] :is(p,small,dt,.hero-text,.form-intro>p:last-child,.progress-search>p,.privacy-note,.field-hint,.review-label) { color:#b8c9c0!important; }
+html[data-customer-theme="dark"] :is(input,select,textarea) { border-color:#50675b!important; color:#eef4ef!important; background:#142019!important; }
+html[data-customer-theme="dark"] .choice-card { border-color:#61786c!important; background:#19271f!important; }
+html[data-customer-theme="dark"] .choice-card:has(input:checked) { border-color:#78b696!important; background:#285f47!important; box-shadow:0 0 0 2px rgba(120,182,150,.16); }
+html[data-customer-theme="dark"] .choice-card:has(input:checked) b { color:#fff!important; }
+html[data-customer-theme="dark"] .choice-card:has(input:checked) small { color:#dcebe3!important; }
+html[data-customer-theme="dark"] .choice-card input { accent-color:#e4b85e; }
+html[data-customer-theme="dark"] :is(.button-secondary,.header-link,.nav-progress,.back-home-button) { border-color:#739181!important; color:#edf5ef!important; background:#1b2b23!important; }
+html[data-customer-theme="dark"] :is(.button-light) { color:#143528!important; background:#f8f5ed!important; }
+html[data-customer-theme="dark"] .button-primary,
+html[data-customer-theme="dark"] .button-primary span { color:#fff!important; }
+html[data-customer-theme="dark"] .final-cta .button.button-light,
+html[data-customer-theme="dark"] .final-cta .button.button-light span { color:#143528!important; }
+html[data-customer-theme="dark"] .social-links a { border-color:#587062!important; color:#edf5ef!important; background:#23352b!important; }
+html[data-customer-theme="dark"] .social-links a span { color:#fff!important; background:#286247!important; }
+html[data-customer-theme="dark"] .footer-social>p { color:#e4b85e!important; }
+html[data-customer-theme="dark"] .hero h1 em { color:#69c297!important; }
+html[data-customer-theme="dark"] .eyebrow { color:#e4b85e!important; }
+html[data-customer-theme="dark"] .hero-art::before { background:#203b31!important; box-shadow:inset 0 0 0 1px rgba(105,194,151,.12); }
+html[data-customer-theme="dark"] .sample-card { box-shadow:0 25px 55px rgba(0,0,0,.38); }
+html[data-customer-theme="dark"] :is(.public-progress-track,.progress-bar-track) { background:#34453c!important; }
+html[data-customer-theme="dark"] :is(.status-badge,.public-stages div,.public-stages i) { border-color:#52675c!important; background:#22342a!important; color:#c9dbd0!important; }
+html[data-customer-theme="dark"] .public-stages div { border-color:transparent!important; background:transparent!important; }
+html[data-customer-theme="dark"] .balance-payment-card { border-color:#53675c!important; background:#203028!important; color:#e5ece7!important; }
+html[data-customer-theme="dark"] .balance-payment-heading small { color:#e4b85e!important; }
+html[data-customer-theme="dark"] .balance-payment-heading>strong { color:#dff3e7!important; background:#28543d!important; }
+html[data-customer-theme="dark"] .balance-status-message { border-left-color:#d3a84f!important; background:#3a321f!important; }
+html[data-customer-theme="dark"] .balance-status-message strong { color:#f4e8c9!important; }
+html[data-customer-theme="dark"] .balance-status-message span { color:#d8cba8!important; }
+html[data-customer-theme="dark"] .balance-status-message.is-paid { border-left-color:#4ca36c!important; background:#193c2b!important; }
+html[data-customer-theme="dark"] .balance-status-message.is-paid strong { color:#dff3e7!important; }
+html[data-customer-theme="dark"] .balance-status-message.is-paid span { color:#c9ddd0!important; }
+html[data-customer-theme="dark"] .balance-status-message.is-failed { border-left-color:#d86666!important; background:#432626!important; }
+html[data-customer-theme="dark"] .balance-status-message.is-failed strong { color:#ffdede!important; }
+html[data-customer-theme="dark"] .balance-status-message.is-failed span { color:#e9bcbc!important; }
+html[data-customer-theme="dark"] .payment-success-message { border-color:#4c8062!important; color:#dff3e7!important; background:#193c2b!important; }
+html[data-customer-theme="dark"] .balance-qr-placeholder { border-color:#50675b!important; color:#e5ece7!important; background:#142019!important; }
+html[data-customer-theme="dark"] .balance-receipt-picker button { border-color:#9b5951!important; color:#ffd7d1!important; background:#422824!important; }
+html[data-customer-theme="dark"] :is(.live-card-preview,.wedding-card-front,.wedding-card-back,.card-preview) { color:#17251e!important; }
+html[data-customer-theme="dark"] .customer-theme-toggle { border-color:#647c6e; color:#f7efcf; background:#25372d; }.customer-theme-toggle-sun { color:#a56f14; }
+html[data-customer-theme="dark"] .customer-theme-toggle-sun { display:none; } html[data-customer-theme="dark"] .customer-theme-toggle-moon { display:block; }
+@media (max-width:560px) { .customer-theme-toggle { right:14px; bottom:14px; width:38px; height:38px; } }
+@media (max-width:560px) { html[data-customer-theme="dark"] .site-footer { width:calc(100% - 28px); } }
+@media (prefers-reduced-motion:reduce) { .customer-theme-toggle { transition:none; }.customer-theme-toggle:hover { transform:none; } }
