@@ -67,7 +67,7 @@ class StaffOrderController extends Controller
         $order->unsetRelation('printJobs');
         $order->unsetRelation('packingJob');
 
-        if ($user->isAdmin()) {
+        if ($user->isOperationManagement()) {
             $order->load([
                 'designJobs.assignedUser',
                 'designJobs.artworkVersions',
@@ -97,15 +97,6 @@ class StaffOrderController extends Controller
                 'printJobs' => fn ($query) => $query
                     ->where('assigned_user_id', $user->id)
                     ->with('assignedUser'),
-            ]);
-        } elseif ($user->hasStaffRole(User::ROLE_OM)) {
-            $order->load([
-                'packingJob' => fn ($query) => $query
-                    ->where('assigned_user_id', $user->id)
-                    ->with([
-                        'assignedUser',
-                        'items',
-                    ]),
             ]);
         }
 
@@ -188,13 +179,11 @@ class StaffOrderController extends Controller
 
     private function allowedWorkstream(User $user, string $requested): ?string
     {
-        $allowed = $user->isAdmin()
+        $allowed = $user->isOperationManagement()
             ? ['design', 'printing', 'packing', 'fulfilment']
             : match ($user->role) {
                 User::ROLE_DESIGNER => ['design'],
                 User::ROLE_PRODUCTION => ['printing'],
-                User::ROLE_OM => ['packing'],
-                User::ROLE_OM => ['packing'],
                 default => [],
             };
 
@@ -268,7 +257,7 @@ class StaffOrderController extends Controller
             }
         }
 
-        if (! $user->isAdmin()) {
+        if (! $user->isOperationManagement()) {
             return;
         }
 

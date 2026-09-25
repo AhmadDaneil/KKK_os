@@ -14,6 +14,7 @@ class StaffBalancePaymentController extends Controller
 {
     public function approve(Request $request, PaymentTransaction $payment, InitializePrintJobsForOrderService $initializePrint, SyncOrderPrintStatusService $syncPrint): RedirectResponse
     {
+        $this->authorizePaymentReview($request);
         $this->ensureBalance($payment);
         $validated = $request->validate([
             'amount' => ['required', 'numeric', 'decimal:0,2', 'min:0.01', 'max:9999999999.99'],
@@ -44,6 +45,7 @@ class StaffBalancePaymentController extends Controller
 
     public function reject(Request $request, PaymentTransaction $payment): RedirectResponse
     {
+        $this->authorizePaymentReview($request);
         $this->ensureBalance($payment);
         $validated = $request->validate(['rejection_reason' => ['required', 'string', 'max:1000']]);
 
@@ -65,5 +67,10 @@ class StaffBalancePaymentController extends Controller
     private function ensureBalance(PaymentTransaction $payment): void
     {
         abort_unless($payment->payment_type === 'BALANCE', 404);
+    }
+
+    private function authorizePaymentReview(Request $request): void
+    {
+        abort_unless($request->user()?->isOperationManagement(), 403);
     }
 }

@@ -3,7 +3,6 @@
 namespace App\Services\Photoshop;
 
 use RuntimeException;
-use Symfony\Component\Process\Process;
 use Throwable;
 
 class LaunchPhotoshopService
@@ -32,29 +31,26 @@ class LaunchPhotoshopService
             throw new RuntimeException('The Photoshop script does not match the approved V11 script.');
         }
 
-        $launchScript = $this->createUnlockedScriptCopy($script, $actualHash);
+        $automationLauncher = $this->createAutomationLauncher($script);
 
-        // Photoshop can keep a launched JSX path open. A unique runtime copy avoids
-        // collisions with the repository file and with another Photoshop session.
-        $process = new Process([
-            'cmd.exe',
-            '/d',
-            '/s',
-            '/c',
-            'start',
-            '',
-            $executable,
-            $launchScript,
-        ]);
-        $process->setTimeout(10);
-        $process->run();
+        // Photoshop treats a JSX command-line argument as a document, which can
+        // trigger a locked-file alert. Windows COM automation runs it as a script.
+        // `popen()` sends this raw command to cmd.exe, where `start` is a
+        // built-in. This keeps the VBS path intact and detaches Script Host
+        // from the HTTP request; Symfony's argument escaping previously
+        // transformed it into an invalid network-style path.
+        $wscript = 'C:\\Windows\\System32\\wscript.exe';
+        $command = sprintf('start "" /b "%s" "%s"', $wscript, $automationLauncher);
+        $handle = @popen($command, 'r');
 
-        if (! $process->isSuccessful()) {
+        if ($handle === false) {
             throw new RuntimeException('Photoshop could not be opened. Please try again from the design workstation.');
         }
+
+        pclose($handle);
     }
 
-    private function createUnlockedScriptCopy(string $source, string $expectedHash): string
+    private function createAutomationLauncher(string $script): string
     {
         $directory = storage_path('app/private/photoshop-launches');
 
@@ -62,7 +58,7 @@ class LaunchPhotoshopService
             throw new RuntimeException('The temporary Photoshop launch folder could not be created.');
         }
 
-        $this->removeExpiredCopies($directory);
+        $this->removeExpiredLaunchers($directory);
 
         try {
             $suffix = bin2hex(random_bytes(12));
@@ -70,27 +66,30 @@ class LaunchPhotoshopService
             throw new RuntimeException('A secure Photoshop launch filename could not be generated.', previous: $exception);
         }
 
-        $copy = $directory.DIRECTORY_SEPARATOR.'kkk-auto-merge-'.$suffix.'.jsx';
+        $launcher = $directory.DIRECTORY_SEPARATOR.'run-photoshop-'.$suffix.'.vbs';
+        $escapedScript = str_replace('"', '""', $script);
+        $contents = implode("\r\n", [
+            'On Error Resume Next',
+            'Set photoshop = CreateObject("Photoshop.Application")',
+            'If Err.Number <> 0 Then',
+            '  WScript.Quit 1',
+            'End If',
+            'photoshop.Visible = True',
+            'Call photoshop.DoJavaScriptFile("'.$escapedScript.'", Array(), 1)',
+            'WScript.Quit 0',
+            '',
+        ]);
 
-        if (! copy($source, $copy)) {
-            throw new RuntimeException('The Photoshop script could not be prepared for launch.');
+        if (file_put_contents($launcher, $contents, LOCK_EX) === false) {
+            throw new RuntimeException('The Photoshop automation launcher could not be prepared.');
         }
 
-        clearstatcache(true, $copy);
-        $copiedHash = strtolower((string) hash_file('sha256', $copy));
-
-        if (! hash_equals($expectedHash, $copiedHash)) {
-            @unlink($copy);
-
-            throw new RuntimeException('The temporary Photoshop script failed its integrity check.');
-        }
-
-        return $copy;
+        return $launcher;
     }
 
-    private function removeExpiredCopies(string $directory): void
+    private function removeExpiredLaunchers(string $directory): void
     {
-        $files = glob($directory.DIRECTORY_SEPARATOR.'kkk-auto-merge-*.jsx') ?: [];
+        $files = glob($directory.DIRECTORY_SEPARATOR.'run-photoshop-*.vbs') ?: [];
         $expiry = time() - 86400;
 
         foreach ($files as $file) {
