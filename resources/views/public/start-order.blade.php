@@ -9,7 +9,10 @@
 <body class="utility-page">
     <header class="site-header compact-header">
         <a class="brand" href="{{ route('home') }}"><span class="brand-mark">K</span><span><b>KingKadKahwin</b><small>Kad indah, kenangan bermakna</small></span></a>
-        <a class="header-link" href="{{ route('public.orders.progress') }}">Semak Progress</a>
+        <nav aria-label="Navigasi halaman tempahan">
+            <a class="header-link nav-progress" href="{{ route('home') }}">← Kembali</a>
+            <a class="header-link nav-progress" href="{{ route('public.orders.progress') }}">Semak Progress</a>
+        </nav>
     </header>
     <main class="form-page">
         <section class="form-intro">

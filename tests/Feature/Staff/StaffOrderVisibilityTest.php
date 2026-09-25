@@ -662,8 +662,10 @@ class StaffOrderVisibilityTest extends TestCase
                 route('staff.design-jobs.artwork.store', $job),
                 false
             )
-            ->assertSee('name="source_artwork"', false)
-            ->assertSee('name="customer_preview"', false)
+            ->assertSee('name="source_artwork[]"', false)
+            ->assertSee('name="customer_preview[]"', false)
+            ->assertSee('+ Add File')
+            ->assertSee('staff-file-delete', false)
             ->assertDontSee('Start Design')
             ->assertDontSee('Resume Correction');
     }

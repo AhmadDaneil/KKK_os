@@ -106,16 +106,16 @@
 @if ($depositPayment)
     <section class="deposit-status-card" data-deposit-status="{{ strtolower($depositPayment->status) }}">
         <div><span>Status Deposit</span><strong>{{ match ($depositPayment->status) { 'PAID' => 'Deposit Disahkan', 'FAILED' => 'Resit Ditolak', default => 'Menunggu Semakan' } }}</strong></div>
+        @if (session('deposit_status'))<p class="deposit-success">{{ session('deposit_status') }}</p>@endif
         @if ($depositPayment->status === 'PENDING')<p>Resit deposit anda telah diterima dan sedang disemak oleh Operation Management.</p>@endif
         @if ($depositPayment->status === 'PAID')<p>Bayaran deposit telah disahkan. Tempahan boleh diteruskan ke proses design.</p>@endif
         @if ($depositPayment->status === 'FAILED')
             <p><strong>Sebab penolakan:</strong> {{ $depositPayment->metadata['rejection_reason'] ?? 'Resit tidak dapat disahkan.' }}</p>
-            @if (session('deposit_status'))<p class="deposit-success">{{ session('deposit_status') }}</p>@endif
-            <form method="POST" enctype="multipart/form-data" action="{{ route('orders.deposit-receipt.update', ['orderId' => $order->order_id]) }}">
+            <form method="POST" enctype="multipart/form-data" action="{{ route('orders.deposit-receipt.update', ['orderId' => $order->order_id]) }}" data-deposit-resubmission-form>
                 @csrf
                 <label for="replacement-deposit-receipt">Muat naik resit baharu</label>
                 <input id="replacement-deposit-receipt" type="file" name="deposit_receipt" accept=".jpg,.jpeg,.png,.webp,.pdf,image/jpeg,image/png,image/webp,application/pdf" required>
-                <button type="submit">Hantar Semula Resit</button>
+                <button type="submit" data-deposit-resubmission-button>Hantar Semula Resit</button>
             </form>
         @endif
     </section>
@@ -451,7 +451,7 @@
 <div>
     <label>Hari</label>
 
-    <select name="sides[{{ $side }}][event][day_name]">
+    <select name="sides[{{ $side }}][event][day_name]" data-event-day>
         <option value="">-- Pilih Hari --</option>
 
         @foreach ([
@@ -469,8 +469,16 @@
         @endforeach
     </select>
 </div>
-                    <div><label>Tarikh</label><input type="date" name="sides[{{ $side }}][event][event_date]" value="{{ old("sides.$side.event.event_date", $event?->event_date?->format('Y-m-d')) }}"></div>
-                    <div><label>Tarikh Hijri</label><input name="sides[{{ $side }}][event][hijri_date]" placeholder="e.g. 4 Zulhijjah 1446H" value="{{ old("sides.$side.event.hijri_date", $event?->hijri_date) }}"></div>
+                    <div>
+                        <label>Tarikh</label>
+                        <input type="date" name="sides[{{ $side }}][event][event_date]" value="{{ old("sides.$side.event.event_date", $event?->event_date?->format('Y-m-d')) }}" data-event-date>
+                        <p class="date-picker-help" data-event-date-help>Pilih hari dahulu untuk memaparkan tarikh yang sepadan sahaja.</p>
+                    </div>
+                    <div>
+                        <label>Tarikh Hijri</label>
+                        <input name="sides[{{ $side }}][event][hijri_date]" placeholder="Contoh: 4 Zulhijjah 1446H" value="{{ old("sides.$side.event.hijri_date", $event?->hijri_date) }}" data-hijri-date>
+                        <p class="date-picker-help" data-hijri-date-help>Pilih hari dahulu untuk menapis tarikh Hijri yang sepadan.</p>
+                    </div>
                     <div><label>Masa Makan</label><input type="time" name="sides[{{ $side }}][event][meal_time]" value="{{ old("sides.$side.event.meal_time", $event?->meal_time ? substr($event->meal_time, 0, 5) : '') }}"></div>
                     <div><label>Masa Bersanding</label><input type="time" name="sides[{{ $side }}][event][bersanding_time]" value="{{ old("sides.$side.event.bersanding_time", $event?->bersanding_time ? substr($event->bersanding_time, 0, 5) : '') }}"></div>
                     <div><label>Nama Tempat</label><input name="sides[{{ $side }}][event][venue_name]" placeholder="e.g. Dewan Seri Impian" value="{{ old("sides.$side.event.venue_name", $event?->venue_name) }}"></div>
@@ -606,6 +614,7 @@
 
 </form>
 </main>
+<script src="{{ asset('js/customer-event-date-pickers.js') }}?v={{ filemtime(public_path('js/customer-event-date-pickers.js')) }}" data-calendar-url="{{ route('public.calendar.convert') }}" defer></script>
 <script>
 document.addEventListener('DOMContentLoaded', function () {
     const reviewLink = document.getElementById('review-order-link');
@@ -1132,6 +1141,21 @@ document.addEventListener('DOMContentLoaded', function () {
             });
 
             updateCancelButton();
+        });
+    });
+</script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const form = document.querySelector('[data-deposit-resubmission-form]');
+        const button = form?.querySelector('[data-deposit-resubmission-button]');
+
+        if (!form || !button) {
+            return;
+        }
+
+        form.addEventListener('submit', function () {
+            button.disabled = true;
+            button.textContent = 'Menghantar...';
         });
     });
 </script>

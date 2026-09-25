@@ -18,6 +18,7 @@ use App\Http\Controllers\DevMergeJobController;
 use App\Http\Controllers\DevOrderController;
 use App\Http\Controllers\DevPackingJobController;
 use App\Http\Controllers\DevPrintJobController;
+use App\Http\Controllers\PublicCalendarController;
 use App\Http\Controllers\PublicOrderController;
 use App\Http\Controllers\Staff\StaffAuthController;
 use App\Http\Controllers\Staff\StaffBalancePaymentController;
@@ -37,6 +38,10 @@ use App\Models\User;
 use Illuminate\Support\Facades\Route;
 
 Route::view('/', 'public.landing')->name('home');
+
+Route::get('/kalendar/jakim', [PublicCalendarController::class, 'convert'])
+    ->middleware('throttle:60,1')
+    ->name('public.calendar.convert');
 
 Route::get('/tempah', [PublicOrderController::class, 'create'])
     ->name('public.orders.create');
@@ -121,6 +126,8 @@ Route::middleware(['auth:admin', 'active.staff', 'staff.role:ADMIN'])
             ->name('print-jobs.start');
         Route::post('/print-jobs/{printJob}/mark-printed', [StaffPrintingWorkflowController::class, 'markPrinted'])
             ->name('print-jobs.mark-printed');
+        Route::get('/print-jobs/{printJob}/progress-files/{file}', [StaffPrintingWorkflowController::class, 'showProgressFile'])
+            ->name('print-jobs.progress-files.show');
 
         Route::post('/packing-jobs/{packingJob}/assign', [StaffJobAssignmentController::class, 'assignPacking'])
             ->name('packing-jobs.assign');
@@ -134,6 +141,8 @@ Route::middleware(['auth:admin', 'active.staff', 'staff.role:ADMIN'])
             ->name('packing-jobs.complete-courier');
         Route::post('/packing-jobs/{packingJob}/collect-pickup', [StaffPackingWorkflowController::class, 'collectPickup'])
             ->name('packing-jobs.collect-pickup');
+        Route::get('/packing-jobs/{packingJob}/proof', [StaffPackingWorkflowController::class, 'showProof'])
+            ->name('packing-jobs.proof.show');
     });
 
 /*
@@ -324,6 +333,16 @@ Route::middleware(['auth:staff', 'active.staff'])
         */
 
         Route::middleware('staff.role:PRINTING')->group(function () {
+            Route::get(
+                '/print-jobs/{printJob}/progress-files/{file}',
+                [StaffPrintingWorkflowController::class, 'showProgressFile']
+            )->name('print-jobs.progress-files.show');
+
+            Route::post(
+                '/print-jobs/{printJob}/progress-files',
+                [StaffPrintingWorkflowController::class, 'uploadProgress']
+            )->name('print-jobs.progress-files.store');
+
             Route::post(
                 '/print-jobs/{printJob}/start',
                 [StaffPrintingWorkflowController::class, 'start']
@@ -346,6 +365,11 @@ Route::middleware(['auth:staff', 'active.staff'])
             */
 
         Route::middleware('staff.role:PACKING,OPERATION_MANAGEMENT')->group(function () {
+            Route::get(
+                '/packing-jobs/{packingJob}/proof',
+                [StaffPackingWorkflowController::class, 'showProof']
+            )->name('packing-jobs.proof.show');
+
             Route::post(
                 '/packing-jobs/{packingJob}/start',
                 [StaffPackingWorkflowController::class, 'start']

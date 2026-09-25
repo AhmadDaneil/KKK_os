@@ -54,6 +54,15 @@ class StaffDepositPaymentWorkflowTest extends TestCase
         $this->assertSame('PENDING', $payment->fresh()->status);
         $this->assertSame('RECEIPT_SUBMITTED', $order->fresh()->booking_payment_status);
 
+        $this->post(route('orders.deposit-receipt.update', ['orderId' => $order->order_id]), [
+            'deposit_receipt' => UploadedFile::fake()->image('resit-baharu-dua.jpg'),
+        ])
+            ->assertRedirect()
+            ->assertSessionHas('deposit_status', 'Resit baharu anda telah pun dihantar dan sedang menunggu semakan.');
+
+        $this->assertSame('PENDING', $payment->fresh()->status);
+        $this->assertDatabaseCount('payment_events', 2);
+
         $this->actingAs($admin)
             ->post(route('staff.payments.deposit.approve', $payment), ['amount' => '125.50'])
             ->assertRedirect();

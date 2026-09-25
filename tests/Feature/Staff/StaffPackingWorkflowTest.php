@@ -215,6 +215,11 @@ class StaffPackingWorkflowTest extends TestCase
         $this->assertSame('packing.jpg', $job->proof_original_name);
         $this->assertSame('PACKED', $order->status);
 
+        $this->actingAs($packing, 'staff')
+            ->get(route('staff.packing-jobs.proof.show', $job))
+            ->assertOk()
+            ->assertHeader('Content-Type', 'image/jpeg');
+
         $this->assertDatabaseHas('fulfilment_jobs', [
             'order_id' => $order->id,
             'method' => 'PICKUP',

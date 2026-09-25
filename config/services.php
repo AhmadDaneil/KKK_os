@@ -2,6 +2,10 @@
 
 return [
 
+    'jakim_calendar' => [
+        'url' => env('JAKIM_CALENDAR_URL', 'https://www.e-solat.gov.my/index.php'),
+    ],
+
     /*
     |--------------------------------------------------------------------------
     | Third Party Services

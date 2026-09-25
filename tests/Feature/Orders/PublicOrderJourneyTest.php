@@ -45,7 +45,18 @@ class PublicOrderJourneyTest extends TestCase
         $this->get(route('public.orders.progress'))
             ->assertOk()
             ->assertSee('Kembali')
+            ->assertSee('header-link nav-progress', false)
             ->assertSee('href="'.route('home').'"', false);
+    }
+
+    public function test_start_order_header_has_back_and_progress_buttons_with_landing_hover_style(): void
+    {
+        $this->get(route('public.orders.create'))
+            ->assertOk()
+            ->assertSeeInOrder(['Kembali', 'Semak Progress'])
+            ->assertSee('href="'.route('home').'"', false)
+            ->assertSee('href="'.route('public.orders.progress').'"', false)
+            ->assertSee('header-link nav-progress', false);
     }
 
     public function test_customer_can_start_an_order_and_reach_full_form(): void

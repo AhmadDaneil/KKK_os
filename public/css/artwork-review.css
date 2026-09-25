@@ -189,6 +189,13 @@ textarea {
     font-size: 1.05rem;
 }
 
+.artwork-preview-links {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: 8px;
+}
+
 .button {
     display: inline-flex;
     align-items: center;

@@ -23,7 +23,7 @@
 
     <title>{{ $order->order_id }} - KKK OS Staff</title>
 
-    <link rel="stylesheet" href="{{ asset('css/staff.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/staff.css') }}?v={{ filemtime(public_path('css/staff.css')) }}">
 </head>
 <body @class(['admin-operations-mode' => auth()->user()->isAdmin()])>
     <div class="staff-app-shell">
@@ -398,16 +398,18 @@
                                                             Source Artwork
                                                         </label>
 
-                                                        <div class="staff-file-picker">
+                                                        <div class="staff-multi-file-picker" data-file-kind="source artwork">
                                                         <input
                                                             id="source-artwork-{{ $job->id }}"
                                                             type="file"
-                                                            name="{{ $isBatchArtworkJob ? 'artworks['.$job->id.'][source_artwork]' : 'source_artwork' }}"
+                                                            name="{{ $isBatchArtworkJob ? 'artworks['.$job->id.'][source_artwork][]' : 'source_artwork[]' }}"
                                                             @if ($isBatchArtworkJob) form="batch-artwork-upload" @endif
                                                             accept=".psd,.pdf"
+                                                            multiple
                                                             required
                                                         >
-                                                            <button type="button" class="staff-file-cancel" hidden aria-controls="source-artwork-{{ $job->id }}">Batal</button>
+                                                            <button type="button" class="staff-file-add" aria-controls="source-artwork-{{ $job->id }}">+ Add File</button>
+                                                            <ul class="staff-selected-files" aria-live="polite"></ul>
                                                         </div>
 
                                                         <span class="staff-field-help">
@@ -420,20 +422,22 @@
                                                             Customer Preview
                                                         </label>
 
-                                                        <div class="staff-file-picker">
+                                                        <div class="staff-multi-file-picker" data-file-kind="customer preview">
                                                         <input
                                                             id="customer-preview-{{ $job->id }}"
                                                             type="file"
-                                                            name="{{ $isBatchArtworkJob ? 'artworks['.$job->id.'][customer_preview]' : 'customer_preview' }}"
+                                                            name="{{ $isBatchArtworkJob ? 'artworks['.$job->id.'][customer_preview][]' : 'customer_preview[]' }}"
                                                             @if ($isBatchArtworkJob) form="batch-artwork-upload" @endif
-                                                            accept=".jpg,.jpeg,.png,.pdf"
+                                                            accept=".jpg,.jpeg,.png"
+                                                            multiple
                                                             required
                                                         >
-                                                            <button type="button" class="staff-file-cancel" hidden aria-controls="customer-preview-{{ $job->id }}">Batal</button>
+                                                            <button type="button" class="staff-file-add" aria-controls="customer-preview-{{ $job->id }}">+ Add File</button>
+                                                            <ul class="staff-selected-files" aria-live="polite"></ul>
                                                         </div>
 
                                                         <span class="staff-field-help">
-                                                            JPG, PNG or PDF. Maximum 20 MB.
+                                                            JPG or PNG only. Maximum 20 MB. Customer image previews are reduced in size and quality, then protected with a large King Kad Kahwin watermark.
                                                         </span>
                                                     </div>
 
@@ -737,13 +741,45 @@
                                         <dt>Printed</dt>
                                         <dd>{{ $job->printed_at?->format('Y-m-d H:i') ?? '-' }}</dd>
                                     </div>
+
+                                    <div>
+                                        <dt>Progress Updated</dt>
+                                        <dd>{{ $job->progress_updated_at?->format('Y-m-d H:i') ?? '-' }}</dd>
+                                    </div>
                                 </dl>
+
+                                @if (filled($job->progress_files))
+                                    <div class="staff-detail-group">
+                                        <h4>Printing Progress Files</h4>
+
+                                        <div class="staff-contact-list">
+                                            @foreach ($job->progress_files as $file)
+                                                <div class="staff-contact-row">
+                                                    <span>{{ $file['original_name'] ?? 'Progress file' }}</span>
+                                                    <a href="{{ route($operationRoutePrefix.'print-jobs.progress-files.show', ['printJob' => $job, 'file' => $loop->index]) }}" class="staff-button staff-button-small" target="_blank" rel="noopener">
+                                                        View · {{ isset($file['uploaded_at']) ? \Illuminate\Support\Carbon::parse($file['uploaded_at'])->format('Y-m-d H:i') : '-' }}
+                                                    </a>
+                                                </div>
+                                            @endforeach
+                                        </div>
+                                    </div>
+                                @endif
                                 @if (auth()->user()->hasStaffRole(\App\Models\User::ROLE_PRINTING) && $job->assigned_user_id === auth()->id())
                                     @if ($job->status === 'READY_FOR_PRINT')
                                         <form method="POST" action="{{ route($operationRoutePrefix.'print-jobs.start', $job) }}" class="staff-workflow-form">@csrf<button type="submit" class="staff-button staff-button-primary">Start Printing</button></form>
                                     @elseif ($job->status === 'WAITING_FOR_PAYMENT')
                                         <p class="staff-work-message">Menunggu pengesahan bayaran penuh sebelum cetakan boleh dimulakan.</p>
                                     @elseif ($job->status === 'PRINTING')
+                                        <form method="POST" enctype="multipart/form-data" action="{{ route('staff.print-jobs.progress-files.store', $job) }}" class="staff-packing-complete-form">
+                                            @csrf
+                                            <label for="print-progress-{{ $job->id }}">Upload printing progress</label>
+                                            <div class="staff-file-picker">
+                                                <input id="print-progress-{{ $job->id }}" type="file" name="progress_files[]" accept=".jpg,.jpeg,.png,.webp,.pdf,image/jpeg,image/png,image/webp,application/pdf" multiple required>
+                                                <button type="button" class="staff-file-cancel" hidden aria-controls="print-progress-{{ $job->id }}">Batal</button>
+                                            </div>
+                                            <p class="staff-muted-text">Upload photos or PDFs that show the current printing progress. Maximum 10 files, 20 MB each.</p>
+                                            <button type="submit" class="staff-button staff-button-secondary">Upload Progress</button>
+                                        </form>
                                         <form method="POST" action="{{ route($operationRoutePrefix.'print-jobs.mark-printed', $job) }}" class="staff-workflow-form">@csrf<button type="submit" class="staff-button staff-button-primary">Mark Printed</button></form>
                                     @elseif ($job->status === 'PRINTED')
                                         <p class="staff-work-message">Cetakan untuk pakej ini telah siap.</p>
@@ -807,7 +843,13 @@
                         @endif
 
                         @if ($order->packingJob->proof_storage_path)
-                            <p class="staff-proof-status"><strong>Bukti packing:</strong> {{ $order->packingJob->proof_original_name ?? 'Telah dimuat naik' }}</p>
+                            <div class="staff-proof-status">
+                                <strong>Bukti packing:</strong> {{ $order->packingJob->proof_original_name ?? 'Telah dimuat naik' }}
+
+                                @if (auth()->user()->isOperationManagement() || (auth()->user()->hasStaffRole(\App\Models\User::ROLE_PACKING) && $order->packingJob->assigned_user_id === auth()->id()))
+                                    <a href="{{ route($operationRoutePrefix.'packing-jobs.proof.show', $order->packingJob) }}" class="staff-button staff-button-small" target="_blank" rel="noopener">View</a>
+                                @endif
+                            </div>
                         @endif
 
                         @if (auth()->user()->isOperationManagement() || (auth()->user()->hasStaffRole(\App\Models\User::ROLE_PACKING) && $order->packingJob->assigned_user_id === auth()->id()))
@@ -1032,6 +1074,76 @@
     </div>
 <script>
     document.addEventListener('DOMContentLoaded', function () {
+        document.querySelectorAll('.staff-multi-file-picker').forEach(function (picker) {
+            const input = picker.querySelector('input[type="file"]');
+            const addButton = picker.querySelector('.staff-file-add');
+            const list = picker.querySelector('.staff-selected-files');
+            let selectedFiles = [];
+
+            function fileKey(file) {
+                return [file.name, file.size, file.lastModified].join(':');
+            }
+
+            function syncInput() {
+                const transfer = new DataTransfer();
+                selectedFiles.forEach(function (file) {
+                    transfer.items.add(file);
+                });
+                input.files = transfer.files;
+            }
+
+            function renderFiles() {
+                list.replaceChildren();
+
+                selectedFiles.forEach(function (file, index) {
+                    const item = document.createElement('li');
+                    const details = document.createElement('span');
+                    const name = document.createElement('strong');
+                    const size = document.createElement('small');
+                    const remove = document.createElement('button');
+
+                    name.textContent = file.name;
+                    size.textContent = (file.size / 1024 / 1024).toFixed(2) + ' MB';
+                    details.append(name, size);
+
+                    remove.type = 'button';
+                    remove.className = 'staff-file-delete';
+                    remove.textContent = 'Delete';
+                    remove.setAttribute('aria-label', 'Delete ' + file.name);
+                    remove.addEventListener('click', function () {
+                        selectedFiles.splice(index, 1);
+                        syncInput();
+                        renderFiles();
+                    });
+
+                    item.append(details, remove);
+                    list.append(item);
+                });
+
+                picker.classList.toggle('has-files', selectedFiles.length > 0);
+            }
+
+            addButton.addEventListener('click', function () {
+                input.click();
+            });
+
+            input.addEventListener('change', function () {
+                const knownFiles = new Set(selectedFiles.map(fileKey));
+
+                Array.from(input.files).forEach(function (file) {
+                    if (!knownFiles.has(fileKey(file))) {
+                        selectedFiles.push(file);
+                        knownFiles.add(fileKey(file));
+                    }
+                });
+
+                syncInput();
+                renderFiles();
+            });
+
+            renderFiles();
+        });
+
         document.querySelectorAll('.staff-file-picker').forEach(function (picker) {
             const input = picker.querySelector('input[type="file"]');
             const cancelButton = picker.querySelector('.staff-file-cancel');

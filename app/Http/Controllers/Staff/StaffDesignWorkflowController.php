@@ -9,6 +9,7 @@ use App\Services\Design\MarkDesignReadyService;
 use App\Services\Design\ResumeDesignAfterCorrectionService;
 use App\Services\Design\StartDesignJobService;
 use App\Services\Design\SyncOrderDesignStatusService;
+use App\Services\Design\WatermarkArtworkPreviewService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
@@ -72,51 +73,46 @@ class StaffDesignWorkflowController extends Controller
     }
 
     public function markReady(
-    Request $request,
-    DesignJob $designJob,
-    MarkDesignReadyService $service,
-    SyncOrderDesignStatusService $sync
-): RedirectResponse {
-    $this->authorizeAssignedDesigner($request, $designJob);
+        Request $request,
+        DesignJob $designJob,
+        MarkDesignReadyService $service,
+        SyncOrderDesignStatusService $sync
+    ): RedirectResponse {
+        $this->authorizeAssignedDesigner($request, $designJob);
 
-    try {
-        $service->markReady(
-            $designJob,
-            $request->user()
+        try {
+            $service->markReady(
+                $designJob,
+                $request->user()
+            );
+            $sync->sync($designJob->order);
+        } catch (RuntimeException $exception) {
+            return back()->withErrors([
+                'design_job' => $exception->getMessage(),
+            ]);
+        }
+
+        return back()->with(
+            'status',
+            'Artwork marked ready for customer review.'
         );
-        $sync->sync($designJob->order);
-    } catch (RuntimeException $exception) {
-        return back()->withErrors([
-            'design_job' => $exception->getMessage(),
-        ]);
-    }
-
-    return back()->with(
-        'status',
-        'Artwork marked ready for customer review.'
-    );
     }
 
     public function uploadArtwork(
         Request $request,
         DesignJob $designJob,
-        CreateArtworkVersionService $service
+        CreateArtworkVersionService $service,
+        WatermarkArtworkPreviewService $watermark
     ): RedirectResponse {
         $this->authorizeAssignedDesigner($request, $designJob);
 
+        $this->normalizeArtworkFiles($request);
+
         $validated = $request->validate([
-            'source_artwork' => [
-                'required',
-                'file',
-                'mimes:psd,pdf',
-                'max:102400',
-            ],
-            'customer_preview' => [
-                'required',
-                'file',
-                'mimes:jpg,jpeg,png,pdf',
-                'max:20480',
-            ],
+            'source_artwork' => ['required', 'array', 'min:1', 'max:20'],
+            'source_artwork.*' => ['required', 'file', 'mimes:psd,pdf', 'max:102400'],
+            'customer_preview' => ['required', 'array', 'min:1', 'max:20'],
+            'customer_preview.*' => ['required', 'file', 'mimes:jpg,jpeg,png', 'max:20480'],
             'internal_note' => [
                 'nullable',
                 'string',
@@ -132,16 +128,9 @@ class StaffDesignWorkflowController extends Controller
 
         if ($designJob->status !== 'DESIGN_IN_PROGRESS') {
             return back()->withErrors([
-                'design_job' =>
-                    "Artwork can only be added while design job {$designJob->id} is DESIGN_IN_PROGRESS.",
+                'design_job' => "Artwork can only be added while design job {$designJob->id} is DESIGN_IN_PROGRESS.",
             ]);
         }
-
-        /** @var UploadedFile $source */
-        $source = $validated['source_artwork'];
-
-        /** @var UploadedFile $preview */
-        $preview = $validated['customer_preview'];
 
         $diskName = 'local';
         $disk = Storage::disk($diskName);
@@ -158,104 +147,38 @@ class StaffDesignWorkflowController extends Controller
             (string) Str::uuid(),
         ]);
 
-        $sourceExtension = strtolower(
-            $source->extension()
-        );
-
-        $previewExtension = strtolower(
-            $preview->extension()
-        );
-
-        $sourcePath = $directory . '/source.' . $sourceExtension;
-        $previewPath = $directory . '/preview.' . $previewExtension;
-
-        $storedSource = false;
-        $storedPreview = false;
+        $storedPaths = [];
 
         try {
-            $sourceStream = fopen(
-                $source->getRealPath(),
-                'rb'
+            $sourceFiles = $this->storeFileCollection(
+                $validated['source_artwork'],
+                $directory,
+                'source',
+                $storedPaths
             );
-
-            if ($sourceStream === false) {
-                throw new RuntimeException(
-                    'Unable to read uploaded source artwork.'
-                );
-            }
-
-            try {
-                $storedSource = $disk->put(
-                    $sourcePath,
-                    $sourceStream
-                );
-            } finally {
-                if (is_resource($sourceStream)) {
-                    fclose($sourceStream);
-                }
-            }
-
-            if (! $storedSource) {
-                throw new RuntimeException(
-                    'Unable to store source artwork.'
-                );
-            }
-
-            $previewStream = fopen(
-                $preview->getRealPath(),
-                'rb'
+            $previewFiles = $this->storeFileCollection(
+                $validated['customer_preview'],
+                $directory,
+                'preview',
+                $storedPaths,
+                $watermark
             );
-
-            if ($previewStream === false) {
-                throw new RuntimeException(
-                    'Unable to read uploaded customer preview.'
-                );
-            }
-
-            try {
-                $storedPreview = $disk->put(
-                    $previewPath,
-                    $previewStream
-                );
-            } finally {
-                if (is_resource($previewStream)) {
-                    fclose($previewStream);
-                }
-            }
-
-            if (! $storedPreview) {
-                throw new RuntimeException(
-                    'Unable to store customer preview.'
-                );
-            }
-
-            $checksum = hash_file(
-                'sha256',
-                $source->getRealPath()
-            );
-
-            if ($checksum === false) {
-                throw new RuntimeException(
-                    'Unable to calculate artwork checksum.'
-                );
-            }
+            $primarySource = $sourceFiles[0];
+            $primaryPreview = $previewFiles[0];
 
             $artwork = $service->create(
                 $designJob,
                 [
                     'storage_disk' => $diskName,
-                    'storage_path' => $sourcePath,
-                    'original_filename' =>
-                        $source->getClientOriginalName(),
-                    'mime_type' =>
-                        $source->getMimeType()
-                        ?: 'application/octet-stream',
-                    'file_size_bytes' =>
-                        $source->getSize(),
-                    'checksum_sha256' => $checksum,
-                    'preview_storage_path' => $previewPath,
-                    'internal_note' =>
-                        $validated['internal_note'] ?? null,
+                    'storage_path' => $primarySource['path'],
+                    'original_filename' => $primarySource['original_name'],
+                    'mime_type' => $primarySource['mime_type'],
+                    'file_size_bytes' => $primarySource['size'],
+                    'checksum_sha256' => $primarySource['checksum_sha256'],
+                    'source_files' => $sourceFiles,
+                    'preview_storage_path' => $primaryPreview['path'],
+                    'preview_files' => $previewFiles,
+                    'internal_note' => $validated['internal_note'] ?? null,
                 ],
                 $request->user()
             );
@@ -265,13 +188,7 @@ class StaffDesignWorkflowController extends Controller
              * Remove anything written by this request if DB/service
              * creation fails.
              */
-            if ($storedPreview) {
-                $disk->delete($previewPath);
-            }
-
-            if ($storedSource) {
-                $disk->delete($sourcePath);
-            }
+            $disk->delete($storedPaths);
 
             if ($exception instanceof RuntimeException) {
                 return back()->withErrors([
@@ -282,15 +199,91 @@ class StaffDesignWorkflowController extends Controller
             report($exception);
 
             return back()->withErrors([
-                'design_job' =>
-                    'Artwork could not be uploaded. Please try again.',
+                'design_job' => 'Artwork could not be uploaded. Please try again.',
             ]);
         }
 
         return back()->with(
             'status',
-            "Artwork version {$artwork->version_number} uploaded successfully."
+            count($validated['source_artwork']) === 1 && count($validated['customer_preview']) === 1
+                ? "Artwork version {$artwork->version_number} uploaded successfully."
+                : "Artwork version {$artwork->version_number} uploaded successfully with "
+                    .count($validated['source_artwork']).' source file(s) and '
+                    .count($validated['customer_preview']).' preview file(s).'
         );
+    }
+
+    private function normalizeArtworkFiles(Request $request): void
+    {
+        foreach (['source_artwork', 'customer_preview'] as $field) {
+            $file = $request->files->get($field);
+
+            if ($file instanceof UploadedFile) {
+                $request->files->set($field, [$file]);
+            }
+        }
+    }
+
+    /**
+     * @param  array<int, UploadedFile>  $files
+     * @param  array<int, string>  $storedPaths
+     * @return array<int, array<string, int|string>>
+     */
+    private function storeFileCollection(
+        array $files,
+        string $directory,
+        string $prefix,
+        array &$storedPaths,
+        ?WatermarkArtworkPreviewService $watermark = null
+    ): array {
+        $disk = Storage::disk('local');
+        $storedFiles = [];
+
+        foreach (array_values($files) as $index => $file) {
+            $filename = $prefix.($index === 0 ? '' : '-'.($index + 1))
+                .'.'.strtolower($file->extension());
+            $path = $disk->putFileAs(
+                $directory,
+                $file,
+                $filename
+            );
+
+            if ($path === false) {
+                throw new RuntimeException("Unable to store {$prefix} artwork file.");
+            }
+
+            $checksum = hash_file('sha256', $file->getRealPath());
+
+            if ($checksum === false) {
+                throw new RuntimeException("Unable to calculate {$prefix} artwork checksum.");
+            }
+
+            $storedPaths[] = $path;
+            $watermarkedPath = null;
+
+            if ($watermark !== null) {
+                $watermarkedPath = $watermark->create(
+                    $path,
+                    $directory.'/preview-watermarked-'.($index + 1).'.jpg'
+                );
+
+                if ($watermarkedPath !== null) {
+                    $storedPaths[] = $watermarkedPath;
+                }
+            }
+
+            $storedFiles[] = [
+                'path' => $path,
+                'original_name' => $file->getClientOriginalName(),
+                'mime_type' => $file->getMimeType() ?: 'application/octet-stream',
+                'size' => $file->getSize(),
+                'checksum_sha256' => $checksum,
+                'watermarked_path' => $watermarkedPath,
+                'watermark_version' => $watermarkedPath === null ? null : 2,
+            ];
+        }
+
+        return $storedFiles;
     }
 
     private function authorizeAssignedDesigner(

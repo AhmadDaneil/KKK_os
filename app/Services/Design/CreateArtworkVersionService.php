@@ -36,7 +36,9 @@ class CreateArtworkVersionService
                 'mime_type' => $fileData['mime_type'] ?? null,
                 'file_size_bytes' => $fileData['file_size_bytes'] ?? null,
                 'checksum_sha256' => $fileData['checksum_sha256'] ?? null,
+                'source_files' => $fileData['source_files'] ?? null,
                 'preview_storage_path' => $fileData['preview_storage_path'] ?? null,
+                'preview_files' => $fileData['preview_files'] ?? null,
                 'internal_note' => $fileData['internal_note'] ?? null,
                 'created_by_user_id' => $actor?->id,
             ]);
