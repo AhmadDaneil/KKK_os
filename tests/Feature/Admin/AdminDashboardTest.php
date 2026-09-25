@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Admin;
 
+use App\Models\Order;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
@@ -41,6 +42,48 @@ class AdminDashboardTest extends TestCase
             ->assertSee('Printing Belum Assign')
             ->assertSee('Packing Belum Assign')
             ->assertSee(route('admin.orders.index'), false);
+    }
+
+    public function test_admin_can_open_an_order_from_dashboard_quick_search(): void
+    {
+        $admin = $this->staff(User::ROLE_ADMIN);
+        $order = Order::create([
+            'order_id' => 'KKK-260925-0042',
+            'package_count' => 1,
+            'status' => 'DETAILS_INCOMPLETE',
+        ]);
+
+        $this->actingAs($admin)
+            ->get(route('admin.dashboard'))
+            ->assertOk()
+            ->assertSee('Cari pantas Order ID')
+            ->assertSee(route('admin.orders.find'), false);
+
+        $this->get(route('admin.orders.find', ['order_id' => strtolower($order->order_id)]))
+            ->assertRedirect(route('admin.orders.show', $order->order_id));
+    }
+
+    public function test_dashboard_quick_search_reports_missing_or_unknown_order_id(): void
+    {
+        $admin = $this->staff(User::ROLE_ADMIN);
+
+        $this->actingAs($admin)
+            ->from(route('admin.dashboard'))
+            ->get(route('admin.orders.find'))
+            ->assertRedirect(route('admin.dashboard'))
+            ->assertSessionHasErrors(['order_id' => 'Sila masukkan Order ID.']);
+
+        $this->from(route('admin.dashboard'))
+            ->get(route('admin.orders.find', ['order_id' => 'KKK-TIDAK-WUJUD']))
+            ->assertRedirect(route('admin.dashboard'))
+            ->assertSessionHasErrors(['order_id' => 'Order ID tidak dijumpai.'])
+            ->assertSessionHasInput('order_id', 'KKK-TIDAK-WUJUD');
+    }
+
+    public function test_guest_cannot_use_admin_order_quick_search(): void
+    {
+        $this->get(route('admin.orders.find', ['order_id' => 'KKK-260925-0042']))
+            ->assertRedirect(route('admin.login'));
     }
 
     public function test_admin_operations_keep_using_admin_session_when_staff_session_also_exists(): void

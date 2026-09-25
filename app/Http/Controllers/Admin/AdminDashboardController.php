@@ -9,10 +9,33 @@ use App\Models\PackingJob;
 use App\Models\PaymentTransaction;
 use App\Models\PrintJob;
 use App\Models\User;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\View\View;
 
 class AdminDashboardController extends Controller
 {
+    public function findOrder(Request $request): RedirectResponse
+    {
+        $validated = $request->validate([
+            'order_id' => ['required', 'string', 'max:32'],
+        ], [
+            'order_id.required' => 'Sila masukkan Order ID.',
+            'order_id.max' => 'Order ID tidak boleh melebihi 32 aksara.',
+        ]);
+
+        $orderId = strtoupper(trim($validated['order_id']));
+        $order = Order::query()->where('order_id', $orderId)->first();
+
+        if (! $order) {
+            return back()
+                ->withErrors(['order_id' => 'Order ID tidak dijumpai.'])
+                ->withInput();
+        }
+
+        return redirect()->route('admin.orders.show', $order->order_id);
+    }
+
     public function index(): View
     {
         $statistics = [

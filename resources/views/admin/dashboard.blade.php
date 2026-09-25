@@ -5,7 +5,21 @@
 
 @section('content')
     <section class="admin-welcome">
-        <div><p class="admin-eyebrow">Selamat datang, {{ auth()->user()->name }}</p><h2>Semua operasi dalam satu paparan.</h2><p>Pantau tempahan, pembayaran dan beban kerja setiap jabatan sebelum membuka butiran operasi.</p></div>
+        <div>
+            <p class="admin-eyebrow">Selamat datang, {{ auth()->user()->name }}</p>
+            <h2>Semua operasi dalam satu paparan.</h2>
+            <p>Pantau tempahan, pembayaran dan beban kerja setiap jabatan sebelum membuka butiran operasi.</p>
+            <form class="admin-quick-order-search" method="GET" action="{{ route('admin.orders.find') }}">
+                <label for="dashboard-order-id">Cari pantas Order ID</label>
+                <div>
+                    <input id="dashboard-order-id" name="order_id" value="{{ old('order_id') }}" placeholder="Contoh: KKK-260924-0003" maxlength="32" required>
+                    <button class="admin-button admin-button-gold" type="submit">Buka Order</button>
+                </div>
+                @error('order_id')
+                    <span class="admin-quick-search-error">{{ $message }}</span>
+                @enderror
+            </form>
+        </div>
         <a class="admin-button admin-button-gold" href="{{ route('admin.staff.index') }}">Urus Staff</a>
     </section>
 

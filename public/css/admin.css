@@ -86,3 +86,12 @@ body{background:linear-gradient(180deg,#f4efe3 0,#f3f4f1 380px)}
 @keyframes admin-stat-enter{from{opacity:0;transform:translateY(18px) scale(.98)}to{opacity:1;transform:translateY(0) scale(1)}}
 @keyframes admin-stat-float{0%,100%{transform:translateY(0)}50%{transform:translateY(-3px)}}
 @media(prefers-reduced-motion:reduce){.admin-stat-grid article{transition:none}.admin-stat-grid article:hover{transform:none}.admin-stat-grid.is-animated article,.admin-stat-grid.is-floating article{animation:none}}
+
+.admin-quick-order-search{width:min(100%,560px);margin-top:22px}
+.admin-quick-order-search label{display:block;margin-bottom:7px;color:#ead7a3;font-size:11px;font-weight:850;text-transform:uppercase;letter-spacing:.08em}
+.admin-quick-order-search>div{display:flex;gap:8px}
+.admin-quick-order-search input{width:100%;min-width:0;min-height:43px;padding:10px 13px;border:1px solid rgba(255,255,255,.32);border-radius:9px;color:#2f291d;background:#fffdf8}
+.admin-quick-order-search input:focus{border-color:#e0b95c;outline:3px solid rgba(224,185,92,.2)}
+.admin-quick-order-search .admin-button{flex:0 0 auto}
+.admin-quick-search-error{display:block;margin-top:7px;color:#ffd1c7;font-size:12px;font-weight:750}
+@media(max-width:560px){.admin-quick-order-search>div{align-items:stretch;flex-direction:column}.admin-quick-order-search .admin-button{width:100%}}
