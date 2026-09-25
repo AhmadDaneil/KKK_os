@@ -57,9 +57,13 @@ class StaffOrderController extends Controller
                 'packageSides.event.contacts',
                 'fulfilment',
                 'payments',
-                'fulfilmentJob',
+                'fulfilmentJob.events.actor',
                 'printingAssignedUser',
                 'packingAssignedUser',
+                'statusEvents' => fn ($query) => $query
+                    ->with('actor')
+                    ->latest('occurred_at')
+                    ->latest('id'),
             ])
             ->firstOrFail();
 
@@ -74,6 +78,9 @@ class StaffOrderController extends Controller
                 'printJobs.assignedUser',
                 'packingJob.assignedUser',
                 'packingJob.items',
+                'designJobs.events.actor',
+                'printJobs.events.actor',
+                'packingJob.events.actor',
             ]);
         } elseif ($user->hasStaffRole(User::ROLE_OM)) {
             $order->load([
@@ -82,6 +89,9 @@ class StaffOrderController extends Controller
                 'printJobs.assignedUser',
                 'packingJob.assignedUser',
                 'packingJob.items',
+                'designJobs.events.actor',
+                'printJobs.events.actor',
+                'packingJob.events.actor',
             ]);
         } elseif ($user->hasStaffRole(User::ROLE_DESIGNER)) {
             $order->load([
@@ -99,6 +109,49 @@ class StaffOrderController extends Controller
                     ->with('assignedUser'),
             ]);
         }
+
+        $timelineEvents = collect([
+            ...$order->statusEvents->map(fn ($event) => [
+                'event_type' => $event->event_type,
+                'from_status' => $event->from_status,
+                'to_status' => $event->to_status,
+                'actor' => $event->actor,
+                'occurred_at' => $event->occurred_at,
+                'reason' => $event->reason,
+            ]),
+            ...$order->designJobs->flatMap(fn ($job) => $job->events->map(fn ($event) => [
+                'event_type' => $event->event_type,
+                'from_status' => $event->from_status,
+                'to_status' => $event->to_status,
+                'actor' => $event->actor,
+                'occurred_at' => $event->occurred_at,
+                'reason' => null,
+            ])),
+            ...$order->printJobs->flatMap(fn ($job) => $job->events->map(fn ($event) => [
+                'event_type' => $event->event_type,
+                'from_status' => $event->from_status,
+                'to_status' => $event->to_status,
+                'actor' => $event->actor,
+                'occurred_at' => $event->occurred_at,
+                'reason' => null,
+            ])),
+            ...($order->packingJob?->events ?? collect())->map(fn ($event) => [
+                'event_type' => $event->event_type,
+                'from_status' => $event->from_status,
+                'to_status' => $event->to_status,
+                'actor' => $event->actor,
+                'occurred_at' => $event->occurred_at,
+                'reason' => null,
+            ]),
+            ...($order->fulfilmentJob?->events ?? collect())->map(fn ($event) => [
+                'event_type' => $event->event_type,
+                'from_status' => $event->from_status,
+                'to_status' => $event->to_status,
+                'actor' => $event->actor,
+                'occurred_at' => $event->occurred_at,
+                'reason' => null,
+            ]),
+        ])->sortByDesc('occurred_at')->values();
 
         $assignmentOptions = [
             'designers' => collect(),
@@ -130,6 +183,7 @@ class StaffOrderController extends Controller
 
         return view('staff.orders.show', [
             'order' => $order,
+            'timelineEvents' => $timelineEvents,
             'canAssignProduction' => $order->designJobs()->exists()
                 && $order->designJobs()
                     ->where('status', '!=', 'DESIGN_APPROVED')

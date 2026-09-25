@@ -130,6 +130,39 @@
                 </section>
             </div>
 
+            <section class="staff-section staff-timeline-section">
+                <h2 class="staff-section-title">Timeline Order</h2>
+
+                @if ($timelineEvents->isNotEmpty())
+                    <ol class="staff-timeline">
+                        @foreach ($timelineEvents as $event)
+                            <li class="staff-timeline-item">
+                                <span class="staff-timeline-marker" aria-hidden="true"></span>
+                                <div class="staff-timeline-content">
+                                    <div class="staff-timeline-heading">
+                                        <strong>{{ str_replace('_', ' ', $event['to_status'] ?: $event['event_type']) }}</strong>
+                                        <time datetime="{{ $event['occurred_at']?->toIso8601String() }}">
+                                            {{ $event['occurred_at']?->format('d/m/Y, H:i') ?? '-' }}
+                                        </time>
+                                    </div>
+                                    <p>
+                                        {{ $event['actor']?->name ?? 'Sistem' }}
+                                        @if ($event['from_status'] && $event['from_status'] !== $event['to_status'])
+                                            <span>· {{ str_replace('_', ' ', $event['from_status']) }} → {{ str_replace('_', ' ', $event['to_status']) }}</span>
+                                        @endif
+                                    </p>
+                                    @if ($event['reason'])
+                                        <small>{{ $event['reason'] }}</small>
+                                    @endif
+                                </div>
+                            </li>
+                        @endforeach
+                    </ol>
+                @else
+                    <p class="staff-empty-state">Belum ada rekod perubahan status untuk order ini.</p>
+                @endif
+            </section>
+
             <section class="staff-section">
                 <h2 class="staff-section-title">Packages</h2>
 
