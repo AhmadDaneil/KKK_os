@@ -13,7 +13,7 @@
     $workstreamLabels = [
         'design' => 'Design',
         'printing' => 'Production',
-        'packing' => 'OM Packing',
+        'packing' => 'Packing',
         'fulfilment' => 'Fulfilment',
     ];
     $workstreamLabel = $workstreamLabels[$workstream] ?? null;
@@ -55,10 +55,10 @@
                         &larr; Dashboard
                     </a>
 
-                    <h1>{{ $workstream ? ucfirst($workstream).' Queue' : 'Semua Orders' }}</h1>
+                    <h1>{{ $workstreamLabel ? $workstreamLabel.' Queue' : 'Semua Orders' }}</h1>
 
                     <p>
-                        @if (auth()->user()->isAdmin())
+                        @if (auth()->user()->isOperationManagement())
                             {{ $workstreamDescriptions[$workstream] ?? 'Pantau semua order dan kerja operasi KKK OS.' }}
                         @else
                             Lihat order yang mempunyai kerja assigned kepada anda.
@@ -80,7 +80,7 @@
                 @if (request()->hasAny(['search', 'status']))<a class="staff-button" href="{{ route($ordersIndexRoute, array_filter(['workstream' => $workstream, 'attention' => request('attention')])) }}">Reset</a>@endif
             </form>
 
-            @if (auth()->user()->isAdmin() && request('attention'))
+            @if (auth()->user()->isOperationManagement() && request('attention'))
                 <div class="staff-filter-notice">
                     Memaparkan order untuk tindakan: <strong>{{ str_replace('_', ' ', request('attention')) }}</strong>
                     <a href="{{ route($ordersIndexRoute, array_filter(['workstream' => $workstream])) }}">Buang penapis</a>
@@ -120,7 +120,7 @@
                         </div>
 
                         <div class="staff-order-work">
-                            @if (auth()->user()->isAdmin())
+                            @if (auth()->user()->isOperationManagement())
                                 @if ((! $workstream || $workstream === 'design') && $order->relationLoaded('designJobs') && $order->designJobs->isNotEmpty())
                                     <div class="staff-work-row">
                                         <span>Design</span>
@@ -219,8 +219,8 @@
                 @empty
                     <div class="staff-empty">
                         @if ($workstream)
-                            Tiada order aktif dalam {{ ucfirst($workstream) }} Queue.
-                        @elseif (auth()->user()->isAdmin())
+                            Tiada order aktif dalam {{ $workstreamLabel }} Queue.
+                        @elseif (auth()->user()->isOperationManagement())
                             Tiada order tersedia.
                         @else
                             Tiada order assigned kepada anda.

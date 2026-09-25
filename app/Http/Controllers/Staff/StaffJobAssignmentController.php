@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Staff;
 
 use App\Http\Controllers\Controller;
 use App\Models\DesignJob;
+use App\Models\Order;
 use App\Models\PackingJob;
 use App\Models\PrintJob;
 use App\Models\User;
@@ -21,6 +22,7 @@ class StaffJobAssignmentController extends Controller
         DesignJob $designJob,
         AssignDesignJobService $service
     ): RedirectResponse {
+        $this->ensureOrderIsAssignable($designJob->order);
         $assignee = $this->validatedAssignee(
             $request,
             User::ROLE_DESIGNER
@@ -40,6 +42,7 @@ class StaffJobAssignmentController extends Controller
         PrintJob $printJob,
         AssignPrintJobService $service
     ): RedirectResponse {
+        $this->ensureOrderIsAssignable($printJob->order);
         $assignee = $this->validatedAssignee(
             $request,
             User::ROLE_PRODUCTION
@@ -59,6 +62,7 @@ class StaffJobAssignmentController extends Controller
         PackingJob $packingJob,
         AssignPackingJobService $service
     ): RedirectResponse {
+        $this->ensureOrderIsAssignable($packingJob->order);
         $assignee = $this->validatedAssignee($request, User::ROLE_OM);
 
         $service->assign(
@@ -90,6 +94,15 @@ class StaffJobAssignmentController extends Controller
 
         return User::query()->findOrFail(
             $validated['assigned_user_id']
+        );
+    }
+
+    private function ensureOrderIsAssignable(?Order $order): void
+    {
+        abort_if(
+            $order?->isAssignmentLocked(),
+            422,
+            'Completed or closed orders cannot be reassigned.'
         );
     }
 }

@@ -18,6 +18,7 @@ class StaffOrderProductionAssignmentController extends Controller
         AssignOrderProductionStaffService $service
     ): RedirectResponse {
         $this->authorizeManager($request);
+        $this->ensureOrderIsAssignable($order);
         $this->ensureDesignIsApproved($order);
         $assignee = $this->validatedAssignee($request, User::ROLE_PRODUCTION);
 
@@ -32,6 +33,7 @@ class StaffOrderProductionAssignmentController extends Controller
         AssignOrderProductionStaffService $service
     ): RedirectResponse {
         $this->authorizeManager($request);
+        $this->ensureOrderIsAssignable($order);
         $this->ensureDesignIsApproved($order);
         $assignee = $this->validatedAssignee($request, User::ROLE_OM);
 
@@ -54,6 +56,15 @@ class StaffOrderProductionAssignmentController extends Controller
             && $statuses->every(fn (string $status): bool => $status === 'DESIGN_APPROVED'),
             422,
             'Production staff can only be assigned after every artwork is approved.'
+        );
+    }
+
+    private function ensureOrderIsAssignable(Order $order): void
+    {
+        abort_unless(
+            ! $order->isAssignmentLocked(),
+            422,
+            'Completed or closed orders cannot be reassigned.'
         );
     }
 

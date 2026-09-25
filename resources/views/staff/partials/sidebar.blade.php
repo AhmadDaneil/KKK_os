@@ -4,8 +4,11 @@
     $isOverview = request()->attributes->get('staff_overview_mode', false);
     $isAdminPortal = request()->routeIs('admin.orders.*');
     $ordersIndexRoute = $isAdminPortal ? 'admin.orders.index' : 'staff.orders.index';
+    $canMonitorOperations = $staffUser->isOperationManagement();
+    $canViewDesignQueue = $canMonitorOperations || $staffUser->hasStaffRole(\App\Models\User::ROLE_DESIGNER);
+    $canViewProductionQueue = $canMonitorOperations || $staffUser->hasStaffRole(\App\Models\User::ROLE_PRODUCTION);
     $roleLabel = match ($staffUser->role) {
-        \App\Models\User::ROLE_OM => 'OM · Packing & Fulfilment',
+        \App\Models\User::ROLE_OM => 'Operation Management',
         \App\Models\User::ROLE_CUSTOMER_SERVICE => 'Customer Service',
         \App\Models\User::ROLE_PRODUCTION => 'Production',
         default => str_replace('_', ' ', $staffUser->role),
@@ -35,27 +38,29 @@
             <a href="{{ route($ordersIndexRoute) }}" @class(['staff-nav-link', 'is-active' => request()->routeIs($isAdminPortal ? 'admin.orders.*' : 'staff.orders.*') && ! $activeWorkstream])><span class="staff-nav-icon" aria-hidden="true">OR</span>Semua Orders</a>
         </section>
 
-        <section class="staff-nav-section">
-            <h2>Design</h2>
-            @if ($staffUser->isAdmin() || $staffUser->hasStaffRole(\App\Models\User::ROLE_DESIGNER))
+        @if ($canViewDesignQueue)
+            <section class="staff-nav-section">
+                <h2>Design</h2>
                 <a href="{{ route($ordersIndexRoute, ['workstream' => 'design']) }}" @class(['staff-nav-link', 'is-active' => $activeWorkstream === 'design'])><span class="staff-nav-icon" aria-hidden="true">DE</span>Design Queue</a>
-            @endif
-        </section>
+            </section>
+        @endif
 
-        <section class="staff-nav-section">
-            <h2>Production</h2>
-            @if ($staffUser->isAdmin() || $staffUser->hasStaffRole(\App\Models\User::ROLE_PRODUCTION))
+        @if ($canViewProductionQueue || $canMonitorOperations)
+            <section class="staff-nav-section">
+                <h2>Production</h2>
+                @if ($canViewProductionQueue)
                 <a href="{{ route($ordersIndexRoute, ['workstream' => 'printing']) }}" @class(['staff-nav-link', 'is-active' => $activeWorkstream === 'printing'])><span class="staff-nav-icon" aria-hidden="true">PR</span>Production Queue</a>
-            @endif
+                @endif
 
-            @if ($staffUser->isOperationManagement())
-                <a href="{{ route($ordersIndexRoute, ['workstream' => 'packing']) }}" @class(['staff-nav-link', 'is-active' => $activeWorkstream === 'packing'])><span class="staff-nav-icon" aria-hidden="true">PA</span>OM Packing Queue</a>
-            @endif
+                @if ($canMonitorOperations)
+                <a href="{{ route($ordersIndexRoute, ['workstream' => 'packing']) }}" @class(['staff-nav-link', 'is-active' => $activeWorkstream === 'packing'])><span class="staff-nav-icon" aria-hidden="true">PA</span>Packing Queue</a>
+                @endif
 
-            @if ($isOverview || $staffUser->isAdmin())
+                @if ($canMonitorOperations)
                 <a href="{{ route($ordersIndexRoute, ['workstream' => 'fulfilment']) }}" @class(['staff-nav-link', 'is-active' => $activeWorkstream === 'fulfilment'])><span class="staff-nav-icon" aria-hidden="true">FU</span>Fulfilment</a>
-            @endif
-        </section>
+                @endif
+            </section>
+        @endif
     </nav>
 
     @unless ($isOverview)

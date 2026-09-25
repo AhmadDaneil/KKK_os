@@ -15,14 +15,14 @@
                 <label for="dashboard-order-id">Cari pantas Order ID</label>
                 <div>
                     <input id="dashboard-order-id" name="order_id" value="{{ old('order_id') }}" placeholder="Contoh: KKK-260924-0003" maxlength="32" required>
-                    <button class="admin-button admin-button-gold" type="submit">Buka Order</button>
+                    <button class="admin-button admin-button-gold admin-action-hover" type="submit">Buka Order</button>
                 </div>
                 @error('order_id')
                     <span class="admin-quick-search-error">{{ $message }}</span>
                 @enderror
             </form>
         </div>
-        <a class="admin-button admin-button-gold" href="{{ route('admin.staff.index') }}">Urus Staff</a>
+        <a class="admin-button admin-button-gold admin-action-hover" href="{{ route('admin.staff.index') }}">Urus Staff</a>
     </section>
 
     <section class="admin-stat-grid" aria-label="Ringkasan operasi">
@@ -39,7 +39,7 @@
             <a href="{{ route('admin.orders.index', ['attention' => 'pending_payment']) }}" @class(['has-alert' => $attention['pending_payments'] > 0, 'is-clear' => $attention['pending_payments'] === 0])><span class="action-icon is-payment">RM</span><div><strong>Semakan Pembayaran</strong><small>Deposit atau bayaran penuh yang masih pending</small></div><b>{{ $attention['pending_payments'] }}</b></a>
             <a href="{{ route('admin.orders.index', ['workstream' => 'design', 'attention' => 'unassigned_design']) }}" @class(['has-alert' => $attention['unassigned_design'] > 0, 'is-clear' => $attention['unassigned_design'] === 0])><span class="action-icon is-design">DE</span><div><strong>Design Belum Assign</strong><small>Assign designer supaya artwork boleh dimulakan</small></div><b>{{ $attention['unassigned_design'] }}</b></a>
             <a href="{{ route('admin.orders.index', ['workstream' => 'printing', 'attention' => 'unassigned_printing']) }}" @class(['has-alert' => $attention['unassigned_printing'] > 0, 'is-clear' => $attention['unassigned_printing'] === 0])><span class="action-icon is-printing">PR</span><div><strong>Production Belum Assign</strong><small>Assign staf production untuk menghasilkan hanger</small></div><b>{{ $attention['unassigned_printing'] }}</b></a>
-            <a href="{{ route('admin.orders.index', ['workstream' => 'packing', 'attention' => 'unassigned_packing']) }}" @class(['has-alert' => $attention['unassigned_packing'] > 0, 'is-clear' => $attention['unassigned_packing'] === 0])><span class="action-icon is-packing">PA</span><div><strong>OM Packing Belum Assign</strong><small>Assign OM untuk packing dan fulfilment</small></div><b>{{ $attention['unassigned_packing'] }}</b></a>
+            <a href="{{ route('admin.orders.index', ['workstream' => 'packing', 'attention' => 'unassigned_packing']) }}" @class(['has-alert' => $attention['unassigned_packing'] > 0, 'is-clear' => $attention['unassigned_packing'] === 0])><span class="action-icon is-packing">PA</span><div><strong>Packing Belum Assign</strong><small>Assign OM untuk packing dan fulfilment</small></div><b>{{ $attention['unassigned_packing'] }}</b></a>
         </div>
     </section>
 
@@ -49,7 +49,7 @@
             <div class="admin-queue-list">
                 <a href="{{ route('admin.orders.index', ['workstream' => 'design']) }}"><span class="queue-icon">DE</span><div><strong>Design</strong><small>Ready, sedang design atau pembetulan</small></div><b>{{ $queues['design'] }}</b></a>
                 <a href="{{ route('admin.orders.index', ['workstream' => 'printing']) }}"><span class="queue-icon">PR</span><div><strong>Production</strong><small>Hanger sedang dihasilkan</small></div><b>{{ $queues['printing'] }}</b></a>
-                <a href="{{ route('admin.orders.index', ['workstream' => 'packing']) }}"><span class="queue-icon">PA</span><div><strong>OM Packing</strong><small>Menunggu atau sedang dibungkus</small></div><b>{{ $queues['packing'] }}</b></a>
+                <a href="{{ route('admin.orders.index', ['workstream' => 'packing']) }}"><span class="queue-icon">PA</span><div><strong>Packing</strong><small>Menunggu atau sedang dibungkus</small></div><b>{{ $queues['packing'] }}</b></a>
             </div>
         </section>
 

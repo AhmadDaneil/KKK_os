@@ -273,7 +273,7 @@
                                 <h3>Prepare this customer order in Photoshop</h3>
                                 <ol>
                                     <li>Download the customer order CSV.</li>
-                                    <li>Open Photoshop with the approved JavaScript.</li>
+                                    <li>Open Photoshop; the approved JavaScript starts automatically.</li>
                                     <li>Select the ROOT folder, then select the downloaded CSV file.</li>
                                 </ol>
                                 <p class="staff-design-tools-note">
@@ -516,7 +516,7 @@
                                         @endif
                                     </div>
                                 @endif
-                                @if (auth()->user()->isOperationManagement() && ! request()->attributes->get('staff_overview_mode', false))
+                                @if (auth()->user()->isOperationManagement() && ! $order->isAssignmentLocked() && ! request()->attributes->get('staff_overview_mode', false))
     <form
         method="POST"
         action="{{ route($operationRoutePrefix.'design-jobs.assign', $job) }}"
@@ -678,7 +678,7 @@
                 </div>
             </section>
 
-            @if (($canAssignProduction ?? false) && auth()->user()->isOperationManagement() && ! request()->attributes->get('staff_overview_mode', false))
+            @if (($canAssignProduction ?? false) && ! $order->isAssignmentLocked() && auth()->user()->isOperationManagement() && ! request()->attributes->get('staff_overview_mode', false))
                 <section class="staff-section">
                     <h2 class="staff-section-title">Assign Production Staff</h2>
 

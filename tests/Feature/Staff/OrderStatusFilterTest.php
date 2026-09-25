@@ -34,6 +34,26 @@ class OrderStatusFilterTest extends TestCase
             ->assertDontSee($completedOrder->order_id);
     }
 
+    public function test_om_can_open_every_department_queue_for_monitoring(): void
+    {
+        $manager = User::factory()->create([
+            'role' => User::ROLE_OM,
+            'is_active' => true,
+        ]);
+
+        foreach ([
+            'design' => 'Design Queue',
+            'printing' => 'Production Queue',
+            'packing' => 'Packing Queue',
+            'fulfilment' => 'Fulfilment Queue',
+        ] as $workstream => $heading) {
+            $this->actingAs($manager, 'staff')
+                ->get(route('staff.orders.index', ['workstream' => $workstream]))
+                ->assertOk()
+                ->assertSee($heading);
+        }
+    }
+
     public function test_admin_portal_uses_the_same_not_completed_filter(): void
     {
         $admin = User::factory()->create([
