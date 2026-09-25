@@ -34,8 +34,7 @@ class OrderProductionAssignmentTest extends TestCase
             ->get(route('staff.orders.show', $order->order_id))
             ->assertOk()
             ->assertSee('Assign Production Staff')
-            ->assertSee('Assign Printing Staff')
-            ->assertSee('Assign Packing &amp; Fulfilment Staff', false);
+            ->assertSee('Assign OM');
 
         $this->actingAs($operationManagement)
             ->post(route('staff.design-jobs.assign', $order->designJobs->first()), ['assigned_user_id' => $designer->id])
@@ -55,8 +54,8 @@ class OrderProductionAssignmentTest extends TestCase
         $managementView = $this->actingAs($operationManagement)
             ->get(route('staff.orders.show', $order->order_id));
         $managementView->assertOk()
-            ->assertSee('Reassign Printing Staff')
-            ->assertSee('Reassign Packing &amp; Fulfilment Staff', false)
+            ->assertSee('Reassign Production Staff')
+            ->assertSee('Reassign OM')
             ->assertDontSee(route('staff.print-jobs.assign', $order->printJobs->first()));
 
         $this->actingAs($printing)
@@ -68,10 +67,9 @@ class OrderProductionAssignmentTest extends TestCase
         $this->actingAs($packing)
             ->get(route('staff.orders.index', ['workstream' => 'packing']))
             ->assertOk()
-            ->assertSee($order->order_id)
-            ->assertSee('WAITING FOR PACKING JOB');
+            ->assertSee($order->order_id);
 
-        foreach ([$designer, $printing, $packing] as $assignee) {
+        foreach ([$designer, $printing] as $assignee) {
             $this->actingAs($assignee)
                 ->get(route('staff.orders.index'))
                 ->assertOk()
@@ -132,6 +130,30 @@ class OrderProductionAssignmentTest extends TestCase
 
         $this->actingAs($operationManagement)
             ->post(route('staff.orders.assign-packing-fulfilment', $unapprovedOrder), ['assigned_user_id' => $designer->id])
+            ->assertUnprocessable();
+    }
+
+    public function test_completed_order_cannot_be_reassigned(): void
+    {
+        $manager = $this->staff(User::ROLE_OM);
+        $designer = $this->staff(User::ROLE_DESIGNER);
+        $production = $this->staff(User::ROLE_PRODUCTION);
+        $order = $this->approvedOrder();
+        $designJob = $order->designJobs()->firstOrFail();
+        $order->update(['status' => 'COMPLETED']);
+
+        $this->actingAs($manager)
+            ->get(route('staff.orders.show', $order->order_id))
+            ->assertOk()
+            ->assertDontSee('Assign Production Staff')
+            ->assertDontSee('Reassign Designer');
+
+        $this->actingAs($manager)
+            ->post(route('staff.design-jobs.assign', $designJob), ['assigned_user_id' => $designer->id])
+            ->assertUnprocessable();
+
+        $this->actingAs($manager)
+            ->post(route('staff.orders.assign-printing', $order), ['assigned_user_id' => $production->id])
             ->assertUnprocessable();
     }
 

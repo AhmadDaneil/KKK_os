@@ -273,7 +273,7 @@
                                 <h3>Prepare this customer order in Photoshop</h3>
                                 <ol>
                                     <li>Download the customer order CSV.</li>
-                                    <li>Open Photoshop with the approved JavaScript.</li>
+                                    <li>Open Photoshop; the approved JavaScript starts automatically.</li>
                                     <li>Select the ROOT folder, then select the downloaded CSV file.</li>
                                 </ol>
                                 <p class="staff-design-tools-note">
@@ -516,11 +516,11 @@
                                         @endif
                                     </div>
                                 @endif
-                                @if (auth()->user()->isOperationManagement() && ! request()->attributes->get('staff_overview_mode', false))
+                                @if (auth()->user()->isOperationManagement() && ! $order->isAssignmentLocked() && ! request()->attributes->get('staff_overview_mode', false))
     <form
         method="POST"
         action="{{ route($operationRoutePrefix.'design-jobs.assign', $job) }}"
-        class="staff-assignment-form js-staff-confirmation-form"
+        class="staff-assignment-form js-staff-confirmation-form js-async-assignment"
         data-confirm-assignment="Designer"
         data-confirm-mode="{{ $job->assigned_user_id ? 'reassign' : 'assign' }}"
     >
@@ -678,12 +678,12 @@
                 </div>
             </section>
 
-            @if (($canAssignProduction ?? false) && auth()->user()->isOperationManagement() && ! request()->attributes->get('staff_overview_mode', false))
+            @if (($canAssignProduction ?? false) && ! $order->isAssignmentLocked() && auth()->user()->isOperationManagement() && ! request()->attributes->get('staff_overview_mode', false))
                 <section class="staff-section">
                     <h2 class="staff-section-title">Assign Production Staff</h2>
 
                     <div class="staff-work-grid">
-                        <form method="POST" action="{{ route($operationRoutePrefix.'orders.assign-printing', $order) }}" class="staff-card staff-assignment-form js-staff-confirmation-form" data-confirm-assignment="Production" data-confirm-mode="{{ $order->printing_assigned_user_id ? 'reassign' : 'assign' }}">
+                        <form method="POST" action="{{ route($operationRoutePrefix.'orders.assign-printing', $order) }}" class="staff-card staff-assignment-form js-staff-confirmation-form js-async-assignment" data-confirm-assignment="Production" data-confirm-mode="{{ $order->printing_assigned_user_id ? 'reassign' : 'assign' }}">
                             @csrf
                             <div class="staff-card-heading">
                                 <h3>Production</h3>
@@ -701,7 +701,7 @@
                             </div>
                         </form>
 
-                        <form method="POST" action="{{ route($operationRoutePrefix.'orders.assign-packing-fulfilment', $order) }}" class="staff-card staff-assignment-form js-staff-confirmation-form" data-confirm-assignment="OM (Packing & Fulfilment)" data-confirm-mode="{{ $order->packing_assigned_user_id ? 'reassign' : 'assign' }}">
+                        <form method="POST" action="{{ route($operationRoutePrefix.'orders.assign-packing-fulfilment', $order) }}" class="staff-card staff-assignment-form js-staff-confirmation-form js-async-assignment" data-confirm-assignment="OM (Packing & Fulfilment)" data-confirm-mode="{{ $order->packing_assigned_user_id ? 'reassign' : 'assign' }}">
                             @csrf
                             <div class="staff-card-heading">
                                 <h3>OM: Packing &amp; Fulfilment</h3>
@@ -1258,6 +1258,66 @@
             dialog.close();
         });
 
+        function showAssignmentNotice(form, message, isError) {
+            let notice = form.querySelector('.staff-assignment-notice');
+
+            if (!notice) {
+                notice = document.createElement('p');
+                notice.className = 'staff-assignment-notice';
+                notice.setAttribute('role', 'status');
+                form.appendChild(notice);
+            }
+
+            notice.textContent = message;
+            notice.classList.toggle('is-error', isError);
+        }
+
+        async function submitAssignment(form) {
+            const submitButton = form.querySelector('[type="submit"]');
+            const originalButtonText = submitButton.textContent;
+
+            submitButton.disabled = true;
+            submitButton.textContent = 'Menyimpan...';
+
+            try {
+                const response = await fetch(form.action, {
+                    method: 'POST',
+                    body: new FormData(form),
+                    credentials: 'same-origin',
+                    headers: {
+                        Accept: 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest',
+                    },
+                });
+                const payload = await response.json().catch(function () { return {}; });
+
+                if (!response.ok) {
+                    const errors = payload.errors ? Object.values(payload.errors).flat().join(' ') : null;
+                    throw new Error(errors || payload.message || 'Assignment could not be saved.');
+                }
+
+                form.dataset.confirmMode = 'reassign';
+                const label = form.querySelector('label');
+                const status = form.querySelector('.staff-status');
+
+                if (label) {
+                    label.textContent = label.textContent.replace(/^Assign\b/i, 'Reassign');
+                }
+
+                if (status) {
+                    status.textContent = 'ASSIGNED';
+                }
+
+                submitButton.textContent = 'Reassign';
+                showAssignmentNotice(form, payload.message || 'Staff assigned successfully.', false);
+            } catch (error) {
+                submitButton.textContent = originalButtonText;
+                showAssignmentNotice(form, error.message || 'Assignment could not be saved.', true);
+            } finally {
+                submitButton.disabled = false;
+            }
+        }
+
         confirmButton.addEventListener('click', function () {
             if (!pendingForm) {
                 return;
@@ -1265,6 +1325,17 @@
 
             confirmButton.disabled = true;
             confirmButton.textContent = 'Memproses...';
+
+            if (pendingForm.classList.contains('js-async-assignment')) {
+                const form = pendingForm;
+                pendingForm = null;
+                dialog.close();
+                confirmButton.disabled = false;
+                confirmButton.textContent = 'Ya, teruskan';
+                submitAssignment(form);
+                return;
+            }
+
             pendingForm.submit();
         });
     });

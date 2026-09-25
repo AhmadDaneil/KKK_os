@@ -23,7 +23,7 @@
             <a href="{{ route('admin.orders.index', ['attention' => 'pending_payment']) }}"><span>RM</span>Semakan Bayaran</a>
             <a href="{{ route('admin.orders.index', ['workstream' => 'design']) }}"><span>DE</span>Design Queue</a>
             <a href="{{ route('admin.orders.index', ['workstream' => 'printing']) }}"><span>PR</span>Production Queue</a>
-            <a href="{{ route('admin.orders.index', ['workstream' => 'packing']) }}"><span>PA</span>OM Packing Queue</a>
+            <a href="{{ route('admin.orders.index', ['workstream' => 'packing']) }}"><span>PA</span>Packing Queue</a>
         </nav>
 
         <div class="admin-profile">

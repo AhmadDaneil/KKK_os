@@ -51,7 +51,7 @@ class StaffPhotoshopController extends Controller
 
         return back()->with(
             'status',
-            'Photoshop is opening with the V11 script. Select the ROOT folder, then select the downloaded CSV file.'
+            'Photoshop is opening and the approved V11 script is starting. Select the ROOT folder, then select the downloaded CSV file.'
         );
     }
 

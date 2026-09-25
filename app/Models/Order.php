@@ -65,6 +65,11 @@ class Order extends Model
         return in_array($this->status, self::TERMINAL_OPERATIONAL_STATUSES, true);
     }
 
+    public function isAssignmentLocked(): bool
+    {
+        return $this->status === 'COMPLETED' || $this->isTerminalOperationalStatus();
+    }
+
     public function accessTokens(): HasMany
     {
         return $this->hasMany(OrderAccessToken::class, 'order_fk');

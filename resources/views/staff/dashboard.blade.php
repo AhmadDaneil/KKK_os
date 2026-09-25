@@ -1,4 +1,10 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
+@php
+    $dashboardUser = auth()->user();
+    $canMonitorOperations = $dashboardUser->isOperationManagement();
+    $canViewDesignQueue = $canMonitorOperations || $dashboardUser->hasStaffRole(\App\Models\User::ROLE_DESIGNER);
+    $canViewProductionQueue = $canMonitorOperations || $dashboardUser->hasStaffRole(\App\Models\User::ROLE_PRODUCTION);
+@endphp
 <html lang="ms">
 <head>
     <meta charset="UTF-8">
@@ -12,7 +18,7 @@
 
         <div class="staff-workspace">
             <header class="staff-topbar">
-                <div><p class="staff-kicker">{{ auth()->user()->isAdmin() ? 'Admin Operations' : 'Operation Management' }}</p><h1>{{ auth()->user()->isAdmin() ? 'Admin Operations Dashboard' : 'Staff Dashboard' }}</h1></div>
+                <div><p class="staff-kicker">{{ $dashboardUser->isAdmin() ? 'Admin Operations' : str_replace('_', ' ', $dashboardUser->role) }}</p><h1>{{ $dashboardUser->isAdmin() ? 'Admin Operations Dashboard' : 'Staff Dashboard' }}</h1></div>
                 <form class="js-logout-form" method="POST" action="{{ route('staff.logout') }}">@csrf<button type="submit" class="staff-button staff-button-small">Log Keluar</button></form>
             </header>
 
@@ -30,31 +36,34 @@
                 </section>
 
                 <div class="staff-dashboard-sections">
+                    @if ($canMonitorOperations)
                     <section class="staff-dashboard-group">
-                        <div class="staff-dashboard-group-heading"><span class="staff-group-number">01</span><div><h2>Operation Management</h2><p>Rujukan utama untuk semua order dan status semasa.</p></div></div>
+                        <div class="staff-dashboard-group-heading"><span class="staff-group-number">01</span><div><h2>Operation Management</h2><p>Pantau semua jabatan, tugasan dan status order dari satu paparan.</p></div></div>
                         <a href="{{ route('staff.orders.index') }}" class="staff-feature-card"><span class="staff-feature-icon">OR</span><div><h3>Semua Orders</h3><p>Lihat identiti pelanggan, pakej, bayaran dan status operasi.</p></div><span class="staff-card-arrow">→</span></a>
                     </section>
+                    @endif
 
+                    @if ($canViewDesignQueue)
                     <section class="staff-dashboard-group">
                         <div class="staff-dashboard-group-heading"><span class="staff-group-number">02</span><div><h2>Design</h2><p>Data disahkan, merge job dan semakan artwork.</p></div></div>
-                        @if (auth()->user()->isAdmin() || auth()->user()->hasStaffRole(\App\Models\User::ROLE_DESIGNER))
-                            <a href="{{ route('staff.orders.index', ['workstream' => 'design']) }}" class="staff-feature-card"><span class="staff-feature-icon">DE</span><div><h3>Design Queue</h3><p>Urus order yang sedia untuk design, sedang disediakan atau memerlukan pembetulan.</p></div><span class="staff-card-arrow">→</span></a>
-                        @else
-                            <p class="staff-access-note">Tiada tugasan untuk role anda dalam bahagian ini.</p>
-                        @endif
+                        <a href="{{ route('staff.orders.index', ['workstream' => 'design']) }}" class="staff-feature-card"><span class="staff-feature-icon">DE</span><div><h3>Design Queue</h3><p>Urus order yang sedia untuk design, sedang disediakan atau memerlukan pembetulan.</p></div><span class="staff-card-arrow">→</span></a>
                     </section>
+                    @endif
 
+                    @if ($canViewProductionQueue || $canMonitorOperations)
                     <section class="staff-dashboard-group">
                         <div class="staff-dashboard-group-heading"><span class="staff-group-number">03</span><div><h2>Production</h2><p>Cetakan, pembungkusan dan serahan kepada pelanggan.</p></div></div>
                         <div class="staff-feature-grid">
-                            @if (auth()->user()->isAdmin() || auth()->user()->hasStaffRole(\App\Models\User::ROLE_PRODUCTION))
+                            @if ($canViewProductionQueue)
                                 <a href="{{ route('staff.orders.index', ['workstream' => 'printing']) }}" class="staff-feature-card"><span class="staff-feature-icon">PR</span><div><h3>Production</h3><p>Sediakan hanger Pengantin Lelaki/Perempuan dan muat naik kemajuan kerja.</p></div><span class="staff-card-arrow">→</span></a>
                             @endif
-                            @if (auth()->user()->isOperationManagement())
-                                <a href="{{ route('staff.orders.index', ['workstream' => 'packing']) }}" class="staff-feature-card"><span class="staff-feature-icon">PA</span><div><h3>OM Packing</h3><p>Semak item dan kemajuan pembungkusan setiap order.</p></div><span class="staff-card-arrow">→</span></a>
+                            @if ($canMonitorOperations)
+                                <a href="{{ route('staff.orders.index', ['workstream' => 'packing']) }}" class="staff-feature-card"><span class="staff-feature-icon">PA</span><div><h3>Packing</h3><p>Semak item dan kemajuan pembungkusan setiap order.</p></div><span class="staff-card-arrow">→</span></a>
+                                <a href="{{ route('staff.orders.index', ['workstream' => 'fulfilment']) }}" class="staff-feature-card"><span class="staff-feature-icon">FU</span><div><h3>Fulfilment</h3><p>Pantau serahan courier dan kutipan pelanggan.</p></div><span class="staff-card-arrow">→</span></a>
                             @endif
                         </div>
                     </section>
+                    @endif
                 </div>
             </main>
         </div>
