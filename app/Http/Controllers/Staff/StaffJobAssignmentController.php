@@ -11,6 +11,7 @@ use App\Models\User;
 use App\Services\Design\AssignDesignJobService;
 use App\Services\Packing\AssignPackingJobService;
 use App\Services\Printing\AssignPrintJobService;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
@@ -21,7 +22,7 @@ class StaffJobAssignmentController extends Controller
         Request $request,
         DesignJob $designJob,
         AssignDesignJobService $service
-    ): RedirectResponse {
+    ): RedirectResponse|JsonResponse {
         $this->ensureOrderIsAssignable($designJob->order);
         $assignee = $this->validatedAssignee(
             $request,
@@ -34,14 +35,14 @@ class StaffJobAssignmentController extends Controller
             $request->user()
         );
 
-        return back()->with('status', 'Design job assigned successfully.');
+        return $this->assignmentResponse($request, 'Design job assigned successfully.', $assignee);
     }
 
     public function assignPrinting(
         Request $request,
         PrintJob $printJob,
         AssignPrintJobService $service
-    ): RedirectResponse {
+    ): RedirectResponse|JsonResponse {
         $this->ensureOrderIsAssignable($printJob->order);
         $assignee = $this->validatedAssignee(
             $request,
@@ -54,14 +55,14 @@ class StaffJobAssignmentController extends Controller
             $request->user()
         );
 
-        return back()->with('status', 'Production job assigned successfully.');
+        return $this->assignmentResponse($request, 'Production job assigned successfully.', $assignee);
     }
 
     public function assignPacking(
         Request $request,
         PackingJob $packingJob,
         AssignPackingJobService $service
-    ): RedirectResponse {
+    ): RedirectResponse|JsonResponse {
         $this->ensureOrderIsAssignable($packingJob->order);
         $assignee = $this->validatedAssignee($request, User::ROLE_OM);
 
@@ -71,7 +72,7 @@ class StaffJobAssignmentController extends Controller
             $request->user()
         );
 
-        return back()->with('status', 'Packing job assigned successfully.');
+        return $this->assignmentResponse($request, 'Packing job assigned successfully.', $assignee);
     }
 
     private function validatedAssignee(
@@ -104,5 +105,17 @@ class StaffJobAssignmentController extends Controller
             422,
             'Completed or closed orders cannot be reassigned.'
         );
+    }
+
+    private function assignmentResponse(Request $request, string $message, User $assignee): RedirectResponse|JsonResponse
+    {
+        if ($request->expectsJson()) {
+            return response()->json([
+                'message' => $message,
+                'assignee' => ['id' => $assignee->id, 'name' => $assignee->name],
+            ]);
+        }
+
+        return back()->with('status', $message);
     }
 }

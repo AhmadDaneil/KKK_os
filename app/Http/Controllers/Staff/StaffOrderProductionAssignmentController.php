@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Order;
 use App\Models\User;
 use App\Services\Orders\AssignOrderProductionStaffService;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
@@ -16,7 +17,7 @@ class StaffOrderProductionAssignmentController extends Controller
         Request $request,
         Order $order,
         AssignOrderProductionStaffService $service
-    ): RedirectResponse {
+    ): RedirectResponse|JsonResponse {
         $this->authorizeManager($request);
         $this->ensureOrderIsAssignable($order);
         $this->ensureDesignIsApproved($order);
@@ -24,14 +25,14 @@ class StaffOrderProductionAssignmentController extends Controller
 
         $service->assignPrinting($order, $assignee, $request->user());
 
-        return back()->with('status', 'Production staff assigned successfully.');
+        return $this->assignmentResponse($request, 'Production staff assigned successfully.', $assignee);
     }
 
     public function assignPackingAndFulfilment(
         Request $request,
         Order $order,
         AssignOrderProductionStaffService $service
-    ): RedirectResponse {
+    ): RedirectResponse|JsonResponse {
         $this->authorizeManager($request);
         $this->ensureOrderIsAssignable($order);
         $this->ensureDesignIsApproved($order);
@@ -39,7 +40,7 @@ class StaffOrderProductionAssignmentController extends Controller
 
         $service->assignPackingAndFulfilment($order, $assignee, $request->user());
 
-        return back()->with('status', 'OM (packing and fulfilment) assigned successfully.');
+        return $this->assignmentResponse($request, 'OM (packing and fulfilment) assigned successfully.', $assignee);
     }
 
     private function authorizeManager(Request $request): void
@@ -83,5 +84,17 @@ class StaffOrderProductionAssignmentController extends Controller
         ]);
 
         return User::query()->findOrFail($validated['assigned_user_id']);
+    }
+
+    private function assignmentResponse(Request $request, string $message, User $assignee): RedirectResponse|JsonResponse
+    {
+        if ($request->expectsJson()) {
+            return response()->json([
+                'message' => $message,
+                'assignee' => ['id' => $assignee->id, 'name' => $assignee->name],
+            ]);
+        }
+
+        return back()->with('status', $message);
     }
 }

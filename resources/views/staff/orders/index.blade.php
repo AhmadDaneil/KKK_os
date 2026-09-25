@@ -203,11 +203,11 @@
                                 View order &rarr;
                             </a>
 
-                            @if (auth()->user()->isOperationManagement() && $order->status === 'DETAILS_INCOMPLETE')
+                            @if (auth()->user()->isAdmin())
                                 <form
                                     method="POST"
                                     action="{{ route($isAdminPortal ? 'admin.orders.destroy' : 'staff.orders.destroy', $order) }}"
-                                    onsubmit="return confirm('Delete order {{ $order->order_id }}? This incomplete order and its entered information will be permanently removed.');"
+                                    onsubmit="return confirm('Delete order {{ $order->order_id }}? All order information, payments and workflow records will be permanently removed.');"
                                 >
                                     @csrf
                                     @method('DELETE')
