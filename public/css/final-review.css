@@ -264,6 +264,88 @@ body {
     opacity: 0.92;
 }
 
+.confirm-button:disabled {
+    cursor: wait;
+    opacity: 0.7;
+}
+
+.final-confirmation-dialog {
+    width: min(92vw, 480px);
+    padding: 2rem;
+    border: 1px solid #d9e1dc;
+    border-radius: 14px;
+    background: #ffffff;
+    color: #18251f;
+    box-shadow: 0 28px 80px rgba(17, 45, 35, 0.28);
+    text-align: center;
+}
+
+.final-confirmation-dialog::backdrop {
+    background: rgba(14, 35, 28, 0.6);
+    backdrop-filter: blur(3px);
+}
+
+.final-confirmation-dialog-icon {
+    display: grid;
+    width: 48px;
+    height: 48px;
+    margin: 0 auto 1rem;
+    border-radius: 50%;
+    place-items: center;
+    background: #c89a4b;
+    color: #ffffff;
+    font-family: Georgia, serif;
+    font-size: 1.4rem;
+    font-weight: 800;
+}
+
+.final-confirmation-dialog h2 {
+    margin: 0;
+    color: #17382c;
+    font-family: Georgia, serif;
+    font-size: 1.75rem;
+}
+
+.final-confirmation-dialog p {
+    margin: 0.75rem 0 1.5rem;
+    color: #64716a;
+    font-size: 0.9rem;
+    line-height: 1.65;
+}
+
+.final-confirmation-dialog-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.65rem;
+}
+
+.final-confirmation-dialog-actions button {
+    min-height: 46px;
+    padding: 0.65rem 0.9rem;
+    border: 1px solid #cbd5cf;
+    border-radius: 8px;
+    background: #ffffff;
+    color: #26332d;
+    font: inherit;
+    font-weight: 750;
+    cursor: pointer;
+}
+
+.final-confirmation-dialog-actions button.is-primary {
+    border-color: #17382c;
+    background: #17382c;
+    color: #ffffff;
+}
+
+.final-confirmation-dialog[open] {
+    animation: final-confirmation-enter 0.18s ease-out;
+}
+
+@keyframes final-confirmation-enter {
+    from { opacity: 0; transform: translateY(10px) scale(0.98); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
 .confirm-button:focus,
 .back-link:focus,
 .maps-link:focus {
@@ -312,5 +394,23 @@ body {
 
     .confirm-button {
         width: 100%;
+    }
+
+    .final-confirmation-dialog {
+        padding: 1.5rem 1.25rem;
+    }
+
+    .final-confirmation-dialog-actions {
+        grid-template-columns: 1fr;
+    }
+
+    .final-confirmation-dialog-actions .is-primary {
+        grid-row: 1;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .final-confirmation-dialog[open] {
+        animation: none;
     }
 }

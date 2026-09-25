@@ -606,6 +606,19 @@
 
 </form>
 </main>
+
+@if ($isEditable)
+    <dialog id="review-order-confirmation" class="customer-confirmation-dialog" aria-labelledby="review-order-confirmation-title">
+        <div class="customer-confirmation-icon" aria-hidden="true">?</div>
+        <h2 id="review-order-confirmation-title">Semak maklumat tempahan?</h2>
+        <p>Pastikan maklumat pengantin, majlis, contact dan kaedah penghantaran telah diisi dengan betul sebelum meneruskan.</p>
+        <div class="customer-confirmation-actions">
+            <button id="cancel-order-review" type="button">Tidak, semak semula</button>
+            <button id="confirm-order-review" class="is-primary" type="button">Ya, teruskan</button>
+        </div>
+    </dialog>
+@endif
+
 <script>
 document.addEventListener('DOMContentLoaded', function () {
     const reviewLink = document.getElementById('review-order-link');
@@ -797,8 +810,11 @@ document.addEventListener('DOMContentLoaded', function () {
         const form = document.getElementById('customer-order-form');
         const reviewLink = document.getElementById('review-order-link');
         const status = document.getElementById('autosave-status');
+        const confirmationDialog = document.getElementById('review-order-confirmation');
+        const confirmOrderReview = document.getElementById('confirm-order-review');
+        const cancelOrderReview = document.getElementById('cancel-order-review');
 
-        if (!form || !reviewLink || !status) {
+        if (!form || !reviewLink || !status || !confirmationDialog || !confirmOrderReview || !cancelOrderReview) {
             return;
         }
 
@@ -873,8 +889,19 @@ document.addEventListener('DOMContentLoaded', function () {
             }
 
             event.preventDefault();
+            confirmationDialog.showModal();
+        });
+
+        cancelOrderReview.addEventListener('click', function () {
+            confirmationDialog.close();
+        });
+
+        confirmOrderReview.addEventListener('click', function () {
+            confirmationDialog.close();
             window.clearTimeout(autosaveTimer);
             reviewLink.setAttribute('aria-disabled', 'true');
+            confirmOrderReview.disabled = true;
+            confirmOrderReview.textContent = 'Menyimpan...';
 
             queueSave(true)
                 .then(function () {
@@ -882,6 +909,8 @@ document.addEventListener('DOMContentLoaded', function () {
                 })
                 .catch(function () {
                     reviewLink.removeAttribute('aria-disabled');
+                    confirmOrderReview.disabled = false;
+                    confirmOrderReview.textContent = 'Ya, teruskan';
                 });
         });
     });

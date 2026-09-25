@@ -163,7 +163,10 @@
                                     'orderId' => $order->order_id,
                                     'designJobId' => $designJob->id,
                                 ]) }}"
-                                onsubmit="return confirm('Anda pasti mahu meluluskan artwork ini? Selepas diluluskan, artwork akan diteruskan ke proses seterusnya.');"
+                                class="js-artwork-confirmation-form"
+                                data-confirm-title="Luluskan artwork {{ ucfirst(strtolower($designJob->side)) }}?"
+                                data-confirm-message="Artwork ini akan dianggap betul dan diteruskan ke proses pembayaran baki serta cetakan."
+                                data-confirm-button="Ya, luluskan artwork"
                             >
                                 @csrf
                                 <button type="submit" class="button button-primary">
@@ -181,7 +184,11 @@
                             @endif
 
                             <form
-                                class="correction-payment-form"
+                                class="correction-payment-form js-artwork-confirmation-form"
+                                data-confirm-title="Hantar permintaan pembetulan?"
+                                data-confirm-message="Permintaan, caj RM10 dan bukti pembayaran akan dihantar untuk semakan. Pastikan semua pembetulan telah dinyatakan dengan jelas."
+                                data-confirm-button="Ya, hantar pembetulan"
+                                data-confirm-tone="danger"
                                 enctype="multipart/form-data"
                                 method="POST"
                                 action="{{ route('orders.artwork.correction', [
@@ -285,6 +292,15 @@
         </a>
     </div>
 </div>
+<dialog id="artwork-confirmation-dialog" class="artwork-confirmation-dialog" aria-labelledby="artwork-confirmation-title">
+    <div class="artwork-confirmation-icon" aria-hidden="true">?</div>
+    <h2 id="artwork-confirmation-title">Sahkan tindakan?</h2>
+    <p id="artwork-confirmation-message"></p>
+    <div class="artwork-confirmation-actions">
+        <button id="cancel-artwork-confirmation" type="button">Tidak, kembali</button>
+        <button id="confirm-artwork-action" type="button">Ya, teruskan</button>
+    </div>
+</dialog>
 <script>
     document.querySelectorAll('.correction-payment-form').forEach(function (form) {
         const consent = form.querySelector('[name="correction_fee_agreed"]');
@@ -306,6 +322,42 @@
             receipt.focus();
         });
         update();
+    });
+
+    const artworkConfirmationForms = document.querySelectorAll('.js-artwork-confirmation-form');
+    const artworkConfirmationDialog = document.getElementById('artwork-confirmation-dialog');
+    const artworkConfirmationTitle = document.getElementById('artwork-confirmation-title');
+    const artworkConfirmationMessage = document.getElementById('artwork-confirmation-message');
+    const confirmArtworkAction = document.getElementById('confirm-artwork-action');
+    const cancelArtworkConfirmation = document.getElementById('cancel-artwork-confirmation');
+    let pendingArtworkForm = null;
+
+    artworkConfirmationForms.forEach(function (form) {
+        form.addEventListener('submit', function (event) {
+            event.preventDefault();
+            pendingArtworkForm = form;
+            artworkConfirmationTitle.textContent = form.dataset.confirmTitle;
+            artworkConfirmationMessage.textContent = form.dataset.confirmMessage;
+            confirmArtworkAction.textContent = form.dataset.confirmButton;
+            confirmArtworkAction.classList.toggle('is-danger', form.dataset.confirmTone === 'danger');
+            confirmArtworkAction.classList.toggle('is-primary', form.dataset.confirmTone !== 'danger');
+            artworkConfirmationDialog.showModal();
+        });
+    });
+
+    cancelArtworkConfirmation.addEventListener('click', function () {
+        pendingArtworkForm = null;
+        artworkConfirmationDialog.close();
+    });
+
+    confirmArtworkAction.addEventListener('click', function () {
+        if (!pendingArtworkForm) {
+            return;
+        }
+
+        confirmArtworkAction.disabled = true;
+        confirmArtworkAction.textContent = 'Memproses...';
+        pendingArtworkForm.submit();
     });
 </script>
 </body>
