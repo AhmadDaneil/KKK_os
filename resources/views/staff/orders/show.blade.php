@@ -782,11 +782,21 @@
                                 @endif
                                 @if (auth()->user()->hasStaffRole(\App\Models\User::ROLE_PRINTING) && $job->assigned_user_id === auth()->id())
                                     @if ($job->status === 'READY_FOR_PRINT')
-                                        <form method="POST" action="{{ route($operationRoutePrefix.'print-jobs.start', $job) }}" class="staff-workflow-form">@csrf<button type="submit" class="staff-button staff-button-primary">Start Printing</button></form>
+                                        <form
+                                            method="POST"
+                                            action="{{ route($operationRoutePrefix.'print-jobs.start', $job) }}"
+                                            class="staff-workflow-form js-staff-confirmation-form"
+                                            data-confirm-title="Mulakan cetakan {{ ucfirst(strtolower($job->side)) }}?"
+                                            data-confirm-message="Kuantiti yang akan dicetak ialah {{ $job->quantity ?? $order->card_quantity ?? '-' }} keping. Pastikan pakej dan kuantiti adalah betul."
+                                            data-confirm-button="Ya, mula printing"
+                                        >
+                                            @csrf
+                                            <button type="submit" class="staff-button staff-button-primary">Start Printing</button>
+                                        </form>
                                     @elseif ($job->status === 'WAITING_FOR_PAYMENT')
                                         <p class="staff-work-message">Menunggu pengesahan bayaran penuh sebelum cetakan boleh dimulakan.</p>
                                     @elseif ($job->status === 'PRINTING')
-                                        <form method="POST" enctype="multipart/form-data" action="{{ route('staff.print-jobs.progress-files.store', $job) }}" class="staff-packing-complete-form">
+                                        <form method="POST" enctype="multipart/form-data" action="{{ route('staff.print-jobs.progress-files.store', $job) }}" class="staff-packing-complete-form js-staff-confirmation-form" data-confirm-title="Upload progress cetakan {{ ucfirst(strtolower($job->side)) }}?" data-confirm-message="Gambar atau PDF yang dipilih akan disimpan sebagai bukti progress cetakan semasa." data-confirm-button="Ya, upload progress">
                                             @csrf
                                             <label for="print-progress-{{ $job->id }}">Upload printing progress</label>
                                             <div class="staff-file-picker">
@@ -796,7 +806,7 @@
                                             <p class="staff-muted-text">Upload photos or PDFs that show the current printing progress. Maximum 10 files, 20 MB each.</p>
                                             <button type="submit" class="staff-button staff-button-secondary">Upload Progress</button>
                                         </form>
-                                        <form method="POST" action="{{ route($operationRoutePrefix.'print-jobs.mark-printed', $job) }}" class="staff-workflow-form">@csrf<button type="submit" class="staff-button staff-button-primary">Mark Printed</button></form>
+                                        <form method="POST" action="{{ route($operationRoutePrefix.'print-jobs.mark-printed', $job) }}" class="staff-workflow-form js-staff-confirmation-form" data-confirm-title="Tandakan cetakan {{ ucfirst(strtolower($job->side)) }} sebagai siap?" data-confirm-message="Pastikan semua {{ $job->quantity ?? $order->card_quantity ?? '-' }} keping kad telah selesai dicetak dan diperiksa sebelum meneruskan." data-confirm-button="Ya, tandakan siap" data-confirm-tone="danger">@csrf<button type="submit" class="staff-button staff-button-primary">Mark Printed</button></form>
                                     @elseif ($job->status === 'PRINTED')
                                         <p class="staff-work-message">Cetakan untuk pakej ini telah siap.</p>
                                     @endif
@@ -870,16 +880,16 @@
 
                         @if (auth()->user()->isOperationManagement() || (auth()->user()->hasStaffRole(\App\Models\User::ROLE_PACKING) && $order->packingJob->assigned_user_id === auth()->id()))
                             @if ($order->packingJob->status === 'READY_FOR_PACKING')
-                                <form method="POST" action="{{ route($operationRoutePrefix.'packing-jobs.start', $order->packingJob) }}" class="staff-workflow-form">@csrf<button type="submit" class="staff-button staff-button-primary">Start Packing</button></form>
+                                <form method="POST" action="{{ route($operationRoutePrefix.'packing-jobs.start', $order->packingJob) }}" class="staff-workflow-form js-staff-confirmation-form" data-confirm-title="Mulakan proses packing?" data-confirm-message="Masa mula packing akan direkodkan. Pastikan semua barang yang telah dicetak tersedia untuk diperiksa dan dibungkus." data-confirm-button="Ya, mula packing">@csrf<button type="submit" class="staff-button staff-button-primary">Start Packing</button></form>
                             @endif
                             @if ($order->packingJob->status === 'PACKING')
                                 @foreach ($order->packingJob->items as $item)
                                     @unless ($item->verified_present)
-                                        <form method="POST" action="{{ route($operationRoutePrefix.'packing-jobs.items.verify', ['packingJob' => $order->packingJob, 'packingItem' => $item]) }}" class="staff-workflow-form">@csrf<button type="submit" class="staff-button staff-button-small">Verify {{ ucfirst(strtolower($item->side)) }}</button></form>
+                                        <form method="POST" action="{{ route($operationRoutePrefix.'packing-jobs.items.verify', ['packingJob' => $order->packingJob, 'packingItem' => $item]) }}" class="staff-workflow-form js-staff-confirmation-form" data-confirm-title="Verify item {{ ucfirst(strtolower($item->side)) }}?" data-confirm-message="Pastikan semua kad untuk pakej {{ ucfirst(strtolower($item->side)) }} ada, lengkap dan dalam keadaan baik sebelum ditanda Verified." data-confirm-button="Ya, verify item">@csrf<button type="submit" class="staff-button staff-button-small">Verify {{ ucfirst(strtolower($item->side)) }}</button></form>
                                     @endunless
                                 @endforeach
                                 @if ($order->packingJob->items->every(fn ($item) => $item->verified_present))
-                                    <form method="POST" enctype="multipart/form-data" action="{{ route($operationRoutePrefix.'packing-jobs.mark-packed', $order->packingJob) }}" class="staff-packing-complete-form">
+                                    <form method="POST" enctype="multipart/form-data" action="{{ route($operationRoutePrefix.'packing-jobs.mark-packed', $order->packingJob) }}" class="staff-packing-complete-form js-staff-confirmation-form" data-confirm-title="Upload bukti dan tandakan packing siap?" data-confirm-message="{{ $order->fulfilment?->method === 'COURIER' ? 'Pastikan gambar bukti packing, nama courier dan tracking number adalah betul. Packing akan ditandakan siap selepas dihantar.' : 'Pastikan gambar bukti menunjukkan semua barang telah dibungkus dengan lengkap. Packing akan ditandakan siap untuk Self Pickup.' }}" data-confirm-button="Ya, tandakan packed">
                                         @csrf
                                         <label for="packing-proof">Bukti gambar barang telah dipack</label>
                                         <div class="staff-file-picker">
@@ -1017,7 +1027,9 @@
                                             method="POST"
                                             enctype="multipart/form-data"
                                             action="{{ route($operationRoutePrefix.'packing-jobs.complete-courier', $order->packingJob) }}"
-                                            class="staff-packing-complete-form"
+                                            class="staff-packing-complete-form js-staff-confirmation-form"
+                                            data-confirm-courier
+                                            data-confirm-tone="danger"
                                         >
                                             @csrf
 
@@ -1208,7 +1220,14 @@
                 event.preventDefault();
                 pendingForm = form;
 
-                if (form.dataset.confirmAssignment) {
+                if (form.dataset.confirmCourier !== undefined) {
+                    const courierName = form.querySelector('[name="courier_provider"]').value.trim();
+                    const trackingNumber = form.querySelector('[name="tracking_number"]').value.trim();
+
+                    title.textContent = 'Sahkan serahan kepada ' + courierName + '?';
+                    message.textContent = 'Tracking number ' + trackingNumber + ' akan dipaparkan kepada customer dan parcel akan ditandakan telah diserahkan. Pastikan bukti serta maklumat tracking adalah betul.';
+                    confirmButton.textContent = 'Ya, sahkan serahan';
+                } else if (form.dataset.confirmAssignment) {
                     const assignee = form.querySelector('[name="assigned_user_id"]');
                     const assigneeName = assignee.options[assignee.selectedIndex].text.trim();
                     const isReassignment = form.dataset.confirmMode === 'reassign';
