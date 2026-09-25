@@ -5,7 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="description" content="Kad kahwin yang mudah ditempah, direka dengan teliti dan boleh disemak secara online.">
     <title>KingKadKahwin — Kad Kahwin Anda, Direka Dengan Teliti</title>
-    <link rel="stylesheet" href="{{ asset('css/landing.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/landing.css') }}?v={{ filemtime(public_path('css/landing.css')) }}">
+    <link rel="stylesheet" href="{{ asset('css/customer-theme.css') }}?v={{ filemtime(public_path('css/customer-theme.css')) }}">
 </head>
 <body>
     <header class="site-header">
@@ -38,28 +39,22 @@
             </div>
 
             <div class="hero-art" aria-label="Contoh kad kahwin KingKadKahwin">
-                <div class="botanical botanical-one">✦</div>
                 <div class="card-runner card-runner-back">
-                    <article class="sample-card sample-card-back">
-                        <small>WALIMATUL URUS</small>
-                        <strong>Syafiq<br><i>&amp;</i><br>Awanis</strong>
-                        <span>SABTU</span>
-                        <b>16 SEPTEMBER 2026</b>
+                    <article class="sample-card sample-card-back sample-card-image">
+                        <img src="{{ asset('images/landing/card-nostalgia-ckn-008.jpg') }}"
+                            alt="Kad kahwin tema Nostalgia"
+                            loading="eager"
+                            decoding="async">
                     </article>
                 </div>
                 <div class="card-runner card-runner-front">
-                    <article class="sample-card sample-card-front">
-                        <div class="card-pattern"></div>
-                        <small>Dengan penuh kesyukuran</small>
-                        <h2>Syafiq <i>&amp;</i> Awanis</h2>
-                        <div class="mini-details">
-                            <b>16</b>
-                            <span>SEPTEMBER<br>2026</span>
-                        </div>
-                        <p>Raikan cinta, abadikan kenangan.</p>
+                    <article class="sample-card sample-card-front sample-card-image">
+                        <img src="{{ asset('images/landing/card-desa-ckd-008.jpg') }}"
+                            alt="Kad kahwin tema Desa"
+                            loading="eager"
+                            decoding="async">
                     </article>
                 </div>
-                <div class="botanical botanical-two">✦</div>
             </div>
         </section>
 
@@ -129,5 +124,6 @@
             <span>Kad indah untuk hari yang bermakna.</span>
         </div>
     </footer>
+    @include('public.partials.theme-toggle')
 </body>
 </html>
