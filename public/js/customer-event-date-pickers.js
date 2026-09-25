@@ -381,11 +381,10 @@
                 option.disabled = false;
                 help.textContent = 'Hanya ' + label + ', yang sepadan dengan ' + displayDate(gregorianDate) + ', boleh dipilih.';
 
-                if (preserveExisting && previousValue === label) {
+                if (previousValue !== label) {
                     input.value = label;
                     updateDisplay();
-                } else if (preserveExisting) {
-                    clearSelection(Boolean(previousValue));
+                    emitChange(input);
                 }
             } catch (error) {
                 if (currentRequestId === requestId) {
