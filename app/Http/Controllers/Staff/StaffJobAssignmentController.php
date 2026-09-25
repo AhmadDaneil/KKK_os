@@ -42,7 +42,7 @@ class StaffJobAssignmentController extends Controller
     ): RedirectResponse {
         $assignee = $this->validatedAssignee(
             $request,
-            User::ROLE_PRINTING
+            User::ROLE_PRODUCTION
         );
 
         $service->assign(
@@ -51,7 +51,7 @@ class StaffJobAssignmentController extends Controller
             $request->user()
         );
 
-        return back()->with('status', 'Print job assigned successfully.');
+        return back()->with('status', 'Production job assigned successfully.');
     }
 
     public function assignPacking(
@@ -59,13 +59,7 @@ class StaffJobAssignmentController extends Controller
         PackingJob $packingJob,
         AssignPackingJobService $service
     ): RedirectResponse {
-        $assignee = $this->validatedAssignee(
-        $request,
-        [
-            User::ROLE_PACKING,
-            User::ROLE_OM,
-        ]
-    );
+        $assignee = $this->validatedAssignee($request, User::ROLE_OM);
 
         $service->assign(
             $packingJob,

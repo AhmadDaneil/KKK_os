@@ -44,7 +44,7 @@ class StaffPrintingWorkflowController extends Controller
 
         return back()->with(
             'status',
-            'Printing started successfully.'
+            'Production started successfully.'
         );
     }
 
@@ -78,7 +78,7 @@ class StaffPrintingWorkflowController extends Controller
 
         return back()->with(
             'status',
-            'Printing completed successfully.'
+            'Production completed successfully.'
         );
     }
 
@@ -90,7 +90,7 @@ class StaffPrintingWorkflowController extends Controller
 
         if ($printJob->status !== 'PRINTING') {
             return back()->withErrors([
-                'print_job' => 'Progress files can only be uploaded while this job is PRINTING.',
+                'print_job' => 'Progress files can only be uploaded while this job is in production.',
             ]);
         }
 
@@ -151,7 +151,7 @@ class StaffPrintingWorkflowController extends Controller
             ]);
         }
 
-        return back()->with('status', 'Printing progress uploaded successfully.');
+        return back()->with('status', 'Production progress uploaded successfully.');
     }
 
     public function showProgressFile(
@@ -163,7 +163,7 @@ class StaffPrintingWorkflowController extends Controller
 
         abort_unless(
             $user->isOperationManagement()
-                || ($user->hasStaffRole(User::ROLE_PRINTING)
+                || ($user->hasStaffRole(User::ROLE_PRODUCTION)
                     && $printJob->assigned_user_id === $user->id),
             404
         );
@@ -185,7 +185,7 @@ class StaffPrintingWorkflowController extends Controller
         PrintJob $printJob
     ): void {
         abort_unless(
-            $request->user()->hasStaffRole(User::ROLE_PRINTING)
+            $request->user()->hasStaffRole(User::ROLE_PRODUCTION)
                 && $printJob->assigned_user_id === $request->user()->id,
             404
         );
