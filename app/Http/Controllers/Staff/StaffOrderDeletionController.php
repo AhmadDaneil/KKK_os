@@ -16,7 +16,7 @@ class StaffOrderDeletionController extends Controller
         Order $order,
         DeleteIncompleteOrderService $service
     ): RedirectResponse {
-        abort_unless($request->user()?->isAdmin(), 403);
+        abort_unless($request->user()?->isOperationManagement(), 403);
 
         $orderId = $order->order_id;
 

@@ -203,7 +203,7 @@
                                 View order &rarr;
                             </a>
 
-                            @if (auth()->user()->isAdmin())
+                            @if (auth()->user()->isOperationManagement())
                                 <form
                                     method="POST"
                                     action="{{ route($isAdminPortal ? 'admin.orders.destroy' : 'staff.orders.destroy', $order) }}"

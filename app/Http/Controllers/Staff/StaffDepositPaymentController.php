@@ -28,6 +28,7 @@ class StaffDepositPaymentController extends Controller
 
     public function approve(Request $request, PaymentTransaction $payment, GenerateMergeJobsForOrderService $merge, InitializeDesignJobsForOrderService $design): RedirectResponse
     {
+        $this->authorizePaymentReview($request);
         $this->ensureDeposit($payment);
         $validated = $request->validate([
             'amount' => ['required', 'numeric', 'decimal:0,2', 'min:0.01', 'max:9999999999.99'],
@@ -64,6 +65,7 @@ class StaffDepositPaymentController extends Controller
 
     public function reject(Request $request, PaymentTransaction $payment): RedirectResponse
     {
+        $this->authorizePaymentReview($request);
         $this->ensureDeposit($payment);
         $validated = $request->validate(['rejection_reason' => ['required', 'string', 'max:1000']]);
 
@@ -85,5 +87,10 @@ class StaffDepositPaymentController extends Controller
     private function ensureDeposit(PaymentTransaction $payment): void
     {
         abort_unless($payment->payment_type === 'BOOKING_DEPOSIT', 404);
+    }
+
+    private function authorizePaymentReview(Request $request): void
+    {
+        abort_unless($request->user()?->isOperationManagement(), 403);
     }
 }
