@@ -35,7 +35,7 @@ class StaffJobAssignmentController extends Controller
             $request->user()
         );
 
-        return $this->assignmentResponse($request, 'Design job assigned successfully.', $assignee);
+        return $this->assignmentResponse($request, 'Tugasan design berjaya diberikan.', $assignee);
     }
 
     public function assignPrinting(
@@ -55,7 +55,7 @@ class StaffJobAssignmentController extends Controller
             $request->user()
         );
 
-        return $this->assignmentResponse($request, 'Production job assigned successfully.', $assignee);
+        return $this->assignmentResponse($request, 'Tugasan production berjaya diberikan.', $assignee);
     }
 
     public function assignPacking(
@@ -72,7 +72,7 @@ class StaffJobAssignmentController extends Controller
             $request->user()
         );
 
-        return $this->assignmentResponse($request, 'Packing job assigned successfully.', $assignee);
+        return $this->assignmentResponse($request, 'Tugasan packing berjaya diberikan.', $assignee);
     }
 
     private function validatedAssignee(

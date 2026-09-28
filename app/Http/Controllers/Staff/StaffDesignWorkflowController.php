@@ -42,7 +42,7 @@ class StaffDesignWorkflowController extends Controller
 
         return back()->with(
             'status',
-            'Design work started successfully.'
+            'Kerja design berjaya dimulakan.'
         );
     }
 
@@ -68,7 +68,7 @@ class StaffDesignWorkflowController extends Controller
 
         return back()->with(
             'status',
-            'Correction work resumed successfully.'
+            'Kerja pembetulan berjaya disambung.'
         );
     }
 
@@ -206,8 +206,8 @@ class StaffDesignWorkflowController extends Controller
         return back()->with(
             'status',
             count($validated['source_artwork']) === 1 && count($validated['customer_preview']) === 1
-                ? "Artwork version {$artwork->version_number} uploaded successfully."
-                : "Artwork version {$artwork->version_number} uploaded successfully with "
+                ? "Versi artwork {$artwork->version_number} berjaya dimuat naik."
+                : "Versi artwork {$artwork->version_number} berjaya dimuat naik dengan "
                     .count($validated['source_artwork']).' source file(s) and '
                     .count($validated['customer_preview']).' preview file(s).'
         );

@@ -44,7 +44,7 @@
 
 @if ($errors->any())
     <div class="staff-alert staff-alert-error">
-        <strong>Action could not be completed.</strong>
+        <strong>Tindakan tidak dapat diselesaikan.</strong>
 
         <ul>
             @foreach ($errors->all() as $error)
@@ -1350,7 +1350,7 @@
                 }
 
                 submitButton.textContent = 'Reassign';
-                showAssignmentNotice(form, payload.message || 'Staff assigned successfully.', false);
+                showAssignmentNotice(form, payload.message || 'Staff berjaya ditugaskan.', false);
             } catch (error) {
                 submitButton.textContent = originalButtonText;
                 showAssignmentNotice(form, error.message || 'Assignment could not be saved.', true);
@@ -1410,7 +1410,7 @@
 
                 showUploadNotice(
                     form,
-                    (payload.message || 'Production progress uploaded successfully.')
+                    (payload.message || 'Kemajuan production berjaya dimuat naik.')
                         + (fileNames.length ? ' ' + fileNames.join(', ') : ''),
                     false
                 );

@@ -48,5 +48,6 @@
         </section>
     </main>
     <footer class="login-footer">KING KAD KAHWIN <span>·</span> Ruang kerja pasukan anda</footer>
+    @include('partials.malay-validation')
 </body>
 </html>

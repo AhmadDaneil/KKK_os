@@ -93,7 +93,7 @@ class StaffBatchArtworkController extends Controller
 
         return back()->with(
             'status',
-            $jobs->count().' artwork files uploaded successfully.'
+            $jobs->count().' fail artwork berjaya dimuat naik.'
         );
     }
 
