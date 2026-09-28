@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Staff;
 
 use App\Http\Controllers\Controller;
 use App\Models\DesignJob;
+use App\Models\FulfilmentJob;
 use App\Models\PackingJob;
 use App\Models\PaymentTransaction;
 use App\Models\PrintJob;
@@ -18,6 +19,7 @@ class StaffDashboardController extends Controller
         $attention = [];
         $designerAttention = 0;
         $productionAttention = ['ready' => 0, 'printing' => 0];
+        $packingAttention = ['ready' => 0, 'packing' => 0, 'fulfilment' => 0];
 
         if ($user->isOperationManagement()) {
             $attention = [
@@ -45,6 +47,20 @@ class StaffDashboardController extends Controller
             ];
         }
 
-        return view('staff.dashboard', compact('attention', 'designerAttention', 'productionAttention'));
+        if ($user->isOperationManagement()) {
+            $packingJobs = PackingJob::where('assigned_user_id', $user->id)
+                ->whereIn('status', ['READY_FOR_PACKING', 'PACKING'])
+                ->select('status')
+                ->get();
+            $packingAttention = [
+                'ready' => $packingJobs->where('status', 'READY_FOR_PACKING')->count(),
+                'packing' => $packingJobs->where('status', 'PACKING')->count(),
+                'fulfilment' => FulfilmentJob::where('status', 'READY')
+                    ->whereHas('packingJob', fn ($query) => $query->where('assigned_user_id', $user->id))
+                    ->count(),
+            ];
+        }
+
+        return view('staff.dashboard', compact('attention', 'designerAttention', 'productionAttention', 'packingAttention'));
     }
 }
