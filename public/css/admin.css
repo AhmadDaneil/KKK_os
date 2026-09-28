@@ -115,3 +115,6 @@ body{background:linear-gradient(180deg,#f4efe3 0,#f3f4f1 380px)}
 
 /* Consistent card foundation */
 :is(.admin-panel,.admin-stat-grid article,.admin-staff-card,.admin-action-grid a,.admin-queue-list a){border-radius:12px;box-shadow:0 4px 14px rgba(21,55,41,.07)}
+
+/* Interactive card hover */
+:is(.admin-action-grid a,.admin-queue-list a,.admin-staff-card):is(:hover,:focus-visible){transform:translateY(-3px);box-shadow:0 9px 22px rgba(21,55,41,.14)}.admin-action-grid a,.admin-queue-list a,.admin-staff-card{transition:transform .2s ease,box-shadow .2s ease}

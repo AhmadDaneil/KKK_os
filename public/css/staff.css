@@ -1480,3 +1480,6 @@ a.staff-pagination-link:hover {
 
 /* Consistent card foundation */
 :is(.staff-card,.staff-feature-card,.staff-order-card,.staff-attention-card,.staff-timeline-content){border-radius:12px;box-shadow:0 4px 14px rgba(23,56,43,.07)}
+
+/* Interactive card hover */
+:is(.staff-feature-card,.staff-order-card,.staff-attention-card[href]):is(:hover,:focus-visible){transform:translateY(-3px);box-shadow:0 9px 22px rgba(23,56,43,.14)}.staff-feature-card,.staff-order-card,.staff-attention-card[href]{transition:transform .2s ease,box-shadow .2s ease}

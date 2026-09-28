@@ -140,3 +140,6 @@ html[data-customer-theme="dark"] .customer-theme-toggle-sun { display:none; } ht
 
 /* Consistent customer card foundation */
 :is(.progress-panel,.public-progress-card,.order-summary,.order-summary-card,.package-summary,.review-card,.review-section,.history-panel,.action-panel,.state-panel,.success-card,.tracking-card,.customer-tracking-card){border-radius:12px!important;box-shadow:0 4px 14px rgba(23,56,43,.07)}
+
+/* Interactive customer card hover */
+:is(.action-panel,.dashboard-action-card,.package-summary,.review-card,.tracking-card):is(:hover,:focus-within){transform:translateY(-2px);box-shadow:0 8px 20px rgba(23,56,43,.13)!important;transition:transform .2s ease,box-shadow .2s ease}
