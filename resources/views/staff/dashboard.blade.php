@@ -31,6 +31,54 @@
                     </div>
                 </section>
 
+                @if ($canMonitorOperations)
+                    @php($attentionTotal = array_sum($attention))
+                    <section class="staff-attention-panel" aria-labelledby="staff-attention-title">
+                        <div class="staff-attention-heading">
+                            <div><p class="staff-kicker">Tindakan Operation Management</p><h2 id="staff-attention-title">Memerlukan Perhatian</h2></div>
+                            <span class="staff-attention-total @if ($attentionTotal > 0) has-alert @endif">{{ $attentionTotal > 0 ? $attentionTotal.' tindakan' : 'Semua selesai' }}</span>
+                        </div>
+                        <div class="staff-attention-grid">
+                            @foreach ([
+                                ['key' => 'pending_payments', 'label' => 'Semakan Bayaran', 'description' => 'Bayaran yang perlu diluluskan atau ditolak', 'icon' => 'RM', 'params' => ['attention' => 'pending_payment']],
+                                ['key' => 'unassigned_design', 'label' => 'Design Belum Assign', 'description' => 'Assign designer untuk mula kerja artwork', 'icon' => 'DE', 'params' => ['workstream' => 'design', 'attention' => 'unassigned_design']],
+                                ['key' => 'unassigned_printing', 'label' => 'Production Belum Assign', 'description' => 'Assign staff printing untuk mula production', 'icon' => 'PR', 'params' => ['workstream' => 'printing', 'attention' => 'unassigned_printing']],
+                                ['key' => 'unassigned_packing', 'label' => 'Packing Belum Assign', 'description' => 'Assign OM untuk packing dan fulfilment', 'icon' => 'PA', 'params' => ['workstream' => 'packing', 'attention' => 'unassigned_packing']],
+                            ] as $item)
+                                <a href="{{ route('staff.orders.index', $item['params']) }}" class="staff-attention-card @if ($attention[$item['key']] > 0) has-alert @else is-clear @endif">
+                                    <span class="staff-attention-icon">{{ $item['icon'] }}</span><span><strong>{{ $item['label'] }}</strong><small>{{ $item['description'] }}</small></span><b>{{ $attention[$item['key']] }}</b>
+                                </a>
+                            @endforeach
+                        </div>
+                    </section>
+                @endif
+
+                @if ($dashboardUser->hasStaffRole(\App\Models\User::ROLE_DESIGNER))
+                    <section class="staff-attention-panel staff-designer-attention" aria-labelledby="designer-attention-title">
+                        <div class="staff-attention-heading">
+                            <div><p class="staff-kicker">Tindakan Designer</p><h2 id="designer-attention-title">Memerlukan Perhatian</h2></div>
+                            <span class="staff-attention-total @if ($designerAttention > 0) has-alert @endif">{{ $designerAttention > 0 ? $designerAttention.' tugasan' : 'Tiada tindakan diperlukan' }}</span>
+                        </div>
+                        <div class="staff-attention-card @if ($designerAttention > 0) has-alert @else is-clear @endif">
+                            <span class="staff-attention-icon">DE</span><span><strong>Design Queue</strong><small>{{ $designerAttention > 0 ? 'Order sedia untuk dimulakan atau memerlukan pembetulan' : 'Semua tugasan design telah dikemas kini' }}</small></span><b>{{ $designerAttention }}</b>
+                        </div>
+                    </section>
+                @endif
+
+                @if ($dashboardUser->hasStaffRole(\App\Models\User::ROLE_PRODUCTION))
+                    @php($productionTotal = array_sum($productionAttention))
+                    <section class="staff-attention-panel staff-production-attention" aria-labelledby="production-attention-title">
+                        <div class="staff-attention-heading">
+                            <div><p class="staff-kicker">Tindakan Production</p><h2 id="production-attention-title">Memerlukan Perhatian</h2></div>
+                            <span class="staff-attention-total @if ($productionTotal > 0) has-alert @endif">{{ $productionTotal > 0 ? $productionTotal.' tugasan' : 'Tiada tindakan diperlukan' }}</span>
+                        </div>
+                        <div class="staff-attention-grid">
+                            <div class="staff-attention-card @if ($productionAttention['ready'] > 0) has-alert @else is-clear @endif"><span class="staff-attention-icon">PR</span><span><strong>Printing Belum Mula</strong><small>Kerja printing yang boleh dimulakan</small></span><b>{{ $productionAttention['ready'] }}</b></div>
+                            <div class="staff-attention-card @if ($productionAttention['printing'] > 0) has-alert @else is-clear @endif"><span class="staff-attention-icon">PR</span><span><strong>Printing Sedang Berjalan</strong><small>Muat naik progress dan tandakan printed</small></span><b>{{ $productionAttention['printing'] }}</b></div>
+                        </div>
+                    </section>
+                @endif
+
                 <div class="staff-dashboard-sections">
                     @if ($canMonitorOperations)
                     <section class="staff-dashboard-group">

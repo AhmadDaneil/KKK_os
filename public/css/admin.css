@@ -90,6 +90,11 @@ body{background:linear-gradient(180deg,#f4efe3 0,#f3f4f1 380px)}
 @media(prefers-reduced-motion:reduce){.admin-stat-grid article{transition:none}.admin-stat-grid article:hover{transform:none}.admin-stat-grid.is-animated article,.admin-stat-grid.is-floating article{animation:none}}
 
 /* Dashboard attention colours */
+@keyframes admin-attention-card-flash{0%,100%{box-shadow:0 0 0 0 rgba(198,74,59,.12);transform:scale(1)}50%{box-shadow:0 0 0 6px rgba(198,74,59,.24);transform:scale(1.012)}}
+@keyframes admin-attention-number-flash{0%,100%{transform:scale(1)}50%{transform:scale(1.18)}}
+.admin-action-grid a.has-alert{animation:admin-attention-card-flash 1s ease-in-out infinite}
+.admin-action-grid a.has-alert b{animation:admin-attention-number-flash 1s ease-in-out infinite}
+@media(prefers-reduced-motion:reduce){.admin-action-grid a.has-alert,.admin-action-grid a.has-alert b{animation:none}}
 .admin-stat-grid article.has-alert{border-color:#efb3a9;border-top-color:#c64a3b;background:#fff7f5}.admin-stat-grid article.has-alert strong{color:#a83232}.admin-stat-grid article.is-clear{border-color:#b9dcc7;border-top-color:#36a168;background:#f5fcf8}.admin-stat-grid article.is-clear strong{color:#26734d}.admin-attention-total.has-alert{color:#922b2b;background:#ffe4df;animation:admin-attention-pulse 2s ease-in-out infinite}.admin-attention-total.is-clear{color:#21613b;background:#e4f5ea}.admin-action-grid a.has-alert{border-color:#efb8ae;border-left-color:#c64a3b;background:#fff8f6}.admin-action-grid a.has-alert:hover{border-color:#d87b6d;background:#fff1ed}.admin-action-grid a.has-alert b{color:#a83232}.admin-action-grid a.is-clear{border-color:#bfddca;border-left-color:#36a168;background:#f7fcf9}.admin-action-grid a.is-clear:hover{border-color:#83be9a;background:#eef8f2}.admin-action-grid a.is-clear b{color:#26734d}@keyframes admin-attention-pulse{0%,100%{box-shadow:0 0 0 0 rgba(198,74,59,.18)}50%{box-shadow:0 0 0 7px rgba(198,74,59,0)}}@media(prefers-reduced-motion:reduce){.admin-attention-total.has-alert{animation:none}}
 
 .admin-quick-order-search{width:min(100%,560px);margin-top:22px}
