@@ -77,8 +77,8 @@ class CustomerThankYouPageTest extends TestCase
             ->assertSee('Muhammad Syafiq')
             ->assertSee('Nur Awanis')
             ->assertSee('Semak Progress')
-            ->assertSee(route('orders.dashboard', [
-                'orderId' => $order->order_id,
+            ->assertSee(route('public.orders.progress', [
+                'order_id' => $order->order_id,
             ]), false);
 
         $payment = $order->fresh()->payments()->where('payment_type', 'BOOKING_DEPOSIT')->firstOrFail();
@@ -105,6 +105,15 @@ class CustomerThankYouPageTest extends TestCase
 
         $this->assertSame('DETAILS_INCOMPLETE', $order->fresh()->status);
         $this->assertDatabaseCount('payment_transactions', 0);
+    }
+
+    public function test_legacy_order_id_url_redirects_to_final_review(): void
+    {
+        $order = $this->completeOrder();
+        $this->establishCustomerSession($order);
+
+        $this->get(route('orders.order-id.legacy', ['orderId' => $order->order_id]))
+            ->assertRedirect(route('orders.review.show', ['orderId' => $order->order_id]));
     }
 
     public function test_unconfirmed_order_is_redirected_away_from_thank_you_page(): void

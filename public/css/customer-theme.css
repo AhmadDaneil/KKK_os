@@ -49,7 +49,81 @@ html[data-customer-theme="dark"] .balance-status-message.is-failed span { color:
 html[data-customer-theme="dark"] .payment-success-message { border-color:#4c8062!important; color:#dff3e7!important; background:#193c2b!important; }
 html[data-customer-theme="dark"] .balance-qr-placeholder { border-color:#50675b!important; color:#e5ece7!important; background:#142019!important; }
 html[data-customer-theme="dark"] .balance-receipt-picker button { border-color:#9b5951!important; color:#ffd7d1!important; background:#422824!important; }
-html[data-customer-theme="dark"] :is(.live-card-preview,.wedding-card-front,.wedding-card-back,.card-preview) { color:#17251e!important; }
+html[data-customer-theme="dark"] :is(.live-card-preview,.card-preview) { color:#17251e!important; }
+
+/* The preview is an invitation artwork, so preserve its designed ink colours.
+   The general dark-mode typography palette must not wash out its contents. */
+html[data-customer-theme="dark"] .wedding-card-front { color:#a62d8b!important; }
+html[data-customer-theme="dark"] .wedding-card-front[data-theme="garden"] { color:#477a55!important; }
+html[data-customer-theme="dark"] .wedding-card-front[data-theme="minimalist"] { color:#252525!important; }
+html[data-customer-theme="dark"] .wedding-card-front[data-theme="rusty"] { color:#a34f35!important; }
+html[data-customer-theme="dark"] .wedding-card-front[data-theme="islamic"] { color:#267058!important; }
+html[data-customer-theme="dark"] .wedding-card-front[data-theme="nostalgia"] { color:#805f45!important; }
+html[data-customer-theme="dark"] .wedding-card-front[data-theme="desa"] { color:#68783f!important; }
+html[data-customer-theme="dark"] .wedding-card-back { color:#111827!important; }
+html[data-customer-theme="dark"] .wedding-card :is(p, small, strong, b, span, footer) {
+  color:inherit !important;
+}
+
+html[data-customer-theme="dark"] .wedding-card-front .card-couple-names b {
+  color:rgba(166,45,139,.38) !important;
+}
+/* Customer dashboard, preview, and date-picker surfaces. */
+html[data-customer-theme="dark"] :is(.order-summary-grid,.order-status-message,.form-actions,.dashboard-action-card,.live-preview,.live-preview-toggle,.live-preview-body,.date-picker-panel,.hijri-picker-panel,.date-picker-nav,.hijri-picker-clear) { border-color:#40554a!important; background:#1c2923!important; color:#e5ece7!important; }
+html[data-customer-theme="dark"] :is(.date-picker-trigger,.date-picker-day,.hijri-date-option) { border-color:#50675b!important; color:#e5ece7!important; background:#142019!important; }
+html[data-customer-theme="dark"] .date-picker-trigger.has-value { color:#eef4ef!important; }
+html[data-customer-theme="dark"] :is(.date-picker-icon,.date-picker-heading strong,.date-picker-weekdays span,.date-picker-note,.date-picker-help,.field-help,.live-preview-toggle small,.live-preview-heading>span,.autosave-status) { color:#b8c9c0!important; }
+html[data-customer-theme="dark"] :is(.date-picker-day:hover:not(:disabled),.date-picker-day.is-selected,.hijri-date-option:hover:not(:disabled)) { border-color:#5ba67d!important; color:#fff!important; background:#286247!important; }
+html[data-customer-theme="dark"] .date-picker-day:disabled { color:#65796d!important; background:transparent!important; }
+html[data-customer-theme="dark"] .hijri-date-option:disabled { color:#83958a!important; background:#26352d!important; }
+html[data-customer-theme="dark"] :is(.preview-side-tab,.preview-face-tab) { border-color:#50675b!important; color:#c9dbd0!important; background:#1b2b23!important; }
+html[data-customer-theme="dark"] :is(.preview-side-tab.is-active,.preview-face-tab.is-active) { border-color:#c04a97!important; color:#fff!important; background:#9b2c74!important; }
+html[data-customer-theme="dark"] .live-preview-toggle:hover { background:#25372d!important; }
+html[data-customer-theme="dark"] .live-preview-chevron { border-color:#c9dbd0!important; }
+html[data-customer-theme="dark"] :is(.progress-panel,.order-summary-grid,.order-status-message,.package-summary,.review-item) { color:#e5ece7!important; }
+html[data-customer-theme="dark"] .progress-panel { border-color:#40554a!important; background:#1c2923!important; }
+html[data-customer-theme="dark"] .progress-track { background:#34453c!important; }
+html[data-customer-theme="dark"] .progress-stage { color:#aebeb5!important; }
+html[data-customer-theme="dark"] .stage-dot { border-color:#71877b!important; background:#142019!important; }
+html[data-customer-theme="dark"] .autosave-status[data-state="saved"] { color:#78d5a0!important; }
+html[data-customer-theme="dark"] .autosave-status[data-state="saving"] { color:#8fc4e8!important; }
+html[data-customer-theme="dark"] .autosave-status[data-state="error"] { color:#ffaaa4!important; }
+html[data-customer-theme="dark"] .notice { border-color:#4c8062!important; color:#dff3e7!important; background:#193c2b!important; }
+html[data-customer-theme="dark"] .upload-status { border:1px solid #4c8062!important; color:#dff3e7!important; background:#193c2b!important; }
+html[data-customer-theme="dark"] .upload-status.not-uploaded { border-color:#50675b!important; color:#c3d2ca!important; background:#26322d!important; }
+/* The deposit row needs a complete outline in dark mode, not only a left accent. */
+html[data-customer-theme="dark"] .deposit-public-status { border:1px solid #40554a!important; border-left:4px solid #d3a84f!important; }
+html[data-customer-theme="dark"] .deposit-public-status[data-status="paid"] { border-left-color:#4ca36c!important; }
+html[data-customer-theme="dark"] .deposit-public-status[data-status="failed"] { border-left-color:#d86666!important; }
+/* Final review, payment upload, dialogs, and confirmation pages. */
+html[data-customer-theme="dark"] :is(.review-header,.review-card,.order-card,.final-confirmation-dialog,.confirmation-dialog) { border-color:#40554a!important; background:#1c2923!important; color:#e5ece7!important; }
+html[data-customer-theme="dark"] :is(.review-item,.package-summary,.qr-panel,.receipt-panel) { border-color:#40554a!important; background:#203028!important; color:#e5ece7!important; }
+html[data-customer-theme="dark"] .contact-list li { border:1px solid #40554a!important; color:#e5ece7!important; background:#203028!important; }
+html[data-customer-theme="dark"] .contact-list .contact-number { color:#b8c9c0!important; }
+html[data-customer-theme="dark"] :is(.order-badge,.side-badge,.artwork-progress-label) { color:#d6e9dd!important; background:#263b30!important; }
+html[data-customer-theme="dark"] :is(.deposit-amount,.confirmed-badge) { color:#dff3e7!important; background:#28543d!important; }
+html[data-customer-theme="dark"] .deposit-notice { border-left-color:#d3a84f!important; background:#3a321f!important; }
+html[data-customer-theme="dark"] .deposit-notice strong { color:#f4e8c9!important; }
+html[data-customer-theme="dark"] .deposit-notice p { color:#d8cba8!important; }
+html[data-customer-theme="dark"] :is(.confirmation-note,.confirmation-checkbox) { border-color:#50675b!important; color:#d4e2da!important; background:#203028!important; }
+html[data-customer-theme="dark"] .confirmation-checkbox:has(input:checked) { border-color:#5ba67d!important; background:#28543d!important; }
+html[data-customer-theme="dark"] :is(.final-confirmation-dialog h2,.confirmation-dialog h2) { color:#f4f1e9!important; }
+html[data-customer-theme="dark"] :is(.final-confirmation-dialog p,.confirmation-dialog p) { color:#c3d2ca!important; }
+html[data-customer-theme="dark"] :is(.final-confirmation-dialog-actions button,.confirmation-dialog-actions .button-secondary) { border-color:#50675b!important; color:#edf5ef!important; background:#1b2b23!important; }
+html[data-customer-theme="dark"] :is(.final-confirmation-dialog-actions .is-primary,.confirmation-dialog-actions .button-primary) { border-color:#2c7b55!important; color:#fff!important; background:#286247!important; }
+html[data-customer-theme="dark"] :is(.summary-grid,.summary-grid dt,.package-summary dt) { border-color:#40554a!important; }
+html[data-customer-theme="dark"] :is(.summary-grid dt,.package-summary dt,.review-label,.success-message) { color:#b8c9c0!important; }
+html[data-customer-theme="dark"] :is(.order-card,.thank-you-page) { background:transparent!important; }
+html[data-customer-theme="dark"] .order-card { background:#1c2923!important; }
+/* Artwork review actions remain legible while the page shell is dark. */
+html[data-customer-theme="dark"] :is(.action-panel,.state-panel,.history-panel,.empty-state) { border-color:#40554a!important; color:#e5ece7!important; background:#203028!important; }
+html[data-customer-theme="dark"] :is(.action-panel p,.state-panel p,.empty-state p,.history-item p,.correction-fee-consent) { color:#c3d2ca!important; }
+html[data-customer-theme="dark"] .correction-panel .correction-fee-warning { color:#ffd39a!important; }
+html[data-customer-theme="dark"] .correction-payment-details { border-color:#50675b!important; color:#d4e2da!important; background:#1b2b23!important; }
+html[data-customer-theme="dark"] .button-danger-outline { border-color:#bd6a63!important; color:#ffd7d1!important; background:#422824!important; }
+html[data-customer-theme="dark"] .artwork-confirmation-dialog { border-color:#40554a!important; color:#e5ece7!important; background:#1c2923!important; }
+html[data-customer-theme="dark"] .artwork-confirmation-dialog h2 { color:#f4f1e9!important; }
+html[data-customer-theme="dark"] .artwork-confirmation-dialog p { color:#c3d2ca!important; }
 html[data-customer-theme="dark"] .customer-theme-toggle { border-color:#647c6e; color:#f7efcf; background:#25372d; }.customer-theme-toggle-sun { color:#a56f14; }
 html[data-customer-theme="dark"] .customer-theme-toggle-sun { display:none; } html[data-customer-theme="dark"] .customer-theme-toggle-moon { display:block; }
 @media (max-width:560px) { .customer-theme-toggle { right:14px; bottom:14px; width:38px; height:38px; } }

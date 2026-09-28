@@ -3,6 +3,7 @@
     $logoutRoute = $isAdminPortal ? 'admin.logout' : 'staff.logout';
     $ordersIndexRoute = $isAdminPortal ? 'admin.orders.index' : 'staff.orders.index';
     $operationRoutePrefix = $isAdminPortal ? 'admin.' : 'staff.';
+    $hasFullQueueView = auth()->user()->isOperationManagement();
     $batchArtworkJobs = $order->relationLoaded('designJobs')
         ? $order->designJobs->filter(fn ($job) =>
             auth()->user()->hasStaffRole(\App\Models\User::ROLE_DESIGNER)
@@ -81,6 +82,7 @@
                 <p class="staff-work-message">Read-only order details.</p>
             @endif
 
+            @if ($hasFullQueueView)
             <div class="staff-detail-grid">
                 <section class="staff-card">
                     <h2>Order Summary</h2>
@@ -162,6 +164,7 @@
                     <p class="staff-empty-state">Belum ada rekod perubahan status untuk order ini.</p>
                 @endif
             </section>
+            @endif
 
             <section class="staff-section">
                 <h2 class="staff-section-title">Packages</h2>
@@ -618,6 +621,7 @@
                 </section>
             @endif
 
+            @if ($hasFullQueueView)
             <section class="staff-section">
                 <h2 class="staff-section-title">Payment</h2>
 
@@ -710,6 +714,7 @@
                     @endforelse
                 </div>
             </section>
+            @endif
 
             @if (($canAssignProduction ?? false) && ! $order->isAssignmentLocked() && auth()->user()->isOperationManagement() && ! request()->attributes->get('staff_overview_mode', false))
                 <section class="staff-section">
@@ -834,7 +839,7 @@
                                     @elseif ($job->status === 'WAITING_FOR_PAYMENT')
                                         <p class="staff-work-message">Menunggu pengesahan bayaran penuh sebelum cetakan boleh dimulakan.</p>
                                     @elseif ($job->status === 'PRINTING')
-                                        <form method="POST" enctype="multipart/form-data" action="{{ route('staff.print-jobs.progress-files.store', $job) }}" class="staff-packing-complete-form js-staff-confirmation-form" data-confirm-title="Upload progress cetakan {{ ucfirst(strtolower($job->side)) }}?" data-confirm-message="Gambar atau PDF yang dipilih akan disimpan sebagai bukti progress cetakan semasa." data-confirm-button="Ya, upload progress">
+                                        <form method="POST" enctype="multipart/form-data" action="{{ route('staff.print-jobs.progress-files.store', $job) }}" class="staff-packing-complete-form js-staff-confirmation-form js-async-progress-upload" data-confirm-title="Upload progress cetakan {{ ucfirst(strtolower($job->side)) }}?" data-confirm-message="Gambar atau PDF yang dipilih akan disimpan sebagai bukti progress cetakan semasa." data-confirm-button="Ya, upload progress">
                                             @csrf
                                             <label for="print-progress-{{ $job->id }}">Upload production progress</label>
                                             <div class="staff-file-picker">
@@ -843,6 +848,7 @@
                                             </div>
                                             <p class="staff-muted-text">Upload photos or PDFs showing hanger production progress. Maximum 10 files, 20 MB each.</p>
                                             <button type="submit" class="staff-button staff-button-secondary">Upload Progress</button>
+                                            <p class="staff-upload-notice" role="status" aria-live="polite" hidden></p>
                                         </form>
                                         <form method="POST" action="{{ route($operationRoutePrefix.'print-jobs.mark-printed', $job) }}" class="staff-workflow-form js-staff-confirmation-form" data-confirm-title="Tandakan cetakan {{ ucfirst(strtolower($job->side)) }} sebagai siap?" data-confirm-message="Pastikan semua {{ $job->quantity ?? $order->card_quantity ?? '-' }} keping kad telah selesai dicetak dan diperiksa sebelum meneruskan." data-confirm-button="Ya, tandakan siap" data-confirm-tone="danger">@csrf<button type="submit" class="staff-button staff-button-primary">Mark Printed</button></form>
                                     @elseif ($job->status === 'PRINTED')
@@ -859,7 +865,7 @@
                 </section>
             @endif
 
-            @if ($order->relationLoaded('packingJob') && $order->packingJob)
+            @if ($hasFullQueueView && $order->relationLoaded('packingJob') && $order->packingJob)
                 <section class="staff-section">
                     <h2 class="staff-section-title">Packing</h2>
 
@@ -954,6 +960,7 @@
                 </section>
             @endif
 
+            @if ($hasFullQueueView)
             <section class="staff-section">
                 <h2 class="staff-section-title">Fulfilment</h2>
 
@@ -1135,6 +1142,7 @@
                     @endif
                 </article>
             </section>
+            @endif
         </main>
         </div>
     </div>
@@ -1351,6 +1359,69 @@
             }
         }
 
+        function showUploadNotice(form, message, isError) {
+            const notice = form.querySelector('.staff-upload-notice');
+
+            if (!notice) {
+                return;
+            }
+
+            notice.hidden = false;
+            notice.textContent = message;
+            notice.classList.toggle('is-error', isError);
+        }
+
+        async function submitProgressUpload(form) {
+            const submitButton = form.querySelector('[type="submit"]');
+            const fileInput = form.querySelector('[name="progress_files[]"]');
+            const cancelButton = form.querySelector('.staff-file-cancel');
+            const originalButtonText = submitButton.textContent;
+
+            submitButton.disabled = true;
+            submitButton.textContent = 'Memuat naik...';
+
+            try {
+                const response = await fetch(form.action, {
+                    method: 'POST',
+                    body: new FormData(form),
+                    credentials: 'same-origin',
+                    headers: {
+                        Accept: 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest',
+                    },
+                });
+                const payload = await response.json().catch(function () { return {}; });
+
+                if (!response.ok) {
+                    const errors = payload.errors ? Object.values(payload.errors).flat().join(' ') : null;
+                    throw new Error(errors || payload.message || 'Progress upload could not be completed.');
+                }
+
+                const fileNames = (payload.files || []).map(function (file) {
+                    return file.original_name;
+                }).filter(Boolean);
+
+                if (fileInput) {
+                    fileInput.value = '';
+                }
+                if (cancelButton) {
+                    cancelButton.hidden = true;
+                }
+
+                showUploadNotice(
+                    form,
+                    (payload.message || 'Production progress uploaded successfully.')
+                        + (fileNames.length ? ' ' + fileNames.join(', ') : ''),
+                    false
+                );
+            } catch (error) {
+                showUploadNotice(form, error.message || 'Progress upload could not be completed.', true);
+            } finally {
+                submitButton.disabled = false;
+                submitButton.textContent = originalButtonText;
+            }
+        }
+
         confirmButton.addEventListener('click', function () {
             if (!pendingForm) {
                 return;
@@ -1366,6 +1437,16 @@
                 confirmButton.disabled = false;
                 confirmButton.textContent = 'Ya, teruskan';
                 submitAssignment(form);
+                return;
+            }
+
+            if (pendingForm.classList.contains('js-async-progress-upload')) {
+                const form = pendingForm;
+                pendingForm = null;
+                dialog.close();
+                confirmButton.disabled = false;
+                confirmButton.textContent = 'Ya, teruskan';
+                submitProgressUpload(form);
                 return;
             }
 

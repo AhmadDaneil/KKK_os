@@ -10,6 +10,7 @@ use App\Services\Printing\MarkPrintJobPrintedService;
 use App\Services\Printing\StartPrintingService;
 use App\Services\Printing\SyncOrderPrintStatusService;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
@@ -85,10 +86,16 @@ class StaffPrintingWorkflowController extends Controller
     public function uploadProgress(
         Request $request,
         PrintJob $printJob
-    ): RedirectResponse {
+    ): RedirectResponse|JsonResponse {
         $this->authorizeAssignedPrintingStaff($request, $printJob);
 
         if ($printJob->status !== 'PRINTING') {
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'message' => 'Progress files can only be uploaded while this job is in production.',
+                ], 422);
+            }
+
             return back()->withErrors([
                 'print_job' => 'Progress files can only be uploaded while this job is in production.',
             ]);
@@ -146,8 +153,20 @@ class StaffPrintingWorkflowController extends Controller
         } catch (RuntimeException $exception) {
             $disk->delete($storedPaths);
 
+            if ($request->expectsJson()) {
+                return response()->json(['message' => $exception->getMessage()], 422);
+            }
+
             return back()->withErrors([
                 'print_job' => $exception->getMessage(),
+            ]);
+        }
+
+        if ($request->expectsJson()) {
+            return response()->json([
+                'message' => 'Production progress uploaded successfully.',
+                'files' => $newFiles,
+                'progress_updated_at' => $printJob->fresh()->progress_updated_at?->toIso8601String(),
             ]);
         }
 

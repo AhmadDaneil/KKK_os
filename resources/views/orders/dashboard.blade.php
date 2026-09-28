@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="referrer" content="no-referrer">
     <title>KKK OS - {{ $order->order_id }}</title>
-    <link rel="stylesheet" href="{{ asset('css/customer-dashboard.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/customer-dashboard.css') }}?v={{ filemtime(public_path('css/customer-dashboard.css')) }}">
     <link rel="stylesheet" href="{{ asset('css/customer-theme.css') }}?v={{ filemtime(public_path('css/customer-theme.css')) }}">
 </head>
 <body>
@@ -817,13 +817,15 @@ document.addEventListener('DOMContentLoaded', function () {
 
         let autosaveTimer;
         let saveQueue = Promise.resolve();
+        let draftRevision = 0;
+        let savedRevision = 0;
 
         function setStatus(message, state) {
             status.textContent = message;
             status.dataset.state = state;
         }
 
-        function saveDraft(includeFiles) {
+        function buildDraftData(includeFiles) {
             const formData = new FormData(form);
 
             if (!includeFiles) {
@@ -832,7 +834,20 @@ document.addEventListener('DOMContentLoaded', function () {
                 });
             }
 
+            return formData;
+        }
+
+        function saveDraft(includeFiles, revision, attempt) {
+            const formData = buildDraftData(includeFiles);
+            const csrfToken = formData.get('_token');
+            const retryAttempt = attempt || 0;
+
             setStatus('Menyimpan...', 'saving');
+
+            const controller = new AbortController();
+            const timeout = window.setTimeout(function () {
+                controller.abort();
+            }, 15000);
 
             return fetch(form.action, {
                 method: 'POST',
@@ -840,25 +855,45 @@ document.addEventListener('DOMContentLoaded', function () {
                 credentials: 'same-origin',
                 headers: {
                     'Accept': 'application/json',
-                    'X-Requested-With': 'XMLHttpRequest'
-                }
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRF-TOKEN': csrfToken || ''
+                },
+                signal: controller.signal
             }).then(function (response) {
                 if (!response.ok) {
                     throw new Error('Autosave failed');
                 }
 
-                setStatus('Semua perubahan telah disimpan', 'saved');
+                savedRevision = Math.max(savedRevision, revision);
+
+                if (savedRevision === draftRevision) {
+                    setStatus('Semua perubahan telah disimpan', 'saved');
+                }
             }).catch(function (error) {
-                setStatus('Simpanan automatik gagal. Sila tekan Simpan Draft.', 'error');
+                if (retryAttempt === 0) {
+                    return new Promise(function (resolve) {
+                        window.setTimeout(resolve, 1200);
+                    }).then(function () {
+                        return saveDraft(includeFiles, revision, 1);
+                    });
+                }
+
+                if (revision === draftRevision) {
+                    setStatus('Simpanan automatik gagal. Sila tekan Simpan Draft.', 'error');
+                }
                 throw error;
+            }).finally(function () {
+                window.clearTimeout(timeout);
             });
         }
 
         function queueSave(includeFiles) {
+            const revision = draftRevision;
+
             saveQueue = saveQueue
                 .catch(function () {})
                 .then(function () {
-                    return saveDraft(includeFiles);
+                    return saveDraft(includeFiles, revision);
                 });
 
             return saveQueue;
@@ -871,6 +906,7 @@ document.addEventListener('DOMContentLoaded', function () {
             }
 
             window.clearTimeout(autosaveTimer);
+            draftRevision += 1;
             setStatus('Perubahan belum disimpan', 'pending');
             autosaveTimer = window.setTimeout(function () {
                 queueSave(false).catch(function () {});
@@ -879,6 +915,34 @@ document.addEventListener('DOMContentLoaded', function () {
 
         form.addEventListener('input', scheduleAutosave);
         form.addEventListener('change', scheduleAutosave);
+
+        document.addEventListener('visibilitychange', function () {
+            if (document.visibilityState !== 'hidden' || savedRevision === draftRevision) {
+                return;
+            }
+
+            window.clearTimeout(autosaveTimer);
+            queueSave(false).catch(function () {});
+        });
+
+        window.addEventListener('pagehide', function () {
+            if (savedRevision === draftRevision) {
+                return;
+            }
+
+            window.clearTimeout(autosaveTimer);
+
+            /*
+             * A normal fetch may be cancelled while a page is closing. sendBeacon
+             * keeps the small, file-free draft request alive during navigation.
+             */
+            if (navigator.sendBeacon) {
+                navigator.sendBeacon(form.action, buildDraftData(false));
+                return;
+            }
+
+            queueSave(false).catch(function () {});
+        });
 
         reviewLink.addEventListener('click', function (event) {
             if (event.defaultPrevented) {

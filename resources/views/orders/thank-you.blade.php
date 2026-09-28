@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="referrer" content="no-referrer">
     <title>Terima Kasih - {{ $review['order_id'] }}</title>
-    <link rel="stylesheet" href="{{ asset('css/thank-you.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/thank-you.css') }}?v={{ filemtime(public_path('css/thank-you.css')) }}">
     <link rel="stylesheet" href="{{ asset('css/customer-theme.css') }}?v={{ filemtime(public_path('css/customer-theme.css')) }}">
 </head>
 <body>
@@ -88,7 +88,7 @@
                 @endforeach
             </div>
 
-            <a class="progress-button" href="{{ route('orders.dashboard', ['orderId' => $review['order_id']]) }}">
+            <a class="progress-button" href="{{ route('public.orders.progress', ['order_id' => $review['order_id']]) }}">
                 Semak Progress
             </a>
         </section>

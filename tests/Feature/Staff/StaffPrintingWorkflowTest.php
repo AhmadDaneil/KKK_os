@@ -147,6 +147,42 @@ class StaffPrintingWorkflowTest extends TestCase
             ->assertHeader('Content-Type', 'image/jpeg');
     }
 
+    public function test_assigned_printing_staff_can_upload_progress_without_a_page_redirect(): void
+    {
+        Storage::fake('local');
+
+        $admin = $this->admin();
+        $printing = $this->staff(User::ROLE_PRINTING);
+        [, $jobs] = $this->printJobs();
+        $job = $jobs->first();
+
+        app(AssignPrintJobService::class)->assign($job, $printing, $admin);
+
+        $this->actingAs($printing, 'staff')
+            ->post(route('staff.print-jobs.start', $job))
+            ->assertRedirect();
+
+        $this->actingAs($printing, 'staff')
+            ->withHeaders([
+                'Accept' => 'application/json',
+                'X-Requested-With' => 'XMLHttpRequest',
+            ])
+            ->post(route('staff.print-jobs.progress-files.store', $job), [
+                'progress_files' => [
+                    UploadedFile::fake()->image('printing-stage-async.jpg'),
+                ],
+            ])
+            ->assertOk()
+            ->assertJsonPath('message', 'Production progress uploaded successfully.')
+            ->assertJsonCount(1, 'files')
+            ->assertJsonPath('files.0.original_name', 'printing-stage-async.jpg');
+
+        $job->refresh();
+
+        $this->assertCount(1, $job->progress_files);
+        $this->assertNotNull($job->progress_updated_at);
+    }
+
     public function test_other_printing_staff_cannot_start_assigned_print_job(): void
     {
         $admin = $this->admin();
