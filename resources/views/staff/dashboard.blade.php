@@ -31,6 +31,28 @@
                     </div>
                 </section>
 
+                @if ($canMonitorOperations)
+                    @php($attentionTotal = array_sum($attention))
+                    <section class="staff-attention-panel" aria-labelledby="staff-attention-title">
+                        <div class="staff-attention-heading">
+                            <div><p class="staff-kicker">Tindakan Operation Management</p><h2 id="staff-attention-title">Memerlukan Perhatian</h2></div>
+                            <span class="staff-attention-total @if ($attentionTotal > 0) has-alert @endif">{{ $attentionTotal > 0 ? $attentionTotal.' tindakan' : 'Semua selesai' }}</span>
+                        </div>
+                        <div class="staff-attention-grid">
+                            @foreach ([
+                                ['key' => 'pending_payments', 'label' => 'Semakan Bayaran', 'description' => 'Bayaran yang perlu diluluskan atau ditolak', 'icon' => 'RM', 'params' => ['attention' => 'pending_payment']],
+                                ['key' => 'unassigned_design', 'label' => 'Design Belum Assign', 'description' => 'Assign designer untuk mula kerja artwork', 'icon' => 'DE', 'params' => ['workstream' => 'design', 'attention' => 'unassigned_design']],
+                                ['key' => 'unassigned_printing', 'label' => 'Production Belum Assign', 'description' => 'Assign staff printing untuk mula production', 'icon' => 'PR', 'params' => ['workstream' => 'printing', 'attention' => 'unassigned_printing']],
+                                ['key' => 'unassigned_packing', 'label' => 'Packing Belum Assign', 'description' => 'Assign OM untuk packing dan fulfilment', 'icon' => 'PA', 'params' => ['workstream' => 'packing', 'attention' => 'unassigned_packing']],
+                            ] as $item)
+                                <a href="{{ route('staff.orders.index', $item['params']) }}" class="staff-attention-card @if ($attention[$item['key']] > 0) has-alert @else is-clear @endif">
+                                    <span class="staff-attention-icon">{{ $item['icon'] }}</span><span><strong>{{ $item['label'] }}</strong><small>{{ $item['description'] }}</small></span><b>{{ $attention[$item['key']] }}</b>
+                                </a>
+                            @endforeach
+                        </div>
+                    </section>
+                @endif
+
                 <div class="staff-dashboard-sections">
                     @if ($canMonitorOperations)
                     <section class="staff-dashboard-group">
