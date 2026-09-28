@@ -123,6 +123,8 @@ html[data-customer-theme="dark"] :is(.order-card,.thank-you-page) { background:t
 html[data-customer-theme="dark"] .order-card { background:#1c2923!important; }
 /* Artwork review actions remain legible while the page shell is dark. */
 html[data-customer-theme="dark"] :is(.action-panel,.state-panel,.history-panel,.empty-state) { border-color:#40554a!important; color:#e5ece7!important; background:#203028!important; }
+html[data-customer-theme="dark"] .history-item { border-color:#50675b!important; color:#e5ece7!important; background:#26382e!important; }
+html[data-customer-theme="dark"] .history-item-header time { color:#c3d2ca!important; }
 html[data-customer-theme="dark"] :is(.action-panel p,.state-panel p,.empty-state p,.history-item p,.correction-fee-consent) { color:#c3d2ca!important; }
 html[data-customer-theme="dark"] .correction-panel .correction-fee-warning { color:#ffd39a!important; }
 html[data-customer-theme="dark"] .correction-payment-details { border-color:#50675b!important; color:#d4e2da!important; background:#1b2b23!important; }
