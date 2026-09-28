@@ -782,7 +782,15 @@
                                     </div>
 
                                     <div>
-                                        <dt>Hanger Label</dt>
+                                        <dt>Nama pasangan</dt>
+                                        <dd>
+                                            @php($couple = $order->couples->firstWhere('couple_number', 1))
+                                            {{ collect([$couple?->groom_name, $couple?->bride_name])->filter()->join(' & ') ?: '-' }}
+                                        </dd>
+                                    </div>
+
+                                    <div>
+                                        <dt>Label hanger</dt>
                                         <dd>{{ $job->side === 'LELAKI' ? 'Pengantin Lelaki' : 'Pengantin Perempuan' }}</dd>
                                     </div>
 

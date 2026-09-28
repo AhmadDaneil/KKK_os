@@ -55,6 +55,7 @@ class StaffOrderController extends Controller
                 'packageSides.design',
                 'packageSides.parents',
                 'packageSides.event.contacts',
+                'couples',
                 'fulfilment',
                 'payments',
                 'fulfilmentJob.events.actor',
