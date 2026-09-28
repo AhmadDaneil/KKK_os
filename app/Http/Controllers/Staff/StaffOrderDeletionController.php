@@ -28,6 +28,6 @@ class StaffOrderDeletionController extends Controller
             ]);
         }
 
-        return back()->with('status', "Order {$orderId} deleted successfully.");
+        return back()->with('status', "Order {$orderId} berjaya dipadam.");
     }
 }

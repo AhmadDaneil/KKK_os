@@ -9,8 +9,8 @@ use App\Services\Packing\InitializePackingJobForOrderService;
 use App\Services\Printing\MarkPrintJobPrintedService;
 use App\Services\Printing\StartPrintingService;
 use App\Services\Printing\SyncOrderPrintStatusService;
-use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
@@ -45,7 +45,7 @@ class StaffPrintingWorkflowController extends Controller
 
         return back()->with(
             'status',
-            'Production started successfully.'
+            'Production berjaya dimulakan.'
         );
     }
 
@@ -79,7 +79,7 @@ class StaffPrintingWorkflowController extends Controller
 
         return back()->with(
             'status',
-            'Production completed successfully.'
+            'Production berjaya diselesaikan.'
         );
     }
 
@@ -164,13 +164,13 @@ class StaffPrintingWorkflowController extends Controller
 
         if ($request->expectsJson()) {
             return response()->json([
-                'message' => 'Production progress uploaded successfully.',
+                'message' => 'Kemajuan production berjaya dimuat naik.',
                 'files' => $newFiles,
                 'progress_updated_at' => $printJob->fresh()->progress_updated_at?->toIso8601String(),
             ]);
         }
 
-        return back()->with('status', 'Production progress uploaded successfully.');
+        return back()->with('status', 'Kemajuan production berjaya dimuat naik.');
     }
 
     public function showProgressFile(

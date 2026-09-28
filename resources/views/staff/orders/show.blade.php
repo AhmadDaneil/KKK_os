@@ -44,7 +44,7 @@
 
 @if ($errors->any())
     <div class="staff-alert staff-alert-error">
-        <strong>Action could not be completed.</strong>
+        <strong>Tindakan tidak dapat diselesaikan.</strong>
 
         <ul>
             @foreach ($errors->all() as $error)
@@ -781,7 +781,15 @@
                                     </div>
 
                                     <div>
-                                        <dt>Hanger Label</dt>
+                                        <dt>Nama pasangan</dt>
+                                        <dd>
+                                            @php($couple = $order->couples->firstWhere('couple_number', 1))
+                                            {{ collect([$couple?->groom_name, $couple?->bride_name])->filter()->join(' & ') ?: '-' }}
+                                        </dd>
+                                    </div>
+
+                                    <div>
+                                        <dt>Label hanger</dt>
                                         <dd>{{ $job->side === 'LELAKI' ? 'Pengantin Lelaki' : 'Pengantin Perempuan' }}</dd>
                                     </div>
 
@@ -1349,7 +1357,7 @@
                 }
 
                 submitButton.textContent = 'Reassign';
-                showAssignmentNotice(form, payload.message || 'Staff assigned successfully.', false);
+                showAssignmentNotice(form, payload.message || 'Staff berjaya ditugaskan.', false);
             } catch (error) {
                 submitButton.textContent = originalButtonText;
                 showAssignmentNotice(form, error.message || 'Assignment could not be saved.', true);
@@ -1409,7 +1417,7 @@
 
                 showUploadNotice(
                     form,
-                    (payload.message || 'Production progress uploaded successfully.')
+                    (payload.message || 'Kemajuan production berjaya dimuat naik.')
                         + (fileNames.length ? ' ' + fileNames.join(', ') : ''),
                     false
                 );

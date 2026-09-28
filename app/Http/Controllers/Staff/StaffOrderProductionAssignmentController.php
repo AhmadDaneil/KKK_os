@@ -25,7 +25,7 @@ class StaffOrderProductionAssignmentController extends Controller
 
         $service->assignPrinting($order, $assignee, $request->user());
 
-        return $this->assignmentResponse($request, 'Production staff assigned successfully.', $assignee);
+        return $this->assignmentResponse($request, 'Staff production berjaya ditugaskan.', $assignee);
     }
 
     public function assignPackingAndFulfilment(
@@ -40,7 +40,7 @@ class StaffOrderProductionAssignmentController extends Controller
 
         $service->assignPackingAndFulfilment($order, $assignee, $request->user());
 
-        return $this->assignmentResponse($request, 'OM (packing and fulfilment) assigned successfully.', $assignee);
+        return $this->assignmentResponse($request, 'OM (packing dan fulfilment) berjaya ditugaskan.', $assignee);
     }
 
     private function authorizeManager(Request $request): void

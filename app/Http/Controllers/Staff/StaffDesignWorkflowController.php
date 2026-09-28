@@ -43,7 +43,7 @@ class StaffDesignWorkflowController extends Controller
 
         return back()->with(
             'status',
-            'Design work started successfully.'
+            'Kerja design berjaya dimulakan.'
         );
     }
 
@@ -69,7 +69,7 @@ class StaffDesignWorkflowController extends Controller
 
         return back()->with(
             'status',
-            'Correction work resumed successfully.'
+            'Kerja pembetulan berjaya disambung.'
         );
     }
 

@@ -66,7 +66,7 @@ class StaffPackingWorkflowController extends Controller
 
         return back()->with(
             'status',
-            'Packing started successfully.'
+            'Packing berjaya dimulakan.'
         );
     }
 
@@ -96,7 +96,7 @@ class StaffPackingWorkflowController extends Controller
 
         return back()->with(
             'status',
-            'Packing item verified successfully.'
+            'Item packing berjaya disahkan.'
         );
     }
 
@@ -191,7 +191,7 @@ class StaffPackingWorkflowController extends Controller
 
         return back()->with(
             'status',
-            'Packing completed successfully.'
+            'Packing berjaya diselesaikan.'
         );
     }
 
@@ -301,7 +301,7 @@ class StaffPackingWorkflowController extends Controller
 
         return back()->with(
             'status',
-            'Courier fulfilment completed successfully.'
+            'Serahan kepada courier berjaya diselesaikan.'
         );
     }
 
@@ -357,7 +357,7 @@ class StaffPackingWorkflowController extends Controller
 
         return back()->with(
             'status',
-            'Pickup fulfilment completed successfully.'
+            'Kutipan pelanggan berjaya diselesaikan.'
         );
     }
 

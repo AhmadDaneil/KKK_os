@@ -34,6 +34,8 @@ html[data-customer-theme="dark"] .sample-card { box-shadow:0 25px 55px rgba(0,0,
 html[data-customer-theme="dark"] :is(.public-progress-track,.progress-bar-track) { background:#34453c!important; }
 html[data-customer-theme="dark"] :is(.status-badge,.public-stages div,.public-stages i) { border-color:#52675c!important; background:#22342a!important; color:#c9dbd0!important; }
 html[data-customer-theme="dark"] .public-stages div { border-color:transparent!important; background:transparent!important; }
+html[data-customer-theme="dark"] .public-stages .complete { color:#e7f7ed!important; }
+html[data-customer-theme="dark"] .public-stages .complete i { border-color:#73d09a!important; background:#2f9b63!important; color:#fff!important; box-shadow:0 0 0 3px rgba(115,208,154,.18); }
 html[data-customer-theme="dark"] .balance-payment-card { border-color:#53675c!important; background:#203028!important; color:#e5ece7!important; }
 html[data-customer-theme="dark"] .balance-payment-heading small { color:#e4b85e!important; }
 html[data-customer-theme="dark"] .balance-payment-heading>strong { color:#dff3e7!important; background:#28543d!important; }
@@ -85,6 +87,8 @@ html[data-customer-theme="dark"] .progress-panel { border-color:#40554a!importan
 html[data-customer-theme="dark"] .progress-track { background:#34453c!important; }
 html[data-customer-theme="dark"] .progress-stage { color:#aebeb5!important; }
 html[data-customer-theme="dark"] .stage-dot { border-color:#71877b!important; background:#142019!important; }
+html[data-customer-theme="dark"] .progress-stage.is-complete { color:#e7f7ed!important; }
+html[data-customer-theme="dark"] .progress-stage.is-complete .stage-dot { border-color:#73d09a!important; background:#2f9b63!important; box-shadow:0 0 0 3px rgba(115,208,154,.18); }
 html[data-customer-theme="dark"] .autosave-status[data-state="saved"] { color:#78d5a0!important; }
 html[data-customer-theme="dark"] .autosave-status[data-state="saving"] { color:#8fc4e8!important; }
 html[data-customer-theme="dark"] .autosave-status[data-state="error"] { color:#ffaaa4!important; }
