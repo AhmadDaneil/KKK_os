@@ -7,6 +7,7 @@ use App\Models\DesignJob;
 use App\Models\PackingJob;
 use App\Models\PaymentTransaction;
 use App\Models\PrintJob;
+use App\Models\User;
 use Illuminate\View\View;
 
 class StaffDashboardController extends Controller
@@ -15,6 +16,7 @@ class StaffDashboardController extends Controller
     {
         $user = auth()->user();
         $attention = [];
+        $designerAttention = 0;
 
         if ($user->isOperationManagement()) {
             $attention = [
@@ -25,6 +27,12 @@ class StaffDashboardController extends Controller
             ];
         }
 
-        return view('staff.dashboard', compact('attention'));
+        if ($user->hasStaffRole(User::ROLE_DESIGNER)) {
+            $designerAttention = DesignJob::where('assigned_user_id', $user->id)
+                ->whereIn('status', ['READY_FOR_DESIGN', 'CORRECTION_REQUESTED'])
+                ->count();
+        }
+
+        return view('staff.dashboard', compact('attention', 'designerAttention'));
     }
 }

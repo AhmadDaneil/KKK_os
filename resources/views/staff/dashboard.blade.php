@@ -53,6 +53,18 @@
                     </section>
                 @endif
 
+                @if ($dashboardUser->hasStaffRole(\App\Models\User::ROLE_DESIGNER))
+                    <section class="staff-attention-panel staff-designer-attention" aria-labelledby="designer-attention-title">
+                        <div class="staff-attention-heading">
+                            <div><p class="staff-kicker">Tindakan Designer</p><h2 id="designer-attention-title">Memerlukan Perhatian</h2></div>
+                            <span class="staff-attention-total @if ($designerAttention > 0) has-alert @endif">{{ $designerAttention > 0 ? $designerAttention.' tugasan' : 'Tiada tindakan diperlukan' }}</span>
+                        </div>
+                        <div class="staff-attention-card @if ($designerAttention > 0) has-alert @else is-clear @endif">
+                            <span class="staff-attention-icon">DE</span><span><strong>Design Queue</strong><small>{{ $designerAttention > 0 ? 'Order sedia untuk dimulakan atau memerlukan pembetulan' : 'Semua tugasan design telah dikemas kini' }}</small></span><b>{{ $designerAttention }}</b>
+                        </div>
+                    </section>
+                @endif
+
                 <div class="staff-dashboard-sections">
                     @if ($canMonitorOperations)
                     <section class="staff-dashboard-group">
