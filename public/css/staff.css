@@ -1477,3 +1477,6 @@ a.staff-pagination-link:hover {
 .staff-topbar-avatar{position:relative;overflow:hidden}.staff-topbar-avatar::before{position:absolute;top:6px;left:50%;width:9px;height:9px;border:2px solid #fff;border-radius:50%;content:'';transform:translateX(-50%)}.staff-topbar-avatar::after{position:absolute;bottom:-4px;left:50%;width:21px;height:17px;border:2px solid #fff;border-radius:50% 50% 0 0;content:'';transform:translateX(-50%)}
 
 .staff-logout-profile{margin:0}.staff-logout-profile button{display:flex;padding:0;align-items:center;flex-direction:column;gap:3px;border:0;color:#66756e;background:transparent;font-size:10px;font-weight:750;cursor:pointer}.staff-logout-profile button:hover{color:#246d50}
+
+/* Consistent card foundation */
+:is(.staff-card,.staff-feature-card,.staff-order-card,.staff-attention-card,.staff-timeline-content){border-radius:12px;box-shadow:0 4px 14px rgba(23,56,43,.07)}

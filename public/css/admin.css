@@ -112,3 +112,6 @@ body{background:linear-gradient(180deg,#f4efe3 0,#f3f4f1 380px)}
 .admin-topbar-avatar{position:relative;overflow:hidden}.admin-topbar-avatar::before{position:absolute;top:6px;left:50%;width:9px;height:9px;border:2px solid #fff;border-radius:50%;content:'';transform:translateX(-50%)}.admin-topbar-avatar::after{position:absolute;bottom:-4px;left:50%;width:21px;height:17px;border:2px solid #fff;border-radius:50% 50% 0 0;content:'';transform:translateX(-50%)}
 
 .admin-logout-profile{margin:0}.admin-logout-profile button{display:flex;padding:0;align-items:center;flex-direction:column;gap:3px;border:0;color:var(--admin-muted);background:transparent;font-size:10px;font-weight:750;cursor:pointer}.admin-logout-profile button:hover{color:var(--admin-green)}
+
+/* Consistent card foundation */
+:is(.admin-panel,.admin-stat-grid article,.admin-staff-card,.admin-action-grid a,.admin-queue-list a){border-radius:12px;box-shadow:0 4px 14px rgba(21,55,41,.07)}

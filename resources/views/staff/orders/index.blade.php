@@ -26,7 +26,7 @@
 
     <title>{{ $workstreamLabel ? $workstreamLabel.' Queue' : 'Staff Orders' }} - KKK OS</title>
 
-    <link rel="stylesheet" href="{{ asset('css/staff.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/staff.css') }}?v={{ filemtime(public_path('css/staff.css')) }}">
 </head>
 <body @class(['admin-operations-mode' => auth()->user()->isAdmin()])>
     <div class="staff-app-shell">

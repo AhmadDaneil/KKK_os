@@ -137,3 +137,6 @@ html[data-customer-theme="dark"] .customer-theme-toggle-sun { display:none; } ht
 @media (max-width:560px) { .customer-theme-toggle { right:14px; bottom:14px; width:38px; height:38px; } }
 @media (max-width:560px) { html[data-customer-theme="dark"] .site-footer { width:calc(100% - 28px); } }
 @media (prefers-reduced-motion:reduce) { .customer-theme-toggle { transition:none; }.customer-theme-toggle:hover { transform:none; } }
+
+/* Consistent customer card foundation */
+:is(.progress-panel,.public-progress-card,.order-summary,.order-summary-card,.package-summary,.review-card,.review-section,.history-panel,.action-panel,.state-panel,.success-card,.tracking-card,.customer-tracking-card){border-radius:12px!important;box-shadow:0 4px 14px rgba(23,56,43,.07)}
