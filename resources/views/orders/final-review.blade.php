@@ -428,5 +428,6 @@
         });
     </script>
     @include('public.partials.theme-toggle')
+    @include('partials.malay-validation')
 </body>
 </html>

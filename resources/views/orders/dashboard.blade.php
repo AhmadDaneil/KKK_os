@@ -616,6 +616,7 @@
 </form>
 </main>
 <script src="{{ asset('js/customer-event-date-pickers.js') }}?v={{ filemtime(public_path('js/customer-event-date-pickers.js')) }}" data-calendar-url="{{ route('public.calendar.convert') }}" defer></script>
+@include('partials.malay-validation')
 <script>
 document.addEventListener('DOMContentLoaded', function () {
     const reviewLink = document.getElementById('review-order-link');

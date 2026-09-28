@@ -44,3 +44,4 @@
         });
     });
 </script>
+@include('partials.malay-validation')
