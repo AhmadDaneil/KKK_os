@@ -1483,3 +1483,6 @@ a.staff-pagination-link:hover {
 
 /* Interactive card hover */
 :is(.staff-feature-card,.staff-order-card,.staff-attention-card[href]):is(:hover,:focus-visible){transform:translateY(-3px);box-shadow:0 9px 22px rgba(23,56,43,.14)}.staff-feature-card,.staff-order-card,.staff-attention-card[href]{transition:transform .2s ease,box-shadow .2s ease}
+
+/* Mobile card layout */
+@media(max-width:700px){.staff-topbar-avatar{width:30px;height:30px}.staff-topbar-avatar::before{top:5px}.staff-topbar-avatar::after{width:19px;height:15px}.staff-topbar-profile span:not(.staff-topbar-avatar){display:none}.staff-topbar{gap:10px}.staff-feature-grid,.staff-dashboard-sections{grid-template-columns:1fr}.staff-card-heading{align-items:flex-start;flex-direction:column}}

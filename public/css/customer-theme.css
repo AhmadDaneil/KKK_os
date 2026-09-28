@@ -143,3 +143,6 @@ html[data-customer-theme="dark"] .customer-theme-toggle-sun { display:none; } ht
 
 /* Interactive customer card hover */
 :is(.action-panel,.dashboard-action-card,.package-summary,.review-card,.tracking-card):is(:hover,:focus-within){transform:translateY(-2px);box-shadow:0 8px 20px rgba(23,56,43,.13)!important;transition:transform .2s ease,box-shadow .2s ease}
+
+/* Mobile card layout */
+@media(max-width:700px){.progress-stages,.public-stages{grid-template-columns:repeat(3,1fr);row-gap:14px}.progress-stage{font-size:.7rem}.action-panel,.dashboard-action-card,.package-summary,.review-card,.tracking-card{padding:16px!important}}
