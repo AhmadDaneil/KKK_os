@@ -4,7 +4,7 @@
     $isOverview = request()->attributes->get('staff_overview_mode', false);
     $isAdminPortal = request()->routeIs('admin.orders.*');
     $ordersIndexRoute = $isAdminPortal ? 'admin.orders.index' : 'staff.orders.index';
-    $canMonitorOperations = $staffUser->isOperationManagement();
+    $canMonitorOperations = $staffUser->canMonitorAllDepartments();
     $canViewDesignQueue = $canMonitorOperations || $staffUser->hasStaffRole(\App\Models\User::ROLE_DESIGNER);
     $canViewProductionQueue = $canMonitorOperations || $staffUser->hasStaffRole(\App\Models\User::ROLE_PRODUCTION);
     $roleLabel = $staffUser->isAdmin() ? 'Administrator' : match ($staffUser->role) {

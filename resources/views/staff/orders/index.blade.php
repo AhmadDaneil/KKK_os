@@ -58,7 +58,7 @@
                     <h1>{{ $workstreamLabel ? $workstreamLabel.' Queue' : 'Semua Orders' }}</h1>
 
                     <p>
-                        @if (auth()->user()->isOperationManagement())
+                        @if (auth()->user()->canMonitorAllDepartments())
                             {{ $workstreamDescriptions[$workstream] ?? 'Pantau semua order dan kerja operasi KKK OS.' }}
                         @else
                             Lihat order yang mempunyai kerja assigned kepada anda.
@@ -80,7 +80,7 @@
                 @if (request()->hasAny(['search', 'status']))<a class="staff-button" href="{{ route($ordersIndexRoute, array_filter(['workstream' => $workstream, 'attention' => request('attention')])) }}">Reset</a>@endif
             </form>
 
-            @if (auth()->user()->isOperationManagement() && request('attention'))
+            @if (auth()->user()->canMonitorAllDepartments() && request('attention'))
                 <div class="staff-filter-notice">
                     Memaparkan order untuk tindakan: <strong>{{ str_replace('_', ' ', request('attention')) }}</strong>
                     <a href="{{ route($ordersIndexRoute, array_filter(['workstream' => $workstream])) }}">Buang penapis</a>
@@ -120,7 +120,7 @@
                         </div>
 
                         <div class="staff-order-work">
-                            @if (auth()->user()->isOperationManagement())
+                            @if (auth()->user()->canMonitorAllDepartments())
                                 @if ((! $workstream || $workstream === 'design') && $order->relationLoaded('designJobs') && $order->designJobs->isNotEmpty())
                                     <div class="staff-work-row">
                                         <span>Design</span>
@@ -220,7 +220,7 @@
                     <div class="staff-empty">
                         @if ($workstream)
                             Tiada order aktif dalam {{ $workstreamLabel }} Queue.
-                        @elseif (auth()->user()->isOperationManagement())
+                        @elseif (auth()->user()->canMonitorAllDepartments())
                             Tiada order tersedia.
                         @else
                             Tiada order assigned kepada anda.

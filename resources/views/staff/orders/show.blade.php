@@ -3,7 +3,13 @@
     $logoutRoute = $isAdminPortal ? 'admin.logout' : 'staff.logout';
     $ordersIndexRoute = $isAdminPortal ? 'admin.orders.index' : 'staff.orders.index';
     $operationRoutePrefix = $isAdminPortal ? 'admin.' : 'staff.';
-    $hasFullQueueView = auth()->user()->isOperationManagement();
+    $hasFullQueueView = auth()->user()->canMonitorAllDepartments();
+    $customerWhatsappNumber = preg_replace('/\D+/', '', (string) $order->customer_phone);
+    if (str_starts_with($customerWhatsappNumber, '0')) {
+        $customerWhatsappNumber = '6'.$customerWhatsappNumber;
+    }
+    $customerFeedbackMessage = "Salam {$order->customer_name}, terima kasih kerana memilih King Kad Kahwin. Kami ingin mendapatkan maklum balas anda dan membantu jika ada sebarang pertanyaan tentang tempahan {$order->order_id}.";
+    $customerPaymentReminder = "Salam {$order->customer_name}, ini peringatan mesra daripada King Kad Kahwin mengenai baki bayaran atau caj bagi tempahan {$order->order_id}. Sila hubungi kami jika anda perlukan bantuan.";
     $batchArtworkJobs = $order->relationLoaded('designJobs')
         ? $order->designJobs->filter(fn ($job) =>
             auth()->user()->hasStaffRole(\App\Models\User::ROLE_DESIGNER)
@@ -129,6 +135,13 @@
                             <dd>{{ $order->customer_phone ?: '-' }}</dd>
                         </div>
                     </dl>
+
+                    @if (auth()->user()->isCustomerService() && $customerWhatsappNumber !== '')
+                        <div class="staff-customer-contact-actions">
+                            <a class="staff-button staff-button-primary" target="_blank" rel="noopener" href="https://wa.me/{{ $customerWhatsappNumber }}?text={{ rawurlencode($customerFeedbackMessage) }}">Mesej</a>
+                            <a class="staff-button" target="_blank" rel="noopener" href="https://wa.me/{{ $customerWhatsappNumber }}?text={{ rawurlencode($customerPaymentReminder) }}">Peringatan Bayaran</a>
+                        </div>
+                    @endif
                 </section>
             </div>
 

@@ -77,6 +77,14 @@ class User extends Authenticatable
     }
 
     /**
+     * Customer Service can monitor every department, but cannot manage its work.
+     */
+    public function canMonitorAllDepartments(): bool
+    {
+        return $this->isOperationManagement() || $this->isCustomerService();
+    }
+
+    /**
      * Get the attributes that should be cast.
      *
      * @return array<string, string>

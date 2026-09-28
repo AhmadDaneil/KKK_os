@@ -44,7 +44,12 @@
                         <img src="{{ asset('images/landing/card-nostalgia-ckn-008.jpg') }}"
                             alt="Kad kahwin tema Nostalgia"
                             loading="eager"
-                            decoding="async">
+                            decoding="async"
+                            draggable="false">
+                        <span class="landing-card-watermark" aria-hidden="true">
+                            <span>KING KAD KAHWIN · PREVIEW</span>
+                            <span>KING KAD KAHWIN · PREVIEW</span>
+                        </span>
                     </article>
                 </div>
                 <div class="card-runner card-runner-front">
@@ -52,7 +57,12 @@
                         <img src="{{ asset('images/landing/card-desa-ckd-008.jpg') }}"
                             alt="Kad kahwin tema Desa"
                             loading="eager"
-                            decoding="async">
+                            decoding="async"
+                            draggable="false">
+                        <span class="landing-card-watermark" aria-hidden="true">
+                            <span>KING KAD KAHWIN · PREVIEW</span>
+                            <span>KING KAD KAHWIN · PREVIEW</span>
+                        </span>
                     </article>
                 </div>
             </div>
@@ -124,6 +134,12 @@
             <span>Kad indah untuk hari yang bermakna.</span>
         </div>
     </footer>
+    <script>
+        document.querySelectorAll('.sample-card-image').forEach(function (card) {
+            card.addEventListener('contextmenu', function (event) { event.preventDefault(); });
+            card.addEventListener('dragstart', function (event) { event.preventDefault(); });
+        });
+    </script>
     @include('public.partials.theme-toggle')
     @include('partials.malay-validation')
 </body>
