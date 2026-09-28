@@ -4,6 +4,7 @@ namespace Tests\Feature\Orders;
 
 use App\Services\Orders\CreateOrderService;
 use App\Services\Orders\GenerateOrderAccessLinkService;
+use App\Services\Orders\SaveOrderDraftService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 use App\Models\FulfilmentJob;
@@ -106,7 +107,67 @@ public function test_two_package_dashboard_orders_majlis_and_keeps_designs_separ
         ->assertSee('Majlis 2 – Pihak Lelaki')
         ->assertSee('Ibu Bapa Pengantin Perempuan')
         ->assertSee('Ibu Bapa Pengantin Lelaki')
+        ->assertSee('data-folded-second-design="true"', false)
         ->assertSee('data-preview-field="card_title_jawi"', false);
+}
+
+public function test_folded_card_preview_uses_the_first_event_for_front_and_orders_the_back_pages(): void
+{
+    $order = app(CreateOrderService::class)->create([
+        'package_count' => 2,
+        'package_format' => 'FOLDED',
+        'first_event_side' => 'PEREMPUAN',
+        'customer_name' => 'Folded Card Customer',
+    ]);
+
+    $this->get(app(GenerateOrderAccessLinkService::class)->generate($order));
+
+    $this->get(route('orders.dashboard', ['orderId' => $order->order_id]))
+        ->assertOk()
+        ->assertSee('data-folded-card-preview="true"', false)
+        ->assertSee('Halaman 1 · Kad Depan')
+        ->assertSee('Halaman 2 · Kad Belakang · Perempuan')
+        ->assertSee('Halaman 3 · Kad Belakang · Lelaki')
+        ->assertSee('data-preview-folded-side="PEREMPUAN" data-preview-folded-face="front"', false)
+        ->assertSee('data-preview-folded-side="PEREMPUAN" data-preview-folded-face="back"', false)
+        ->assertSee('data-preview-folded-side="LELAKI" data-preview-folded-face="back"', false)
+        ->assertSee('name="sides[PEREMPUAN][design][design_code]"', false)
+        ->assertSee('data-folded-second-design="true"', false)
+        ->assertSee('@kingkadkahwin');
+}
+
+public function test_folded_card_reuses_the_first_majlis_design_for_the_second_back_page(): void
+{
+    $order = app(CreateOrderService::class)->create([
+        'package_count' => 2,
+        'package_format' => 'FOLDED',
+        'first_event_side' => 'PEREMPUAN',
+    ]);
+
+    app(SaveOrderDraftService::class)->save($order, [
+        'package_format' => 'FOLDED',
+        'first_event_side' => 'PEREMPUAN',
+        'sides' => [
+            'PEREMPUAN' => [
+                'design' => [
+                    'theme' => 'GARDEN',
+                    'design_code' => 'FOLD-101',
+                    'card_title' => 'Majlis Perkahwinan',
+                ],
+            ],
+        ],
+    ]);
+
+    $order->refresh()->load('packageSides.design');
+
+    $this->assertSame(
+        'FOLD-101',
+        $order->packageSides->firstWhere('side', 'LELAKI')->design->design_code
+    );
+    $this->assertSame(
+        'GARDEN',
+        $order->packageSides->firstWhere('side', 'LELAKI')->design->theme
+    );
 }
 
 public function test_design_in_progress_dashboard_does_not_show_artwork_review_cta(): void
