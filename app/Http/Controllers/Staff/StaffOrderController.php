@@ -33,11 +33,16 @@ class StaffOrderController extends Controller
             ->paginate(25)
             ->withQueryString();
 
+        $statusOptions = Order::query()->whereNotNull('status');
+
+        if (! $user->isCustomerService()) {
+            $statusOptions->where('status', '!=', 'DETAILS_INCOMPLETE');
+        }
+
         return view('staff.orders.index', [
             'orders' => $orders,
             'workstream' => $workstream,
-            'statusOptions' => Order::query()
-                ->whereNotNull('status')
+            'statusOptions' => $statusOptions
                 ->distinct()
                 ->orderBy('status')
                 ->pluck('status'),
@@ -190,9 +195,16 @@ class StaffOrderController extends Controller
     {
         $query = Order::query();
 
-        if ($user->canMonitorAllDepartments()) {
+        if ($user->isCustomerService()) {
             return $query;
         }
+
+        // Incomplete entries are customer drafts, not operational orders.
+        if ($user->isOperationManagement()) {
+            return $query->where('status', '!=', 'DETAILS_INCOMPLETE');
+        }
+
+        $query->where('status', '!=', 'DETAILS_INCOMPLETE');
 
         return match ($user->role) {
             User::ROLE_DESIGNER => $query->whereHas(

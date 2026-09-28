@@ -39,18 +39,18 @@ class AdminDashboardTest extends TestCase
             ->assertSee('Memerlukan Perhatian')
             ->assertSee('Semakan Pembayaran')
             ->assertSee('Design Belum Assign')
-            ->assertSee('Printing Belum Assign')
+            ->assertSee('Production Belum Assign')
             ->assertSee('Packing Belum Assign')
             ->assertSee(route('admin.orders.index'), false);
     }
 
-    public function test_admin_can_open_an_order_from_dashboard_quick_search(): void
+    public function test_admin_can_open_a_confirmed_order_from_dashboard_quick_search(): void
     {
         $admin = $this->staff(User::ROLE_ADMIN);
         $order = Order::create([
             'order_id' => 'KKK-260925-0042',
             'package_count' => 1,
-            'status' => 'DETAILS_INCOMPLETE',
+            'status' => 'DETAILS_CONFIRMED',
         ]);
 
         $this->actingAs($admin)
@@ -61,6 +61,32 @@ class AdminDashboardTest extends TestCase
 
         $this->get(route('admin.orders.find', ['order_id' => strtolower($order->order_id)]))
             ->assertRedirect(route('admin.orders.show', $order->order_id));
+    }
+
+    public function test_incomplete_drafts_are_not_shown_or_searchable_from_admin_dashboard(): void
+    {
+        $admin = $this->staff(User::ROLE_ADMIN);
+        $draft = Order::create([
+            'order_id' => 'KKK-DRAFT-DASHBOARD',
+            'package_count' => 1,
+            'status' => 'DETAILS_INCOMPLETE',
+        ]);
+        $confirmed = Order::create([
+            'order_id' => 'KKK-CONFIRMED-DASHBOARD',
+            'package_count' => 1,
+            'status' => 'DETAILS_CONFIRMED',
+        ]);
+
+        $this->actingAs($admin, 'admin')
+            ->get(route('admin.dashboard'))
+            ->assertOk()
+            ->assertSee($confirmed->order_id)
+            ->assertDontSee($draft->order_id);
+
+        $this->from(route('admin.dashboard'))
+            ->get(route('admin.orders.find', ['order_id' => $draft->order_id]))
+            ->assertRedirect(route('admin.dashboard'))
+            ->assertSessionHasErrors(['order_id' => 'Order ID tidak dijumpai.']);
     }
 
     public function test_dashboard_quick_search_reports_missing_or_unknown_order_id(): void

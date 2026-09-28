@@ -59,6 +59,23 @@ class PublicOrderJourneyTest extends TestCase
             ->assertSee('header-link nav-progress', false);
     }
 
+    public function test_order_button_resumes_the_customers_unfinished_draft(): void
+    {
+        $order = app(CreateOrderService::class)->create([
+            'package_count' => 1,
+            'side' => 'LELAKI',
+            'customer_name' => 'Draft Resume Customer',
+            'customer_email' => 'draft@example.com',
+            'customer_phone' => '0123456789',
+        ]);
+
+        $this->get(app(GenerateOrderAccessLinkService::class)->generate($order))
+            ->assertRedirect(route('orders.dashboard', ['orderId' => $order->order_id]));
+
+        $this->get(route('public.orders.create'))
+            ->assertRedirect(route('orders.dashboard', ['orderId' => $order->order_id]));
+    }
+
     public function test_customer_can_start_an_order_and_reach_full_form(): void
     {
         $response = $this->post(route('public.orders.store'), [

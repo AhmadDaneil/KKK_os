@@ -25,7 +25,10 @@ class AdminDashboardController extends Controller
         ]);
 
         $orderId = strtoupper(trim($validated['order_id']));
-        $order = Order::query()->where('order_id', $orderId)->first();
+        $order = Order::query()
+            ->where('order_id', $orderId)
+            ->where('status', '!=', 'DETAILS_INCOMPLETE')
+            ->first();
 
         if (! $order) {
             return back()
@@ -39,8 +42,9 @@ class AdminDashboardController extends Controller
     public function index(): View
     {
         $statistics = [
-            'orders_total' => Order::count(),
-            'orders_active' => Order::whereNotIn('status', Order::TERMINAL_OPERATIONAL_STATUSES)
+            'orders_total' => Order::where('status', '!=', 'DETAILS_INCOMPLETE')->count(),
+            'orders_active' => Order::where('status', '!=', 'DETAILS_INCOMPLETE')
+                ->whereNotIn('status', Order::TERMINAL_OPERATIONAL_STATUSES)
                 ->whereNotIn('status', ['COMPLETED'])
                 ->count(),
             'pending_deposits' => PaymentTransaction::where('payment_type', 'BOOKING_DEPOSIT')
@@ -78,7 +82,11 @@ class AdminDashboardController extends Controller
             ->groupBy('role')
             ->pluck('total', 'role');
 
-        $recentOrders = Order::query()->latest()->limit(8)->get();
+        $recentOrders = Order::query()
+            ->where('status', '!=', 'DETAILS_INCOMPLETE')
+            ->latest()
+            ->limit(8)
+            ->get();
 
         return view('admin.dashboard', compact('statistics', 'queues', 'attention', 'teamCounts', 'recentOrders'));
     }
