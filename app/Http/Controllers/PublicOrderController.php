@@ -13,8 +13,17 @@ use Illuminate\View\View;
 
 class PublicOrderController extends Controller
 {
-    public function create(): View
+    public function create(
+        Request $request,
+        CustomerOrderSessionAccessService $sessionAccess,
+    ): View|RedirectResponse
     {
+        $draft = $sessionAccess->unfinishedDraft($request);
+
+        if ($draft) {
+            return redirect()->route('orders.dashboard', ['orderId' => $draft->order_id]);
+        }
+
         return view('public.start-order');
     }
 

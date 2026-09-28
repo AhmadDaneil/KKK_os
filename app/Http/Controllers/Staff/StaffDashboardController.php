@@ -21,7 +21,7 @@ class StaffDashboardController extends Controller
         $productionAttention = ['ready' => 0, 'printing' => 0];
         $packingAttention = ['ready' => 0, 'packing' => 0, 'fulfilment' => 0];
 
-        if ($user->isOperationManagement()) {
+        if ($user->canMonitorAllDepartments()) {
             $attention = [
                 'pending_payments' => PaymentTransaction::where('status', 'PENDING')->count(),
                 'unassigned_design' => DesignJob::whereNull('assigned_user_id')->whereIn('status', ['READY_FOR_DESIGN', 'CORRECTION_REQUESTED'])->count(),
@@ -47,16 +47,14 @@ class StaffDashboardController extends Controller
             ];
         }
 
-        if ($user->isOperationManagement()) {
-            $packingJobs = PackingJob::where('assigned_user_id', $user->id)
-                ->whereIn('status', ['READY_FOR_PACKING', 'PACKING'])
+        if ($user->canMonitorAllDepartments()) {
+            $packingJobs = PackingJob::whereIn('status', ['READY_FOR_PACKING', 'PACKING'])
                 ->select('status')
                 ->get();
             $packingAttention = [
                 'ready' => $packingJobs->where('status', 'READY_FOR_PACKING')->count(),
                 'packing' => $packingJobs->where('status', 'PACKING')->count(),
-                'fulfilment' => FulfilmentJob::where('status', 'READY')
-                    ->whereHas('packingJob', fn ($query) => $query->where('assigned_user_id', $user->id))
+                'fulfilment' => FulfilmentJob::whereIn('status', ['READY', 'IN_TRANSIT'])
                     ->count(),
             ];
         }

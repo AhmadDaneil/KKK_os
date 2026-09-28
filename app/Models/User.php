@@ -16,6 +16,7 @@ use Illuminate\Notifications\Notifiable;
     'password',
     'role',
     'is_active',
+    'staff_theme',
 ])]
 #[Hidden(['password', 'remember_token'])]
 class User extends Authenticatable
@@ -32,6 +33,18 @@ class User extends Authenticatable
     public const ROLE_DESIGNER = 'DESIGNER';
 
     public const ROLE_PRODUCTION = 'PRODUCTION';
+
+    public const STAFF_THEME_DEFAULT = 'default';
+
+    public const STAFF_THEMES = [
+        self::STAFF_THEME_DEFAULT,
+        'modern_blue',
+        'indigo_violet',
+        'warm_orange',
+        'amber_gold',
+        'dusty_rose',
+        'rose_burgundy',
+    ];
 
     /** @deprecated Use ROLE_PRODUCTION. */
     public const ROLE_PRINTING = self::ROLE_PRODUCTION;

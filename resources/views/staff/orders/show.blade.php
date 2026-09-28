@@ -32,7 +32,7 @@
 
     <link rel="stylesheet" href="{{ asset('css/staff.css') }}?v={{ filemtime(public_path('css/staff.css')) }}">
 </head>
-<body @class(['admin-operations-mode' => auth()->user()->isAdmin()])>
+<body @class(['admin-operations-mode' => auth()->user()->isAdmin()]) data-staff-theme="{{ auth()->user()->staff_theme }}">
     <div class="staff-app-shell">
         @include('staff.partials.sidebar')
         <div class="staff-workspace">

@@ -10,6 +10,7 @@ use Illuminate\Http\Request;
 class CustomerOrderSessionAccessService
 {
     private const SESSION_PREFIX = 'kkk.customer_orders.';
+    private const ACTIVE_DRAFT_SESSION_KEY = 'kkk.customer_active_draft';
 
     public function establishFromToken(
         Request $request,
@@ -30,6 +31,7 @@ class CustomerOrderSessionAccessService
             'order_fk' => $order->id,
             'expires_at' => $accessToken->expires_at?->toIso8601String(),
         ]);
+        $this->rememberActiveDraft($request, $order, $accessToken->expires_at?->toIso8601String());
 
         return $order;
     }
@@ -77,10 +79,54 @@ class CustomerOrderSessionAccessService
             'order_fk' => $order->id,
             'expires_at' => now()->addHours(2)->toIso8601String(),
         ]);
+
+        $this->rememberActiveDraft($request, $order, now()->addHours(2)->toIso8601String());
+    }
+
+    public function unfinishedDraft(Request $request): ?Order
+    {
+        $draft = $request->session()->get(self::ACTIVE_DRAFT_SESSION_KEY);
+
+        if (! is_array($draft)) {
+            return null;
+        }
+
+        $expiresAt = $draft['expires_at'] ?? null;
+
+        if ($expiresAt !== null && CarbonImmutable::parse($expiresAt)->isPast()) {
+            $request->session()->forget(self::ACTIVE_DRAFT_SESSION_KEY);
+
+            return null;
+        }
+
+        $order = Order::query()
+            ->whereKey($draft['order_fk'] ?? 0)
+            ->where('order_id', $draft['order_id'] ?? '')
+            ->where('status', 'DETAILS_INCOMPLETE')
+            ->first();
+
+        if (! $order) {
+            $request->session()->forget(self::ACTIVE_DRAFT_SESSION_KEY);
+        }
+
+        return $order;
     }
 
     private function sessionKey(string $orderId): string
     {
         return self::SESSION_PREFIX.$orderId;
+    }
+
+    private function rememberActiveDraft(Request $request, Order $order, ?string $expiresAt): void
+    {
+        if ($order->status !== 'DETAILS_INCOMPLETE') {
+            return;
+        }
+
+        $request->session()->put(self::ACTIVE_DRAFT_SESSION_KEY, [
+            'order_fk' => $order->id,
+            'order_id' => $order->order_id,
+            'expires_at' => $expiresAt,
+        ]);
     }
 }
