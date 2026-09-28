@@ -93,6 +93,8 @@ html[data-customer-theme="dark"] .autosave-status[data-state="saved"] { color:#7
 html[data-customer-theme="dark"] .autosave-status[data-state="saving"] { color:#8fc4e8!important; }
 html[data-customer-theme="dark"] .autosave-status[data-state="error"] { color:#ffaaa4!important; }
 html[data-customer-theme="dark"] .notice { border-color:#4c8062!important; color:#dff3e7!important; background:#193c2b!important; }
+html[data-customer-theme="dark"] .errors { border-color:#b85c5c!important; color:#ffdede!important; background:#432626!important; }
+html[data-customer-theme="dark"] .errors :is(strong,li) { color:#ffdede!important; }
 html[data-customer-theme="dark"] .upload-status { border:1px solid #4c8062!important; color:#dff3e7!important; background:#193c2b!important; }
 html[data-customer-theme="dark"] .upload-status.not-uploaded { border-color:#50675b!important; color:#c3d2ca!important; background:#26322d!important; }
 /* The deposit row needs a complete outline in dark mode, not only a left accent. */

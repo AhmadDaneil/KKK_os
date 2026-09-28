@@ -7,7 +7,9 @@ use RuntimeException;
 
 class WatermarkArtworkPreviewService
 {
-    private const TEXT = 'King Kad Kahwin';
+    public const VERSION = 3;
+
+    private const TEXT = 'KING KAD KAHWIN - PREVIEW';
 
     private const MAX_PREVIEW_DIMENSION = 900;
 
@@ -95,27 +97,44 @@ class WatermarkArtworkPreviewService
 
         $width = imagesx($image);
         $height = imagesy($image);
-        $colour = imagecolorallocatealpha($image, 17, 75, 55, 62);
         $font = $this->watermarkFont();
 
         if ($font !== null && function_exists('imagettftext')) {
-            $fontSize = max(24, min(180, (int) round($width / 5.5)));
+            /*
+             * Customer proofs need a visible, non-croppable mark.  A large
+             * 45-degree brand is repeated through the centre: it overlaps
+             * both the artwork and its background, while the 46% white ink
+             * and soft shadow retain readability without obscuring the proof.
+             */
+            $fontSize = max(24, min(110, (int) round(min($width, $height) / 10)));
+            $angle = -45;
+            $shadow = imagecolorallocatealpha($image, 0, 0, 0, 84);
+            $ink = imagecolorallocatealpha($image, 255, 255, 255, 68);
+            $shadowOffset = max(2, (int) round($fontSize / 18));
 
-            foreach ([-0.05, 0.5, 1.05] as $position) {
-                $bounds = imagettfbbox($fontSize, -28, $font, self::TEXT);
-                $textWidth = abs($bounds[2] - $bounds[0]);
-                $textHeight = abs($bounds[7] - $bounds[1]);
-                $x = (int) round(($width - $textWidth) / 2);
-                $y = (int) round(($height * $position) + ($textHeight / 2));
+            foreach ([0.42, 0.82] as $position) {
+                $x = (int) round(-$width * 0.07);
+                $y = (int) round($height * $position);
 
-                imagettftext($image, $fontSize, -28, $x, $y, $colour, $font, self::TEXT);
+                imagettftext(
+                    $image,
+                    $fontSize,
+                    $angle,
+                    $x + $shadowOffset,
+                    $y + $shadowOffset,
+                    $shadow,
+                    $font,
+                    self::TEXT
+                );
+                imagettftext($image, $fontSize, $angle, $x, $y, $ink, $font, self::TEXT);
             }
 
             return;
         }
 
-        // Fallback for installations without FreeType: repeat an opaque label
-        // so that a full-resolution design is still not exposed.
+        // Fallback for installations without FreeType: tile the label so a
+        // full-resolution design is still not exposed.
+        $colour = imagecolorallocatealpha($image, 255, 255, 255, 68);
         for ($y = 10; $y < $height; $y += 50) {
             for ($x = 10; $x < $width; $x += 120) {
                 imagestring($image, 5, $x, $y, self::TEXT, $colour);
