@@ -49,6 +49,8 @@
                                     <span class="staff-attention-icon">{{ $item['icon'] }}</span><span><strong>{{ $item['label'] }}</strong><small>{{ $item['description'] }}</small></span><b>{{ $attention[$item['key']] }}</b>
                                 </a>
                             @endforeach
+                            @php($packingTotal = array_sum($packingAttention))
+                            <div class="staff-attention-card @if ($packingTotal > 0) has-alert @else is-clear @endif"><span class="staff-attention-icon">PA</span><span><strong>Packing & Fulfilment Perlu Tindakan</strong><small>{{ $packingTotal > 0 ? $packingAttention['ready'].' belum mula · '.$packingAttention['packing'].' sedang packing · '.$packingAttention['fulfilment'].' perlu diserah' : 'Semua packing dan fulfilment telah selesai' }}</small></span><b>{{ $packingTotal }}</b></div>
                         </div>
                     </section>
                 @endif
