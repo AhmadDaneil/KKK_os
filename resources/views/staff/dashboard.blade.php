@@ -65,6 +65,20 @@
                     </section>
                 @endif
 
+                @if ($dashboardUser->hasStaffRole(\App\Models\User::ROLE_PRODUCTION))
+                    @php($productionTotal = array_sum($productionAttention))
+                    <section class="staff-attention-panel staff-production-attention" aria-labelledby="production-attention-title">
+                        <div class="staff-attention-heading">
+                            <div><p class="staff-kicker">Tindakan Production</p><h2 id="production-attention-title">Memerlukan Perhatian</h2></div>
+                            <span class="staff-attention-total @if ($productionTotal > 0) has-alert @endif">{{ $productionTotal > 0 ? $productionTotal.' tugasan' : 'Tiada tindakan diperlukan' }}</span>
+                        </div>
+                        <div class="staff-attention-grid">
+                            <div class="staff-attention-card @if ($productionAttention['ready'] > 0) has-alert @else is-clear @endif"><span class="staff-attention-icon">PR</span><span><strong>Printing Belum Mula</strong><small>Kerja printing yang boleh dimulakan</small></span><b>{{ $productionAttention['ready'] }}</b></div>
+                            <div class="staff-attention-card @if ($productionAttention['printing'] > 0) has-alert @else is-clear @endif"><span class="staff-attention-icon">PR</span><span><strong>Printing Sedang Berjalan</strong><small>Muat naik progress dan tandakan printed</small></span><b>{{ $productionAttention['printing'] }}</b></div>
+                        </div>
+                    </section>
+                @endif
+
                 <div class="staff-dashboard-sections">
                     @if ($canMonitorOperations)
                     <section class="staff-dashboard-group">

@@ -17,6 +17,7 @@ class StaffDashboardController extends Controller
         $user = auth()->user();
         $attention = [];
         $designerAttention = 0;
+        $productionAttention = ['ready' => 0, 'printing' => 0];
 
         if ($user->isOperationManagement()) {
             $attention = [
@@ -33,6 +34,17 @@ class StaffDashboardController extends Controller
                 ->count();
         }
 
-        return view('staff.dashboard', compact('attention', 'designerAttention'));
+        if ($user->hasStaffRole(User::ROLE_PRODUCTION)) {
+            $productionJobs = PrintJob::where('assigned_user_id', $user->id)
+                ->whereIn('status', ['READY_FOR_PRINT', 'PRINTING'])
+                ->select('status')
+                ->get();
+            $productionAttention = [
+                'ready' => $productionJobs->where('status', 'READY_FOR_PRINT')->count(),
+                'printing' => $productionJobs->where('status', 'PRINTING')->count(),
+            ];
+        }
+
+        return view('staff.dashboard', compact('attention', 'designerAttention', 'productionAttention'));
     }
 }
