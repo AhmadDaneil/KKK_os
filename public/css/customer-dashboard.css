@@ -565,12 +565,25 @@ button {
 }
 
 .stage-dot {
+    position: relative;
     width: 9px;
     height: 9px;
     flex: 0 0 auto;
     border: 2px solid #aeb7b1;
     border-radius: 50%;
     background: #fff;
+}
+
+.progress-stage.is-complete .stage-dot::after {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    color: #fff;
+    content: '✓';
+    font-size: 8px;
+    font-weight: 800;
+    line-height: 1;
+    transform: translate(-50%, -54%);
 }
 
 .progress-stage.is-complete { color: var(--progress-color); }
