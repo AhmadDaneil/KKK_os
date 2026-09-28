@@ -784,7 +784,10 @@
                                         <dt>Nama pasangan</dt>
                                         <dd>
                                             @php($couple = $order->couples->firstWhere('couple_number', 1))
-                                            {{ collect([$couple?->groom_name, $couple?->bride_name])->filter()->join(' & ') ?: '-' }}
+                                            {{ collect([
+                                                $couple?->groom_abbreviation ?: $couple?->groom_name,
+                                                $couple?->bride_abbreviation ?: $couple?->bride_name,
+                                            ])->filter()->join(' & ') ?: '-' }}
                                         </dd>
                                     </div>
 
