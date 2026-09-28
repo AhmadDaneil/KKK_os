@@ -182,6 +182,23 @@ class SaveOrderDraftService
                     }
                 }
 
+                if ((int) $order->package_count === 2 && $order->package_format === 'FOLDED') {
+                    $firstSide = $order->packageSides->firstWhere('side', $order->first_event_side);
+                    $secondSide = $order->packageSides->firstWhere(
+                        'side',
+                        $order->first_event_side === 'LELAKI' ? 'PEREMPUAN' : 'LELAKI'
+                    );
+
+                    if ($firstSide?->design && $secondSide?->design) {
+                        $secondSide->design->update([
+                            'theme' => $firstSide->design->theme,
+                            'design_code' => $firstSide->design->design_code,
+                            'card_title' => $firstSide->design->card_title,
+                            'card_image_path' => $firstSide->design->card_image_path,
+                        ]);
+                    }
+                }
+
                 if (array_key_exists('fulfilment', $data)) {
                     $method = Arr::get($data, 'fulfilment.method');
                     $method = $method === '' ? null : $method;

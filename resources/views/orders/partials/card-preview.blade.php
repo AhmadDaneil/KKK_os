@@ -1,4 +1,8 @@
-<aside class="live-preview is-collapsed" aria-labelledby="live-preview-title" data-live-preview>
+@php
+    $isFoldedCard = $order->package_count === 2 && $order->package_format === 'FOLDED';
+@endphp
+
+<aside class="live-preview is-collapsed" aria-labelledby="live-preview-title" data-live-preview data-folded-card-preview="{{ $isFoldedCard ? 'true' : 'false' }}">
     <button
         type="button"
         class="live-preview-toggle"
@@ -25,8 +29,24 @@
             <span>Anggaran paparan</span>
         </div>
 
+    <div class="preview-page-tabs" role="tablist" aria-label="Pilih halaman kad lipatan" data-folded-preview-tabs @if (! $isFoldedCard) hidden @endif>
+            @php
+                $firstPackageSide = $orderedPackageSides->first();
+            @endphp
+            @if ($firstPackageSide)
+                <button type="button" class="preview-page-tab is-active" data-preview-folded-side="{{ $firstPackageSide->side }}" data-preview-folded-face="front">
+                    Halaman 1 · Kad Depan
+                </button>
+            @endif
+            @foreach ($orderedPackageSides as $packageSide)
+                <button type="button" class="preview-page-tab" data-preview-folded-side="{{ $packageSide->side }}" data-preview-folded-face="back">
+                    Halaman {{ $loop->iteration + 1 }} · Kad Belakang · {{ $packageSide->side === 'LELAKI' ? 'Lelaki' : 'Perempuan' }}
+                </button>
+            @endforeach
+    </div>
+
     @if ($order->packageSides->count() > 1)
-        <div class="preview-side-tabs" role="tablist" aria-label="Pilih pakej untuk preview">
+        <div class="preview-side-tabs" role="tablist" aria-label="Pilih pakej untuk preview" data-preview-separate-tabs @if ($isFoldedCard) hidden @endif>
             @foreach ($orderedPackageSides as $packageSide)
                 <button type="button" class="preview-side-tab @if ($loop->first) is-active @endif" data-preview-side-target="{{ $packageSide->side }}">
                     <span data-preview-tab-label>Majlis {{ $loop->iteration }} – {{ $packageSide->side === 'LELAKI' ? 'Lelaki' : 'Perempuan' }}</span>
@@ -35,7 +55,7 @@
         </div>
     @endif
 
-    <div class="preview-face-tabs" role="tablist" aria-label="Pilih muka kad">
+    <div class="preview-face-tabs" role="tablist" aria-label="Pilih muka kad" data-preview-separate-face-tabs @if ($isFoldedCard) hidden @endif>
         <button type="button" class="preview-face-tab is-active" data-preview-face-target="front">Hadapan</button>
         <button type="button" class="preview-face-tab" data-preview-face-target="back">Belakang</button>
     </div>
@@ -91,7 +111,10 @@
                     <div class="qr-placeholder" aria-hidden="true"><span></span></div>
                     <div><b>Lokasi Majlis</b><strong data-preview-field="venue_name">{{ $packageSide->event?->venue_name ?: 'NAMA TEMPAT' }}</strong><p data-preview-field="full_address">{{ $packageSide->event?->full_address ?: 'Alamat penuh majlis' }}</p></div>
                 </div>
-                <footer>Semoga dengan kehadiran para hadirin akan memeriahkan lagi majlis ini.</footer>
+                <footer>
+                    <span>Semoga dengan kehadiran para hadirin akan memeriahkan lagi majlis ini.</span>
+                    <span class="card-social-handle"><span class="card-social-logo" aria-hidden="true">◎</span> @kingkadkahwin</span>
+                </footer>
             </article>
         </div>
     @endforeach

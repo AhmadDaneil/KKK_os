@@ -888,7 +888,8 @@ button {
 .live-preview-heading > span { color: #6b7280; font-size: 0.68rem; text-align: right; }
 
 .preview-side-tabs,
-.preview-face-tabs {
+.preview-face-tabs,
+.preview-page-tabs {
     display: grid;
     grid-auto-flow: column;
     grid-auto-columns: 1fr;
@@ -896,8 +897,15 @@ button {
     margin-bottom: 0.55rem;
 }
 
+.preview-side-tabs[hidden],
+.preview-face-tabs[hidden],
+.preview-page-tabs[hidden] {
+    display: none !important;
+}
+
 .preview-side-tab,
-.preview-face-tab {
+.preview-face-tab,
+.preview-page-tab {
     min-height: 32px;
     padding: 0.35rem 0.45rem;
     border: 1px solid #d7dce4;
@@ -910,10 +918,22 @@ button {
 }
 
 .preview-side-tab.is-active,
-.preview-face-tab.is-active {
+.preview-face-tab.is-active,
+.preview-page-tab.is-active {
     border-color: #9b2c74;
     background: #9b2c74;
     color: #fff;
+}
+
+.preview-page-tabs {
+    grid-auto-flow: initial;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.preview-page-tab {
+    min-height: 39px;
+    font-size: 0.62rem;
+    line-height: 1.2;
 }
 
 .card-preview-wrap { display: flex; justify-content: center; }
@@ -1000,7 +1020,9 @@ button {
 .card-location p { margin: 0.1rem 0 0; overflow-wrap: anywhere; }
 .qr-placeholder { position: relative; aspect-ratio: 1; background: repeating-conic-gradient(#111 0 25%, #fff 0 50%) 0 / 9px 9px; border: 4px solid #fff; outline: 1px solid #111; }
 .qr-placeholder span { position: absolute; inset: 23%; background: #fff; border: 4px solid #111; }
-.wedding-card-back footer { padding-top: 0.42rem; font-style: italic; }
+.wedding-card-back footer { display: grid; gap: 0.28rem; padding-top: 0.42rem; font-style: italic; }
+.card-social-handle { color: #355848; font-family: Arial, sans-serif; font-size: 0.5rem; font-style: normal; font-weight: 700; letter-spacing: 0.02em; }
+.card-social-logo { display: inline-grid; width: 0.75rem; height: 0.75rem; place-items: center; border-radius: 50%; color: #fff; background: #355848; font-size: 0.58rem; line-height: 1; }
 .preview-note { margin: 0.7rem 0 0; color: #6b7280; font-size: 0.68rem; line-height: 1.45; }
 
 @media (max-width: 960px) {

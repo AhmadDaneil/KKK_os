@@ -348,8 +348,10 @@
         @foreach ($orderedPackageSides as $packageSide)
             @php($side = $packageSide->side)
             @php($event = $packageSide->event)
+            @php($hideFoldedDesign = $order->package_count === 2 && $order->package_format === 'FOLDED' && ! $loop->first)
             <fieldset data-package-side="{{ $side }}">
                 <legend data-package-legend>{{ $order->package_count === 2 ? 'Majlis '.$loop->iteration.' – ' : 'Pakej ' }}Pihak {{ ucfirst(strtolower($side)) }}</legend>
+                <div data-folded-second-design="{{ ! $loop->first ? 'true' : 'false' }}" @if ($hideFoldedDesign) hidden @endif>
                 <h3>Design</h3>
 
 <div class="grid">
@@ -439,6 +441,7 @@
         <p class="field-error">{{ $message }}</p>
     @enderror
 </div>
+                </div>
                 <h3>Ibu Bapa Pengantin {{ ucfirst(strtolower($side)) }}</h3>
                 <p class="field-help">Masukkan nama ibu bapa bagi pihak yang menjadi tuan rumah majlis ini.</p>
                 <div class="grid">
@@ -1013,6 +1016,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
         let activeSide = preview.querySelector('[data-card-preview]:not(.is-hidden)')?.dataset.cardPreview;
         let activeFace = 'front';
+        let isFoldedCardPreview = preview.dataset.foldedCardPreview === 'true';
 
         function field(name) {
             return form.elements.namedItem(name);
@@ -1099,6 +1103,14 @@ document.addEventListener('DOMContentLoaded', function () {
                     face.classList.toggle('is-hidden', face.dataset.cardFace !== activeFace);
                 });
             });
+
+            preview.querySelectorAll('[data-preview-folded-side]').forEach(function (tab) {
+                tab.classList.toggle(
+                    'is-active',
+                    tab.dataset.previewFoldedSide === activeSide
+                        && tab.dataset.previewFoldedFace === activeFace
+                );
+            });
         }
 
         function updateTwoPackageOrder() {
@@ -1122,21 +1134,67 @@ document.addEventListener('DOMContentLoaded', function () {
                 }
             });
 
-            const tabs = preview.querySelector('.preview-side-tabs');
-            order.forEach(function (side, index) {
-                const tab = preview.querySelector('[data-preview-side-target="' + side + '"]');
-                if (tab && tabs) {
-                    tabs.appendChild(tab);
-                    const label = tab.querySelector('[data-preview-tab-label]');
-                    if (label) label.textContent = 'Majlis ' + (index + 1) + ' – ' + (side === 'LELAKI' ? 'Lelaki' : 'Perempuan');
-                }
-            });
+            if (isFoldedCardPreview) {
+                const tabs = preview.querySelector('[data-folded-preview-tabs]');
+                const pages = [
+                    { side: order[0], face: 'front', label: 'Halaman 1 · Kad Depan' },
+                    { side: order[0], face: 'back', label: 'Halaman 2 · Kad Belakang · ' + (order[0] === 'LELAKI' ? 'Lelaki' : 'Perempuan') },
+                    { side: order[1], face: 'back', label: 'Halaman 3 · Kad Belakang · ' + (order[1] === 'LELAKI' ? 'Lelaki' : 'Perempuan') },
+                ];
+
+                pages.forEach(function (page) {
+                    const tab = preview.querySelector('[data-preview-folded-side="' + page.side + '"][data-preview-folded-face="' + page.face + '"]');
+                    if (tab && tabs) {
+                        tabs.appendChild(tab);
+                        tab.textContent = page.label;
+                    }
+                });
+            } else {
+                const tabs = preview.querySelector('.preview-side-tabs');
+                order.forEach(function (side, index) {
+                    const tab = preview.querySelector('[data-preview-side-target="' + side + '"]');
+                    if (tab && tabs) {
+                        tabs.appendChild(tab);
+                        const label = tab.querySelector('[data-preview-tab-label]');
+                        if (label) label.textContent = 'Majlis ' + (index + 1) + ' – ' + (side === 'LELAKI' ? 'Lelaki' : 'Perempuan');
+                    }
+                });
+            }
 
             activeSide = order[0];
+            activeFace = 'front';
             preview.querySelectorAll('[data-preview-side-target]').forEach(function (tab) {
                 tab.classList.toggle('is-active', tab.dataset.previewSideTarget === activeSide);
             });
             showSelection();
+        }
+
+        function updatePackageFormatPreview() {
+            const packageFormat = field('package_format');
+
+            if (!packageFormat) {
+                return;
+            }
+
+            isFoldedCardPreview = packageFormat.value === 'FOLDED';
+            preview.dataset.foldedCardPreview = isFoldedCardPreview ? 'true' : 'false';
+
+            const foldedTabs = preview.querySelector('[data-folded-preview-tabs]');
+            const separateTabs = preview.querySelector('[data-preview-separate-tabs]');
+            const separateFaceTabs = preview.querySelector('[data-preview-separate-face-tabs]');
+
+            if (foldedTabs) foldedTabs.hidden = !isFoldedCardPreview;
+            if (separateTabs) separateTabs.hidden = isFoldedCardPreview;
+            if (separateFaceTabs) separateFaceTabs.hidden = isFoldedCardPreview;
+
+            form.querySelectorAll('[data-folded-second-design="true"]').forEach(function (section) {
+                section.hidden = isFoldedCardPreview;
+                section.querySelectorAll('input, select, textarea').forEach(function (control) {
+                    control.disabled = isFoldedCardPreview;
+                });
+            });
+
+            updateTwoPackageOrder();
         }
 
         preview.querySelectorAll('[data-preview-side-target]').forEach(function (button) {
@@ -1159,6 +1217,14 @@ document.addEventListener('DOMContentLoaded', function () {
             });
         });
 
+        preview.querySelectorAll('[data-preview-folded-side]').forEach(function (button) {
+            button.addEventListener('click', function () {
+                activeSide = button.dataset.previewFoldedSide;
+                activeFace = button.dataset.previewFoldedFace;
+                showSelection();
+            });
+        });
+
         form.addEventListener('input', function () {
             preview.querySelectorAll('[data-card-preview]').forEach(function (card) {
                 syncCard(card.dataset.cardPreview);
@@ -1172,12 +1238,15 @@ document.addEventListener('DOMContentLoaded', function () {
             if (event.target.name === 'first_event_side') {
                 updateTwoPackageOrder();
             }
+            if (event.target.name === 'package_format') {
+                updatePackageFormatPreview();
+            }
         });
 
         preview.querySelectorAll('[data-card-preview]').forEach(function (card) {
             syncCard(card.dataset.cardPreview);
         });
-        updateTwoPackageOrder();
+        updatePackageFormatPreview();
         showSelection();
     });
 </script>
