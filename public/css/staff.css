@@ -955,6 +955,13 @@ a.staff-pagination-link:hover {
     border-bottom: 1px solid var(--staff-border);
 }
 
+.staff-customer-contact-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 14px;
+}
+
 .staff-detail-list > div:nth-last-child(-n + 2) {
     border-bottom: 0;
 }

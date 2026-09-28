@@ -72,18 +72,7 @@ class StaffOrderController extends Controller
         $order->unsetRelation('printJobs');
         $order->unsetRelation('packingJob');
 
-        if ($user->isOperationManagement()) {
-            $order->load([
-                'designJobs.assignedUser',
-                'designJobs.artworkVersions',
-                'printJobs.assignedUser',
-                'packingJob.assignedUser',
-                'packingJob.items',
-                'designJobs.events.actor',
-                'printJobs.events.actor',
-                'packingJob.events.actor',
-            ]);
-        } elseif ($user->hasStaffRole(User::ROLE_OM)) {
+        if ($user->canMonitorAllDepartments()) {
             $order->load([
                 'designJobs.assignedUser',
                 'designJobs.artworkVersions',
@@ -113,7 +102,7 @@ class StaffOrderController extends Controller
 
         $timelineEvents = collect();
 
-        if ($user->isOperationManagement()) {
+        if ($user->canMonitorAllDepartments()) {
             $timelineEvents = collect([
                 ...$order->statusEvents->map(fn ($event) => [
                     'event_type' => $event->event_type,
@@ -201,7 +190,7 @@ class StaffOrderController extends Controller
     {
         $query = Order::query();
 
-        if ($user->isOperationManagement()) {
+        if ($user->canMonitorAllDepartments()) {
             return $query;
         }
 
@@ -238,7 +227,7 @@ class StaffOrderController extends Controller
 
     private function allowedWorkstream(User $user, string $requested): ?string
     {
-        $allowed = $user->isOperationManagement()
+        $allowed = $user->canMonitorAllDepartments()
             ? ['design', 'printing', 'packing', 'fulfilment']
             : match ($user->role) {
                 User::ROLE_DESIGNER => ['design'],
@@ -316,7 +305,7 @@ class StaffOrderController extends Controller
             }
         }
 
-        if (! $user->isOperationManagement()) {
+        if (! $user->canMonitorAllDepartments()) {
             return;
         }
 

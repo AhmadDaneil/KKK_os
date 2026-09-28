@@ -1,7 +1,7 @@
 ﻿<!DOCTYPE html>
 @php
     $dashboardUser = auth()->user();
-    $canMonitorOperations = $dashboardUser->isOperationManagement();
+    $canMonitorOperations = $dashboardUser->canMonitorAllDepartments();
     $canViewDesignQueue = $canMonitorOperations || $dashboardUser->hasStaffRole(\App\Models\User::ROLE_DESIGNER);
     $canViewProductionQueue = $canMonitorOperations || $dashboardUser->hasStaffRole(\App\Models\User::ROLE_PRODUCTION);
 @endphp
