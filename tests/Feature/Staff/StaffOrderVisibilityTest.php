@@ -616,6 +616,47 @@ class StaffOrderVisibilityTest extends TestCase
             ->assertDontSee('Printing');
     }
 
+    public function test_customer_service_can_monitor_every_department_and_message_the_customer(): void
+    {
+        $customerService = $this->staff(User::ROLE_CUSTOMER_SERVICE);
+        $order = $this->printedOrder('Customer Service Monitoring');
+
+        app(InitializePackingJobForOrderService::class)->initialize($order);
+
+        $order->update([
+            'customer_phone' => '012-345 6789',
+        ]);
+
+        $this->actingAs($customerService)
+            ->get(route('staff.dashboard'))
+            ->assertOk()
+            ->assertSee('Semua Orders')
+            ->assertSee('Design Queue')
+            ->assertSee('Production')
+            ->assertSee('Packing')
+            ->assertSee('Fulfilment');
+
+        $this->actingAs($customerService)
+            ->get(route('staff.orders.index'))
+            ->assertOk()
+            ->assertSee($order->order_id);
+
+        $this->actingAs($customerService)
+            ->get(route('staff.orders.show', $order->order_id))
+            ->assertOk()
+            ->assertSee('Order Summary')
+            ->assertSee('<h2>Customer</h2>', false)
+            ->assertSee('Timeline Order')
+            ->assertSee('Design Work')
+            ->assertSee('Production')
+            ->assertSee('Packing')
+            ->assertSee('Fulfilment')
+            ->assertSee('Mesej')
+            ->assertSee('Peringatan Bayaran')
+            ->assertSee('https://wa.me/60123456789', false)
+            ->assertDontSee('Assign Production Staff');
+    }
+
     public function test_assigned_designer_sees_start_design_action_when_job_is_ready(): void
     {
         $designer = $this->staff(User::ROLE_DESIGNER);

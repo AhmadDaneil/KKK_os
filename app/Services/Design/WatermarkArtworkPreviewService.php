@@ -9,7 +9,7 @@ class WatermarkArtworkPreviewService
 {
     public const VERSION = 3;
 
-    private const TEXT = 'KING KAD KAHWIN - PREVIEW';
+    private const TEXT = 'KING KAD KAHWIN · PREVIEW';
 
     private const MAX_PREVIEW_DIMENSION = 900;
 
@@ -112,7 +112,7 @@ class WatermarkArtworkPreviewService
             $ink = imagecolorallocatealpha($image, 255, 255, 255, 68);
             $shadowOffset = max(2, (int) round($fontSize / 18));
 
-            foreach ([0.42, 0.82] as $position) {
+            foreach ([0.34, 0.62] as $position) {
                 $x = (int) round(-$width * 0.07);
                 $y = (int) round($height * $position);
 
