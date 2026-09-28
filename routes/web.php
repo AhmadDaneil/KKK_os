@@ -163,6 +163,11 @@ Route::post(
 Route::post('/order/{orderId}/deposit-receipt', [CustomerDepositReceiptController::class, 'update'])
     ->name('orders.deposit-receipt.update');
 
+// Support dashboards that were open before the Order ID step was removed.
+Route::get('/order/{orderId}/order-id', function (string $orderId) {
+    return redirect()->route('orders.review.show', ['orderId' => $orderId]);
+})->name('orders.order-id.legacy');
+
 Route::get(
     '/order/{orderId}/review',
     [CustomerOrderReviewController::class, 'show']

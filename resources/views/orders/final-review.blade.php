@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="referrer" content="no-referrer">
     <title>Semakan Akhir - {{ $review['order_id'] }}</title>
-    <link rel="stylesheet" href="{{ asset('css/final-review.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/final-review.css') }}?v={{ filemtime(public_path('css/final-review.css')) }}">
     <link rel="stylesheet" href="{{ asset('css/customer-theme.css') }}?v={{ filemtime(public_path('css/customer-theme.css')) }}">
 </head>
 <body>

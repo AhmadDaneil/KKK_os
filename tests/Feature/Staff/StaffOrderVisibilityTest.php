@@ -556,7 +556,13 @@ class StaffOrderVisibilityTest extends TestCase
         $this->actingAs($designer)
             ->get(route('staff.orders.show', $order->order_id))
             ->assertOk()
+            ->assertSee('Packages')
             ->assertSee('Design Work')
+            ->assertDontSee('Order Summary')
+            ->assertDontSee('<h2>Customer</h2>', false)
+            ->assertDontSee('Timeline Order')
+            ->assertDontSee('Payment')
+            ->assertDontSee('Fulfilment')
             ->assertDontSee('Printing')
             ->assertDontSee('Packing');
     }
@@ -578,7 +584,13 @@ class StaffOrderVisibilityTest extends TestCase
         $this->actingAs($printing)
             ->get(route('staff.orders.show', $order->order_id))
             ->assertOk()
+            ->assertSee('Packages')
             ->assertSee('Printing')
+            ->assertDontSee('Order Summary')
+            ->assertDontSee('<h2>Customer</h2>', false)
+            ->assertDontSee('Timeline Order')
+            ->assertDontSee('Payment')
+            ->assertDontSee('Fulfilment')
             ->assertDontSee('Design Work')
             ->assertDontSee('Packing');
     }

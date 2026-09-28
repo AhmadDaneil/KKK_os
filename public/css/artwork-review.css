@@ -305,7 +305,9 @@ textarea {
 }
 
 .state-panel {
-    margin: 0 24px 24px;
+    box-sizing: border-box;
+    width: min(680px, calc(100% - 48px));
+    margin: 0 auto 24px;
     padding: 18px 20px;
     border: 1px solid #e5e7eb;
 }
@@ -317,6 +319,7 @@ textarea {
 .state-success {
     border-color: #bbf7d0;
     background: #f0fdf4;
+    text-align: center;
 }
 
 .state-warning {

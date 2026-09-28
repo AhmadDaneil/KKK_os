@@ -110,48 +110,52 @@ class StaffOrderController extends Controller
             ]);
         }
 
-        $timelineEvents = collect([
-            ...$order->statusEvents->map(fn ($event) => [
-                'event_type' => $event->event_type,
-                'from_status' => $event->from_status,
-                'to_status' => $event->to_status,
-                'actor' => $event->actor,
-                'occurred_at' => $event->occurred_at,
-                'reason' => $event->reason,
-            ]),
-            ...$order->designJobs->flatMap(fn ($job) => $job->events->map(fn ($event) => [
-                'event_type' => $event->event_type,
-                'from_status' => $event->from_status,
-                'to_status' => $event->to_status,
-                'actor' => $event->actor,
-                'occurred_at' => $event->occurred_at,
-                'reason' => null,
-            ])),
-            ...$order->printJobs->flatMap(fn ($job) => $job->events->map(fn ($event) => [
-                'event_type' => $event->event_type,
-                'from_status' => $event->from_status,
-                'to_status' => $event->to_status,
-                'actor' => $event->actor,
-                'occurred_at' => $event->occurred_at,
-                'reason' => null,
-            ])),
-            ...($order->packingJob?->events ?? collect())->map(fn ($event) => [
-                'event_type' => $event->event_type,
-                'from_status' => $event->from_status,
-                'to_status' => $event->to_status,
-                'actor' => $event->actor,
-                'occurred_at' => $event->occurred_at,
-                'reason' => null,
-            ]),
-            ...($order->fulfilmentJob?->events ?? collect())->map(fn ($event) => [
-                'event_type' => $event->event_type,
-                'from_status' => $event->from_status,
-                'to_status' => $event->to_status,
-                'actor' => $event->actor,
-                'occurred_at' => $event->occurred_at,
-                'reason' => null,
-            ]),
-        ])->sortByDesc('occurred_at')->values();
+        $timelineEvents = collect();
+
+        if ($user->isOperationManagement()) {
+            $timelineEvents = collect([
+                ...$order->statusEvents->map(fn ($event) => [
+                    'event_type' => $event->event_type,
+                    'from_status' => $event->from_status,
+                    'to_status' => $event->to_status,
+                    'actor' => $event->actor,
+                    'occurred_at' => $event->occurred_at,
+                    'reason' => $event->reason,
+                ]),
+                ...$order->designJobs->flatMap(fn ($job) => $job->events->map(fn ($event) => [
+                    'event_type' => $event->event_type,
+                    'from_status' => $event->from_status,
+                    'to_status' => $event->to_status,
+                    'actor' => $event->actor,
+                    'occurred_at' => $event->occurred_at,
+                    'reason' => null,
+                ])),
+                ...$order->printJobs->flatMap(fn ($job) => $job->events->map(fn ($event) => [
+                    'event_type' => $event->event_type,
+                    'from_status' => $event->from_status,
+                    'to_status' => $event->to_status,
+                    'actor' => $event->actor,
+                    'occurred_at' => $event->occurred_at,
+                    'reason' => null,
+                ])),
+                ...($order->packingJob?->events ?? collect())->map(fn ($event) => [
+                    'event_type' => $event->event_type,
+                    'from_status' => $event->from_status,
+                    'to_status' => $event->to_status,
+                    'actor' => $event->actor,
+                    'occurred_at' => $event->occurred_at,
+                    'reason' => null,
+                ]),
+                ...($order->fulfilmentJob?->events ?? collect())->map(fn ($event) => [
+                    'event_type' => $event->event_type,
+                    'from_status' => $event->from_status,
+                    'to_status' => $event->to_status,
+                    'actor' => $event->actor,
+                    'occurred_at' => $event->occurred_at,
+                    'reason' => null,
+                ]),
+            ])->sortByDesc('occurred_at')->values();
+        }
 
         $assignmentOptions = [
             'designers' => collect(),
