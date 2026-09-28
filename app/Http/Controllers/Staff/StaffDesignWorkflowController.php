@@ -10,6 +10,7 @@ use App\Services\Design\ResumeDesignAfterCorrectionService;
 use App\Services\Design\StartDesignJobService;
 use App\Services\Design\SyncOrderDesignStatusService;
 use App\Services\Design\WatermarkArtworkPreviewService;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
@@ -103,7 +104,7 @@ class StaffDesignWorkflowController extends Controller
         DesignJob $designJob,
         CreateArtworkVersionService $service,
         WatermarkArtworkPreviewService $watermark
-    ): RedirectResponse {
+    ): RedirectResponse|JsonResponse {
         $this->authorizeAssignedDesigner($request, $designJob);
 
         $this->normalizeArtworkFiles($request);
@@ -127,6 +128,12 @@ class StaffDesignWorkflowController extends Controller
         $designJob->refresh();
 
         if ($designJob->status !== 'DESIGN_IN_PROGRESS') {
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'message' => "Artwork can only be added while design job {$designJob->id} is DESIGN_IN_PROGRESS.",
+                ], 422);
+            }
+
             return back()->withErrors([
                 'design_job' => "Artwork can only be added while design job {$designJob->id} is DESIGN_IN_PROGRESS.",
             ]);
@@ -191,6 +198,10 @@ class StaffDesignWorkflowController extends Controller
             $disk->delete($storedPaths);
 
             if ($exception instanceof RuntimeException) {
+                if ($request->expectsJson()) {
+                    return response()->json(['message' => $exception->getMessage()], 422);
+                }
+
                 return back()->withErrors([
                     'design_job' => $exception->getMessage(),
                 ]);
@@ -198,19 +209,32 @@ class StaffDesignWorkflowController extends Controller
 
             report($exception);
 
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'message' => 'Artwork could not be uploaded. Please try again.',
+                ], 422);
+            }
+
             return back()->withErrors([
                 'design_job' => 'Artwork could not be uploaded. Please try again.',
             ]);
         }
 
-        return back()->with(
-            'status',
-            count($validated['source_artwork']) === 1 && count($validated['customer_preview']) === 1
-                ? "Artwork version {$artwork->version_number} uploaded successfully."
-                : "Artwork version {$artwork->version_number} uploaded successfully with "
-                    .count($validated['source_artwork']).' source file(s) and '
-                    .count($validated['customer_preview']).' preview file(s).'
-        );
+        $message = count($validated['source_artwork']) === 1 && count($validated['customer_preview']) === 1
+            ? "Artwork version {$artwork->version_number} uploaded successfully."
+            : "Artwork version {$artwork->version_number} uploaded successfully with "
+                .count($validated['source_artwork']).' source file(s) and '
+                .count($validated['customer_preview']).' preview file(s).';
+
+        if ($request->expectsJson()) {
+            return response()->json([
+                'message' => $message,
+                'job_id' => $designJob->id,
+                'version_number' => $artwork->version_number,
+            ]);
+        }
+
+        return back()->with('status', $message);
     }
 
     private function normalizeArtworkFiles(Request $request): void
@@ -279,7 +303,7 @@ class StaffDesignWorkflowController extends Controller
                 'size' => $file->getSize(),
                 'checksum_sha256' => $checksum,
                 'watermarked_path' => $watermarkedPath,
-                'watermark_version' => $watermarkedPath === null ? null : 2,
+                'watermark_version' => $watermarkedPath === null ? null : WatermarkArtworkPreviewService::VERSION,
             ];
         }
 

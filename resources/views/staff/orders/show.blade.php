@@ -341,7 +341,7 @@
 
                     <div class="staff-work-grid">
                         @forelse ($order->designJobs as $job)
-                            <article class="staff-card">
+                            <article class="staff-card" data-design-job-id="{{ $job->id }}">
                                 <div class="staff-card-heading">
                                     <h3>{{ $job->side }}</h3>
 
@@ -428,7 +428,7 @@
                                                         method="POST"
                                                         action="{{ route($operationRoutePrefix.'design-jobs.artwork.store', $job) }}"
                                                         enctype="multipart/form-data"
-                                                        class="staff-artwork-form js-staff-confirmation-form"
+                                                        class="staff-artwork-form js-staff-confirmation-form js-async-artwork-upload"
                                                         data-confirm-title="Upload artwork {{ ucfirst(strtolower($job->side)) }}?"
                                                         data-confirm-message="Pastikan fail source artwork dan customer preview yang dipilih adalah betul. Fail ini akan disimpan sebagai versi artwork baharu."
                                                         data-confirm-button="Ya, upload artwork"
@@ -508,15 +508,15 @@
                                                         >
                                                             Upload Artwork
                                                         </button>
+                                                        <p class="staff-upload-notice" role="status" aria-live="polite" hidden></p>
                                                         </form>
                                                     @endif
 
-                                                @if ($job->artworkVersions->isNotEmpty())
-                                                    <div class="staff-artwork-ready-panel">
+                                                <div class="staff-artwork-ready-panel" data-artwork-ready-panel @if ($job->artworkVersions->isEmpty()) hidden @endif>
                                                         <div>
                                                             <strong>Artwork telah dimuat naik</strong>
                                                             <p>
-                                                                Versi {{ $job->artworkVersions->max('version_number') }} ialah versi terkini.
+                                                                Versi <span data-artwork-version>{{ $job->artworkVersions->max('version_number') }}</span> ialah versi terkini.
                                                                 Hantar kepada customer apabila preview sudah diperiksa.
                                                             </p>
                                                         </div>
@@ -538,12 +538,10 @@
                                                             </button>
                                                         </form>
                                                     </div>
-                                                @else
-                                                    <p class="staff-work-message">
+                                                    <p class="staff-work-message" data-artwork-upload-hint @if ($job->artworkVersions->isNotEmpty()) hidden @endif>
                                                         Muat naik source artwork dan customer preview terlebih dahulu.
                                                         Selepas itu, butang untuk menghantar artwork kepada customer akan dipaparkan.
                                                     </p>
-                                                @endif
                                             </div>
                                         @elseif ($job->status === 'DESIGN_READY')
                                             <p class="staff-work-message">
@@ -607,7 +605,7 @@
                             method="POST"
                             action="{{ route('staff.orders.design-artworks.store', $order) }}"
                             enctype="multipart/form-data"
-                            class="staff-batch-artwork-form js-staff-confirmation-form"
+                            class="staff-batch-artwork-form js-staff-confirmation-form js-async-artwork-upload"
                             data-confirm-title="Upload kedua-dua artwork?"
                             data-confirm-message="Pastikan fail source dan customer preview untuk pakej Lelaki serta Perempuan adalah betul. Kedua-duanya akan disimpan sebagai versi artwork baharu."
                             data-confirm-button="Ya, upload kedua-duanya"
@@ -616,6 +614,7 @@
                             <button type="submit" class="staff-button staff-button-primary">
                                 Upload Both Artwork
                             </button>
+                            <p class="staff-upload-notice" role="status" aria-live="polite" hidden></p>
                         </form>
                     @endif
                 </section>
@@ -1422,6 +1421,86 @@
             }
         }
 
+        async function submitArtworkUpload(form) {
+            const submitButton = form.querySelector('[type="submit"]');
+            const originalButtonText = submitButton.textContent;
+
+            submitButton.disabled = true;
+            submitButton.textContent = 'Memuat naik...';
+
+            try {
+                const response = await fetch(form.action, {
+                    method: 'POST',
+                    body: new FormData(form),
+                    credentials: 'same-origin',
+                    headers: {
+                        Accept: 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest',
+                    },
+                });
+                const payload = await response.json().catch(function () { return {}; });
+
+                if (!response.ok) {
+                    const errors = payload.errors ? Object.values(payload.errors).flat().join(' ') : null;
+                    throw new Error(errors || payload.message || 'Artwork could not be uploaded.');
+                }
+
+                const selector = form.id
+                    ? 'input[type="file"][form="' + form.id + '"]'
+                    : '';
+                const inputs = [
+                    ...form.querySelectorAll('input[type="file"]'),
+                    ...(selector ? document.querySelectorAll(selector) : []),
+                ];
+
+                inputs.forEach(function (input) {
+                    input.value = '';
+                    input.dispatchEvent(new Event('change'));
+                });
+
+                const artworkJobs = payload.jobs || (payload.job_ids || (payload.job_id ? [payload.job_id] : []))
+                    .map(function (jobId) {
+                        return { id: jobId, version_number: payload.version_number };
+                    });
+
+                artworkJobs.forEach(function (artworkJob) {
+                    const jobCard = document.querySelector('[data-design-job-id="' + artworkJob.id + '"]');
+
+                    if (!jobCard) {
+                        return;
+                    }
+
+                    const reviewPanel = jobCard.querySelector('[data-artwork-ready-panel]');
+                    const uploadHint = jobCard.querySelector('[data-artwork-upload-hint]');
+                    const version = reviewPanel?.querySelector('[data-artwork-version]');
+                    const reviewForm = reviewPanel?.querySelector('.js-staff-confirmation-form');
+
+                    if (version && artworkJob.version_number) {
+                        version.textContent = artworkJob.version_number;
+                    }
+
+                    if (reviewForm && artworkJob.version_number) {
+                        reviewForm.dataset.confirmMessage = 'Versi ' + artworkJob.version_number
+                            + ' akan dihantar untuk semakan customer. Pastikan preview telah diperiksa dan merupakan versi yang betul.';
+                    }
+
+                    if (reviewPanel) {
+                        reviewPanel.hidden = false;
+                    }
+                    if (uploadHint) {
+                        uploadHint.hidden = true;
+                    }
+                });
+
+                showUploadNotice(form, payload.message || 'Artwork uploaded successfully.', false);
+            } catch (error) {
+                showUploadNotice(form, error.message || 'Artwork could not be uploaded.', true);
+            } finally {
+                submitButton.disabled = false;
+                submitButton.textContent = originalButtonText;
+            }
+        }
+
         confirmButton.addEventListener('click', function () {
             if (!pendingForm) {
                 return;
@@ -1447,6 +1526,16 @@
                 confirmButton.disabled = false;
                 confirmButton.textContent = 'Ya, teruskan';
                 submitProgressUpload(form);
+                return;
+            }
+
+            if (pendingForm.classList.contains('js-async-artwork-upload')) {
+                const form = pendingForm;
+                pendingForm = null;
+                dialog.close();
+                confirmButton.disabled = false;
+                confirmButton.textContent = 'Ya, teruskan';
+                submitArtworkUpload(form);
                 return;
             }
 

@@ -138,7 +138,7 @@ class CustomerArtworkReviewController extends Controller
 
         if (
             ! filled($sourcePath)
-            || data_get($previewFile, 'watermark_version') === 2
+            || data_get($previewFile, 'watermark_version') === WatermarkArtworkPreviewService::VERSION
             || ! in_array(strtolower(pathinfo($sourcePath, PATHINFO_EXTENSION)), ['jpg', 'jpeg', 'png'], true)
         ) {
             return data_get($previewFile, 'watermarked_path');
@@ -160,7 +160,7 @@ class CustomerArtworkReviewController extends Controller
         }
 
         $previewFiles[$previewIndex]['watermarked_path'] = $path;
-        $previewFiles[$previewIndex]['watermark_version'] = 2;
+        $previewFiles[$previewIndex]['watermark_version'] = WatermarkArtworkPreviewService::VERSION;
         $artwork->update(['preview_files' => $previewFiles]);
 
         return $path;

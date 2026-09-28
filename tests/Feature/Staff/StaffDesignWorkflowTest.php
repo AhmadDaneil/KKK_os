@@ -452,6 +452,38 @@ class StaffDesignWorkflowTest extends TestCase
         );
     }
 
+    public function test_assigned_designer_can_upload_artwork_without_a_page_redirect(): void
+    {
+        Storage::fake('local');
+
+        $designer = $this->designer();
+        $job = $this->designJob();
+        $this->assign($job, $designer);
+
+        $this->actingAs($designer)
+            ->post(route('staff.design-jobs.start', $job))
+            ->assertRedirect();
+
+        $this->actingAs($designer)
+            ->withHeaders([
+                'Accept' => 'application/json',
+                'X-Requested-With' => 'XMLHttpRequest',
+            ])
+            ->post(route('staff.design-jobs.artwork.store', $job), [
+                'source_artwork' => UploadedFile::fake()->create('async-artwork.pdf', 100, 'application/pdf'),
+                'customer_preview' => UploadedFile::fake()->image('async-preview.jpg'),
+            ])
+            ->assertOk()
+            ->assertJsonPath('message', 'Artwork version 1 uploaded successfully.')
+            ->assertJsonPath('job_id', $job->id)
+            ->assertJsonPath('version_number', 1);
+
+        $this->assertDatabaseHas('artwork_versions', [
+            'design_job_id' => $job->id,
+            'version_number' => 1,
+        ]);
+    }
+
     public function test_assigned_designer_can_upload_multiple_source_and_preview_files_in_one_version(): void
     {
         Storage::fake('local');

@@ -7,6 +7,7 @@ use App\Models\DesignJob;
 use App\Models\Order;
 use App\Services\Design\CreateArtworkVersionService;
 use App\Services\Design\WatermarkArtworkPreviewService;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
@@ -23,7 +24,7 @@ class StaffBatchArtworkController extends Controller
         Order $order,
         CreateArtworkVersionService $service,
         WatermarkArtworkPreviewService $watermark
-    ): RedirectResponse {
+    ): RedirectResponse|JsonResponse {
         $this->normalizeArtworkFiles($request);
 
         $validated = $request->validate([
@@ -52,6 +53,12 @@ class StaffBatchArtworkController extends Controller
             abort_unless($job->assigned_user_id === $request->user()->id, 404);
 
             if ($job->status !== 'DESIGN_IN_PROGRESS') {
+                if ($request->expectsJson()) {
+                    return response()->json([
+                        'message' => "Artwork can only be uploaded while {$job->side} design is in progress.",
+                    ], 422);
+                }
+
                 return back()->withErrors([
                     'artworks' => "Artwork can only be uploaded while {$job->side} design is in progress.",
                 ]);
@@ -79,6 +86,10 @@ class StaffBatchArtworkController extends Controller
             Storage::disk('local')->delete($storedPaths);
 
             if ($exception instanceof RuntimeException) {
+                if ($request->expectsJson()) {
+                    return response()->json(['message' => $exception->getMessage()], 422);
+                }
+
                 return back()->withErrors([
                     'artworks' => $exception->getMessage(),
                 ]);
@@ -86,15 +97,31 @@ class StaffBatchArtworkController extends Controller
 
             report($exception);
 
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'message' => 'Artwork could not be uploaded. Please try again.',
+                ], 422);
+            }
+
             return back()->withErrors([
                 'artworks' => 'Artwork could not be uploaded. Please try again.',
             ]);
         }
 
-        return back()->with(
-            'status',
-            $jobs->count().' artwork files uploaded successfully.'
-        );
+        $message = $jobs->count().' artwork files uploaded successfully.';
+
+        if ($request->expectsJson()) {
+            return response()->json([
+                'message' => $message,
+                'job_ids' => $jobs->keys()->values(),
+                'jobs' => $jobs->map(fn (DesignJob $job) => [
+                    'id' => $job->id,
+                    'version_number' => $job->artworkVersions()->max('version_number'),
+                ])->values(),
+            ]);
+        }
+
+        return back()->with('status', $message);
     }
 
     /**
@@ -207,7 +234,7 @@ class StaffBatchArtworkController extends Controller
                 'size' => $file->getSize(),
                 'checksum_sha256' => $checksum,
                 'watermarked_path' => $watermarkedPath,
-                'watermark_version' => $watermarkedPath === null ? null : 2,
+                'watermark_version' => $watermarkedPath === null ? null : WatermarkArtworkPreviewService::VERSION,
             ];
         }
 

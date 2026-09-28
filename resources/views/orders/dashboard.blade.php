@@ -812,7 +812,7 @@ document.addEventListener('DOMContentLoaded', function () {
         const confirmOrderReview = document.getElementById('confirm-order-review');
         const cancelOrderReview = document.getElementById('cancel-order-review');
 
-        if (!form || !reviewLink || !status || !confirmationDialog || !confirmOrderReview || !cancelOrderReview) {
+        if (!form || !status) {
             return;
         }
 
@@ -862,7 +862,10 @@ document.addEventListener('DOMContentLoaded', function () {
                 signal: controller.signal
             }).then(function (response) {
                 if (!response.ok) {
-                    throw new Error('Autosave failed');
+                    return response.json().catch(function () { return {}; }).then(function (payload) {
+                        const errors = payload.errors ? Object.values(payload.errors).flat().join(' ') : '';
+                        throw new Error(errors || payload.message || 'Autosave failed');
+                    });
                 }
 
                 savedRevision = Math.max(savedRevision, revision);
@@ -880,7 +883,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 }
 
                 if (revision === draftRevision) {
-                    setStatus('Simpanan automatik gagal. Sila tekan Simpan Draft.', 'error');
+                    setStatus(error.message || 'Simpanan automatik gagal. Sila tekan Simpan Draft.', 'error');
                 }
                 throw error;
             }).finally(function () {
@@ -901,16 +904,13 @@ document.addEventListener('DOMContentLoaded', function () {
         }
 
         function scheduleAutosave(event) {
-            if (event.target.type === 'file') {
-                setStatus('Tekan Simpan Draft atau Seterusnya untuk memuat naik fail', 'pending');
-                return;
-            }
+            const includeFiles = event.target instanceof HTMLInputElement && event.target.type === 'file';
 
             window.clearTimeout(autosaveTimer);
             draftRevision += 1;
             setStatus('Perubahan belum disimpan', 'pending');
             autosaveTimer = window.setTimeout(function () {
-                queueSave(false).catch(function () {});
+                queueSave(includeFiles).catch(function () {});
             }, 800);
         }
 
@@ -945,36 +945,38 @@ document.addEventListener('DOMContentLoaded', function () {
             queueSave(false).catch(function () {});
         });
 
-        reviewLink.addEventListener('click', function (event) {
-            if (event.defaultPrevented) {
-                return;
-            }
+        if (reviewLink && confirmationDialog && confirmOrderReview && cancelOrderReview) {
+            reviewLink.addEventListener('click', function (event) {
+                if (event.defaultPrevented) {
+                    return;
+                }
 
-            event.preventDefault();
-            confirmationDialog.showModal();
-        });
+                event.preventDefault();
+                confirmationDialog.showModal();
+            });
 
-        cancelOrderReview.addEventListener('click', function () {
-            confirmationDialog.close();
-        });
+            cancelOrderReview.addEventListener('click', function () {
+                confirmationDialog.close();
+            });
 
-        confirmOrderReview.addEventListener('click', function () {
-            confirmationDialog.close();
-            window.clearTimeout(autosaveTimer);
-            reviewLink.setAttribute('aria-disabled', 'true');
-            confirmOrderReview.disabled = true;
-            confirmOrderReview.textContent = 'Menyimpan...';
+            confirmOrderReview.addEventListener('click', function () {
+                confirmationDialog.close();
+                window.clearTimeout(autosaveTimer);
+                reviewLink.setAttribute('aria-disabled', 'true');
+                confirmOrderReview.disabled = true;
+                confirmOrderReview.textContent = 'Menyimpan...';
 
-            queueSave(true)
-                .then(function () {
-                    window.location.assign(reviewLink.href);
-                })
-                .catch(function () {
-                    reviewLink.removeAttribute('aria-disabled');
-                    confirmOrderReview.disabled = false;
-                    confirmOrderReview.textContent = 'Ya, teruskan';
-                });
-        });
+                queueSave(true)
+                    .then(function () {
+                        window.location.assign(reviewLink.href);
+                    })
+                    .catch(function () {
+                        reviewLink.removeAttribute('aria-disabled');
+                        confirmOrderReview.disabled = false;
+                        confirmOrderReview.textContent = 'Ya, teruskan';
+                    });
+            });
+        }
     });
 </script>
 <script>
