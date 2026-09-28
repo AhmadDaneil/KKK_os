@@ -64,6 +64,11 @@
             <article><span>03</span><div><h2>Status yang jelas</h2><p>Ikuti progress design, cetakan, packing dan penghantaran.</p></div></article>
         </section>
 
+        <section class="final-cta">
+            <div><p class="eyebrow">Hari bahagia bermula di sini</p><h2>Sedia mencipta kad kahwin anda?</h2></div>
+            <a class="button button-light" href="{{ route('public.orders.create') }}"><span>Mulakan Tempahan</span><span class="button-arrow" aria-hidden="true">→</span></a>
+        </section>
+
         <section class="journey" id="cara-tempah">
             <div class="section-intro">
                 <p class="eyebrow">Daripada idea kepada kad sebenar</p>
@@ -75,11 +80,6 @@
                 <li><b>3</b><div><h3>Kami siapkan</h3><p>Pasukan kami mengurus design, cetakan dan pembungkusan.</p></div></li>
                 <li><b>4</b><div><h3>Ikuti progress</h3><p>Masukkan Order ID pada bila-bila masa untuk melihat perkembangan.</p></div></li>
             </ol>
-        </section>
-
-        <section class="final-cta">
-            <div><p class="eyebrow">Hari bahagia bermula di sini</p><h2>Sedia mencipta kad kahwin anda?</h2></div>
-            <a class="button button-light" href="{{ route('public.orders.create') }}"><span>Mulakan Tempahan</span><span class="button-arrow" aria-hidden="true">→</span></a>
         </section>
     </main>
 
