@@ -19,7 +19,7 @@
         <div class="staff-workspace">
             <header class="staff-topbar">
                 <div><p class="staff-kicker">{{ $dashboardUser->isAdmin() ? 'Admin Operations' : str_replace('_', ' ', $dashboardUser->role) }}</p><h1>{{ $dashboardUser->isAdmin() ? 'Admin Operations Dashboard' : 'Staff Dashboard' }}</h1></div>
-                <form class="js-logout-form" method="POST" action="{{ route('staff.logout') }}">@csrf<button type="submit" class="staff-button staff-button-small">Log Keluar</button></form>
+                <form class="js-logout-form staff-logout-profile" method="POST" action="{{ route('staff.logout') }}">@csrf<button type="submit"><span class="staff-topbar-avatar" aria-hidden="true"></span><span>Log Keluar</span></button></form>
             </header>
 
             <main class="staff-main staff-dashboard-main">

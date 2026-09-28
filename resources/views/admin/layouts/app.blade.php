@@ -37,7 +37,7 @@
             <div><p>KingKadKahwin</p><h1>@yield('heading', 'Admin Dashboard')</h1></div>
             <div class="admin-topbar-actions">
                 <a href="{{ route('staff.dashboard') }}" class="admin-button admin-button-secondary">Staff Dashboard</a>
-                <form class="js-logout-form" method="POST" action="{{ route('admin.logout') }}">@csrf<button class="admin-button" type="submit">Log Keluar</button></form>
+                <form class="js-logout-form admin-logout-profile" method="POST" action="{{ route('admin.logout') }}">@csrf<button type="submit"><span class="admin-topbar-avatar" aria-hidden="true"></span><span>Log Keluar</span></button></form>
             </div>
         </header>
 
