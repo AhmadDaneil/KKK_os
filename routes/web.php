@@ -34,6 +34,7 @@ use App\Http\Controllers\Staff\StaffOrderProductionAssignmentController;
 use App\Http\Controllers\Staff\StaffPackingWorkflowController;
 use App\Http\Controllers\Staff\StaffPhotoshopController;
 use App\Http\Controllers\Staff\StaffPrintingWorkflowController;
+use App\Http\Controllers\Staff\StaffThemePreferenceController;
 use App\Models\User;
 use Illuminate\Support\Facades\Route;
 
@@ -227,6 +228,8 @@ Route::middleware(['auth:staff', 'active.staff'])
     ->group(function () {
         Route::get('/', [StaffDashboardController::class, 'index'])
             ->name('dashboard');
+        Route::put('/theme', [StaffThemePreferenceController::class, 'update'])
+            ->name('theme.update');
 
         Route::post('/logout', [StaffAuthController::class, 'destroy'])
             ->name('logout');

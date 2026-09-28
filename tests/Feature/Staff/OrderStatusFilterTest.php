@@ -73,6 +73,37 @@ class OrderStatusFilterTest extends TestCase
             ->assertDontSee($completedOrder->order_id);
     }
 
+    public function test_incomplete_customer_drafts_are_hidden_from_operational_order_pages(): void
+    {
+        $manager = User::factory()->create([
+            'role' => User::ROLE_OM,
+            'is_active' => true,
+        ]);
+        $admin = User::factory()->create([
+            'role' => User::ROLE_ADMIN,
+            'is_active' => true,
+        ]);
+
+        $draft = $this->order('KKK-DRAFT-HIDDEN', 'DETAILS_INCOMPLETE', 'Draft Customer');
+        $confirmed = $this->order('KKK-CONFIRMED-VISIBLE', 'DETAILS_CONFIRMED', 'Confirmed Customer');
+
+        $this->actingAs($manager, 'staff')
+            ->get(route('staff.orders.index'))
+            ->assertOk()
+            ->assertSee($confirmed->order_id)
+            ->assertDontSee($draft->order_id);
+
+        $this->actingAs($manager, 'staff')
+            ->get(route('staff.orders.show', $draft->order_id))
+            ->assertNotFound();
+
+        $this->actingAs($admin, 'admin')
+            ->get(route('admin.orders.index'))
+            ->assertOk()
+            ->assertSee($confirmed->order_id)
+            ->assertDontSee($draft->order_id);
+    }
+
     public function test_admin_packing_queue_only_lists_orders_with_active_packing_work(): void
     {
         $admin = User::factory()->create([

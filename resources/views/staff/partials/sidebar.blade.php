@@ -70,6 +70,29 @@
         @endif
     </nav>
 
+    @if (! $isAdminPortal)
+        <section class="staff-sidebar-theme" aria-labelledby="staff-sidebar-theme-title">
+            <p id="staff-sidebar-theme-title">Personalisasi</p>
+            <form method="POST" action="{{ route('staff.theme.update') }}">
+                @csrf
+                @method('PUT')
+                <label for="staff-sidebar-theme">Tema paparan</label>
+                <div>
+                    <select id="staff-sidebar-theme" name="staff_theme">
+                        <option value="default" @selected($staffUser->staff_theme === 'default')>Default Green</option>
+                        <option value="modern_blue" @selected($staffUser->staff_theme === 'modern_blue')>Modern Blue</option>
+                        <option value="indigo_violet" @selected($staffUser->staff_theme === 'indigo_violet')>Indigo &amp; Violet</option>
+                        <option value="warm_orange" @selected($staffUser->staff_theme === 'warm_orange')>Warm Orange</option>
+                        <option value="amber_gold" @selected($staffUser->staff_theme === 'amber_gold')>Amber / Gold</option>
+                        <option value="dusty_rose" @selected($staffUser->staff_theme === 'dusty_rose')>Dusty Rose</option>
+                        <option value="rose_burgundy" @selected($staffUser->staff_theme === 'rose_burgundy')>Rose / Burgundy</option>
+                    </select>
+                    <button type="submit">Simpan</button>
+                </div>
+            </form>
+        </section>
+    @endif
+
     @unless ($isOverview)
         <div class="staff-sidebar-user">
             <span class="staff-user-avatar">{{ strtoupper(substr($staffUser->name, 0, 1)) }}</span>

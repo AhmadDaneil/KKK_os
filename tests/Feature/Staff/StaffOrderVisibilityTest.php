@@ -57,6 +57,29 @@ class StaffOrderVisibilityTest extends TestCase
         $response->assertSee($second->order_id);
     }
 
+    public function test_only_customer_service_can_see_orders_with_incomplete_details(): void
+    {
+        $operationManagement = $this->staff(User::ROLE_OM);
+        $customerService = $this->staff(User::ROLE_CUSTOMER_SERVICE);
+        $draft = app(CreateOrderService::class)->create([
+            'package_count' => 1,
+            'side' => 'LELAKI',
+            'customer_name' => 'Needs Reminder',
+            'customer_phone' => '0123456789',
+        ]);
+
+        $this->actingAs($operationManagement)
+            ->get(route('staff.orders.index'))
+            ->assertOk()
+            ->assertDontSee($draft->order_id);
+
+        $this->actingAs($customerService)
+            ->get(route('staff.orders.index'))
+            ->assertOk()
+            ->assertSee($draft->order_id)
+            ->assertSee('DETAILS INCOMPLETE');
+    }
+
     public function test_operation_management_can_see_all_orders(): void
     {
         $operationManagement = $this->staff(User::ROLE_OM);
