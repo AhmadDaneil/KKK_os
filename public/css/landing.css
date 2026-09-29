@@ -42,10 +42,13 @@ nav a:active { transform:translateY(0) scale(.98); }
 .trust-list { display:flex; margin:28px 0 0; padding:0; gap:22px; color:var(--muted); font-size:.8rem; list-style:none; }
 .trust-list span { color:var(--green); font-weight:800; }
 .hero-art { position:relative; min-height:610px; overflow:hidden; isolation:isolate; perspective:1000px; }
-.hero-art::before { position:absolute; inset:7% -8% 6% 10%; border-radius:47% 47% 8px 8px; background:#dce8df; content:''; }
+.hero-art::before { position:absolute; z-index:0; inset:5%; border:1px solid rgba(36,91,70,.12); border-radius:48% 48% 28px 28px; background:radial-gradient(circle at 76% 22%,rgba(255,255,255,.72) 0 8%,transparent 29%),radial-gradient(circle at 24% 78%,rgba(200,154,75,.13),transparent 31%),linear-gradient(145deg,#edf3ee 0%,#dce8df 54%,#cfdfd5 100%); box-shadow:inset 0 0 0 9px rgba(255,255,255,.24),0 28px 65px rgba(27,51,40,.12); content:''; }
+.hero-art::after { position:absolute; z-index:0; inset:9%; border:1px solid rgba(255,255,255,.56); border-radius:46% 46% 22px 22px; background:linear-gradient(120deg,rgba(255,255,255,.1),transparent 42%); content:''; pointer-events:none; }
 .card-runner { position:absolute; inset:0; z-index:1; backface-visibility:hidden; transform-style:preserve-3d; will-change:transform; }
 .card-runner-back { animation:wedding-card-drift 24s linear infinite both; }
+.card-runner-garden { z-index:3; animation:wedding-card-drift 24s linear -6s infinite both; }
 .card-runner-front { z-index:2; animation:wedding-card-drift 24s linear -12s infinite both; }
+.card-runner-islamic { z-index:4; animation:wedding-card-drift 24s linear -18s infinite both; }
 .sample-card { position:absolute; display:flex; width:250px; aspect-ratio:2/3; flex-direction:column; align-items:center; justify-content:center; overflow:hidden; border:1px solid rgba(23,50,40,.12); background:var(--paper); box-shadow:0 25px 50px rgba(27,51,40,.18); text-align:center; backface-visibility:hidden; transform-style:preserve-3d; }
 .sample-card-back { top:7%; left:8%; transform:rotate(-8deg); background:linear-gradient(150deg,#edf8f7,#fff); color:#aa398e; }
 .sample-card-back small { margin-bottom:70px; font-family:'Playfair Display',serif; font-style:italic; }
@@ -54,6 +57,12 @@ nav a:active { transform:translateY(0) scale(.98); }
 .sample-card-back span { margin-top:65px; font-size:.72rem; font-weight:700; }
 .sample-card-back b { font-size:.65rem; }
 .sample-card-front { right:4%; bottom:2%; transform:rotate(5deg); padding:28px; }
+.sample-card-garden { top:5%; right:7%; transform:rotate(4deg); }
+.sample-card-islamic { bottom:3%; left:7%; transform:rotate(-5deg); }
+.hero-art .sample-card-back,
+.hero-art .sample-card-front,
+.hero-art .sample-card-garden,
+.hero-art .sample-card-islamic { top:50%; right:auto; bottom:auto; left:50%; transform:translate(-50%,-50%); }
 .sample-card-front small { margin-top:55px; font-size:.62rem; letter-spacing:.12em; text-transform:uppercase; }
 .sample-card-front h2 { font-family:'Playfair Display',serif; font-size:2rem; line-height:1; }
 .sample-card-front h2 i { color:var(--gold); }
@@ -67,7 +76,7 @@ nav a:active { transform:translateY(0) scale(.98); }
 .landing-card-watermark { position:absolute; z-index:2; inset:0; overflow:hidden; pointer-events:none; }
 .landing-card-watermark span { position:absolute; left:-28%; width:156%; color:rgba(255,255,255,.48); font:800 clamp(.52rem,.95vw,.78rem)/1 Arial,sans-serif; letter-spacing:.1em; text-align:center; text-shadow:1px 1px 2px rgba(0,0,0,.58); transform:rotate(-45deg); white-space:nowrap; }
 .landing-card-watermark span:first-child { top:34%; }.landing-card-watermark span:last-child { top:62%; }
-@keyframes wedding-card-drift { from { transform:translate3d(110%,0,0); } to { transform:translate3d(-110%,0,0); } }
+@keyframes wedding-card-drift { from { transform:translate3d(145%,0,0); } to { transform:translate3d(-145%,0,0); } }
 .feature-strip { display:grid; width:calc(100% - 48px); margin:65px auto 120px; padding:38px 24px; border-block:1px solid var(--line); grid-template-columns:repeat(3,1fr); gap:60px; }
 .feature-strip article { display:flex; gap:18px; }
 .feature-strip article>span { color:var(--gold); font-family:'Playfair Display',serif; font-size:1.7rem; }
