@@ -39,7 +39,10 @@
         <div class="staff-workspace">
             <header class="staff-topbar">
                 <div><p class="staff-kicker">{{ auth()->user()->isAdmin() ? __('ui.admin_operations') : __('ui.staff_operations') }} · {{ __('ui.order_detail') }}</p><h1>{{ $order->order_id }}</h1></div>
-                <form class="js-logout-form staff-logout-profile" method="POST" action="{{ route($logoutRoute) }}">@csrf<button type="submit"><span class="staff-topbar-avatar" aria-hidden="true"></span><span>{{ __('ui.logout') }}</span></button></form>
+                <div class="staff-topbar-actions">
+                    @include('partials.language-toggle')
+                    <form class="js-logout-form staff-logout-profile" method="POST" action="{{ route($logoutRoute) }}">@csrf<button type="submit"><span class="staff-topbar-avatar" aria-hidden="true"></span><span>{{ __('ui.logout') }}</span></button></form>
+                </div>
             </header>
 
         <main class="staff-main">

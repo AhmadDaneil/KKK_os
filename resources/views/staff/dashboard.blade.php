@@ -20,7 +20,10 @@
         <div class="staff-workspace">
             <header class="staff-topbar">
                 <div><p class="staff-kicker">{{ $dashboardUser->isAdmin() ? __('ui.operations') : str_replace('_', ' ', $dashboardUser->role) }}</p><h1>{{ __('ui.staff_dashboard') }}</h1></div>
-                <form class="js-logout-form staff-logout-profile" method="POST" action="{{ route('staff.logout') }}">@csrf<button type="submit"><span class="staff-topbar-avatar" aria-hidden="true"></span><span>{{ __('ui.logout') }}</span></button></form>
+                <div class="staff-topbar-actions">
+                    @include('partials.language-toggle')
+                    <form class="js-logout-form staff-logout-profile" method="POST" action="{{ route('staff.logout') }}">@csrf<button type="submit"><span class="staff-topbar-avatar" aria-hidden="true"></span><span>{{ __('ui.logout') }}</span></button></form>
+                </div>
             </header>
 
             <main class="staff-main staff-dashboard-main">
