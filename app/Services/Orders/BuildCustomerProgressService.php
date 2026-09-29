@@ -108,6 +108,7 @@ class BuildCustomerProgressService
             $stage['number'] = $index + 1;
             $stage['state'] = match (true) {
                 $currentStage === null => 'pending',
+                $currentStage === 8 && $index === 8 => 'complete',
                 $index < $currentStage => 'complete',
                 $index === $currentStage => 'current',
                 default => 'pending',
