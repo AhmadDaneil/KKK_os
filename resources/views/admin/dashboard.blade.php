@@ -33,6 +33,69 @@
         <article class="is-success"><span>Order Selesai</span><strong data-stat-value="{{ $statistics['orders_completed'] }}">{{ number_format($statistics['orders_completed']) }}</strong><small>Keseluruhan fulfilment selesai</small></article>
     </section>
 
+    <section class="admin-panel admin-sales-panel" id="sales-analysis">
+        <div class="admin-panel-heading">
+            <div><p class="admin-eyebrow">Prestasi Perniagaan</p><h2>Sales Analysis</h2><small>Jumlah kutipan berdasarkan transaksi yang telah disahkan sebagai PAID.</small></div>
+            <span class="admin-sales-period">{{ now()->format('Y') }}</span>
+        </div>
+
+        <div class="admin-sales-summary">
+            <article><span>Hari Ini</span><strong>RM {{ number_format($sales['summary']['today'], 2) }}</strong><small>{{ $sales['summary']['today_transactions'] }} transaksi</small></article>
+            <article><span>Bulan Ini</span><strong>RM {{ number_format($sales['summary']['month'], 2) }}</strong><small @class(['is-up' => $sales['summary']['month_change'] >= 0, 'is-down' => $sales['summary']['month_change'] < 0])>{{ $sales['summary']['month_change'] >= 0 ? '+' : '' }}{{ number_format($sales['summary']['month_change'], 1) }}% berbanding bulan lalu</small></article>
+            <article><span>Tahun Ini</span><strong>RM {{ number_format($sales['summary']['year'], 2) }}</strong><small>{{ $sales['summary']['year_orders'] }} order · {{ $sales['summary']['year_transactions'] }} transaksi</small></article>
+            <article><span>Purata Setiap Order</span><strong>RM {{ number_format($sales['summary']['average_order_value'], 2) }}</strong><small>Berdasarkan kutipan bulan ini</small></article>
+            <article class="is-pending"><span>Bayaran Pending</span><strong>RM {{ number_format($sales['summary']['pending_amount'], 2) }}</strong><small>{{ $sales['summary']['pending_count'] }} transaksi perlu disemak</small></article>
+        </div>
+
+        <div class="admin-sales-chart-grid">
+            <article class="admin-sales-chart">
+                <header><div><strong>Trend Harian</strong><small>14 hari terakhir</small></div></header>
+                <div class="admin-bar-chart is-daily" aria-label="Graf jualan harian">
+                    @foreach ($sales['daily'] as $point)
+                        <div class="admin-bar-column" title="{{ $point['label'] }}: RM {{ number_format($point['amount'], 2) }}"><span class="admin-bar-value">{{ $point['amount'] > 0 ? 'RM'.number_format($point['amount'], 0) : '' }}</span><i style="height: {{ $point['percentage'] }}%"></i><small>{{ $point['label'] }}</small></div>
+                    @endforeach
+                </div>
+            </article>
+
+            <article class="admin-sales-chart">
+                <header><div><strong>Trend Bulanan</strong><small>Januari hingga Disember {{ now()->year }}</small></div>@if ($sales['summary']['best_month'])<span>Terbaik: {{ $sales['summary']['best_month']['label'] }}</span>@endif</header>
+                <div class="admin-bar-chart" aria-label="Graf jualan bulanan">
+                    @foreach ($sales['monthly'] as $point)
+                        <div class="admin-bar-column" title="{{ $point['label'] }}: RM {{ number_format($point['amount'], 2) }}"><span class="admin-bar-value">{{ $point['amount'] > 0 ? 'RM'.number_format($point['amount'], 0) : '' }}</span><i style="height: {{ $point['percentage'] }}%"></i><small>{{ $point['label'] }}</small></div>
+                    @endforeach
+                </div>
+            </article>
+        </div>
+
+        <div class="admin-sales-bottom-grid">
+            <article>
+                <h3>Jualan Tahunan</h3>
+                <div class="admin-annual-list">
+                    @foreach ($sales['annual'] as $point)
+                        <div><span>{{ $point['label'] }}</span><i><b style="width: {{ $point['percentage'] }}%"></b></i><strong>RM {{ number_format($point['amount'], 2) }}</strong></div>
+                    @endforeach
+                </div>
+            </article>
+            <article>
+                <h3>Pecahan Kutipan {{ now()->year }}</h3>
+                <div class="admin-sales-breakdown">
+                    @foreach ($sales['breakdown'] as $item)
+                        <div><span>{{ $item['label'] }}<small>{{ $item['transactions'] }} transaksi</small></span><strong>RM {{ number_format($item['amount'], 2) }}</strong></div>
+                    @endforeach
+                </div>
+            </article>
+            <article class="admin-sales-note">
+                <h3>Perkara Penting</h3>
+                <ul>
+                    <li><strong>{{ $sales['summary']['pending_count'] }}</strong> bayaran masih menunggu semakan.</li>
+                    <li><strong>{{ $sales['summary']['year_orders'] }}</strong> order telah menyumbang kepada jualan tahun ini.</li>
+                    <li>@if ($sales['summary']['best_month'])Bulan terbaik ialah <strong>{{ $sales['summary']['best_month']['label'] }}</strong> dengan RM {{ number_format($sales['summary']['best_month']['amount'], 2) }}.@elseBelum ada jualan berbayar untuk tahun ini.@endif</li>
+                </ul>
+                @if ($sales['summary']['pending_count'] > 0)<a href="{{ route('admin.orders.index', ['attention' => 'pending_payment']) }}">Semak pembayaran sekarang →</a>@endif
+            </article>
+        </div>
+    </section>
+
     <section class="admin-panel admin-attention-panel">
         <div class="admin-panel-heading"><div><p class="admin-eyebrow">Tindakan Admin</p><h2>Memerlukan Perhatian</h2></div><span @class(['admin-attention-total', 'has-alert' => $attentionTotal > 0, 'is-clear' => $attentionTotal === 0])>{{ $attentionTotal > 0 ? $attentionTotal.' tindakan' : 'Semua selesai' }}</span></div>
         <div class="admin-action-grid">

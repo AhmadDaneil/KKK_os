@@ -3,7 +3,9 @@
 namespace Tests\Feature\Admin;
 
 use App\Models\Order;
+use App\Models\PaymentTransaction;
 use App\Models\User;
+use Carbon\CarbonImmutable;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
 use Tests\TestCase;
@@ -42,6 +44,57 @@ class AdminDashboardTest extends TestCase
             ->assertSee('Production Belum Assign')
             ->assertSee('Packing Belum Assign')
             ->assertSee(route('admin.orders.index'), false);
+    }
+
+    public function test_dashboard_calculates_daily_monthly_and_yearly_sales_from_paid_transactions(): void
+    {
+        CarbonImmutable::setTestNow('2026-09-29 12:00:00');
+
+        try {
+            $admin = $this->staff(User::ROLE_ADMIN);
+            $order = Order::create([
+                'order_id' => 'KKK-SALES-0001',
+                'package_count' => 1,
+                'status' => 'DETAILS_CONFIRMED',
+            ]);
+
+            PaymentTransaction::create([
+                'order_id' => $order->id,
+                'payment_type' => 'BOOKING_DEPOSIT',
+                'amount' => '50.00',
+                'currency' => 'MYR',
+                'status' => 'PAID',
+                'paid_at' => now(),
+            ]);
+            PaymentTransaction::create([
+                'order_id' => $order->id,
+                'payment_type' => 'BALANCE',
+                'amount' => '200.00',
+                'currency' => 'MYR',
+                'status' => 'PAID',
+                'paid_at' => now(),
+            ]);
+            PaymentTransaction::create([
+                'order_id' => $order->id,
+                'payment_type' => 'ARTWORK_CORRECTION',
+                'amount' => '10.00',
+                'currency' => 'MYR',
+                'status' => 'PENDING',
+            ]);
+
+            $this->actingAs($admin, 'admin')
+                ->get(route('admin.dashboard'))
+                ->assertOk()
+                ->assertSee('Sales Analysis')
+                ->assertSee('RM 250.00')
+                ->assertSee('RM 10.00')
+                ->assertSee('Trend Harian')
+                ->assertSee('Trend Bulanan')
+                ->assertSee('Jualan Tahunan')
+                ->assertSee('Pecahan Kutipan');
+        } finally {
+            CarbonImmutable::setTestNow();
+        }
     }
 
     public function test_admin_can_open_a_confirmed_order_from_dashboard_quick_search(): void

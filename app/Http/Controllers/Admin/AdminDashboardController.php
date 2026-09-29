@@ -9,6 +9,7 @@ use App\Models\PackingJob;
 use App\Models\PaymentTransaction;
 use App\Models\PrintJob;
 use App\Models\User;
+use App\Services\Admin\BuildSalesAnalysisService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -39,7 +40,7 @@ class AdminDashboardController extends Controller
         return redirect()->route('admin.orders.show', $order->order_id);
     }
 
-    public function index(): View
+    public function index(BuildSalesAnalysisService $salesAnalysis): View
     {
         $statistics = [
             'orders_total' => Order::where('status', '!=', 'DETAILS_INCOMPLETE')->count(),
@@ -88,6 +89,8 @@ class AdminDashboardController extends Controller
             ->limit(8)
             ->get();
 
-        return view('admin.dashboard', compact('statistics', 'queues', 'attention', 'teamCounts', 'recentOrders'));
+        $sales = $salesAnalysis->build();
+
+        return view('admin.dashboard', compact('statistics', 'queues', 'attention', 'teamCounts', 'recentOrders', 'sales'));
     }
 }
