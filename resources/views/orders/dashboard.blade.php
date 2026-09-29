@@ -371,19 +371,19 @@
     <option value="">-- Pilih Tema --</option>
 
     @foreach ([
-        'PORTRAIT' => 'Potret',
-        'ARCH' => 'Gerbang',
-        'CARTOON' => 'Kartun',
-        'ISLAMIC' => 'Islamik',
-        'MINIMALIST' => 'Minimalis',
-        'RUSTY' => 'Rustik',
-        'SONGKET' => 'Songket',
-        'GARDEN' => 'Taman',
-        'NOSTALGIA' => 'Nostalgia',
-        'DESA' => 'Desa',
-    ] as $theme => $themeLabel)
+        'PORTRAIT',
+        'ARCH',
+        'CARTOON',
+        'ISLAMIC',
+        'MINIMALIST',
+        'RUSTY',
+        'SONGKET',
+        'GARDEN',
+        'NOSTALGIA',
+        'DESA',
+    ] as $theme)
         <option value="{{ $theme }}" @selected($selectedTheme === $theme)>
-            {{ $themeLabel }}
+            {{ $theme }}
         </option>
     @endforeach
 </select>
