@@ -1,0 +1,12 @@
+/* Shared KKK OS component foundation. Individual portal styles keep their own colour themes. */
+:root{--kkk-radius:12px;--kkk-radius-sm:8px;--kkk-focus:#246d50;--kkk-focus-ring:rgba(36,109,80,.18);--kkk-shadow:0 4px 14px rgba(23,56,43,.07);--kkk-space:clamp(16px,2vw,24px)}
+:is(button,input,select,textarea){font:inherit}:is(button,a,input,select,textarea):focus-visible{outline:3px solid var(--kkk-focus-ring);outline-offset:2px}
+:is(.button,.staff-button,.admin-button,.staff-order-open,.back-home-button,.header-link,.nav-progress){min-height:40px;border-radius:var(--kkk-radius-sm)}
+:is(input,select,textarea,.date-picker-trigger){border-radius:var(--kkk-radius-sm)}
+:is(.admin-panel,.admin-stat-grid article,.admin-staff-card,.staff-card,.staff-order-card,.staff-attention-card,.staff-feature-card,.progress-panel,.public-progress-card,.order-summary,.order-summary-card,.package-summary,.review-card,.review-section,.history-panel,.action-panel,.state-panel,.success-card,.tracking-card,.customer-tracking-card){border-radius:var(--kkk-radius)!important;box-shadow:var(--kkk-shadow)}
+:is(.admin-status,.staff-status,.status-badge,.order-badge,.side-badge,.admin-account-status){border-radius:999px;font-weight:800;letter-spacing:.025em}
+:is(.admin-alert,.staff-alert,.notice,.errors,.customer-feedback-success,.customer-feedback-error,.order-status-message){border-radius:var(--kkk-radius-sm);line-height:1.5}
+:is(.logout-confirmation-dialog,.confirmation-dialog,.final-confirmation-dialog,.artwork-confirmation-dialog){border-radius:var(--kkk-radius);box-shadow:0 28px 80px rgba(17,45,35,.28)}
+:is(.admin-table,.staff-table,table){border-radius:var(--kkk-radius-sm)}
+:is(.admin-page-intro,.admin-welcome,.staff-page-header,.form-intro,.progress-search,.review-header){margin-bottom:var(--kkk-space)}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;transition-duration:.01ms!important;animation-duration:.01ms!important;animation-iteration-count:1!important}}
