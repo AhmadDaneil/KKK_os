@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Staff;
 use App\Http\Controllers\Controller;
 use App\Models\Order;
 use App\Models\User;
+use App\Services\Orders\BuildCustomerProgressService;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -49,7 +50,7 @@ class StaffOrderController extends Controller
         ]);
     }
 
-    public function show(Request $request, string $orderId): View
+    public function show(Request $request, string $orderId, BuildCustomerProgressService $progressBuilder): View
     {
         /** @var User $user */
         $user = $request->user();
@@ -182,6 +183,7 @@ class StaffOrderController extends Controller
 
         return view('staff.orders.show', [
             'order' => $order,
+            'orderProgress' => $progressBuilder->build($order),
             'timelineEvents' => $timelineEvents,
             'canAssignProduction' => $order->designJobs()->exists()
                 && $order->designJobs()
