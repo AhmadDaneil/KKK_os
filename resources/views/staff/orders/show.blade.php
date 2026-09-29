@@ -187,35 +187,40 @@
             </div>
 
             <section class="staff-section staff-timeline-section">
-                <h2 class="staff-section-title">Timeline Order</h2>
+                <div class="staff-lifecycle-heading">
+                    <div><p class="staff-kicker">Perjalanan tempahan</p><h2>Progress tempahan</h2></div>
+                    <span>Status semasa ditandakan dengan warna utama</span>
+                </div>
+
+                <ol class="staff-lifecycle-list" aria-label="Peringkat tempahan">
+                    @foreach ($orderProgress['stages'] as $stage)
+                        <li class="is-{{ $stage['state'] }}" @if ($stage['state'] === 'current') aria-current="step" @endif>
+                            <span class="staff-lifecycle-marker" aria-hidden="true">{{ $stage['state'] === 'complete' ? '✓' : $stage['number'] }}</span>
+                            <strong>{{ $stage['label'] }}</strong>
+                            <small>{{ $stage['description'] }}</small>
+                        </li>
+                    @endforeach
+                </ol>
 
                 @if ($timelineEvents->isNotEmpty())
-                    <ol class="staff-timeline">
-                        @foreach ($timelineEvents as $event)
-                            <li class="staff-timeline-item">
-                                <span class="staff-timeline-marker" aria-hidden="true"></span>
-                                <div class="staff-timeline-content">
-                                    <div class="staff-timeline-heading">
-                                        <strong>{{ str_replace('_', ' ', $event['to_status'] ?: $event['event_type']) }}</strong>
-                                        <time datetime="{{ $event['occurred_at']?->toIso8601String() }}">
-                                            {{ $event['occurred_at']?->format('d/m/Y, H:i') ?? '-' }}
-                                        </time>
+                    <details class="staff-activity-history">
+                        <summary>Lihat rekod aktiviti terperinci ({{ $timelineEvents->count() }})</summary>
+                        <ol class="staff-timeline">
+                            @foreach ($timelineEvents as $event)
+                                <li class="staff-timeline-item">
+                                    <span class="staff-timeline-marker" aria-hidden="true"></span>
+                                    <div class="staff-timeline-content">
+                                        <div class="staff-timeline-heading">
+                                            <strong>{{ str_replace('_', ' ', $event['to_status'] ?: $event['event_type']) }}</strong>
+                                            <time datetime="{{ $event['occurred_at']?->toIso8601String() }}">{{ $event['occurred_at']?->format('d/m/Y, H:i') ?? '-' }}</time>
+                                        </div>
+                                        <p>{{ $event['actor']?->name ?? 'Sistem' }} @if ($event['from_status'] && $event['from_status'] !== $event['to_status'])<span>· {{ str_replace('_', ' ', $event['from_status']) }} → {{ str_replace('_', ' ', $event['to_status']) }}</span>@endif</p>
+                                        @if ($event['reason'])<small>{{ $event['reason'] }}</small>@endif
                                     </div>
-                                    <p>
-                                        {{ $event['actor']?->name ?? 'Sistem' }}
-                                        @if ($event['from_status'] && $event['from_status'] !== $event['to_status'])
-                                            <span>· {{ str_replace('_', ' ', $event['from_status']) }} → {{ str_replace('_', ' ', $event['to_status']) }}</span>
-                                        @endif
-                                    </p>
-                                    @if ($event['reason'])
-                                        <small>{{ $event['reason'] }}</small>
-                                    @endif
-                                </div>
-                            </li>
-                        @endforeach
-                    </ol>
-                @else
-                    <p class="staff-empty-state">Belum ada rekod perubahan status untuk order ini.</p>
+                                </li>
+                            @endforeach
+                        </ol>
+                    </details>
                 @endif
             </section>
             @endif
