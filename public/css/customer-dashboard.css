@@ -588,6 +588,8 @@ button {
 
 .progress-stage.is-complete { color: var(--progress-color); }
 .progress-stage.is-complete .stage-dot { border-color: var(--progress-color); background: var(--progress-color); }
+.progress-stage.is-current { color: #173f2d; }
+.progress-stage.is-current .stage-dot { border-color: var(--progress-color); background: #fff; box-shadow: 0 0 0 3px color-mix(in srgb, var(--progress-color) 18%, transparent); }
 
 @media (max-width: 700px) {
     .order-summary-heading {

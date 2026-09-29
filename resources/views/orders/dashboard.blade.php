@@ -89,10 +89,11 @@
 
         <div class="progress-stages" aria-label="{{ __('ui.order_stages') }}">
             @foreach ($progress['stages'] as $stage)
-                <div
-                    class="progress-stage @if (in_array($stage['state'], ['complete', 'current'], true)) is-complete @endif"
-                    @if ($stage['state'] === 'current') aria-current="step" @endif
-                >
+                <div @class([
+                    'progress-stage',
+                    'is-complete' => $stage['state'] === 'complete',
+                    'is-current' => $stage['state'] === 'current',
+                ])>
                     <span class="stage-dot" aria-hidden="true"></span>
                     <span>{{ $stage['label'] }}</span>
                 </div>
@@ -821,9 +822,6 @@ document.addEventListener('DOMContentLoaded', function () {
         const form = document.getElementById('customer-order-form');
         const reviewLink = document.getElementById('review-order-link');
         const status = document.getElementById('autosave-status');
-        const confirmationDialog = document.getElementById('review-order-confirmation');
-        const confirmOrderReview = document.getElementById('confirm-order-review');
-        const cancelOrderReview = document.getElementById('cancel-order-review');
 
         if (!form || !status) {
             return;
@@ -969,26 +967,17 @@ document.addEventListener('DOMContentLoaded', function () {
             queueSave(false).catch(function () {});
         });
 
-        if (reviewLink && confirmationDialog && confirmOrderReview && cancelOrderReview) {
+        if (reviewLink) {
             reviewLink.addEventListener('click', function (event) {
                 if (event.defaultPrevented) {
                     return;
                 }
 
                 event.preventDefault();
-                confirmationDialog.showModal();
-            });
-
-            cancelOrderReview.addEventListener('click', function () {
-                confirmationDialog.close();
-            });
-
-            confirmOrderReview.addEventListener('click', function () {
-                confirmationDialog.close();
                 window.clearTimeout(autosaveTimer);
                 reviewLink.setAttribute('aria-disabled', 'true');
-                confirmOrderReview.disabled = true;
-                confirmOrderReview.textContent = 'Menyimpan...';
+                reviewLink.classList.add('is-loading');
+                reviewLink.textContent = 'Menyimpan maklumat...';
 
                 queueSave(true)
                     .then(function () {
@@ -996,8 +985,8 @@ document.addEventListener('DOMContentLoaded', function () {
                     })
                     .catch(function () {
                         reviewLink.removeAttribute('aria-disabled');
-                        confirmOrderReview.disabled = false;
-                        confirmOrderReview.textContent = 'Ya, teruskan';
+                        reviewLink.classList.remove('is-loading');
+                        reviewLink.textContent = 'Semak Maklumat & Teruskan';
                     });
             });
         }
