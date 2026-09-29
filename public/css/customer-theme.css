@@ -152,6 +152,9 @@ html[data-customer-theme="dark"] .artwork-confirmation-dialog { border-color:#40
 html[data-customer-theme="dark"] .artwork-confirmation-dialog h2 { color:#f4f1e9!important; }
 html[data-customer-theme="dark"] .artwork-confirmation-dialog p { color:#c3d2ca!important; }
 html[data-customer-theme="dark"] .customer-theme-toggle { border-color:#647c6e; color:#f7efcf; background:#25372d; }.customer-theme-toggle-sun { color:#a56f14; }
+html[data-customer-theme="dark"] .language-toggle button { border-color:#7f9e8e!important; color:#f7f3e8!important; background:#284035!important; box-shadow:0 5px 16px rgba(0,0,0,.24); }
+html[data-customer-theme="dark"] .language-toggle button:hover { border-color:#e4b85e!important; color:#fff!important; background:#365748!important; }
+html[data-customer-theme="dark"] .language-toggle button:focus-visible { outline:3px solid rgba(228,184,94,.55); outline-offset:3px; }
 html[data-customer-theme="dark"] .customer-theme-toggle-sun { display:none; } html[data-customer-theme="dark"] .customer-theme-toggle-moon { display:block; }
 @media (max-width:560px) { .customer-theme-toggle { right:14px; bottom:14px; width:38px; height:38px; } }
 @media (max-width:560px) { html[data-customer-theme="dark"] .site-footer { width:calc(100% - 28px); } }

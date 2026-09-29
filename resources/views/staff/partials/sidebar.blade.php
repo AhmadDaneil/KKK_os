@@ -18,36 +18,36 @@
 <aside class="staff-sidebar" id="staff-sidebar">
     <a href="{{ $staffUser->isAdmin() ? route('admin.dashboard') : route('staff.dashboard') }}" class="staff-sidebar-brand">
         <span class="staff-brand-mark">KKK</span>
-        <span><strong>KKK OS</strong><small>{{ $staffUser->isAdmin() ? 'Admin Operations' : 'Staff Operations' }}</small></span>
+        <span><strong>KKK OS</strong><small>{{ $staffUser->isAdmin() ? __('ui.operations') : __('ui.staff_operations') }}</small></span>
     </a>
 
     <nav class="staff-nav" aria-label="Staff navigation">
         @if ($isAdminPortal)
             <section class="staff-nav-section">
-                <h2>Management</h2>
-                <a href="{{ route('admin.dashboard') }}" @class(['staff-nav-link', 'is-active' => request()->routeIs('admin.dashboard')])><span class="staff-nav-icon" aria-hidden="true">OV</span>Overview</a>
-                <a href="{{ route('admin.staff.index') }}" @class(['staff-nav-link', 'is-active' => request()->routeIs('admin.staff.*')])><span class="staff-nav-icon" aria-hidden="true">ST</span>Staff &amp; Akses</a>
+                <h2>{{ __('ui.management') }}</h2>
+                <a href="{{ route('admin.dashboard') }}" @class(['staff-nav-link', 'is-active' => request()->routeIs('admin.dashboard')])><span class="staff-nav-icon" aria-hidden="true">OV</span>{{ __('ui.overview') }}</a>
+                <a href="{{ route('admin.staff.index') }}" @class(['staff-nav-link', 'is-active' => request()->routeIs('admin.staff.*')])><span class="staff-nav-icon" aria-hidden="true">ST</span>{{ __('ui.staff_access') }}</a>
             </section>
 
             <section class="staff-nav-section">
-                <h2>Operations</h2>
-                <a href="{{ route('admin.orders.index') }}" @class(['staff-nav-link', 'is-active' => request()->routeIs('admin.orders.*') && ! $activeWorkstream && ! request()->query('attention')])><span class="staff-nav-icon" aria-hidden="true">OR</span>Semua Orders</a>
-                <a href="{{ route('admin.orders.index', ['attention' => 'pending_payment']) }}" @class(['staff-nav-link', 'is-active' => request()->query('attention') === 'pending_payment'])><span class="staff-nav-icon" aria-hidden="true">RM</span>Semakan Bayaran</a>
-                <a href="{{ route('admin.orders.index', ['workstream' => 'design']) }}" @class(['staff-nav-link', 'is-active' => $activeWorkstream === 'design'])><span class="staff-nav-icon" aria-hidden="true">DE</span>Design Queue</a>
-                <a href="{{ route('admin.orders.index', ['workstream' => 'printing']) }}" @class(['staff-nav-link', 'is-active' => $activeWorkstream === 'printing'])><span class="staff-nav-icon" aria-hidden="true">PR</span>Production Queue</a>
-                <a href="{{ route('admin.orders.index', ['workstream' => 'packing']) }}" @class(['staff-nav-link', 'is-active' => $activeWorkstream === 'packing'])><span class="staff-nav-icon" aria-hidden="true">PA</span>Packing Queue</a>
+                <h2>{{ __('ui.operations') }}</h2>
+                <a href="{{ route('admin.orders.index') }}" @class(['staff-nav-link', 'is-active' => request()->routeIs('admin.orders.*') && ! $activeWorkstream && ! request()->query('attention')])><span class="staff-nav-icon" aria-hidden="true">OR</span>{{ __('ui.all_orders') }}</a>
+                <a href="{{ route('admin.orders.index', ['attention' => 'pending_payment']) }}" @class(['staff-nav-link', 'is-active' => request()->query('attention') === 'pending_payment'])><span class="staff-nav-icon" aria-hidden="true">RM</span>{{ __('ui.payment_review') }}</a>
+                <a href="{{ route('admin.orders.index', ['workstream' => 'design']) }}" @class(['staff-nav-link', 'is-active' => $activeWorkstream === 'design'])><span class="staff-nav-icon" aria-hidden="true">RB</span>{{ __('ui.design_queue') }}</a>
+                <a href="{{ route('admin.orders.index', ['workstream' => 'printing']) }}" @class(['staff-nav-link', 'is-active' => $activeWorkstream === 'printing'])><span class="staff-nav-icon" aria-hidden="true">CT</span>{{ __('ui.production_queue') }}</a>
+                <a href="{{ route('admin.orders.index', ['workstream' => 'packing']) }}" @class(['staff-nav-link', 'is-active' => $activeWorkstream === 'packing'])><span class="staff-nav-icon" aria-hidden="true">PK</span>{{ __('ui.packing_queue') }}</a>
             </section>
         @else
             <section class="staff-nav-section">
-                <h2>Operation Management</h2>
-                <a href="{{ route('staff.dashboard') }}" @class(['staff-nav-link', 'is-active' => request()->routeIs('staff.dashboard')])><span class="staff-nav-icon" aria-hidden="true">OV</span>Overview</a>
-                <a href="{{ route($ordersIndexRoute) }}" @class(['staff-nav-link', 'is-active' => request()->routeIs('staff.orders.*') && ! $activeWorkstream])><span class="staff-nav-icon" aria-hidden="true">OR</span>Semua Orders</a>
+                <h2>{{ __('ui.operation_management') }}</h2>
+                <a href="{{ route('staff.dashboard') }}" @class(['staff-nav-link', 'is-active' => request()->routeIs('staff.dashboard')])><span class="staff-nav-icon" aria-hidden="true">OV</span>{{ __('ui.overview') }}</a>
+                <a href="{{ route($ordersIndexRoute) }}" @class(['staff-nav-link', 'is-active' => request()->routeIs('staff.orders.*') && ! $activeWorkstream])><span class="staff-nav-icon" aria-hidden="true">OR</span>{{ __('ui.all_orders') }}</a>
             </section>
 
         @if ($canViewDesignQueue)
             <section class="staff-nav-section">
                 <h2>Design</h2>
-                <a href="{{ route($ordersIndexRoute, ['workstream' => 'design']) }}" @class(['staff-nav-link', 'is-active' => $activeWorkstream === 'design'])><span class="staff-nav-icon" aria-hidden="true">DE</span>Design Queue</a>
+                <a href="{{ route($ordersIndexRoute, ['workstream' => 'design']) }}" @class(['staff-nav-link', 'is-active' => $activeWorkstream === 'design'])><span class="staff-nav-icon" aria-hidden="true">RB</span>{{ __('ui.design_queue') }}</a>
             </section>
         @endif
 
@@ -55,11 +55,11 @@
             <section class="staff-nav-section">
                 <h2>Production</h2>
                 @if ($canViewProductionQueue)
-                <a href="{{ route($ordersIndexRoute, ['workstream' => 'printing']) }}" @class(['staff-nav-link', 'is-active' => $activeWorkstream === 'printing'])><span class="staff-nav-icon" aria-hidden="true">PR</span>Production Queue</a>
+                <a href="{{ route($ordersIndexRoute, ['workstream' => 'printing']) }}" @class(['staff-nav-link', 'is-active' => $activeWorkstream === 'printing'])><span class="staff-nav-icon" aria-hidden="true">CT</span>{{ __('ui.production_queue') }}</a>
                 @endif
 
                 @if ($canMonitorOperations)
-                <a href="{{ route($ordersIndexRoute, ['workstream' => 'packing']) }}" @class(['staff-nav-link', 'is-active' => $activeWorkstream === 'packing'])><span class="staff-nav-icon" aria-hidden="true">PA</span>Packing Queue</a>
+                <a href="{{ route($ordersIndexRoute, ['workstream' => 'packing']) }}" @class(['staff-nav-link', 'is-active' => $activeWorkstream === 'packing'])><span class="staff-nav-icon" aria-hidden="true">PK</span>{{ __('ui.packing_queue') }}</a>
                 @endif
 
                 @if ($canMonitorOperations)
@@ -72,11 +72,11 @@
 
     @if (! $isAdminPortal)
         <section class="staff-sidebar-theme" aria-labelledby="staff-sidebar-theme-title">
-            <p id="staff-sidebar-theme-title">Personalisasi</p>
+            <p id="staff-sidebar-theme-title">{{ __('ui.personalisation') }}</p>
             <form method="POST" action="{{ route('staff.theme.update') }}">
                 @csrf
                 @method('PUT')
-                <label for="staff-sidebar-theme">Tema paparan</label>
+                <label for="staff-sidebar-theme">{{ __('ui.display_theme') }}</label>
                 <div>
                     <select id="staff-sidebar-theme" name="staff_theme">
                         <option value="default" @selected($staffUser->staff_theme === 'default')>Default Green</option>
@@ -87,11 +87,12 @@
                         <option value="dusty_rose" @selected($staffUser->staff_theme === 'dusty_rose')>Charcoal / Lime</option>
                         <option value="rose_burgundy" @selected($staffUser->staff_theme === 'rose_burgundy')>Rose / Burgundy</option>
                     </select>
-                    <button type="submit">Simpan</button>
+                    <button type="submit">{{ __('ui.save') }}</button>
                 </div>
             </form>
         </section>
     @endif
+    <div class="staff-sidebar-language">@include('partials.language-toggle')</div>
 
     @unless ($isOverview)
         <div class="staff-sidebar-user">
