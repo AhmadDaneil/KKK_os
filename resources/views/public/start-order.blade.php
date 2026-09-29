@@ -12,7 +12,7 @@
         <a class="brand" href="{{ route('home') }}"><span class="brand-mark">K</span><span><b>KingKadKahwin</b><small>Kad indah, kenangan bermakna</small></span></a>
         <nav aria-label="Navigasi halaman tempahan">
             <a class="header-link nav-progress" href="{{ route('home') }}">← Kembali</a>
-            <a class="header-link nav-progress" href="{{ route('public.orders.progress') }}">Semak Progress</a>
+            <a class="header-link nav-progress" href="{{ route('public.orders.progress') }}">Semak Kemajuan</a>
         </nav>
     </header>
     <main class="form-page">
@@ -64,11 +64,11 @@
             </div>
 
             <label for="customer_name">Nama anda</label>
-            <input id="customer_name" name="customer_name" placeholder="e.g. Muhammad Syafiq Bin Rahim" value="{{ old('customer_name') }}" autocomplete="name" required>
+            <input id="customer_name" name="customer_name" placeholder="Contoh: Muhammad Syafiq Bin Rahim" value="{{ old('customer_name') }}" autocomplete="name" required>
             @error('customer_name')<p class="field-error">{{ $message }}</p>@enderror
 
             <div class="two-columns">
-                <div><label for="customer_email">E-mel</label><input id="customer_email" type="email" name="customer_email" placeholder="e.g. syafiq@email.com" value="{{ old('customer_email') }}" autocomplete="email" required>@error('customer_email')<p class="field-error">{{ $message }}</p>@enderror</div>
+                <div><label for="customer_email">E-mel</label><input id="customer_email" type="email" name="customer_email" placeholder="Contoh: syafiq@email.com" value="{{ old('customer_email') }}" autocomplete="email" required>@error('customer_email')<p class="field-error">{{ $message }}</p>@enderror</div>
                 <div><label for="customer_phone">Nombor telefon</label><input id="customer_phone" type="tel" name="customer_phone" placeholder="Contoh: 0123456789" pattern="01[0-9]{8,9}" inputmode="numeric" minlength="10" maxlength="11" title="Masukkan 10 atau 11 digit bermula dengan 01." value="{{ old('customer_phone') }}" autocomplete="tel" required>@error('customer_phone')<p class="field-error">{{ $message }}</p>@enderror</div>
             </div>
             <button id="start-order-submit" class="button button-primary submit-button" type="submit">Cipta Tempahan & Teruskan →</button>
@@ -79,7 +79,7 @@
     <dialog id="start-order-confirmation" class="confirmation-dialog" aria-labelledby="start-order-confirmation-title">
         <div class="confirmation-dialog-icon" aria-hidden="true">?</div>
         <h2 id="start-order-confirmation-title">Cipta tempahan ini?</h2>
-        <p>Pastikan nama, email, nombor telefon dan pilihan pakej anda betul sebelum meneruskan.</p>
+            <p>Pastikan nama, e-mel, nombor telefon dan pilihan pakej anda betul sebelum meneruskan.</p>
         <div class="confirmation-dialog-actions">
             <button id="cancel-start-order" class="button button-secondary" type="button">Tidak, semak semula</button>
             <button id="confirm-start-order" class="button button-primary" type="button">Ya, cipta tempahan</button>

@@ -41,15 +41,15 @@ class BuildCustomerProgressServiceTest extends TestCase
         );
 
         $this->assertSame([
-            'Booking',
-            'Details',
-            'Design',
-            'Approval',
-            'Balance Payment',
-            'Printing',
-            'Packaging',
-            'Shipped / Pickup',
-            'Completed',
+            'Tempahan',
+            'Maklumat',
+            'Reka Bentuk',
+            'Kelulusan',
+            'Bayaran Baki',
+            'Cetakan',
+            'Pembungkusan',
+            'Penghantaran / Pengambilan',
+            'Selesai',
         ], array_column($progress['stages'], 'label'));
         $this->assertSame('complete', $progress['stages'][3]['state']);
         $this->assertSame('current', $progress['stages'][4]['state']);

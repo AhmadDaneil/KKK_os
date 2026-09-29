@@ -109,7 +109,7 @@ class AdminDashboardTest extends TestCase
         $this->actingAs($admin)
             ->get(route('admin.dashboard'))
             ->assertOk()
-            ->assertSee('Cari pantas Order ID')
+            ->assertSee('Carian pantas ID tempahan')
             ->assertSee(route('admin.orders.find'), false);
 
         $this->get(route('admin.orders.find', ['order_id' => strtolower($order->order_id)]))
@@ -174,7 +174,7 @@ class AdminDashboardTest extends TestCase
 
         $this->get(route('admin.orders.index'))
             ->assertOk()
-            ->assertSee('Operasi Admin')
+            ->assertSee('Operasi Pentadbir')
             ->assertSee(route('admin.dashboard'), false)
             ->assertSee('Staf &amp; Akses', false)
             ->assertSee(route('admin.staff.index'), false)

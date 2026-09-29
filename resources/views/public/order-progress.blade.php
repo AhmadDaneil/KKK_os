@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="robots" content="noindex,nofollow">
-    <title>Semak Progress — KingKadKahwin</title>
+    <title>Semak Kemajuan — KingKadKahwin</title>
     <link rel="stylesheet" href="{{ asset('css/landing.css') }}?v={{ filemtime(public_path('css/landing.css')) }}">
     <link rel="stylesheet" href="{{ asset('css/customer-theme.css') }}?v={{ filemtime(public_path('css/customer-theme.css')) }}">
 </head>
@@ -19,8 +19,8 @@
     <main class="progress-page">
         <section class="progress-search">
             <p class="eyebrow">Status tempahan anda</p>
-            <h1>Semak progress</h1>
-            <p>Paste atau masukkan ID Tempahan yang diterima semasa membuat tempahan.</p>
+            <h1>Semak kemajuan</h1>
+            <p>Tampal atau masukkan ID tempahan yang diterima semasa membuat tempahan.</p>
             <form method="POST" action="{{ route('public.orders.progress.lookup') }}">
                 @csrf
                 <label for="order_id">ID Tempahan</label>
@@ -38,7 +38,7 @@
                     <div class="order-lifecycle-heading">
                         <div>
                             <small>PERJALANAN TEMPAHAN</small>
-                            <h4 id="order-lifecycle-title">Progress tempahan anda</h4>
+                            <h4 id="order-lifecycle-title">Kemajuan tempahan anda</h4>
                         </div>
                         <span>Status semasa ditanda dengan warna hijau</span>
                     </div>
@@ -57,7 +57,7 @@
                 @if ($artworkReady ?? false)
                     <div class="public-artwork-action">
                         <div>
-                            <strong>Artwork anda sudah tersedia</strong>
+                            <strong>Hasil reka bentuk anda sudah tersedia</strong>
                             <span>Semak setiap preview sebelum meluluskan atau meminta pembetulan.</span>
                         </div>
                         <a class="button button-primary" href="{{ route('orders.artwork.review', ['orderId' => $orderId]) }}">Buka Semakan Penuh</a>
@@ -66,12 +66,12 @@
                         <div class="public-artwork-previews">
                             @foreach ($artworkPreviews as $artwork)
                                 <article>
-                                    <div><strong>Kad Pihak {{ ucfirst(strtolower($artwork['side'])) }}</strong><span>Artwork versi {{ $artwork['version'] }}</span></div>
+                                    <div><strong>Kad Pihak {{ ucfirst(strtolower($artwork['side'])) }}</strong><span>Versi hasil reka bentuk {{ $artwork['version'] }}</span></div>
                                     <div class="public-artwork-preview-frame">
                                     <img
                                         src="{{ route('orders.artwork.preview', ['orderId' => $orderId, 'designJobId' => $artwork['design_job_id']]) }}"
-                                        title="Preview artwork pihak {{ strtolower($artwork['side']) }}"
-                                        alt="Preview artwork kad 4 kali 6 pihak {{ strtolower($artwork['side']) }}"
+                                        title="Pratonton hasil reka bentuk pihak {{ strtolower($artwork['side']) }}"
+                                        alt="Pratonton hasil reka bentuk kad 4 kali 6 pihak {{ strtolower($artwork['side']) }}"
                                         loading="lazy"
                                     >
                                     </div>
@@ -90,12 +90,12 @@
                 @if (($orderStatus ?? null) === 'DESIGN_APPROVED' || ! empty($balance))
                     <section class="balance-payment-card" data-status="{{ strtolower($balance['status'] ?? 'new') }}">
                         <div class="balance-payment-heading">
-                            <div><small>PEMBAYARAN PENUH</small><h4>Bayaran baki selepas artwork diluluskan</h4></div>
+                            <div><small>PEMBAYARAN PENUH</small><h4>Bayaran baki selepas hasil reka bentuk diluluskan</h4></div>
                             @if ((float) ($balanceAmount ?? 0) > 0)<strong>RM {{ number_format((float) $balanceAmount, 2) }}</strong>@endif
                         </div>
 
                         @if (($balance['status'] ?? null) === 'PENDING')
-                            <div class="balance-status-message"><strong>Resit sedang disemak</strong><span>Operation Management akan mengesahkan pembayaran sebelum cetakan dimulakan.</span></div>
+                            <div class="balance-status-message"><strong>Resit sedang disemak</strong><span>Pengurusan Operasi akan mengesahkan pembayaran sebelum cetakan dimulakan.</span></div>
                         @elseif (($balance['status'] ?? null) === 'PAID')
                             <div class="balance-status-message is-paid"><strong>Bayaran penuh disahkan</strong><span>Tempahan anda akan diteruskan ke proses cetakan.</span></div>
                         @else
@@ -129,7 +129,7 @@
                 @if (! empty($shipment['tracking_number']))
                     <div class="tracking-card">
                         <small>MAKLUMAT PENGHANTARAN</small>
-                        <div><span>Courier</span><strong>{{ $shipment['courier_provider'] ?: '-' }}</strong></div>
+                        <div><span>Kurier</span><strong>{{ $shipment['courier_provider'] ?: '-' }}</strong></div>
                         <div><span>Tracking Number</span><strong class="tracking-number">{{ $shipment['tracking_number'] }}</strong></div>
                         @if ($shipment['shipped_at'])<p>Dihantar pada {{ $shipment['shipped_at']->timezone('Asia/Kuala_Lumpur')->format('d/m/Y, h:i A') }}</p>@endif
                     </div>

@@ -11,8 +11,8 @@
 <body>
     @php
         $fulfilmentLabel = match ($review['fulfilment']['method'] ?? null) {
-            'COURIER' => 'Pos / Courier',
-            'PICKUP' => 'Self Pickup di KKK',
+            'COURIER' => 'Pos / Kurier',
+            'PICKUP' => 'Pengambilan Sendiri di KKK',
             default => '-',
         };
     @endphp
@@ -89,7 +89,7 @@
             </div>
 
             <a class="progress-button" href="{{ route('public.orders.progress', ['order_id' => $review['order_id']]) }}">
-                Semak Progress
+                Semak Kemajuan
             </a>
         </section>
     </main>

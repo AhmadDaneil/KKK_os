@@ -90,15 +90,15 @@ class ValidateOrderCompletionService
             $missing[] = 'Kaedah fulfilment';
         } elseif ($fulfilment->method === 'COURIER') {
             if (! $fulfilment->recipient_name) {
-                $missing[] = 'Courier: Nama penerima';
+                $missing[] = 'Kurier: Nama penerima';
             }
 
             if (! $fulfilment->recipient_phone) {
-                $missing[] = 'Courier: Telefon penerima';
+                $missing[] = 'Kurier: Telefon penerima';
             }
 
             if (! $fulfilment->shipping_address) {
-                $missing[] = 'Courier: Alamat penghantaran';
+                $missing[] = 'Kurier: Alamat penghantaran';
             }
         }
 

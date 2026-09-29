@@ -17,9 +17,9 @@ class BuildCustomerProgressService
             'DETAILS_CONFIRMED' => [35, 'Maklumat Telah Disahkan', 'Maklumat tempahan anda telah berjaya disahkan.'],
             'READY_FOR_DESIGN' => [40, 'Menunggu Proses Design', 'Maklumat anda telah diterima dan sedia untuk proses design.'],
             'DESIGN_IN_PROGRESS' => [50, ...$this->designProgressCopy($order)],
-            'DESIGN_READY' => [60, 'Artwork Sedia Untuk Semakan', 'Artwork anda telah tersedia untuk semakan.'],
-            'CORRECTION_REQUESTED' => [60, 'Pembetulan Artwork Sedang Diproses', 'Permintaan pembetulan anda telah diterima.'],
-            'DESIGN_APPROVED' => [70, 'Artwork Diluluskan', 'Artwork anda telah diluluskan.'],
+            'DESIGN_READY' => [60, 'Hasil Reka Bentuk Sedia Untuk Semakan', 'Hasil reka bentuk anda telah tersedia untuk semakan.'],
+            'CORRECTION_REQUESTED' => [60, 'Pembetulan Hasil Reka Bentuk Sedang Diproses', 'Permintaan pembetulan anda telah diterima.'],
+            'DESIGN_APPROVED' => [70, 'Hasil Reka Bentuk Diluluskan', 'Hasil reka bentuk anda telah diluluskan.'],
             'BALANCE_PENDING' => [75, 'Menunggu Bayaran Baki', 'Bayaran baki diperlukan sebelum proses seterusnya.'],
             'PAID' => [80, 'Bayaran Selesai', 'Bayaran tempahan anda telah selesai.'],
             'READY_FOR_PRINT' => [82, 'Menunggu Proses Cetakan', 'Tempahan anda berada dalam giliran cetakan.'],
@@ -28,8 +28,8 @@ class BuildCustomerProgressService
             'READY_FOR_PACKING' => [90, 'Menunggu Pembungkusan', 'Tempahan anda sedang menunggu proses pembungkusan.'],
             'PACKING' => [92, 'Dalam Proses Pembungkusan', 'Tempahan anda sedang dibungkus.'],
             'PACKED' => [95, 'Pembungkusan Selesai', 'Tempahan anda telah siap dibungkus.'],
-            'READY_FOR_PICKUP' => [95, 'Sedia Untuk Pickup', 'Tempahan anda telah sedia untuk diambil.'],
-            'SHIPPED' => [95, 'Telah Dihantar', 'Tempahan anda telah diserahkan kepada courier.'],
+            'READY_FOR_PICKUP' => [95, 'Sedia Untuk Pengambilan', 'Tempahan anda telah sedia untuk diambil.'],
+            'SHIPPED' => [95, 'Telah Dihantar', 'Tempahan anda telah diserahkan kepada kurier.'],
             'COMPLETED' => [100, 'Tempahan Selesai', 'Tempahan anda telah selesai.'],
             'CANCELLED' => [0, 'Tempahan Dibatalkan', 'Tempahan ini telah dibatalkan.'],
             'ARCHIVED' => [100, 'Tempahan Diarkibkan', 'Tempahan ini telah diarkibkan.'],
@@ -69,8 +69,8 @@ class BuildCustomerProgressService
 
         if ($active->isEmpty()) {
             return $english
-                ? ['Design in Progress', 'The designer is preparing your order artwork.']
-                : ['Design Sedang Disediakan', 'Designer sedang menyediakan artwork tempahan anda.'];
+                ? ['Reka Bentuk Sedang Disediakan', 'Pereka sedang menyediakan hasil reka bentuk tempahan anda.']
+                : ['Reka Bentuk Sedang Disediakan', 'Pereka sedang menyediakan artwork tempahan anda.'];
         }
 
         $subject = $active->count() > 1
@@ -78,8 +78,8 @@ class BuildCustomerProgressService
             : $active->first();
 
         return $english
-            ? ["{$subject} Design in Progress", "The designer is preparing the {$subject} design for your order."]
-            : ["Design {$subject} Sedang Disediakan", "Designer sedang menyediakan design {$subject} untuk tempahan anda."];
+            ? ["Reka Bentuk {$subject} Sedang Disediakan", "Pereka sedang menyediakan reka bentuk {$subject} untuk tempahan anda."]
+            : ["Reka Bentuk {$subject} Sedang Disediakan", "Pereka sedang menyediakan reka bentuk {$subject} untuk tempahan anda."];
     }
 
     private function tone(int $percentage): string
@@ -108,18 +108,18 @@ class BuildCustomerProgressService
 
         $stageLabels = app()->bound('translator')
             ? __('ui.stages')
-            : ['Booking', 'Details', 'Design', 'Approval', 'Balance Payment', 'Printing', 'Packaging', 'Shipped / Pickup', 'Completed'];
+            : ['Tempahan', 'Maklumat', 'Reka Bentuk', 'Kelulusan', 'Bayaran Baki', 'Cetakan', 'Pembungkusan', 'Penghantaran / Pengambilan', 'Selesai'];
 
         return collect([
-            ['label' => 'Booking', 'description' => 'Tempahan diterima'],
-            ['label' => 'Details', 'description' => 'Maklumat disahkan'],
-            ['label' => 'Design', 'description' => 'Artwork disediakan'],
-            ['label' => 'Approval', 'description' => 'Semakan artwork'],
-            ['label' => 'Balance Payment', 'description' => 'Bayaran penuh'],
-            ['label' => 'Printing', 'description' => 'Kad dicetak'],
-            ['label' => 'Packaging', 'description' => 'Kad dibungkus'],
-            ['label' => 'Shipped / Pickup', 'description' => 'Dihantar atau diambil'],
-            ['label' => 'Completed', 'description' => 'Tempahan selesai'],
+            ['label' => 'Tempahan', 'description' => 'Tempahan diterima'],
+            ['label' => 'Maklumat', 'description' => 'Maklumat disahkan'],
+            ['label' => 'Reka Bentuk', 'description' => 'Hasil reka bentuk disediakan'],
+            ['label' => 'Kelulusan', 'description' => 'Semakan hasil reka bentuk'],
+            ['label' => 'Bayaran Baki', 'description' => 'Bayaran penuh'],
+            ['label' => 'Cetakan', 'description' => 'Kad dicetak'],
+            ['label' => 'Pembungkusan', 'description' => 'Kad dibungkus'],
+            ['label' => 'Penghantaran / Pengambilan', 'description' => 'Dihantar atau diambil'],
+            ['label' => 'Selesai', 'description' => 'Tempahan selesai'],
         ])->map(function (array $stage, int $index) use ($currentStage, $stageLabels) {
             $stage['label'] = $stageLabels[$index];
             $stage['number'] = $index + 1;
