@@ -1,30 +1,31 @@
 <!doctype html>
-<html lang="ms">
+<html lang="{{ app()->getLocale() }}">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>@yield('title', 'Admin Dashboard') — KKK OS</title>
     <link rel="stylesheet" href="{{ asset('css/admin.css') }}?v={{ filemtime(public_path('css/admin.css')) }}">
+    <link rel="stylesheet" href="{{ asset('css/language-toggle.css') }}?v={{ filemtime(public_path('css/language-toggle.css')) }}">
 </head>
-<body>
+<body data-locale="{{ app()->getLocale() }}">
 <div class="admin-shell">
     <aside class="admin-sidebar">
         <a class="admin-brand" href="{{ route('admin.dashboard') }}">
             <span class="admin-brand-mark">KKK</span>
-            <span><strong>KKK OS</strong><small>Administration</small></span>
+            <span><strong>KKK OS</strong><small>{{ __('ui.administration') }}</small></span>
         </a>
 
         <nav class="admin-nav" aria-label="Admin navigation">
-            <p>Management</p>
-            <a href="{{ route('admin.dashboard') }}" @class(['is-active' => request()->routeIs('admin.dashboard')])><span>OV</span>Overview</a>
-            <a href="{{ route('admin.dashboard') }}#sales-analysis"><span>SA</span>Sales Analysis</a>
-            <a href="{{ route('admin.staff.index') }}" @class(['is-active' => request()->routeIs('admin.staff.*')])><span>ST</span>Staff & Akses</a>
-            <p>Operations</p>
-            <a href="{{ route('admin.orders.index') }}"><span>OR</span>Semua Orders</a>
-            <a href="{{ route('admin.orders.index', ['attention' => 'pending_payment']) }}"><span>RM</span>Semakan Bayaran</a>
-            <a href="{{ route('admin.orders.index', ['workstream' => 'design']) }}"><span>DE</span>Design Queue</a>
-            <a href="{{ route('admin.orders.index', ['workstream' => 'printing']) }}"><span>PR</span>Production Queue</a>
-            <a href="{{ route('admin.orders.index', ['workstream' => 'packing']) }}"><span>PA</span>Packing Queue</a>
+            <p>{{ __('ui.management') }}</p>
+            <a href="{{ route('admin.dashboard') }}" @class(['is-active' => request()->routeIs('admin.dashboard')])><span>OV</span>{{ __('ui.overview') }}</a>
+            <a href="{{ route('admin.dashboard') }}#sales-analysis"><span>SA</span>{{ __('ui.sales_analysis') }}</a>
+            <a href="{{ route('admin.staff.index') }}" @class(['is-active' => request()->routeIs('admin.staff.*')])><span>ST</span>{{ __('ui.staff_access') }}</a>
+            <p>{{ __('ui.operations') }}</p>
+            <a href="{{ route('admin.orders.index') }}"><span>OR</span>{{ __('ui.all_orders') }}</a>
+            <a href="{{ route('admin.orders.index', ['attention' => 'pending_payment']) }}"><span>RM</span>{{ __('ui.payment_review') }}</a>
+            <a href="{{ route('admin.orders.index', ['workstream' => 'design']) }}"><span>DE</span>{{ __('ui.design_queue') }}</a>
+            <a href="{{ route('admin.orders.index', ['workstream' => 'printing']) }}"><span>PR</span>{{ __('ui.production_queue') }}</a>
+            <a href="{{ route('admin.orders.index', ['workstream' => 'packing']) }}"><span>PA</span>{{ __('ui.packing_queue') }}</a>
         </nav>
 
         <div class="admin-profile">
@@ -37,8 +38,8 @@
         <header class="admin-topbar">
             <div><p>KingKadKahwin</p><h1>@yield('heading', 'Admin Dashboard')</h1></div>
             <div class="admin-topbar-actions">
-                <a href="{{ route('staff.dashboard') }}" class="admin-button admin-button-secondary">Staff Dashboard</a>
-                <form class="js-logout-form admin-logout-profile" method="POST" action="{{ route('admin.logout') }}">@csrf<button type="submit"><span class="admin-topbar-avatar" aria-hidden="true"></span><span>Log Keluar</span></button></form>
+                @include('partials.language-toggle')
+                <form class="js-logout-form admin-logout-profile" method="POST" action="{{ route('admin.logout') }}">@csrf<button type="submit"><span class="admin-topbar-avatar" aria-hidden="true"></span><span>{{ __('ui.logout') }}</span></button></form>
             </div>
         </header>
 
@@ -55,5 +56,6 @@
 </div>
 @include('staff.partials.logout-confirmation')
 @stack('scripts')
+<script src="{{ asset('js/language-runtime.js') }}?v={{ filemtime(public_path('js/language-runtime.js')) }}"></script>
 </body>
 </html>

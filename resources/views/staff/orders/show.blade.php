@@ -23,7 +23,7 @@
         && $order->designJobs->contains('assigned_user_id', auth()->id());
 @endphp
 <!DOCTYPE html>
-<html lang="ms">
+<html lang="{{ app()->getLocale() }}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -31,14 +31,15 @@
     <title>{{ $order->order_id }} - KKK OS Staff</title>
 
     <link rel="stylesheet" href="{{ asset('css/staff.css') }}?v={{ filemtime(public_path('css/staff.css')) }}">
+    <link rel="stylesheet" href="{{ asset('css/language-toggle.css') }}?v={{ filemtime(public_path('css/language-toggle.css')) }}">
 </head>
 <body @class(['admin-operations-mode' => auth()->user()->isAdmin()]) data-staff-theme="{{ auth()->user()->staff_theme }}">
     <div class="staff-app-shell">
         @include('staff.partials.sidebar')
         <div class="staff-workspace">
             <header class="staff-topbar">
-                <div><p class="staff-kicker">{{ auth()->user()->isAdmin() ? 'Admin Operations' : 'Staff Operations' }} · Order Detail</p><h1>{{ $order->order_id }}</h1></div>
-                <form class="js-logout-form staff-logout-profile" method="POST" action="{{ route($logoutRoute) }}">@csrf<button type="submit"><span class="staff-topbar-avatar" aria-hidden="true"></span><span>Log Keluar</span></button></form>
+                <div><p class="staff-kicker">{{ auth()->user()->isAdmin() ? __('ui.admin_operations') : __('ui.staff_operations') }} · {{ __('ui.order_detail') }}</p><h1>{{ $order->order_id }}</h1></div>
+                <form class="js-logout-form staff-logout-profile" method="POST" action="{{ route($logoutRoute) }}">@csrf<button type="submit"><span class="staff-topbar-avatar" aria-hidden="true"></span><span>{{ __('ui.logout') }}</span></button></form>
             </header>
 
         <main class="staff-main">
@@ -1567,5 +1568,6 @@
         });
     });
 </script>
+<script src="{{ asset('js/language-runtime.js') }}?v={{ filemtime(public_path('js/language-runtime.js')) }}"></script>
 </body>
 </html>
