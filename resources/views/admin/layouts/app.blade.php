@@ -17,6 +17,7 @@
         <nav class="admin-nav" aria-label="Admin navigation">
             <p>Management</p>
             <a href="{{ route('admin.dashboard') }}" @class(['is-active' => request()->routeIs('admin.dashboard')])><span>OV</span>Overview</a>
+            <a href="{{ route('admin.dashboard') }}#sales-analysis"><span>SA</span>Sales Analysis</a>
             <a href="{{ route('admin.staff.index') }}" @class(['is-active' => request()->routeIs('admin.staff.*')])><span>ST</span>Staff & Akses</a>
             <p>Operations</p>
             <a href="{{ route('admin.orders.index') }}"><span>OR</span>Semua Orders</a>
