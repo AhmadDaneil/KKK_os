@@ -2,7 +2,6 @@
 
 use App\Http\Middleware\EnsureActiveStaff;
 use App\Http\Middleware\EnsureStaffRole;
-use App\Http\Middleware\SetApplicationLocale;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -15,8 +14,6 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
-
-        $middleware->web(append: [SetApplicationLocale::class]);
 
         $middleware->alias([
         'active.staff' => EnsureActiveStaff::class,

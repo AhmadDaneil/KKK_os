@@ -40,9 +40,9 @@ class AdminDashboardTest extends TestCase
             ->assertOk()
             ->assertSee('Memerlukan Perhatian')
             ->assertSee('Semakan Pembayaran')
-            ->assertSee('Design Belum Assign')
-            ->assertSee('Production Belum Assign')
-            ->assertSee('Packing Belum Assign')
+            ->assertSee('Reka Bentuk Belum Ditugaskan')
+            ->assertSee('Pengeluaran Belum Ditugaskan')
+            ->assertSee('Pembungkusan Belum Ditugaskan')
             ->assertSee(route('admin.orders.index'), false);
     }
 
@@ -174,7 +174,7 @@ class AdminDashboardTest extends TestCase
 
         $this->get(route('admin.orders.index'))
             ->assertOk()
-            ->assertSee('Admin Operations')
+            ->assertSee('Operasi Admin')
             ->assertSee(route('admin.dashboard'), false)
             ->assertSee('Staf &amp; Akses', false)
             ->assertSee(route('admin.staff.index'), false)

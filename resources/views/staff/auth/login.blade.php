@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Staff Login — KKK OS</title>
+    <title>Log Masuk Staf — KKK OS</title>
     <link rel="stylesheet" href="{{ asset('css/login.css') }}">
 </head>
 <body class="login-page login-page--staff">
@@ -17,7 +17,7 @@
                 <span class="login-eyebrow">BERSAMA, KITA JAYAKAN</span>
                 <h2>Setiap tugasan, <br>bermula di sini.</h2>
                 <p>Dari idea hingga hasil akhir, urus kerja harian dan cipta sesuatu yang bermakna bersama pasukan.</p>
-                <div class="login-tags"><span>Operation</span><span>Design</span><span>Production</span></div>
+                <div class="login-tags"><span>Operation</span><span>Reka Bentuk</span><span>Pengeluaran</span></div>
             </div>
             <div class="login-story-footer"><span class="login-dot"></span> Satu pasukan. Satu tujuan.</div>
             <div class="login-orbit login-orbit--one" aria-hidden="true"></div>
@@ -26,7 +26,7 @@
         <section class="login-panel" aria-labelledby="login-title">
             <div class="login-heading">
                 <span class="login-eyebrow">SELAMAT KEMBALI</span>
-                <h1 id="login-title">Staff Login<span>.</span></h1>
+                <h1 id="login-title">Log Masuk Staf<span>.</span></h1>
                 <p>Log masuk untuk mengakses tugasan dan meneruskan kerja anda.</p>
             </div>
             @if ($errors->any())
@@ -35,7 +35,7 @@
             <form method="POST" action="{{ route('staff.login.store') }}" class="login-form">
                 @csrf
                 <div class="login-field">
-                    <label for="email">Email</label>
+                    <label for="email">E-mel</label>
                     <input id="email" type="email" name="email" value="{{ old('email') }}" placeholder="nama@kingkadkahwin.com" required autofocus autocomplete="email">
                 </div>
                 <div class="login-field">

@@ -8,9 +8,9 @@
     $canViewDesignQueue = $canMonitorOperations || $staffUser->hasStaffRole(\App\Models\User::ROLE_DESIGNER);
     $canViewProductionQueue = $canMonitorOperations || $staffUser->hasStaffRole(\App\Models\User::ROLE_PRODUCTION);
     $roleLabel = $staffUser->isAdmin() ? 'Administrator' : match ($staffUser->role) {
-        \App\Models\User::ROLE_OM => 'Operation Management',
-        \App\Models\User::ROLE_CUSTOMER_SERVICE => 'Customer Service',
-        \App\Models\User::ROLE_PRODUCTION => 'Production',
+        \App\Models\User::ROLE_OM => 'Pengurusan Operasi',
+        \App\Models\User::ROLE_CUSTOMER_SERVICE => 'Khidmat Pelanggan',
+        \App\Models\User::ROLE_PRODUCTION => 'Pengeluaran',
         default => str_replace('_', ' ', $staffUser->role),
     };
 @endphp
@@ -46,14 +46,14 @@
 
         @if ($canViewDesignQueue)
             <section class="staff-nav-section">
-                <h2>Design</h2>
+                <h2>Reka Bentuk</h2>
                 <a href="{{ route($ordersIndexRoute, ['workstream' => 'design']) }}" @class(['staff-nav-link', 'is-active' => $activeWorkstream === 'design'])><span class="staff-nav-icon" aria-hidden="true">RB</span>{{ __('ui.design_queue') }}</a>
             </section>
         @endif
 
         @if ($canViewProductionQueue || $canMonitorOperations)
             <section class="staff-nav-section">
-                <h2>Production</h2>
+                <h2>Pengeluaran</h2>
                 @if ($canViewProductionQueue)
                 <a href="{{ route($ordersIndexRoute, ['workstream' => 'printing']) }}" @class(['staff-nav-link', 'is-active' => $activeWorkstream === 'printing'])><span class="staff-nav-icon" aria-hidden="true">CT</span>{{ __('ui.production_queue') }}</a>
                 @endif
@@ -63,7 +63,7 @@
                 @endif
 
                 @if ($canMonitorOperations)
-                <a href="{{ route($ordersIndexRoute, ['workstream' => 'fulfilment']) }}" @class(['staff-nav-link', 'is-active' => $activeWorkstream === 'fulfilment'])><span class="staff-nav-icon" aria-hidden="true">FU</span>Fulfilment</a>
+                <a href="{{ route($ordersIndexRoute, ['workstream' => 'fulfilment']) }}" @class(['staff-nav-link', 'is-active' => $activeWorkstream === 'fulfilment'])><span class="staff-nav-icon" aria-hidden="true">PT</span>Pemenuhan Tempahan</a>
                 @endif
             </section>
         @endif
@@ -79,13 +79,13 @@
                 <label for="staff-sidebar-theme">{{ __('ui.display_theme') }}</label>
                 <div>
                     <select id="staff-sidebar-theme" name="staff_theme">
-                        <option value="default" @selected($staffUser->staff_theme === 'default')>Default Green</option>
-                        <option value="modern_blue" @selected($staffUser->staff_theme === 'modern_blue')>Modern Blue</option>
-                        <option value="indigo_violet" @selected($staffUser->staff_theme === 'indigo_violet')>Indigo &amp; Violet</option>
-                        <option value="warm_orange" @selected($staffUser->staff_theme === 'warm_orange')>Warm Orange</option>
-                        <option value="amber_gold" @selected($staffUser->staff_theme === 'amber_gold')>Amber / Gold</option>
-                        <option value="dusty_rose" @selected($staffUser->staff_theme === 'dusty_rose')>Charcoal / Lime</option>
-                        <option value="rose_burgundy" @selected($staffUser->staff_theme === 'rose_burgundy')>Rose / Burgundy</option>
+                        <option value="default" @selected($staffUser->staff_theme === 'default')>Hijau Lalai</option>
+                        <option value="modern_blue" @selected($staffUser->staff_theme === 'modern_blue')>Biru Moden</option>
+                        <option value="indigo_violet" @selected($staffUser->staff_theme === 'indigo_violet')>Indigo &amp; Ungu</option>
+                        <option value="warm_orange" @selected($staffUser->staff_theme === 'warm_orange')>Jingga Hangat</option>
+                        <option value="amber_gold" @selected($staffUser->staff_theme === 'amber_gold')>Ambar / Emas</option>
+                        <option value="dusty_rose" @selected($staffUser->staff_theme === 'dusty_rose')>Kelabu Arang / Hijau Limau</option>
+                        <option value="rose_burgundy" @selected($staffUser->staff_theme === 'rose_burgundy')>Ros / Burgundy</option>
                     </select>
                     <button type="submit">{{ __('ui.save') }}</button>
                 </div>

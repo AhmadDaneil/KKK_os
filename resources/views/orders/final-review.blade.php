@@ -53,7 +53,7 @@
 
             <div class="review-grid">
                 <div class="review-item">
-                    <span class="review-label">Order ID</span>
+                    <span class="review-label">ID Tempahan</span>
                     <span class="review-value">{{ $review['order_id'] }}</span>
                 </div>
 
@@ -145,7 +145,7 @@
                     <span class="side-badge">{{ $side['side'] }}</span>
                 </div>
 
-                <h3>Design Kad</h3>
+                <h3>Reka Bentuk Kad</h3>
                 <div class="review-grid">
                     <div class="review-item">
                         <span class="review-label">Tema</span>
@@ -153,7 +153,7 @@
                     </div>
 
                     <div class="review-item">
-                        <span class="review-label">Kod Design</span>
+                        <span class="review-label">Kod Reka Bentuk</span>
                         <span class="review-value">{{ $design['design_code'] ?: '-' }}</span>
                     </div>
 

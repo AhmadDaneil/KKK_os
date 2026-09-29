@@ -35,7 +35,7 @@
             <form method="POST" action="{{ route('admin.login.store') }}" class="login-form">
                 @csrf
                 <div class="login-field">
-                    <label for="email">Email Admin</label>
+                    <label for="email">E-mel Admin</label>
                     <input id="email" type="email" name="email" value="{{ old('email') }}" placeholder="nama@kingkadkahwin.com" required autofocus autocomplete="email">
                 </div>
                 <div class="login-field">

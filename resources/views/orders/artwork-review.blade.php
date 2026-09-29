@@ -52,7 +52,7 @@
 
         <div class="order-summary">
             <div>
-                <span class="summary-label">Order ID</span>
+                <span class="summary-label">ID Tempahan</span>
                 <strong>{{ $order->order_id }}</strong>
             </div>
             <div>

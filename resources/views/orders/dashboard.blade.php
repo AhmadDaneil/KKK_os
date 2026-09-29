@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="{{ app()->getLocale() }}">
+<html lang="ms">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -7,7 +7,6 @@
     <title>KKK OS - {{ $order->order_id }}</title>
     <link rel="stylesheet" href="{{ asset('css/customer-dashboard.css') }}?v={{ filemtime(public_path('css/customer-dashboard.css')) }}">
     <link rel="stylesheet" href="{{ asset('css/customer-theme.css') }}?v={{ filemtime(public_path('css/customer-theme.css')) }}">
-    <link rel="stylesheet" href="{{ asset('css/language-toggle.css') }}?v={{ filemtime(public_path('css/language-toggle.css')) }}">
 </head>
 <body>
 <main>
@@ -19,7 +18,6 @@
         </div>
 
         <div class="order-summary-actions">
-            @include('partials.language-toggle')
             <a href="{{ route('home') }}" class="back-home-button">
                 <span aria-hidden="true">&larr;</span>
                 {{ __('ui.back') }}
@@ -33,7 +31,7 @@
 
     <div class="order-summary-grid">
         <div>
-            <span class="summary-label">Order ID</span>
+            <span class="summary-label">ID Tempahan</span>
             <strong>{{ $order->order_id }}</strong>
         </div>
 
@@ -362,7 +360,7 @@
             <fieldset data-package-side="{{ $side }}">
                 <legend data-package-legend>{{ $order->package_count === 2 ? 'Majlis '.$loop->iteration.' – ' : 'Pakej ' }}Pihak {{ ucfirst(strtolower($side)) }}</legend>
                 <div data-folded-second-design="{{ ! $loop->first ? 'true' : 'false' }}" @if ($hideFoldedDesign) hidden @endif>
-                <h3>Design</h3>
+                <h3>Reka Bentuk</h3>
 
 <div class="grid">
     <div>
@@ -392,7 +390,7 @@
     </div>
 
     <div>
-        <label>Kod Design</label>
+        <label>Kod Reka Bentuk</label>
         <input
             name="sides[{{ $side }}][design][design_code]"
             placeholder="e.g. KKK-001"
@@ -755,7 +753,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     : 'Pakej Perempuan';
 
                 const sideRequiredFields = [
-                    ['design][design_code]', 'Kod Design'],
+                    ['design][design_code]', 'Kod Reka Bentuk'],
                     ['parents][father_name]', 'Nama Bapa'],
                     ['parents][mother_name]', 'Nama Ibu'],
                     ['event][event_date]', 'Tarikh Majlis'],
