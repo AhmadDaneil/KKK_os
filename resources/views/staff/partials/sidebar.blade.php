@@ -92,8 +92,6 @@
             </form>
         </section>
     @endif
-    <div class="staff-sidebar-language">@include('partials.language-toggle')</div>
-
     @unless ($isOverview)
         <div class="staff-sidebar-user">
             <span class="staff-user-avatar">{{ strtoupper(substr($staffUser->name, 0, 1)) }}</span>
