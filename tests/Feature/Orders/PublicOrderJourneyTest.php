@@ -26,6 +26,18 @@ class PublicOrderJourneyTest extends TestCase
             ->assertSee(route('public.orders.progress'));
     }
 
+    public function test_landing_page_displays_all_four_animated_card_examples(): void
+    {
+        $this->get(route('home'))
+            ->assertOk()
+            ->assertSee('images/landing/card-nostalgia-ckn-008.jpg', false)
+            ->assertSee('images/landing/card-desa-ckd-008.jpg', false)
+            ->assertSee('images/landing/card-garden-purple.png', false)
+            ->assertSee('images/landing/card-islamic-gold.png', false)
+            ->assertSee('card-runner-garden', false)
+            ->assertSee('card-runner-islamic', false);
+    }
+
     public function test_landing_page_renders_branded_social_icons(): void
     {
         config()->set('kingkadkahwin.social.instagram', 'https://instagram.example/kkk');

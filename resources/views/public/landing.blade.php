@@ -66,6 +66,32 @@
                         </span>
                     </article>
                 </div>
+                <div class="card-runner card-runner-garden">
+                    <article class="sample-card sample-card-garden sample-card-image">
+                        <img src="{{ asset('images/landing/card-garden-purple.png') }}"
+                            alt="Kad kahwin tema taman bunga ungu"
+                            loading="eager"
+                            decoding="async"
+                            draggable="false">
+                        <span class="landing-card-watermark" aria-hidden="true">
+                            <span>KING KAD KAHWIN · PREVIEW</span>
+                            <span>KING KAD KAHWIN · PREVIEW</span>
+                        </span>
+                    </article>
+                </div>
+                <div class="card-runner card-runner-islamic">
+                    <article class="sample-card sample-card-islamic sample-card-image">
+                        <img src="{{ asset('images/landing/card-islamic-gold.png') }}"
+                            alt="Kad kahwin tema Islamik emas"
+                            loading="lazy"
+                            decoding="async"
+                            draggable="false">
+                        <span class="landing-card-watermark" aria-hidden="true">
+                            <span>KING KAD KAHWIN · PREVIEW</span>
+                            <span>KING KAD KAHWIN · PREVIEW</span>
+                        </span>
+                    </article>
+                </div>
             </div>
         </section>
 
