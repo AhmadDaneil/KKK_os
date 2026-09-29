@@ -85,7 +85,7 @@ class AdminDashboardTest extends TestCase
             $this->actingAs($admin, 'admin')
                 ->get(route('admin.dashboard'))
                 ->assertOk()
-                ->assertSee('Sales Analysis')
+                ->assertSee('Analisis Jualan')
                 ->assertSee('RM 250.00')
                 ->assertSee('RM 10.00')
                 ->assertSee('Trend Harian')
@@ -176,7 +176,7 @@ class AdminDashboardTest extends TestCase
             ->assertOk()
             ->assertSee('Admin Operations')
             ->assertSee(route('admin.dashboard'), false)
-            ->assertSee('Staff &amp; Akses', false)
+            ->assertSee('Staf &amp; Akses', false)
             ->assertSee(route('admin.staff.index'), false)
             ->assertSee(route('admin.logout'), false)
             ->assertDontSee(route('staff.logout'), false);
@@ -206,7 +206,7 @@ class AdminDashboardTest extends TestCase
 
         $this->get(route('staff.orders.index'))
             ->assertOk()
-            ->assertSee('Staff Operations')
+            ->assertSee('Operasi Staf')
             ->assertSee(route('staff.logout'), false)
             ->assertDontSee('Admin Operations');
 

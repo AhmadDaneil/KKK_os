@@ -1,0 +1,31 @@
+<?php
+
+return [
+    'admin_dashboard' => 'Admin Dashboard', 'overview' => 'Overview', 'management' => 'Management',
+    'operations' => 'Operations', 'sales_analysis' => 'Sales Analysis', 'staff_access' => 'Staff & Access',
+    'all_orders' => 'All Orders', 'payment_review' => 'Payment Review', 'design_queue' => 'Design Queue',
+    'production_queue' => 'Production Queue', 'packing_queue' => 'Packing Queue', 'logout' => 'Log Out',
+    'welcome' => 'Welcome, :name', 'admin_intro_title' => 'Every operation in one clear view.',
+    'admin_intro' => 'Monitor orders, payments, and each department’s workload before opening operational details.',
+    'find_order' => 'Quick Order ID Search', 'open_order' => 'Open Order', 'manage_staff' => 'Manage Staff',
+    'total_orders' => 'Total Orders', 'active_orders' => 'Active Orders', 'pending_deposits' => 'Deposits Pending Review',
+    'pending_balances' => 'Balances Pending Review', 'completed_orders' => 'Completed Orders', 'needs_attention' => 'Needs Attention',
+    'business_performance' => 'Business Performance', 'today' => 'Today', 'this_month' => 'This Month',
+    'this_year' => 'This Year', 'average_order' => 'Average per Order', 'pending_payment' => 'Pending Payments',
+    'daily_trend' => 'Daily Trend', 'monthly_trend' => 'Monthly Trend', 'annual_sales' => 'Annual Sales',
+    'collection_breakdown' => ':year Collection Breakdown', 'important' => 'Important Insights', 'transactions' => ':count transactions',
+    'staff_dashboard' => 'Staff Dashboard', 'staff_operations' => 'Staff Operations', 'operation_management' => 'Operation Management',
+    'personalisation' => 'Personalisation', 'display_theme' => 'Display Theme', 'save' => 'Save',
+    'staff_intro_title' => 'Clear operations, from order to completion.',
+    'staff_intro' => 'Monitor tasks according to your role while following the established workflow.',
+    'customer_order' => 'Your Order', 'back' => 'Back', 'package' => 'Package', 'customer_name' => 'Customer Name',
+    'phone' => 'Phone No.', 'email' => 'Email', 'order_progress' => 'Order Progress', 'order_stages' => 'Order Stages',
+    'shipping_information' => 'Shipping Information', 'deposit_status' => 'Deposit Status', 'deposit_confirmed' => 'Deposit Confirmed',
+    'receipt_rejected' => 'Receipt Rejected', 'pending_review' => 'Pending Review', 'upload_new_receipt' => 'Upload a new receipt',
+    'resubmit_receipt' => 'Resubmit Receipt', 'language' => 'Language', 'actions' => 'Actions',
+    'administration' => 'Administration', 'admin_operations' => 'Admin Operations', 'order_detail' => 'Order Details',
+    'progress' => [
+        'BOOKING_PENDING'=>['Order Being Processed','Your order is being processed.'],'BOOKED'=>['Order Received','Your order has been received.'],'DETAILS_INCOMPLETE'=>['Information Incomplete','Complete the required information before confirming your order.'],'DETAILS_CONFIRMED'=>['Information Confirmed','Your order information has been confirmed.'],'READY_FOR_DESIGN'=>['Waiting for Design','Your information has been received and is ready for design.'],'DESIGN_READY'=>['Artwork Ready for Review','Your artwork is ready for review.'],'CORRECTION_REQUESTED'=>['Artwork Correction in Progress','Your correction request has been received.'],'DESIGN_APPROVED'=>['Artwork Approved','Your artwork has been approved.'],'BALANCE_PENDING'=>['Waiting for Balance Payment','The balance payment is required before the next process.'],'PAID'=>['Payment Completed','Your order payment has been completed.'],'READY_FOR_PRINT'=>['Waiting for Printing','Your order is in the printing queue.'],'PRINTING'=>['Printing in Progress','Your order is being printed.'],'PRINTED'=>['Printing Completed','Printing is complete and your order will proceed to packing.'],'READY_FOR_PACKING'=>['Waiting for Packing','Your order is waiting to be packed.'],'PACKING'=>['Packing in Progress','Your order is being packed.'],'PACKED'=>['Packing Completed','Your order has been packed.'],'READY_FOR_PICKUP'=>['Ready for Pickup','Your order is ready for collection.'],'SHIPPED'=>['Shipped','Your order has been handed to the courier.'],'COMPLETED'=>['Order Completed','Your order has been completed.'],'CANCELLED'=>['Order Cancelled','This order has been cancelled.'],'ARCHIVED'=>['Order Archived','This order has been archived.'],'DEFAULT'=>['Order Status','Your order status is being updated.'],
+    ],
+    'stages' => ['Booking','Details','Design','Approval','Balance Payment','Printing','Packaging','Shipped / Pickup','Completed'],
+];

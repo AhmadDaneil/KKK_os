@@ -1,55 +1,55 @@
 @extends('admin.layouts.app')
 
-@section('title', 'Admin Overview')
-@section('heading', 'Overview')
+@section('title', __('ui.admin_dashboard'))
+@section('heading', __('ui.overview'))
 
 @section('content')
     @php($attentionTotal = array_sum($attention))
 
     <section class="admin-welcome">
         <div>
-            <p class="admin-eyebrow">Selamat datang, {{ auth()->user()->name }}</p>
-            <h2>Semua operasi dalam satu paparan.</h2>
-            <p>Pantau tempahan, pembayaran dan beban kerja setiap jabatan sebelum membuka butiran operasi.</p>
+            <p class="admin-eyebrow">{{ __('ui.welcome', ['name' => auth()->user()->name]) }}</p>
+            <h2>{{ __('ui.admin_intro_title') }}</h2>
+            <p>{{ __('ui.admin_intro') }}</p>
             <form class="admin-quick-order-search" method="GET" action="{{ route('admin.orders.find') }}">
-                <label for="dashboard-order-id">Cari pantas Order ID</label>
+                <label for="dashboard-order-id">{{ __('ui.find_order') }}</label>
                 <div>
                     <input id="dashboard-order-id" name="order_id" value="{{ old('order_id') }}" placeholder="Contoh: KKK-260924-0003" maxlength="32" required>
-                    <button class="admin-button admin-button-gold admin-action-hover" type="submit">Buka Order</button>
+                    <button class="admin-button admin-button-gold admin-action-hover" type="submit">{{ __('ui.open_order') }}</button>
                 </div>
                 @error('order_id')
                     <span class="admin-quick-search-error">{{ $message }}</span>
                 @enderror
             </form>
         </div>
-        <a class="admin-button admin-button-gold admin-action-hover" href="{{ route('admin.staff.index') }}">Urus Staff</a>
+        <a class="admin-button admin-button-gold admin-action-hover" href="{{ route('admin.staff.index') }}">{{ __('ui.manage_staff') }}</a>
     </section>
 
     <section class="admin-stat-grid" aria-label="Ringkasan operasi">
-        <article><span>Jumlah Order</span><strong data-stat-value="{{ $statistics['orders_total'] }}">{{ number_format($statistics['orders_total']) }}</strong><small>Semua rekod tempahan</small></article>
-        <article><span>Order Aktif</span><strong data-stat-value="{{ $statistics['orders_active'] }}">{{ number_format($statistics['orders_active']) }}</strong><small>Belum selesai atau diarkib</small></article>
-        <article @class(['is-warning', 'has-alert' => $statistics['pending_deposits'] > 0, 'is-clear' => $statistics['pending_deposits'] === 0])><span>Deposit Belum Semak</span><strong data-stat-value="{{ $statistics['pending_deposits'] }}">{{ number_format($statistics['pending_deposits']) }}</strong><small>{{ $statistics['pending_deposits'] > 0 ? 'Perlu disemak segera' : 'Tiada semakan tertunggak' }}</small></article>
-        <article @class(['is-warning', 'has-alert' => $statistics['pending_balances'] > 0, 'is-clear' => $statistics['pending_balances'] === 0])><span>Baki Belum Semak</span><strong data-stat-value="{{ $statistics['pending_balances'] }}">{{ number_format($statistics['pending_balances']) }}</strong><small>{{ $statistics['pending_balances'] > 0 ? 'Perlu disemak segera' : 'Tiada semakan tertunggak' }}</small></article>
-        <article class="is-success"><span>Order Selesai</span><strong data-stat-value="{{ $statistics['orders_completed'] }}">{{ number_format($statistics['orders_completed']) }}</strong><small>Keseluruhan fulfilment selesai</small></article>
+        <article><span>{{ __('ui.total_orders') }}</span><strong data-stat-value="{{ $statistics['orders_total'] }}">{{ number_format($statistics['orders_total']) }}</strong><small>Semua rekod tempahan</small></article>
+        <article><span>{{ __('ui.active_orders') }}</span><strong data-stat-value="{{ $statistics['orders_active'] }}">{{ number_format($statistics['orders_active']) }}</strong><small>Belum selesai atau diarkib</small></article>
+        <article @class(['is-warning', 'has-alert' => $statistics['pending_deposits'] > 0, 'is-clear' => $statistics['pending_deposits'] === 0])><span>{{ __('ui.pending_deposits') }}</span><strong data-stat-value="{{ $statistics['pending_deposits'] }}">{{ number_format($statistics['pending_deposits']) }}</strong><small>{{ $statistics['pending_deposits'] > 0 ? 'Perlu disemak segera' : 'Tiada semakan tertunggak' }}</small></article>
+        <article @class(['is-warning', 'has-alert' => $statistics['pending_balances'] > 0, 'is-clear' => $statistics['pending_balances'] === 0])><span>{{ __('ui.pending_balances') }}</span><strong data-stat-value="{{ $statistics['pending_balances'] }}">{{ number_format($statistics['pending_balances']) }}</strong><small>{{ $statistics['pending_balances'] > 0 ? 'Perlu disemak segera' : 'Tiada semakan tertunggak' }}</small></article>
+        <article class="is-success"><span>{{ __('ui.completed_orders') }}</span><strong data-stat-value="{{ $statistics['orders_completed'] }}">{{ number_format($statistics['orders_completed']) }}</strong><small>Keseluruhan fulfilment selesai</small></article>
     </section>
 
     <section class="admin-panel admin-sales-panel" id="sales-analysis">
         <div class="admin-panel-heading">
-            <div><p class="admin-eyebrow">Prestasi Perniagaan</p><h2>Sales Analysis</h2><small>Jumlah kutipan berdasarkan transaksi yang telah disahkan sebagai PAID.</small></div>
+            <div><p class="admin-eyebrow">{{ __('ui.business_performance') }}</p><h2>{{ __('ui.sales_analysis') }}</h2><small>{{ app()->getLocale() === 'en' ? 'Collections are calculated from transactions confirmed as PAID.' : 'Jumlah kutipan berdasarkan transaksi yang telah disahkan sebagai PAID.' }}</small></div>
             <span class="admin-sales-period">{{ now()->format('Y') }}</span>
         </div>
 
         <div class="admin-sales-summary">
-            <article><span>Hari Ini</span><strong>RM {{ number_format($sales['summary']['today'], 2) }}</strong><small>{{ $sales['summary']['today_transactions'] }} transaksi</small></article>
-            <article><span>Bulan Ini</span><strong>RM {{ number_format($sales['summary']['month'], 2) }}</strong><small @class(['is-up' => $sales['summary']['month_change'] >= 0, 'is-down' => $sales['summary']['month_change'] < 0])>{{ $sales['summary']['month_change'] >= 0 ? '+' : '' }}{{ number_format($sales['summary']['month_change'], 1) }}% berbanding bulan lalu</small></article>
-            <article><span>Tahun Ini</span><strong>RM {{ number_format($sales['summary']['year'], 2) }}</strong><small>{{ $sales['summary']['year_orders'] }} order · {{ $sales['summary']['year_transactions'] }} transaksi</small></article>
-            <article><span>Purata Setiap Order</span><strong>RM {{ number_format($sales['summary']['average_order_value'], 2) }}</strong><small>Berdasarkan kutipan bulan ini</small></article>
-            <article class="is-pending"><span>Bayaran Pending</span><strong>RM {{ number_format($sales['summary']['pending_amount'], 2) }}</strong><small>{{ $sales['summary']['pending_count'] }} transaksi perlu disemak</small></article>
+            <article><span>{{ __('ui.today') }}</span><strong>RM {{ number_format($sales['summary']['today'], 2) }}</strong><small>{{ __('ui.transactions', ['count' => $sales['summary']['today_transactions']]) }}</small></article>
+            <article><span>{{ __('ui.this_month') }}</span><strong>RM {{ number_format($sales['summary']['month'], 2) }}</strong><small @class(['is-up' => $sales['summary']['month_change'] >= 0, 'is-down' => $sales['summary']['month_change'] < 0])>{{ $sales['summary']['month_change'] >= 0 ? '+' : '' }}{{ number_format($sales['summary']['month_change'], 1) }}% {{ app()->getLocale() === 'en' ? 'vs last month' : 'berbanding bulan lalu' }}</small></article>
+            <article><span>{{ __('ui.this_year') }}</span><strong>RM {{ number_format($sales['summary']['year'], 2) }}</strong><small>{{ $sales['summary']['year_orders'] }} {{ app()->getLocale() === 'en' ? 'orders' : 'tempahan' }} · {{ __('ui.transactions', ['count' => $sales['summary']['year_transactions']]) }}</small></article>
+            <article><span>{{ __('ui.average_order') }}</span><strong>RM {{ number_format($sales['summary']['average_order_value'], 2) }}</strong><small>{{ app()->getLocale() === 'en' ? 'Based on this month’s collections' : 'Berdasarkan kutipan bulan ini' }}</small></article>
+            <article class="is-pending"><span>{{ __('ui.pending_payment') }}</span><strong>RM {{ number_format($sales['summary']['pending_amount'], 2) }}</strong><small>{{ __('ui.transactions', ['count' => $sales['summary']['pending_count']]) }}</small></article>
         </div>
 
         <div class="admin-sales-chart-grid">
             <article class="admin-sales-chart">
-                <header><div><strong>Trend Harian</strong><small>14 hari terakhir</small></div></header>
+                <header><div><strong>{{ __('ui.daily_trend') }}</strong><small>{{ app()->getLocale() === 'en' ? 'Last 14 days' : '14 hari terakhir' }}</small></div></header>
                 <div class="admin-bar-chart is-daily" aria-label="Graf jualan harian">
                     @foreach ($sales['daily'] as $point)
                         <div class="admin-bar-column" title="{{ $point['label'] }}: RM {{ number_format($point['amount'], 2) }}"><span class="admin-bar-value">{{ $point['amount'] > 0 ? 'RM'.number_format($point['amount'], 0) : '' }}</span><i style="height: {{ $point['percentage'] }}%"></i><small>{{ $point['label'] }}</small></div>
@@ -58,7 +58,7 @@
             </article>
 
             <article class="admin-sales-chart">
-                <header><div><strong>Trend Bulanan</strong><small>Januari hingga Disember {{ now()->year }}</small></div>@if ($sales['summary']['best_month'])<span>Terbaik: {{ $sales['summary']['best_month']['label'] }}</span>@endif</header>
+                <header><div><strong>{{ __('ui.monthly_trend') }}</strong><small>{{ app()->getLocale() === 'en' ? 'January to December' : 'Januari hingga Disember' }} {{ now()->year }}</small></div>@if ($sales['summary']['best_month'])<span>{{ app()->getLocale() === 'en' ? 'Best' : 'Terbaik' }}: {{ $sales['summary']['best_month']['label'] }}</span>@endif</header>
                 <div class="admin-bar-chart" aria-label="Graf jualan bulanan">
                     @foreach ($sales['monthly'] as $point)
                         <div class="admin-bar-column" title="{{ $point['label'] }}: RM {{ number_format($point['amount'], 2) }}"><span class="admin-bar-value">{{ $point['amount'] > 0 ? 'RM'.number_format($point['amount'], 0) : '' }}</span><i style="height: {{ $point['percentage'] }}%"></i><small>{{ $point['label'] }}</small></div>
@@ -69,7 +69,7 @@
 
         <div class="admin-sales-bottom-grid">
             <article>
-                <h3>Jualan Tahunan</h3>
+                <h3>{{ __('ui.annual_sales') }}</h3>
                 <div class="admin-annual-list">
                     @foreach ($sales['annual'] as $point)
                         <div><span>{{ $point['label'] }}</span><i><b style="width: {{ $point['percentage'] }}%"></b></i><strong>RM {{ number_format($point['amount'], 2) }}</strong></div>
@@ -77,7 +77,7 @@
                 </div>
             </article>
             <article>
-                <h3>Pecahan Kutipan {{ now()->year }}</h3>
+                <h3>{{ __('ui.collection_breakdown', ['year' => now()->year]) }}</h3>
                 <div class="admin-sales-breakdown">
                     @foreach ($sales['breakdown'] as $item)
                         <div><span>{{ $item['label'] }}<small>{{ $item['transactions'] }} transaksi</small></span><strong>RM {{ number_format($item['amount'], 2) }}</strong></div>
@@ -85,11 +85,17 @@
                 </div>
             </article>
             <article class="admin-sales-note">
-                <h3>Perkara Penting</h3>
+                <h3>{{ __('ui.important') }}</h3>
                 <ul>
                     <li><strong>{{ $sales['summary']['pending_count'] }}</strong> bayaran masih menunggu semakan.</li>
                     <li><strong>{{ $sales['summary']['year_orders'] }}</strong> order telah menyumbang kepada jualan tahun ini.</li>
-                    <li>@if ($sales['summary']['best_month'])Bulan terbaik ialah <strong>{{ $sales['summary']['best_month']['label'] }}</strong> dengan RM {{ number_format($sales['summary']['best_month']['amount'], 2) }}.@elseBelum ada jualan berbayar untuk tahun ini.@endif</li>
+                    <li>
+                        @if ($sales['summary']['best_month'])
+                            Bulan terbaik ialah <strong>{{ $sales['summary']['best_month']['label'] }}</strong> dengan RM {{ number_format($sales['summary']['best_month']['amount'], 2) }}.
+                        @else
+                            Belum ada jualan berbayar untuk tahun ini.
+                        @endif
+                    </li>
                 </ul>
                 @if ($sales['summary']['pending_count'] > 0)<a href="{{ route('admin.orders.index', ['attention' => 'pending_payment']) }}">Semak pembayaran sekarang →</a>@endif
             </article>

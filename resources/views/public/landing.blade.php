@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="ms">
+<html lang="{{ app()->getLocale() }}">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -7,6 +7,7 @@
     <title>KingKadKahwin — Kad Kahwin Anda, Direka Dengan Teliti</title>
     <link rel="stylesheet" href="{{ asset('css/landing.css') }}?v={{ filemtime(public_path('css/landing.css')) }}">
     <link rel="stylesheet" href="{{ asset('css/customer-theme.css') }}?v={{ filemtime(public_path('css/customer-theme.css')) }}">
+    <link rel="stylesheet" href="{{ asset('css/language-toggle.css') }}?v={{ filemtime(public_path('css/language-toggle.css')) }}">
 </head>
 <body>
     <header class="site-header">
@@ -18,13 +19,13 @@
             <a href="#kelebihan">Kelebihan</a>
             <a href="#cara-tempah">Cara Tempah</a>
             <a class="nav-progress" href="{{ route('public.orders.progress') }}">Semak Progress</a>
+            @include('partials.language-toggle')
         </nav>
     </header>
 
     <main>
         <section class="hero">
             <div class="hero-copy">
-                <p class="eyebrow">Kad kahwin 4 × 6 • Mudah • Tersusun</p>
                 <h1>Raikan hari istimewa dengan kad yang terasa <em>benar-benar milik anda.</em></h1>
                 <p class="hero-text">Pilih tema, lengkapkan maklumat majlis dan lihat preview kad secara langsung. Kami uruskan perjalanan daripada design hingga kad siap dihantar.</p>
                 <div class="hero-actions">
@@ -142,5 +143,6 @@
     </script>
     @include('public.partials.theme-toggle')
     @include('partials.malay-validation')
+    <script src="{{ asset('js/language-runtime.js') }}?v={{ filemtime(public_path('js/language-runtime.js')) }}"></script>
 </body>
 </html>
