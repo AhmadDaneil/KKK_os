@@ -36,6 +36,12 @@ class BuildCustomerProgressService
             default => [0, 'Status Tempahan', 'Status tempahan anda sedang dikemas kini.'],
         };
 
+        if ($status !== 'DESIGN_IN_PROGRESS' && app()->bound('translator')) {
+            $translationStatus = $status === 'DEPOSIT_PAID' ? 'BOOKED' : $status;
+            $translations = __('ui.progress');
+            [$label, $message] = $translations[array_key_exists($translationStatus, $translations) ? $translationStatus : 'DEFAULT'];
+        }
+
         return [
             'percentage' => $percentage,
             'tone' => $this->tone($percentage),
@@ -55,19 +61,25 @@ class BuildCustomerProgressService
             : $order->designJobs()->get();
 
         $sides = $jobs->mapWithKeys(fn ($job) => [strtoupper((string) $job->side) => $job->status])->all();
-        $labels = ['LELAKI' => 'lelaki', 'PEREMPUAN' => 'perempuan'];
+        $english = app()->getLocale() === 'en';
+        $labels = $english
+            ? ['LELAKI' => "groom's side", 'PEREMPUAN' => "bride's side"]
+            : ['LELAKI' => 'lelaki', 'PEREMPUAN' => 'perempuan'];
         $active = collect($labels)->filter(fn ($label, $side) => isset($sides[$side]))->values();
 
         if ($active->isEmpty()) {
-            return ['Design Sedang Disediakan', 'Designer sedang menyediakan artwork tempahan anda.'];
+            return $english
+                ? ['Design in Progress', 'The designer is preparing your order artwork.']
+                : ['Design Sedang Disediakan', 'Designer sedang menyediakan artwork tempahan anda.'];
         }
 
-        $subject = $active->count() > 1 ? 'lelaki dan perempuan' : $active->first();
+        $subject = $active->count() > 1
+            ? ($english ? "the groom's and bride's sides" : 'lelaki dan perempuan')
+            : $active->first();
 
-        return [
-            "Design {$subject} Sedang Disediakan",
-            "Designer sedang menyediakan design {$subject} untuk tempahan anda.",
-        ];
+        return $english
+            ? ["{$subject} Design in Progress", "The designer is preparing the {$subject} design for your order."]
+            : ["Design {$subject} Sedang Disediakan", "Designer sedang menyediakan design {$subject} untuk tempahan anda."];
     }
 
     private function tone(int $percentage): string
@@ -94,6 +106,10 @@ class BuildCustomerProgressService
             default => null,
         };
 
+        $stageLabels = app()->bound('translator')
+            ? __('ui.stages')
+            : ['Booking', 'Details', 'Design', 'Approval', 'Balance Payment', 'Printing', 'Packaging', 'Shipped / Pickup', 'Completed'];
+
         return collect([
             ['label' => 'Booking', 'description' => 'Tempahan diterima'],
             ['label' => 'Details', 'description' => 'Maklumat disahkan'],
@@ -104,7 +120,8 @@ class BuildCustomerProgressService
             ['label' => 'Packaging', 'description' => 'Kad dibungkus'],
             ['label' => 'Shipped / Pickup', 'description' => 'Dihantar atau diambil'],
             ['label' => 'Completed', 'description' => 'Tempahan selesai'],
-        ])->map(function (array $stage, int $index) use ($currentStage) {
+        ])->map(function (array $stage, int $index) use ($currentStage, $stageLabels) {
+            $stage['label'] = $stageLabels[$index];
             $stage['number'] = $index + 1;
             $stage['state'] = match (true) {
                 $currentStage === null => 'pending',
