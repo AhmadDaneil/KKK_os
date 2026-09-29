@@ -33,4 +33,26 @@ class BuildCustomerProgressServiceTest extends TestCase
             'green at completion' => ['COMPLETED', 100, 'green'],
         ];
     }
+
+    public function test_it_returns_the_established_nine_step_customer_lifecycle(): void
+    {
+        $progress = (new BuildCustomerProgressService)->build(
+            new Order(['status' => 'BALANCE_PENDING'])
+        );
+
+        $this->assertSame([
+            'Booking',
+            'Details',
+            'Design',
+            'Approval',
+            'Balance Payment',
+            'Printing',
+            'Packaging',
+            'Shipped / Pickup',
+            'Completed',
+        ], array_column($progress['stages'], 'label'));
+        $this->assertSame('complete', $progress['stages'][3]['state']);
+        $this->assertSame('current', $progress['stages'][4]['state']);
+        $this->assertSame('pending', $progress['stages'][5]['state']);
+    }
 }

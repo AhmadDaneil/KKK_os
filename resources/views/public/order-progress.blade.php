@@ -34,6 +34,24 @@
                 @if (session('balance_success'))<div class="payment-success-message">{{ session('balance_success') }}</div>@endif
                 <div class="progress-card-heading"><div><small>ORDER ID</small><h2>{{ $orderId }}</h2></div><strong>{{ $progress['percentage'] }}%</strong></div>
                 <div class="public-progress-track" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="{{ $progress['percentage'] }}"><span style="width: {{ $progress['percentage'] }}%"></span></div>
+                <section class="order-lifecycle" aria-labelledby="order-lifecycle-title">
+                    <div class="order-lifecycle-heading">
+                        <div>
+                            <small>PERJALANAN TEMPAHAN</small>
+                            <h4 id="order-lifecycle-title">Progress tempahan anda</h4>
+                        </div>
+                        <span>Status semasa ditanda dengan warna hijau</span>
+                    </div>
+                    <ol class="order-lifecycle-list">
+                        @foreach ($progress['stages'] as $stage)
+                            <li class="is-{{ $stage['state'] }}" @if ($stage['state'] === 'current') aria-current="step" @endif>
+                                <span class="order-lifecycle-marker" aria-hidden="true">{{ $stage['state'] === 'complete' ? '✓' : $stage['number'] }}</span>
+                                <strong>{{ $stage['label'] }}</strong>
+                                <small>{{ $stage['description'] }}</small>
+                            </li>
+                        @endforeach
+                    </ol>
+                </section>
                 <h3>{{ $progress['label'] }}</h3>
                 <p>{{ $progress['message'] }}</p>
                 @if ($artworkReady ?? false)
@@ -113,11 +131,6 @@
                         @if ($shipment['shipped_at'])<p>Dihantar pada {{ $shipment['shipped_at']->timezone('Asia/Kuala_Lumpur')->format('d/m/Y, h:i A') }}</p>@endif
                     </div>
                 @endif
-                <div class="public-stages">
-                    @foreach ($progress['stages'] as $stage)
-                        <div class="@if ($stage['complete']) complete @endif"><i>✓</i><span>{{ $stage['label'] }}</span></div>
-                    @endforeach
-                </div>
             </section>
         @endisset
     </main>

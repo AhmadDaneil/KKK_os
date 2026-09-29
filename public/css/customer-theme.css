@@ -97,6 +97,17 @@ html[data-customer-theme="dark"] .errors { border-color:#b85c5c!important; color
 html[data-customer-theme="dark"] .errors :is(strong,li) { color:#ffdede!important; }
 html[data-customer-theme="dark"] .upload-status { border:1px solid #4c8062!important; color:#dff3e7!important; background:#193c2b!important; }
 html[data-customer-theme="dark"] .upload-status.not-uploaded { border-color:#50675b!important; color:#c3d2ca!important; background:#26322d!important; }
+html[data-customer-theme="dark"] .order-lifecycle { border-color:#40554a!important; }
+html[data-customer-theme="dark"] .order-lifecycle-heading h4 { color:#f4f1e9!important; }
+html[data-customer-theme="dark"] .order-lifecycle-heading>span,
+html[data-customer-theme="dark"] .order-lifecycle-list li { color:#b8c9c0!important; }
+html[data-customer-theme="dark"] .order-lifecycle-list li:not(:last-child)::after { background:#40554a!important; }
+html[data-customer-theme="dark"] .order-lifecycle-marker { border-color:#50675b!important; color:#c3d2ca!important; background:#142019!important; }
+html[data-customer-theme="dark"] .order-lifecycle-list .is-complete { color:#bfe6cc!important; }
+html[data-customer-theme="dark"] .order-lifecycle-list .is-complete .order-lifecycle-marker { border-color:#5ba67d!important; color:#fff!important; background:#286247!important; }
+html[data-customer-theme="dark"] .order-lifecycle-list .is-complete:not(:last-child)::after { background:#4c8062!important; }
+html[data-customer-theme="dark"] .order-lifecycle-list .is-current { color:#f4f1e9!important; }
+html[data-customer-theme="dark"] .order-lifecycle-list .is-current .order-lifecycle-marker { border-color:#73d09a!important; color:#fff!important; background:#2f9b63!important; box-shadow:0 0 0 5px rgba(115,208,154,.18)!important; }
 /* The deposit row needs a complete outline in dark mode, not only a left accent. */
 html[data-customer-theme="dark"] .deposit-public-status { border:1px solid #40554a!important; border-left:4px solid #d3a84f!important; }
 html[data-customer-theme="dark"] .deposit-public-status[data-status="paid"] { border-left-color:#4ca36c!important; }

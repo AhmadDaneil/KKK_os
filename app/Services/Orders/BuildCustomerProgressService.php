@@ -41,7 +41,7 @@ class BuildCustomerProgressService
             'tone' => $this->tone($percentage),
             'label' => $label,
             'message' => $message,
-            'stages' => $this->stages($percentage),
+            'stages' => $this->stages($status),
         ];
     }
 
@@ -54,16 +54,39 @@ class BuildCustomerProgressService
         };
     }
 
-    private function stages(int $percentage): array
+    private function stages(string $status): array
     {
+        $currentStage = match ($status) {
+            'BOOKING_PENDING' => 0,
+            'BOOKED', 'DEPOSIT_PAID', 'DETAILS_INCOMPLETE' => 1,
+            'DETAILS_CONFIRMED', 'READY_FOR_DESIGN', 'DESIGN_IN_PROGRESS' => 2,
+            'DESIGN_READY', 'CORRECTION_REQUESTED' => 3,
+            'DESIGN_APPROVED', 'BALANCE_PENDING' => 4,
+            'PAID', 'READY_FOR_PRINT', 'PRINTING', 'PRINTED' => 5,
+            'READY_FOR_PACKING', 'PACKING', 'PACKED', 'READY_FOR_FULFILMENT' => 6,
+            'READY_FOR_PICKUP', 'SHIPPED' => 7,
+            'COMPLETED', 'ARCHIVED' => 8,
+            default => null,
+        };
+
         return collect([
-            ['label' => 'Maklumat', 'threshold' => 20],
-            ['label' => 'Design', 'threshold' => 40],
-            ['label' => 'Bayaran', 'threshold' => 80],
-            ['label' => 'Cetakan', 'threshold' => 86],
-            ['label' => 'Siap', 'threshold' => 100],
-        ])->map(function (array $stage) use ($percentage) {
-            $stage['complete'] = $percentage >= $stage['threshold'];
+            ['label' => 'Booking', 'description' => 'Tempahan diterima'],
+            ['label' => 'Details', 'description' => 'Maklumat disahkan'],
+            ['label' => 'Design', 'description' => 'Artwork disediakan'],
+            ['label' => 'Approval', 'description' => 'Semakan artwork'],
+            ['label' => 'Balance Payment', 'description' => 'Bayaran penuh'],
+            ['label' => 'Printing', 'description' => 'Kad dicetak'],
+            ['label' => 'Packaging', 'description' => 'Kad dibungkus'],
+            ['label' => 'Shipped / Pickup', 'description' => 'Dihantar atau diambil'],
+            ['label' => 'Completed', 'description' => 'Tempahan selesai'],
+        ])->map(function (array $stage, int $index) use ($currentStage) {
+            $stage['number'] = $index + 1;
+            $stage['state'] = match (true) {
+                $currentStage === null => 'pending',
+                $index < $currentStage => 'complete',
+                $index === $currentStage => 'current',
+                default => 'pending',
+            };
 
             return $stage;
         })->all();
