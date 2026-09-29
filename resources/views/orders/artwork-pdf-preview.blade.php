@@ -8,15 +8,12 @@
         html, body, object { width: 100%; height: 100%; margin: 0; }
         body { overflow: hidden; background: #eef3f0; }
         .watermark { position: fixed; z-index: 2; inset: 0; pointer-events: none; overflow: hidden; }
-        .watermark span { position: absolute; left: -12vmax; width: 140vmax; color: rgba(255, 255, 255, .46); font: 800 clamp(1.45rem, 4vw, 4.8rem)/1 Arial, sans-serif; letter-spacing: .04em; text-align: center; text-shadow: 2px 2px 4px rgba(0, 0, 0, .34); transform: rotate(-45deg); white-space: nowrap; }
-        .watermark span:nth-child(1) { top: 34%; }
-        .watermark span:nth-child(2) { top: 62%; }
+        .watermark span { position: absolute; top: 50%; left: 50%; width: 90%; color: rgba(255, 255, 255, .5); font: 800 clamp(1.1rem, 3vw, 3.2rem)/1 Arial, sans-serif; letter-spacing: .04em; text-align: center; text-shadow: 2px 2px 4px rgba(0, 0, 0, .34); transform: translate(-50%, -50%) rotate(-30deg); white-space: nowrap; }
     </style>
 </head>
 <body>
     <object data="data:application/pdf;base64,{{ $pdf }}" type="application/pdf" aria-label="Artwork preview"></object>
     <div class="watermark" aria-hidden="true">
-        <span>KING KAD KAHWIN · PREVIEW</span>
         <span>KING KAD KAHWIN · PREVIEW</span>
     </div>
 </body>

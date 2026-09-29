@@ -16,7 +16,7 @@ class BuildCustomerProgressService
             'DETAILS_INCOMPLETE' => [20, 'Maklumat Belum Lengkap', 'Lengkapkan maklumat yang diperlukan sebelum membuat pengesahan.'],
             'DETAILS_CONFIRMED' => [35, 'Maklumat Telah Disahkan', 'Maklumat tempahan anda telah berjaya disahkan.'],
             'READY_FOR_DESIGN' => [40, 'Menunggu Proses Design', 'Maklumat anda telah diterima dan sedia untuk proses design.'],
-            'DESIGN_IN_PROGRESS' => [50, 'Design Sedang Disediakan', 'Designer sedang menyediakan artwork tempahan anda.'],
+            'DESIGN_IN_PROGRESS' => [50, ...$this->designProgressCopy($order)],
             'DESIGN_READY' => [60, 'Artwork Sedia Untuk Semakan', 'Artwork anda telah tersedia untuk semakan.'],
             'CORRECTION_REQUESTED' => [60, 'Pembetulan Artwork Sedang Diproses', 'Permintaan pembetulan anda telah diterima.'],
             'DESIGN_APPROVED' => [70, 'Artwork Diluluskan', 'Artwork anda telah diluluskan.'],
@@ -42,6 +42,31 @@ class BuildCustomerProgressService
             'label' => $label,
             'message' => $message,
             'stages' => $this->stages($status),
+        ];
+    }
+
+    /**
+     * @return array{string, string}
+     */
+    private function designProgressCopy(Order $order): array
+    {
+        $jobs = $order->relationLoaded('designJobs')
+            ? $order->designJobs
+            : $order->designJobs()->get();
+
+        $sides = $jobs->mapWithKeys(fn ($job) => [strtoupper((string) $job->side) => $job->status])->all();
+        $labels = ['LELAKI' => 'lelaki', 'PEREMPUAN' => 'perempuan'];
+        $active = collect($labels)->filter(fn ($label, $side) => isset($sides[$side]))->values();
+
+        if ($active->isEmpty()) {
+            return ['Design Sedang Disediakan', 'Designer sedang menyediakan artwork tempahan anda.'];
+        }
+
+        $subject = $active->count() > 1 ? 'lelaki dan perempuan' : $active->first();
+
+        return [
+            "Design {$subject} Sedang Disediakan",
+            "Designer sedang menyediakan design {$subject} untuk tempahan anda.",
         ];
     }
 

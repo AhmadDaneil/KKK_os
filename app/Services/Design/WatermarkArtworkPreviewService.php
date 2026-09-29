@@ -7,7 +7,7 @@ use RuntimeException;
 
 class WatermarkArtworkPreviewService
 {
-    public const VERSION = 3;
+    public const VERSION = 4;
 
     private const TEXT = 'KING KAD KAHWIN · PREVIEW';
 
@@ -45,7 +45,7 @@ class WatermarkArtworkPreviewService
             $image = $this->resizeForCustomerPreview($sourceImage);
             imagedestroy($sourceImage);
 
-            $this->applyLargeWatermark($image);
+            $this->applyCenteredWatermark($image);
 
             $directory = dirname($destination);
             if (! is_dir($directory) && ! mkdir($directory, 0775, true) && ! is_dir($directory)) {
@@ -72,12 +72,27 @@ class WatermarkArtworkPreviewService
     {
         $sourceWidth = imagesx($source);
         $sourceHeight = imagesy($source);
+        $targetRatio = 2 / 3;
+        $sourceRatio = $sourceWidth / $sourceHeight;
+
+        if ($sourceRatio > $targetRatio) {
+            $cropHeight = $sourceHeight;
+            $cropWidth = max(1, (int) round($sourceHeight * $targetRatio));
+            $sourceX = max(0, (int) round(($sourceWidth - $cropWidth) / 2));
+            $sourceY = 0;
+        } else {
+            $cropWidth = $sourceWidth;
+            $cropHeight = max(1, (int) round($sourceWidth / $targetRatio));
+            $sourceX = 0;
+            $sourceY = max(0, (int) round(($sourceHeight - $cropHeight) / 2));
+        }
+
         $scale = min(
             self::PREVIEW_SCALE,
-            self::MAX_PREVIEW_DIMENSION / max($sourceWidth, $sourceHeight)
+            self::MAX_PREVIEW_DIMENSION / max($cropWidth, $cropHeight)
         );
-        $width = max(1, (int) round($sourceWidth * $scale));
-        $height = max(1, (int) round($sourceHeight * $scale));
+        $width = max(1, (int) round($cropWidth * $scale));
+        $height = max(1, (int) round($cropHeight * $scale));
         $preview = imagecreatetruecolor($width, $height);
 
         if ($preview === false) {
@@ -86,12 +101,23 @@ class WatermarkArtworkPreviewService
 
         $white = imagecolorallocate($preview, 255, 255, 255);
         imagefill($preview, 0, 0, $white);
-        imagecopyresampled($preview, $source, 0, 0, 0, 0, $width, $height, $sourceWidth, $sourceHeight);
+        imagecopyresampled(
+            $preview,
+            $source,
+            0,
+            0,
+            $sourceX,
+            $sourceY,
+            $width,
+            $height,
+            $cropWidth,
+            $cropHeight
+        );
 
         return $preview;
     }
 
-    private function applyLargeWatermark(\GdImage $image): void
+    private function applyCenteredWatermark(\GdImage $image): void
     {
         imagealphablending($image, true);
 
@@ -100,46 +126,31 @@ class WatermarkArtworkPreviewService
         $font = $this->watermarkFont();
 
         if ($font !== null && function_exists('imagettftext')) {
-            /*
-             * Customer proofs need a visible, non-croppable mark.  A large
-             * 45-degree brand is repeated through the centre: it overlaps
-             * both the artwork and its background, while the 46% white ink
-             * and soft shadow retain readability without obscuring the proof.
-             */
-            $fontSize = max(24, min(110, (int) round(min($width, $height) / 10)));
-            $angle = -45;
+            $fontSize = max(18, min(72, (int) round(min($width, $height) / 15)));
+            $angle = -30;
             $shadow = imagecolorallocatealpha($image, 0, 0, 0, 84);
-            $ink = imagecolorallocatealpha($image, 255, 255, 255, 68);
+            $ink = imagecolorallocatealpha($image, 255, 255, 255, 64);
             $shadowOffset = max(2, (int) round($fontSize / 18));
 
-            foreach ([0.34, 0.62] as $position) {
-                $x = (int) round(-$width * 0.07);
-                $y = (int) round($height * $position);
+            $box = imagettfbbox($fontSize, $angle, $font, self::TEXT);
+            $minX = min($box[0], $box[2], $box[4], $box[6]);
+            $maxX = max($box[0], $box[2], $box[4], $box[6]);
+            $minY = min($box[1], $box[3], $box[5], $box[7]);
+            $maxY = max($box[1], $box[3], $box[5], $box[7]);
+            $x = (int) round(($width / 2) - (($minX + $maxX) / 2));
+            $y = (int) round(($height / 2) - (($minY + $maxY) / 2));
 
-                imagettftext(
-                    $image,
-                    $fontSize,
-                    $angle,
-                    $x + $shadowOffset,
-                    $y + $shadowOffset,
-                    $shadow,
-                    $font,
-                    self::TEXT
-                );
-                imagettftext($image, $fontSize, $angle, $x, $y, $ink, $font, self::TEXT);
-            }
+            imagettftext($image, $fontSize, $angle, $x + $shadowOffset, $y + $shadowOffset, $shadow, $font, self::TEXT);
+            imagettftext($image, $fontSize, $angle, $x, $y, $ink, $font, self::TEXT);
 
             return;
         }
 
-        // Fallback for installations without FreeType: tile the label so a
-        // full-resolution design is still not exposed.
+        // Fallback for installations without FreeType: keep one centred label.
         $colour = imagecolorallocatealpha($image, 255, 255, 255, 68);
-        for ($y = 10; $y < $height; $y += 50) {
-            for ($x = 10; $x < $width; $x += 120) {
-                imagestring($image, 5, $x, $y, self::TEXT, $colour);
-            }
-        }
+        $textWidth = imagefontwidth(5) * strlen(self::TEXT);
+        $textHeight = imagefontheight(5);
+        imagestring($image, 5, max(0, (int) (($width - $textWidth) / 2)), max(0, (int) (($height - $textHeight) / 2)), self::TEXT, $colour);
     }
 
     private function watermarkFont(): ?string
