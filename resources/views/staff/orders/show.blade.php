@@ -23,12 +23,12 @@
         && $order->designJobs->contains('assigned_user_id', auth()->id());
     $statusLabels = [
         'DETAILS_INCOMPLETE' => 'Maklumat belum lengkap', 'READY_FOR_DESIGN' => 'Sedia untuk design',
-        'DESIGN_IN_PROGRESS' => 'Design sedang berjalan', 'DESIGN_READY' => 'Menunggu semakan customer',
+        'DESIGN_IN_PROGRESS' => 'Reka bentuk sedang berjalan', 'DESIGN_READY' => 'Menunggu semakan customer',
         'CORRECTION_REQUESTED' => 'Pembetulan diperlukan', 'DESIGN_APPROVED' => 'Design diluluskan',
         'BALANCE_PENDING' => 'Menunggu bayaran baki', 'READY_FOR_PRINT' => 'Sedia untuk production',
-        'PRINTING' => 'Production sedang berjalan', 'PRINTED' => 'Production siap',
-        'READY_FOR_PACKING' => 'Sedia untuk packing', 'PACKING' => 'Packing sedang berjalan',
-        'PACKED' => 'Packing siap', 'READY_FOR_PICKUP' => 'Sedia untuk pickup',
+        'PRINTING' => 'Pengeluaran sedang berjalan', 'PRINTED' => 'Pengeluaran siap',
+        'READY_FOR_PACKING' => 'Sedia untuk pembungkusan', 'PACKING' => 'Pembungkusan sedang berjalan',
+        'PACKED' => 'Pembungkusan siap', 'READY_FOR_PICKUP' => 'Sedia untuk pengambilan',
         'SHIPPED' => 'Telah dihantar', 'COMPLETED' => 'Tempahan selesai',
     ];
     $statusTone = static fn (string $status): string => match ($status) {
@@ -39,7 +39,7 @@
     $nextActions = [
         'DETAILS_INCOMPLETE' => 'Dapatkan maklumat customer yang belum lengkap',
         'READY_FOR_DESIGN' => 'Mulakan atau assign kerja design', 'DESIGN_IN_PROGRESS' => 'Teruskan kerja design',
-        'DESIGN_READY' => 'Tunggu semakan artwork daripada customer', 'CORRECTION_REQUESTED' => 'Selesaikan pembetulan artwork',
+                    'DESIGN_READY' => 'Tunggu semakan hasil reka bentuk daripada pelanggan', 'CORRECTION_REQUESTED' => 'Selesaikan pembetulan hasil reka bentuk',
         'DESIGN_APPROVED' => 'Semak bayaran baki', 'BALANCE_PENDING' => 'Semak bayaran baki',
         'READY_FOR_PRINT' => 'Mulakan production', 'PRINTING' => 'Kemas kini atau siapkan production',
         'PRINTED' => 'Mulakan packing', 'READY_FOR_PACKING' => 'Mulakan packing',
@@ -54,7 +54,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>{{ $order->order_id }} - KKK OS Staff</title>
+    <title>{{ $order->order_id }} - Staf KKK OS</title>
 
     <link rel="stylesheet" href="{{ asset('css/staff.css') }}?v={{ filemtime(public_path('css/staff.css')) }}">
 </head>
@@ -108,7 +108,7 @@
 
                 <div class="staff-page-count">
                     {{ $order->package_count }}
-                    {{ $order->package_count == 1 ? 'package' : 'packages' }}
+                    pakej
                 </div>
             </div>
 
@@ -119,7 +119,7 @@
 
             @if ($hasFullQueueView)
                 <nav class="staff-order-sections" aria-label="Bahagian order">
-                    <a href="#customer-data">Pelanggan</a><a href="#design-work">Reka Bentuk</a><a href="#payment">Payment</a><a href="#production">Pengeluaran</a><a href="#packing">Pembungkusan</a><a href="#fulfilment">Pemenuhan Tempahan</a>
+                    <a href="#customer-data">Pelanggan</a><a href="#design-work">Reka Bentuk</a><a href="#payment">Pembayaran</a><a href="#production">Pengeluaran</a><a href="#packing">Pembungkusan</a><a href="#fulfilment">Pemenuhan Tempahan</a>
                 </nav>
             @endif
 
@@ -149,7 +149,7 @@
                         </div>
 
                         <div>
-                            <dt>Booking Payment</dt>
+                            <dt>Bayaran Tempahan</dt>
                             <dd>{{ $order->booking_payment_status ?? '-' }}</dd>
                         </div>
                     </dl>
@@ -186,7 +186,7 @@
 
             <section class="staff-section staff-timeline-section">
                 <div class="staff-lifecycle-heading">
-                    <div><p class="staff-kicker">Perjalanan tempahan</p><h2>Progress tempahan</h2></div>
+                    <div><p class="staff-kicker">Perjalanan tempahan</p><h2>Kemajuan tempahan</h2></div>
                     <span>Status semasa ditandakan dengan warna utama</span>
                 </div>
 
@@ -329,7 +329,7 @@
                                                 rel="noopener noreferrer"
                                                 class="staff-button staff-button-small"
                                             >
-                                                Open Google Maps
+                                                Buka Google Maps
                                             </a>
                                         </div>
                                     @endif
@@ -337,7 +337,7 @@
 
                                 @if ($packageSide->event->contacts->isNotEmpty())
                                     <div class="staff-detail-group">
-                                        <h4>Contacts</h4>
+                                        <h4>Wakil Untuk Dihubungi</h4>
 
                                         <div class="staff-contact-list">
                                             @foreach ($packageSide->event->contacts as $contact)
@@ -365,7 +365,7 @@
                                 <p class="staff-kicker">Photoshop Auto Merge V11</p>
                                 <h3>Prepare this customer order in Photoshop</h3>
                                 <ol>
-                                    <li>Download the customer order CSV.</li>
+                                    <li>Muat turun fail CSV tempahan pelanggan.</li>
                                     <li>Open Photoshop; the approved JavaScript starts automatically.</li>
                                     <li>Select the ROOT folder, then select the downloaded CSV file.</li>
                                 </ol>
@@ -379,7 +379,7 @@
                                     href="{{ route('staff.orders.photoshop.csv', $order) }}"
                                     class="staff-button"
                                 >
-                                    Download Customer CSV
+                                    Muat Turun CSV Pelanggan
                                 </a>
 
                                 <form
@@ -410,7 +410,7 @@
                                 <dl class="staff-detail-list">
                                     <div>
                                         <dt>Ditugaskan</dt>
-                                        <dd>{{ $job->assignedUser?->name ?? 'Unassigned' }}</dd>
+                                        <dd>{{ $job->assignedUser?->name ?? 'Belum ditugaskan' }}</dd>
                                     </div>
 
                                     <div>
@@ -424,7 +424,7 @@
                                     </div>
 
                                     <div>
-                                        <dt>Artwork Versions</dt>
+                                        <dt>Versi Hasil Reka Bentuk</dt>
                                         <dd>{{ $job->artworkVersions->count() }}</dd>
                                     </div>
                                 </dl>
@@ -446,7 +446,7 @@
                                                     type="submit"
                                                     class="staff-button staff-button-primary"
                                                 >
-                                                    Start Design
+                                                    Mulakan Reka Bentuk
                                                 </button>
                                             </form>
                                         @elseif ($job->status === 'CORRECTION_REQUESTED')
@@ -470,10 +470,10 @@
                                             @endphp
                                             <div class="staff-design-upload">
                                                 <div class="staff-design-upload-heading">
-                                                    <h4>Muat Naik Versi Artwork</h4>
+                                                    <h4>Muat Naik Versi Hasil Reka Bentuk</h4>
 
                                                     <p>
-                                                        Upload the editable source artwork and a separate
+                                                        Muat naik fail sumber yang boleh disunting dan
                                                         customer preview.
                                                     </p>
                                                 </div>
@@ -486,16 +486,16 @@
                                                         action="{{ route($operationRoutePrefix.'design-jobs.artwork.store', $job) }}"
                                                         enctype="multipart/form-data"
                                                         class="staff-artwork-form js-staff-confirmation-form js-async-artwork-upload"
-                                                        data-confirm-title="Upload artwork {{ ucfirst(strtolower($job->side)) }}?"
-                                                        data-confirm-message="Pastikan fail source artwork dan customer preview yang dipilih adalah betul. Fail ini akan disimpan sebagai versi artwork baharu."
-                                                        data-confirm-button="Ya, upload artwork"
+                                                        data-confirm-title="Muat naik hasil reka bentuk {{ ucfirst(strtolower($job->side)) }}?"
+                                                        data-confirm-message="Pastikan fail sumber dan pratonton pelanggan yang dipilih adalah betul. Fail ini akan disimpan sebagai versi baharu hasil reka bentuk."
+                                                        data-confirm-button="Ya, muat naik"
                                                     >
                                                         @csrf
                                                 @endif
 
                                                     <div class="staff-field">
                                                         <label for="source-artwork-{{ $job->id }}">
-                                                            Source Artwork
+                                                            Fail Sumber Hasil Reka Bentuk
                                                         </label>
 
                                                         <div class="staff-multi-file-picker" data-file-kind="source artwork">
@@ -508,7 +508,7 @@
                                                             multiple
                                                             required
                                                         >
-                                                            <button type="button" class="staff-file-add" aria-controls="source-artwork-{{ $job->id }}">+ Add File</button>
+                                                            <button type="button" class="staff-file-add" aria-controls="source-artwork-{{ $job->id }}">+ Tambah Fail</button>
                                                             <ul class="staff-selected-files" aria-live="polite"></ul>
                                                         </div>
 
@@ -519,7 +519,7 @@
 
                                                     <div class="staff-field">
                                                         <label for="customer-preview-{{ $job->id }}">
-                                                            Customer Preview
+                                                            Pratonton Pelanggan
                                                         </label>
 
                                                         <div class="staff-multi-file-picker" data-file-kind="customer preview">
@@ -532,12 +532,12 @@
                                                             multiple
                                                             required
                                                         >
-                                                            <button type="button" class="staff-file-add" aria-controls="customer-preview-{{ $job->id }}">+ Add File</button>
+                                                            <button type="button" class="staff-file-add" aria-controls="customer-preview-{{ $job->id }}">+ Tambah Fail</button>
                                                             <ul class="staff-selected-files" aria-live="polite"></ul>
                                                         </div>
 
                                                         <span class="staff-field-help">
-                                                            JPG or PNG only. Maximum 20 MB. Customer image previews are reduced in size and quality, then protected with a large King Kad Kahwin watermark.
+                                                            Format JPG atau PNG sahaja. Saiz maksimum 20 MB. Saiz dan kualiti pratonton pelanggan akan dikurangkan, kemudian dilindungi dengan tera air King Kad Kahwin.
                                                         </span>
                                                     </div>
 
@@ -563,7 +563,7 @@
                                                             type="submit"
                                                             class="staff-button staff-button-primary"
                                                         >
-                                                            Upload Artwork
+                                                            Muat Naik Hasil Reka Bentuk
                                                         </button>
                                                         <p class="staff-upload-notice" role="status" aria-live="polite" hidden></p>
                                                         </form>
@@ -571,7 +571,7 @@
 
                                                 <div class="staff-artwork-ready-panel" data-artwork-ready-panel @if ($job->artworkVersions->isEmpty()) hidden @endif>
                                                         <div>
-                                                            <strong>Artwork telah dimuat naik</strong>
+                                                            <strong>Hasil reka bentuk telah dimuat naik</strong>
                                                             <p>
                                                                 Versi <span data-artwork-version>{{ $job->artworkVersions->max('version_number') }}</span> ialah versi terkini.
                                                                 Hantar kepada customer apabila preview sudah diperiksa.
@@ -582,8 +582,8 @@
                                                             method="POST"
                                                             action="{{ route($operationRoutePrefix.'design-jobs.mark-ready', $job) }}"
                                                             class="js-staff-confirmation-form"
-                                                            data-confirm-title="Hantar artwork {{ ucfirst(strtolower($job->side)) }} kepada customer?"
-                                                            data-confirm-message="Versi {{ $job->artworkVersions->max('version_number') }} akan dihantar untuk semakan customer. Pastikan preview telah diperiksa dan merupakan versi yang betul."
+                                                            data-confirm-title="Hantar hasil reka bentuk {{ ucfirst(strtolower($job->side)) }} kepada pelanggan?"
+                                                            data-confirm-message="Versi {{ $job->artworkVersions->max('version_number') }} akan dihantar untuk semakan pelanggan. Pastikan pratonton telah diperiksa dan merupakan versi yang betul."
                                                             data-confirm-button="Ya, hantar untuk semakan"
                                                         >
                                                             @csrf
@@ -591,18 +591,18 @@
                                                                 type="submit"
                                                                 class="staff-button staff-button-primary"
                                                             >
-                                                                Hantar Untuk Semakan Customer
+                                                                Hantar Untuk Semakan Pelanggan
                                                             </button>
                                                         </form>
                                                     </div>
                                                     <p class="staff-work-message" data-artwork-upload-hint @if ($job->artworkVersions->isNotEmpty()) hidden @endif>
-                                                        Muat naik source artwork dan customer preview terlebih dahulu.
-                                                        Selepas itu, butang untuk menghantar artwork kepada customer akan dipaparkan.
+                                                        Muat naik fail sumber dan pratonton pelanggan terlebih dahulu.
+                                                        Selepas itu, butang untuk menghantar hasil reka bentuk kepada pelanggan akan dipaparkan.
                                                     </p>
                                             </div>
                                         @elseif ($job->status === 'DESIGN_READY')
                                             <p class="staff-work-message">
-                                                Artwork is ready for customer review.
+                                                Hasil reka bentuk sedia untuk semakan pelanggan.
                                             </p>
                                         @endif
                                     </div>
@@ -612,13 +612,13 @@
         method="POST"
         action="{{ route($operationRoutePrefix.'design-jobs.assign', $job) }}"
         class="staff-assignment-form js-staff-confirmation-form js-async-assignment"
-        data-confirm-assignment="Designer"
+        data-confirm-assignment="Pereka"
         data-confirm-mode="{{ $job->assigned_user_id ? 'reassign' : 'assign' }}"
     >
         @csrf
 
         <label for="design-assignee-{{ $job->id }}">
-            {{ $job->assigned_user_id ? 'Reassign Designer' : 'Assign Designer' }}
+            {{ $job->assigned_user_id ? 'Tugaskan Semula Pereka' : 'Tugaskan Pereka' }}
         </label>
 
         <div class="staff-assignment-controls">
@@ -643,7 +643,7 @@
                 type="submit"
                 class="staff-button staff-button-small"
             >
-                {{ $job->assigned_user_id ? 'Reassign' : 'Assign' }}
+                {{ $job->assigned_user_id ? 'Tugaskan Semula' : 'Tugaskan' }}
             </button>
         </div>
     </form>
@@ -663,13 +663,13 @@
                             action="{{ route('staff.orders.design-artworks.store', $order) }}"
                             enctype="multipart/form-data"
                             class="staff-batch-artwork-form js-staff-confirmation-form js-async-artwork-upload"
-                            data-confirm-title="Upload kedua-dua artwork?"
-                            data-confirm-message="Pastikan fail source dan customer preview untuk pakej Lelaki serta Perempuan adalah betul. Kedua-duanya akan disimpan sebagai versi artwork baharu."
+                            data-confirm-title="Muat naik kedua-dua hasil reka bentuk?"
+                            data-confirm-message="Pastikan fail sumber dan pratonton pelanggan untuk pakej Lelaki serta Perempuan adalah betul. Kedua-duanya akan disimpan sebagai versi baharu hasil reka bentuk."
                             data-confirm-button="Ya, upload kedua-duanya"
                         >
                             @csrf
                             <button type="submit" class="staff-button staff-button-primary">
-                                Upload Both Artwork
+                                Muat Naik Kedua-dua Hasil Reka Bentuk
                             </button>
                             <p class="staff-upload-notice" role="status" aria-live="polite" hidden></p>
                         </form>
@@ -679,7 +679,7 @@
 
             @if ($hasFullQueueView)
             <section id="payment" class="staff-section">
-                <h2 class="staff-section-title">Payment</h2>
+                <h2 class="staff-section-title">Pembayaran</h2>
 
                 <div class="staff-work-grid">
                     @forelse ($order->payments as $payment)
@@ -736,7 +736,7 @@
                                             <input id="payment-amount-{{ $payment->id }}" name="amount" type="number" min="0.01" max="9999999999.99" step="0.01" placeholder="Contoh: 100.00" required>
                                             <button class="staff-button staff-button-primary" type="submit">Sahkan Deposit</button>
                                         </form>
-                                        <form method="POST" action="{{ route($operationRoutePrefix.'payments.deposit.reject', $payment) }}" class="staff-reject-payment-form js-staff-confirmation-form" data-confirm-title="Tolak bayaran deposit?" data-confirm-message="Customer perlu menghantar semula bukti pembayaran selepas deposit ditolak. Pastikan sebab penolakan telah ditulis dengan jelas." data-confirm-button="Ya, tolak deposit" data-confirm-tone="danger">
+                                        <form method="POST" action="{{ route($operationRoutePrefix.'payments.deposit.reject', $payment) }}" class="staff-reject-payment-form js-staff-confirmation-form" data-confirm-title="Tolak bayaran deposit?" data-confirm-message="Pelanggan perlu menghantar semula bukti pembayaran selepas deposit ditolak. Pastikan sebab penolakan telah ditulis dengan jelas." data-confirm-button="Ya, tolak deposit" data-confirm-tone="danger">
                                             @csrf
                                             <label for="rejection-reason-{{ $payment->id }}">Sebab penolakan</label>
                                             <textarea id="rejection-reason-{{ $payment->id }}" name="rejection_reason" rows="2" required>{{ old('rejection_reason') }}</textarea>
@@ -750,7 +750,7 @@
                                             <input id="payment-amount-{{ $payment->id }}" name="amount" type="number" min="0.01" max="9999999999.99" step="0.01" placeholder="Contoh: 100.00" required>
                                             <button class="staff-button staff-button-primary" type="submit">Sahkan Bayaran Penuh</button>
                                         </form>
-                                        <form method="POST" action="{{ route($operationRoutePrefix.'payments.balance.reject', $payment) }}" class="staff-reject-payment-form js-staff-confirmation-form" data-confirm-title="Tolak bayaran penuh?" data-confirm-message="Customer perlu menghantar semula bukti pembayaran. Pastikan sebab penolakan telah ditulis dengan jelas." data-confirm-button="Ya, tolak bayaran" data-confirm-tone="danger">
+                                        <form method="POST" action="{{ route($operationRoutePrefix.'payments.balance.reject', $payment) }}" class="staff-reject-payment-form js-staff-confirmation-form" data-confirm-title="Tolak bayaran penuh?" data-confirm-message="Pelanggan perlu menghantar semula bukti pembayaran. Pastikan sebab penolakan telah ditulis dengan jelas." data-confirm-button="Ya, tolak bayaran" data-confirm-tone="danger">
                                             @csrf
                                             <label for="balance-rejection-reason-{{ $payment->id }}">Sebab penolakan</label>
                                             <textarea id="balance-rejection-reason-{{ $payment->id }}" name="rejection_reason" rows="2" required>{{ old('rejection_reason') }}</textarea>
@@ -765,7 +765,7 @@
                         </article>
                     @empty
                         <div class="staff-empty">
-                            No payment transactions.
+                            Tiada transaksi pembayaran.
                         </div>
                     @endforelse
                 </div>
@@ -777,11 +777,11 @@
                     <h2 class="staff-section-title">Tugaskan Staf Pengeluaran</h2>
 
                     <div class="staff-work-grid">
-                        <form method="POST" action="{{ route($operationRoutePrefix.'orders.assign-printing', $order) }}" class="staff-card staff-assignment-form js-staff-confirmation-form js-async-assignment" data-confirm-assignment="Production" data-confirm-mode="{{ $order->printing_assigned_user_id ? 'reassign' : 'assign' }}">
+                        <form method="POST" action="{{ route($operationRoutePrefix.'orders.assign-printing', $order) }}" class="staff-card staff-assignment-form js-staff-confirmation-form js-async-assignment" data-confirm-assignment="Pengeluaran" data-confirm-mode="{{ $order->printing_assigned_user_id ? 'reassign' : 'assign' }}">
                             @csrf
                             <div class="staff-card-heading">
                                 <h3>Pengeluaran</h3>
-                                <span class="staff-status">{{ $order->printingAssignedUser ? 'ASSIGNED' : 'UNASSIGNED' }}</span>
+                                <span class="staff-status">{{ $order->printingAssignedUser ? 'DITUGASKAN' : 'BELUM DITUGASKAN' }}</span>
                             </div>
                             <label for="order-printing-assignee">{{ $order->printing_assigned_user_id ? 'Tugaskan Semula Staf Pengeluaran' : 'Tugaskan Staf Pengeluaran' }}</label>
                             <div class="staff-assignment-controls">
@@ -791,15 +791,15 @@
                                         <option value="{{ $staff->id }}" @selected($order->printing_assigned_user_id === $staff->id)>{{ $staff->name }}</option>
                                     @endforeach
                                 </select>
-                                <button type="submit" class="staff-button staff-button-small">{{ $order->printing_assigned_user_id ? 'Reassign' : 'Assign' }}</button>
+                                <button type="submit" class="staff-button staff-button-small">{{ $order->printing_assigned_user_id ? 'Tugaskan Semula' : 'Tugaskan' }}</button>
                             </div>
                         </form>
 
-                        <form method="POST" action="{{ route($operationRoutePrefix.'orders.assign-packing-fulfilment', $order) }}" class="staff-card staff-assignment-form js-staff-confirmation-form js-async-assignment" data-confirm-assignment="OM (Packing & Fulfilment)" data-confirm-mode="{{ $order->packing_assigned_user_id ? 'reassign' : 'assign' }}">
+                        <form method="POST" action="{{ route($operationRoutePrefix.'orders.assign-packing-fulfilment', $order) }}" class="staff-card staff-assignment-form js-staff-confirmation-form js-async-assignment" data-confirm-assignment="OM (Pembungkusan & Pemenuhan Tempahan)" data-confirm-mode="{{ $order->packing_assigned_user_id ? 'reassign' : 'assign' }}">
                             @csrf
                             <div class="staff-card-heading">
-                                <h3>OM: Packing &amp; Fulfilment</h3>
-                                <span class="staff-status">{{ $order->packingAssignedUser ? 'ASSIGNED' : 'UNASSIGNED' }}</span>
+                                <h3>OM: Pembungkusan &amp; Pemenuhan Tempahan</h3>
+                                <span class="staff-status">{{ $order->packingAssignedUser ? 'DITUGASKAN' : 'BELUM DITUGASKAN' }}</span>
                             </div>
                             <label for="order-packing-assignee">{{ $order->packing_assigned_user_id ? 'Tugaskan Semula OM' : 'Tugaskan OM' }}</label>
                             <div class="staff-assignment-controls">
@@ -809,7 +809,7 @@
                                         <option value="{{ $staff->id }}" @selected($order->packing_assigned_user_id === $staff->id)>{{ $staff->name }}</option>
                                     @endforeach
                                 </select>
-                                <button type="submit" class="staff-button staff-button-small">{{ $order->packing_assigned_user_id ? 'Reassign' : 'Assign' }}</button>
+                                <button type="submit" class="staff-button staff-button-small">{{ $order->packing_assigned_user_id ? 'Tugaskan Semula' : 'Tugaskan' }}</button>
                             </div>
                         </form>
                     </div>
@@ -855,7 +855,7 @@
 
                                     <div>
                                         <dt>Ditugaskan</dt>
-                                        <dd>{{ $job->assignedUser?->name ?? 'Unassigned' }}</dd>
+                                        <dd>{{ $job->assignedUser?->name ?? 'Belum ditugaskan' }}</dd>
                                     </div>
 
                                     <div>
@@ -869,7 +869,7 @@
                                     </div>
 
                                     <div>
-                                        <dt>Progress Updated</dt>
+                                        <dt>Kemajuan Dikemas Kini</dt>
                                         <dd>{{ $job->progress_updated_at?->format('Y-m-d H:i') ?? '-' }}</dd>
                                     </div>
                                 </dl>
@@ -881,9 +881,9 @@
                                         <div class="staff-contact-list">
                                             @foreach ($job->progress_files as $file)
                                                 <div class="staff-contact-row">
-                                                    <span>{{ $file['original_name'] ?? 'Progress file' }}</span>
+                                                    <span>{{ $file['original_name'] ?? 'Fail kemajuan' }}</span>
                                                     <a href="{{ route($operationRoutePrefix.'print-jobs.progress-files.show', ['printJob' => $job, 'file' => $loop->index]) }}" class="staff-button staff-button-small" target="_blank" rel="noopener">
-                                                        View · {{ isset($file['uploaded_at']) ? \Illuminate\Support\Carbon::parse($file['uploaded_at'])->format('Y-m-d H:i') : '-' }}
+                                                        Lihat · {{ isset($file['uploaded_at']) ? \Illuminate\Support\Carbon::parse($file['uploaded_at'])->format('Y-m-d H:i') : '-' }}
                                                     </a>
                                                 </div>
                                             @endforeach
@@ -906,7 +906,7 @@
                                     @elseif ($job->status === 'WAITING_FOR_PAYMENT')
                                         <p class="staff-work-message">Menunggu pengesahan bayaran penuh sebelum cetakan boleh dimulakan.</p>
                                     @elseif ($job->status === 'PRINTING')
-                                        <form method="POST" enctype="multipart/form-data" action="{{ route('staff.print-jobs.progress-files.store', $job) }}" class="staff-packing-complete-form js-staff-confirmation-form js-async-progress-upload" data-confirm-title="Upload progress cetakan {{ ucfirst(strtolower($job->side)) }}?" data-confirm-message="Gambar atau PDF yang dipilih akan disimpan sebagai bukti progress cetakan semasa." data-confirm-button="Ya, upload progress">
+                                        <form method="POST" enctype="multipart/form-data" action="{{ route('staff.print-jobs.progress-files.store', $job) }}" class="staff-packing-complete-form js-staff-confirmation-form js-async-progress-upload" data-confirm-title="Muat naik kemajuan cetakan {{ ucfirst(strtolower($job->side)) }}?" data-confirm-message="Gambar atau PDF yang dipilih akan disimpan sebagai bukti kemajuan cetakan semasa." data-confirm-button="Ya, muat naik kemajuan">
                                             @csrf
                                             <label for="print-progress-{{ $job->id }}">Muat naik kemajuan pengeluaran</label>
                                             <div class="staff-file-picker">
@@ -948,7 +948,7 @@
                         <dl class="staff-detail-list">
                             <div>
                                 <dt>Ditugaskan</dt>
-                                <dd>{{ $order->packingJob->assignedUser?->name ?? 'Unassigned' }}</dd>
+                                <dd>{{ $order->packingJob->assignedUser?->name ?? 'Belum ditugaskan' }}</dd>
                             </div>
 
                             <div>
@@ -984,7 +984,7 @@
                                 <strong>Bukti packing:</strong> {{ $order->packingJob->proof_original_name ?? 'Telah dimuat naik' }}
 
                                 @if (auth()->user()->isOperationManagement())
-                                    <a href="{{ route($operationRoutePrefix.'packing-jobs.proof.show', $order->packingJob) }}" class="staff-button staff-button-small" target="_blank" rel="noopener">View</a>
+                                    <a href="{{ route($operationRoutePrefix.'packing-jobs.proof.show', $order->packingJob) }}" class="staff-button staff-button-small" target="_blank" rel="noopener">Lihat</a>
                                 @endif
                             </div>
                         @endif
@@ -1000,7 +1000,7 @@
                                     @endunless
                                 @endforeach
                                 @if ($order->packingJob->items->every(fn ($item) => $item->verified_present))
-                                    <form method="POST" enctype="multipart/form-data" action="{{ route($operationRoutePrefix.'packing-jobs.mark-packed', $order->packingJob) }}" class="staff-packing-complete-form js-staff-confirmation-form" data-confirm-title="Upload bukti dan tandakan packing siap?" data-confirm-message="{{ $order->fulfilment?->method === 'COURIER' ? 'Pastikan gambar bukti packing, nama courier dan tracking number adalah betul. Packing akan ditandakan siap selepas dihantar.' : 'Pastikan gambar bukti menunjukkan semua barang telah dibungkus dengan lengkap. Packing akan ditandakan siap untuk Self Pickup.' }}" data-confirm-button="Ya, tandakan packed">
+                                    <form method="POST" enctype="multipart/form-data" action="{{ route($operationRoutePrefix.'packing-jobs.mark-packed', $order->packingJob) }}" class="staff-packing-complete-form js-staff-confirmation-form" data-confirm-title="Muat naik bukti dan tandakan pembungkusan selesai?" data-confirm-message="{{ $order->fulfilment?->method === 'COURIER' ? 'Pastikan gambar bukti pembungkusan, nama kurier dan nombor penjejakan adalah betul. Pembungkusan akan ditandakan selesai selepas dihantar.' : 'Pastikan gambar bukti menunjukkan semua barang telah dibungkus dengan lengkap. Pembungkusan akan ditandakan selesai untuk Pengambilan Sendiri.' }}" data-confirm-button="Ya, tandakan selesai dibungkus">
                                         @csrf
                                         <label for="packing-proof">Bukti gambar barang telah dipack</label>
                                         <div class="staff-file-picker">
@@ -1022,7 +1022,7 @@
                 <section id="packing" class="staff-section">
                     <h2 class="staff-section-title">Pembungkusan</h2>
                     <div class="staff-empty">
-                        Packing job akan diwujudkan secara automatik selepas semua kerja cetakan selesai.
+                        Kerja pembungkusan akan diwujudkan secara automatik selepas semua kerja cetakan selesai.
                     </div>
                 </section>
             @endif
@@ -1071,7 +1071,7 @@
                                 </div>
 
                                 <div>
-                                    <dt>Courier</dt>
+                                    <dt>Kurier</dt>
                                     <dd>{{ $order->fulfilmentJob->courier_provider ?? '-' }}</dd>
                                 </div>
 
@@ -1092,7 +1092,7 @@
                             )
                                 <div class="staff-detail-group">
                                     @if ($order->fulfilmentJob->method === 'PICKUP')
-                                        <h4>Pickup Completion</h4>
+                                        <h4>Penyelesaian Pengambilan</h4>
 
                                         <form
                                             method="POST"
@@ -1128,12 +1128,12 @@
                                                 type="submit"
                                                 class="staff-button staff-button-primary"
                                             >
-                                                Mark Pickup Collected
+                                                Tandakan Pesanan Telah Diambil
                                             </button>
                                         </form>
 
                                     @elseif ($order->fulfilmentJob->method === 'COURIER')
-                                        <h4>Serahan kepada Courier</h4>
+                                        <h4>Serahan kepada Kurier</h4>
 
                                         <form
                                             method="POST"
@@ -1199,7 +1199,7 @@
                                                 type="submit"
                                                 class="staff-button staff-button-primary"
                                             >
-                                                Sahkan Serahan kepada Courier
+                                                Sahkan Serahan kepada Kurier
                                             </button>
                                         </form>
                                     @endif
@@ -1250,7 +1250,7 @@
                     remove.type = 'button';
                     remove.className = 'staff-file-delete';
                     remove.textContent = 'Delete';
-                    remove.setAttribute('aria-label', 'Delete ' + file.name);
+                    remove.setAttribute('aria-label', 'Padam ' + file.name);
                     remove.addEventListener('click', function () {
                         selectedFiles.splice(index, 1);
                         syncInput();
@@ -1401,7 +1401,7 @@
 
                 if (!response.ok) {
                     const errors = payload.errors ? Object.values(payload.errors).flat().join(' ') : null;
-                    throw new Error(errors || payload.message || 'Assignment could not be saved.');
+                    throw new Error(errors || payload.message || 'Penugasan tidak dapat disimpan.');
                 }
 
                 form.dataset.confirmMode = 'reassign';
@@ -1413,14 +1413,14 @@
                 }
 
                 if (status) {
-                    status.textContent = 'ASSIGNED';
+                    status.textContent = 'DITUGASKAN';
                 }
 
                 submitButton.textContent = 'Reassign';
-                showAssignmentNotice(form, payload.message || 'Staff berjaya ditugaskan.', false);
+                showAssignmentNotice(form, payload.message || 'Staf berjaya ditugaskan.', false);
             } catch (error) {
                 submitButton.textContent = originalButtonText;
-                showAssignmentNotice(form, error.message || 'Assignment could not be saved.', true);
+                showAssignmentNotice(form, error.message || 'Penugasan tidak dapat disimpan.', true);
             } finally {
                 submitButton.disabled = false;
             }
@@ -1461,7 +1461,7 @@
 
                 if (!response.ok) {
                     const errors = payload.errors ? Object.values(payload.errors).flat().join(' ') : null;
-                    throw new Error(errors || payload.message || 'Progress upload could not be completed.');
+                    throw new Error(errors || payload.message || 'Muat naik kemajuan tidak dapat diselesaikan.');
                 }
 
                 const fileNames = (payload.files || []).map(function (file) {
@@ -1482,7 +1482,7 @@
                     false
                 );
             } catch (error) {
-                showUploadNotice(form, error.message || 'Progress upload could not be completed.', true);
+                showUploadNotice(form, error.message || 'Muat naik kemajuan tidak dapat diselesaikan.', true);
             } finally {
                 submitButton.disabled = false;
                 submitButton.textContent = originalButtonText;
@@ -1510,7 +1510,7 @@
 
                 if (!response.ok) {
                     const errors = payload.errors ? Object.values(payload.errors).flat().join(' ') : null;
-                    throw new Error(errors || payload.message || 'Artwork could not be uploaded.');
+                    throw new Error(errors || payload.message || 'Hasil reka bentuk tidak dapat dimuat naik.');
                 }
 
                 const selector = form.id
@@ -1560,9 +1560,9 @@
                     }
                 });
 
-                showUploadNotice(form, payload.message || 'Artwork uploaded successfully.', false);
+                showUploadNotice(form, payload.message || 'Hasil reka bentuk berjaya dimuat naik.', false);
             } catch (error) {
-                showUploadNotice(form, error.message || 'Artwork could not be uploaded.', true);
+                showUploadNotice(form, error.message || 'Hasil reka bentuk tidak dapat dimuat naik.', true);
             } finally {
                 submitButton.disabled = false;
                 submitButton.textContent = originalButtonText;
@@ -1611,6 +1611,5 @@
         });
     });
 </script>
-<script src="{{ asset('js/language-runtime.js') }}?v={{ filemtime(public_path('js/language-runtime.js')) }}"></script>
 </body>
 </html>

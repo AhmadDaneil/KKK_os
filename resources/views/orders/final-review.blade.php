@@ -14,8 +14,8 @@
         $hasSecondCouple = collect($secondCouple)->filter(fn ($value) => filled($value))->isNotEmpty();
 
         $fulfilmentLabel = match ($review['fulfilment']['method'] ?? null) {
-            'COURIER' => 'Pos / Courier',
-            'PICKUP' => 'Self Pickup di KKK',
+            'COURIER' => 'Pos / Kurier',
+            'PICKUP' => 'Pengambilan Sendiri di KKK',
             default => $review['fulfilment']['method'] ?? '-',
         };
     @endphp
@@ -234,11 +234,11 @@
                     </div>
                 </div>
 
-                <h3>Contact Person</h3>
+                <h3>Wakil Untuk Dihubungi</h3>
                 <ol class="contact-list">
                     @foreach ($event['contacts'] as $contact)
                         <li>
-                            <span class="contact-number">Contact {{ $contact['contact_number'] }}</span>
+                            <span class="contact-number">Wakil {{ $contact['contact_number'] }}</span>
                             <strong>{{ $contact['name'] ?: '-' }}</strong>
                             <span> — {{ $contact['phone'] ?: '-' }}</span>
                         </li>

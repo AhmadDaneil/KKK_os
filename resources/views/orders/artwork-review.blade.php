@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="referrer" content="no-referrer">
-    <title>Semakan Artwork - {{ $order->order_id }}</title>
+    <title>Semakan Hasil Reka Bentuk - {{ $order->order_id }}</title>
     <link rel="stylesheet" href="{{ asset('css/artwork-review.css') }}?v={{ filemtime(public_path('css/artwork-review.css')) }}">
     <link rel="stylesheet" href="{{ asset('css/customer-theme.css') }}?v={{ filemtime(public_path('css/customer-theme.css')) }}">
 </head>
@@ -12,17 +12,17 @@
 @php
     $orderStatusLabels = [
         'READY_FOR_DESIGN' => 'Menunggu Proses Design',
-        'DESIGN_IN_PROGRESS' => 'Artwork Sedang Disediakan',
-        'DESIGN_READY' => 'Artwork Sedia Untuk Semakan',
+        'DESIGN_IN_PROGRESS' => 'Hasil Reka Bentuk Sedang Disediakan',
+        'DESIGN_READY' => 'Hasil Reka Bentuk Sedia Untuk Semakan',
         'CORRECTION_REQUESTED' => 'Pembetulan Sedang Diproses',
-        'DESIGN_APPROVED' => 'Artwork Telah Diluluskan',
+        'DESIGN_APPROVED' => 'Hasil Reka Bentuk Telah Diluluskan',
         'BALANCE_PAYMENT_PENDING' => 'Menunggu Bayaran Baki',
         'PAID' => 'Bayaran Selesai',
         'PRINTING' => 'Dalam Proses Cetakan',
         'PRINTED' => 'Cetakan Selesai',
-        'PACKING' => 'Dalam Proses Packing',
-        'PACKED' => 'Packing Selesai',
-        'READY_FOR_FULFILMENT' => 'Sedia Untuk Penghantaran / Pickup',
+        'PACKING' => 'Dalam Proses Pembungkusan',
+        'PACKED' => 'Pembungkusan Selesai',
+        'READY_FOR_FULFILMENT' => 'Sedia Untuk Penghantaran / Pengambilan',
         'SHIPPED' => 'Telah Dihantar',
         'COMPLETED' => 'Selesai',
         'CANCELLED' => 'Dibatalkan',
@@ -30,7 +30,7 @@
     ];
 
     $jobStatusLabels = [
-        'READY_FOR_DESIGN' => 'Menunggu Designer',
+        'READY_FOR_DESIGN' => 'Menunggu Pereka',
         'DESIGN_IN_PROGRESS' => 'Sedang Disediakan',
         'DESIGN_READY' => 'Sedia Untuk Semakan',
         'CORRECTION_REQUESTED' => 'Pembetulan Diminta',
@@ -44,9 +44,9 @@
     <header class="page-header">
         <div>
             <p class="eyebrow">King Kad Kahwin</p>
-            <h1>Semakan Artwork</h1>
+            <h1>Semakan Hasil Reka Bentuk</h1>
             <p class="header-copy">
-                Sila semak artwork setiap pakej dengan teliti sebelum meluluskan atau meminta pembetulan.
+                Sila semak hasil reka bentuk bagi setiap pakej dengan teliti sebelum meluluskan atau meminta pembetulan.
             </p>
         </div>
 
@@ -83,8 +83,8 @@
 
     @if ($isTerminalOrder)
         <div class="alert alert-neutral">
-            Order ini telah {{ $order->status === 'CANCELLED' ? 'dibatalkan' : 'diarkibkan' }}.
-            Tiada tindakan artwork baharu boleh dibuat.
+            Tempahan ini telah {{ $order->status === 'CANCELLED' ? 'dibatalkan' : 'diarkibkan' }}.
+            Tiada tindakan baharu terhadap hasil reka bentuk boleh dibuat.
         </div>
     @endif
 
@@ -122,7 +122,7 @@
                 @if ($latestArtwork)
                     <div class="artwork-meta">
                         <div>
-                            <span class="meta-label">Versi Artwork</span>
+                            <span class="meta-label">Versi Hasil Reka Bentuk</span>
                             <strong>v{{ $latestArtwork->version_number }}</strong>
                         </div>
 
@@ -139,7 +139,7 @@
                                         target="_blank"
                                         rel="noopener noreferrer"
                                     >
-                                        {{ count($previewFiles) > 1 ? 'Lihat Artwork '.($previewIndex + 1) : 'Lihat Artwork' }}
+                                        {{ count($previewFiles) > 1 ? 'Lihat Hasil Reka Bentuk '.($previewIndex + 1) : 'Lihat Hasil Reka Bentuk' }}
                                     </a>
                                 @endforeach
                             </div>
@@ -148,8 +148,8 @@
                 @else
                     <div class="empty-state customer-empty-state">
                         <span class="customer-empty-icon" aria-hidden="true">✦</span>
-                        <strong>Artwork belum sedia untuk dilihat.</strong>
-                        <p>Pasukan design sedang menyiapkan artwork untuk pakej ini. Kami akan kemas kini status sebaik sahaja ia sedia untuk semakan.</p>
+                        <strong>Hasil reka bentuk belum sedia untuk dilihat.</strong>
+                        <p>Pasukan reka bentuk sedang menyiapkan hasil reka bentuk untuk pakej ini. Kami akan mengemas kini status sebaik sahaja ia sedia untuk semakan.</p>
                     </div>
                 @endif
 
@@ -162,9 +162,9 @@
                 @elseif ($designJob->status === 'DESIGN_READY' && ! $isTerminalOrder)
                     <div class="review-actions">
                         <div class="action-panel approve-panel">
-                            <h3>Artwork sudah betul?</h3>
+                            <h3>Hasil reka bentuk sudah betul?</h3>
                             <p>
-                                Pastikan nama, tarikh, masa, alamat, nombor telefon dan semua maklumat pada artwork telah diperiksa.
+                                Pastikan nama, tarikh, masa, alamat, nombor telefon dan semua maklumat pada hasil reka bentuk telah diperiksa.
                             </p>
 
                             <form
@@ -174,13 +174,13 @@
                                     'designJobId' => $designJob->id,
                                 ]) }}"
                                 class="js-artwork-confirmation-form"
-                                data-confirm-title="Luluskan artwork {{ ucfirst(strtolower($designJob->side)) }}?"
-                                data-confirm-message="Artwork ini akan dianggap betul dan diteruskan ke proses pembayaran baki serta cetakan."
-                                data-confirm-button="Ya, luluskan artwork"
+                                data-confirm-title="Luluskan hasil reka bentuk {{ ucfirst(strtolower($designJob->side)) }}?"
+                                data-confirm-message="Hasil reka bentuk ini akan dianggap betul dan diteruskan ke proses pembayaran baki serta cetakan."
+                                data-confirm-button="Ya, luluskan hasil reka bentuk"
                             >
                                 @csrf
                                 <button type="submit" class="button button-primary">
-                                    Luluskan Artwork
+                                    Luluskan Hasil Reka Bentuk
                                 </button>
                             </form>
                         </div>
@@ -241,22 +241,22 @@
                 @elseif ($designJob->status === 'CORRECTION_REQUESTED')
                     <div class="state-panel state-warning">
                         <h3>Pembetulan telah diminta</h3>
-                        <p>Designer sedang membuat pembetulan. Artwork versi baharu akan tersedia selepas siap.</p>
+                        <p>Pereka sedang membuat pembetulan. Versi baharu hasil reka bentuk akan tersedia selepas siap.</p>
                     </div>
                 @elseif ($designJob->status === 'DESIGN_APPROVED')
                     <div class="state-panel state-success">
-                        <h3>Artwork telah diluluskan</h3>
+                        <h3>Hasil reka bentuk telah diluluskan</h3>
                         <p>Tiada tindakan lanjut diperlukan untuk pakej ini.</p>
                     </div>
                 @elseif ($designJob->status === 'DESIGN_IN_PROGRESS')
                     <div class="state-panel state-neutral">
-                        <h3>Artwork sedang disediakan</h3>
-                        <p>Sila tunggu sehingga designer menandakan artwork sedia untuk semakan.</p>
+                        <h3>Hasil reka bentuk sedang disediakan</h3>
+                        <p>Sila tunggu sehingga pereka menandakan hasil reka bentuk sebagai sedia untuk semakan.</p>
                     </div>
                 @elseif ($designJob->status === 'READY_FOR_DESIGN')
                     <div class="state-panel state-neutral">
-                        <h3>Menunggu proses design</h3>
-                        <p>Artwork untuk pakej ini belum mula diproses.</p>
+                        <h3>Menunggu proses reka bentuk</h3>
+                        <p>Hasil reka bentuk untuk pakej ini belum mula diproses.</p>
                     </div>
                 @endif
 
@@ -288,8 +288,8 @@
         @empty
             <div class="empty-state customer-empty-state page-empty-state">
                 <span class="customer-empty-icon" aria-hidden="true">✦</span>
-                <strong>Belum ada artwork untuk disemak.</strong>
-                <p>Tempahan anda masih menunggu proses design. Anda tidak perlu membuat apa-apa buat masa ini.</p>
+                <strong>Belum ada hasil reka bentuk untuk disemak.</strong>
+                <p>Tempahan anda masih menunggu proses reka bentuk. Anda tidak perlu membuat apa-apa buat masa ini.</p>
             </div>
         @endforelse
     </main>
@@ -299,7 +299,7 @@
             class="button button-secondary"
             href="{{ route('public.orders.progress', ['order_id' => $order->order_id]) }}"
         >
-            &larr; Kembali ke Semak Progress
+            &larr; Kembali ke Semak Kemajuan
         </a>
     </div>
 </div>

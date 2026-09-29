@@ -17,7 +17,7 @@
         <nav aria-label="Navigasi utama">
             <a href="#kelebihan">Kelebihan</a>
             <a href="#cara-tempah">Cara Tempah</a>
-            <a class="nav-progress" href="{{ route('public.orders.progress') }}">Semak Progress</a>
+            <a class="nav-progress" href="{{ route('public.orders.progress') }}">Semak Kemajuan</a>
         </nav>
     </header>
 
@@ -25,15 +25,15 @@
         <section class="hero">
             <div class="hero-copy">
                 <h1>Raikan hari istimewa dengan kad yang terasa <em>benar-benar milik anda.</em></h1>
-                <p class="hero-text">Pilih tema, lengkapkan maklumat majlis dan lihat preview kad secara langsung. Kami uruskan perjalanan daripada design hingga kad siap dihantar.</p>
+                <p class="hero-text">Pilih tema, lengkapkan maklumat majlis dan lihat pratonton kad secara langsung. Kami uruskan proses daripada reka bentuk hingga kad siap dihantar.</p>
                 <div class="hero-actions">
                     <a class="button button-primary" href="{{ route('public.orders.create') }}"><span>Tempah Sekarang</span><span class="button-arrow" aria-hidden="true">→</span></a>
-                    <a class="button button-secondary" href="{{ route('public.orders.progress') }}"><span>Semak Progress</span></a>
+                    <a class="button button-secondary" href="{{ route('public.orders.progress') }}"><span>Semak Kemajuan</span></a>
                 </div>
                 <ul class="trust-list" aria-label="Kelebihan utama">
-                    <li><span>✓</span> Live preview</li>
-                    <li><span>✓</span> Autosave maklumat</li>
-                    <li><span>✓</span> Progress online</li>
+                    <li><span>✓</span> Pratonton langsung</li>
+                    <li><span>✓</span> Simpan automatik</li>
+                    <li><span>✓</span> Kemajuan dalam talian</li>
                 </ul>
             </div>
 
@@ -46,8 +46,8 @@
                             decoding="async"
                             draggable="false">
                         <span class="landing-card-watermark" aria-hidden="true">
-                            <span>KING KAD KAHWIN · PREVIEW</span>
-                            <span>KING KAD KAHWIN · PREVIEW</span>
+                            <span>KING KAD KAHWIN · PRATONTON</span>
+                            <span>KING KAD KAHWIN · PRATONTON</span>
                         </span>
                     </article>
                 </div>
@@ -59,8 +59,8 @@
                             decoding="async"
                             draggable="false">
                         <span class="landing-card-watermark" aria-hidden="true">
-                            <span>KING KAD KAHWIN · PREVIEW</span>
-                            <span>KING KAD KAHWIN · PREVIEW</span>
+                            <span>KING KAD KAHWIN · PRATONTON</span>
+                            <span>KING KAD KAHWIN · PRATONTON</span>
                         </span>
                     </article>
                 </div>
@@ -72,8 +72,8 @@
                             decoding="async"
                             draggable="false">
                         <span class="landing-card-watermark" aria-hidden="true">
-                            <span>KING KAD KAHWIN · PREVIEW</span>
-                            <span>KING KAD KAHWIN · PREVIEW</span>
+                            <span>KING KAD KAHWIN · PRATONTON</span>
+                            <span>KING KAD KAHWIN · PRATONTON</span>
                         </span>
                     </article>
                 </div>
@@ -85,8 +85,8 @@
                             decoding="async"
                             draggable="false">
                         <span class="landing-card-watermark" aria-hidden="true">
-                            <span>KING KAD KAHWIN · PREVIEW</span>
-                            <span>KING KAD KAHWIN · PREVIEW</span>
+                            <span>KING KAD KAHWIN · PRATONTON</span>
+                            <span>KING KAD KAHWIN · PRATONTON</span>
                         </span>
                     </article>
                 </div>
@@ -94,9 +94,9 @@
         </section>
 
         <section class="feature-strip" id="kelebihan">
-            <article><span>01</span><div><h2>Pilihan design</h2><p>Tema untuk pelbagai gaya majlis, daripada minimal hingga klasik.</p></div></article>
+            <article><span>01</span><div><h2>Pilihan reka bentuk</h2><p>Tema untuk pelbagai gaya majlis, daripada minimal hingga klasik.</p></div></article>
             <article><span>02</span><div><h2>Semakan lebih mudah</h2><p>Lihat nama dan maklumat majlis pada kad sambil mengisi borang.</p></div></article>
-            <article><span>03</span><div><h2>Status yang jelas</h2><p>Ikuti progress design, cetakan, packing dan penghantaran.</p></div></article>
+            <article><span>03</span><div><h2>Status yang jelas</h2><p>Ikuti kemajuan reka bentuk, cetakan, pembungkusan dan penghantaran.</p></div></article>
         </section>
 
         <section class="final-cta">
@@ -111,9 +111,9 @@
             </div>
             <ol>
                 <li><b>1</b><div><h3>Isi maklumat</h3><p>Pilih pakej dan lengkapkan butiran pengantin serta majlis.</p></div></li>
-                <li><b>2</b><div><h3>Semak & sahkan</h3><p>Lihat preview, betulkan maklumat dan sahkan apabila tepat.</p></div></li>
-                <li><b>3</b><div><h3>Kami siapkan</h3><p>Pasukan kami mengurus design, cetakan dan pembungkusan.</p></div></li>
-                <li><b>4</b><div><h3>Ikuti progress</h3><p>Masukkan ID Tempahan pada bila-bila masa untuk melihat perkembangan.</p></div></li>
+                <li><b>2</b><div><h3>Semak & sahkan</h3><p>Lihat pratonton, betulkan maklumat dan sahkan apabila tepat.</p></div></li>
+                <li><b>3</b><div><h3>Kami siapkan</h3><p>Pasukan kami mengurus reka bentuk, cetakan dan pembungkusan.</p></div></li>
+                <li><b>4</b><div><h3>Ikuti kemajuan</h3><p>Masukkan ID Tempahan pada bila-bila masa untuk melihat perkembangan.</p></div></li>
             </ol>
         </section>
     </main>
@@ -167,6 +167,5 @@
     </script>
     @include('public.partials.theme-toggle')
     @include('partials.malay-validation')
-    <script src="{{ asset('js/language-runtime.js') }}?v={{ filemtime(public_path('js/language-runtime.js')) }}"></script>
 </body>
 </html>

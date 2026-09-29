@@ -5,10 +5,10 @@
     $ordersIndexRoute = $isAdminPortal ? 'admin.orders.index' : 'staff.orders.index';
     $ordersShowRoute = $isAdminPortal ? 'admin.orders.show' : 'staff.orders.show';
     $workstreamDescriptions = [
-        'design' => 'Order yang masih memerlukan design, semakan artwork atau pembetulan.',
-        'printing' => 'Order yang menunggu atau sedang dalam proses production.',
-        'packing' => 'Order yang telah siap production dan masih memerlukan pembungkusan oleh OM.',
-        'fulfilment' => 'Order yang telah dibungkus dan masih menunggu serahan atau kutipan.',
+        'design' => 'Tempahan yang masih memerlukan reka bentuk, semakan hasil reka bentuk atau pembetulan.',
+        'printing' => 'Tempahan yang menunggu atau sedang dalam proses pengeluaran.',
+        'packing' => 'Tempahan yang telah siap dicetak dan masih memerlukan pembungkusan oleh OM.',
+        'fulfilment' => 'Tempahan yang telah dibungkus dan masih menunggu serahan atau kutipan.',
     ];
     $workstreamLabels = [
         'design' => 'Reka Bentuk',
@@ -23,18 +23,18 @@
         'DEPOSIT_PAID' => 'Deposit diterima',
         'DETAILS_CONFIRMED' => 'Maklumat disahkan',
         'READY_FOR_DESIGN' => 'Sedia untuk design',
-        'DESIGN_IN_PROGRESS' => 'Design sedang berjalan',
+        'DESIGN_IN_PROGRESS' => 'Reka bentuk sedang berjalan',
         'DESIGN_READY' => 'Menunggu semakan customer',
         'CORRECTION_REQUESTED' => 'Pembetulan diperlukan',
         'DESIGN_APPROVED' => 'Design diluluskan',
         'BALANCE_PENDING' => 'Menunggu bayaran baki',
         'PAID' => 'Bayaran selesai',
         'READY_FOR_PRINT' => 'Sedia untuk production',
-        'PRINTING' => 'Production sedang berjalan',
-        'PRINTED' => 'Production siap',
+        'PRINTING' => 'Pengeluaran sedang berjalan',
+        'PRINTED' => 'Pengeluaran siap',
         'READY_FOR_PACKING' => 'Sedia untuk packing',
-        'PACKING' => 'Packing sedang berjalan',
-        'PACKED' => 'Packing siap',
+        'PACKING' => 'Pembungkusan sedang berjalan',
+        'PACKED' => 'Pembungkusan siap',
         'READY_FOR_FULFILMENT' => 'Sedia untuk serahan',
         'READY_FOR_PICKUP' => 'Sedia untuk pickup',
         'SHIPPED' => 'Telah dihantar',
@@ -48,18 +48,18 @@
     };
     $nextActions = [
         'DETAILS_INCOMPLETE' => 'Dapatkan maklumat customer yang belum lengkap',
-        'BOOKED', 'DEPOSIT_PAID' => 'Semak maklumat tempahan customer',
-        'DETAILS_CONFIRMED', 'READY_FOR_DESIGN' => 'Mulakan atau assign kerja design',
-        'DESIGN_IN_PROGRESS' => 'Teruskan kerja design',
-        'DESIGN_READY' => 'Tunggu semakan artwork daripada customer',
-        'CORRECTION_REQUESTED' => 'Selesaikan pembetulan artwork',
+        'BOOKED', 'DEPOSIT_PAID' => 'Semak maklumat tempahan pelanggan',
+        'DETAILS_CONFIRMED', 'READY_FOR_DESIGN' => 'Mulakan atau tugaskan kerja reka bentuk',
+        'DESIGN_IN_PROGRESS' => 'Teruskan kerja reka bentuk',
+        'DESIGN_READY' => 'Tunggu semakan hasil reka bentuk daripada pelanggan',
+        'CORRECTION_REQUESTED' => 'Selesaikan pembetulan hasil reka bentuk',
         'DESIGN_APPROVED', 'BALANCE_PENDING' => 'Semak bayaran baki',
-        'PAID', 'READY_FOR_PRINT' => 'Mulakan production',
-        'PRINTING' => 'Kemas kini atau siapkan production',
-        'PRINTED', 'READY_FOR_PACKING' => 'Mulakan packing',
-        'PACKING' => 'Sahkan item dan siapkan packing',
-        'PACKED', 'READY_FOR_FULFILMENT' => 'Aturkan serahan atau pickup',
-        'READY_FOR_PICKUP' => 'Maklumkan customer untuk pickup',
+        'PAID', 'READY_FOR_PRINT' => 'Mulakan pengeluaran',
+        'PRINTING' => 'Kemas kini atau siapkan pengeluaran',
+        'PRINTED', 'READY_FOR_PACKING' => 'Mulakan pembungkusan',
+        'PACKING' => 'Sahkan item dan siapkan pembungkusan',
+        'PACKED', 'READY_FOR_FULFILMENT' => 'Aturkan serahan atau pengambilan',
+        'READY_FOR_PICKUP' => 'Maklumkan pelanggan untuk pengambilan',
         'SHIPPED' => 'Pantau penghantaran',
         'COMPLETED' => 'Tiada tindakan lanjut diperlukan',
     ];
@@ -79,7 +79,7 @@
         @include('staff.partials.sidebar')
         <div class="staff-workspace">
             <header class="staff-topbar">
-                <div><p class="staff-kicker">{{ auth()->user()->isAdmin() ? 'Operasi Admin' : ($workstreamLabel ?? 'Pengurusan Operasi') }}</p><h1>{{ $workstreamLabel ? 'Senarai '.$workstreamLabel : 'Semua Tempahan' }}</h1></div>
+                <div><p class="staff-kicker">{{ auth()->user()->isAdmin() ? 'Operasi Pentadbir' : ($workstreamLabel ?? 'Pengurusan Operasi') }}</p><h1>{{ $workstreamLabel ? 'Senarai '.$workstreamLabel : 'Semua Tempahan' }}</h1></div>
                 <div class="staff-topbar-actions">
                     <form class="js-logout-form staff-logout-profile" method="POST" action="{{ route($logoutRoute) }}">@csrf<button type="submit"><span class="staff-topbar-avatar" aria-hidden="true"></span><span>{{ __('ui.logout') }}</span></button></form>
                 </div>
@@ -100,32 +100,32 @@
                         href="{{ route($dashboardRoute) }}"
                         class="staff-back-link"
                     >
-                        &larr; Dashboard
+                        &larr; Papan Pemuka
                     </a>
 
                     <h1>{{ $workstreamLabel ? 'Senarai '.$workstreamLabel : 'Semua Tempahan' }}</h1>
 
                     <p>
                         @if (auth()->user()->canMonitorAllDepartments())
-                            {{ $workstreamDescriptions[$workstream] ?? 'Pantau semua order dan kerja operasi KKK OS.' }}
+                            {{ $workstreamDescriptions[$workstream] ?? 'Pantau semua tempahan dan kerja operasi KKK OS.' }}
                         @else
-                            Lihat order yang mempunyai kerja assigned kepada anda.
+                            Lihat tempahan yang mempunyai kerja yang ditugaskan kepada anda.
                         @endif
                     </p>
                 </div>
 
                 <div class="staff-page-count">
-                    {{ $orders->total() }} order
+                    {{ $orders->total() }} tempahan
                 </div>
             </div>
 
             <form class="staff-order-filter" method="GET" action="{{ route($ordersIndexRoute) }}">
                 @if ($workstream)<input type="hidden" name="workstream" value="{{ $workstream }}">@endif
                 @if (request('attention'))<input type="hidden" name="attention" value="{{ request('attention') }}">@endif
-                <div class="staff-filter-heading"><strong>Cari &amp; tapis order</strong><small>Gunakan ID Tempahan, nama customer atau status kerja.</small></div>
-                <label><span>Cari order atau customer</span><input type="search" name="search" value="{{ request('search') }}" placeholder="ID Tempahan, nama, email atau telefon"></label>
+                <div class="staff-filter-heading"><strong>Cari &amp; tapis tempahan</strong><small>Gunakan ID Tempahan, nama pelanggan atau status kerja.</small></div>
+                <label><span>Cari tempahan atau pelanggan</span><input type="search" name="search" value="{{ request('search') }}" placeholder="ID Tempahan, nama, e-mel atau telefon"></label>
                 <label><span>Status tempahan</span><select name="status"><option value="">Semua status</option><option value="{{ \App\Models\Order::STATUS_FILTER_NOT_COMPLETED }}" @selected(request('status') === \App\Models\Order::STATUS_FILTER_NOT_COMPLETED)>Belum selesai</option>@foreach ($statusOptions as $status)<option value="{{ $status }}" @selected(request('status') === $status)>{{ $statusLabels[$status] ?? str_replace('_', ' ', $status) }}</option>@endforeach</select></label>
-                <div class="staff-filter-actions"><button class="staff-button staff-button-primary" type="submit">Tapis order</button>@if (request()->hasAny(['search', 'status', 'attention']))<a class="staff-button" href="{{ route($ordersIndexRoute, array_filter(['workstream' => $workstream])) }}">Kosongkan</a>@endif</div>
+                <div class="staff-filter-actions"><button class="staff-button staff-button-primary" type="submit">Tapis tempahan</button>@if (request()->hasAny(['search', 'status', 'attention']))<a class="staff-button" href="{{ route($ordersIndexRoute, array_filter(['workstream' => $workstream])) }}">Kosongkan</a>@endif</div>
             </form>
 
             @if (request()->hasAny(['search', 'status', 'attention']))
@@ -159,19 +159,19 @@
                             <div class="staff-order-meta">
                                 <span>
                                     {{ $order->package_count }}
-                                    {{ $order->package_count == 1 ? 'package' : 'packages' }}
+                                    pakej
                                 </span>
 
                                 @if ($order->card_quantity)
                                     <span>
-                                        {{ $order->card_quantity }} cards
+                                        {{ $order->card_quantity }} kad
                                     </span>
                                 @endif
                             </div>
 
                             <div class="staff-order-next-action">
                                 <span>Tindakan seterusnya</span>
-                                <strong>{{ $nextActions[$order->status] ?? 'Buka order untuk semakan' }}</strong>
+                                <strong>{{ $nextActions[$order->status] ?? 'Buka tempahan untuk semakan' }}</strong>
                             </div>
                         </div>
 
@@ -214,7 +214,7 @@
                                 @foreach ($order->designJobs as $job)
                                     @if ($job->assigned_user_id === auth()->id())
                                         <div class="staff-work-row">
-                                            <span>Design {{ $job->side }}</span>
+                                            <span>Reka Bentuk {{ $job->side }}</span>
                                             <strong>{{ $job->status }}</strong>
                                         </div>
                                     @endif
@@ -223,14 +223,14 @@
                                 @if ($order->printJobs->where('assigned_user_id', auth()->id())->isNotEmpty())
                                     @foreach ($order->printJobs->where('assigned_user_id', auth()->id()) as $job)
                                             <div class="staff-work-row">
-                                        <span>Production {{ $job->side }}</span>
+                                        <span>Pengeluaran {{ $job->side }}</span>
                                                 <strong>{{ $job->status }}</strong>
                                             </div>
                                     @endforeach
                                 @elseif ($order->printing_assigned_user_id === auth()->id())
                                     <div class="staff-work-row">
                                         <span>Pengeluaran</span>
-                                        <strong>ASSIGNED · WAITING FOR ARTWORK APPROVAL</strong>
+                                        <strong>DITUGASKAN · MENUNGGU KELULUSAN ARTWORK</strong>
                                     </div>
                                 @endif
                             @elseif (auth()->user()->hasStaffRole(\App\Models\User::ROLE_OM))
@@ -245,7 +245,7 @@
                                 @elseif ($order->packing_assigned_user_id === auth()->id())
                                     <div class="staff-work-row">
                                         <span>Pembungkusan</span>
-                                        <strong>ASSIGNED · WAITING FOR PACKING JOB</strong>
+                                        <strong>DITUGASKAN · MENUNGGU KERJA PEMBUNGKUSAN</strong>
                                     </div>
                                 @endif
                             @endif
@@ -263,7 +263,7 @@
                                 <form
                                     method="POST"
                                     action="{{ route($isAdminPortal ? 'admin.orders.destroy' : 'staff.orders.destroy', $order) }}"
-                                    onsubmit="return confirm('Delete order {{ $order->order_id }}? All order information, payments and workflow records will be permanently removed.');"
+                                    onsubmit="return confirm('Padam tempahan {{ $order->order_id }}? Semua maklumat tempahan, pembayaran dan rekod aliran kerja akan dipadam secara kekal.');"
                                 >
                                     @csrf
                                     @method('DELETE')
@@ -275,35 +275,35 @@
                 @empty
                     <div class="staff-empty">
                         @if ($workstream)
-                            Tiada order aktif dalam {{ $workstreamLabel }} Queue.
+                            Tiada tempahan aktif dalam senarai {{ $workstreamLabel }}.
                         @elseif (auth()->user()->canMonitorAllDepartments())
-                            Tiada order tersedia.
+                            Tiada tempahan tersedia.
                         @else
-                            Tiada order assigned kepada anda.
+                            Tiada tempahan ditugaskan kepada anda.
                         @endif
                     </div>
                 @endforelse
             </div>
 
             @if ($orders->hasPages())
-                <nav class="staff-pagination" aria-label="Orders pagination">
+                <nav class="staff-pagination" aria-label="Penomboran halaman tempahan">
                     <div class="staff-pagination-summary">
-                        Showing {{ $orders->firstItem() }}
-                        to {{ $orders->lastItem() }}
-                        of {{ $orders->total() }} results
+                        Memaparkan {{ $orders->firstItem() }}
+                        hingga {{ $orders->lastItem() }}
+                        daripada {{ $orders->total() }} hasil
                     </div>
 
                     <div class="staff-pagination-links">
                         @if ($orders->onFirstPage())
                             <span class="staff-pagination-link is-disabled">
-                                Previous
+                                Sebelumnya
                             </span>
                         @else
                             <a
                                 href="{{ $orders->previousPageUrl() }}"
                                 class="staff-pagination-link"
                             >
-                                Previous
+                                Sebelumnya
                             </a>
                         @endif
 
@@ -330,11 +330,11 @@
                                 href="{{ $orders->nextPageUrl() }}"
                                 class="staff-pagination-link"
                             >
-                                Next
+                                Seterusnya
                             </a>
                         @else
                             <span class="staff-pagination-link is-disabled">
-                                Next
+                                Seterusnya
                             </span>
                         @endif
                     </div>
@@ -344,6 +344,5 @@
         </div>
     </div>
     @include('staff.partials.logout-confirmation')
-    <script src="{{ asset('js/language-runtime.js') }}?v={{ filemtime(public_path('js/language-runtime.js')) }}"></script>
 </body>
 </html>

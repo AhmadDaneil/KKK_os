@@ -7,7 +7,7 @@
     $canMonitorOperations = $staffUser->canMonitorAllDepartments();
     $canViewDesignQueue = $canMonitorOperations || $staffUser->hasStaffRole(\App\Models\User::ROLE_DESIGNER);
     $canViewProductionQueue = $canMonitorOperations || $staffUser->hasStaffRole(\App\Models\User::ROLE_PRODUCTION);
-    $roleLabel = $staffUser->isAdmin() ? 'Administrator' : match ($staffUser->role) {
+    $roleLabel = $staffUser->isAdmin() ? 'Pentadbir' : match ($staffUser->role) {
         \App\Models\User::ROLE_OM => 'Pengurusan Operasi',
         \App\Models\User::ROLE_CUSTOMER_SERVICE => 'Khidmat Pelanggan',
         \App\Models\User::ROLE_PRODUCTION => 'Pengeluaran',
@@ -21,7 +21,7 @@
         <span><strong>KKK OS</strong><small>{{ $staffUser->isAdmin() ? __('ui.operations') : __('ui.staff_operations') }}</small></span>
     </a>
 
-    <nav class="staff-nav" aria-label="Staff navigation">
+    <nav class="staff-nav" aria-label="Navigasi staf">
         @if ($isAdminPortal)
             <section class="staff-nav-section">
                 <h2>{{ __('ui.management') }}</h2>

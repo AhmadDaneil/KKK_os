@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Login — KKK OS</title>
+    <title>Log Masuk Pentadbir — KKK OS</title>
     <link rel="stylesheet" href="{{ asset('css/login.css') }}">
 </head>
 <body class="login-page login-page--admin">
@@ -11,13 +11,13 @@
         <section class="login-story" aria-label="King Kad Kahwin">
             <div class="login-brand">
                 <span class="login-mark">KKK</span>
-                <div><strong>King Kad Kahwin</strong><span>OPERATIONS SYSTEM</span></div>
+                <div><strong>King Kad Kahwin</strong><span>SISTEM OPERASI</span></div>
             </div>
             <div class="login-story-content">
                 <span class="login-eyebrow">PANDANGAN MENYELURUH</span>
                 <h2>Urus pasukan. <br>Gerakkan operasi.</h2>
-                <p>Satukan pengurusan staff dan pantau perjalanan operasi dalam satu ruang yang teratur.</p>
-                <div class="login-tags"><span>Pengurusan staff</span><span>Pemantauan operasi</span></div>
+                <p>Satukan pengurusan staf dan pantau perjalanan operasi dalam satu ruang yang teratur.</p>
+                <div class="login-tags"><span>Pengurusan staf</span><span>Pemantauan operasi</span></div>
             </div>
             <div class="login-story-footer"><span class="login-dot"></span> Satu pasukan. Satu tujuan.</div>
             <div class="login-orbit login-orbit--one" aria-hidden="true"></div>
@@ -26,8 +26,8 @@
         <section class="login-panel" aria-labelledby="login-title">
             <div class="login-heading">
                 <span class="login-eyebrow">SELAMAT KEMBALI</span>
-                <h1 id="login-title">Admin Login<span>.</span></h1>
-                <p>Log masuk untuk mengurus akaun staff dan memantau keseluruhan operasi.</p>
+                <h1 id="login-title">Log Masuk Pentadbir<span>.</span></h1>
+                <p>Log masuk untuk mengurus akaun staf dan memantau keseluruhan operasi.</p>
             </div>
             @if ($errors->any())
                 <div class="login-alert" role="alert">{{ $errors->first() }}</div>
@@ -35,7 +35,7 @@
             <form method="POST" action="{{ route('admin.login.store') }}" class="login-form">
                 @csrf
                 <div class="login-field">
-                    <label for="email">E-mel Admin</label>
+                    <label for="email">E-mel Pentadbir</label>
                     <input id="email" type="email" name="email" value="{{ old('email') }}" placeholder="nama@kingkadkahwin.com" required autofocus autocomplete="email">
                 </div>
                 <div class="login-field">

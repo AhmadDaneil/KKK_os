@@ -65,7 +65,7 @@ class PublicOrderJourneyTest extends TestCase
     {
         $this->get(route('public.orders.create'))
             ->assertOk()
-            ->assertSeeInOrder(['Kembali', 'Semak Progress'])
+            ->assertSeeInOrder(['Kembali', 'Semak Kemajuan'])
             ->assertSee('href="'.route('home').'"', false)
             ->assertSee('href="'.route('public.orders.progress').'"', false)
             ->assertSee('header-link nav-progress', false);
@@ -144,7 +144,7 @@ class PublicOrderJourneyTest extends TestCase
             ->assertOk()
             ->assertSee($order->order_id)
             ->assertSee('50%')
-            ->assertSee('Design Sedang Disediakan')
+            ->assertSee('Reka Bentuk Sedang Disediakan')
             ->assertDontSee('Nama Sulit')
             ->assertDontSee('sulit@example.com')
             ->assertDontSee('0199999999');

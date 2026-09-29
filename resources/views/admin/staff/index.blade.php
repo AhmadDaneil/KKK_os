@@ -6,11 +6,11 @@
 @section('content')
     @php
         $roleLabels = [
-            'ADMIN' => 'Admin',
-            'OPERATION_MANAGEMENT' => 'OM (Packing & Fulfilment)',
+            'ADMIN' => 'Pentadbir',
+            'OPERATION_MANAGEMENT' => 'OM (Pembungkusan & Pemenuhan Tempahan)',
             'CUSTOMER_SERVICE' => 'Khidmat Pelanggan',
-            'DESIGNER' => 'Designer',
-            'PRODUCTION' => 'Production',
+            'DESIGNER' => 'Pereka',
+            'PRODUCTION' => 'Pengeluaran',
         ];
     @endphp
 
@@ -23,8 +23,8 @@
         <div class="admin-panel-heading"><div><p class="admin-eyebrow">Akaun baharu</p><h2>Tambah Staf</h2></div></div>
         <form class="admin-form admin-create-form" method="POST" action="{{ route('admin.staff.store') }}">
             @csrf
-            <div><label for="new-name">Nama penuh</label><input id="new-name" name="name" value="{{ old('name') }}" placeholder="e.g. Nur Aisyah" required></div>
-            <div><label for="new-email">E-mel</label><input id="new-email" type="email" name="email" value="{{ old('email') }}" placeholder="e.g. aisyah@kkk.local" required></div>
+            <div><label for="new-name">Nama penuh</label><input id="new-name" name="name" value="{{ old('name') }}" placeholder="Contoh: Nur Aisyah" required></div>
+            <div><label for="new-email">E-mel</label><input id="new-email" type="email" name="email" value="{{ old('email') }}" placeholder="Contoh: aisyah@kkk.local" required></div>
             <div><label for="new-role">Jabatan / Role</label><select id="new-role" name="role" required>@foreach ($roleLabels as $value => $label)<option value="{{ $value }}" @selected(old('role') === $value)>{{ $label }}</option>@endforeach</select></div>
             <div><label for="new-password">Kata laluan sementara</label><input id="new-password" type="password" name="password" minlength="8" required></div>
             <div><label for="new-password-confirmation">Ulang kata laluan</label><input id="new-password-confirmation" type="password" name="password_confirmation" minlength="8" required></div>

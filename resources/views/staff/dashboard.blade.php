@@ -1,15 +1,22 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 @php
     $dashboardUser = auth()->user();
     $canMonitorOperations = $dashboardUser->canMonitorAllDepartments();
     $canViewDesignQueue = $canMonitorOperations || $dashboardUser->hasStaffRole(\App\Models\User::ROLE_DESIGNER);
     $canViewProductionQueue = $canMonitorOperations || $dashboardUser->hasStaffRole(\App\Models\User::ROLE_PRODUCTION);
+    $roleLabels = [
+        'OPERATION_MANAGEMENT' => 'Pengurusan Operasi',
+        'DESIGNER' => 'Pereka',
+        'PRODUCTION' => 'Pengeluaran',
+        'CUSTOMER_SERVICE' => 'Khidmat Pelanggan',
+        'ADMIN' => 'Pentadbir',
+    ];
 @endphp
 <html lang="ms">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard Staf - KKK OS</title>
+    <title>Papan Pemuka Staf - KKK OS</title>
     <link rel="stylesheet" href="{{ asset('css/staff.css') }}?v={{ filemtime(public_path('css/staff.css')) }}">
 </head>
 <body @class(['admin-operations-mode' => auth()->user()->isAdmin()]) data-staff-theme="{{ $dashboardUser->staff_theme }}">
@@ -18,7 +25,7 @@
 
         <div class="staff-workspace">
             <header class="staff-topbar">
-                <div><p class="staff-kicker">{{ $dashboardUser->isAdmin() ? __('ui.operations') : str_replace('_', ' ', $dashboardUser->role) }}</p><h1>{{ __('ui.staff_dashboard') }}</h1></div>
+                <div><p class="staff-kicker">{{ $dashboardUser->isAdmin() ? __('ui.operations') : ($roleLabels[$dashboardUser->role] ?? 'Staf') }}</p><h1>{{ __('ui.staff_dashboard') }}</h1></div>
                 <div class="staff-topbar-actions">
                     <form class="js-logout-form staff-logout-profile" method="POST" action="{{ route('staff.logout') }}">@csrf<button type="submit"><span class="staff-topbar-avatar" aria-hidden="true"></span><span>{{ __('ui.logout') }}</span></button></form>
                 </div>
@@ -37,13 +44,13 @@
                     @php($attentionTotal = array_sum($attention))
                     <section class="staff-attention-panel" aria-labelledby="staff-attention-title">
                         <div class="staff-attention-heading">
-                            <div><p class="staff-kicker">Tindakan Operation Management</p><h2 id="staff-attention-title">Memerlukan Perhatian</h2></div>
+                            <div><p class="staff-kicker">Tindakan Pengurusan Operasi</p><h2 id="staff-attention-title">Memerlukan Perhatian</h2></div>
                             <span class="staff-attention-total @if ($attentionTotal > 0) has-alert @endif">{{ $attentionTotal > 0 ? $attentionTotal.' tindakan' : 'Semua selesai' }}</span>
                         </div>
                         <div class="staff-attention-grid">
                             @foreach ([
                                 ['key' => 'pending_payments', 'label' => 'Semakan Bayaran', 'description' => 'Bayaran yang perlu diluluskan atau ditolak', 'icon' => 'RM', 'params' => ['attention' => 'pending_payment']],
-                                ['key' => 'unassigned_design', 'label' => 'Reka Bentuk Belum Ditugaskan', 'description' => 'Tugaskan pereka untuk memulakan artwork', 'icon' => 'RB', 'params' => ['workstream' => 'design', 'attention' => 'unassigned_design']],
+                                ['key' => 'unassigned_design', 'label' => 'Reka Bentuk Belum Ditugaskan', 'description' => 'Tugaskan pereka untuk memulakan hasil reka bentuk', 'icon' => 'RB', 'params' => ['workstream' => 'design', 'attention' => 'unassigned_design']],
                                 ['key' => 'unassigned_printing', 'label' => 'Pengeluaran Belum Ditugaskan', 'description' => 'Tugaskan staf cetakan untuk memulakan pengeluaran', 'icon' => 'CT', 'params' => ['workstream' => 'printing', 'attention' => 'unassigned_printing']],
                                 ['key' => 'unassigned_packing', 'label' => 'Pembungkusan Belum Ditugaskan', 'description' => 'Tugaskan OM untuk pembungkusan dan pemenuhan tempahan', 'icon' => 'PK', 'params' => ['workstream' => 'packing', 'attention' => 'unassigned_packing']],
                             ] as $item)
@@ -60,7 +67,7 @@
                 @if ($dashboardUser->hasStaffRole(\App\Models\User::ROLE_DESIGNER))
                     <section class="staff-attention-panel staff-designer-attention" aria-labelledby="designer-attention-title">
                         <div class="staff-attention-heading">
-                            <div><p class="staff-kicker">Tindakan Designer</p><h2 id="designer-attention-title">Memerlukan Perhatian</h2></div>
+                            <div><p class="staff-kicker">Tindakan Pereka</p><h2 id="designer-attention-title">Memerlukan Perhatian</h2></div>
                             <span class="staff-attention-total @if ($designerAttention > 0) has-alert @endif">{{ $designerAttention > 0 ? $designerAttention.' tugasan' : 'Tiada tindakan diperlukan' }}</span>
                         </div>
                         <div class="staff-attention-card @if ($designerAttention > 0) has-alert @else is-clear @endif">
@@ -73,7 +80,7 @@
                     @php($productionTotal = array_sum($productionAttention))
                     <section class="staff-attention-panel staff-production-attention" aria-labelledby="production-attention-title">
                         <div class="staff-attention-heading">
-                            <div><p class="staff-kicker">Tindakan Production</p><h2 id="production-attention-title">Memerlukan Perhatian</h2></div>
+                            <div><p class="staff-kicker">Tindakan Pengeluaran</p><h2 id="production-attention-title">Memerlukan Perhatian</h2></div>
                             <span class="staff-attention-total @if ($productionTotal > 0) has-alert @endif">{{ $productionTotal > 0 ? $productionTotal.' tugasan' : 'Tiada tindakan diperlukan' }}</span>
                         </div>
                         <div class="staff-attention-grid">
@@ -93,7 +100,7 @@
 
                     @if ($canViewDesignQueue)
                     <section class="staff-dashboard-group">
-                        <div class="staff-dashboard-group-heading"><span class="staff-group-number">02</span><div><h2>Reka Bentuk</h2><p>Data disahkan, proses gabungan dan semakan artwork.</p></div></div>
+                        <div class="staff-dashboard-group-heading"><span class="staff-group-number">02</span><div><h2>Reka Bentuk</h2><p>Data disahkan, proses gabungan dan semakan hasil reka bentuk.</p></div></div>
                         <a href="{{ route('staff.orders.index', ['workstream' => 'design']) }}" class="staff-feature-card"><span class="staff-feature-icon">RB</span><div><h3>{{ __('ui.design_queue') }}</h3><p>Urus tempahan yang sedia untuk reka bentuk, sedang disediakan atau memerlukan pembetulan.</p></div><span class="staff-card-arrow">→</span></a>
                     </section>
                     @endif
@@ -117,6 +124,5 @@
         </div>
     </div>
     @include('staff.partials.logout-confirmation')
-    <script src="{{ asset('js/language-runtime.js') }}?v={{ filemtime(public_path('js/language-runtime.js')) }}"></script>
 </body>
 </html>

@@ -13,7 +13,7 @@
         <span class="live-preview-avatar" aria-hidden="true">K</span>
 
         <div>
-            <strong id="live-preview-title">Live Card Preview</strong>
+                <strong id="live-preview-title">Pratonton Kad Langsung</strong>
             <small><span aria-hidden="true"></span> Kad 4 × 6 · dikemas kini secara langsung</small>
         </div>
 
@@ -23,8 +23,8 @@
     <div class="live-preview-body" id="live-preview-panel" data-live-preview-body hidden>
         <div class="live-preview-heading">
             <div>
-                <p class="eyebrow">Live Preview</p>
-                <h2>Preview Kad Kahwin</h2>
+                <p class="eyebrow">Pratonton Langsung</p>
+                <h2>Pratonton Kad Kahwin</h2>
             </div>
             <span>Anggaran paparan</span>
         </div>
@@ -119,6 +119,6 @@
         </div>
     @endforeach
 
-        <p class="preview-note">Preview ini membantu semakan susun atur. Hasil cetakan sebenar mungkin berbeza sedikit mengikut design yang dipilih.</p>
+    <p class="preview-note">Pratonton ini membantu semakan susun atur. Hasil cetakan sebenar mungkin berbeza sedikit mengikut reka bentuk yang dipilih.</p>
     </div>
 </aside>
