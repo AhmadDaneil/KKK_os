@@ -89,6 +89,8 @@ html[data-customer-theme="dark"] .progress-stage { color:#aebeb5!important; }
 html[data-customer-theme="dark"] .stage-dot { border-color:#71877b!important; background:#142019!important; }
 html[data-customer-theme="dark"] .progress-stage.is-complete { color:#e7f7ed!important; }
 html[data-customer-theme="dark"] .progress-stage.is-complete .stage-dot { border-color:#73d09a!important; background:#2f9b63!important; box-shadow:0 0 0 3px rgba(115,208,154,.18); }
+html[data-customer-theme="dark"] .progress-stage.is-current { color:#f4f1e9!important; }
+html[data-customer-theme="dark"] .progress-stage.is-current .stage-dot { border-color:#73d09a!important; background:#142019!important; box-shadow:0 0 0 3px rgba(115,208,154,.18); }
 html[data-customer-theme="dark"] .autosave-status[data-state="saved"] { color:#78d5a0!important; }
 html[data-customer-theme="dark"] .autosave-status[data-state="saving"] { color:#8fc4e8!important; }
 html[data-customer-theme="dark"] .autosave-status[data-state="error"] { color:#ffaaa4!important; }
