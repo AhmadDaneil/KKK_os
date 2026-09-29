@@ -17,6 +17,52 @@
         'fulfilment' => 'Fulfilment',
     ];
     $workstreamLabel = $workstreamLabels[$workstream] ?? null;
+    $statusLabels = [
+        'DETAILS_INCOMPLETE' => 'Maklumat belum lengkap',
+        'BOOKED' => 'Tempahan diterima',
+        'DEPOSIT_PAID' => 'Deposit diterima',
+        'DETAILS_CONFIRMED' => 'Maklumat disahkan',
+        'READY_FOR_DESIGN' => 'Sedia untuk design',
+        'DESIGN_IN_PROGRESS' => 'Design sedang berjalan',
+        'DESIGN_READY' => 'Menunggu semakan customer',
+        'CORRECTION_REQUESTED' => 'Pembetulan diperlukan',
+        'DESIGN_APPROVED' => 'Design diluluskan',
+        'BALANCE_PENDING' => 'Menunggu bayaran baki',
+        'PAID' => 'Bayaran selesai',
+        'READY_FOR_PRINT' => 'Sedia untuk production',
+        'PRINTING' => 'Production sedang berjalan',
+        'PRINTED' => 'Production siap',
+        'READY_FOR_PACKING' => 'Sedia untuk packing',
+        'PACKING' => 'Packing sedang berjalan',
+        'PACKED' => 'Packing siap',
+        'READY_FOR_FULFILMENT' => 'Sedia untuk serahan',
+        'READY_FOR_PICKUP' => 'Sedia untuk pickup',
+        'SHIPPED' => 'Telah dihantar',
+        'COMPLETED' => 'Tempahan selesai',
+    ];
+    $statusTone = static fn (string $status): string => match ($status) {
+        'DETAILS_INCOMPLETE', 'CORRECTION_REQUESTED' => 'attention',
+        'DESIGN_READY', 'BALANCE_PENDING', 'READY_FOR_PICKUP', 'SHIPPED' => 'waiting',
+        'COMPLETED' => 'complete',
+        default => 'active',
+    };
+    $nextActions = [
+        'DETAILS_INCOMPLETE' => 'Dapatkan maklumat customer yang belum lengkap',
+        'BOOKED', 'DEPOSIT_PAID' => 'Semak maklumat tempahan customer',
+        'DETAILS_CONFIRMED', 'READY_FOR_DESIGN' => 'Mulakan atau assign kerja design',
+        'DESIGN_IN_PROGRESS' => 'Teruskan kerja design',
+        'DESIGN_READY' => 'Tunggu semakan artwork daripada customer',
+        'CORRECTION_REQUESTED' => 'Selesaikan pembetulan artwork',
+        'DESIGN_APPROVED', 'BALANCE_PENDING' => 'Semak bayaran baki',
+        'PAID', 'READY_FOR_PRINT' => 'Mulakan production',
+        'PRINTING' => 'Kemas kini atau siapkan production',
+        'PRINTED', 'READY_FOR_PACKING' => 'Mulakan packing',
+        'PACKING' => 'Sahkan item dan siapkan packing',
+        'PACKED', 'READY_FOR_FULFILMENT' => 'Aturkan serahan atau pickup',
+        'READY_FOR_PICKUP' => 'Maklumkan customer untuk pickup',
+        'SHIPPED' => 'Pantau penghantaran',
+        'COMPLETED' => 'Tiada tindakan lanjut diperlukan',
+    ];
 @endphp
 <!DOCTYPE html>
 <html lang="{{ app()->getLocale() }}">
@@ -75,16 +121,19 @@
             <form class="staff-order-filter" method="GET" action="{{ route($ordersIndexRoute) }}">
                 @if ($workstream)<input type="hidden" name="workstream" value="{{ $workstream }}">@endif
                 @if (request('attention'))<input type="hidden" name="attention" value="{{ request('attention') }}">@endif
-                <label><span>Cari order/customer</span><input name="search" value="{{ request('search') }}" placeholder="Order ID, nama, email atau telefon"></label>
-                <label><span>Status order</span><select name="status"><option value="">Semua status</option><option value="{{ \App\Models\Order::STATUS_FILTER_NOT_COMPLETED }}" @selected(request('status') === \App\Models\Order::STATUS_FILTER_NOT_COMPLETED)>NOT COMPLETED</option>@foreach ($statusOptions as $status)<option value="{{ $status }}" @selected(request('status') === $status)>{{ str_replace('_', ' ', $status) }}</option>@endforeach</select></label>
-                <button class="staff-button staff-button-primary" type="submit">Tapis</button>
-                @if (request()->hasAny(['search', 'status']))<a class="staff-button" href="{{ route($ordersIndexRoute, array_filter(['workstream' => $workstream, 'attention' => request('attention')])) }}">Reset</a>@endif
+                <div class="staff-filter-heading"><strong>Cari &amp; tapis order</strong><small>Gunakan Order ID, nama customer atau status kerja.</small></div>
+                <label><span>Cari order atau customer</span><input type="search" name="search" value="{{ request('search') }}" placeholder="Order ID, nama, email atau telefon"></label>
+                <label><span>Status tempahan</span><select name="status"><option value="">Semua status</option><option value="{{ \App\Models\Order::STATUS_FILTER_NOT_COMPLETED }}" @selected(request('status') === \App\Models\Order::STATUS_FILTER_NOT_COMPLETED)>Belum selesai</option>@foreach ($statusOptions as $status)<option value="{{ $status }}" @selected(request('status') === $status)>{{ $statusLabels[$status] ?? str_replace('_', ' ', $status) }}</option>@endforeach</select></label>
+                <div class="staff-filter-actions"><button class="staff-button staff-button-primary" type="submit">Tapis order</button>@if (request()->hasAny(['search', 'status', 'attention']))<a class="staff-button" href="{{ route($ordersIndexRoute, array_filter(['workstream' => $workstream])) }}">Kosongkan</a>@endif</div>
             </form>
 
-            @if (auth()->user()->canMonitorAllDepartments() && request('attention'))
+            @if (request()->hasAny(['search', 'status', 'attention']))
                 <div class="staff-filter-notice">
-                    Memaparkan order untuk tindakan: <strong>{{ str_replace('_', ' ', request('attention')) }}</strong>
-                    <a href="{{ route($ordersIndexRoute, array_filter(['workstream' => $workstream])) }}">Buang penapis</a>
+                    <span>Penapis aktif:</span>
+                    @if (request('search'))<strong>“{{ request('search') }}”</strong>@endif
+                    @if (request('status'))<strong>{{ $statusLabels[request('status')] ?? str_replace('_', ' ', request('status')) }}</strong>@endif
+                    @if (request('attention'))<strong>{{ str_replace('_', ' ', request('attention')) }}</strong>@endif
+                    <a href="{{ route($ordersIndexRoute, array_filter(['workstream' => $workstream])) }}">Kosongkan penapis</a>
                 </div>
             @endif
 
@@ -97,8 +146,8 @@
                                     {{ $order->order_id }}
                                 </strong>
 
-                                <span class="staff-status">
-                                    {{ str_replace('_', ' ', $order->status) }}
+                                <span class="staff-status staff-status--{{ $statusTone($order->status) }}">
+                                    {{ $statusLabels[$order->status] ?? str_replace('_', ' ', $order->status) }}
                                 </span>
                             </div>
 
@@ -117,6 +166,11 @@
                                         {{ $order->card_quantity }} cards
                                     </span>
                                 @endif
+                            </div>
+
+                            <div class="staff-order-next-action">
+                                <span>Tindakan seterusnya</span>
+                                <strong>{{ $nextActions[$order->status] ?? 'Buka order untuk semakan' }}</strong>
                             </div>
                         </div>
 
@@ -201,7 +255,7 @@
                                 href="{{ route($ordersShowRoute, $order->order_id) }}"
                                 class="staff-order-open"
                             >
-                                View order &rarr;
+                                Buka &amp; bertindak &rarr;
                             </a>
 
                             @if (auth()->user()->isOperationManagement())
