@@ -427,6 +427,12 @@ class StaffDesignWorkflowTest extends TestCase
             max($sourceDimensions[0], $sourceDimensions[1]),
             max($previewDimensions[0], $previewDimensions[1])
         );
+        $this->assertEqualsWithDelta(
+            2 / 3,
+            $previewDimensions[0] / $previewDimensions[1],
+            0.02,
+            'Customer artwork preview must retain the 4 x 6 card ratio.'
+        );
 
         $event = $job->events()
             ->where(

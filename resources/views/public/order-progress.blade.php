@@ -49,11 +49,14 @@
                             @foreach ($artworkPreviews as $artwork)
                                 <article>
                                     <div><strong>Kad Pihak {{ ucfirst(strtolower($artwork['side'])) }}</strong><span>Artwork versi {{ $artwork['version'] }}</span></div>
-                                    <iframe
+                                    <div class="public-artwork-preview-frame">
+                                    <img
                                         src="{{ route('orders.artwork.preview', ['orderId' => $orderId, 'designJobId' => $artwork['design_job_id']]) }}"
                                         title="Preview artwork pihak {{ strtolower($artwork['side']) }}"
+                                        alt="Preview artwork kad 4 kali 6 pihak {{ strtolower($artwork['side']) }}"
                                         loading="lazy"
-                                    ></iframe>
+                                    >
+                                    </div>
                                 </article>
                             @endforeach
                         </div>
