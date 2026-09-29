@@ -21,6 +21,32 @@
     $canUsePhotoshop = auth()->user()->hasStaffRole(\App\Models\User::ROLE_DESIGNER)
         && $order->relationLoaded('designJobs')
         && $order->designJobs->contains('assigned_user_id', auth()->id());
+    $statusLabels = [
+        'DETAILS_INCOMPLETE' => 'Maklumat belum lengkap', 'READY_FOR_DESIGN' => 'Sedia untuk design',
+        'DESIGN_IN_PROGRESS' => 'Design sedang berjalan', 'DESIGN_READY' => 'Menunggu semakan customer',
+        'CORRECTION_REQUESTED' => 'Pembetulan diperlukan', 'DESIGN_APPROVED' => 'Design diluluskan',
+        'BALANCE_PENDING' => 'Menunggu bayaran baki', 'READY_FOR_PRINT' => 'Sedia untuk production',
+        'PRINTING' => 'Production sedang berjalan', 'PRINTED' => 'Production siap',
+        'READY_FOR_PACKING' => 'Sedia untuk packing', 'PACKING' => 'Packing sedang berjalan',
+        'PACKED' => 'Packing siap', 'READY_FOR_PICKUP' => 'Sedia untuk pickup',
+        'SHIPPED' => 'Telah dihantar', 'COMPLETED' => 'Tempahan selesai',
+    ];
+    $statusTone = static fn (string $status): string => match ($status) {
+        'DETAILS_INCOMPLETE', 'CORRECTION_REQUESTED' => 'attention',
+        'DESIGN_READY', 'BALANCE_PENDING', 'READY_FOR_PICKUP', 'SHIPPED' => 'waiting',
+        'COMPLETED' => 'complete', default => 'active',
+    };
+    $nextActions = [
+        'DETAILS_INCOMPLETE' => 'Dapatkan maklumat customer yang belum lengkap',
+        'READY_FOR_DESIGN' => 'Mulakan atau assign kerja design', 'DESIGN_IN_PROGRESS' => 'Teruskan kerja design',
+        'DESIGN_READY' => 'Tunggu semakan artwork daripada customer', 'CORRECTION_REQUESTED' => 'Selesaikan pembetulan artwork',
+        'DESIGN_APPROVED' => 'Semak bayaran baki', 'BALANCE_PENDING' => 'Semak bayaran baki',
+        'READY_FOR_PRINT' => 'Mulakan production', 'PRINTING' => 'Kemas kini atau siapkan production',
+        'PRINTED' => 'Mulakan packing', 'READY_FOR_PACKING' => 'Mulakan packing',
+        'PACKING' => 'Sahkan item dan siapkan packing', 'PACKED' => 'Aturkan serahan atau pickup',
+        'READY_FOR_PICKUP' => 'Maklumkan customer untuk pickup', 'SHIPPED' => 'Pantau penghantaran',
+        'COMPLETED' => 'Tiada tindakan lanjut diperlukan',
+    ];
 @endphp
 <!DOCTYPE html>
 <html lang="{{ app()->getLocale() }}">
@@ -72,8 +98,8 @@
                     <div class="staff-detail-heading">
                         <h1>{{ $order->order_id }}</h1>
 
-                        <span class="staff-status">
-                            {{ str_replace('_', ' ', $order->status) }}
+                        <span class="staff-status staff-status--{{ $statusTone($order->status) }}">
+                            {{ $statusLabels[$order->status] ?? str_replace('_', ' ', $order->status) }}
                         </span>
                     </div>
 
@@ -88,12 +114,23 @@
                 </div>
             </div>
 
+            <section class="staff-order-brief" aria-label="Ringkasan tindakan order">
+                <div><span>Status semasa</span><strong>{{ $statusLabels[$order->status] ?? str_replace('_', ' ', $order->status) }}</strong></div>
+                <div><span>Tindakan seterusnya</span><strong>{{ $nextActions[$order->status] ?? 'Buka setiap bahagian untuk semakan' }}</strong></div>
+            </section>
+
+            @if ($hasFullQueueView)
+                <nav class="staff-order-sections" aria-label="Bahagian order">
+                    <a href="#customer-data">Customer</a><a href="#design-work">Design</a><a href="#payment">Payment</a><a href="#production">Production</a><a href="#packing">Packing</a><a href="#fulfilment">Fulfilment</a>
+                </nav>
+            @endif
+
             @if (! auth()->user()->isOperationManagement())
                 <p class="staff-work-message">Read-only order details.</p>
             @endif
 
             @if ($hasFullQueueView)
-            <div class="staff-detail-grid">
+            <div id="customer-data" class="staff-detail-grid staff-department-group">
                 <section class="staff-card">
                     <h2>Order Summary</h2>
 
@@ -316,7 +353,7 @@
             </section>
 
             @if ($order->relationLoaded('designJobs'))
-                <section class="staff-section">
+                <section id="design-work" class="staff-section">
                     <h2 class="staff-section-title">Design Work</h2>
 
                     @if ($canUsePhotoshop)
@@ -638,7 +675,7 @@
             @endif
 
             @if ($hasFullQueueView)
-            <section class="staff-section">
+            <section id="payment" class="staff-section">
                 <h2 class="staff-section-title">Payment</h2>
 
                 <div class="staff-work-grid">
@@ -777,7 +814,7 @@
             @endif
 
             @if ($order->relationLoaded('printJobs'))
-                <section class="staff-section">
+                <section id="production" class="staff-section">
                     <h2 class="staff-section-title">Production</h2>
 
                     <div class="staff-work-grid">
@@ -893,7 +930,7 @@
             @endif
 
             @if ($hasFullQueueView && $order->relationLoaded('packingJob') && $order->packingJob)
-                <section class="staff-section">
+                <section id="packing" class="staff-section">
                     <h2 class="staff-section-title">Packing</h2>
 
                     <article class="staff-card">
@@ -979,7 +1016,7 @@
                     </article>
                 </section>
             @elseif (auth()->user()->hasStaffRole(\App\Models\User::ROLE_OM) && $order->packing_assigned_user_id === auth()->id())
-                <section class="staff-section">
+                <section id="packing" class="staff-section">
                     <h2 class="staff-section-title">Packing</h2>
                     <div class="staff-empty">
                         Packing job akan diwujudkan secara automatik selepas semua kerja cetakan selesai.
@@ -988,7 +1025,7 @@
             @endif
 
             @if ($hasFullQueueView)
-            <section class="staff-section">
+            <section id="fulfilment" class="staff-section">
                 <h2 class="staff-section-title">Fulfilment</h2>
 
                 <article class="staff-card">
