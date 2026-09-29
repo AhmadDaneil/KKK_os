@@ -84,7 +84,7 @@
                         <option value="indigo_violet" @selected($staffUser->staff_theme === 'indigo_violet')>Indigo &amp; Violet</option>
                         <option value="warm_orange" @selected($staffUser->staff_theme === 'warm_orange')>Warm Orange</option>
                         <option value="amber_gold" @selected($staffUser->staff_theme === 'amber_gold')>Amber / Gold</option>
-                        <option value="dusty_rose" @selected($staffUser->staff_theme === 'dusty_rose')>Dusty Rose</option>
+                        <option value="dusty_rose" @selected($staffUser->staff_theme === 'dusty_rose')>Charcoal / Lime</option>
                         <option value="rose_burgundy" @selected($staffUser->staff_theme === 'rose_burgundy')>Rose / Burgundy</option>
                     </select>
                     <button type="submit">Simpan</button>
