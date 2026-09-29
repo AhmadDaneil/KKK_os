@@ -5,12 +5,13 @@
     $canViewDesignQueue = $canMonitorOperations || $dashboardUser->hasStaffRole(\App\Models\User::ROLE_DESIGNER);
     $canViewProductionQueue = $canMonitorOperations || $dashboardUser->hasStaffRole(\App\Models\User::ROLE_PRODUCTION);
 @endphp
-<html lang="ms">
+<html lang="{{ app()->getLocale() }}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Staff Dashboard - KKK OS</title>
     <link rel="stylesheet" href="{{ asset('css/staff.css') }}?v={{ filemtime(public_path('css/staff.css')) }}">
+    <link rel="stylesheet" href="{{ asset('css/language-toggle.css') }}?v={{ filemtime(public_path('css/language-toggle.css')) }}">
 </head>
 <body @class(['admin-operations-mode' => auth()->user()->isAdmin()]) data-staff-theme="{{ $dashboardUser->staff_theme }}">
     <div class="staff-app-shell">
@@ -18,16 +19,16 @@
 
         <div class="staff-workspace">
             <header class="staff-topbar">
-                <div><p class="staff-kicker">{{ $dashboardUser->isAdmin() ? 'Admin Operations' : str_replace('_', ' ', $dashboardUser->role) }}</p><h1>{{ $dashboardUser->isAdmin() ? 'Admin Operations Dashboard' : 'Staff Dashboard' }}</h1></div>
-                <form class="js-logout-form staff-logout-profile" method="POST" action="{{ route('staff.logout') }}">@csrf<button type="submit"><span class="staff-topbar-avatar" aria-hidden="true"></span><span>Log Keluar</span></button></form>
+                <div><p class="staff-kicker">{{ $dashboardUser->isAdmin() ? __('ui.operations') : str_replace('_', ' ', $dashboardUser->role) }}</p><h1>{{ __('ui.staff_dashboard') }}</h1></div>
+                <form class="js-logout-form staff-logout-profile" method="POST" action="{{ route('staff.logout') }}">@csrf<button type="submit"><span class="staff-topbar-avatar" aria-hidden="true"></span><span>{{ __('ui.logout') }}</span></button></form>
             </header>
 
             <main class="staff-main staff-dashboard-main">
                 <section class="staff-hero">
                     <div>
-                        <p class="staff-kicker">Selamat datang, {{ auth()->user()->name }}</p>
-                        <h2>Operasi yang jelas, daripada order hingga siap.</h2>
-                        <p>Pantau tugasan mengikut role anda tanpa mengubah aliran kerja yang ditetapkan dalam Master Blueprint.</p>
+                        <p class="staff-kicker">{{ __('ui.welcome', ['name' => auth()->user()->name]) }}</p>
+                        <h2>{{ __('ui.staff_intro_title') }}</h2>
+                        <p>{{ __('ui.staff_intro') }}</p>
                     </div>
                 </section>
 
@@ -62,7 +63,7 @@
                             <span class="staff-attention-total @if ($designerAttention > 0) has-alert @endif">{{ $designerAttention > 0 ? $designerAttention.' tugasan' : 'Tiada tindakan diperlukan' }}</span>
                         </div>
                         <div class="staff-attention-card @if ($designerAttention > 0) has-alert @else is-clear @endif">
-                            <span class="staff-attention-icon">DE</span><span><strong>Design Queue</strong><small>{{ $designerAttention > 0 ? 'Order sedia untuk dimulakan atau memerlukan pembetulan' : 'Semua tugasan design telah dikemas kini' }}</small></span><b>{{ $designerAttention }}</b>
+                            <span class="staff-attention-icon">RB</span><span><strong>{{ __('ui.design_queue') }}</strong><small>{{ $designerAttention > 0 ? 'Tempahan sedia untuk dimulakan atau memerlukan pembetulan' : 'Semua tugasan reka bentuk telah dikemas kini' }}</small></span><b>{{ $designerAttention }}</b>
                         </div>
                     </section>
                 @endif
@@ -92,7 +93,7 @@
                     @if ($canViewDesignQueue)
                     <section class="staff-dashboard-group">
                         <div class="staff-dashboard-group-heading"><span class="staff-group-number">02</span><div><h2>Design</h2><p>Data disahkan, merge job dan semakan artwork.</p></div></div>
-                        <a href="{{ route('staff.orders.index', ['workstream' => 'design']) }}" class="staff-feature-card"><span class="staff-feature-icon">DE</span><div><h3>Design Queue</h3><p>Urus order yang sedia untuk design, sedang disediakan atau memerlukan pembetulan.</p></div><span class="staff-card-arrow">→</span></a>
+                        <a href="{{ route('staff.orders.index', ['workstream' => 'design']) }}" class="staff-feature-card"><span class="staff-feature-icon">RB</span><div><h3>{{ __('ui.design_queue') }}</h3><p>Urus tempahan yang sedia untuk reka bentuk, sedang disediakan atau memerlukan pembetulan.</p></div><span class="staff-card-arrow">→</span></a>
                     </section>
                     @endif
 
@@ -115,5 +116,6 @@
         </div>
     </div>
     @include('staff.partials.logout-confirmation')
+    <script src="{{ asset('js/language-runtime.js') }}?v={{ filemtime(public_path('js/language-runtime.js')) }}"></script>
 </body>
 </html>

@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="ms">
+<html lang="{{ app()->getLocale() }}">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -7,6 +7,7 @@
     <title>KKK OS - {{ $order->order_id }}</title>
     <link rel="stylesheet" href="{{ asset('css/customer-dashboard.css') }}?v={{ filemtime(public_path('css/customer-dashboard.css')) }}">
     <link rel="stylesheet" href="{{ asset('css/customer-theme.css') }}?v={{ filemtime(public_path('css/customer-theme.css')) }}">
+    <link rel="stylesheet" href="{{ asset('css/language-toggle.css') }}?v={{ filemtime(public_path('css/language-toggle.css')) }}">
 </head>
 <body>
 <main>
@@ -14,13 +15,14 @@
     <div class="order-summary-heading">
         <div>
             <p class="eyebrow">KING KAD KAHWIN</p>
-            <h1>Tempahan Anda</h1>
+            <h1>{{ __('ui.customer_order') }}</h1>
         </div>
 
         <div class="order-summary-actions">
+            @include('partials.language-toggle')
             <a href="{{ route('home') }}" class="back-home-button">
                 <span aria-hidden="true">&larr;</span>
-                Kembali
+                {{ __('ui.back') }}
             </a>
 
             <span class="status-badge">
@@ -36,7 +38,7 @@
         </div>
 
         <div>
-            <span class="summary-label">Pakej</span>
+            <span class="summary-label">{{ __('ui.package') }}</span>
             <strong>
                 {{ $order->package_count }}
                 Pakej
@@ -45,21 +47,21 @@
 
         @if ($order->customer_name)
             <div>
-                <span class="summary-label">Nama Pelanggan</span>
+                <span class="summary-label">{{ __('ui.customer_name') }}</span>
                 <strong>{{ $order->customer_name }}</strong>
             </div>
         @endif
 
         @if ($order->customer_phone)
             <div>
-                <span class="summary-label">No. Telefon</span>
+                <span class="summary-label">{{ __('ui.phone') }}</span>
                 <strong>{{ $order->customer_phone }}</strong>
             </div>
         @endif
 
         @if ($order->customer_email)
             <div>
-                <span class="summary-label">Email</span>
+                <span class="summary-label">{{ __('ui.email') }}</span>
                 <strong>{{ $order->customer_email }}</strong>
             </div>
         @endif
@@ -68,7 +70,7 @@
     <section class="progress-panel" data-progress-tone="{{ $progress['tone'] }}">
         <div class="progress-heading">
             <div>
-                <span class="summary-label">Kemajuan Tempahan</span>
+                <span class="summary-label">{{ __('ui.order_progress') }}</span>
                 <strong>{{ $progress['label'] }}</strong>
             </div>
             <span class="progress-percentage">{{ $progress['percentage'] }}%</span>
@@ -77,7 +79,7 @@
         <div
             class="progress-track"
             role="progressbar"
-            aria-label="Kemajuan tempahan"
+            aria-label="{{ __('ui.order_progress') }}"
             aria-valuemin="0"
             aria-valuemax="100"
             aria-valuenow="{{ $progress['percentage'] }}"
@@ -85,7 +87,7 @@
             <span class="progress-fill" style="width: {{ $progress['percentage'] }}%"></span>
         </div>
 
-        <div class="progress-stages" aria-label="Peringkat tempahan">
+        <div class="progress-stages" aria-label="{{ __('ui.order_stages') }}">
             @foreach ($progress['stages'] as $stage)
                 <div @class([
                     'progress-stage',
@@ -103,14 +105,14 @@
         {{ $progress['message'] }}
     </div>
     @if ($order->fulfilmentJob?->method === 'COURIER' && $order->fulfilmentJob?->tracking_number)
-        <div class="customer-tracking-card"><span>Maklumat Penghantaran</span><strong>{{ $order->fulfilmentJob->courier_provider ?: 'Courier' }}</strong><code>{{ $order->fulfilmentJob->tracking_number }}</code></div>
+        <div class="customer-tracking-card"><span>{{ __('ui.shipping_information') }}</span><strong>{{ $order->fulfilmentJob->courier_provider ?: 'Courier' }}</strong><code>{{ $order->fulfilmentJob->tracking_number }}</code></div>
     @endif
 </header>
 
 @php($depositPayment = $order->payments->firstWhere('payment_type', 'BOOKING_DEPOSIT'))
 @if ($depositPayment)
     <section class="deposit-status-card" data-deposit-status="{{ strtolower($depositPayment->status) }}">
-        <div><span>Status Deposit</span><strong>{{ match ($depositPayment->status) { 'PAID' => 'Deposit Disahkan', 'FAILED' => 'Resit Ditolak', default => 'Menunggu Semakan' } }}</strong></div>
+        <div><span>{{ __('ui.deposit_status') }}</span><strong>{{ match ($depositPayment->status) { 'PAID' => __('ui.deposit_confirmed'), 'FAILED' => __('ui.receipt_rejected'), default => __('ui.pending_review') } }}</strong></div>
         @if (session('deposit_status'))<p class="deposit-success">{{ session('deposit_status') }}</p>@endif
         @if ($depositPayment->status === 'PENDING')<p>Resit deposit anda telah diterima dan sedang disemak oleh Operation Management.</p>@endif
         @if ($depositPayment->status === 'PAID')<p>Bayaran deposit telah disahkan. Tempahan boleh diteruskan ke proses design.</p>@endif
@@ -118,9 +120,9 @@
             <p><strong>Sebab penolakan:</strong> {{ $depositPayment->metadata['rejection_reason'] ?? 'Resit tidak dapat disahkan.' }}</p>
             <form method="POST" enctype="multipart/form-data" action="{{ route('orders.deposit-receipt.update', ['orderId' => $order->order_id]) }}" data-deposit-resubmission-form>
                 @csrf
-                <label for="replacement-deposit-receipt">Muat naik resit baharu</label>
+                <label for="replacement-deposit-receipt">{{ __('ui.upload_new_receipt') }}</label>
                 <input id="replacement-deposit-receipt" type="file" name="deposit_receipt" accept=".jpg,.jpeg,.png,.webp,.pdf,image/jpeg,image/png,image/webp,application/pdf" required>
-                <button type="submit" data-deposit-resubmission-button>Hantar Semula Resit</button>
+                <button type="submit" data-deposit-resubmission-button>{{ __('ui.resubmit_receipt') }}</button>
             </form>
         @endif
     </section>
@@ -1321,5 +1323,6 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 </script>
 @include('public.partials.theme-toggle')
+<script src="{{ asset('js/language-runtime.js') }}?v={{ filemtime(public_path('js/language-runtime.js')) }}"></script>
 </body>
 </html>
