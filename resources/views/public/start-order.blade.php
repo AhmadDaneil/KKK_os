@@ -110,6 +110,7 @@
         startOrderForm.addEventListener('submit', function (event) {
             if (orderConfirmed) {
                 startOrderSubmit.disabled = true;
+                startOrderSubmit.classList.add('is-loading');
                 startOrderSubmit.textContent = 'Mencipta tempahan...';
 
                 return;

@@ -194,12 +194,16 @@
 @endif
 
 @if (session('draft_saved'))
-        <div class="notice">Draft berjaya disimpan. Anda boleh keluar dan sambung semula melalui link dashboard yang sama.</div>
+        <div class="notice customer-feedback customer-feedback-success" role="status">
+            <strong>Maklumat anda telah disimpan.</strong>
+            <span>Anda boleh keluar sekarang dan sambung semula melalui pautan dashboard yang sama.</span>
+        </div>
     @endif
 
     @if ($errors->any())
-        <div class="errors">
-            <strong>Sila semak maklumat berikut:</strong>
+        <div class="errors customer-feedback customer-feedback-error" role="alert">
+            <strong>Kami perlukan beberapa maklumat lagi.</strong>
+            <span>Sila semak ruangan di bawah, kemudian cuba semula.</span>
             <ul>
                 @foreach ($errors->all() as $error)
                     <li>{{ $error }}</li>
@@ -603,8 +607,9 @@
     <div class="form-actions">
         <button type="submit">Simpan Draft</button>
 
-        <span id="autosave-status" class="autosave-status" role="status" aria-live="polite">
-            Perubahan disimpan secara automatik
+        <span id="autosave-status" class="autosave-status" data-state="saved" role="status" aria-live="polite">
+            <span class="autosave-indicator" aria-hidden="true"></span>
+            <span id="autosave-message">Semua perubahan selamat disimpan</span>
         </span>
 
         <a
@@ -825,8 +830,16 @@ document.addEventListener('DOMContentLoaded', function () {
         let savedRevision = 0;
 
         function setStatus(message, state) {
-            status.textContent = message;
+            const messageElement = document.getElementById('autosave-message');
+
+            if (messageElement) {
+                messageElement.textContent = message;
+            } else {
+                status.textContent = message;
+            }
+
             status.dataset.state = state;
+            status.setAttribute('aria-busy', state === 'saving' ? 'true' : 'false');
         }
 
         function buildDraftData(includeFiles) {
@@ -867,7 +880,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 if (!response.ok) {
                     return response.json().catch(function () { return {}; }).then(function (payload) {
                         const errors = payload.errors ? Object.values(payload.errors).flat().join(' ') : '';
-                        throw new Error(errors || payload.message || 'Autosave failed');
+                        throw new Error(errors || payload.message || 'Kami tidak dapat menyimpan perubahan ini.');
                     });
                 }
 
@@ -886,7 +899,10 @@ document.addEventListener('DOMContentLoaded', function () {
                 }
 
                 if (revision === draftRevision) {
-                    setStatus(error.message || 'Simpanan automatik gagal. Sila tekan Simpan Draft.', 'error');
+                    setStatus(
+                        'Simpanan belum berjaya. ' + (error.message || 'Semak sambungan internet, kemudian tekan Simpan Draft.'),
+                        'error'
+                    );
                 }
                 throw error;
             }).finally(function () {

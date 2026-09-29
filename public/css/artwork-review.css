@@ -383,6 +383,9 @@ textarea {
     margin: 0;
 }
 
+.customer-empty-state{display:grid;justify-items:start;gap:7px;border-style:solid;background:linear-gradient(135deg,#f7fbf8,#eef7f1)}.customer-empty-icon{display:grid;width:34px;height:34px;place-items:center;border-radius:50%;color:#21613b;background:#dff1e5;font-size:1rem}.customer-empty-state strong{color:#1f4934}.customer-empty-state p{max-width:560px;margin:0}
+.button.is-loading{display:inline-flex;align-items:center;justify-content:center;pointer-events:none}.button.is-loading::before{width:13px;height:13px;margin-right:8px;border:2px solid currentColor;border-right-color:transparent;border-radius:50%;content:'';animation:artwork-button-spin .75s linear infinite}@keyframes artwork-button-spin{to{transform:rotate(360deg)}}
+
 .correction-panel .correction-fee-warning { color: #b91c1c; font-weight: 600; }
 .correction-fee-consent { display: flex; gap: 10px; align-items: flex-start; margin: 16px 0; }
 .correction-fee-consent input { width: auto; flex-shrink: 0; margin-top: 4px; }

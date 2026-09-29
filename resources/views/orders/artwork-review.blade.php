@@ -146,9 +146,10 @@
                         @endif
                     </div>
                 @else
-                    <div class="empty-state">
-                        <strong>Artwork belum tersedia.</strong>
-                        <p>Designer sedang menyediakan artwork untuk pakej ini.</p>
+                    <div class="empty-state customer-empty-state">
+                        <span class="customer-empty-icon" aria-hidden="true">✦</span>
+                        <strong>Artwork belum sedia untuk dilihat.</strong>
+                        <p>Pasukan design sedang menyiapkan artwork untuk pakej ini. Kami akan kemas kini status sebaik sahaja ia sedia untuk semakan.</p>
                     </div>
                 @endif
 
@@ -285,9 +286,10 @@
                 @endif
             </section>
         @empty
-            <div class="empty-state page-empty-state">
-                <strong>Tiada artwork untuk disemak buat masa ini.</strong>
-                <p>Sila cuba semula selepas proses design bermula.</p>
+            <div class="empty-state customer-empty-state page-empty-state">
+                <span class="customer-empty-icon" aria-hidden="true">✦</span>
+                <strong>Belum ada artwork untuk disemak.</strong>
+                <p>Tempahan anda masih menunggu proses design. Anda tidak perlu membuat apa-apa buat masa ini.</p>
             </div>
         @endforelse
     </main>
@@ -366,6 +368,12 @@
 
         confirmArtworkAction.disabled = true;
         confirmArtworkAction.textContent = 'Memproses...';
+        const formSubmit = pendingArtworkForm.querySelector('[type="submit"]');
+        if (formSubmit) {
+            formSubmit.disabled = true;
+            formSubmit.classList.add('is-loading');
+            formSubmit.textContent = 'Sedang dihantar...';
+        }
         pendingArtworkForm.submit();
     });
 </script>

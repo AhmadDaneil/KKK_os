@@ -97,6 +97,12 @@ html[data-customer-theme="dark"] .errors { border-color:#b85c5c!important; color
 html[data-customer-theme="dark"] .errors :is(strong,li) { color:#ffdede!important; }
 html[data-customer-theme="dark"] .upload-status { border:1px solid #4c8062!important; color:#dff3e7!important; background:#193c2b!important; }
 html[data-customer-theme="dark"] .upload-status.not-uploaded { border-color:#50675b!important; color:#c3d2ca!important; background:#26322d!important; }
+html[data-customer-theme="dark"] :is(.customer-feedback-success,.customer-feedback-error,.autosave-status){border-color:#4c8062!important;color:#dff3e7!important;background:#193c2b!important;}
+html[data-customer-theme="dark"] .autosave-status[data-state="pending"]{border-color:#a98a43!important;color:#f4e8c9!important;background:#3a321f!important;}
+html[data-customer-theme="dark"] .autosave-status[data-state="error"],html[data-customer-theme="dark"] .customer-feedback-error{border-color:#b85c5c!important;color:#ffdede!important;background:#432626!important;}
+html[data-customer-theme="dark"] .customer-empty-state{border-color:#40554a!important;background:#203028!important;}
+html[data-customer-theme="dark"] .customer-empty-state strong{color:#e5ece7!important;}
+html[data-customer-theme="dark"] .customer-empty-icon{color:#dff3e7!important;background:#28543d!important;}
 html[data-customer-theme="dark"] .order-lifecycle { border-color:#40554a!important; }
 html[data-customer-theme="dark"] .order-lifecycle-heading h4 { color:#f4f1e9!important; }
 html[data-customer-theme="dark"] .order-lifecycle-heading>span,

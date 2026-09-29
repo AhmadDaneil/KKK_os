@@ -664,6 +664,8 @@ button {
 .autosave-status[data-state="error"] { color: #b91c1c; }
 .autosave-status[data-state="saving"] { color: #1d4ed8; }
 
+.customer-feedback{display:grid;gap:4px}.customer-feedback strong{font-size:.95rem}.customer-feedback span{font-size:.88rem;line-height:1.5}.customer-feedback-success{border-left:4px solid #2f8a55}.customer-feedback-error{border-left:4px solid #c94343}.autosave-status{display:inline-flex;align-items:center;gap:8px;padding:7px 10px;border-radius:999px;background:#f4f7f5;line-height:1.35}.autosave-indicator{display:inline-block;width:8px;height:8px;flex:0 0 auto;border-radius:50%;background:currentColor}.autosave-status[data-state="saving"] .autosave-indicator{width:14px;height:14px;border:2px solid currentColor;border-right-color:transparent;background:transparent;animation:customer-feedback-spin .75s linear infinite}.autosave-status[data-state="pending"]{color:#765817;background:#fff8e8}.autosave-status[data-state="error"]{background:#fff1f1}.autosave-status[data-state="saved"]{background:#edf8f1}@keyframes customer-feedback-spin{to{transform:rotate(360deg)}}.form-actions button.is-loading,.button.is-loading{position:relative;pointer-events:none}.form-actions button.is-loading::before,.button.is-loading::before{display:inline-block;width:12px;height:12px;margin-right:8px;border:2px solid currentColor;border-right-color:transparent;border-radius:50%;content:'';vertical-align:-2px;animation:customer-feedback-spin .75s linear infinite}
+
 .form-actions button {
     border: 1px solid #d1d5db;
     background: #fff;
