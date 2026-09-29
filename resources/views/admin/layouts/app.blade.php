@@ -1,13 +1,12 @@
 <!doctype html>
-<html lang="{{ app()->getLocale() }}">
+<html lang="ms">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>@yield('title', 'Admin Dashboard') — KKK OS</title>
+    <title>@yield('title', 'Dashboard Admin') — KKK OS</title>
     <link rel="stylesheet" href="{{ asset('css/admin.css') }}?v={{ filemtime(public_path('css/admin.css')) }}">
-    <link rel="stylesheet" href="{{ asset('css/language-toggle.css') }}?v={{ filemtime(public_path('css/language-toggle.css')) }}">
 </head>
-<body data-locale="{{ app()->getLocale() }}">
+<body>
 <div class="admin-shell">
     <aside class="admin-sidebar">
         <a class="admin-brand" href="{{ route('admin.dashboard') }}">
@@ -15,7 +14,7 @@
             <span><strong>KKK OS</strong><small>{{ __('ui.administration') }}</small></span>
         </a>
 
-        <nav class="admin-nav" aria-label="Admin navigation">
+        <nav class="admin-nav" aria-label="Navigasi admin">
             <p>{{ __('ui.management') }}</p>
             <a href="{{ route('admin.dashboard') }}" @class(['is-active' => request()->routeIs('admin.dashboard')])><span>OV</span>{{ __('ui.overview') }}</a>
             <a href="{{ route('admin.dashboard') }}#sales-analysis"><span>SA</span>{{ __('ui.sales_analysis') }}</a>
@@ -30,15 +29,14 @@
 
         <div class="admin-profile">
             <span>{{ strtoupper(substr(auth()->user()->name, 0, 1)) }}</span>
-            <div><strong>{{ auth()->user()->name }}</strong><small>Administrator</small></div>
+            <div><strong>{{ auth()->user()->name }}</strong><small>Pentadbir</small></div>
         </div>
     </aside>
 
     <div class="admin-workspace">
         <header class="admin-topbar">
-            <div><p>KingKadKahwin</p><h1>@yield('heading', 'Admin Dashboard')</h1></div>
+            <div><p>KingKadKahwin</p><h1>@yield('heading', 'Dashboard Admin')</h1></div>
             <div class="admin-topbar-actions">
-                @include('partials.language-toggle')
                 <form class="js-logout-form admin-logout-profile" method="POST" action="{{ route('admin.logout') }}">@csrf<button type="submit"><span class="admin-topbar-avatar" aria-hidden="true"></span><span>{{ __('ui.logout') }}</span></button></form>
             </div>
         </header>

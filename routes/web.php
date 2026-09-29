@@ -20,7 +20,6 @@ use App\Http\Controllers\DevPackingJobController;
 use App\Http\Controllers\DevPrintJobController;
 use App\Http\Controllers\PublicCalendarController;
 use App\Http\Controllers\PublicOrderController;
-use App\Http\Controllers\LanguageController;
 use App\Http\Controllers\Staff\StaffAuthController;
 use App\Http\Controllers\Staff\StaffBalancePaymentController;
 use App\Http\Controllers\Staff\StaffBatchArtworkController;
@@ -40,9 +39,6 @@ use App\Models\User;
 use Illuminate\Support\Facades\Route;
 
 Route::view('/', 'public.landing')->name('home');
-
-Route::post('/language', [LanguageController::class, 'update'])
-    ->name('language.update');
 
 Route::get('/kalendar/jakim', [PublicCalendarController::class, 'convert'])
     ->middleware('throttle:60,1')

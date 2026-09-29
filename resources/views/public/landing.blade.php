@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="{{ app()->getLocale() }}">
+<html lang="ms">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -7,7 +7,6 @@
     <title>KingKadKahwin — Kad Kahwin Anda, Direka Dengan Teliti</title>
     <link rel="stylesheet" href="{{ asset('css/landing.css') }}?v={{ filemtime(public_path('css/landing.css')) }}">
     <link rel="stylesheet" href="{{ asset('css/customer-theme.css') }}?v={{ filemtime(public_path('css/customer-theme.css')) }}">
-    <link rel="stylesheet" href="{{ asset('css/language-toggle.css') }}?v={{ filemtime(public_path('css/language-toggle.css')) }}">
 </head>
 <body>
     <header class="site-header">
@@ -19,7 +18,6 @@
             <a href="#kelebihan">Kelebihan</a>
             <a href="#cara-tempah">Cara Tempah</a>
             <a class="nav-progress" href="{{ route('public.orders.progress') }}">Semak Progress</a>
-            @include('partials.language-toggle')
         </nav>
     </header>
 
@@ -115,7 +113,7 @@
                 <li><b>1</b><div><h3>Isi maklumat</h3><p>Pilih pakej dan lengkapkan butiran pengantin serta majlis.</p></div></li>
                 <li><b>2</b><div><h3>Semak & sahkan</h3><p>Lihat preview, betulkan maklumat dan sahkan apabila tepat.</p></div></li>
                 <li><b>3</b><div><h3>Kami siapkan</h3><p>Pasukan kami mengurus design, cetakan dan pembungkusan.</p></div></li>
-                <li><b>4</b><div><h3>Ikuti progress</h3><p>Masukkan Order ID pada bila-bila masa untuk melihat perkembangan.</p></div></li>
+                <li><b>4</b><div><h3>Ikuti progress</h3><p>Masukkan ID Tempahan pada bila-bila masa untuk melihat perkembangan.</p></div></li>
             </ol>
         </section>
     </main>
@@ -124,7 +122,7 @@
         <div class="footer-main">
             <div>
                 <a class="brand footer-brand" href="{{ route('home') }}"><span class="brand-mark">K</span><b>KingKadKahwin</b></a>
-                <p>Design yang indah. Proses yang tenang.</p>
+                <p>Reka bentuk yang indah. Proses yang tenang.</p>
             </div>
 
             <div class="footer-social">

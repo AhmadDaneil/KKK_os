@@ -19,7 +19,7 @@
         <section class="form-intro">
             <p class="eyebrow">Langkah pertama</p>
             <h1>Mulakan tempahan anda</h1>
-            <p>Beritahu kami jenis pakej yang diperlukan. Selepas ini anda akan terus dibawa ke borang lengkap dan menerima Order ID.</p>
+            <p>Beritahu kami jenis pakej yang diperlukan. Selepas ini anda akan terus dibawa ke borang lengkap dan menerima ID Tempahan.</p>
         </section>
         <form id="start-order-form" class="public-form" method="POST" action="{{ route('public.orders.store') }}">
             @csrf
@@ -68,7 +68,7 @@
             @error('customer_name')<p class="field-error">{{ $message }}</p>@enderror
 
             <div class="two-columns">
-                <div><label for="customer_email">Email</label><input id="customer_email" type="email" name="customer_email" placeholder="e.g. syafiq@email.com" value="{{ old('customer_email') }}" autocomplete="email" required>@error('customer_email')<p class="field-error">{{ $message }}</p>@enderror</div>
+                <div><label for="customer_email">E-mel</label><input id="customer_email" type="email" name="customer_email" placeholder="e.g. syafiq@email.com" value="{{ old('customer_email') }}" autocomplete="email" required>@error('customer_email')<p class="field-error">{{ $message }}</p>@enderror</div>
                 <div><label for="customer_phone">Nombor telefon</label><input id="customer_phone" type="tel" name="customer_phone" placeholder="Contoh: 0123456789" pattern="01[0-9]{8,9}" inputmode="numeric" minlength="10" maxlength="11" title="Masukkan 10 atau 11 digit bermula dengan 01." value="{{ old('customer_phone') }}" autocomplete="tel" required>@error('customer_phone')<p class="field-error">{{ $message }}</p>@enderror</div>
             </div>
             <button id="start-order-submit" class="button button-primary submit-button" type="submit">Cipta Tempahan & Teruskan →</button>

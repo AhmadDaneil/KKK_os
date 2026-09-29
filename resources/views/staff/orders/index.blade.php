@@ -11,10 +11,10 @@
         'fulfilment' => 'Order yang telah dibungkus dan masih menunggu serahan atau kutipan.',
     ];
     $workstreamLabels = [
-        'design' => 'Design',
-        'printing' => 'Production',
-        'packing' => 'Packing',
-        'fulfilment' => 'Fulfilment',
+        'design' => 'Reka Bentuk',
+        'printing' => 'Pengeluaran',
+        'packing' => 'Pembungkusan',
+        'fulfilment' => 'Pemenuhan Tempahan',
     ];
     $workstreamLabel = $workstreamLabels[$workstream] ?? null;
     $statusLabels = [
@@ -65,24 +65,22 @@
     ];
 @endphp
 <!DOCTYPE html>
-<html lang="{{ app()->getLocale() }}">
+<html lang="ms">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>{{ $workstreamLabel ? $workstreamLabel.' Queue' : 'Staff Orders' }} - KKK OS</title>
+    <title>{{ $workstreamLabel ? 'Senarai '.$workstreamLabel : 'Tempahan Staf' }} - KKK OS</title>
 
     <link rel="stylesheet" href="{{ asset('css/staff.css') }}?v={{ filemtime(public_path('css/staff.css')) }}">
-    <link rel="stylesheet" href="{{ asset('css/language-toggle.css') }}?v={{ filemtime(public_path('css/language-toggle.css')) }}">
 </head>
 <body @class(['admin-operations-mode' => auth()->user()->isAdmin()]) data-staff-theme="{{ auth()->user()->staff_theme }}">
     <div class="staff-app-shell">
         @include('staff.partials.sidebar')
         <div class="staff-workspace">
             <header class="staff-topbar">
-                <div><p class="staff-kicker">{{ auth()->user()->isAdmin() ? 'Admin Operations' : ($workstreamLabel ?? 'Operation Management') }}</p><h1>{{ $workstreamLabel ? $workstreamLabel.' Queue' : 'Semua Orders' }}</h1></div>
+                <div><p class="staff-kicker">{{ auth()->user()->isAdmin() ? 'Operasi Admin' : ($workstreamLabel ?? 'Pengurusan Operasi') }}</p><h1>{{ $workstreamLabel ? 'Senarai '.$workstreamLabel : 'Semua Tempahan' }}</h1></div>
                 <div class="staff-topbar-actions">
-                    @include('partials.language-toggle')
                     <form class="js-logout-form staff-logout-profile" method="POST" action="{{ route($logoutRoute) }}">@csrf<button type="submit"><span class="staff-topbar-avatar" aria-hidden="true"></span><span>{{ __('ui.logout') }}</span></button></form>
                 </div>
             </header>
@@ -105,7 +103,7 @@
                         &larr; Dashboard
                     </a>
 
-                    <h1>{{ $workstreamLabel ? $workstreamLabel.' Queue' : 'Semua Orders' }}</h1>
+                    <h1>{{ $workstreamLabel ? 'Senarai '.$workstreamLabel : 'Semua Tempahan' }}</h1>
 
                     <p>
                         @if (auth()->user()->canMonitorAllDepartments())
@@ -124,8 +122,8 @@
             <form class="staff-order-filter" method="GET" action="{{ route($ordersIndexRoute) }}">
                 @if ($workstream)<input type="hidden" name="workstream" value="{{ $workstream }}">@endif
                 @if (request('attention'))<input type="hidden" name="attention" value="{{ request('attention') }}">@endif
-                <div class="staff-filter-heading"><strong>Cari &amp; tapis order</strong><small>Gunakan Order ID, nama customer atau status kerja.</small></div>
-                <label><span>Cari order atau customer</span><input type="search" name="search" value="{{ request('search') }}" placeholder="Order ID, nama, email atau telefon"></label>
+                <div class="staff-filter-heading"><strong>Cari &amp; tapis order</strong><small>Gunakan ID Tempahan, nama customer atau status kerja.</small></div>
+                <label><span>Cari order atau customer</span><input type="search" name="search" value="{{ request('search') }}" placeholder="ID Tempahan, nama, email atau telefon"></label>
                 <label><span>Status tempahan</span><select name="status"><option value="">Semua status</option><option value="{{ \App\Models\Order::STATUS_FILTER_NOT_COMPLETED }}" @selected(request('status') === \App\Models\Order::STATUS_FILTER_NOT_COMPLETED)>Belum selesai</option>@foreach ($statusOptions as $status)<option value="{{ $status }}" @selected(request('status') === $status)>{{ $statusLabels[$status] ?? str_replace('_', ' ', $status) }}</option>@endforeach</select></label>
                 <div class="staff-filter-actions"><button class="staff-button staff-button-primary" type="submit">Tapis order</button>@if (request()->hasAny(['search', 'status', 'attention']))<a class="staff-button" href="{{ route($ordersIndexRoute, array_filter(['workstream' => $workstream])) }}">Kosongkan</a>@endif</div>
             </form>
@@ -155,7 +153,7 @@
                             </div>
 
                             <div class="staff-order-customer">
-                                {{ $order->customer_name ?: 'Customer name unavailable' }}
+                                {{ $order->customer_name ?: 'Nama pelanggan tidak tersedia' }}
                             </div>
 
                             <div class="staff-order-meta">
@@ -181,7 +179,7 @@
                             @if (auth()->user()->canMonitorAllDepartments())
                                 @if ((! $workstream || $workstream === 'design') && $order->relationLoaded('designJobs') && $order->designJobs->isNotEmpty())
                                     <div class="staff-work-row">
-                                        <span>Design</span>
+                                        <span>Reka Bentuk</span>
                                         <strong>
                                             {{ $order->designJobs->pluck('status')->unique()->implode(', ') }}
                                         </strong>
@@ -190,7 +188,7 @@
 
                                 @if ((! $workstream || $workstream === 'printing') && $order->relationLoaded('printJobs') && $order->printJobs->isNotEmpty())
                                     <div class="staff-work-row">
-                                        <span>Production</span>
+                                        <span>Pengeluaran</span>
                                         <strong>
                                             {{ $order->printJobs->pluck('status')->unique()->implode(', ') }}
                                         </strong>
@@ -199,7 +197,7 @@
 
                                 @if ((! $workstream || $workstream === 'packing') && $order->relationLoaded('packingJob') && $order->packingJob)
                                     <div class="staff-work-row">
-                                        <span>Packing</span>
+                                        <span>Pembungkusan</span>
                                         <strong>
                                             {{ $order->packingJob->status }}
                                         </strong>
@@ -208,7 +206,7 @@
 
                                 @if ((! $workstream || $workstream === 'fulfilment') && $order->relationLoaded('fulfilmentJob') && $order->fulfilmentJob)
                                     <div class="staff-work-row">
-                                        <span>Fulfilment</span>
+                                        <span>Pemenuhan Tempahan</span>
                                         <strong>{{ $order->fulfilmentJob->status }}</strong>
                                     </div>
                                 @endif
@@ -231,7 +229,7 @@
                                     @endforeach
                                 @elseif ($order->printing_assigned_user_id === auth()->id())
                                     <div class="staff-work-row">
-                                        <span>Production</span>
+                                        <span>Pengeluaran</span>
                                         <strong>ASSIGNED · WAITING FOR ARTWORK APPROVAL</strong>
                                     </div>
                                 @endif
@@ -241,12 +239,12 @@
                                     $order->packingJob->assigned_user_id === auth()->id()
                                 )
                                     <div class="staff-work-row">
-                                        <span>Packing</span>
+                                        <span>Pembungkusan</span>
                                         <strong>{{ $order->packingJob->status }}</strong>
                                     </div>
                                 @elseif ($order->packing_assigned_user_id === auth()->id())
                                     <div class="staff-work-row">
-                                        <span>Packing</span>
+                                        <span>Pembungkusan</span>
                                         <strong>ASSIGNED · WAITING FOR PACKING JOB</strong>
                                     </div>
                                 @endif
@@ -269,7 +267,7 @@
                                 >
                                     @csrf
                                     @method('DELETE')
-                                    <button type="submit" class="staff-order-delete">Delete</button>
+                                    <button type="submit" class="staff-order-delete">Padam</button>
                                 </form>
                             @endif
                         </div>

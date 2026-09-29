@@ -21,9 +21,9 @@ class StaffThemePreferenceTest extends TestCase
             ->get(route('staff.dashboard'))
             ->assertOk()
             ->assertSee('Tema paparan')
-            ->assertSee('Modern Blue')
-            ->assertSee('Amber / Gold')
-            ->assertSee('Charcoal / Lime');
+            ->assertSee('Biru Moden')
+            ->assertSee('Ambar / Emas')
+            ->assertSee('Kelabu Arang / Hijau Limau');
 
         $this->actingAs($staff)
             ->put(route('staff.theme.update'), ['staff_theme' => 'modern_blue'])

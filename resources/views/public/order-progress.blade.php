@@ -20,10 +20,10 @@
         <section class="progress-search">
             <p class="eyebrow">Status tempahan anda</p>
             <h1>Semak progress</h1>
-            <p>Paste atau masukkan Order ID yang diterima semasa membuat tempahan.</p>
+            <p>Paste atau masukkan ID Tempahan yang diterima semasa membuat tempahan.</p>
             <form method="POST" action="{{ route('public.orders.progress.lookup') }}">
                 @csrf
-                <label for="order_id">Order ID</label>
+                <label for="order_id">ID Tempahan</label>
                 <div class="search-row"><input id="order_id" name="order_id" value="{{ old('order_id', $orderId ?? '') }}" placeholder="Contoh: KKK-260917-0001" autocomplete="off" required><button class="button button-primary" type="submit">Semak</button></div>
                 @error('order_id')<p class="field-error" role="alert">{{ $message }}</p>@enderror
             </form>

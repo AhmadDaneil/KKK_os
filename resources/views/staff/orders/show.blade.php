@@ -49,7 +49,7 @@
     ];
 @endphp
 <!DOCTYPE html>
-<html lang="{{ app()->getLocale() }}">
+<html lang="ms">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -57,7 +57,6 @@
     <title>{{ $order->order_id }} - KKK OS Staff</title>
 
     <link rel="stylesheet" href="{{ asset('css/staff.css') }}?v={{ filemtime(public_path('css/staff.css')) }}">
-    <link rel="stylesheet" href="{{ asset('css/language-toggle.css') }}?v={{ filemtime(public_path('css/language-toggle.css')) }}">
 </head>
 <body @class(['admin-operations-mode' => auth()->user()->isAdmin()]) data-staff-theme="{{ auth()->user()->staff_theme }}">
     <div class="staff-app-shell">
@@ -66,7 +65,6 @@
             <header class="staff-topbar">
                 <div><p class="staff-kicker">{{ auth()->user()->isAdmin() ? __('ui.admin_operations') : __('ui.staff_operations') }} · {{ __('ui.order_detail') }}</p><h1>{{ $order->order_id }}</h1></div>
                 <div class="staff-topbar-actions">
-                    @include('partials.language-toggle')
                     <form class="js-logout-form staff-logout-profile" method="POST" action="{{ route($logoutRoute) }}">@csrf<button type="submit"><span class="staff-topbar-avatar" aria-hidden="true"></span><span>{{ __('ui.logout') }}</span></button></form>
                 </div>
             </header>
@@ -92,7 +90,7 @@
             <div class="staff-page-header">
                 <div>
                     <a href="{{ route($ordersIndexRoute) }}" class="staff-back-link">
-                        &larr; Orders
+                        &larr; Tempahan
                     </a>
 
                     <div class="staff-detail-heading">
@@ -104,7 +102,7 @@
                     </div>
 
                     <p>
-                        {{ $order->customer_name ?: 'Customer name unavailable' }}
+                        {{ $order->customer_name ?: 'Nama pelanggan tidak tersedia' }}
                     </p>
                 </div>
 
@@ -121,7 +119,7 @@
 
             @if ($hasFullQueueView)
                 <nav class="staff-order-sections" aria-label="Bahagian order">
-                    <a href="#customer-data">Customer</a><a href="#design-work">Design</a><a href="#payment">Payment</a><a href="#production">Production</a><a href="#packing">Packing</a><a href="#fulfilment">Fulfilment</a>
+                    <a href="#customer-data">Pelanggan</a><a href="#design-work">Reka Bentuk</a><a href="#payment">Payment</a><a href="#production">Pengeluaran</a><a href="#packing">Pembungkusan</a><a href="#fulfilment">Pemenuhan Tempahan</a>
                 </nav>
             @endif
 
@@ -132,7 +130,7 @@
             @if ($hasFullQueueView)
             <div id="customer-data" class="staff-detail-grid staff-department-group">
                 <section class="staff-card">
-                    <h2>Order Summary</h2>
+                    <h2>Ringkasan Tempahan</h2>
 
                     <dl class="staff-detail-list">
                         <div>
@@ -158,7 +156,7 @@
                 </section>
 
                 <section class="staff-card">
-                    <h2>Customer</h2>
+                    <h2>Pelanggan</h2>
 
                     <dl class="staff-detail-list">
                         <div>
@@ -167,7 +165,7 @@
                         </div>
 
                         <div>
-                            <dt>Email</dt>
+                            <dt>E-mel</dt>
                             <dd>{{ $order->customer_email ?: '-' }}</dd>
                         </div>
 
@@ -243,7 +241,7 @@
 
                             @if ($packageSide->design)
                                 <div class="staff-detail-group">
-                                    <h4>Design</h4>
+                                    <h4>Reka Bentuk</h4>
 
                                     <dl class="staff-detail-list">
                                         <div>
@@ -252,7 +250,7 @@
                                         </div>
 
                                         <div>
-                                            <dt>Design Code</dt>
+                                            <dt>Kod Reka Bentuk</dt>
                                             <dd>{{ $packageSide->design->design_code ?? '-' }}</dd>
                                         </div>
 
@@ -359,7 +357,7 @@
 
             @if ($order->relationLoaded('designJobs'))
                 <section id="design-work" class="staff-section">
-                    <h2 class="staff-section-title">Design Work</h2>
+                    <h2 class="staff-section-title">Kerja Reka Bentuk</h2>
 
                     @if ($canUsePhotoshop)
                         <div class="staff-design-tools">
@@ -411,17 +409,17 @@
 
                                 <dl class="staff-detail-list">
                                     <div>
-                                        <dt>Assigned</dt>
+                                        <dt>Ditugaskan</dt>
                                         <dd>{{ $job->assignedUser?->name ?? 'Unassigned' }}</dd>
                                     </div>
 
                                     <div>
-                                        <dt>Started</dt>
+                                        <dt>Dimulakan</dt>
                                         <dd>{{ $job->started_at?->format('Y-m-d H:i') ?? '-' }}</dd>
                                     </div>
 
                                     <div>
-                                        <dt>Ready</dt>
+                                        <dt>Sedia</dt>
                                         <dd>{{ $job->design_ready_at?->format('Y-m-d H:i') ?? '-' }}</dd>
                                     </div>
 
@@ -472,7 +470,7 @@
                                             @endphp
                                             <div class="staff-design-upload">
                                                 <div class="staff-design-upload-heading">
-                                                    <h4>Upload Artwork Version</h4>
+                                                    <h4>Muat Naik Versi Artwork</h4>
 
                                                     <p>
                                                         Upload the editable source artwork and a separate
@@ -776,16 +774,16 @@
 
             @if (($canAssignProduction ?? false) && ! $order->isAssignmentLocked() && auth()->user()->isOperationManagement() && ! request()->attributes->get('staff_overview_mode', false))
                 <section class="staff-section">
-                    <h2 class="staff-section-title">Assign Production Staff</h2>
+                    <h2 class="staff-section-title">Tugaskan Staf Pengeluaran</h2>
 
                     <div class="staff-work-grid">
                         <form method="POST" action="{{ route($operationRoutePrefix.'orders.assign-printing', $order) }}" class="staff-card staff-assignment-form js-staff-confirmation-form js-async-assignment" data-confirm-assignment="Production" data-confirm-mode="{{ $order->printing_assigned_user_id ? 'reassign' : 'assign' }}">
                             @csrf
                             <div class="staff-card-heading">
-                                <h3>Production</h3>
+                                <h3>Pengeluaran</h3>
                                 <span class="staff-status">{{ $order->printingAssignedUser ? 'ASSIGNED' : 'UNASSIGNED' }}</span>
                             </div>
-                            <label for="order-printing-assignee">{{ $order->printing_assigned_user_id ? 'Reassign Production Staff' : 'Assign Production Staff' }}</label>
+                            <label for="order-printing-assignee">{{ $order->printing_assigned_user_id ? 'Tugaskan Semula Staf Pengeluaran' : 'Tugaskan Staf Pengeluaran' }}</label>
                             <div class="staff-assignment-controls">
                                 <select id="order-printing-assignee" name="assigned_user_id" required>
                                     <option value="">Select production staff</option>
@@ -803,10 +801,10 @@
                                 <h3>OM: Packing &amp; Fulfilment</h3>
                                 <span class="staff-status">{{ $order->packingAssignedUser ? 'ASSIGNED' : 'UNASSIGNED' }}</span>
                             </div>
-                            <label for="order-packing-assignee">{{ $order->packing_assigned_user_id ? 'Reassign OM' : 'Assign OM' }}</label>
+                            <label for="order-packing-assignee">{{ $order->packing_assigned_user_id ? 'Tugaskan Semula OM' : 'Tugaskan OM' }}</label>
                             <div class="staff-assignment-controls">
                                 <select id="order-packing-assignee" name="assigned_user_id" required>
-                                    <option value="">Select OM (Packing &amp; Fulfilment)</option>
+                                    <option value="">Pilih OM (Pembungkusan &amp; Pemenuhan Tempahan)</option>
                                     @foreach ($packingStaff as $staff)
                                         <option value="{{ $staff->id }}" @selected($order->packing_assigned_user_id === $staff->id)>{{ $staff->name }}</option>
                                     @endforeach
@@ -820,7 +818,7 @@
 
             @if ($order->relationLoaded('printJobs'))
                 <section id="production" class="staff-section">
-                    <h2 class="staff-section-title">Production</h2>
+                    <h2 class="staff-section-title">Pengeluaran</h2>
 
                     <div class="staff-work-grid">
                         @forelse ($order->printJobs as $job)
@@ -856,12 +854,12 @@
                                     </div>
 
                                     <div>
-                                        <dt>Assigned</dt>
+                                        <dt>Ditugaskan</dt>
                                         <dd>{{ $job->assignedUser?->name ?? 'Unassigned' }}</dd>
                                     </div>
 
                                     <div>
-                                        <dt>Started</dt>
+                                        <dt>Dimulakan</dt>
                                         <dd>{{ $job->started_at?->format('Y-m-d H:i') ?? '-' }}</dd>
                                     </div>
 
@@ -878,7 +876,7 @@
 
                                 @if (filled($job->progress_files))
                                     <div class="staff-detail-group">
-                                        <h4>Production Progress Files</h4>
+                                        <h4>Fail Kemajuan Pengeluaran</h4>
 
                                         <div class="staff-contact-list">
                                             @foreach ($job->progress_files as $file)
@@ -903,20 +901,20 @@
                                             data-confirm-button="Ya, mula printing"
                                         >
                                             @csrf
-                                            <button type="submit" class="staff-button staff-button-primary">Start Printing</button>
+                                            <button type="submit" class="staff-button staff-button-primary">Mulakan Cetakan</button>
                                         </form>
                                     @elseif ($job->status === 'WAITING_FOR_PAYMENT')
                                         <p class="staff-work-message">Menunggu pengesahan bayaran penuh sebelum cetakan boleh dimulakan.</p>
                                     @elseif ($job->status === 'PRINTING')
                                         <form method="POST" enctype="multipart/form-data" action="{{ route('staff.print-jobs.progress-files.store', $job) }}" class="staff-packing-complete-form js-staff-confirmation-form js-async-progress-upload" data-confirm-title="Upload progress cetakan {{ ucfirst(strtolower($job->side)) }}?" data-confirm-message="Gambar atau PDF yang dipilih akan disimpan sebagai bukti progress cetakan semasa." data-confirm-button="Ya, upload progress">
                                             @csrf
-                                            <label for="print-progress-{{ $job->id }}">Upload production progress</label>
+                                            <label for="print-progress-{{ $job->id }}">Muat naik kemajuan pengeluaran</label>
                                             <div class="staff-file-picker">
                                                 <input id="print-progress-{{ $job->id }}" type="file" name="progress_files[]" accept=".jpg,.jpeg,.png,.webp,.pdf,image/jpeg,image/png,image/webp,application/pdf" multiple required>
                                                 <button type="button" class="staff-file-cancel" hidden aria-controls="print-progress-{{ $job->id }}">Batal</button>
                                             </div>
-                                            <p class="staff-muted-text">Upload photos or PDFs showing hanger production progress. Maximum 10 files, 20 MB each.</p>
-                                            <button type="submit" class="staff-button staff-button-secondary">Upload Progress</button>
+                                            <p class="staff-muted-text">Muat naik gambar atau PDF yang menunjukkan kemajuan pengeluaran. Maksimum 10 fail, 20 MB setiap satu.</p>
+                                            <button type="submit" class="staff-button staff-button-secondary">Muat Naik Kemajuan</button>
                                             <p class="staff-upload-notice" role="status" aria-live="polite" hidden></p>
                                         </form>
                                         <form method="POST" action="{{ route($operationRoutePrefix.'print-jobs.mark-printed', $job) }}" class="staff-workflow-form js-staff-confirmation-form" data-confirm-title="Tandakan cetakan {{ ucfirst(strtolower($job->side)) }} sebagai siap?" data-confirm-message="Pastikan semua {{ $job->quantity ?? $order->card_quantity ?? '-' }} keping kad telah selesai dicetak dan diperiksa sebelum meneruskan." data-confirm-button="Ya, tandakan siap" data-confirm-tone="danger">@csrf<button type="submit" class="staff-button staff-button-primary">Mark Printed</button></form>
@@ -936,11 +934,11 @@
 
             @if ($hasFullQueueView && $order->relationLoaded('packingJob') && $order->packingJob)
                 <section id="packing" class="staff-section">
-                    <h2 class="staff-section-title">Packing</h2>
+                    <h2 class="staff-section-title">Pembungkusan</h2>
 
                     <article class="staff-card">
                         <div class="staff-card-heading">
-                            <h3>Packing Job</h3>
+                            <h3>Kerja Pembungkusan</h3>
 
                             <span class="staff-status">
                                 {{ str_replace('_', ' ', $order->packingJob->status) }}
@@ -949,12 +947,12 @@
 
                         <dl class="staff-detail-list">
                             <div>
-                                <dt>Assigned</dt>
+                                <dt>Ditugaskan</dt>
                                 <dd>{{ $order->packingJob->assignedUser?->name ?? 'Unassigned' }}</dd>
                             </div>
 
                             <div>
-                                <dt>Started</dt>
+                                <dt>Dimulakan</dt>
                                 <dd>{{ $order->packingJob->started_at?->format('Y-m-d H:i') ?? '-' }}</dd>
                             </div>
 
@@ -993,7 +991,7 @@
 
                         @if (auth()->user()->isOperationManagement())
                             @if ($order->packingJob->status === 'READY_FOR_PACKING')
-                                <form method="POST" action="{{ route($operationRoutePrefix.'packing-jobs.start', $order->packingJob) }}" class="staff-workflow-form js-staff-confirmation-form" data-confirm-title="Mulakan proses packing?" data-confirm-message="Masa mula packing akan direkodkan. Pastikan semua barang yang telah dicetak tersedia untuk diperiksa dan dibungkus." data-confirm-button="Ya, mula packing">@csrf<button type="submit" class="staff-button staff-button-primary">Start Packing</button></form>
+                                <form method="POST" action="{{ route($operationRoutePrefix.'packing-jobs.start', $order->packingJob) }}" class="staff-workflow-form js-staff-confirmation-form" data-confirm-title="Mulakan proses packing?" data-confirm-message="Masa mula packing akan direkodkan. Pastikan semua barang yang telah dicetak tersedia untuk diperiksa dan dibungkus." data-confirm-button="Ya, mula packing">@csrf<button type="submit" class="staff-button staff-button-primary">Mulakan Pembungkusan</button></form>
                             @endif
                             @if ($order->packingJob->status === 'PACKING')
                                 @foreach ($order->packingJob->items as $item)
@@ -1013,7 +1011,7 @@
                                             <label for="courier-provider">Nama courier</label><input id="courier-provider" name="courier_provider" value="{{ old('courier_provider') }}" placeholder="Contoh: Pos Laju" required>
                                             <label for="tracking-number">Tracking number</label><input id="tracking-number" name="tracking_number" value="{{ old('tracking_number') }}" required>
                                         @endif
-                                        <button type="submit" class="staff-button staff-button-primary">Upload Bukti & Mark Packed</button>
+                                        <button type="submit" class="staff-button staff-button-primary">Muat Naik Bukti & Tandakan Selesai Dibungkus</button>
                                     </form>
                                 @endif
                             @endif
@@ -1022,7 +1020,7 @@
                 </section>
             @elseif (auth()->user()->hasStaffRole(\App\Models\User::ROLE_OM) && $order->packing_assigned_user_id === auth()->id())
                 <section id="packing" class="staff-section">
-                    <h2 class="staff-section-title">Packing</h2>
+                    <h2 class="staff-section-title">Pembungkusan</h2>
                     <div class="staff-empty">
                         Packing job akan diwujudkan secara automatik selepas semua kerja cetakan selesai.
                     </div>
@@ -1031,7 +1029,7 @@
 
             @if ($hasFullQueueView)
             <section id="fulfilment" class="staff-section">
-                <h2 class="staff-section-title">Fulfilment</h2>
+                <h2 class="staff-section-title">Pemenuhan Tempahan</h2>
 
                 <article class="staff-card">
                     @if ($order->fulfilment)
@@ -1064,7 +1062,7 @@
 
                     @if ($order->fulfilmentJob)
                         <div class="staff-detail-group">
-                            <h4>Fulfilment Job</h4>
+                            <h4>Kerja Pemenuhan Tempahan</h4>
 
                             <dl class="staff-detail-list">
                                 <div>
