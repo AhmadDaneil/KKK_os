@@ -4,8 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Services\Orders\CustomerOrderSessionAccessService;
 use App\Services\Orders\SaveOrderDraftService;
-use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 
 class CustomerOrderDraftController extends Controller
@@ -19,7 +19,7 @@ class CustomerOrderDraftController extends Controller
         $order = $access->resolve($request, $orderId);
 
         $validated = $request->validate([
-	    'card_quantity' => ['sometimes', 'nullable', 'integer', 'min:1'],
+            'card_quantity' => ['sometimes', 'nullable', 'integer', 'min:1'],
             'couple' => ['sometimes', 'array'],
             'couple.groom_name' => ['nullable', 'string', 'max:255'],
             'couple.groom_abbreviation' => ['nullable', 'string', 'max:100'],
@@ -52,7 +52,7 @@ class CustomerOrderDraftController extends Controller
             'sides.LELAKI.event.google_maps_url' => ['nullable', 'url:http,https', 'max:2000'],
             'sides.LELAKI.event.contacts' => ['sometimes', 'array'],
             'sides.LELAKI.event.contacts.*.contact_name' => ['nullable', 'string', 'max:255'],
-            'sides.LELAKI.event.contacts.*.contact_phone' => ['nullable', 'string', 'max:50'],
+            'sides.LELAKI.event.contacts.*.contact_phone' => ['nullable', 'string', 'regex:/^01\d{8,9}$/'],
 
             'sides.PEREMPUAN.design.theme' => ['nullable', 'string', 'max:255'],
             'sides.PEREMPUAN.design.design_code' => ['nullable', 'string', 'max:100'],
@@ -70,13 +70,16 @@ class CustomerOrderDraftController extends Controller
             'sides.PEREMPUAN.event.google_maps_url' => ['nullable', 'url:http,https', 'max:2000'],
             'sides.PEREMPUAN.event.contacts' => ['sometimes', 'array'],
             'sides.PEREMPUAN.event.contacts.*.contact_name' => ['nullable', 'string', 'max:255'],
-            'sides.PEREMPUAN.event.contacts.*.contact_phone' => ['nullable', 'string', 'max:50'],
+            'sides.PEREMPUAN.event.contacts.*.contact_phone' => ['nullable', 'string', 'regex:/^01\d{8,9}$/'],
 
             'fulfilment' => ['sometimes', 'array'],
             'fulfilment.method' => ['nullable', 'in:COURIER,PICKUP'],
             'fulfilment.recipient_name' => ['nullable', 'string', 'max:255'],
-            'fulfilment.recipient_phone' => ['nullable', 'string', 'max:50'],
+            'fulfilment.recipient_phone' => ['nullable', 'string', 'regex:/^01\d{8,9}$/'],
             'fulfilment.shipping_address' => ['nullable', 'string', 'max:2000'],
+        ], [
+            'sides.*.event.contacts.*.contact_phone.regex' => 'Nombor telefon mestilah 10 atau 11 digit dan bermula dengan 01.',
+            'fulfilment.recipient_phone.regex' => 'Nombor telefon mestilah 10 atau 11 digit dan bermula dengan 01.',
         ]);
 
         $saveDraft->save($order, $validated);

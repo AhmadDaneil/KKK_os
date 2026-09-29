@@ -14,7 +14,7 @@ return [
     'social' => [
         'instagram' => env('KKK_SOCIAL_INSTAGRAM', 'https://www.instagram.com/kingkadkahwin/'),
         'facebook' => env('KKK_SOCIAL_FACEBOOK', 'https://www.facebook.com/stickingbyking/'),
-        'tiktok' => env('KKK_SOCIAL_TIKTOK', 'https://www.tiktok.com/@kingkadkahwinhq?_r=1&_t=ZS-9A7t5VH9y9x'), 
+        'tiktok' => env('KKK_SOCIAL_TIKTOK','https://www.tiktok.com/@kingkadkahwinhq?_r=1&_t=ZS-9A7t5VH9y9x'),
         'whatsapp' => env('KKK_SOCIAL_WHATSAPP', 'https://wa.me/60187716968'),
     ],
 
