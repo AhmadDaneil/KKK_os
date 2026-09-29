@@ -69,7 +69,7 @@
 
             <div class="two-columns">
                 <div><label for="customer_email">Email</label><input id="customer_email" type="email" name="customer_email" placeholder="e.g. syafiq@email.com" value="{{ old('customer_email') }}" autocomplete="email" required>@error('customer_email')<p class="field-error">{{ $message }}</p>@enderror</div>
-                <div><label for="customer_phone">Nombor telefon</label><input id="customer_phone" type="tel" name="customer_phone" placeholder="e.g. 012-3456789" value="{{ old('customer_phone') }}" autocomplete="tel" required>@error('customer_phone')<p class="field-error">{{ $message }}</p>@enderror</div>
+                <div><label for="customer_phone">Nombor telefon</label><input id="customer_phone" type="tel" name="customer_phone" placeholder="Contoh: 0123456789" pattern="01[0-9]{8,9}" inputmode="numeric" minlength="10" maxlength="11" title="Masukkan 10 atau 11 digit bermula dengan 01." value="{{ old('customer_phone') }}" autocomplete="tel" required>@error('customer_phone')<p class="field-error">{{ $message }}</p>@enderror</div>
             </div>
             <button id="start-order-submit" class="button button-primary submit-button" type="submit">Cipta Tempahan & Teruskan →</button>
             <p class="privacy-note">Maklumat ini digunakan untuk mengurus tempahan anda sahaja.</p>

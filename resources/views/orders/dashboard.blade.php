@@ -518,7 +518,13 @@
             <label>Contact {{ $contactNumber }} - Telefon</label>
             <input
                 name="sides[{{ $side }}][event][contacts][{{ $contactNumber }}][contact_phone]"
-                placeholder="e.g. 012-3456789"
+                type="tel"
+                pattern="01[0-9]{8,9}"
+                inputmode="numeric"
+                minlength="10"
+                maxlength="11"
+                title="Masukkan 10 atau 11 digit bermula dengan 01."
+                placeholder="Contoh: 0123456789"
                 value="{{ old("sides.$side.event.contacts.$contactNumber.contact_phone", $contact?->contact_phone) }}"
             >
         </div>
@@ -587,7 +593,13 @@
             <input
                 id="courier-recipient-phone"
                 name="fulfilment[recipient_phone]"
-                placeholder="e.g. 012-3456789"
+                type="tel"
+                pattern="01[0-9]{8,9}"
+                inputmode="numeric"
+                minlength="10"
+                maxlength="11"
+                title="Masukkan 10 atau 11 digit bermula dengan 01."
+                placeholder="Contoh: 0123456789"
                 value="{{ old('fulfilment.recipient_phone', $order->fulfilment?->recipient_phone) }}"
             >
         </div>

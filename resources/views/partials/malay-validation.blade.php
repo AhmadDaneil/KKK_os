@@ -18,6 +18,10 @@
                     field.setCustomValidity(`Sila masukkan tidak lebih daripada ${field.maxLength} aksara.`);
                 } else if (field.validity.rangeUnderflow || field.validity.rangeOverflow) {
                     field.setCustomValidity('Sila masukkan nilai dalam julat yang sah.');
+                } else if (field.validity.patternMismatch) {
+                    field.setCustomValidity(field.type === 'tel'
+                        ? 'Sila masukkan nombor telefon 10 atau 11 digit bermula dengan 01.'
+                        : 'Sila masukkan format yang sah.');
                 } else if (field.validity.badInput || field.validity.stepMismatch) {
                     field.setCustomValidity('Sila masukkan nilai yang sah.');
                 }

@@ -16,8 +16,7 @@ class PublicOrderController extends Controller
     public function create(
         Request $request,
         CustomerOrderSessionAccessService $sessionAccess,
-    ): View|RedirectResponse
-    {
+    ): View|RedirectResponse {
         $draft = $sessionAccess->unfinishedDraft($request);
 
         if ($draft) {
@@ -39,7 +38,7 @@ class PublicOrderController extends Controller
             'first_event_side' => ['nullable', 'string', 'in:LELAKI,PEREMPUAN', 'required_if:package_count,2'],
             'customer_name' => ['required', 'string', 'max:255'],
             'customer_email' => ['required', 'email', 'max:255'],
-            'customer_phone' => ['required', 'string', 'max:30'],
+            'customer_phone' => ['required', 'string', 'regex:/^01\d{8,9}$/'],
         ]);
 
         $order = $createOrder->create($validated);
@@ -51,8 +50,7 @@ class PublicOrderController extends Controller
         Request $request,
         BuildCustomerProgressService $customerProgress,
         CustomerOrderSessionAccessService $sessionAccess,
-    ): View|RedirectResponse
-    {
+    ): View|RedirectResponse {
         if ($request->filled('order_id')) {
             return $this->lookupProgress($request, $customerProgress, $sessionAccess);
         }
