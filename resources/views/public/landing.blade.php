@@ -46,8 +46,8 @@
                             decoding="async"
                             draggable="false">
                         <span class="landing-card-watermark" aria-hidden="true">
-                            <span>KING KAD KAHWIN · PRATONTON</span>
-                            <span>KING KAD KAHWIN · PRATONTON</span>
+                            <span>KING KAD KAHWIN · PREVIEW</span>
+                            <span>KING KAD KAHWIN · PREVIEW</span>
                         </span>
                     </article>
                 </div>
@@ -59,8 +59,8 @@
                             decoding="async"
                             draggable="false">
                         <span class="landing-card-watermark" aria-hidden="true">
-                            <span>KING KAD KAHWIN · PRATONTON</span>
-                            <span>KING KAD KAHWIN · PRATONTON</span>
+                            <span>KING KAD KAHWIN · PREVIEW</span>
+                            <span>KING KAD KAHWIN · PREVIEW</span>
                         </span>
                     </article>
                 </div>
@@ -72,8 +72,8 @@
                             decoding="async"
                             draggable="false">
                         <span class="landing-card-watermark" aria-hidden="true">
-                            <span>KING KAD KAHWIN · PRATONTON</span>
-                            <span>KING KAD KAHWIN · PRATONTON</span>
+                            <span>KING KAD KAHWIN · PREVIEW</span>
+                            <span>KING KAD KAHWIN · PREVIEW</span>
                         </span>
                     </article>
                 </div>
@@ -85,8 +85,8 @@
                             decoding="async"
                             draggable="false">
                         <span class="landing-card-watermark" aria-hidden="true">
-                            <span>KING KAD KAHWIN · PRATONTON</span>
-                            <span>KING KAD KAHWIN · PRATONTON</span>
+                            <span>KING KAD KAHWIN · PREVIEW</span>
+                            <span>KING KAD KAHWIN · PREVIEW</span>
                         </span>
                     </article>
                 </div>

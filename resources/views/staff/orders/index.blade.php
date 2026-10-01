@@ -79,7 +79,7 @@
         @include('staff.partials.sidebar')
         <div class="staff-workspace">
             <header class="staff-topbar">
-                <div><p class="staff-kicker">{{ auth()->user()->isAdmin() ? 'Operasi Pentadbir' : ($workstreamLabel ?? 'Pengurusan Operasi') }}</p><h1>{{ $workstreamLabel ? 'Senarai '.$workstreamLabel : 'Semua Tempahan' }}</h1></div>
+                <div><p class="staff-kicker">{{ auth()->user()->isAdmin() ? 'Operasi Admin' : ($workstreamLabel ?? 'Pengurusan Operasi') }}</p><h1>{{ $workstreamLabel ? 'Senarai '.$workstreamLabel : 'Semua Tempahan' }}</h1></div>
                 <div class="staff-topbar-actions">
                     <form class="js-logout-form staff-logout-profile" method="POST" action="{{ route($logoutRoute) }}">@csrf<button type="submit"><span class="staff-topbar-avatar" aria-hidden="true"></span><span>{{ __('ui.logout') }}</span></button></form>
                 </div>

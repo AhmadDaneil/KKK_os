@@ -106,7 +106,7 @@
     </section>
 
     <section class="admin-panel admin-attention-panel">
-        <div class="admin-panel-heading"><div><p class="admin-eyebrow">Tindakan Pentadbir</p><h2>Memerlukan Perhatian</h2></div><span @class(['admin-attention-total', 'has-alert' => $attentionTotal > 0, 'is-clear' => $attentionTotal === 0])>{{ $attentionTotal > 0 ? $attentionTotal.' tindakan' : 'Semua selesai' }}</span></div>
+        <div class="admin-panel-heading"><div><p class="admin-eyebrow">Tindakan Admin</p><h2>Memerlukan Perhatian</h2></div><span @class(['admin-attention-total', 'has-alert' => $attentionTotal > 0, 'is-clear' => $attentionTotal === 0])>{{ $attentionTotal > 0 ? $attentionTotal.' tindakan' : 'Semua selesai' }}</span></div>
         <div class="admin-action-grid">
             <a href="{{ route('admin.orders.index', ['attention' => 'pending_payment']) }}" @class(['has-alert' => $attention['pending_payments'] > 0, 'is-clear' => $attention['pending_payments'] === 0])><span class="action-icon is-payment">RM</span><div><strong>Semakan Pembayaran</strong><small>Deposit atau bayaran penuh yang masih menunggu</small></div><b>{{ $attention['pending_payments'] }}</b></a>
             <a href="{{ route('admin.orders.index', ['workstream' => 'design', 'attention' => 'unassigned_design']) }}" @class(['has-alert' => $attention['unassigned_design'] > 0, 'is-clear' => $attention['unassigned_design'] === 0])><span class="action-icon is-design">RB</span><div><strong>Reka Bentuk Belum Ditugaskan</strong><small>Tugaskan pereka supaya hasil reka bentuk boleh dimulakan</small></div><b>{{ $attention['unassigned_design'] }}</b></a>
@@ -128,7 +128,7 @@
         <section class="admin-panel">
             <div class="admin-panel-heading"><div><p class="admin-eyebrow">Pasukan</p><h2>Staf Aktif</h2></div><a href="{{ route('admin.staff.index') }}">Urus →</a></div>
             <dl class="admin-team-counts">
-                <div><dt>Pentadbir</dt><dd>{{ $teamCounts['ADMIN'] ?? 0 }}</dd></div>
+                <div><dt>Admin</dt><dd>{{ $teamCounts['ADMIN'] ?? 0 }}</dd></div>
                 <div><dt>Pengurusan Operasi</dt><dd>{{ $teamCounts['OPERATION_MANAGEMENT'] ?? 0 }}</dd></div>
                 <div><dt>Pereka</dt><dd>{{ $teamCounts['DESIGNER'] ?? 0 }}</dd></div>
                 <div><dt>Pengeluaran</dt><dd>{{ $teamCounts['PRODUCTION'] ?? 0 }}</dd></div>

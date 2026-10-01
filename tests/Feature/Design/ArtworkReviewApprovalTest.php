@@ -188,7 +188,7 @@ class ArtworkReviewApprovalTest extends TestCase
 
         $this->get(route('orders.artwork.review', ['orderId' => $order->order_id]))
             ->assertOk()
-            ->assertSee('Kembali ke Semak Progress')
+            ->assertSee('Kembali ke Semak Kemajuan')
             ->assertSee(
                 route('public.orders.progress', ['order_id' => $order->order_id]),
                 false

@@ -9,7 +9,7 @@
         'DESIGNER' => 'Pereka',
         'PRODUCTION' => 'Pengeluaran',
         'CUSTOMER_SERVICE' => 'Khidmat Pelanggan',
-        'ADMIN' => 'Pentadbir',
+        'ADMIN' => 'Admin',
     ];
 @endphp
 <html lang="ms">

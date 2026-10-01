@@ -7,7 +7,7 @@
     $canMonitorOperations = $staffUser->canMonitorAllDepartments();
     $canViewDesignQueue = $canMonitorOperations || $staffUser->hasStaffRole(\App\Models\User::ROLE_DESIGNER);
     $canViewProductionQueue = $canMonitorOperations || $staffUser->hasStaffRole(\App\Models\User::ROLE_PRODUCTION);
-    $roleLabel = $staffUser->isAdmin() ? 'Pentadbir' : match ($staffUser->role) {
+    $roleLabel = $staffUser->isAdmin() ? 'Admin' : match ($staffUser->role) {
         \App\Models\User::ROLE_OM => 'Pengurusan Operasi',
         \App\Models\User::ROLE_CUSTOMER_SERVICE => 'Khidmat Pelanggan',
         \App\Models\User::ROLE_PRODUCTION => 'Pengeluaran',

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Log Masuk Pentadbir — KKK OS</title>
+    <title>Log Masuk Admin — KKK OS</title>
     <link rel="stylesheet" href="{{ asset('css/login.css') }}">
 </head>
 <body class="login-page login-page--admin">
@@ -26,7 +26,7 @@
         <section class="login-panel" aria-labelledby="login-title">
             <div class="login-heading">
                 <span class="login-eyebrow">SELAMAT KEMBALI</span>
-                <h1 id="login-title">Log Masuk Pentadbir<span>.</span></h1>
+                <h1 id="login-title">Log Masuk Admin<span>.</span></h1>
                 <p>Log masuk untuk mengurus akaun staf dan memantau keseluruhan operasi.</p>
             </div>
             @if ($errors->any())
@@ -35,7 +35,7 @@
             <form method="POST" action="{{ route('admin.login.store') }}" class="login-form">
                 @csrf
                 <div class="login-field">
-                    <label for="email">E-mel Pentadbir</label>
+                    <label for="email">E-mel Admin</label>
                     <input id="email" type="email" name="email" value="{{ old('email') }}" placeholder="nama@kingkadkahwin.com" required autofocus autocomplete="email">
                 </div>
                 <div class="login-field">

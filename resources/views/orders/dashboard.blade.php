@@ -306,53 +306,6 @@
                 <div><label>Singkatan Pengantin Perempuan</label><input name="couple[bride_abbreviation]" placeholder="Contoh: Awanis" value="{{ old('couple.bride_abbreviation', $couple?->bride_abbreviation) }}"></div>
             </div>
         </fieldset>
-        <fieldset>
-    <legend>Pasangan Kedua (Jika Ada)</legend>
-
-    <p class="field-help">
-        Isi bahagian ini hanya jika majlis melibatkan dua pasangan pengantin.
-        Jika tidak berkenaan, biarkan kosong.
-    </p>
-
-    <div class="grid">
-        <div>
-            <label>Nama Pengantin Lelaki Kedua</label>
-            <input
-                name="second_couple[groom_name]"
-                placeholder="Contoh: Ahmad Danial Bin Zulkifli"
-                value="{{ old('second_couple.groom_name', $secondCouple?->groom_name) }}"
-            >
-        </div>
-
-        <div>
-            <label>Singkatan Pengantin Lelaki Kedua</label>
-            <input
-                name="second_couple[groom_abbreviation]"
-                placeholder="Contoh: Danial"
-                value="{{ old('second_couple.groom_abbreviation', $secondCouple?->groom_abbreviation) }}"
-            >
-        </div>
-
-        <div>
-            <label>Nama Pengantin Perempuan Kedua</label>
-            <input
-                name="second_couple[bride_name]"
-                placeholder="Contoh: Siti Hajar Binti Hamid"
-                value="{{ old('second_couple.bride_name', $secondCouple?->bride_name) }}"
-            >
-        </div>
-
-        <div>
-            <label>Singkatan Pengantin Perempuan Kedua</label>
-            <input
-                name="second_couple[bride_abbreviation]"
-                placeholder="Contoh: Hajar"
-                value="{{ old('second_couple.bride_abbreviation', $secondCouple?->bride_abbreviation) }}"
-            >
-        </div>
-    </div>
-</fieldset>
-
         @foreach ($orderedPackageSides as $packageSide)
             @php($side = $packageSide->side)
             @php($event = $packageSide->event)

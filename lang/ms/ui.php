@@ -1,7 +1,7 @@
 <?php
 
 return [
-    'admin_dashboard' => 'Papan Pemuka Pentadbir', 'overview' => 'Gambaran Keseluruhan', 'management' => 'Pengurusan',
+    'admin_dashboard' => 'Papan Pemuka Admin', 'overview' => 'Gambaran Keseluruhan', 'management' => 'Pengurusan',
     'operations' => 'Operasi', 'sales_analysis' => 'Analisis Jualan', 'staff_access' => 'Staf & Akses',
     'all_orders' => 'Semua Tempahan', 'payment_review' => 'Semakan Bayaran', 'design_queue' => 'Senarai Reka Bentuk',
     'production_queue' => 'Senarai Pengeluaran', 'packing_queue' => 'Senarai Pembungkusan', 'logout' => 'Log Keluar',
@@ -23,7 +23,7 @@ return [
     'shipping_information' => 'Maklumat Penghantaran', 'deposit_status' => 'Status Deposit', 'deposit_confirmed' => 'Deposit Disahkan',
     'receipt_rejected' => 'Resit Ditolak', 'pending_review' => 'Menunggu Semakan', 'upload_new_receipt' => 'Muat naik resit baharu',
     'resubmit_receipt' => 'Hantar Semula Resit', 'language' => 'Bahasa', 'actions' => 'Tindakan',
-    'administration' => 'Pentadbiran', 'admin_operations' => 'Operasi Pentadbir', 'order_detail' => 'Butiran Tempahan',
+    'administration' => 'Pentadbiran', 'admin_operations' => 'Operasi Admin', 'order_detail' => 'Butiran Tempahan',
     'progress' => [
         'BOOKING_PENDING'=>['Tempahan Sedang Diproses','Tempahan anda sedang diproses.'],'BOOKED'=>['Tempahan Diterima','Tempahan anda telah diterima.'],'DETAILS_INCOMPLETE'=>['Maklumat Belum Lengkap','Lengkapkan maklumat yang diperlukan sebelum membuat pengesahan.'],'DETAILS_CONFIRMED'=>['Maklumat Telah Disahkan','Maklumat tempahan anda telah berjaya disahkan.'],'READY_FOR_DESIGN'=>['Menunggu Proses Reka Bentuk','Maklumat anda telah diterima dan sedia untuk proses reka bentuk.'],'DESIGN_READY'=>['Hasil Reka Bentuk Sedia Untuk Semakan','Hasil Reka Bentuk anda telah tersedia untuk semakan.'],'CORRECTION_REQUESTED'=>['Pembetulan Hasil Reka Bentuk Sedang Diproses','Permintaan pembetulan anda telah diterima.'],'DESIGN_APPROVED'=>['Hasil Reka Bentuk Diluluskan','Hasil Reka Bentuk anda telah diluluskan.'],'BALANCE_PENDING'=>['Menunggu Bayaran Baki','Bayaran baki diperlukan sebelum proses seterusnya.'],'PAID'=>['Bayaran Selesai','Bayaran tempahan anda telah selesai.'],'READY_FOR_PRINT'=>['Menunggu Proses Cetakan','Tempahan anda berada dalam giliran cetakan.'],'PRINTING'=>['Dalam Proses Cetakan','Tempahan anda sedang dicetak.'],'PRINTED'=>['Cetakan Selesai','Cetakan tempahan anda telah siap dan akan diteruskan ke proses pembungkusan.'],'READY_FOR_PACKING'=>['Menunggu Pembungkusan','Tempahan anda sedang menunggu proses pembungkusan.'],'PACKING'=>['Dalam Proses Pembungkusan','Tempahan anda sedang dibungkus.'],'PACKED'=>['Pembungkusan Selesai','Tempahan anda telah siap dibungkus.'],'READY_FOR_PICKUP'=>['Sedia Untuk Pengambilan','Tempahan anda telah sedia untuk diambil.'],'SHIPPED'=>['Telah Dihantar','Tempahan anda telah diserahkan kepada kurier.'],'COMPLETED'=>['Tempahan Selesai','Tempahan anda telah selesai.'],'CANCELLED'=>['Tempahan Dibatalkan','Tempahan ini telah dibatalkan.'],'ARCHIVED'=>['Tempahan Diarkibkan','Tempahan ini telah diarkibkan.'],'DEFAULT'=>['Status Tempahan','Status tempahan anda sedang dikemas kini.'],
     ],
