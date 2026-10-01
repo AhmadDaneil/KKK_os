@@ -143,7 +143,7 @@
                 <thead><tr><th>ID Tempahan</th><th>Pelanggan</th><th>Pakej</th><th>Status</th><th>Tarikh</th><th></th></tr></thead>
                 <tbody>
                 @forelse ($recentOrders as $order)
-                    <tr><td><strong>{{ $order->order_id }}</strong></td><td>{{ $order->customer_name ?: 'Belum diisi' }}</td><td>{{ $order->package_count }} pakej</td><td><span class="admin-status">{{ $statusLabels[$order->status] ?? 'Status Tempahan' }}</span></td><td>{{ $order->created_at->format('d M Y') }}</td><td><a href="{{ route('admin.orders.show', $order->order_id) }}">Buka</a></td></tr>
+                    <tr><td><strong>{{ $order->order_id }}</strong></td><td>{{ $order->customer_name ?: 'Belum diisi' }}</td><td>{{ $order->package_count }} pakej</td><td><span class="admin-status">{{ $statusLabels[$order->status] ?? 'Status Tempahan' }}</span></td><td>{{ $order->created_at->timezone(config('app.display_timezone'))->format('d M Y') }}</td><td><a href="{{ route('admin.orders.show', $order->order_id) }}">Buka</a></td></tr>
                 @empty
                     <tr><td colspan="6" class="admin-empty">Belum ada tempahan.</td></tr>
                 @endforelse

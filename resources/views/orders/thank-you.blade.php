@@ -60,7 +60,7 @@
                 </div>
                 <div>
                     <dt>Tarikh Disahkan</dt>
-                    <dd>{{ $order->details_confirmed_at?->format('d/m/Y, h:i A') }}</dd>
+                    <dd>{{ $order->details_confirmed_at?->timezone(config('app.display_timezone'))->format('d/m/Y, h:i A') }}</dd>
                 </div>
             </dl>
 

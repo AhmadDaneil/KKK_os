@@ -272,7 +272,7 @@
                                         <strong>Permintaan pembetulan</strong>
                                         @if ($action->acted_at)
                                             <time datetime="{{ $action->acted_at->toIso8601String() }}">
-                                                {{ $action->acted_at->format('d/m/Y H:i') }}
+                                                {{ $action->acted_at->timezone(config('app.display_timezone'))->format('d/m/Y H:i') }}
                                             </time>
                                         @endif
                                     </div>

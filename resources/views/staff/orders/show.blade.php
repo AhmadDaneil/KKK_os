@@ -211,7 +211,7 @@
                                     <div class="staff-timeline-content">
                                         <div class="staff-timeline-heading">
                                             <strong>{{ str_replace('_', ' ', $event['to_status'] ?: $event['event_type']) }}</strong>
-                                            <time datetime="{{ $event['occurred_at']?->toIso8601String() }}">{{ $event['occurred_at']?->format('d/m/Y, H:i') ?? '-' }}</time>
+                                            <time datetime="{{ $event['occurred_at']?->toIso8601String() }}">{{ $event['occurred_at']?->timezone(config('app.display_timezone'))->format('d/m/Y, H:i') ?? '-' }}</time>
                                         </div>
                                         <p>{{ $event['actor']?->name ?? 'Sistem' }} @if ($event['from_status'] && $event['from_status'] !== $event['to_status'])<span>· {{ str_replace('_', ' ', $event['from_status']) }} → {{ str_replace('_', ' ', $event['to_status']) }}</span>@endif</p>
                                         @if ($event['reason'])<small>{{ $event['reason'] }}</small>@endif
@@ -416,12 +416,12 @@
 
                                     <div>
                                         <dt>Dimulakan</dt>
-                                        <dd>{{ $job->started_at?->format('Y-m-d H:i') ?? '-' }}</dd>
+                                        <dd>{{ $job->started_at?->timezone(config('app.display_timezone'))->format('Y-m-d H:i') ?? '-' }}</dd>
                                     </div>
 
                                     <div>
                                         <dt>Sedia</dt>
-                                        <dd>{{ $job->design_ready_at?->format('Y-m-d H:i') ?? '-' }}</dd>
+                                        <dd>{{ $job->design_ready_at?->timezone(config('app.display_timezone'))->format('Y-m-d H:i') ?? '-' }}</dd>
                                     </div>
 
                                     <div>
@@ -706,7 +706,7 @@
 
                                 <div>
                                     <dt>Paid At</dt>
-                                    <dd>{{ $payment->paid_at?->format('Y-m-d H:i') ?? '-' }}</dd>
+                                    <dd>{{ $payment->paid_at?->timezone(config('app.display_timezone'))->format('Y-m-d H:i') ?? '-' }}</dd>
                                 </div>
                             </dl>
 
@@ -861,17 +861,17 @@
 
                                     <div>
                                         <dt>Dimulakan</dt>
-                                        <dd>{{ $job->started_at?->format('Y-m-d H:i') ?? '-' }}</dd>
+                                        <dd>{{ $job->started_at?->timezone(config('app.display_timezone'))->format('Y-m-d H:i') ?? '-' }}</dd>
                                     </div>
 
                                     <div>
                                         <dt>Printed</dt>
-                                        <dd>{{ $job->printed_at?->format('Y-m-d H:i') ?? '-' }}</dd>
+                                        <dd>{{ $job->printed_at?->timezone(config('app.display_timezone'))->format('Y-m-d H:i') ?? '-' }}</dd>
                                     </div>
 
                                     <div>
                                         <dt>Progress Dikemas Kini</dt>
-                                        <dd>{{ $job->progress_updated_at?->format('Y-m-d H:i') ?? '-' }}</dd>
+                                        <dd>{{ $job->progress_updated_at?->timezone(config('app.display_timezone'))->format('Y-m-d H:i') ?? '-' }}</dd>
                                     </div>
                                 </dl>
 
@@ -884,7 +884,7 @@
                                                 <div class="staff-contact-row">
                                                     <span>{{ $file['original_name'] ?? 'Fail progress' }}</span>
                                                     <a href="{{ route($operationRoutePrefix.'print-jobs.progress-files.show', ['printJob' => $job, 'file' => $loop->index]) }}" class="staff-button staff-button-small" target="_blank" rel="noopener">
-                                                        Lihat · {{ isset($file['uploaded_at']) ? \Illuminate\Support\Carbon::parse($file['uploaded_at'])->format('Y-m-d H:i') : '-' }}
+                                                        Lihat · {{ isset($file['uploaded_at']) ? \Illuminate\Support\Carbon::parse($file['uploaded_at'])->timezone(config('app.display_timezone'))->format('Y-m-d H:i') : '-' }}
                                                     </a>
                                                 </div>
                                             @endforeach
@@ -954,12 +954,12 @@
 
                             <div>
                                 <dt>Dimulakan</dt>
-                                <dd>{{ $order->packingJob->started_at?->format('Y-m-d H:i') ?? '-' }}</dd>
+                                <dd>{{ $order->packingJob->started_at?->timezone(config('app.display_timezone'))->format('Y-m-d H:i') ?? '-' }}</dd>
                             </div>
 
                             <div>
                                 <dt>Packed</dt>
-                                <dd>{{ $order->packingJob->packed_at?->format('Y-m-d H:i') ?? '-' }}</dd>
+                                <dd>{{ $order->packingJob->packed_at?->timezone(config('app.display_timezone'))->format('Y-m-d H:i') ?? '-' }}</dd>
                             </div>
                         </dl>
                         @if ($order->packingJob->items->isNotEmpty())

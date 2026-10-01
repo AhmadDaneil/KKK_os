@@ -132,7 +132,7 @@
                         <small>MAKLUMAT PENGHANTARAN</small>
                         <div><span>Kurier</span><strong>{{ $shipment['courier_provider'] ?: '-' }}</strong></div>
                         <div><span>Tracking Number</span><strong class="tracking-number">{{ $shipment['tracking_number'] }}</strong></div>
-                        @if ($shipment['shipped_at'])<p>Dihantar pada {{ $shipment['shipped_at']->timezone('Asia/Kuala_Lumpur')->format('d/m/Y, h:i A') }}</p>@endif
+                        @if ($shipment['shipped_at'])<p>Dihantar pada {{ $shipment['shipped_at']->timezone(config('app.display_timezone'))->format('d/m/Y, h:i A') }}</p>@endif
                     </div>
                 @endif
             </section>

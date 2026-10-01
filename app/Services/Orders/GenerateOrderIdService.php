@@ -8,8 +8,9 @@ class GenerateOrderIdService
 {
     public function generate(): string
     {
-        $date = now()->toDateString();
-        $datePart = now()->format('ymd');
+        $malaysiaNow = now(config('app.display_timezone'));
+        $date = $malaysiaNow->toDateString();
+        $datePart = $malaysiaNow->format('ymd');
 
         return DB::transaction(function () use ($date, $datePart) {
             $sequence = DB::table('order_number_sequences')
