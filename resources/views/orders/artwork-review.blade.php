@@ -7,6 +7,7 @@
     <title>Semakan Hasil Reka Bentuk - {{ $order->order_id }}</title>
     <link rel="stylesheet" href="{{ asset('css/artwork-review.css') }}?v={{ filemtime(public_path('css/artwork-review.css')) }}">
     <link rel="stylesheet" href="{{ asset('css/customer-theme.css') }}?v={{ filemtime(public_path('css/customer-theme.css')) }}">
+    <link rel="stylesheet" href="{{ asset('css/customer-service.css') }}?v={{ filemtime(public_path('css/customer-service.css')) }}">
 </head>
 <body>
 @php
@@ -377,6 +378,7 @@
         pendingArtworkForm.submit();
     });
 </script>
+@include('public.partials.customer-service')
 @include('public.partials.theme-toggle')
 @include('partials.malay-validation')
 </body>

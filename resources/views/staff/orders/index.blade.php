@@ -17,6 +17,18 @@
         'fulfilment' => 'Pemenuhan Tempahan',
     ];
     $workstreamLabel = $workstreamLabels[$workstream] ?? null;
+    $attentionLabels = [
+        'pending_payment' => 'Semakan Bayaran',
+        'unassigned_design' => 'Reka Bentuk Belum Ditugaskan',
+        'unassigned_printing' => 'Pengeluaran Belum Ditugaskan',
+        'unassigned_packing' => 'Pembungkusan Belum Ditugaskan',
+    ];
+    $attentionDescriptions = [
+        'pending_payment' => 'Semak deposit dan bayaran penuh yang masih menunggu pengesahan.',
+    ];
+    $attention = request('attention');
+    $attentionLabel = $attentionLabels[$attention] ?? null;
+    $pageLabel = $attentionLabel ?? ($workstreamLabel ? 'Senarai '.$workstreamLabel : 'Semua Tempahan');
     $statusLabels = [
         'DETAILS_INCOMPLETE' => 'Maklumat belum lengkap',
         'BOOKED' => 'Tempahan diterima',
@@ -70,7 +82,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>{{ $workstreamLabel ? 'Senarai '.$workstreamLabel : 'Tempahan Staf' }} - KKK OS</title>
+    <title>{{ $pageLabel }} - KKK OS</title>
 
     <link rel="stylesheet" href="{{ asset('css/staff.css') }}?v={{ filemtime(public_path('css/staff.css')) }}">
 </head>
@@ -79,7 +91,7 @@
         @include('staff.partials.sidebar')
         <div class="staff-workspace">
             <header class="staff-topbar">
-                <div><p class="staff-kicker">{{ auth()->user()->isAdmin() ? 'Operasi Admin' : ($workstreamLabel ?? 'Pengurusan Operasi') }}</p><h1>{{ $workstreamLabel ? 'Senarai '.$workstreamLabel : 'Semua Tempahan' }}</h1></div>
+                <div><p class="staff-kicker">{{ auth()->user()->isAdmin() ? 'Operasi Admin' : ($workstreamLabel ?? 'Pengurusan Operasi') }}</p><h1>{{ $pageLabel }}</h1></div>
                 <div class="staff-topbar-actions">
                     <form class="js-logout-form staff-logout-profile" method="POST" action="{{ route($logoutRoute) }}">@csrf<button type="submit"><span class="staff-topbar-avatar" aria-hidden="true"></span><span>{{ __('ui.logout') }}</span></button></form>
                 </div>
@@ -103,11 +115,11 @@
                         &larr; Papan Pemuka
                     </a>
 
-                    <h1>{{ $workstreamLabel ? 'Senarai '.$workstreamLabel : 'Semua Tempahan' }}</h1>
+                    <h1>{{ $pageLabel }}</h1>
 
                     <p>
                         @if (auth()->user()->canMonitorAllDepartments())
-                            {{ $workstreamDescriptions[$workstream] ?? 'Pantau semua tempahan dan kerja operasi KKK OS.' }}
+                            {{ $attentionDescriptions[$attention] ?? $workstreamDescriptions[$workstream] ?? 'Pantau semua tempahan dan kerja operasi KKK OS.' }}
                         @else
                             Lihat tempahan yang mempunyai kerja yang ditugaskan kepada anda.
                         @endif
@@ -133,7 +145,7 @@
                     <span>Penapis aktif:</span>
                     @if (request('search'))<strong>“{{ request('search') }}”</strong>@endif
                     @if (request('status'))<strong>{{ $statusLabels[request('status')] ?? str_replace('_', ' ', request('status')) }}</strong>@endif
-                    @if (request('attention'))<strong>{{ str_replace('_', ' ', request('attention')) }}</strong>@endif
+                    @if ($attention)<strong>{{ $attentionLabel ?? str_replace('_', ' ', $attention) }}</strong>@endif
                     <a href="{{ route($ordersIndexRoute, array_filter(['workstream' => $workstream])) }}">Kosongkan penapis</a>
                 </div>
             @endif

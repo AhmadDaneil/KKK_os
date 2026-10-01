@@ -7,6 +7,7 @@
     <title>Semak Kemajuan — KingKadKahwin</title>
     <link rel="stylesheet" href="{{ asset('css/landing.css') }}?v={{ filemtime(public_path('css/landing.css')) }}">
     <link rel="stylesheet" href="{{ asset('css/customer-theme.css') }}?v={{ filemtime(public_path('css/customer-theme.css')) }}">
+    <link rel="stylesheet" href="{{ asset('css/customer-service.css') }}?v={{ filemtime(public_path('css/customer-service.css')) }}">
 </head>
 <body class="utility-page">
     <header class="site-header compact-header">
@@ -197,6 +198,7 @@
             });
         });
     </script>
+    @include('public.partials.customer-service')
     @include('public.partials.theme-toggle')
     @include('partials.malay-validation')
 </body>
