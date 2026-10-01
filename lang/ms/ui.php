@@ -19,7 +19,7 @@ return [
     'staff_intro_title' => 'Operasi yang jelas, daripada tempahan hingga siap.',
     'staff_intro' => 'Pantau tugasan mengikut peranan anda tanpa mengubah aliran kerja yang ditetapkan.',
     'customer_order' => 'Tempahan Anda', 'back' => 'Kembali', 'package' => 'Pakej', 'customer_name' => 'Nama Pelanggan',
-    'phone' => 'No. Telefon', 'email' => 'E-mel', 'order_progress' => 'Kemajuan Tempahan', 'order_stages' => 'Peringkat tempahan',
+    'phone' => 'No. Telefon', 'email' => 'E-mel', 'order_progress' => 'Progress Tempahan', 'order_stages' => 'Peringkat tempahan',
     'shipping_information' => 'Maklumat Penghantaran', 'deposit_status' => 'Status Deposit', 'deposit_confirmed' => 'Deposit Disahkan',
     'receipt_rejected' => 'Resit Ditolak', 'pending_review' => 'Menunggu Semakan', 'upload_new_receipt' => 'Muat naik resit baharu',
     'resubmit_receipt' => 'Hantar Semula Resit', 'language' => 'Bahasa', 'actions' => 'Tindakan',

@@ -86,7 +86,7 @@
                         </div>
                         <div class="staff-attention-grid">
                             <div class="staff-attention-card @if ($productionAttention['ready'] > 0) has-alert @else is-clear @endif"><span class="staff-attention-icon">CT</span><span><strong>Cetakan Belum Mula</strong><small>Kerja cetakan yang boleh dimulakan</small></span><b>{{ $productionAttention['ready'] }}</b></div>
-                            <div class="staff-attention-card @if ($productionAttention['printing'] > 0) has-alert @else is-clear @endif"><span class="staff-attention-icon">CT</span><span><strong>Cetakan Sedang Berjalan</strong><small>Muat naik kemajuan dan tandakan selesai dicetak</small></span><b>{{ $productionAttention['printing'] }}</b></div>
+                            <div class="staff-attention-card @if ($productionAttention['printing'] > 0) has-alert @else is-clear @endif"><span class="staff-attention-icon">CT</span><span><strong>Cetakan Sedang Berjalan</strong><small>Muat naik progress dan tandakan selesai dicetak</small></span><b>{{ $productionAttention['printing'] }}</b></div>
                         </div>
                     </section>
                 @endif
@@ -111,10 +111,10 @@
                         <div class="staff-dashboard-group-heading"><span class="staff-group-number">03</span><div><h2>Pengeluaran</h2><p>Cetakan, pembungkusan dan serahan kepada pelanggan.</p></div></div>
                         <div class="staff-feature-grid">
                             @if ($canViewProductionQueue)
-                                <a href="{{ route('staff.orders.index', ['workstream' => 'printing']) }}" class="staff-feature-card"><span class="staff-feature-icon">CT</span><div><h3>Pengeluaran</h3><p>Sediakan kad pihak lelaki/perempuan dan muat naik kemajuan kerja.</p></div><span class="staff-card-arrow">→</span></a>
+                                <a href="{{ route('staff.orders.index', ['workstream' => 'printing']) }}" class="staff-feature-card"><span class="staff-feature-icon">CT</span><div><h3>Pengeluaran</h3><p>Sediakan kad pihak lelaki/perempuan dan muat naik progress kerja.</p></div><span class="staff-card-arrow">→</span></a>
                             @endif
                             @if ($canMonitorOperations)
-                                <a href="{{ route('staff.orders.index', ['workstream' => 'packing']) }}" class="staff-feature-card"><span class="staff-feature-icon">PK</span><div><h3>Pembungkusan</h3><p>Semak item dan kemajuan pembungkusan setiap tempahan.</p></div><span class="staff-card-arrow">→</span></a>
+                                <a href="{{ route('staff.orders.index', ['workstream' => 'packing']) }}" class="staff-feature-card"><span class="staff-feature-icon">PK</span><div><h3>Pembungkusan</h3><p>Semak item dan progress pembungkusan setiap tempahan.</p></div><span class="staff-card-arrow">→</span></a>
                                 <a href="{{ route('staff.orders.index', ['workstream' => 'fulfilment']) }}" class="staff-feature-card"><span class="staff-feature-icon">PT</span><div><h3>Pemenuhan Tempahan</h3><p>Pantau serahan kurier dan kutipan pelanggan.</p></div><span class="staff-card-arrow">→</span></a>
                             @endif
                         </div>

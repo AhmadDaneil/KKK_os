@@ -90,7 +90,7 @@
             </div>
 
             <a class="progress-button" href="{{ route('public.orders.progress', ['order_id' => $review['order_id']]) }}">
-                Semak Kemajuan
+                Semak Progress
             </a>
         </section>
     </main>

@@ -187,7 +187,7 @@
 
             <section class="staff-section staff-timeline-section">
                 <div class="staff-lifecycle-heading">
-                    <div><p class="staff-kicker">Perjalanan tempahan</p><h2>Kemajuan tempahan</h2></div>
+                    <div><p class="staff-kicker">Perjalanan tempahan</p><h2>Progress tempahan</h2></div>
                     <span>Status semasa ditandakan dengan warna utama</span>
                 </div>
 
@@ -870,19 +870,19 @@
                                     </div>
 
                                     <div>
-                                        <dt>Kemajuan Dikemas Kini</dt>
+                                        <dt>Progress Dikemas Kini</dt>
                                         <dd>{{ $job->progress_updated_at?->format('Y-m-d H:i') ?? '-' }}</dd>
                                     </div>
                                 </dl>
 
                                 @if (filled($job->progress_files))
                                     <div class="staff-detail-group">
-                                        <h4>Fail Kemajuan Pengeluaran</h4>
+                                        <h4>Fail Progress Pengeluaran</h4>
 
                                         <div class="staff-contact-list">
                                             @foreach ($job->progress_files as $file)
                                                 <div class="staff-contact-row">
-                                                    <span>{{ $file['original_name'] ?? 'Fail kemajuan' }}</span>
+                                                    <span>{{ $file['original_name'] ?? 'Fail progress' }}</span>
                                                     <a href="{{ route($operationRoutePrefix.'print-jobs.progress-files.show', ['printJob' => $job, 'file' => $loop->index]) }}" class="staff-button staff-button-small" target="_blank" rel="noopener">
                                                         Lihat · {{ isset($file['uploaded_at']) ? \Illuminate\Support\Carbon::parse($file['uploaded_at'])->format('Y-m-d H:i') : '-' }}
                                                     </a>
@@ -907,15 +907,15 @@
                                     @elseif ($job->status === 'WAITING_FOR_PAYMENT')
                                         <p class="staff-work-message">Menunggu pengesahan bayaran penuh sebelum cetakan boleh dimulakan.</p>
                                     @elseif ($job->status === 'PRINTING')
-                                        <form method="POST" enctype="multipart/form-data" action="{{ route('staff.print-jobs.progress-files.store', $job) }}" class="staff-packing-complete-form js-staff-confirmation-form js-async-progress-upload" data-confirm-title="Muat naik kemajuan cetakan {{ ucfirst(strtolower($job->side)) }}?" data-confirm-message="Gambar atau PDF yang dipilih akan disimpan sebagai bukti kemajuan cetakan semasa." data-confirm-button="Ya, muat naik kemajuan">
+                                        <form method="POST" enctype="multipart/form-data" action="{{ route('staff.print-jobs.progress-files.store', $job) }}" class="staff-packing-complete-form js-staff-confirmation-form js-async-progress-upload" data-confirm-title="Muat naik progress cetakan {{ ucfirst(strtolower($job->side)) }}?" data-confirm-message="Gambar atau PDF yang dipilih akan disimpan sebagai bukti progress cetakan semasa." data-confirm-button="Ya, muat naik progress">
                                             @csrf
-                                            <label for="print-progress-{{ $job->id }}">Muat naik kemajuan pengeluaran</label>
+                                            <label for="print-progress-{{ $job->id }}">Muat naik progress pengeluaran</label>
                                             <div class="staff-file-picker">
                                                 <input id="print-progress-{{ $job->id }}" type="file" name="progress_files[]" accept=".jpg,.jpeg,.png,.webp,.pdf,image/jpeg,image/png,image/webp,application/pdf" multiple required>
                                                 <button type="button" class="staff-file-cancel" hidden aria-controls="print-progress-{{ $job->id }}">Batal</button>
                                             </div>
-                                            <p class="staff-muted-text">Muat naik gambar atau PDF yang menunjukkan kemajuan pengeluaran. Maksimum 10 fail, 20 MB setiap satu.</p>
-                                            <button type="submit" class="staff-button staff-button-secondary">Muat Naik Kemajuan</button>
+                                            <p class="staff-muted-text">Muat naik gambar atau PDF yang menunjukkan progress pengeluaran. Maksimum 10 fail, 20 MB setiap satu.</p>
+                                            <button type="submit" class="staff-button staff-button-secondary">Muat Naik Progress</button>
                                             <p class="staff-upload-notice" role="status" aria-live="polite" hidden></p>
                                         </form>
                                         <form method="POST" action="{{ route($operationRoutePrefix.'print-jobs.mark-printed', $job) }}" class="staff-workflow-form js-staff-confirmation-form" data-confirm-title="Tandakan cetakan {{ ucfirst(strtolower($job->side)) }} sebagai siap?" data-confirm-message="Pastikan semua {{ $job->quantity ?? $order->card_quantity ?? '-' }} keping kad telah selesai dicetak dan diperiksa sebelum meneruskan." data-confirm-button="Ya, tandakan siap" data-confirm-tone="danger">@csrf<button type="submit" class="staff-button staff-button-primary">Mark Printed</button></form>
@@ -1462,7 +1462,7 @@
 
                 if (!response.ok) {
                     const errors = payload.errors ? Object.values(payload.errors).flat().join(' ') : null;
-                    throw new Error(errors || payload.message || 'Muat naik kemajuan tidak dapat diselesaikan.');
+                    throw new Error(errors || payload.message || 'Muat naik progress tidak dapat diselesaikan.');
                 }
 
                 const fileNames = (payload.files || []).map(function (file) {
@@ -1478,12 +1478,12 @@
 
                 showUploadNotice(
                     form,
-                    (payload.message || 'Kemajuan production berjaya dimuat naik.')
+                    (payload.message || 'Progress production berjaya dimuat naik.')
                         + (fileNames.length ? ' ' + fileNames.join(', ') : ''),
                     false
                 );
             } catch (error) {
-                showUploadNotice(form, error.message || 'Muat naik kemajuan tidak dapat diselesaikan.', true);
+                showUploadNotice(form, error.message || 'Muat naik progress tidak dapat diselesaikan.', true);
             } finally {
                 submitButton.disabled = false;
                 submitButton.textContent = originalButtonText;

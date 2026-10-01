@@ -67,7 +67,7 @@ class PublicOrderJourneyTest extends TestCase
     {
         $this->get(route('public.orders.create'))
             ->assertOk()
-            ->assertSeeInOrder(['Kembali', 'Semak Kemajuan'])
+            ->assertSeeInOrder(['Kembali', 'Semak Progress'])
             ->assertSee('href="'.route('home').'"', false)
             ->assertSee('href="'.route('public.orders.progress').'"', false)
             ->assertSee('header-link nav-progress', false);

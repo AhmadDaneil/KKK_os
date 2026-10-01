@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="robots" content="noindex,nofollow">
-    <title>Semak Kemajuan — KingKadKahwin</title>
+    <title>Semak Progress — KingKadKahwin</title>
     <link rel="stylesheet" href="{{ asset('css/landing.css') }}?v={{ filemtime(public_path('css/landing.css')) }}">
     <link rel="stylesheet" href="{{ asset('css/customer-theme.css') }}?v={{ filemtime(public_path('css/customer-theme.css')) }}">
     <link rel="stylesheet" href="{{ asset('css/customer-service.css') }}?v={{ filemtime(public_path('css/customer-service.css')) }}">
@@ -20,7 +20,7 @@
     <main class="progress-page">
         <section class="progress-search">
             <p class="eyebrow">Status tempahan anda</p>
-            <h1>Semak kemajuan</h1>
+            <h1>Semak progress</h1>
             <p>Tampal atau masukkan ID tempahan yang diterima semasa membuat tempahan.</p>
             <form method="POST" action="{{ route('public.orders.progress.lookup') }}">
                 @csrf
@@ -39,7 +39,7 @@
                     <div class="order-lifecycle-heading">
                         <div>
                             <small>PERJALANAN TEMPAHAN</small>
-                            <h4 id="order-lifecycle-title">Kemajuan tempahan anda</h4>
+                            <h4 id="order-lifecycle-title">Progress tempahan anda</h4>
                         </div>
                         <span>Status semasa ditanda dengan warna hijau</span>
                     </div>

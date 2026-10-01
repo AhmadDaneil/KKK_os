@@ -164,13 +164,13 @@ class StaffPrintingWorkflowController extends Controller
 
         if ($request->expectsJson()) {
             return response()->json([
-                'message' => 'Kemajuan production berjaya dimuat naik.',
+                'message' => 'Progress production berjaya dimuat naik.',
                 'files' => $newFiles,
                 'progress_updated_at' => $printJob->fresh()->progress_updated_at?->toIso8601String(),
             ]);
         }
 
-        return back()->with('status', 'Kemajuan production berjaya dimuat naik.');
+        return back()->with('status', 'Progress production berjaya dimuat naik.');
     }
 
     public function showProgressFile(

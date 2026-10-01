@@ -13,7 +13,7 @@
         <a class="brand" href="{{ route('home') }}"><span class="brand-mark">K</span><span><b>KingKadKahwin</b><small>Kad indah, kenangan bermakna</small></span></a>
         <nav aria-label="Navigasi halaman tempahan">
             <a class="header-link nav-progress" href="{{ route('home') }}">← Kembali</a>
-            <a class="header-link nav-progress" href="{{ route('public.orders.progress') }}">Semak Kemajuan</a>
+            <a class="header-link nav-progress" href="{{ route('public.orders.progress') }}">Semak Progress</a>
         </nav>
     </header>
     <main class="form-page">

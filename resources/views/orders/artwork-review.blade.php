@@ -300,7 +300,7 @@
             class="button button-secondary"
             href="{{ route('public.orders.progress', ['order_id' => $order->order_id]) }}"
         >
-            &larr; Kembali ke Semak Kemajuan
+            &larr; Kembali ke Semak Progress
         </a>
     </div>
 </div>
