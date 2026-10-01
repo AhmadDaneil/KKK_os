@@ -61,4 +61,19 @@ class BackupCommandsAndScheduleTest extends TestCase
         $this->assertSame('0 2 * * *', $event->expression);
         $this->assertSame(['production'], $event->environments);
     }
+
+    public function test_production_backup_disks_use_private_local_and_s3_storage(): void
+    {
+        $primary = config('filesystems.disks.backup_primary');
+        $secondary = config('filesystems.disks.backup_secondary');
+
+        $this->assertSame('local', $primary['driver']);
+        $this->assertFalse($primary['serve']);
+        $this->assertTrue($primary['throw']);
+        $this->assertSame(0600, $primary['permissions']['file']['private']);
+        $this->assertSame(0700, $primary['permissions']['dir']['private']);
+        $this->assertSame('s3', $secondary['driver']);
+        $this->assertSame('private', $secondary['visibility']);
+        $this->assertTrue($secondary['throw']);
+    }
 }
