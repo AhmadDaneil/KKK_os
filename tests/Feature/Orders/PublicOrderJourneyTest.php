@@ -146,7 +146,7 @@ class PublicOrderJourneyTest extends TestCase
             ->assertOk()
             ->assertSee($order->order_id)
             ->assertSee('50%')
-            ->assertSee('Reka Bentuk Sedang Disediakan')
+            ->assertSee('Design Sedang Disediakan')
             ->assertDontSee('Nama Sulit')
             ->assertDontSee('sulit@example.com')
             ->assertDontSee('0199999999');

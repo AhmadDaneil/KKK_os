@@ -39,7 +39,7 @@
     $nextActions = [
         'DETAILS_INCOMPLETE' => 'Dapatkan maklumat customer yang belum lengkap',
         'READY_FOR_DESIGN' => 'Mulakan atau assign kerja design', 'DESIGN_IN_PROGRESS' => 'Teruskan kerja design',
-                    'DESIGN_READY' => 'Tunggu semakan hasil reka bentuk daripada pelanggan', 'CORRECTION_REQUESTED' => 'Selesaikan pembetulan hasil reka bentuk',
+                    'DESIGN_READY' => 'Tunggu semakan hasil design daripada pelanggan', 'CORRECTION_REQUESTED' => 'Selesaikan pembetulan hasil design',
         'DESIGN_APPROVED' => 'Semak bayaran baki', 'BALANCE_PENDING' => 'Semak bayaran baki',
         'READY_FOR_PRINT' => 'Mulakan production', 'PRINTING' => 'Kemas kini atau siapkan production',
         'PRINTED' => 'Mulakan packing', 'READY_FOR_PACKING' => 'Mulakan packing',
@@ -119,7 +119,7 @@
 
             @if ($hasFullQueueView)
                 <nav class="staff-order-sections" aria-label="Bahagian order">
-                    <a href="#customer-data">Pelanggan</a><a href="#design-work">Reka Bentuk</a><a href="#payment">Pembayaran</a><a href="#production">Pengeluaran</a><a href="#packing">Pembungkusan</a><a href="#fulfilment">Pemenuhan Tempahan</a>
+                    <a href="#customer-data">Pelanggan</a><a href="#design-work">Design</a><a href="#payment">Pembayaran</a><a href="#production">Pengeluaran</a><a href="#packing">Pembungkusan</a><a href="#fulfilment">Pemenuhan Tempahan</a>
                 </nav>
             @endif
 
@@ -241,7 +241,7 @@
 
                             @if ($packageSide->design)
                                 <div class="staff-detail-group">
-                                    <h4>Reka Bentuk</h4>
+                                    <h4>Design</h4>
 
                                     <dl class="staff-detail-list">
                                         <div>
@@ -250,7 +250,7 @@
                                         </div>
 
                                         <div>
-                                            <dt>Kod Reka Bentuk</dt>
+                                            <dt>Kod Design</dt>
                                             <dd>{{ $packageSide->design->design_code ?? '-' }}</dd>
                                         </div>
 
@@ -357,7 +357,7 @@
 
             @if ($order->relationLoaded('designJobs'))
                 <section id="design-work" class="staff-section">
-                    <h2 class="staff-section-title">Kerja Reka Bentuk</h2>
+                    <h2 class="staff-section-title">Kerja Design</h2>
 
                     @if ($canUsePhotoshop)
                         <div class="staff-design-tools">
@@ -424,7 +424,7 @@
                                     </div>
 
                                     <div>
-                                        <dt>Versi Hasil Reka Bentuk</dt>
+                                        <dt>Versi Hasil Design</dt>
                                         <dd>{{ $job->artworkVersions->count() }}</dd>
                                     </div>
                                 </dl>
@@ -446,7 +446,7 @@
                                                     type="submit"
                                                     class="staff-button staff-button-primary"
                                                 >
-                                                    Mulakan Reka Bentuk
+                                                    Mulakan Design
                                                 </button>
                                             </form>
                                         @elseif ($job->status === 'CORRECTION_REQUESTED')
@@ -470,7 +470,7 @@
                                             @endphp
                                             <div class="staff-design-upload">
                                                 <div class="staff-design-upload-heading">
-                                                    <h4>Muat Naik Versi Hasil Reka Bentuk</h4>
+                                                    <h4>Muat Naik Versi Hasil Design</h4>
 
                                                     <p>
                                                         Muat naik fail sumber yang boleh disunting dan
@@ -486,8 +486,8 @@
                                                         action="{{ route($operationRoutePrefix.'design-jobs.artwork.store', $job) }}"
                                                         enctype="multipart/form-data"
                                                         class="staff-artwork-form js-staff-confirmation-form js-async-artwork-upload"
-                                                        data-confirm-title="Muat naik hasil reka bentuk {{ ucfirst(strtolower($job->side)) }}?"
-                                                        data-confirm-message="Pastikan fail sumber dan pratonton pelanggan yang dipilih adalah betul. Fail ini akan disimpan sebagai versi baharu hasil reka bentuk."
+                                                        data-confirm-title="Muat naik hasil design {{ ucfirst(strtolower($job->side)) }}?"
+                                                        data-confirm-message="Pastikan fail sumber dan pratonton pelanggan yang dipilih adalah betul. Fail ini akan disimpan sebagai versi baharu hasil design."
                                                         data-confirm-button="Ya, muat naik"
                                                     >
                                                         @csrf
@@ -495,7 +495,7 @@
 
                                                     <div class="staff-field">
                                                         <label for="source-artwork-{{ $job->id }}">
-                                                            Fail Sumber Hasil Reka Bentuk
+                                                            Fail Sumber Hasil Design
                                                         </label>
 
                                                         <div class="staff-multi-file-picker" data-file-kind="source artwork">
@@ -563,7 +563,7 @@
                                                             type="submit"
                                                             class="staff-button staff-button-primary"
                                                         >
-                                                            Muat Naik Hasil Reka Bentuk
+                                                            Muat Naik Hasil Design
                                                         </button>
                                                         <p class="staff-upload-notice" role="status" aria-live="polite" hidden></p>
                                                         </form>
@@ -571,7 +571,7 @@
 
                                                 <div class="staff-artwork-ready-panel" data-artwork-ready-panel @if ($job->artworkVersions->isEmpty()) hidden @endif>
                                                         <div>
-                                                            <strong>Hasil reka bentuk telah dimuat naik</strong>
+                                                            <strong>Hasil design telah dimuat naik</strong>
                                                             <p>
                                                                 Versi <span data-artwork-version>{{ $job->artworkVersions->max('version_number') }}</span> ialah versi terkini.
                                                                 Hantar kepada customer apabila preview sudah diperiksa.
@@ -582,7 +582,7 @@
                                                             method="POST"
                                                             action="{{ route($operationRoutePrefix.'design-jobs.mark-ready', $job) }}"
                                                             class="js-staff-confirmation-form"
-                                                            data-confirm-title="Hantar hasil reka bentuk {{ ucfirst(strtolower($job->side)) }} kepada pelanggan?"
+                                                            data-confirm-title="Hantar hasil design {{ ucfirst(strtolower($job->side)) }} kepada pelanggan?"
                                                             data-confirm-message="Versi {{ $job->artworkVersions->max('version_number') }} akan dihantar untuk semakan pelanggan. Pastikan pratonton telah diperiksa dan merupakan versi yang betul."
                                                             data-confirm-button="Ya, hantar untuk semakan"
                                                         >
@@ -597,12 +597,12 @@
                                                     </div>
                                                     <p class="staff-work-message" data-artwork-upload-hint @if ($job->artworkVersions->isNotEmpty()) hidden @endif>
                                                         Muat naik fail sumber dan pratonton pelanggan terlebih dahulu.
-                                                        Selepas itu, butang untuk menghantar hasil reka bentuk kepada pelanggan akan dipaparkan.
+                                                        Selepas itu, butang untuk menghantar hasil design kepada pelanggan akan dipaparkan.
                                                     </p>
                                             </div>
                                         @elseif ($job->status === 'DESIGN_READY')
                                             <p class="staff-work-message">
-                                                Hasil reka bentuk sedia untuk semakan pelanggan.
+                                                Hasil design sedia untuk semakan pelanggan.
                                             </p>
                                         @endif
                                     </div>
@@ -663,13 +663,13 @@
                             action="{{ route('staff.orders.design-artworks.store', $order) }}"
                             enctype="multipart/form-data"
                             class="staff-batch-artwork-form js-staff-confirmation-form js-async-artwork-upload"
-                            data-confirm-title="Muat naik kedua-dua hasil reka bentuk?"
-                            data-confirm-message="Pastikan fail sumber dan pratonton pelanggan untuk pakej Lelaki serta Perempuan adalah betul. Kedua-duanya akan disimpan sebagai versi baharu hasil reka bentuk."
+                            data-confirm-title="Muat naik kedua-dua hasil design?"
+                            data-confirm-message="Pastikan fail sumber dan pratonton pelanggan untuk pakej Lelaki serta Perempuan adalah betul. Kedua-duanya akan disimpan sebagai versi baharu hasil design."
                             data-confirm-button="Ya, upload kedua-duanya"
                         >
                             @csrf
                             <button type="submit" class="staff-button staff-button-primary">
-                                Muat Naik Kedua-dua Hasil Reka Bentuk
+                                Muat Naik Kedua-dua Hasil Design
                             </button>
                             <p class="staff-upload-notice" role="status" aria-live="polite" hidden></p>
                         </form>
@@ -1510,7 +1510,7 @@
 
                 if (!response.ok) {
                     const errors = payload.errors ? Object.values(payload.errors).flat().join(' ') : null;
-                    throw new Error(errors || payload.message || 'Hasil reka bentuk tidak dapat dimuat naik.');
+                    throw new Error(errors || payload.message || 'Hasil design tidak dapat dimuat naik.');
                 }
 
                 const selector = form.id
@@ -1560,9 +1560,9 @@
                     }
                 });
 
-                showUploadNotice(form, payload.message || 'Hasil reka bentuk berjaya dimuat naik.', false);
+                showUploadNotice(form, payload.message || 'Hasil design berjaya dimuat naik.', false);
             } catch (error) {
-                showUploadNotice(form, error.message || 'Hasil reka bentuk tidak dapat dimuat naik.', true);
+                showUploadNotice(form, error.message || 'Hasil design tidak dapat dimuat naik.', true);
             } finally {
                 submitButton.disabled = false;
                 submitButton.textContent = originalButtonText;

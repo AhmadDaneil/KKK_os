@@ -12,7 +12,7 @@
     </style>
 </head>
 <body>
-    <object data="data:application/pdf;base64,{{ $pdf }}" type="application/pdf" aria-label="Pratonton hasil reka bentuk"></object>
+    <object data="data:application/pdf;base64,{{ $pdf }}" type="application/pdf" aria-label="Pratonton hasil design"></object>
     <div class="watermark" aria-hidden="true">
         <span>KING KAD KAHWIN · PREVIEW</span>
     </div>

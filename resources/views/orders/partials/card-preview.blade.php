@@ -119,6 +119,6 @@
         </div>
     @endforeach
 
-    <p class="preview-note">Pratonton ini membantu semakan susun atur. Hasil cetakan sebenar mungkin berbeza sedikit mengikut reka bentuk yang dipilih.</p>
+    <p class="preview-note">Pratonton ini membantu semakan susun atur. Hasil cetakan sebenar mungkin berbeza sedikit mengikut design yang dipilih.</p>
     </div>
 </aside>

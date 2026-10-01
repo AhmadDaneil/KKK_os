@@ -5,13 +5,13 @@
     $ordersIndexRoute = $isAdminPortal ? 'admin.orders.index' : 'staff.orders.index';
     $ordersShowRoute = $isAdminPortal ? 'admin.orders.show' : 'staff.orders.show';
     $workstreamDescriptions = [
-        'design' => 'Tempahan yang masih memerlukan reka bentuk, semakan hasil reka bentuk atau pembetulan.',
+        'design' => 'Tempahan yang masih memerlukan design, semakan hasil design atau pembetulan.',
         'printing' => 'Tempahan yang menunggu atau sedang dalam proses pengeluaran.',
         'packing' => 'Tempahan yang telah siap dicetak dan masih memerlukan pembungkusan oleh OM.',
         'fulfilment' => 'Tempahan yang telah dibungkus dan masih menunggu serahan atau kutipan.',
     ];
     $workstreamLabels = [
-        'design' => 'Reka Bentuk',
+        'design' => 'Design',
         'printing' => 'Pengeluaran',
         'packing' => 'Pembungkusan',
         'fulfilment' => 'Pemenuhan Tempahan',
@@ -19,7 +19,7 @@
     $workstreamLabel = $workstreamLabels[$workstream] ?? null;
     $attentionLabels = [
         'pending_payment' => 'Semakan Bayaran',
-        'unassigned_design' => 'Reka Bentuk Belum Ditugaskan',
+        'unassigned_design' => 'Design Belum Ditugaskan',
         'unassigned_printing' => 'Pengeluaran Belum Ditugaskan',
         'unassigned_packing' => 'Pembungkusan Belum Ditugaskan',
     ];
@@ -61,10 +61,10 @@
     $nextActions = [
         'DETAILS_INCOMPLETE' => 'Dapatkan maklumat customer yang belum lengkap',
         'BOOKED', 'DEPOSIT_PAID' => 'Semak maklumat tempahan pelanggan',
-        'DETAILS_CONFIRMED', 'READY_FOR_DESIGN' => 'Mulakan atau tugaskan kerja reka bentuk',
-        'DESIGN_IN_PROGRESS' => 'Teruskan kerja reka bentuk',
-        'DESIGN_READY' => 'Tunggu semakan hasil reka bentuk daripada pelanggan',
-        'CORRECTION_REQUESTED' => 'Selesaikan pembetulan hasil reka bentuk',
+        'DETAILS_CONFIRMED', 'READY_FOR_DESIGN' => 'Mulakan atau tugaskan kerja design',
+        'DESIGN_IN_PROGRESS' => 'Teruskan kerja design',
+        'DESIGN_READY' => 'Tunggu semakan hasil design daripada pelanggan',
+        'CORRECTION_REQUESTED' => 'Selesaikan pembetulan hasil design',
         'DESIGN_APPROVED', 'BALANCE_PENDING' => 'Semak bayaran baki',
         'PAID', 'READY_FOR_PRINT' => 'Mulakan pengeluaran',
         'PRINTING' => 'Kemas kini atau siapkan pengeluaran',
@@ -191,7 +191,7 @@
                             @if (auth()->user()->canMonitorAllDepartments())
                                 @if ((! $workstream || $workstream === 'design') && $order->relationLoaded('designJobs') && $order->designJobs->isNotEmpty())
                                     <div class="staff-work-row">
-                                        <span>Reka Bentuk</span>
+                                        <span>Design</span>
                                         <strong>
                                             {{ $order->designJobs->pluck('status')->unique()->implode(', ') }}
                                         </strong>
@@ -226,7 +226,7 @@
                                 @foreach ($order->designJobs as $job)
                                     @if ($job->assigned_user_id === auth()->id())
                                         <div class="staff-work-row">
-                                            <span>Reka Bentuk {{ $job->side }}</span>
+                                            <span>Design {{ $job->side }}</span>
                                             <strong>{{ $job->status }}</strong>
                                         </div>
                                     @endif

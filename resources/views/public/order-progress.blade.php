@@ -58,7 +58,7 @@
                 @if ($artworkReady ?? false)
                     <div class="public-artwork-action">
                         <div>
-                            <strong>Hasil reka bentuk anda sudah tersedia</strong>
+                            <strong>Hasil design anda sudah tersedia</strong>
                             <span>Semak setiap preview sebelum meluluskan atau meminta pembetulan.</span>
                         </div>
                         <a class="button button-primary" href="{{ route('orders.artwork.review', ['orderId' => $orderId]) }}">Buka Semakan Penuh</a>
@@ -67,12 +67,12 @@
                         <div class="public-artwork-previews">
                             @foreach ($artworkPreviews as $artwork)
                                 <article>
-                                    <div><strong>Kad Pihak {{ ucfirst(strtolower($artwork['side'])) }}</strong><span>Versi hasil reka bentuk {{ $artwork['version'] }}</span></div>
+                                    <div><strong>Kad Pihak {{ ucfirst(strtolower($artwork['side'])) }}</strong><span>Versi hasil design {{ $artwork['version'] }}</span></div>
                                     <div class="public-artwork-preview-frame">
                                     <img
                                         src="{{ route('orders.artwork.preview', ['orderId' => $orderId, 'designJobId' => $artwork['design_job_id']]) }}"
-                                        title="Pratonton hasil reka bentuk pihak {{ strtolower($artwork['side']) }}"
-                                        alt="Pratonton hasil reka bentuk kad 4 kali 6 pihak {{ strtolower($artwork['side']) }}"
+                                        title="Pratonton hasil design pihak {{ strtolower($artwork['side']) }}"
+                                        alt="Pratonton hasil design kad 4 kali 6 pihak {{ strtolower($artwork['side']) }}"
                                         loading="lazy"
                                     >
                                     </div>
@@ -91,7 +91,7 @@
                 @if (($orderStatus ?? null) === 'DESIGN_APPROVED' || ! empty($balance))
                     <section class="balance-payment-card" data-status="{{ strtolower($balance['status'] ?? 'new') }}">
                         <div class="balance-payment-heading">
-                            <div><small>PEMBAYARAN PENUH</small><h4>Bayaran baki selepas hasil reka bentuk diluluskan</h4></div>
+                            <div><small>PEMBAYARAN PENUH</small><h4>Bayaran baki selepas hasil design diluluskan</h4></div>
                             @if ((float) ($balanceAmount ?? 0) > 0)<strong>RM {{ number_format((float) $balanceAmount, 2) }}</strong>@endif
                         </div>
 

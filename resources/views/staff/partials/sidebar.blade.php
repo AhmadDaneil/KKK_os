@@ -47,7 +47,7 @@
 
         @if ($canViewDesignQueue)
             <section class="staff-nav-section">
-                <h2>Reka Bentuk</h2>
+                <h2>Design</h2>
                 <a href="{{ route($ordersIndexRoute, ['workstream' => 'design']) }}" @class(['staff-nav-link', 'is-active' => $activeWorkstream === 'design'])><span class="staff-nav-icon" aria-hidden="true">RB</span>{{ __('ui.design_queue') }}</a>
             </section>
         @endif

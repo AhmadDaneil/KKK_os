@@ -50,7 +50,7 @@
                         <div class="staff-attention-grid">
                             @foreach ([
                                 ['key' => 'pending_payments', 'label' => 'Semakan Bayaran', 'description' => 'Bayaran yang perlu diluluskan atau ditolak', 'icon' => 'RM', 'params' => ['attention' => 'pending_payment']],
-                                ['key' => 'unassigned_design', 'label' => 'Reka Bentuk Belum Ditugaskan', 'description' => 'Tugaskan pereka untuk memulakan hasil reka bentuk', 'icon' => 'RB', 'params' => ['workstream' => 'design', 'attention' => 'unassigned_design']],
+                                ['key' => 'unassigned_design', 'label' => 'Design Belum Ditugaskan', 'description' => 'Tugaskan pereka untuk memulakan hasil design', 'icon' => 'RB', 'params' => ['workstream' => 'design', 'attention' => 'unassigned_design']],
                                 ['key' => 'unassigned_printing', 'label' => 'Pengeluaran Belum Ditugaskan', 'description' => 'Tugaskan staf cetakan untuk memulakan pengeluaran', 'icon' => 'CT', 'params' => ['workstream' => 'printing', 'attention' => 'unassigned_printing']],
                                 ['key' => 'unassigned_packing', 'label' => 'Pembungkusan Belum Ditugaskan', 'description' => 'Tugaskan OM untuk pembungkusan dan pemenuhan tempahan', 'icon' => 'PK', 'params' => ['workstream' => 'packing', 'attention' => 'unassigned_packing']],
                             ] as $item)
@@ -71,7 +71,7 @@
                             <span class="staff-attention-total @if ($designerAttention > 0) has-alert @endif">{{ $designerAttention > 0 ? $designerAttention.' tugasan' : 'Tiada tindakan diperlukan' }}</span>
                         </div>
                         <div class="staff-attention-card @if ($designerAttention > 0) has-alert @else is-clear @endif">
-                            <span class="staff-attention-icon">RB</span><span><strong>{{ __('ui.design_queue') }}</strong><small>{{ $designerAttention > 0 ? 'Tempahan sedia untuk dimulakan atau memerlukan pembetulan' : 'Semua tugasan reka bentuk telah dikemas kini' }}</small></span><b>{{ $designerAttention }}</b>
+                            <span class="staff-attention-icon">RB</span><span><strong>{{ __('ui.design_queue') }}</strong><small>{{ $designerAttention > 0 ? 'Tempahan sedia untuk dimulakan atau memerlukan pembetulan' : 'Semua tugasan design telah dikemas kini' }}</small></span><b>{{ $designerAttention }}</b>
                         </div>
                     </section>
                 @endif
@@ -100,8 +100,8 @@
 
                     @if ($canViewDesignQueue)
                     <section class="staff-dashboard-group">
-                        <div class="staff-dashboard-group-heading"><span class="staff-group-number">02</span><div><h2>Reka Bentuk</h2><p>Data disahkan, proses gabungan dan semakan hasil reka bentuk.</p></div></div>
-                        <a href="{{ route('staff.orders.index', ['workstream' => 'design']) }}" class="staff-feature-card"><span class="staff-feature-icon">RB</span><div><h3>{{ __('ui.design_queue') }}</h3><p>Urus tempahan yang sedia untuk reka bentuk, sedang disediakan atau memerlukan pembetulan.</p></div><span class="staff-card-arrow">→</span></a>
+                        <div class="staff-dashboard-group-heading"><span class="staff-group-number">02</span><div><h2>Design</h2><p>Data disahkan, proses gabungan dan semakan hasil design.</p></div></div>
+                        <a href="{{ route('staff.orders.index', ['workstream' => 'design']) }}" class="staff-feature-card"><span class="staff-feature-icon">RB</span><div><h3>{{ __('ui.design_queue') }}</h3><p>Urus tempahan yang sedia untuk design, sedang disediakan atau memerlukan pembetulan.</p></div><span class="staff-card-arrow">→</span></a>
                     </section>
                     @endif
 

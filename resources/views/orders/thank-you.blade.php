@@ -73,7 +73,7 @@
                         <h3>{{ $review['package_count'] === 2 ? 'Majlis '.$loop->iteration.' – ' : 'Pakej ' }}Pihak {{ $sideLabel }}</h3>
                         <dl>
                             <div>
-                                <dt>Kod Reka Bentuk</dt>
+                                <dt>Kod Design</dt>
                                 <dd>{{ $side['design']['design_code'] ?: '-' }}</dd>
                             </div>
                             <div>
