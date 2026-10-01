@@ -82,6 +82,7 @@ class StaffOrderController extends Controller
             $order->load([
                 'designJobs.assignedUser',
                 'designJobs.artworkVersions',
+                'designJobs.reviewActions',
                 'printJobs.assignedUser',
                 'packingJob.assignedUser',
                 'packingJob.items',
@@ -96,6 +97,7 @@ class StaffOrderController extends Controller
                     ->with([
                         'assignedUser',
                         'artworkVersions',
+                        'reviewActions',
                     ]),
             ]);
         } elseif ($user->hasStaffRole(User::ROLE_PRODUCTION)) {

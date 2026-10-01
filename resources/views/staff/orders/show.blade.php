@@ -429,6 +429,45 @@
                                         <dd>{{ $job->artworkVersions->count() }}</dd>
                                     </div>
                                 </dl>
+                                @php
+                                    $latestCorrectionAction = $job->reviewActions
+                                        ->where('action', 'CORRECTION_REQUESTED')
+                                        ->sortByDesc('acted_at')
+                                        ->first();
+                                    $latestCorrectionPayment = $order->payments
+                                        ->where('payment_type', 'ARTWORK_CORRECTION')
+                                        ->filter(fn ($correctionPayment) => (int) ($correctionPayment->metadata['design_job_id'] ?? 0) === $job->id)
+                                        ->sortByDesc('id')
+                                        ->first();
+                                    $correctionComment = $latestCorrectionAction?->customer_comment
+                                        ?: ($latestCorrectionPayment?->metadata['correction_comment'] ?? null);
+                                    $correctionSubmittedAt = $latestCorrectionAction?->acted_at
+                                        ?: $latestCorrectionPayment?->created_at;
+                                @endphp
+
+                                @if (filled($correctionComment))
+                                    <aside class="staff-correction-note" aria-label="Arahan pembetulan pelanggan">
+                                        <div class="staff-correction-note-heading">
+                                            <span class="staff-correction-note-icon" aria-hidden="true">✎</span>
+                                            <div>
+                                                <span>Komen pelanggan</span>
+                                                <h4>Arahan Pembetulan Artwork</h4>
+                                            </div>
+                                            <span class="staff-correction-note-state">
+                                                {{ $latestCorrectionPayment?->status === 'PENDING' ? 'Menunggu semakan bayaran' : 'Untuk tindakan designer' }}
+                                            </span>
+                                        </div>
+                                        <blockquote>{{ $correctionComment }}</blockquote>
+                                        <footer>
+                                            <span>Pakej {{ ucfirst(strtolower($job->side)) }}</span>
+                                            @if ($correctionSubmittedAt)
+                                                <time datetime="{{ $correctionSubmittedAt->toIso8601String() }}">
+                                                    Dihantar {{ $correctionSubmittedAt->timezone(config('app.display_timezone'))->format('d/m/Y, h:i A') }}
+                                                </time>
+                                            @endif
+                                        </footer>
+                                    </aside>
+                                @endif
                                 @if (auth()->user()->hasStaffRole(\App\Models\User::ROLE_DESIGNER)
                                     && $job->assigned_user_id === auth()->id())
                                     <div class="staff-design-actions">
@@ -713,7 +752,14 @@
                             @if (in_array($payment->payment_type, ['BOOKING_DEPOSIT', 'BALANCE', 'ARTWORK_CORRECTION'], true) && ! empty($payment->metadata['receipt_path']))
                                 <div class="staff-payment-actions">
                                     @if ($payment->payment_type === 'ARTWORK_CORRECTION')
-                                        <p><strong>Caj pembetulan RM10</strong>: {{ $payment->metadata['correction_comment'] ?? '' }}</p>
+                                        <aside class="staff-correction-note staff-correction-note--payment" aria-label="Komen pembetulan pelanggan">
+                                            <div class="staff-correction-note-heading">
+                                                <span class="staff-correction-note-icon" aria-hidden="true">✎</span>
+                                                <div><span>Komen pelanggan</span><h4>Arahan Pembetulan Artwork</h4></div>
+                                            </div>
+                                            <blockquote>{{ $payment->metadata['correction_comment'] ?? 'Tiada komen diberikan.' }}</blockquote>
+                                            <footer><span>Caj pembetulan RM10</span></footer>
+                                        </aside>
                                         @if (auth()->user()->isOperationManagement() && $payment->status === 'PENDING')
                                             <form method="POST" action="{{ route($operationRoutePrefix.'payments.correction.approve', $payment) }}">
                                                 @csrf
