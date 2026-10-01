@@ -269,7 +269,7 @@
                                 href="{{ route($ordersShowRoute, $order->order_id) }}"
                                 class="staff-order-open"
                             >
-                                Buka &amp; bertindak &rarr;
+                                Buka &rarr;
                             </a>
 
                             @if (auth()->user()->isOperationManagement())
