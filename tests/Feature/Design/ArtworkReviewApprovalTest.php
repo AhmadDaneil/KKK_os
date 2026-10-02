@@ -387,7 +387,7 @@ class ArtworkReviewApprovalTest extends TestCase
             'designJobId' => $job->id,
         ]))
             ->assertOk()
-        ->assertSee('KING KAD KAHWIN · PREVIEW')
+        ->assertSee('King Kad Kahwin . Preview')
             ->assertHeader('Content-Type', 'text/html; charset=UTF-8');
     }
 

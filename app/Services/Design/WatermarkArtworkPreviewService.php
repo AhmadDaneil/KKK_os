@@ -7,9 +7,9 @@ use RuntimeException;
 
 class WatermarkArtworkPreviewService
 {
-    public const VERSION = 4;
+    public const VERSION = 7;
 
-    private const TEXT = 'KING KAD KAHWIN · PREVIEW';
+    private const TEXT = 'King Kad Kahwin . Preview';
 
     private const MAX_PREVIEW_DIMENSION = 900;
 
@@ -126,11 +126,25 @@ class WatermarkArtworkPreviewService
         $font = $this->watermarkFont();
 
         if ($font !== null && function_exists('imagettftext')) {
-            $fontSize = max(18, min(72, (int) round(min($width, $height) / 15)));
-            $angle = -30;
+            $fontSize = max(8, min(19, (int) round(min($width, $height) / 40)));
+            $angle = -7;
             $shadow = imagecolorallocatealpha($image, 0, 0, 0, 84);
-            $ink = imagecolorallocatealpha($image, 255, 255, 255, 64);
-            $shadowOffset = max(2, (int) round($fontSize / 18));
+            $ink = imagecolorallocatealpha($image, 255, 255, 255, 58);
+            $shadowOffset = max(1, (int) round($fontSize / 20));
+
+            // Keep the complete label inside the card, even on narrow 4 x 6 previews.
+            do {
+                $box = imagettfbbox($fontSize, $angle, $font, self::TEXT);
+                $minX = min($box[0], $box[2], $box[4], $box[6]);
+                $maxX = max($box[0], $box[2], $box[4], $box[6]);
+                $textWidth = $maxX - $minX;
+
+                if ($textWidth <= $width * .42 || $fontSize <= 8) {
+                    break;
+                }
+
+                $fontSize--;
+            } while (true);
 
             $box = imagettfbbox($fontSize, $angle, $font, self::TEXT);
             $minX = min($box[0], $box[2], $box[4], $box[6]);
