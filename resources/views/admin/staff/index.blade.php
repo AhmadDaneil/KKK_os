@@ -6,7 +6,7 @@
 @section('content')
     @php
         $roleLabels = [
-            'ADMIN' => 'Pentadbir',
+            'ADMIN' => 'Admin',
             'OPERATION_MANAGEMENT' => 'OM (Pembungkusan & Pemenuhan Tempahan)',
             'CUSTOMER_SERVICE' => 'Khidmat Pelanggan',
             'DESIGNER' => 'Pereka',

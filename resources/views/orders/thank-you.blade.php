@@ -7,6 +7,7 @@
     <title>Terima Kasih - {{ $review['order_id'] }}</title>
     <link rel="stylesheet" href="{{ asset('css/thank-you.css') }}?v={{ filemtime(public_path('css/thank-you.css')) }}">
     <link rel="stylesheet" href="{{ asset('css/customer-theme.css') }}?v={{ filemtime(public_path('css/customer-theme.css')) }}">
+    <link rel="stylesheet" href="{{ asset('css/customer-service.css') }}?v={{ filemtime(public_path('css/customer-service.css')) }}">
 </head>
 <body>
     @php
@@ -59,7 +60,7 @@
                 </div>
                 <div>
                     <dt>Tarikh Disahkan</dt>
-                    <dd>{{ $order->details_confirmed_at?->format('d/m/Y, h:i A') }}</dd>
+                    <dd>{{ $order->details_confirmed_at?->timezone(config('app.display_timezone'))->format('d/m/Y, h:i A') }}</dd>
                 </div>
             </dl>
 
@@ -72,7 +73,7 @@
                         <h3>{{ $review['package_count'] === 2 ? 'Majlis '.$loop->iteration.' – ' : 'Pakej ' }}Pihak {{ $sideLabel }}</h3>
                         <dl>
                             <div>
-                                <dt>Kod Reka Bentuk</dt>
+                                <dt>Kod Design</dt>
                                 <dd>{{ $side['design']['design_code'] ?: '-' }}</dd>
                             </div>
                             <div>
@@ -89,10 +90,11 @@
             </div>
 
             <a class="progress-button" href="{{ route('public.orders.progress', ['order_id' => $review['order_id']]) }}">
-                Semak Kemajuan
+                Semak Progress
             </a>
         </section>
     </main>
+    @include('public.partials.customer-service')
     @include('public.partials.theme-toggle')
 </body>
 </html>

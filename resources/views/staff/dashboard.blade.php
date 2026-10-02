@@ -9,7 +9,7 @@
         'DESIGNER' => 'Pereka',
         'PRODUCTION' => 'Pengeluaran',
         'CUSTOMER_SERVICE' => 'Khidmat Pelanggan',
-        'ADMIN' => 'Pentadbir',
+        'ADMIN' => 'Admin',
     ];
 @endphp
 <html lang="ms">
@@ -18,6 +18,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Papan Pemuka Staf - KKK OS</title>
     <link rel="stylesheet" href="{{ asset('css/staff.css') }}?v={{ filemtime(public_path('css/staff.css')) }}">
+    <link rel="stylesheet" href="{{ asset('css/dashboard-compact.css') }}?v={{ filemtime(public_path('css/dashboard-compact.css')) }}">
 </head>
 <body @class(['admin-operations-mode' => auth()->user()->isAdmin()]) data-staff-theme="{{ $dashboardUser->staff_theme }}">
     <div class="staff-app-shell">
@@ -50,7 +51,7 @@
                         <div class="staff-attention-grid">
                             @foreach ([
                                 ['key' => 'pending_payments', 'label' => 'Semakan Bayaran', 'description' => 'Bayaran yang perlu diluluskan atau ditolak', 'icon' => 'RM', 'params' => ['attention' => 'pending_payment']],
-                                ['key' => 'unassigned_design', 'label' => 'Reka Bentuk Belum Ditugaskan', 'description' => 'Tugaskan pereka untuk memulakan hasil reka bentuk', 'icon' => 'RB', 'params' => ['workstream' => 'design', 'attention' => 'unassigned_design']],
+                                ['key' => 'unassigned_design', 'label' => 'Design Belum Ditugaskan', 'description' => 'Tugaskan pereka untuk memulakan hasil design', 'icon' => 'RB', 'params' => ['workstream' => 'design', 'attention' => 'unassigned_design']],
                                 ['key' => 'unassigned_printing', 'label' => 'Pengeluaran Belum Ditugaskan', 'description' => 'Tugaskan staf cetakan untuk memulakan pengeluaran', 'icon' => 'CT', 'params' => ['workstream' => 'printing', 'attention' => 'unassigned_printing']],
                                 ['key' => 'unassigned_packing', 'label' => 'Pembungkusan Belum Ditugaskan', 'description' => 'Tugaskan OM untuk pembungkusan dan pemenuhan tempahan', 'icon' => 'PK', 'params' => ['workstream' => 'packing', 'attention' => 'unassigned_packing']],
                             ] as $item)
@@ -71,7 +72,7 @@
                             <span class="staff-attention-total @if ($designerAttention > 0) has-alert @endif">{{ $designerAttention > 0 ? $designerAttention.' tugasan' : 'Tiada tindakan diperlukan' }}</span>
                         </div>
                         <div class="staff-attention-card @if ($designerAttention > 0) has-alert @else is-clear @endif">
-                            <span class="staff-attention-icon">RB</span><span><strong>{{ __('ui.design_queue') }}</strong><small>{{ $designerAttention > 0 ? 'Tempahan sedia untuk dimulakan atau memerlukan pembetulan' : 'Semua tugasan reka bentuk telah dikemas kini' }}</small></span><b>{{ $designerAttention }}</b>
+                            <span class="staff-attention-icon">RB</span><span><strong>{{ __('ui.design_queue') }}</strong><small>{{ $designerAttention > 0 ? 'Tempahan sedia untuk dimulakan atau memerlukan pembetulan' : 'Semua tugasan design telah dikemas kini' }}</small></span><b>{{ $designerAttention }}</b>
                         </div>
                     </section>
                 @endif
@@ -85,7 +86,7 @@
                         </div>
                         <div class="staff-attention-grid">
                             <div class="staff-attention-card @if ($productionAttention['ready'] > 0) has-alert @else is-clear @endif"><span class="staff-attention-icon">CT</span><span><strong>Cetakan Belum Mula</strong><small>Kerja cetakan yang boleh dimulakan</small></span><b>{{ $productionAttention['ready'] }}</b></div>
-                            <div class="staff-attention-card @if ($productionAttention['printing'] > 0) has-alert @else is-clear @endif"><span class="staff-attention-icon">CT</span><span><strong>Cetakan Sedang Berjalan</strong><small>Muat naik kemajuan dan tandakan selesai dicetak</small></span><b>{{ $productionAttention['printing'] }}</b></div>
+                            <div class="staff-attention-card @if ($productionAttention['printing'] > 0) has-alert @else is-clear @endif"><span class="staff-attention-icon">CT</span><span><strong>Cetakan Sedang Berjalan</strong><small>Muat naik progress dan tandakan selesai dicetak</small></span><b>{{ $productionAttention['printing'] }}</b></div>
                         </div>
                     </section>
                 @endif
@@ -100,8 +101,8 @@
 
                     @if ($canViewDesignQueue)
                     <section class="staff-dashboard-group">
-                        <div class="staff-dashboard-group-heading"><span class="staff-group-number">02</span><div><h2>Reka Bentuk</h2><p>Data disahkan, proses gabungan dan semakan hasil reka bentuk.</p></div></div>
-                        <a href="{{ route('staff.orders.index', ['workstream' => 'design']) }}" class="staff-feature-card"><span class="staff-feature-icon">RB</span><div><h3>{{ __('ui.design_queue') }}</h3><p>Urus tempahan yang sedia untuk reka bentuk, sedang disediakan atau memerlukan pembetulan.</p></div><span class="staff-card-arrow">→</span></a>
+                        <div class="staff-dashboard-group-heading"><span class="staff-group-number">02</span><div><h2>Design</h2><p>Data disahkan, proses gabungan dan semakan hasil design.</p></div></div>
+                        <a href="{{ route('staff.orders.index', ['workstream' => 'design']) }}" class="staff-feature-card"><span class="staff-feature-icon">RB</span><div><h3>{{ __('ui.design_queue') }}</h3><p>Urus tempahan yang sedia untuk design, sedang disediakan atau memerlukan pembetulan.</p></div><span class="staff-card-arrow">→</span></a>
                     </section>
                     @endif
 
@@ -110,10 +111,10 @@
                         <div class="staff-dashboard-group-heading"><span class="staff-group-number">03</span><div><h2>Pengeluaran</h2><p>Cetakan, pembungkusan dan serahan kepada pelanggan.</p></div></div>
                         <div class="staff-feature-grid">
                             @if ($canViewProductionQueue)
-                                <a href="{{ route('staff.orders.index', ['workstream' => 'printing']) }}" class="staff-feature-card"><span class="staff-feature-icon">CT</span><div><h3>Pengeluaran</h3><p>Sediakan kad pihak lelaki/perempuan dan muat naik kemajuan kerja.</p></div><span class="staff-card-arrow">→</span></a>
+                                <a href="{{ route('staff.orders.index', ['workstream' => 'printing']) }}" class="staff-feature-card"><span class="staff-feature-icon">CT</span><div><h3>Pengeluaran</h3><p>Sediakan kad pihak lelaki/perempuan dan muat naik progress kerja.</p></div><span class="staff-card-arrow">→</span></a>
                             @endif
                             @if ($canMonitorOperations)
-                                <a href="{{ route('staff.orders.index', ['workstream' => 'packing']) }}" class="staff-feature-card"><span class="staff-feature-icon">PK</span><div><h3>Pembungkusan</h3><p>Semak item dan kemajuan pembungkusan setiap tempahan.</p></div><span class="staff-card-arrow">→</span></a>
+                                <a href="{{ route('staff.orders.index', ['workstream' => 'packing']) }}" class="staff-feature-card"><span class="staff-feature-icon">PK</span><div><h3>Pembungkusan</h3><p>Semak item dan progress pembungkusan setiap tempahan.</p></div><span class="staff-card-arrow">→</span></a>
                                 <a href="{{ route('staff.orders.index', ['workstream' => 'fulfilment']) }}" class="staff-feature-card"><span class="staff-feature-icon">PT</span><div><h3>Pemenuhan Tempahan</h3><p>Pantau serahan kurier dan kutipan pelanggan.</p></div><span class="staff-card-arrow">→</span></a>
                             @endif
                         </div>

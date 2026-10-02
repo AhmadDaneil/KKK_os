@@ -7,6 +7,7 @@
     <title>KKK OS - {{ $order->order_id }}</title>
     <link rel="stylesheet" href="{{ asset('css/customer-dashboard.css') }}?v={{ filemtime(public_path('css/customer-dashboard.css')) }}">
     <link rel="stylesheet" href="{{ asset('css/customer-theme.css') }}?v={{ filemtime(public_path('css/customer-theme.css')) }}">
+    <link rel="stylesheet" href="{{ asset('css/customer-service.css') }}?v={{ filemtime(public_path('css/customer-service.css')) }}">
 </head>
 <body>
 <main>
@@ -113,7 +114,7 @@
         <div><span>{{ __('ui.deposit_status') }}</span><strong>{{ match ($depositPayment->status) { 'PAID' => __('ui.deposit_confirmed'), 'FAILED' => __('ui.receipt_rejected'), default => __('ui.pending_review') } }}</strong></div>
         @if (session('deposit_status'))<p class="deposit-success">{{ session('deposit_status') }}</p>@endif
         @if ($depositPayment->status === 'PENDING')<p>Resit deposit anda telah diterima dan sedang disemak oleh Pengurusan Operasi.</p>@endif
-        @if ($depositPayment->status === 'PAID')<p>Bayaran deposit telah disahkan. Tempahan boleh diteruskan ke proses reka bentuk.</p>@endif
+        @if ($depositPayment->status === 'PAID')<p>Bayaran deposit telah disahkan. Tempahan boleh diteruskan ke proses design.</p>@endif
         @if ($depositPayment->status === 'FAILED')
             <p><strong>Sebab penolakan:</strong> {{ $depositPayment->metadata['rejection_reason'] ?? 'Resit tidak dapat disahkan.' }}</p>
             <form method="POST" enctype="multipart/form-data" action="{{ route('orders.deposit-receipt.update', ['orderId' => $order->order_id]) }}" data-deposit-resubmission-form>
@@ -135,21 +136,21 @@
     'DESIGN_APPROVED',
 ], true))
     <section class="dashboard-action-card">
-        <h2>Hasil Reka Bentuk Tempahan</h2>
+        <h2>Hasil Design Tempahan</h2>
 
         @if ($order->status === 'DETAILS_CONFIRMED')
             <p>
                 Maklumat tempahan anda telah disahkan.
-                Hasil reka bentuk anda akan disediakan oleh pereka.
+                Hasil design anda akan disediakan oleh pereka.
             </p>
 
             <span class="artwork-progress-label">
-                Menunggu proses reka bentuk
+                Menunggu proses design
             </span>
 
         @elseif ($order->status === 'READY_FOR_DESIGN')
             <p>
-                Tempahan anda sedang menunggu proses reka bentuk.
+                Tempahan anda sedang menunggu proses design.
             </p>
 
             <span class="artwork-progress-label">
@@ -167,12 +168,12 @@
 
         @elseif ($order->status === 'DESIGN_READY')
             <p>
-                Hasil reka bentuk anda telah tersedia. Sila semak hasil reka bentuk sebelum membuat
+                Hasil design anda telah tersedia. Sila semak hasil design sebelum membuat
                 kelulusan atau meminta pembetulan.
             </p>
 
             <a href="{{ route('orders.artwork.review', ['orderId' => $order->order_id]) }}">
-                Semak Hasil Reka Bentuk
+                Semak Hasil Design
             </a>
 
         @elseif ($order->status === 'CORRECTION_REQUESTED')
@@ -182,16 +183,16 @@
             </p>
 
             <a href="{{ route('orders.artwork.review', ['orderId' => $order->order_id]) }}">
-                Lihat Status Hasil Reka Bentuk
+                Lihat Status Hasil Design
             </a>
 
         @else
             <p>
-                Hasil reka bentuk tempahan anda telah diluluskan.
+                Hasil design tempahan anda telah diluluskan.
             </p>
 
             <a href="{{ route('orders.artwork.review', ['orderId' => $order->order_id]) }}">
-                Lihat Hasil Reka Bentuk
+                Lihat Hasil Design
             </a>
         @endif
     </section>
@@ -306,53 +307,6 @@
                 <div><label>Singkatan Pengantin Perempuan</label><input name="couple[bride_abbreviation]" placeholder="Contoh: Awanis" value="{{ old('couple.bride_abbreviation', $couple?->bride_abbreviation) }}"></div>
             </div>
         </fieldset>
-        <fieldset>
-    <legend>Pasangan Kedua (Jika Ada)</legend>
-
-    <p class="field-help">
-        Isi bahagian ini hanya jika majlis melibatkan dua pasangan pengantin.
-        Jika tidak berkenaan, biarkan kosong.
-    </p>
-
-    <div class="grid">
-        <div>
-            <label>Nama Pengantin Lelaki Kedua</label>
-            <input
-                name="second_couple[groom_name]"
-                placeholder="Contoh: Ahmad Danial Bin Zulkifli"
-                value="{{ old('second_couple.groom_name', $secondCouple?->groom_name) }}"
-            >
-        </div>
-
-        <div>
-            <label>Singkatan Pengantin Lelaki Kedua</label>
-            <input
-                name="second_couple[groom_abbreviation]"
-                placeholder="Contoh: Danial"
-                value="{{ old('second_couple.groom_abbreviation', $secondCouple?->groom_abbreviation) }}"
-            >
-        </div>
-
-        <div>
-            <label>Nama Pengantin Perempuan Kedua</label>
-            <input
-                name="second_couple[bride_name]"
-                placeholder="Contoh: Siti Hajar Binti Hamid"
-                value="{{ old('second_couple.bride_name', $secondCouple?->bride_name) }}"
-            >
-        </div>
-
-        <div>
-            <label>Singkatan Pengantin Perempuan Kedua</label>
-            <input
-                name="second_couple[bride_abbreviation]"
-                placeholder="Contoh: Hajar"
-                value="{{ old('second_couple.bride_abbreviation', $secondCouple?->bride_abbreviation) }}"
-            >
-        </div>
-    </div>
-</fieldset>
-
         @foreach ($orderedPackageSides as $packageSide)
             @php($side = $packageSide->side)
             @php($event = $packageSide->event)
@@ -360,7 +314,7 @@
             <fieldset data-package-side="{{ $side }}">
                 <legend data-package-legend>{{ $order->package_count === 2 ? 'Majlis '.$loop->iteration.' – ' : 'Pakej ' }}Pihak {{ ucfirst(strtolower($side)) }}</legend>
                 <div data-folded-second-design="{{ ! $loop->first ? 'true' : 'false' }}" @if ($hideFoldedDesign) hidden @endif>
-                <h3>Reka Bentuk</h3>
+                <h3>Design</h3>
 
 <div class="grid">
     <div>
@@ -390,7 +344,7 @@
     </div>
 
     <div>
-        <label>Kod Reka Bentuk</label>
+        <label>Kod Design</label>
         <input
             name="sides[{{ $side }}][design][design_code]"
             placeholder="Contoh: KKK-001"
@@ -424,7 +378,7 @@
     </label>
 
     <p class="field-help">
-        Muat naik jika reka bentuk yang dipilih memerlukan gambar pengantin.
+        Muat naik jika design yang dipilih memerlukan gambar pengantin.
         Format JPG, JPEG, PNG atau WEBP. Maksimum 10 MB.
     </p>
 
@@ -753,7 +707,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     : 'Pakej Perempuan';
 
                 const sideRequiredFields = [
-                    ['design][design_code]', 'Kod Reka Bentuk'],
+                    ['design][design_code]', 'Kod Design'],
                     ['parents][father_name]', 'Nama Bapa'],
                     ['parents][mother_name]', 'Nama Ibu'],
                     ['event][event_date]', 'Tarikh Majlis'],
@@ -1332,6 +1286,7 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     });
 </script>
+@include('public.partials.customer-service')
 @include('public.partials.theme-toggle')
 </body>
 </html>

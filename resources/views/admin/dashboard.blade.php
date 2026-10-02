@@ -106,10 +106,10 @@
     </section>
 
     <section class="admin-panel admin-attention-panel">
-        <div class="admin-panel-heading"><div><p class="admin-eyebrow">Tindakan Pentadbir</p><h2>Memerlukan Perhatian</h2></div><span @class(['admin-attention-total', 'has-alert' => $attentionTotal > 0, 'is-clear' => $attentionTotal === 0])>{{ $attentionTotal > 0 ? $attentionTotal.' tindakan' : 'Semua selesai' }}</span></div>
+        <div class="admin-panel-heading"><div><p class="admin-eyebrow">Tindakan Admin</p><h2>Memerlukan Perhatian</h2></div><span @class(['admin-attention-total', 'has-alert' => $attentionTotal > 0, 'is-clear' => $attentionTotal === 0])>{{ $attentionTotal > 0 ? $attentionTotal.' tindakan' : 'Semua selesai' }}</span></div>
         <div class="admin-action-grid">
             <a href="{{ route('admin.orders.index', ['attention' => 'pending_payment']) }}" @class(['has-alert' => $attention['pending_payments'] > 0, 'is-clear' => $attention['pending_payments'] === 0])><span class="action-icon is-payment">RM</span><div><strong>Semakan Pembayaran</strong><small>Deposit atau bayaran penuh yang masih menunggu</small></div><b>{{ $attention['pending_payments'] }}</b></a>
-            <a href="{{ route('admin.orders.index', ['workstream' => 'design', 'attention' => 'unassigned_design']) }}" @class(['has-alert' => $attention['unassigned_design'] > 0, 'is-clear' => $attention['unassigned_design'] === 0])><span class="action-icon is-design">RB</span><div><strong>Reka Bentuk Belum Ditugaskan</strong><small>Tugaskan pereka supaya hasil reka bentuk boleh dimulakan</small></div><b>{{ $attention['unassigned_design'] }}</b></a>
+            <a href="{{ route('admin.orders.index', ['workstream' => 'design', 'attention' => 'unassigned_design']) }}" @class(['has-alert' => $attention['unassigned_design'] > 0, 'is-clear' => $attention['unassigned_design'] === 0])><span class="action-icon is-design">RB</span><div><strong>Design Belum Ditugaskan</strong><small>Tugaskan pereka supaya hasil design boleh dimulakan</small></div><b>{{ $attention['unassigned_design'] }}</b></a>
             <a href="{{ route('admin.orders.index', ['workstream' => 'printing', 'attention' => 'unassigned_printing']) }}" @class(['has-alert' => $attention['unassigned_printing'] > 0, 'is-clear' => $attention['unassigned_printing'] === 0])><span class="action-icon is-printing">CT</span><div><strong>Pengeluaran Belum Ditugaskan</strong><small>Tugaskan staf pengeluaran untuk menghasilkan kad</small></div><b>{{ $attention['unassigned_printing'] }}</b></a>
             <a href="{{ route('admin.orders.index', ['workstream' => 'packing', 'attention' => 'unassigned_packing']) }}" @class(['has-alert' => $attention['unassigned_packing'] > 0, 'is-clear' => $attention['unassigned_packing'] === 0])><span class="action-icon is-packing">PK</span><div><strong>Pembungkusan Belum Ditugaskan</strong><small>Tugaskan OM untuk pembungkusan dan pemenuhan tempahan</small></div><b>{{ $attention['unassigned_packing'] }}</b></a>
         </div>
@@ -119,7 +119,7 @@
         <section class="admin-panel">
             <div class="admin-panel-heading"><div><p class="admin-eyebrow">Beban Kerja</p><h2>Senarai Semasa</h2></div><a href="{{ route('admin.orders.index') }}">Lihat semua →</a></div>
             <div class="admin-queue-list">
-                <a href="{{ route('admin.orders.index', ['workstream' => 'design']) }}"><span class="queue-icon">DE</span><div><strong>Reka Bentuk</strong><small>Sedia, sedang direka atau memerlukan pembetulan</small></div><b>{{ $queues['design'] }}</b></a>
+                <a href="{{ route('admin.orders.index', ['workstream' => 'design']) }}"><span class="queue-icon">DE</span><div><strong>Design</strong><small>Sedia, sedang direka atau memerlukan pembetulan</small></div><b>{{ $queues['design'] }}</b></a>
                 <a href="{{ route('admin.orders.index', ['workstream' => 'printing']) }}"><span class="queue-icon">PR</span><div><strong>Pengeluaran</strong><small>Kad sedang dihasilkan</small></div><b>{{ $queues['printing'] }}</b></a>
                 <a href="{{ route('admin.orders.index', ['workstream' => 'packing']) }}"><span class="queue-icon">PA</span><div><strong>Pembungkusan</strong><small>Menunggu atau sedang dibungkus</small></div><b>{{ $queues['packing'] }}</b></a>
             </div>
@@ -128,7 +128,7 @@
         <section class="admin-panel">
             <div class="admin-panel-heading"><div><p class="admin-eyebrow">Pasukan</p><h2>Staf Aktif</h2></div><a href="{{ route('admin.staff.index') }}">Urus →</a></div>
             <dl class="admin-team-counts">
-                <div><dt>Pentadbir</dt><dd>{{ $teamCounts['ADMIN'] ?? 0 }}</dd></div>
+                <div><dt>Admin</dt><dd>{{ $teamCounts['ADMIN'] ?? 0 }}</dd></div>
                 <div><dt>Pengurusan Operasi</dt><dd>{{ $teamCounts['OPERATION_MANAGEMENT'] ?? 0 }}</dd></div>
                 <div><dt>Pereka</dt><dd>{{ $teamCounts['DESIGNER'] ?? 0 }}</dd></div>
                 <div><dt>Pengeluaran</dt><dd>{{ $teamCounts['PRODUCTION'] ?? 0 }}</dd></div>
@@ -143,7 +143,7 @@
                 <thead><tr><th>ID Tempahan</th><th>Pelanggan</th><th>Pakej</th><th>Status</th><th>Tarikh</th><th></th></tr></thead>
                 <tbody>
                 @forelse ($recentOrders as $order)
-                    <tr><td><strong>{{ $order->order_id }}</strong></td><td>{{ $order->customer_name ?: 'Belum diisi' }}</td><td>{{ $order->package_count }} pakej</td><td><span class="admin-status">{{ $statusLabels[$order->status] ?? 'Status Tempahan' }}</span></td><td>{{ $order->created_at->format('d M Y') }}</td><td><a href="{{ route('admin.orders.show', $order->order_id) }}">Buka</a></td></tr>
+                    <tr><td><strong>{{ $order->order_id }}</strong></td><td>{{ $order->customer_name ?: 'Belum diisi' }}</td><td>{{ $order->package_count }} pakej</td><td><span class="admin-status">{{ $statusLabels[$order->status] ?? 'Status Tempahan' }}</span></td><td>{{ $order->created_at->timezone(config('app.display_timezone'))->format('d M Y') }}</td><td><a href="{{ route('admin.orders.show', $order->order_id) }}">Buka</a></td></tr>
                 @empty
                     <tr><td colspan="6" class="admin-empty">Belum ada tempahan.</td></tr>
                 @endforelse

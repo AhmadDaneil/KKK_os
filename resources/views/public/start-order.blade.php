@@ -6,13 +6,14 @@
     <title>Mulakan Tempahan — KingKadKahwin</title>
     <link rel="stylesheet" href="{{ asset('css/landing.css') }}?v={{ filemtime(public_path('css/landing.css')) }}">
     <link rel="stylesheet" href="{{ asset('css/customer-theme.css') }}?v={{ filemtime(public_path('css/customer-theme.css')) }}">
+    <link rel="stylesheet" href="{{ asset('css/customer-service.css') }}?v={{ filemtime(public_path('css/customer-service.css')) }}">
 </head>
 <body class="utility-page">
     <header class="site-header compact-header">
         <a class="brand" href="{{ route('home') }}"><span class="brand-mark">K</span><span><b>KingKadKahwin</b><small>Kad indah, kenangan bermakna</small></span></a>
         <nav aria-label="Navigasi halaman tempahan">
             <a class="header-link nav-progress" href="{{ route('home') }}">← Kembali</a>
-            <a class="header-link nav-progress" href="{{ route('public.orders.progress') }}">Semak Kemajuan</a>
+            <a class="header-link nav-progress" href="{{ route('public.orders.progress') }}">Semak Progress</a>
         </nav>
     </header>
     <main class="form-page">
@@ -130,6 +131,7 @@
             startOrderForm.requestSubmit(startOrderSubmit);
         });
     </script>
+    @include('public.partials.customer-service')
     @include('public.partials.theme-toggle')
     @include('partials.malay-validation')
 </body>

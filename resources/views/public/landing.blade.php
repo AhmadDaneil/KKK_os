@@ -7,6 +7,7 @@
     <title>KingKadKahwin — Kad Kahwin Anda, Direka Dengan Teliti</title>
     <link rel="stylesheet" href="{{ asset('css/landing.css') }}?v={{ filemtime(public_path('css/landing.css')) }}">
     <link rel="stylesheet" href="{{ asset('css/customer-theme.css') }}?v={{ filemtime(public_path('css/customer-theme.css')) }}">
+    <link rel="stylesheet" href="{{ asset('css/customer-service.css') }}?v={{ filemtime(public_path('css/customer-service.css')) }}">
 </head>
 <body>
     <header class="site-header">
@@ -17,7 +18,7 @@
         <nav aria-label="Navigasi utama">
             <a href="#kelebihan">Kelebihan</a>
             <a href="#cara-tempah">Cara Tempah</a>
-            <a class="nav-progress" href="{{ route('public.orders.progress') }}">Semak Kemajuan</a>
+            <a class="nav-progress" href="{{ route('public.orders.progress') }}">Semak Progress</a>
         </nav>
     </header>
 
@@ -25,15 +26,15 @@
         <section class="hero">
             <div class="hero-copy">
                 <h1>Raikan hari istimewa dengan kad yang terasa <em>benar-benar milik anda.</em></h1>
-                <p class="hero-text">Pilih tema, lengkapkan maklumat majlis dan lihat pratonton kad secara langsung. Kami uruskan proses daripada reka bentuk hingga kad siap dihantar.</p>
+                <p class="hero-text">Pilih tema, lengkapkan maklumat majlis dan lihat pratonton kad secara langsung. Kami uruskan proses daripada design hingga kad siap dihantar.</p>
                 <div class="hero-actions">
                     <a class="button button-primary" href="{{ route('public.orders.create') }}"><span>Tempah Sekarang</span><span class="button-arrow" aria-hidden="true">→</span></a>
-                    <a class="button button-secondary" href="{{ route('public.orders.progress') }}"><span>Semak Kemajuan</span></a>
+                    <a class="button button-secondary" href="{{ route('public.orders.progress') }}"><span>Semak Progress</span></a>
                 </div>
                 <ul class="trust-list" aria-label="Kelebihan utama">
                     <li><span>✓</span> Pratonton langsung</li>
                     <li><span>✓</span> Simpan automatik</li>
-                    <li><span>✓</span> Kemajuan dalam talian</li>
+                    <li><span>✓</span> Progress dalam talian</li>
                 </ul>
             </div>
 
@@ -46,8 +47,8 @@
                             decoding="async"
                             draggable="false">
                         <span class="landing-card-watermark" aria-hidden="true">
-                            <span>KING KAD KAHWIN · PRATONTON</span>
-                            <span>KING KAD KAHWIN · PRATONTON</span>
+                            <span>KING KAD KAHWIN · PREVIEW</span>
+                            <span>KING KAD KAHWIN · PREVIEW</span>
                         </span>
                     </article>
                 </div>
@@ -59,8 +60,8 @@
                             decoding="async"
                             draggable="false">
                         <span class="landing-card-watermark" aria-hidden="true">
-                            <span>KING KAD KAHWIN · PRATONTON</span>
-                            <span>KING KAD KAHWIN · PRATONTON</span>
+                            <span>KING KAD KAHWIN · PREVIEW</span>
+                            <span>KING KAD KAHWIN · PREVIEW</span>
                         </span>
                     </article>
                 </div>
@@ -72,8 +73,8 @@
                             decoding="async"
                             draggable="false">
                         <span class="landing-card-watermark" aria-hidden="true">
-                            <span>KING KAD KAHWIN · PRATONTON</span>
-                            <span>KING KAD KAHWIN · PRATONTON</span>
+                            <span>KING KAD KAHWIN · PREVIEW</span>
+                            <span>KING KAD KAHWIN · PREVIEW</span>
                         </span>
                     </article>
                 </div>
@@ -85,8 +86,8 @@
                             decoding="async"
                             draggable="false">
                         <span class="landing-card-watermark" aria-hidden="true">
-                            <span>KING KAD KAHWIN · PRATONTON</span>
-                            <span>KING KAD KAHWIN · PRATONTON</span>
+                            <span>KING KAD KAHWIN · PREVIEW</span>
+                            <span>KING KAD KAHWIN · PREVIEW</span>
                         </span>
                     </article>
                 </div>
@@ -94,9 +95,9 @@
         </section>
 
         <section class="feature-strip" id="kelebihan">
-            <article><span>01</span><div><h2>Pilihan reka bentuk</h2><p>Tema untuk pelbagai gaya majlis, daripada minimal hingga klasik.</p></div></article>
+            <article><span>01</span><div><h2>Pilihan design</h2><p>Tema untuk pelbagai gaya majlis, daripada minimal hingga klasik.</p></div></article>
             <article><span>02</span><div><h2>Semakan lebih mudah</h2><p>Lihat nama dan maklumat majlis pada kad sambil mengisi borang.</p></div></article>
-            <article><span>03</span><div><h2>Status yang jelas</h2><p>Ikuti kemajuan reka bentuk, cetakan, pembungkusan dan penghantaran.</p></div></article>
+            <article><span>03</span><div><h2>Status yang jelas</h2><p>Ikuti progress design, cetakan, pembungkusan dan penghantaran.</p></div></article>
         </section>
 
         <section class="final-cta">
@@ -112,8 +113,8 @@
             <ol>
                 <li><b>1</b><div><h3>Isi maklumat</h3><p>Pilih pakej dan lengkapkan butiran pengantin serta majlis.</p></div></li>
                 <li><b>2</b><div><h3>Semak & sahkan</h3><p>Lihat pratonton, betulkan maklumat dan sahkan apabila tepat.</p></div></li>
-                <li><b>3</b><div><h3>Kami siapkan</h3><p>Pasukan kami mengurus reka bentuk, cetakan dan pembungkusan.</p></div></li>
-                <li><b>4</b><div><h3>Ikuti kemajuan</h3><p>Masukkan ID Tempahan pada bila-bila masa untuk melihat perkembangan.</p></div></li>
+                <li><b>3</b><div><h3>Kami siapkan</h3><p>Pasukan kami mengurus design, cetakan dan pembungkusan.</p></div></li>
+                <li><b>4</b><div><h3>Ikuti progress</h3><p>Masukkan ID Tempahan pada bila-bila masa untuk melihat perkembangan.</p></div></li>
             </ol>
         </section>
     </main>
@@ -132,7 +133,6 @@
                         ['key' => 'instagram', 'label' => 'Instagram'],
                         ['key' => 'facebook', 'label' => 'Facebook'],
                         ['key' => 'tiktok', 'label' => 'TikTok'],
-                        ['key' => 'whatsapp', 'label' => 'WhatsApp'],
                     ] as $social)
                         @if (config('kingkadkahwin.social.'.$social['key']))
                             <a class="social-link social-{{ $social['key'] }}" href="{{ config('kingkadkahwin.social.'.$social['key']) }}" target="_blank" rel="noopener noreferrer" aria-label="KingKadKahwin di {{ $social['label'] }}">
@@ -141,8 +141,6 @@
                                         <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="5"></rect><circle cx="12" cy="12" r="4"></circle><circle cx="17.5" cy="6.5" r="1" class="social-icon-fill"></circle></svg>
                                     @elseif ($social['key'] === 'facebook')
                                         <svg viewBox="0 0 24 24"><path class="social-icon-fill" d="M14 8h3V4.3c-.5-.1-2.2-.3-4.1-.3C9 4 6.3 6.4 6.3 10.8V14H3v4h3.3v6h4V18h3.4l.6-4h-4v-2.8C10.3 9.3 10.8 8 14 8Z"></path></svg>
-                                    @elseif ($social['key'] === 'whatsapp')
-                                        <svg viewBox="0 0 24 24"><path d="M20 11.7a8 8 0 0 1-11.8 7l-4.2 1.1 1.1-4.1A8 8 0 1 1 20 11.7Z"></path><path d="M8.4 7.8c.2-.5.5-.5.8-.5h.5c.2 0 .4.1.5.4l.8 1.9c.1.3.1.5-.1.7l-.6.8c-.2.2-.1.4 0 .6.7 1.3 1.7 2.3 3 2.9.2.1.4.1.6-.1l.9-1.1c.2-.2.4-.3.7-.2l1.9.9c.3.1.5.3.5.5 0 .3-.2 1.6-1.1 2.2-.8.6-1.8.8-3 .4-1.1-.3-2.5-1-4.2-2.5-1.4-1.3-2.4-2.8-2.8-3.9-.4-1-.1-2.2.3-2.7l.3-.3Z"></path></svg>
                                     @else
                                         <svg viewBox="0 0 24 24"><path class="social-icon-fill" d="M14.5 3c.4 2.4 1.8 3.9 4.5 4.1v3.1a8.3 8.3 0 0 1-4.5-1.3v6.2a6.1 6.1 0 1 1-5.3-6v3.3a2.9 2.9 0 1 0 2.1 2.8V3h3.2Z"></path></svg>
                                     @endif
@@ -165,6 +163,7 @@
             card.addEventListener('dragstart', function (event) { event.preventDefault(); });
         });
     </script>
+    @include('public.partials.customer-service')
     @include('public.partials.theme-toggle')
     @include('partials.malay-validation')
 </body>

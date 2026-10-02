@@ -7,6 +7,7 @@
     <title>Semakan Akhir - {{ $review['order_id'] }}</title>
     <link rel="stylesheet" href="{{ asset('css/final-review.css') }}?v={{ filemtime(public_path('css/final-review.css')) }}">
     <link rel="stylesheet" href="{{ asset('css/customer-theme.css') }}?v={{ filemtime(public_path('css/customer-theme.css')) }}">
+    <link rel="stylesheet" href="{{ asset('css/customer-service.css') }}?v={{ filemtime(public_path('css/customer-service.css')) }}">
 </head>
 <body>
     @php
@@ -145,7 +146,7 @@
                     <span class="side-badge">{{ $side['side'] }}</span>
                 </div>
 
-                <h3>Reka Bentuk Kad</h3>
+                <h3>Design Kad</h3>
                 <div class="review-grid">
                     <div class="review-item">
                         <span class="review-label">Tema</span>
@@ -153,7 +154,7 @@
                     </div>
 
                     <div class="review-item">
-                        <span class="review-label">Kod Reka Bentuk</span>
+                        <span class="review-label">Kod Design</span>
                         <span class="review-value">{{ $design['design_code'] ?: '-' }}</span>
                     </div>
 
@@ -427,6 +428,7 @@
             });
         });
     </script>
+    @include('public.partials.customer-service')
     @include('public.partials.theme-toggle')
     @include('partials.malay-validation')
 </body>

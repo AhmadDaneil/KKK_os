@@ -83,7 +83,7 @@ public function test_invalid_token_is_rejected(): void
         'orderId' => $order->order_id,
     ]))
         ->assertOk()
-        ->assertSee('Semak Hasil Reka Bentuk')
+        ->assertSee('Semak Hasil Design')
         ->assertSee(route('orders.artwork.review', [
             'orderId' => $order->order_id,
         ]), false);
@@ -188,7 +188,7 @@ public function test_design_in_progress_dashboard_does_not_show_artwork_review_c
         'orderId' => $order->order_id,
     ]))
         ->assertOk()
-        ->assertDontSee('Semak Hasil Reka Bentuk')
+        ->assertDontSee('Semak Hasil Design')
         ->assertDontSee(route('orders.artwork.review', [
             'orderId' => $order->order_id,
         ]), false);
@@ -212,7 +212,7 @@ public function test_correction_requested_dashboard_shows_artwork_status_cta(): 
         'orderId' => $order->order_id,
     ]))
         ->assertOk()
-        ->assertSee('Lihat Status Hasil Reka Bentuk')
+        ->assertSee('Lihat Status Hasil Design')
         ->assertSee(route('orders.artwork.review', [
             'orderId' => $order->order_id,
         ]), false);
@@ -236,7 +236,7 @@ public function test_correction_requested_dashboard_shows_artwork_status_cta(): 
             'orderId' => $order->order_id,
         ]))
             ->assertOk()
-            ->assertSee('Lihat Hasil Reka Bentuk')
+            ->assertSee('Lihat Hasil Design')
             ->assertSee(route('orders.artwork.review', [
                 'orderId' => $order->order_id,
             ]), false);
@@ -260,11 +260,11 @@ public function test_correction_requested_dashboard_shows_artwork_status_cta(): 
         'orderId' => $order->order_id,
     ]))
         ->assertOk()
-        ->assertSee('Hasil Reka Bentuk Tempahan')
-        ->assertSee('Menunggu proses reka bentuk')
+        ->assertSee('Hasil Design Tempahan')
+        ->assertSee('Menunggu proses design')
         ->assertSee('35%')
         ->assertSee('data-progress-tone="red"', false)
-        ->assertDontSee('Semak Hasil Reka Bentuk')
+        ->assertDontSee('Semak Hasil Design')
         ->assertDontSee(route('orders.artwork.review', [
             'orderId' => $order->order_id,
         ]), false);
@@ -346,11 +346,11 @@ public function test_correction_requested_dashboard_shows_artwork_status_cta(): 
             'orderId' => $order->order_id,
         ]))
             ->assertOk()
-            ->assertSee('Hasil Reka Bentuk Tempahan')
-            ->assertSee('Menunggu Proses Reka Bentuk')
+            ->assertSee('Hasil Design Tempahan')
+            ->assertSee('Menunggu Proses Design')
             ->assertSee('40%')
             ->assertSee('data-progress-tone="yellow"', false)
-            ->assertDontSee('Semak Hasil Reka Bentuk')
+            ->assertDontSee('Semak Hasil Design')
             ->assertDontSee(route('orders.artwork.review', [
                 'orderId' => $order->order_id,
             ]), false);

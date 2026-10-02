@@ -7,7 +7,7 @@
     $canMonitorOperations = $staffUser->canMonitorAllDepartments();
     $canViewDesignQueue = $canMonitorOperations || $staffUser->hasStaffRole(\App\Models\User::ROLE_DESIGNER);
     $canViewProductionQueue = $canMonitorOperations || $staffUser->hasStaffRole(\App\Models\User::ROLE_PRODUCTION);
-    $roleLabel = $staffUser->isAdmin() ? 'Pentadbir' : match ($staffUser->role) {
+    $roleLabel = $staffUser->isAdmin() ? 'Admin' : match ($staffUser->role) {
         \App\Models\User::ROLE_OM => 'Pengurusan Operasi',
         \App\Models\User::ROLE_CUSTOMER_SERVICE => 'Khidmat Pelanggan',
         \App\Models\User::ROLE_PRODUCTION => 'Pengeluaran',
@@ -42,12 +42,15 @@
             <section class="staff-nav-section">
                 <h2>{{ __('ui.operation_management') }}</h2>
                 <a href="{{ route('staff.dashboard') }}" @class(['staff-nav-link', 'is-active' => request()->routeIs('staff.dashboard')])><span class="staff-nav-icon" aria-hidden="true">OV</span>{{ __('ui.overview') }}</a>
-                <a href="{{ route($ordersIndexRoute) }}" @class(['staff-nav-link', 'is-active' => request()->routeIs('staff.orders.*') && ! $activeWorkstream])><span class="staff-nav-icon" aria-hidden="true">OR</span>{{ __('ui.all_orders') }}</a>
+                <a href="{{ route($ordersIndexRoute) }}" @class(['staff-nav-link', 'is-active' => request()->routeIs('staff.orders.*') && ! $activeWorkstream && ! request()->query('attention')])><span class="staff-nav-icon" aria-hidden="true">OR</span>{{ __('ui.all_orders') }}</a>
+                @if ($staffUser->isOperationManagement())
+                    <a href="{{ route($ordersIndexRoute, ['attention' => 'pending_payment']) }}" @class(['staff-nav-link', 'is-active' => request()->query('attention') === 'pending_payment'])><span class="staff-nav-icon" aria-hidden="true">RM</span>{{ __('ui.payment_review') }}</a>
+                @endif
             </section>
 
         @if ($canViewDesignQueue)
             <section class="staff-nav-section">
-                <h2>Reka Bentuk</h2>
+                <h2>Design</h2>
                 <a href="{{ route($ordersIndexRoute, ['workstream' => 'design']) }}" @class(['staff-nav-link', 'is-active' => $activeWorkstream === 'design'])><span class="staff-nav-icon" aria-hidden="true">RB</span>{{ __('ui.design_queue') }}</a>
             </section>
         @endif

@@ -43,7 +43,7 @@ class BuildCustomerProgressServiceTest extends TestCase
         $this->assertSame([
             'Tempahan',
             'Maklumat',
-            'Reka Bentuk',
+            'Design',
             'Kelulusan',
             'Bayaran Baki',
             'Cetakan',

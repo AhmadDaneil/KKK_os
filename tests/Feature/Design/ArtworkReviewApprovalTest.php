@@ -188,7 +188,7 @@ class ArtworkReviewApprovalTest extends TestCase
 
         $this->get(route('orders.artwork.review', ['orderId' => $order->order_id]))
             ->assertOk()
-            ->assertSee('Kembali ke Semak Kemajuan')
+            ->assertSee('Kembali ke Semak Progress')
             ->assertSee(
                 route('public.orders.progress', ['order_id' => $order->order_id]),
                 false
@@ -387,7 +387,7 @@ class ArtworkReviewApprovalTest extends TestCase
             'designJobId' => $job->id,
         ]))
             ->assertOk()
-        ->assertSee('KING KAD KAHWIN · PRATONTON')
+        ->assertSee('KING KAD KAHWIN · PREVIEW')
             ->assertHeader('Content-Type', 'text/html; charset=UTF-8');
     }
 

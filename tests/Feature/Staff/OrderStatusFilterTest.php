@@ -42,7 +42,7 @@ class OrderStatusFilterTest extends TestCase
         ]);
 
         foreach ([
-            'design' => 'Reka Bentuk',
+            'design' => 'Design',
             'printing' => 'Pengeluaran',
             'packing' => 'Pembungkusan',
             'fulfilment' => 'Pemenuhan Tempahan',

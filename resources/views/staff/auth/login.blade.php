@@ -17,7 +17,7 @@
                 <span class="login-eyebrow">BERSAMA, KITA JAYAKAN</span>
                 <h2>Setiap tugasan, <br>bermula di sini.</h2>
                 <p>Dari idea hingga hasil akhir, urus kerja harian dan cipta sesuatu yang bermakna bersama pasukan.</p>
-                <div class="login-tags"><span>Operation</span><span>Reka Bentuk</span><span>Pengeluaran</span></div>
+                <div class="login-tags"><span>Operation</span><span>Design</span><span>Pengeluaran</span></div>
             </div>
             <div class="login-story-footer"><span class="login-dot"></span> Satu pasukan. Satu tujuan.</div>
             <div class="login-orbit login-orbit--one" aria-hidden="true"></div>

@@ -121,7 +121,7 @@ class StaffPrintingWorkflowTest extends TestCase
             ])
             ->assertRedirect()
             ->assertSessionHasNoErrors()
-            ->assertSessionHas('status', 'Kemajuan production berjaya dimuat naik.');
+            ->assertSessionHas('status', 'Progress production berjaya dimuat naik.');
 
         $job->refresh();
 
@@ -173,7 +173,7 @@ class StaffPrintingWorkflowTest extends TestCase
                 ],
             ])
             ->assertOk()
-            ->assertJsonPath('message', 'Kemajuan production berjaya dimuat naik.')
+            ->assertJsonPath('message', 'Progress production berjaya dimuat naik.')
             ->assertJsonCount(1, 'files')
             ->assertJsonPath('files.0.original_name', 'printing-stage-async.jpg');
 

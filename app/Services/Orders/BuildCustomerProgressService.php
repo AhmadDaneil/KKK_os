@@ -17,9 +17,9 @@ class BuildCustomerProgressService
             'DETAILS_CONFIRMED' => [35, 'Maklumat Telah Disahkan', 'Maklumat tempahan anda telah berjaya disahkan.'],
             'READY_FOR_DESIGN' => [40, 'Menunggu Proses Design', 'Maklumat anda telah diterima dan sedia untuk proses design.'],
             'DESIGN_IN_PROGRESS' => [50, ...$this->designProgressCopy($order)],
-            'DESIGN_READY' => [60, 'Hasil Reka Bentuk Sedia Untuk Semakan', 'Hasil reka bentuk anda telah tersedia untuk semakan.'],
-            'CORRECTION_REQUESTED' => [60, 'Pembetulan Hasil Reka Bentuk Sedang Diproses', 'Permintaan pembetulan anda telah diterima.'],
-            'DESIGN_APPROVED' => [70, 'Hasil Reka Bentuk Diluluskan', 'Hasil reka bentuk anda telah diluluskan.'],
+            'DESIGN_READY' => [60, 'Hasil Design Sedia Untuk Semakan', 'Hasil design anda telah tersedia untuk semakan.'],
+            'CORRECTION_REQUESTED' => [60, 'Pembetulan Hasil Design Sedang Diproses', 'Permintaan pembetulan anda telah diterima.'],
+            'DESIGN_APPROVED' => [70, 'Hasil Design Diluluskan', 'Hasil design anda telah diluluskan.'],
             'BALANCE_PENDING' => [75, 'Menunggu Bayaran Baki', 'Bayaran baki diperlukan sebelum proses seterusnya.'],
             'PAID' => [80, 'Bayaran Selesai', 'Bayaran tempahan anda telah selesai.'],
             'READY_FOR_PRINT' => [82, 'Menunggu Proses Cetakan', 'Tempahan anda berada dalam giliran cetakan.'],
@@ -69,8 +69,8 @@ class BuildCustomerProgressService
 
         if ($active->isEmpty()) {
             return $english
-                ? ['Reka Bentuk Sedang Disediakan', 'Pereka sedang menyediakan hasil reka bentuk tempahan anda.']
-                : ['Reka Bentuk Sedang Disediakan', 'Pereka sedang menyediakan artwork tempahan anda.'];
+                ? ['Design Sedang Disediakan', 'Pereka sedang menyediakan hasil design tempahan anda.']
+                : ['Design Sedang Disediakan', 'Pereka sedang menyediakan artwork tempahan anda.'];
         }
 
         $subject = $active->count() > 1
@@ -78,8 +78,8 @@ class BuildCustomerProgressService
             : $active->first();
 
         return $english
-            ? ["Reka Bentuk {$subject} Sedang Disediakan", "Pereka sedang menyediakan reka bentuk {$subject} untuk tempahan anda."]
-            : ["Reka Bentuk {$subject} Sedang Disediakan", "Pereka sedang menyediakan reka bentuk {$subject} untuk tempahan anda."];
+            ? ["Design {$subject} Sedang Disediakan", "Pereka sedang menyediakan design {$subject} untuk tempahan anda."]
+            : ["Design {$subject} Sedang Disediakan", "Pereka sedang menyediakan design {$subject} untuk tempahan anda."];
     }
 
     private function tone(int $percentage): string
@@ -108,13 +108,13 @@ class BuildCustomerProgressService
 
         $stageLabels = app()->bound('translator')
             ? __('ui.stages')
-            : ['Tempahan', 'Maklumat', 'Reka Bentuk', 'Kelulusan', 'Bayaran Baki', 'Cetakan', 'Pembungkusan', 'Penghantaran / Pengambilan', 'Selesai'];
+            : ['Tempahan', 'Maklumat', 'Design', 'Kelulusan', 'Bayaran Baki', 'Cetakan', 'Pembungkusan', 'Penghantaran / Pengambilan', 'Selesai'];
 
         return collect([
             ['label' => 'Tempahan', 'description' => 'Tempahan diterima'],
             ['label' => 'Maklumat', 'description' => 'Maklumat disahkan'],
-            ['label' => 'Reka Bentuk', 'description' => 'Hasil reka bentuk disediakan'],
-            ['label' => 'Kelulusan', 'description' => 'Semakan hasil reka bentuk'],
+            ['label' => 'Design', 'description' => 'Hasil design disediakan'],
+            ['label' => 'Kelulusan', 'description' => 'Semakan hasil design'],
             ['label' => 'Bayaran Baki', 'description' => 'Bayaran penuh'],
             ['label' => 'Cetakan', 'description' => 'Kad dicetak'],
             ['label' => 'Pembungkusan', 'description' => 'Kad dibungkus'],

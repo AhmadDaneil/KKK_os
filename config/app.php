@@ -67,6 +67,9 @@ return [
 
     'timezone' => 'UTC',
 
+    /* Timezone used whenever dates and times are shown to KKK OS users. */
+    'display_timezone' => env('APP_DISPLAY_TIMEZONE', 'Asia/Kuala_Lumpur'),
+
     /*
     |--------------------------------------------------------------------------
     | Application Locale Configuration

@@ -40,7 +40,7 @@ class AdminDashboardTest extends TestCase
             ->assertOk()
             ->assertSee('Memerlukan Perhatian')
             ->assertSee('Semakan Pembayaran')
-            ->assertSee('Reka Bentuk Belum Ditugaskan')
+            ->assertSee('Design Belum Ditugaskan')
             ->assertSee('Pengeluaran Belum Ditugaskan')
             ->assertSee('Pembungkusan Belum Ditugaskan')
             ->assertSee(route('admin.orders.index'), false);
@@ -174,7 +174,7 @@ class AdminDashboardTest extends TestCase
 
         $this->get(route('admin.orders.index'))
             ->assertOk()
-            ->assertSee('Operasi Pentadbir')
+            ->assertSee('Operasi Admin')
             ->assertSee(route('admin.dashboard'), false)
             ->assertSee('Staf &amp; Akses', false)
             ->assertSee(route('admin.staff.index'), false)
@@ -183,6 +183,21 @@ class AdminDashboardTest extends TestCase
 
         $this->assertAuthenticatedAs($admin, 'admin');
         $this->assertAuthenticatedAs($designer, 'staff');
+    }
+
+    public function test_payment_review_page_uses_the_payment_review_heading(): void
+    {
+        $admin = $this->staff(User::ROLE_ADMIN);
+
+        $this->actingAs($admin, 'admin')
+            ->get(route('admin.orders.index', ['attention' => 'pending_payment']))
+            ->assertOk()
+            ->assertSee('<title>Semakan Bayaran - KKK OS</title>', false)
+            ->assertSeeInOrder([
+                'Operasi Admin',
+                'Semakan Bayaran',
+                'Semak deposit dan bayaran penuh yang masih menunggu pengesahan.',
+            ]);
     }
 
     public function test_staff_operations_do_not_fall_back_to_an_admin_session(): void

@@ -580,7 +580,7 @@ class StaffOrderVisibilityTest extends TestCase
             ->get(route('staff.orders.show', $order->order_id))
             ->assertOk()
             ->assertSee('Packages')
-            ->assertSee('Kerja Reka Bentuk')
+            ->assertSee('Kerja Design')
             ->assertDontSee('Order Summary')
             ->assertDontSee('<h2>Customer</h2>', false)
             ->assertDontSee('Timeline Order')
@@ -614,7 +614,7 @@ class StaffOrderVisibilityTest extends TestCase
             ->assertDontSee('Timeline Order')
             ->assertDontSee('Payment')
             ->assertDontSee('Pemenuhan Tempahan')
-            ->assertDontSee('Kerja Reka Bentuk')
+            ->assertDontSee('Kerja Design')
             ->assertDontSee('Pembungkusan');
     }
 
@@ -635,7 +635,7 @@ class StaffOrderVisibilityTest extends TestCase
             ->get(route('staff.orders.show', $order->order_id))
             ->assertOk()
             ->assertSee('Pembungkusan')
-            ->assertSee('Kerja Reka Bentuk')
+            ->assertSee('Kerja Design')
             ->assertDontSee('Printing');
     }
 
@@ -654,7 +654,7 @@ class StaffOrderVisibilityTest extends TestCase
             ->get(route('staff.dashboard'))
             ->assertOk()
             ->assertSee('Semua Tempahan')
-            ->assertSee('Senarai Reka Bentuk')
+            ->assertSee('Senarai Design')
             ->assertSee('Pengeluaran')
             ->assertSee('Pembungkusan')
             ->assertSee('Pemenuhan Tempahan');
@@ -669,8 +669,8 @@ class StaffOrderVisibilityTest extends TestCase
             ->assertOk()
             ->assertSee('Ringkasan Tempahan')
             ->assertSee('<h2>Pelanggan</h2>', false)
-            ->assertSee('Kemajuan tempahan')
-            ->assertSee('Kerja Reka Bentuk')
+            ->assertSee('Progress tempahan')
+            ->assertSee('Kerja Design')
             ->assertSee('Pengeluaran')
             ->assertSee('Pembungkusan')
             ->assertSee('Pemenuhan Tempahan')
@@ -699,12 +699,12 @@ class StaffOrderVisibilityTest extends TestCase
         $this->actingAs($designer)
             ->get(route('staff.orders.show', $order->order_id))
             ->assertOk()
-            ->assertSee('Mulakan Reka Bentuk')
+            ->assertSee('Mulakan Design')
             ->assertSee(
                 route('staff.design-jobs.start', $job),
                 false
             )
-            ->assertDontSee('Muat Naik Versi Hasil Reka Bentuk')
+            ->assertDontSee('Muat Naik Versi Hasil Design')
             ->assertDontSee('Resume Correction');
     }
 
@@ -730,8 +730,8 @@ class StaffOrderVisibilityTest extends TestCase
         $this->actingAs($designer)
             ->get(route('staff.orders.show', $order->order_id))
             ->assertOk()
-            ->assertSee('Muat Naik Versi Hasil Reka Bentuk')
-            ->assertSee('Fail Sumber Hasil Reka Bentuk')
+            ->assertSee('Muat Naik Versi Hasil Design')
+            ->assertSee('Fail Sumber Hasil Design')
             ->assertSee('Pratonton Pelanggan')
             ->assertSee('Internal Note')
             ->assertSee(
@@ -742,7 +742,7 @@ class StaffOrderVisibilityTest extends TestCase
             ->assertSee('name="customer_preview[]"', false)
             ->assertSee('+ Tambah Fail')
             ->assertSee('staff-file-delete', false)
-            ->assertDontSee('Mulakan Reka Bentuk')
+            ->assertDontSee('Mulakan Design')
             ->assertDontSee('Resume Correction');
     }
 
@@ -766,14 +766,14 @@ class StaffOrderVisibilityTest extends TestCase
             ->get(route('admin.orders.show', $order->order_id))
             ->assertOk()
             ->assertSee('Assign')
-            ->assertDontSee('Mulakan Reka Bentuk')
+            ->assertDontSee('Mulakan Design')
             ->assertDontSee(
                 route('admin.design-jobs.start', $job),
                 false
             )
-            ->assertSee('Operasi Pentadbir')
+            ->assertSee('Operasi Admin')
             ->assertSee('admin-operations-mode', false)
-            ->assertDontSee('Muat Naik Versi Hasil Reka Bentuk')
+            ->assertDontSee('Muat Naik Versi Hasil Design')
             ->assertDontSee('Resume Correction');
     }
 
@@ -824,7 +824,7 @@ class StaffOrderVisibilityTest extends TestCase
             1,
             substr_count(
                 $response->getContent(),
-                'Mulakan Reka Bentuk'
+                'Mulakan Design'
             )
         );
     }

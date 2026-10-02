@@ -3,8 +3,9 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>@yield('title', 'Papan Pemuka Pentadbir') — KKK OS</title>
+    <title>@yield('title', 'Papan Pemuka Admin') — KKK OS</title>
     <link rel="stylesheet" href="{{ asset('css/admin.css') }}?v={{ filemtime(public_path('css/admin.css')) }}">
+    <link rel="stylesheet" href="{{ asset('css/dashboard-compact.css') }}?v={{ filemtime(public_path('css/dashboard-compact.css')) }}">
 </head>
 <body>
 <div class="admin-shell">
@@ -29,13 +30,13 @@
 
         <div class="admin-profile">
             <span>{{ strtoupper(substr(auth()->user()->name, 0, 1)) }}</span>
-            <div><strong>{{ auth()->user()->name }}</strong><small>Pentadbir</small></div>
+            <div><strong>{{ auth()->user()->name }}</strong><small>Admin</small></div>
         </div>
     </aside>
 
     <div class="admin-workspace">
         <header class="admin-topbar">
-            <div><p>KingKadKahwin</p><h1>@yield('heading', 'Papan Pemuka Pentadbir')</h1></div>
+            <div><p>KingKadKahwin</p><h1>@yield('heading', 'Papan Pemuka Admin')</h1></div>
             <div class="admin-topbar-actions">
                 <form class="js-logout-form admin-logout-profile" method="POST" action="{{ route('admin.logout') }}">@csrf<button type="submit"><span class="admin-topbar-avatar" aria-hidden="true"></span><span>{{ __('ui.logout') }}</span></button></form>
             </div>

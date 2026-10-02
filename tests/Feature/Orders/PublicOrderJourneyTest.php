@@ -38,7 +38,7 @@ class PublicOrderJourneyTest extends TestCase
             ->assertSee('card-runner-islamic', false);
     }
 
-    public function test_landing_page_renders_branded_social_icons(): void
+    public function test_landing_page_renders_social_icons_and_uses_whatsapp_for_customer_service_only(): void
     {
         config()->set('kingkadkahwin.social.instagram', 'https://instagram.example/kkk');
         config()->set('kingkadkahwin.social.facebook', 'https://facebook.example/kkk');
@@ -48,7 +48,9 @@ class PublicOrderJourneyTest extends TestCase
             ->assertOk()
             ->assertSee('social-instagram', false)
             ->assertSee('social-facebook', false)
-            ->assertSee('social-whatsapp', false)
+            ->assertDontSee('social-whatsapp', false)
+            ->assertSee('customer-service-button', false)
+            ->assertSee('https://wa.example/kkk?text=', false)
             ->assertSee('<svg', false);
     }
 
@@ -65,7 +67,7 @@ class PublicOrderJourneyTest extends TestCase
     {
         $this->get(route('public.orders.create'))
             ->assertOk()
-            ->assertSeeInOrder(['Kembali', 'Semak Kemajuan'])
+            ->assertSeeInOrder(['Kembali', 'Semak Progress'])
             ->assertSee('href="'.route('home').'"', false)
             ->assertSee('href="'.route('public.orders.progress').'"', false)
             ->assertSee('header-link nav-progress', false);
@@ -144,7 +146,7 @@ class PublicOrderJourneyTest extends TestCase
             ->assertOk()
             ->assertSee($order->order_id)
             ->assertSee('50%')
-            ->assertSee('Reka Bentuk Sedang Disediakan')
+            ->assertSee('Design Sedang Disediakan')
             ->assertDontSee('Nama Sulit')
             ->assertDontSee('sulit@example.com')
             ->assertDontSee('0199999999');

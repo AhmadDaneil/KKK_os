@@ -4,18 +4,19 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="referrer" content="no-referrer">
-    <title>Semakan Hasil Reka Bentuk - {{ $order->order_id }}</title>
+    <title>Semakan Hasil Design - {{ $order->order_id }}</title>
     <link rel="stylesheet" href="{{ asset('css/artwork-review.css') }}?v={{ filemtime(public_path('css/artwork-review.css')) }}">
     <link rel="stylesheet" href="{{ asset('css/customer-theme.css') }}?v={{ filemtime(public_path('css/customer-theme.css')) }}">
+    <link rel="stylesheet" href="{{ asset('css/customer-service.css') }}?v={{ filemtime(public_path('css/customer-service.css')) }}">
 </head>
 <body>
 @php
     $orderStatusLabels = [
         'READY_FOR_DESIGN' => 'Menunggu Proses Design',
-        'DESIGN_IN_PROGRESS' => 'Hasil Reka Bentuk Sedang Disediakan',
-        'DESIGN_READY' => 'Hasil Reka Bentuk Sedia Untuk Semakan',
+        'DESIGN_IN_PROGRESS' => 'Hasil Design Sedang Disediakan',
+        'DESIGN_READY' => 'Hasil Design Sedia Untuk Semakan',
         'CORRECTION_REQUESTED' => 'Pembetulan Sedang Diproses',
-        'DESIGN_APPROVED' => 'Hasil Reka Bentuk Telah Diluluskan',
+        'DESIGN_APPROVED' => 'Hasil Design Telah Diluluskan',
         'BALANCE_PAYMENT_PENDING' => 'Menunggu Bayaran Baki',
         'PAID' => 'Bayaran Selesai',
         'PRINTING' => 'Dalam Proses Cetakan',
@@ -44,9 +45,9 @@
     <header class="page-header">
         <div>
             <p class="eyebrow">King Kad Kahwin</p>
-            <h1>Semakan Hasil Reka Bentuk</h1>
+            <h1>Semakan Hasil Design</h1>
             <p class="header-copy">
-                Sila semak hasil reka bentuk bagi setiap pakej dengan teliti sebelum meluluskan atau meminta pembetulan.
+                Sila semak hasil design bagi setiap pakej dengan teliti sebelum meluluskan atau meminta pembetulan.
             </p>
         </div>
 
@@ -84,7 +85,7 @@
     @if ($isTerminalOrder)
         <div class="alert alert-neutral">
             Tempahan ini telah {{ $order->status === 'CANCELLED' ? 'dibatalkan' : 'diarkibkan' }}.
-            Tiada tindakan baharu terhadap hasil reka bentuk boleh dibuat.
+            Tiada tindakan baharu terhadap hasil design boleh dibuat.
         </div>
     @endif
 
@@ -122,7 +123,7 @@
                 @if ($latestArtwork)
                     <div class="artwork-meta">
                         <div>
-                            <span class="meta-label">Versi Hasil Reka Bentuk</span>
+                            <span class="meta-label">Versi Hasil Design</span>
                             <strong>v{{ $latestArtwork->version_number }}</strong>
                         </div>
 
@@ -139,7 +140,7 @@
                                         target="_blank"
                                         rel="noopener noreferrer"
                                     >
-                                        {{ count($previewFiles) > 1 ? 'Lihat Hasil Reka Bentuk '.($previewIndex + 1) : 'Lihat Hasil Reka Bentuk' }}
+                                        {{ count($previewFiles) > 1 ? 'Lihat Hasil Design '.($previewIndex + 1) : 'Lihat Hasil Design' }}
                                     </a>
                                 @endforeach
                             </div>
@@ -148,8 +149,8 @@
                 @else
                     <div class="empty-state customer-empty-state">
                         <span class="customer-empty-icon" aria-hidden="true">✦</span>
-                        <strong>Hasil reka bentuk belum sedia untuk dilihat.</strong>
-                        <p>Pasukan reka bentuk sedang menyiapkan hasil reka bentuk untuk pakej ini. Kami akan mengemas kini status sebaik sahaja ia sedia untuk semakan.</p>
+                        <strong>Hasil design belum sedia untuk dilihat.</strong>
+                        <p>Pasukan design sedang menyiapkan hasil design untuk pakej ini. Kami akan mengemas kini status sebaik sahaja ia sedia untuk semakan.</p>
                     </div>
                 @endif
 
@@ -162,9 +163,9 @@
                 @elseif ($designJob->status === 'DESIGN_READY' && ! $isTerminalOrder)
                     <div class="review-actions">
                         <div class="action-panel approve-panel">
-                            <h3>Hasil reka bentuk sudah betul?</h3>
+                            <h3>Hasil design sudah betul?</h3>
                             <p>
-                                Pastikan nama, tarikh, masa, alamat, nombor telefon dan semua maklumat pada hasil reka bentuk telah diperiksa.
+                                Pastikan nama, tarikh, masa, alamat, nombor telefon dan semua maklumat pada hasil design telah diperiksa.
                             </p>
 
                             <form
@@ -174,13 +175,13 @@
                                     'designJobId' => $designJob->id,
                                 ]) }}"
                                 class="js-artwork-confirmation-form"
-                                data-confirm-title="Luluskan hasil reka bentuk {{ ucfirst(strtolower($designJob->side)) }}?"
-                                data-confirm-message="Hasil reka bentuk ini akan dianggap betul dan diteruskan ke proses pembayaran baki serta cetakan."
-                                data-confirm-button="Ya, luluskan hasil reka bentuk"
+                                data-confirm-title="Luluskan hasil design {{ ucfirst(strtolower($designJob->side)) }}?"
+                                data-confirm-message="Hasil design ini akan dianggap betul dan diteruskan ke proses pembayaran baki serta cetakan."
+                                data-confirm-button="Ya, luluskan hasil design"
                             >
                                 @csrf
                                 <button type="submit" class="button button-primary">
-                                    Luluskan Hasil Reka Bentuk
+                                    Luluskan Hasil Design
                                 </button>
                             </form>
                         </div>
@@ -241,22 +242,22 @@
                 @elseif ($designJob->status === 'CORRECTION_REQUESTED')
                     <div class="state-panel state-warning">
                         <h3>Pembetulan telah diminta</h3>
-                        <p>Pereka sedang membuat pembetulan. Versi baharu hasil reka bentuk akan tersedia selepas siap.</p>
+                        <p>Pereka sedang membuat pembetulan. Versi baharu hasil design akan tersedia selepas siap.</p>
                     </div>
                 @elseif ($designJob->status === 'DESIGN_APPROVED')
                     <div class="state-panel state-success">
-                        <h3>Hasil reka bentuk telah diluluskan</h3>
+                        <h3>Hasil design telah diluluskan</h3>
                         <p>Tiada tindakan lanjut diperlukan untuk pakej ini.</p>
                     </div>
                 @elseif ($designJob->status === 'DESIGN_IN_PROGRESS')
                     <div class="state-panel state-neutral">
-                        <h3>Hasil reka bentuk sedang disediakan</h3>
-                        <p>Sila tunggu sehingga pereka menandakan hasil reka bentuk sebagai sedia untuk semakan.</p>
+                        <h3>Hasil design sedang disediakan</h3>
+                        <p>Sila tunggu sehingga pereka menandakan hasil design sebagai sedia untuk semakan.</p>
                     </div>
                 @elseif ($designJob->status === 'READY_FOR_DESIGN')
                     <div class="state-panel state-neutral">
-                        <h3>Menunggu proses reka bentuk</h3>
-                        <p>Hasil reka bentuk untuk pakej ini belum mula diproses.</p>
+                        <h3>Menunggu proses design</h3>
+                        <p>Hasil design untuk pakej ini belum mula diproses.</p>
                     </div>
                 @endif
 
@@ -271,7 +272,7 @@
                                         <strong>Permintaan pembetulan</strong>
                                         @if ($action->acted_at)
                                             <time datetime="{{ $action->acted_at->toIso8601String() }}">
-                                                {{ $action->acted_at->format('d/m/Y H:i') }}
+                                                {{ $action->acted_at->timezone(config('app.display_timezone'))->format('d/m/Y H:i') }}
                                             </time>
                                         @endif
                                     </div>
@@ -288,8 +289,8 @@
         @empty
             <div class="empty-state customer-empty-state page-empty-state">
                 <span class="customer-empty-icon" aria-hidden="true">✦</span>
-                <strong>Belum ada hasil reka bentuk untuk disemak.</strong>
-                <p>Tempahan anda masih menunggu proses reka bentuk. Anda tidak perlu membuat apa-apa buat masa ini.</p>
+                <strong>Belum ada hasil design untuk disemak.</strong>
+                <p>Tempahan anda masih menunggu proses design. Anda tidak perlu membuat apa-apa buat masa ini.</p>
             </div>
         @endforelse
     </main>
@@ -299,7 +300,7 @@
             class="button button-secondary"
             href="{{ route('public.orders.progress', ['order_id' => $order->order_id]) }}"
         >
-            &larr; Kembali ke Semak Kemajuan
+            &larr; Kembali ke Semak Progress
         </a>
     </div>
 </div>
@@ -377,6 +378,7 @@
         pendingArtworkForm.submit();
     });
 </script>
+@include('public.partials.customer-service')
 @include('public.partials.theme-toggle')
 @include('partials.malay-validation')
 </body>

@@ -1,0 +1,88 @@
+/* Shared compact presentation for the admin and staff workspaces. */
+@media (min-width:761px){
+    .admin-sidebar,.staff-sidebar{width:236px;padding:18px 14px 14px}
+    .admin-workspace,.staff-workspace{margin-left:236px}
+    .admin-brand,.staff-sidebar-brand{padding:0 6px 17px;gap:10px}
+    .admin-brand-mark,.staff-brand-mark{width:38px;height:38px;border-radius:10px}
+    .admin-brand strong,.staff-sidebar-brand strong{font-size:15px}
+    .admin-brand small,.staff-sidebar-brand small{font-size:10px}
+    .admin-nav{gap:2px}.admin-nav p{margin:12px 8px 5px;padding-top:11px}
+    .admin-nav a,.staff-nav-link{min-height:36px;padding:5px 8px;gap:8px;font-size:12px}
+    .admin-nav a span,.staff-nav-icon{width:24px;height:24px}
+    .admin-profile,.staff-sidebar-user{padding:12px 6px 0}
+    .admin-profile>span,.staff-user-avatar{width:32px;height:32px}
+    .staff-nav{gap:13px}.staff-nav-section h2{margin:0 8px 5px}
+    .staff-nav-section+.staff-nav-section{padding-top:12px}
+    .admin-topbar,.staff-topbar{min-height:64px;padding:9px clamp(18px,3vw,32px)}
+    .admin-topbar h1,.staff-topbar h1{font-size:clamp(19px,2vw,23px)}
+}
+
+.admin-main{width:min(1320px,calc(100% - 36px));padding:20px 0 44px}
+.admin-welcome,.admin-page-intro{padding:22px 25px;border-radius:14px}
+.admin-welcome h2,.admin-page-intro h2{margin-top:4px;font-size:clamp(23px,3vw,32px)}
+.admin-welcome>div>p:last-child,.admin-page-intro>div>p:last-child{margin-top:8px;line-height:1.45}
+.admin-stat-grid{margin:14px 0;gap:9px}.admin-stat-grid article{padding:14px 16px;border-top-width:3px}
+.admin-stat-grid strong{margin:5px 0 2px;font-size:25px}
+.admin-panel{margin-top:12px;padding:17px;border-top-width:3px;border-radius:12px}
+.admin-panel-heading{margin-bottom:12px;padding-bottom:9px}.admin-panel-heading h2{font-size:17px}
+.admin-action-grid{gap:8px}.admin-action-grid a{padding:10px 12px;gap:10px}.admin-action-grid b{font-size:20px}
+.action-icon,.queue-icon{width:34px;height:34px}.admin-content-grid{gap:12px}
+.admin-queue-list{gap:7px}.admin-queue-list a{padding:9px 11px;gap:10px}.admin-queue-list b{font-size:19px}
+.admin-team-counts div{padding:8px 0}.admin-table th{padding:8px 10px}.admin-table td{padding:10px}
+.admin-sales-summary{gap:8px}.admin-sales-summary article{padding:11px 12px;border-top-width:3px}
+.admin-sales-summary strong{margin:5px 0 3px;font-size:clamp(16px,1.7vw,20px)}
+.admin-sales-chart-grid{margin-top:12px;gap:10px}.admin-sales-chart{padding:13px}.admin-sales-chart header{margin-bottom:10px}
+.admin-bar-chart{height:178px;padding-top:20px}.admin-sales-bottom-grid{margin-top:10px;gap:10px}
+.admin-sales-bottom-grid>article{padding:13px}.admin-staff-list{gap:8px}
+.admin-staff-card>header{padding:11px 13px}.admin-staff-card summary{padding:8px 13px}
+
+.staff-workspace .staff-main{width:min(1280px,calc(100% - 36px))}
+.staff-dashboard-main{padding-top:19px;padding-bottom:44px}
+.staff-hero{padding:22px 25px;gap:20px;border-radius:14px}.staff-hero h2{margin-top:5px;font-size:clamp(23px,3vw,32px)}
+.staff-hero p:not(.staff-kicker){margin-top:8px;line-height:1.45}.staff-hero .staff-hero-cta{min-height:40px;padding:8px 14px}
+.staff-dashboard-sections{gap:18px;margin-top:18px}.staff-dashboard-group{padding:15px 17px;border-top-width:3px;border-radius:12px}
+.staff-dashboard-group-heading{margin-bottom:10px;padding-bottom:9px;gap:10px}.staff-dashboard-group-heading h2{font-size:17px}
+.staff-dashboard-group-heading p{margin-top:2px;font-size:11px}.staff-feature-grid{gap:9px}
+.staff-feature-card{padding:13px 14px;gap:11px;border-radius:10px}.staff-feature-icon{width:36px;height:36px;border-radius:9px}
+.staff-feature-card h3{font-size:13px}.staff-feature-card p{margin-top:3px;font-size:11px;line-height:1.4}
+.staff-attention-panel{margin-top:18px;padding:15px 17px}.staff-attention-grid{margin-top:10px;gap:8px}
+.staff-attention-card{padding:10px 12px;gap:10px}.staff-attention-icon{width:34px;height:34px}.staff-attention-card b{font-size:20px}
+.staff-section{margin-top:21px;padding-top:16px}.staff-section-title{padding:8px 11px;font-size:17px}
+.staff-card,.staff-order-card{border-radius:10px}.staff-order-filter{margin-bottom:12px;padding:12px;gap:8px}
+.staff-order-card{padding:14px}.staff-artwork-ready-panel{margin-top:11px;padding:11px 13px}
+.staff-timeline-item{padding:7px 0 12px}.staff-timeline-content{padding:9px 11px}
+.staff-order-brief{margin-bottom:12px}.staff-order-brief>div{padding:11px 13px}.staff-order-sections{margin-bottom:16px}
+
+/* Customer artwork correction notes, shared by staff and admin operation views. */
+.staff-correction-note{margin-top:14px;padding:15px;border:1px solid #e2c77e;border-left:4px solid #b9852c;border-radius:10px;color:#312919;background:#fffaf0;box-shadow:0 4px 12px rgba(86,62,18,.07)}
+.staff-correction-note-heading{display:flex;align-items:center;gap:10px}
+.staff-correction-note-icon{display:grid;width:34px;height:34px;flex:0 0 34px;place-items:center;border-radius:9px;color:#fff;background:#9b7126;font-size:17px;font-weight:800}
+.staff-correction-note-heading>div{min-width:0;flex:1}.staff-correction-note-heading>div>span{display:block;color:#80652f;font-size:10px;font-weight:850;letter-spacing:.09em;text-transform:uppercase}
+.staff-correction-note h4{margin:2px 0 0;color:#352b1a;font-size:14px}
+.staff-correction-note-state{padding:5px 8px;border:1px solid #dec683;border-radius:999px;color:#765719;background:#fff5d9;font-size:10px;font-weight:800;white-space:nowrap}
+.staff-correction-note blockquote{margin:13px 0 0;padding:13px 14px;border:1px solid #eadbb5;border-radius:8px;color:#29251d;background:#fff;font-size:14px;font-style:normal;font-weight:650;line-height:1.65;overflow-wrap:anywhere;white-space:pre-wrap}
+.staff-correction-note footer{display:flex;margin-top:10px;align-items:center;justify-content:space-between;gap:10px;color:#76684c;font-size:10px;font-weight:700}
+.staff-correction-note--payment{width:100%;margin-top:0}.staff-correction-note--payment blockquote{min-height:58px}
+.admin-operations-mode .staff-correction-note{border-color:#d7b85e;border-left-color:#967025;background:#fff8e7}
+body[data-staff-theme]:not([data-staff-theme="default"]) .staff-correction-note{border-left-color:var(--staff-primary)}
+@media(max-width:600px){.staff-correction-note-heading{align-items:flex-start;flex-wrap:wrap}.staff-correction-note-state{margin-left:44px}.staff-correction-note footer{align-items:flex-start;flex-direction:column}}
+
+/* Prominent packing verification controls for Operation Management. */
+.staff-packing-checklist{gap:8px}.staff-packing-checklist .staff-contact-row{min-height:66px;padding:11px 12px;border:1px solid #d6dfd9;border-left:4px solid #d39a38;border-radius:9px;background:#fffaf1}
+.staff-packing-checklist .staff-contact-row.is-verified{border-color:#b9d9c6;border-left-color:#2d8a5b;background:#f3fbf6}
+.staff-packing-item-name{display:grid;min-width:0;gap:3px}.staff-packing-item-name>span{color:#24342d;font-size:13px;font-weight:850}.staff-packing-item-name>small{color:#68776f;font-size:10px;line-height:1.35}
+.staff-packing-checklist form{margin:0}.staff-verify-button{display:inline-flex;min-width:142px;min-height:42px;padding:9px 14px;align-items:center;justify-content:center;gap:7px;border-color:#17613f;color:#fff;background:#17613f;font-size:12px;font-weight:850;box-shadow:0 5px 13px rgba(23,97,63,.2)}
+.staff-verify-button:hover,.staff-verify-button:focus-visible{border-color:#104a30;color:#fff;background:#104a30;box-shadow:0 7px 17px rgba(23,97,63,.28);transform:translateY(-1px)}
+.staff-verify-button>span,.staff-verified-badge>span{display:grid;width:19px;height:19px;place-items:center;border-radius:50%;color:#17613f;background:#fff;font-size:12px}
+.staff-verified-badge,.staff-unverified-badge{display:inline-flex;padding:6px 9px;align-items:center;gap:6px;border-radius:999px;font-size:10px;font-weight:850;white-space:nowrap}
+.staff-verified-badge{color:#17613f;background:#dff3e7}.staff-unverified-badge{color:#8a5a0d;background:#fff0cc}
+.admin-operations-mode .staff-verify-button{border-color:#765315;background:#765315;box-shadow:0 5px 13px rgba(118,83,21,.22)}.admin-operations-mode .staff-verify-button:hover{border-color:#5e410e;background:#5e410e}
+@media(max-width:560px){.staff-packing-checklist .staff-contact-row{align-items:stretch;flex-direction:column}.staff-packing-checklist form,.staff-verify-button{width:100%}}
+
+@media (max-width:760px){
+    .admin-main{width:min(100% - 20px,1320px);padding:12px 0 32px}
+    .admin-topbar,.staff-topbar{min-height:60px;padding:9px 14px}
+    .admin-welcome,.admin-page-intro{padding:18px;gap:16px}.admin-stat-grid article,.admin-panel{padding:13px}
+    .staff-workspace .staff-main{width:min(100% - 20px,1280px)}.staff-dashboard-main{padding-top:12px}
+    .staff-hero{padding:18px;align-items:flex-start;gap:15px}.staff-dashboard-group{padding:13px}.staff-feature-card{padding:11px}
+}
