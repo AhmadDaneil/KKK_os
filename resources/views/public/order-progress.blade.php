@@ -33,6 +33,15 @@
         @isset($progress)
             <section class="public-progress-card" data-progress-tone="{{ $progress['tone'] }}">
                 @if (session('balance_success'))<div class="payment-success-message">{{ session('balance_success') }}</div>@endif
+                @if (($orderStatus ?? null) === 'DESIGN_APPROVED' && ($balance['status'] ?? null) !== 'PAID')
+                    <div class="balance-payment-notice" role="status">
+                        <div>
+                            <strong>Tindakan diperlukan: buat pembayaran penuh</strong>
+                            <span>Hasil design sudah diluluskan. Sila buat bayaran penuh dan hantar resit supaya tempahan boleh diteruskan ke cetakan.</span>
+                        </div>
+                        <a href="#balance-payment">Buat pembayaran</a>
+                    </div>
+                @endif
                 <div class="progress-card-heading"><div><small>ORDER ID</small><h2>{{ $orderId }}</h2></div><strong>{{ $progress['percentage'] }}%</strong></div>
                 <div class="public-progress-track" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="{{ $progress['percentage'] }}"><span style="width: {{ $progress['percentage'] }}%"></span></div>
                 <section class="order-lifecycle" aria-labelledby="order-lifecycle-title">
@@ -89,7 +98,7 @@
                     </div>
                 @endif
                 @if (($orderStatus ?? null) === 'DESIGN_APPROVED' || ! empty($balance))
-                    <section class="balance-payment-card" data-status="{{ strtolower($balance['status'] ?? 'new') }}">
+                    <section id="balance-payment" class="balance-payment-card" data-status="{{ strtolower($balance['status'] ?? 'new') }}">
                         <div class="balance-payment-heading">
                             <div><small>PEMBAYARAN PENUH</small><h4>Bayaran baki selepas hasil design diluluskan</h4></div>
                             @if ((float) ($balanceAmount ?? 0) > 0)<strong>RM {{ number_format((float) $balanceAmount, 2) }}</strong>@endif
