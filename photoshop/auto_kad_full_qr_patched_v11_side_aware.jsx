@@ -159,6 +159,8 @@ function centerTextLayerInDocument(doc, layerName){
     try{
         var layer = findLayerByNames(doc, [t(layerName).toLowerCase()]);
         if(!layer || layer.kind != LayerKind.TEXT) return false;
+        app.activeDocument = doc;
+        doc.activeLayer = layer;
         try{ layer.textItem.justification = Justification.CENTER; }catch(e){}
         var b = _boundsPx(layer);
         var docCenter = doc.width.as("px") / 2;
@@ -178,6 +180,43 @@ function replaceCardImageIfExists(doc, imagePath){
         fitLayerToBox(imageLayer, targetBox);
         return true;
     }catch(e){ return false; }
+}
+
+function addCustomerPhoto(doc, imagePath, isBanner){
+    var photoDoc = null;
+    try{
+        photoDoc = app.open(new File(imagePath));
+        var photoLayer = photoDoc.activeLayer.duplicate(doc, ElementPlacement.PLACEATBEGINNING);
+        closeDocNoSave(photoDoc);
+        photoDoc = null;
+
+        app.activeDocument = doc;
+        doc.activeLayer = photoLayer;
+        photoLayer.name = "Gambar Pengantin";
+
+        var width = doc.width.as("px");
+        var height = doc.height.as("px");
+        var box = isBanner
+            ? { x: width * 0.60, y: height * 0.12, w: width * 0.35, h: height * 0.76 }
+            : { x: width * 0.20, y: height * 0.38, w: width * 0.60, h: height * 0.54 };
+        var current = _boundsPx(photoLayer);
+        if(current.w <= 0 || current.h <= 0) return false;
+        var scale = Math.min(box.w / current.w, box.h / current.h) * 100;
+        _transformScalePercent(scale);
+        current = _boundsPx(photoLayer);
+        _translate(box.x + (box.w / 2) - current.cx, box.y + (box.h / 2) - current.cy);
+
+        for(var i=doc.layers.length-1;i>=0;i--){
+            if(doc.layers[i] !== photoLayer){
+                photoLayer.move(doc.layers[i], ElementPlacement.PLACEBEFORE);
+                break;
+            }
+        }
+        return true;
+    }catch(e){
+        if(photoDoc) closeDocNoSave(photoDoc);
+        return false;
+    }
 }
 
 // ---------- Smart Object replace + AUTO-FIT ----------
@@ -449,6 +488,7 @@ try{
         var custLogPath = custRoot.fsName + "/_customer_log.txt";
         logAppend(custLogPath, "===== " + nowStamp() + " | " + NoInv + " | " + custFolderSafe + " =====");
         logBoth(logPath, custLogPath, "---- " + nowStamp() + " | " + NoInv + " | " + custFolderSafe + " ----");
+        if(gambarRaw !== "" && gambarPath === "") logBoth(logPath, custLogPath, "[IMAGE] Fail gambar pengantin tidak ditemui: " + gambarRaw);
 
         var templates = findTemplates(ROOT, tema, code);
         if(!templates || templates.length === 0){
@@ -491,7 +531,9 @@ try{
             setTextIfExistsInDoc(doc, "nama3", nama3); setTextIfExistsInDoc(doc, "notel3", notel3);
 
             setTextIfExistsInDoc(doc, "hari",       hari);
-            setTextIfExistsInDoc(doc, "tarikh",     tarikh);
+            var dateUpdated = setTextIfExistsInDoc(doc, "tarikh", tarikh);
+            if(setTextIfExistsInDoc(doc, "tarikh copy", tarikh)) dateUpdated = true;
+            if(!dateUpdated) logBoth(logPath, custLogPath, "[DATE] Layer tarikh tidak ditemui dalam " + tplPath);
             setTextIfExistsInDoc(doc, "tarikhhari", tarikhhari);
             setTextIfExistsInDoc(doc, "bulan",      bulan);
             setTextIfExistsInDoc(doc, "bulanislam", bulanislam);
@@ -515,10 +557,6 @@ try{
 
             var itemQty = fixedQtyForItem(tplName, qty);
             var tplLower = tplName.toLowerCase();
-            if(gambarPath !== "" && (tplLower.indexOf("banner") >= 0 || tplLower.indexOf("banting") >= 0)){
-                if(replaceCardImageIfExists(doc, gambarPath)) logBoth(logPath, custLogPath, "[IMAGE] Gambar pengantin diganti untuk " + tplName + ".");
-                else logBoth(logPath, custLogPath, "[IMAGE] Layer gambar tidak ditemui untuk " + tplName + ".");
-            }
             var outBase = safeName(
                 NoInv + " " + majlis + " " + tplName +
                 (namesShort!==""?(" " + namesShort):"") +
@@ -540,6 +578,23 @@ try{
                 savePSDdoc(doc, psdOut);
                 logBoth(logPath, custLogPath, "[EXPORT] PSD -> " + psdOut);
             }catch(e){ logBoth(logPath, custLogPath, "[EXPORT FAIL] PSD -> " + e); }
+
+            if(gambarPath !== "" && (tplLower.indexOf("banner") >= 0 || tplLower.indexOf("banting") >= 0)){
+                var isBanner = tplLower.indexOf("banner") >= 0;
+                var imageAdded = replaceCardImageIfExists(doc, gambarPath);
+                if(!imageAdded) imageAdded = addCustomerPhoto(doc, gambarPath, isBanner);
+                if(imageAdded){
+                    var photoBase = safeName(outBase + " GAMBAR PENGANTIN");
+                    var photoJpeg = fJPEG.fsName + "/" + photoBase + ".jpg";
+                    var photoPsd = fPSD.fsName + "/" + photoBase + ".psd";
+                    if(saveJPG(doc, photoJpeg, 12)) logBoth(logPath, custLogPath, "[EXPORT] JPEG gambar pengantin -> " + photoJpeg);
+                    else logBoth(logPath, custLogPath, "[EXPORT FAIL] JPEG gambar pengantin -> " + photoJpeg);
+                    if(savePSDdoc(doc, photoPsd)) logBoth(logPath, custLogPath, "[EXPORT] PSD gambar pengantin -> " + photoPsd);
+                    else logBoth(logPath, custLogPath, "[EXPORT FAIL] PSD gambar pengantin -> " + photoPsd);
+                }else{
+                    logBoth(logPath, custLogPath, "[IMAGE] Gagal memasukkan gambar pengantin untuk " + tplName);
+                }
+            }
 
             closeDocNoSave(doc);
         }

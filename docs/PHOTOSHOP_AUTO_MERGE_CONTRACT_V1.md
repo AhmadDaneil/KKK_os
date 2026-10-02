@@ -93,8 +93,6 @@ The JSX reads these columns:
 
 Present in V2 but not consumed by the current JSX:
 
-- gambar
-- majlis
 - flaggambar
 
 They remain in the compatibility CSV because they are present in the working V2 shape.
@@ -128,8 +126,8 @@ They belong to an AliveCard/downstream export contract if KKK OS later automates
 | qtykad | `source.card_quantity` ← `orders.card_quantity` | One approved order-level quantity; export numeric quantity only; both rows of a 2-package order inherit the same value |
 | tema | `design.theme` | Trim; preserve approved theme naming |
 | designcode | `design.design_code` | Trim + uppercase |
-| gambar | Compatibility-only | Intentionally empty in V1; not consumed by the approved side-aware JSX |
-| majlis | `source.side` | `LELAKI` or `PEREMPUAN`; compatibility only, JSX does not consume it |
+| gambar | `design.card_image_path` | Absolute path to the uploaded image when present; used for additional BANNER/BANTING photo outputs |
+| majlis | `source.side` | `LELAKI` or `PEREMPUAN`; JSX uses it to choose name order |
 | namapengantinlelaki | `couple.groom_name` | Preserve approved spelling/case |
 | namapengantinperempuan | `couple.bride_name` | Preserve approved spelling/case |
 | singkatanlelaki | `couple.groom_abbreviation` | Preserve approved spelling/case |
@@ -335,7 +333,7 @@ VERIFIED and safe to lock now:
 
 V1 field status:
 - `qtykad`: RESOLVED / LOCKED — source is `orders.card_quantity` via `source.card_quantity`.
-- `gambar`: compatibility-only — intentionally empty in V1 and not consumed by the approved side-aware JSX.
+- `gambar`: optional uploaded image path — JSX uses it for extra BANNER/BANTING exports.
 - `flaggambar`: compatibility-only — intentionally empty in V1 and not consumed by the approved side-aware JSX.
 
-No additional V1 business semantics are assigned to `gambar` or `flaggambar`.
+No additional V1 business semantics are assigned to `flaggambar`.

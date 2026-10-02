@@ -125,6 +125,8 @@ class PhotoshopAutoMergeContractV1Test extends TestCase
         $this->assertContains('majlis', PhotoshopAutoMergeContractV1::JSX_CONSUMED_HEADERS);
         $this->assertContains('majlis', PhotoshopAutoMergeContractV1::JSX_REQUIRED_HEADERS);
         $this->assertNotContains('majlis', PhotoshopAutoMergeContractV1::COMPATIBILITY_ONLY_HEADERS);
+        $this->assertContains('gambar', PhotoshopAutoMergeContractV1::JSX_CONSUMED_HEADERS);
+        $this->assertNotContains('gambar', PhotoshopAutoMergeContractV1::COMPATIBILITY_ONLY_HEADERS);
     }
 
     public function test_row_builder_rejects_invalid_majlis_before_export(): void
