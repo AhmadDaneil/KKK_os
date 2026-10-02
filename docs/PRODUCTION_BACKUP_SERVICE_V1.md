@@ -6,7 +6,7 @@ KKK OS creates one full database snapshot every day and keeps rolling restore po
 
 This service backs up the application database only. Private customer uploads, artwork, generated PSD/JPEG files, and other private storage require a separate backup process with its own schedule, retention, verification, and restore drill. They are intentionally not included in the database archive.
 
-No backup provider has been selected. The Project Owner must approve vendor, cost, credentials, regions, and the two physical locations. Until then, `BACKUP_ENABLED` must remain `false`. The application contract accepts any two Laravel filesystem disks, but production must not point both disk names to the same physical storage account, server, volume, or failure domain.
+On 2026-10-01, the KKK Systems Team selected a protected local VPS directory as the proposed primary destination and S3-compatible object storage as the physically separate secondary destination. Production activation remains pending Project Owner approval of the provider and cost, followed by configuration of the region, bucket, credentials, encryption-at-rest evidence, and recovery access. Until both destinations pass a supervised backup and restore test, `BACKUP_ENABLED` must remain `false`.
 
 ## Components
 
@@ -25,6 +25,14 @@ Set these environment values through the production secret/configuration system.
 BACKUP_ENABLED=false
 BACKUP_DB_CONNECTION=mysql
 BACKUP_DATABASE_DISKS=backup_primary,backup_secondary
+BACKUP_PRIMARY_ROOT=/var/backups/kkk-os
+BACKUP_SECONDARY_ACCESS_KEY_ID=
+BACKUP_SECONDARY_SECRET_ACCESS_KEY=
+BACKUP_SECONDARY_REGION=
+BACKUP_SECONDARY_BUCKET=
+BACKUP_SECONDARY_ENDPOINT=
+BACKUP_SECONDARY_USE_PATH_STYLE_ENDPOINT=false
+BACKUP_SECONDARY_ROOT=kkk-os
 BACKUP_DAILY_AT=02:00
 BACKUP_RETENTION_DAYS=30
 BACKUP_PROCESS_TIMEOUT_SECONDS=3600
@@ -32,7 +40,9 @@ BACKUP_MYSQLDUMP_BINARY=mysqldump
 BACKUP_PG_DUMP_BINARY=pg_dump
 ```
 
-`backup_primary` and `backup_secondary` are logical names. Define both in `config/filesystems.php` only after the providers are approved. Both disks must be private and configured to throw write/read errors. Confirm provider-side encryption at rest, restricted service credentials, access logging, object visibility, and recovery access before enabling the schedule.
+`backup_primary` is a private local disk rooted at `/var/backups/kkk-os`. The directory must be owned by the application service account and must not be under the web root. `backup_secondary` is private S3-compatible object storage using dedicated least-privilege credentials and the `kkk-os` object prefix. Both disks throw write/read errors. Confirm provider-side encryption at rest, restricted service credentials, access logging, object visibility, and recovery access before enabling the schedule.
+
+`BACKUP_DAILY_AT` is interpreted in the Laravel application timezone. Confirm the production timezone is `Asia/Kuala_Lumpur` before treating `02:00` as 2:00 AM Malaysia time.
 
 The server must execute Laravel's scheduler every minute. If more than one application server runs the scheduler, all nodes must share a cache store that supports atomic locks. The current database cache store can satisfy this when all nodes use the same production database.
 
@@ -78,14 +88,14 @@ Restoration is deliberately not automated because it is destructive and must be 
 
 ## Known limitations and pending decisions
 
-- Backup vendors, cost, credentials, regions, storage classes, and the second failure domain are pending Project Owner approval. V1 does not invent these decisions.
+- The primary/secondary architecture is technically proposed, but production activation, S3-compatible vendor and cost require Project Owner approval; region, bucket, storage class, credential lifecycle, encryption evidence, and recovery access are not yet configured.
 - The service does not back up private uploads or artwork. A separate private-storage backup service remains required before go-live.
 - Integrity verification proves that stored bytes match the manifest; it does not prove that SQL is logically restorable. A supervised restore drill is required before go-live and should be repeated on a defined operational schedule.
 - Application-level archive encryption is not implemented. Production enablement is blocked until both approved destinations provide verified encryption at rest and access controls, or the Project Owner approves a separate application-level encryption design and key-recovery procedure.
 - Native database client binaries must be installed and compatible with the production database server. Their paths are configuration values, not hardcoded assumptions.
 - MySQL `--single-transaction` consistency applies to transactional tables. If production introduces non-transactional tables, the snapshot strategy must be reviewed.
 - Retention intentionally keeps orphaned or inconsistent backups instead of deleting the only surviving copy. Operators must investigate and reconcile those warnings manually.
-- Provider object-lock, immutability, cross-account recovery, and lifecycle policies are not configured until providers are selected.
+- Provider object-lock, immutability, cross-account recovery, and lifecycle policies remain pending until the S3-compatible provider is selected.
 
 ## Test coverage
 
