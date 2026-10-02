@@ -25,18 +25,18 @@ class StaffPrintingWorkflowTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_assigned_printing_staff_can_start_print_job(): void
+    public function test_assigned_production_staff_can_start_print_job(): void
     {
         $admin = $this->admin();
-        $printing = $this->staff(User::ROLE_PRINTING);
+        $production = $this->staff(User::ROLE_PRODUCTION);
 
         [$order, $jobs] = $this->printJobs();
         $job = $jobs->first();
 
         app(AssignPrintJobService::class)
-            ->assign($job, $printing, $admin);
+            ->assign($job, $production, $admin);
 
-        $response = $this->actingAs($printing, 'staff')->post(
+        $response = $this->actingAs($production, 'staff')->post(
             route('staff.print-jobs.start', $job)
         );
 
@@ -54,27 +54,27 @@ class StaffPrintingWorkflowTest extends TestCase
             ->latest('id')
             ->firstOrFail();
 
-        $this->assertSame($printing->id, $event->actor_user_id);
+        $this->assertSame($production->id, $event->actor_user_id);
         $this->assertSame('READY_FOR_PRINT', $event->from_status);
         $this->assertSame('PRINTING', $event->to_status);
     }
 
-    public function test_assigned_printing_staff_can_mark_print_job_printed(): void
+    public function test_assigned_production_staff_can_mark_print_job_printed(): void
     {
         $admin = $this->admin();
-        $printing = $this->staff(User::ROLE_PRINTING);
+        $production = $this->staff(User::ROLE_PRODUCTION);
 
         [$order, $jobs] = $this->printJobs();
         $job = $jobs->first();
 
         app(AssignPrintJobService::class)
-            ->assign($job, $printing, $admin);
+            ->assign($job, $production, $admin);
 
-        $this->actingAs($printing, 'staff')->post(
+        $this->actingAs($production, 'staff')->post(
             route('staff.print-jobs.start', $job)
         );
 
-        $response = $this->actingAs($printing, 'staff')->post(
+        $response = $this->actingAs($production, 'staff')->post(
             route('staff.print-jobs.mark-printed', $job)
         );
 
@@ -92,27 +92,27 @@ class StaffPrintingWorkflowTest extends TestCase
             ->latest('id')
             ->firstOrFail();
 
-        $this->assertSame($printing->id, $event->actor_user_id);
+        $this->assertSame($production->id, $event->actor_user_id);
         $this->assertSame('PRINTING', $event->from_status);
         $this->assertSame('PRINTED', $event->to_status);
     }
 
-    public function test_assigned_printing_staff_can_upload_printing_progress_files(): void
+    public function test_assigned_production_staff_can_upload_printing_progress_files(): void
     {
         Storage::fake('local');
 
         $admin = $this->admin();
-        $printing = $this->staff(User::ROLE_PRINTING);
+        $production = $this->staff(User::ROLE_PRODUCTION);
         [, $jobs] = $this->printJobs();
         $job = $jobs->first();
 
-        app(AssignPrintJobService::class)->assign($job, $printing, $admin);
+        app(AssignPrintJobService::class)->assign($job, $production, $admin);
 
-        $this->actingAs($printing, 'staff')
+        $this->actingAs($production, 'staff')
             ->post(route('staff.print-jobs.start', $job))
             ->assertRedirect();
 
-        $this->actingAs($printing, 'staff')
+        $this->actingAs($production, 'staff')
             ->post(route('staff.print-jobs.progress-files.store', $job), [
                 'progress_files' => [
                     UploadedFile::fake()->image('printing-stage-1.jpg'),
@@ -121,7 +121,7 @@ class StaffPrintingWorkflowTest extends TestCase
             ])
             ->assertRedirect()
             ->assertSessionHasNoErrors()
-            ->assertSessionHas('status', 'Production progress uploaded successfully.');
+            ->assertSessionHas('status', 'Kemajuan production berjaya dimuat naik.');
 
         $job->refresh();
 
@@ -135,10 +135,10 @@ class StaffPrintingWorkflowTest extends TestCase
         $this->assertDatabaseHas('print_job_events', [
             'print_job_id' => $job->id,
             'event_type' => 'PRINT_PROGRESS_UPLOADED',
-            'actor_user_id' => $printing->id,
+            'actor_user_id' => $production->id,
         ]);
 
-        $this->actingAs($printing, 'staff')
+        $this->actingAs($production, 'staff')
             ->get(route('staff.print-jobs.progress-files.show', [
                 'printJob' => $job,
                 'file' => 0,
@@ -147,22 +147,22 @@ class StaffPrintingWorkflowTest extends TestCase
             ->assertHeader('Content-Type', 'image/jpeg');
     }
 
-    public function test_assigned_printing_staff_can_upload_progress_without_a_page_redirect(): void
+    public function test_assigned_production_staff_can_upload_progress_without_a_page_redirect(): void
     {
         Storage::fake('local');
 
         $admin = $this->admin();
-        $printing = $this->staff(User::ROLE_PRINTING);
+        $production = $this->staff(User::ROLE_PRODUCTION);
         [, $jobs] = $this->printJobs();
         $job = $jobs->first();
 
-        app(AssignPrintJobService::class)->assign($job, $printing, $admin);
+        app(AssignPrintJobService::class)->assign($job, $production, $admin);
 
-        $this->actingAs($printing, 'staff')
+        $this->actingAs($production, 'staff')
             ->post(route('staff.print-jobs.start', $job))
             ->assertRedirect();
 
-        $this->actingAs($printing, 'staff')
+        $this->actingAs($production, 'staff')
             ->withHeaders([
                 'Accept' => 'application/json',
                 'X-Requested-With' => 'XMLHttpRequest',
@@ -173,7 +173,7 @@ class StaffPrintingWorkflowTest extends TestCase
                 ],
             ])
             ->assertOk()
-            ->assertJsonPath('message', 'Production progress uploaded successfully.')
+            ->assertJsonPath('message', 'Kemajuan production berjaya dimuat naik.')
             ->assertJsonCount(1, 'files')
             ->assertJsonPath('files.0.original_name', 'printing-stage-async.jpg');
 
@@ -183,11 +183,11 @@ class StaffPrintingWorkflowTest extends TestCase
         $this->assertNotNull($job->progress_updated_at);
     }
 
-    public function test_other_printing_staff_cannot_start_assigned_print_job(): void
+    public function test_other_production_staff_cannot_start_assigned_print_job(): void
     {
         $admin = $this->admin();
-        $assigned = $this->staff(User::ROLE_PRINTING);
-        $other = $this->staff(User::ROLE_PRINTING);
+        $assigned = $this->staff(User::ROLE_PRODUCTION);
+        $other = $this->staff(User::ROLE_PRODUCTION);
 
         [, $jobs] = $this->printJobs();
         $job = $jobs->first();
@@ -205,11 +205,11 @@ class StaffPrintingWorkflowTest extends TestCase
         );
     }
 
-    public function test_other_printing_staff_cannot_mark_assigned_print_job_printed(): void
+    public function test_other_production_staff_cannot_mark_assigned_print_job_printed(): void
     {
         $admin = $this->admin();
-        $assigned = $this->staff(User::ROLE_PRINTING);
-        $other = $this->staff(User::ROLE_PRINTING);
+        $assigned = $this->staff(User::ROLE_PRODUCTION);
+        $other = $this->staff(User::ROLE_PRODUCTION);
 
         [, $jobs] = $this->printJobs();
         $job = $jobs->first();
@@ -231,16 +231,16 @@ class StaffPrintingWorkflowTest extends TestCase
         );
     }
 
-    public function test_admin_cannot_operate_print_job_assigned_to_printing_staff(): void
+    public function test_admin_cannot_operate_print_job_assigned_to_production_staff(): void
     {
         $admin = $this->admin();
-        $printing = $this->staff(User::ROLE_PRINTING);
+        $production = $this->staff(User::ROLE_PRODUCTION);
 
         [, $jobs] = $this->printJobs();
         $job = $jobs->first();
 
         app(AssignPrintJobService::class)
-            ->assign($job, $printing, $admin);
+            ->assign($job, $production, $admin);
 
         $this->actingAs($admin, 'staff')
             ->post(route('staff.print-jobs.start', $job))
@@ -252,17 +252,17 @@ class StaffPrintingWorkflowTest extends TestCase
         );
     }
 
-    public function test_operation_management_cannot_operate_print_job_assigned_to_printing_staff(): void
+    public function test_operation_management_cannot_operate_print_job_assigned_to_production_staff(): void
     {
         $admin = $this->admin();
         $operationManagement = $this->staff(User::ROLE_OM);
-        $printing = $this->staff(User::ROLE_PRINTING);
+        $production = $this->staff(User::ROLE_PRODUCTION);
 
         [, $jobs] = $this->printJobs();
         $job = $jobs->first();
 
         app(AssignPrintJobService::class)
-            ->assign($job, $printing, $admin);
+            ->assign($job, $production, $admin);
 
         $this->actingAs($operationManagement)
             ->post(route('staff.print-jobs.start', $job))
@@ -277,15 +277,15 @@ class StaffPrintingWorkflowTest extends TestCase
     public function test_invalid_printing_transition_returns_safe_error(): void
     {
         $admin = $this->admin();
-        $printing = $this->staff(User::ROLE_PRINTING);
+        $production = $this->staff(User::ROLE_PRODUCTION);
 
         [, $jobs] = $this->printJobs();
         $job = $jobs->first();
 
         app(AssignPrintJobService::class)
-            ->assign($job, $printing, $admin);
+            ->assign($job, $production, $admin);
 
-        $response = $this->actingAs($printing, 'staff')->post(
+        $response = $this->actingAs($production, 'staff')->post(
             route('staff.print-jobs.mark-printed', $job)
         );
 
@@ -303,8 +303,8 @@ class StaffPrintingWorkflowTest extends TestCase
     public function test_two_package_order_remains_printing_after_only_one_side_is_printed(): void
     {
         $admin = $this->admin();
-        $lelakiStaff = $this->staff(User::ROLE_PRINTING);
-        $perempuanStaff = $this->staff(User::ROLE_PRINTING);
+        $lelakiStaff = $this->staff(User::ROLE_PRODUCTION);
+        $perempuanStaff = $this->staff(User::ROLE_PRODUCTION);
 
         [$order, $jobs] = $this->printJobs(2);
 
@@ -348,8 +348,8 @@ class StaffPrintingWorkflowTest extends TestCase
     public function test_two_package_order_becomes_printed_only_after_both_sides_complete(): void
     {
         $admin = $this->admin();
-        $lelakiStaff = $this->staff(User::ROLE_PRINTING);
-        $perempuanStaff = $this->staff(User::ROLE_PRINTING);
+        $lelakiStaff = $this->staff(User::ROLE_PRODUCTION);
+        $perempuanStaff = $this->staff(User::ROLE_PRODUCTION);
 
         [$order, $jobs] = $this->printJobs(2);
 
@@ -402,22 +402,22 @@ class StaffPrintingWorkflowTest extends TestCase
     public function test_admin_sees_assignment_without_printing_actions(): void
     {
         $admin = $this->admin();
-        $printing = $this->staff(User::ROLE_PRINTING);
+        $production = $this->staff(User::ROLE_PRODUCTION);
         [$order, $jobs] = $this->printJobs();
         $job = $jobs->first();
 
         $this->actingAs($admin, 'staff')->get(route('staff.orders.show', $order->order_id))
             ->assertOk()
-            ->assertSee('Assign Production Staff')
-            ->assertDontSee('Start Printing');
+            ->assertSee('Tugaskan Staf Pengeluaran')
+            ->assertDontSee('Mulakan Pengeluaran');
 
-        app(AssignPrintJobService::class)->assign($job, $printing, $admin);
+        app(AssignPrintJobService::class)->assign($job, $production, $admin);
 
-        $this->actingAs($printing, 'staff')->get(route('staff.orders.show', $order->order_id))
-            ->assertOk()->assertSee('Start Printing');
-        $this->actingAs($printing, 'staff')->post(route('staff.print-jobs.start', $job))
+        $this->actingAs($production, 'staff')->get(route('staff.orders.show', $order->order_id))
+            ->assertOk()->assertSee('Mulakan Cetakan');
+        $this->actingAs($production, 'staff')->post(route('staff.print-jobs.start', $job))
             ->assertRedirect();
-        $this->actingAs($printing, 'staff')->get(route('staff.orders.show', $order->order_id))
+        $this->actingAs($production, 'staff')->get(route('staff.orders.show', $order->order_id))
             ->assertOk()->assertSee('Mark Printed');
 
         $this->actingAs($admin, 'staff')->get(route('staff.orders.show', $order->order_id))

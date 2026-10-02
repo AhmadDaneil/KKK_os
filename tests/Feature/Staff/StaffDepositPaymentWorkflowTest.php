@@ -104,13 +104,13 @@ class StaffDepositPaymentWorkflowTest extends TestCase
             'is_active' => true,
         ]);
 
-        $printing = User::factory()->create([
-            'role' => User::ROLE_PRINTING,
+        $production = User::factory()->create([
+            'role' => User::ROLE_PRODUCTION,
             'is_active' => true,
         ]);
 
-        $packing = User::factory()->create([
-            'role' => User::ROLE_PACKING,
+        $customerService = User::factory()->create([
+            'role' => User::ROLE_CUSTOMER_SERVICE,
             'is_active' => true,
         ]);
 
@@ -123,11 +123,11 @@ class StaffDepositPaymentWorkflowTest extends TestCase
             ->get(route('staff.payments.receipt', $payment))
             ->assertForbidden();
 
-        $this->actingAs($printing)
+        $this->actingAs($production)
             ->get(route('staff.payments.receipt', $payment))
             ->assertForbidden();
 
-        $this->actingAs($packing)
+        $this->actingAs($customerService)
             ->get(route('staff.payments.receipt', $payment))
             ->assertForbidden();
 

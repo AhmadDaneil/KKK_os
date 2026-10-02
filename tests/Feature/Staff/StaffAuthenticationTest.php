@@ -75,7 +75,7 @@ class StaffAuthenticationTest extends TestCase
     public function test_staff_can_log_out(): void
     {
         $staff = User::factory()->create([
-            'role' => User::ROLE_PRINTING,
+            'role' => User::ROLE_PRODUCTION,
             'is_active' => true,
         ]);
 

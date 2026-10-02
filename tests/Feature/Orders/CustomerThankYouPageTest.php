@@ -76,7 +76,7 @@ class CustomerThankYouPageTest extends TestCase
             ->assertSee('Customer Thank You')
             ->assertSee('Muhammad Syafiq')
             ->assertSee('Nur Awanis')
-            ->assertSee('Semak Progress')
+            ->assertSee('Semak Kemajuan')
             ->assertSee(route('public.orders.progress', [
                 'order_id' => $order->order_id,
             ]), false);

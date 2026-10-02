@@ -29,17 +29,17 @@ class StaffPackingWorkflowTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_assigned_packing_staff_can_start_packing(): void
+    public function test_assigned_operation_management_staff_can_start_packing(): void
     {
         $admin = $this->admin();
-        $packing = $this->staff(User::ROLE_PACKING);
+        $operationManagement = $this->staff(User::ROLE_OM);
 
         [$order, $job] = $this->packingJob();
 
         app(AssignPackingJobService::class)
-            ->assign($job, $packing, $admin);
+            ->assign($job, $operationManagement, $admin);
 
-        $response = $this->actingAs($packing)->post(
+        $response = $this->actingAs($operationManagement)->post(
             route('staff.packing-jobs.start', $job)
         );
 
@@ -55,7 +55,7 @@ class StaffPackingWorkflowTest extends TestCase
             ->latest('id')
             ->firstOrFail();
 
-        $this->assertSame($packing->id, $event->actor_user_id);
+        $this->assertSame($operationManagement->id, $event->actor_user_id);
         $this->assertSame('READY_FOR_PACKING', $event->from_status);
         $this->assertSame('PACKING', $event->to_status);
     }
@@ -64,12 +64,12 @@ class StaffPackingWorkflowTest extends TestCase
     {
         $admin = $this->admin();
         $operationManagement = $this->staff(User::ROLE_OM);
-        $assignedPackingStaff = $this->staff(User::ROLE_PACKING);
+        $assignedOperationManagementStaff = $this->staff(User::ROLE_OM);
 
         [, $job] = $this->packingJob();
 
         app(AssignPackingJobService::class)
-            ->assign($job, $assignedPackingStaff, $admin);
+            ->assign($job, $assignedOperationManagementStaff, $admin);
 
         $this->actingAs($operationManagement)
             ->post(route('staff.packing-jobs.start', $job))
@@ -88,23 +88,23 @@ class StaffPackingWorkflowTest extends TestCase
         );
     }
 
-    public function test_assigned_packing_staff_can_verify_item(): void
+    public function test_assigned_operation_management_staff_can_verify_item(): void
     {
         $admin = $this->admin();
-        $packing = $this->staff(User::ROLE_PACKING);
+        $operationManagement = $this->staff(User::ROLE_OM);
 
         [, $job] = $this->packingJob();
 
         app(AssignPackingJobService::class)
-            ->assign($job, $packing, $admin);
+            ->assign($job, $operationManagement, $admin);
 
-        $this->actingAs($packing)->post(
+        $this->actingAs($operationManagement)->post(
             route('staff.packing-jobs.start', $job)
         );
 
         $item = $job->items()->firstOrFail();
 
-        $response = $this->actingAs($packing)->post(
+        $response = $this->actingAs($operationManagement)->post(
             route('staff.packing-jobs.items.verify', [
                 'packingJob' => $job,
                 'packingItem' => $item,
@@ -123,7 +123,7 @@ class StaffPackingWorkflowTest extends TestCase
             ->latest('id')
             ->firstOrFail();
 
-        $this->assertSame($packing->id, $event->actor_user_id);
+        $this->assertSame($operationManagement->id, $event->actor_user_id);
         $this->assertSame(
             $item->id,
             $event->metadata['packing_job_item_id']
@@ -137,14 +137,14 @@ class StaffPackingWorkflowTest extends TestCase
     public function test_packing_cannot_complete_before_all_items_are_verified(): void
     {
         $admin = $this->admin();
-        $packing = $this->staff(User::ROLE_PACKING);
+        $operationManagement = $this->staff(User::ROLE_OM);
 
         [$order, $job] = $this->packingJob(2);
 
         app(AssignPackingJobService::class)
-            ->assign($job, $packing, $admin);
+            ->assign($job, $operationManagement, $admin);
 
-        $this->actingAs($packing)->post(
+        $this->actingAs($operationManagement)->post(
             route('staff.packing-jobs.start', $job)
         );
 
@@ -152,14 +152,14 @@ class StaffPackingWorkflowTest extends TestCase
             ->orderBy('id')
             ->firstOrFail();
 
-        $this->actingAs($packing)->post(
+        $this->actingAs($operationManagement)->post(
             route('staff.packing-jobs.items.verify', [
                 'packingJob' => $job,
                 'packingItem' => $firstItem,
             ])
         );
 
-        $response = $this->actingAs($packing)->post(
+        $response = $this->actingAs($operationManagement)->post(
             route('staff.packing-jobs.mark-packed', $job),
             [
                 'packing_proof' => UploadedFile::fake()->image('packing.jpg'),
@@ -177,27 +177,27 @@ class StaffPackingWorkflowTest extends TestCase
     public function test_one_package_order_becomes_packed_after_item_verified(): void
     {
         $admin = $this->admin();
-        $packing = $this->staff(User::ROLE_PACKING);
+        $operationManagement = $this->staff(User::ROLE_OM);
 
         [$order, $job] = $this->packingJob();
 
         app(AssignPackingJobService::class)
-            ->assign($job, $packing, $admin);
+            ->assign($job, $operationManagement, $admin);
 
-        $this->actingAs($packing)->post(
+        $this->actingAs($operationManagement)->post(
             route('staff.packing-jobs.start', $job)
         );
 
         $item = $job->items()->firstOrFail();
 
-        $this->actingAs($packing)->post(
+        $this->actingAs($operationManagement)->post(
             route('staff.packing-jobs.items.verify', [
                 'packingJob' => $job,
                 'packingItem' => $item,
             ])
         );
 
-        $response = $this->actingAs($packing)->post(
+        $response = $this->actingAs($operationManagement)->post(
             route('staff.packing-jobs.mark-packed', $job),
             [
                 'packing_proof' => UploadedFile::fake()->image('packing.jpg'),
@@ -215,7 +215,7 @@ class StaffPackingWorkflowTest extends TestCase
         $this->assertSame('packing.jpg', $job->proof_original_name);
         $this->assertSame('PACKED', $order->status);
 
-        $this->actingAs($packing, 'staff')
+        $this->actingAs($operationManagement, 'staff')
             ->get(route('staff.packing-jobs.proof.show', $job))
             ->assertOk()
             ->assertHeader('Content-Type', 'image/jpeg');
@@ -231,7 +231,7 @@ class StaffPackingWorkflowTest extends TestCase
             ->latest('id')
             ->firstOrFail();
 
-        $this->assertSame($packing->id, $event->actor_user_id);
+        $this->assertSame($operationManagement->id, $event->actor_user_id);
         $this->assertSame('PACKING', $event->from_status);
         $this->assertSame('PACKED', $event->to_status);
         $this->assertSame(
@@ -243,14 +243,14 @@ class StaffPackingWorkflowTest extends TestCase
     public function test_two_package_order_becomes_packed_only_after_both_items_verified(): void
     {
         $admin = $this->admin();
-        $packing = $this->staff(User::ROLE_PACKING);
+        $operationManagement = $this->staff(User::ROLE_OM);
 
         [$order, $job] = $this->packingJob(2);
 
         app(AssignPackingJobService::class)
-            ->assign($job, $packing, $admin);
+            ->assign($job, $operationManagement, $admin);
 
-        $this->actingAs($packing)->post(
+        $this->actingAs($operationManagement)->post(
             route('staff.packing-jobs.start', $job)
         );
 
@@ -266,7 +266,7 @@ class StaffPackingWorkflowTest extends TestCase
         );
 
         foreach ($items as $item) {
-            $this->actingAs($packing)->post(
+            $this->actingAs($operationManagement)->post(
                 route('staff.packing-jobs.items.verify', [
                     'packingJob' => $job,
                     'packingItem' => $item,
@@ -274,7 +274,7 @@ class StaffPackingWorkflowTest extends TestCase
             );
         }
 
-        $this->actingAs($packing)
+        $this->actingAs($operationManagement)
             ->post(
                 route('staff.packing-jobs.mark-packed', $job),
                 [
@@ -306,12 +306,12 @@ class StaffPackingWorkflowTest extends TestCase
         );
     }
 
-    public function test_one_package_courier_order_can_be_completed_by_assigned_packing_staff(): void
+    public function test_one_package_courier_order_can_be_completed_by_assigned_operation_management_staff(): void
     {
         Storage::fake('local');
 
         $admin = $this->admin();
-        $packing = $this->staff(User::ROLE_PACKING);
+        $operationManagement = $this->staff(User::ROLE_OM);
 
         [$order, $job] = $this->packingJob(
             1,
@@ -320,15 +320,15 @@ class StaffPackingWorkflowTest extends TestCase
         );
 
         app(AssignPackingJobService::class)
-            ->assign($job, $packing, $admin);
+            ->assign($job, $operationManagement, $admin);
 
-        $this->actingAs($packing)
+        $this->actingAs($operationManagement)
             ->post(route('staff.packing-jobs.start', $job))
             ->assertRedirect();
 
         $item = $job->items()->firstOrFail();
 
-        $this->actingAs($packing)
+        $this->actingAs($operationManagement)
             ->post(
                 route('staff.packing-jobs.items.verify', [
                     'packingJob' => $job,
@@ -342,7 +342,7 @@ class StaffPackingWorkflowTest extends TestCase
         * Packing completion itself does not require the final
         * courier proof/tracking information.
         */
-        $this->actingAs($packing)
+        $this->actingAs($operationManagement)
             ->post(
                 route('staff.packing-jobs.mark-packed', $job)
             )
@@ -369,7 +369,7 @@ class StaffPackingWorkflowTest extends TestCase
         * Staff records final parcel/label proof + tracking,
         * then explicitly marks COMPLETE.
         */
-        $response = $this->actingAs($packing)->post(
+        $response = $this->actingAs($operationManagement)->post(
             route('staff.packing-jobs.complete-courier', $job),
             [
                 'packing_proof' => UploadedFile::fake()->image('parcel-with-label.jpg'),
@@ -425,7 +425,7 @@ class StaffPackingWorkflowTest extends TestCase
             ->latest('id')
             ->firstOrFail();
 
-        $this->assertSame($packing->id, $event->actor_user_id);
+        $this->assertSame($operationManagement->id, $event->actor_user_id);
         $this->assertSame('READY', $event->from_status);
         $this->assertSame('COMPLETED', $event->to_status);
 
@@ -454,38 +454,38 @@ class StaffPackingWorkflowTest extends TestCase
         );
     }
 
-    public function test_other_packing_staff_cannot_operate_assigned_job(): void
+    public function test_operation_management_can_operate_job_assigned_to_another_operation_management_staff(): void
     {
         $admin = $this->admin();
-        $assigned = $this->staff(User::ROLE_PACKING);
-        $other = $this->staff(User::ROLE_PACKING);
+        $assigned = $this->staff(User::ROLE_OM);
+        $other = $this->staff(User::ROLE_OM);
 
         [, $job] = $this->packingJob();
 
         app(AssignPackingJobService::class)
             ->assign($job, $assigned, $admin);
 
-        $this->actingAs($other)
+        $this->actingAs($other, 'staff')
             ->post(route('staff.packing-jobs.start', $job))
-            ->assertNotFound();
+            ->assertRedirect();
 
         $this->assertSame(
-            'READY_FOR_PACKING',
+            'PACKING',
             $job->fresh()->status
         );
     }
 
-    public function test_admin_cannot_operate_job_assigned_to_packing_staff(): void
+    public function test_admin_cannot_operate_job_assigned_to_operation_management_staff(): void
     {
         $admin = $this->admin();
-        $packing = $this->staff(User::ROLE_PACKING);
+        $operationManagement = $this->staff(User::ROLE_OM);
 
         [, $job] = $this->packingJob();
 
         app(AssignPackingJobService::class)
-            ->assign($job, $packing, $admin);
+            ->assign($job, $operationManagement, $admin);
 
-        $this->actingAs($admin)
+        $this->actingAs($admin, 'staff')
             ->post(route('staff.packing-jobs.start', $job))
             ->assertNotFound();
 
@@ -498,7 +498,7 @@ class StaffPackingWorkflowTest extends TestCase
     public function test_item_from_another_packing_job_cannot_be_verified_through_wrong_job(): void
     {
         $admin = $this->admin();
-        $packing = $this->staff(User::ROLE_PACKING);
+        $operationManagement = $this->staff(User::ROLE_OM);
 
         [, $firstJob] = $this->packingJob(
             1,
@@ -511,23 +511,23 @@ class StaffPackingWorkflowTest extends TestCase
         );
 
         app(AssignPackingJobService::class)
-            ->assign($firstJob, $packing, $admin);
+            ->assign($firstJob, $operationManagement, $admin);
 
         app(AssignPackingJobService::class)
-            ->assign($secondJob, $packing, $admin);
+            ->assign($secondJob, $operationManagement, $admin);
 
-        $this->actingAs($packing)->post(
+        $this->actingAs($operationManagement)->post(
             route('staff.packing-jobs.start', $firstJob)
         );
 
-        $this->actingAs($packing)->post(
+        $this->actingAs($operationManagement)->post(
             route('staff.packing-jobs.start', $secondJob)
         );
 
         $foreignItem = $secondJob->items()
             ->firstOrFail();
 
-        $this->actingAs($packing)
+        $this->actingAs($operationManagement)
             ->post(
                 route('staff.packing-jobs.items.verify', [
                     'packingJob' => $firstJob,
@@ -544,16 +544,16 @@ class StaffPackingWorkflowTest extends TestCase
     public function test_item_cannot_be_verified_before_packing_has_started(): void
     {
         $admin = $this->admin();
-        $packing = $this->staff(User::ROLE_PACKING);
+        $operationManagement = $this->staff(User::ROLE_OM);
 
         [, $job] = $this->packingJob();
 
         app(AssignPackingJobService::class)
-            ->assign($job, $packing, $admin);
+            ->assign($job, $operationManagement, $admin);
 
         $item = $job->items()->firstOrFail();
 
-        $response = $this->actingAs($packing)->post(
+        $response = $this->actingAs($operationManagement)->post(
             route('staff.packing-jobs.items.verify', [
                 'packingJob' => $job,
                 'packingItem' => $item,
@@ -769,7 +769,7 @@ class StaffPackingWorkflowTest extends TestCase
         Storage::fake('local');
 
         $admin = $this->admin();
-        $packing = $this->staff(User::ROLE_PACKING);
+        $operationManagement = $this->staff(User::ROLE_OM);
 
         [$order, $job] = $this->packingJob(
             2,
@@ -778,9 +778,9 @@ class StaffPackingWorkflowTest extends TestCase
         );
 
         app(AssignPackingJobService::class)
-            ->assign($job, $packing, $admin);
+            ->assign($job, $operationManagement, $admin);
 
-        $this->actingAs($packing)
+        $this->actingAs($operationManagement)
             ->post(route('staff.packing-jobs.start', $job))
             ->assertRedirect();
 
@@ -796,7 +796,7 @@ class StaffPackingWorkflowTest extends TestCase
         );
 
         foreach ($items as $item) {
-            $this->actingAs($packing)
+            $this->actingAs($operationManagement)
                 ->post(
                     route('staff.packing-jobs.items.verify', [
                         'packingJob' => $job,
@@ -806,7 +806,7 @@ class StaffPackingWorkflowTest extends TestCase
                 ->assertRedirect();
         }
 
-        $this->actingAs($packing)
+        $this->actingAs($operationManagement)
             ->post(route('staff.packing-jobs.mark-packed', $job))
             ->assertRedirect();
 
@@ -839,7 +839,7 @@ class StaffPackingWorkflowTest extends TestCase
         $this->assertSame('READY', $fulfilmentJob->status);
         $this->assertNull($fulfilmentJob->tracking_number);
 
-        $response = $this->actingAs($packing)->post(
+        $response = $this->actingAs($operationManagement)->post(
             route('staff.packing-jobs.complete-courier', $job),
             [
                 'packing_proof' => UploadedFile::fake()->image(
@@ -899,7 +899,7 @@ class StaffPackingWorkflowTest extends TestCase
             ->latest('id')
             ->firstOrFail();
 
-        $this->assertSame($packing->id, $event->actor_user_id);
+        $this->assertSame($operationManagement->id, $event->actor_user_id);
         $this->assertSame('READY', $event->from_status);
         $this->assertSame('COMPLETED', $event->to_status);
 
@@ -931,7 +931,7 @@ class StaffPackingWorkflowTest extends TestCase
         Storage::fake('local');
 
         $admin = $this->admin();
-        $packing = $this->staff(User::ROLE_PACKING);
+        $operationManagement = $this->staff(User::ROLE_OM);
 
         [$order, $job] = $this->packingJob(
             1,
@@ -940,15 +940,15 @@ class StaffPackingWorkflowTest extends TestCase
         );
 
         app(AssignPackingJobService::class)
-            ->assign($job, $packing, $admin);
+            ->assign($job, $operationManagement, $admin);
 
-        $this->actingAs($packing)
+        $this->actingAs($operationManagement)
             ->post(route('staff.packing-jobs.start', $job))
             ->assertRedirect();
 
         $item = $job->items()->firstOrFail();
 
-        $this->actingAs($packing)
+        $this->actingAs($operationManagement)
             ->post(
                 route('staff.packing-jobs.items.verify', [
                     'packingJob' => $job,
@@ -957,7 +957,7 @@ class StaffPackingWorkflowTest extends TestCase
             )
             ->assertRedirect();
 
-        $this->actingAs($packing)
+        $this->actingAs($operationManagement)
             ->post(route('staff.packing-jobs.mark-packed', $job))
             ->assertRedirect();
 
@@ -978,7 +978,7 @@ class StaffPackingWorkflowTest extends TestCase
         * No proof, courier provider, tracking number,
         * or explicit COMPLETE confirmation.
         */
-        $response = $this->actingAs($packing)->post(
+        $response = $this->actingAs($operationManagement)->post(
             route('staff.packing-jobs.complete-courier', $job),
             []
         );
@@ -1017,13 +1017,13 @@ class StaffPackingWorkflowTest extends TestCase
         );
     }
 
-    public function test_other_packing_staff_cannot_complete_courier_job_assigned_to_another_packing_staff(): void
+    public function test_other_operation_management_staff_cannot_complete_courier_job_assigned_to_another_operation_management_staff(): void
     {
         Storage::fake('local');
 
         $admin = $this->admin();
-        $assignedPacking = $this->staff(User::ROLE_PACKING);
-        $otherPacking = $this->staff(User::ROLE_PACKING);
+        $assignedOperationManagement = $this->staff(User::ROLE_OM);
+        $otherOperationManagement = $this->staff(User::ROLE_OM);
 
         [$order, $job] = $this->packingJob(
             1,
@@ -1032,15 +1032,15 @@ class StaffPackingWorkflowTest extends TestCase
         );
 
         app(AssignPackingJobService::class)
-            ->assign($job, $assignedPacking, $admin);
+            ->assign($job, $assignedOperationManagement, $admin);
 
-        $this->actingAs($assignedPacking)
+        $this->actingAs($assignedOperationManagement)
             ->post(route('staff.packing-jobs.start', $job))
             ->assertRedirect();
 
         $item = $job->items()->firstOrFail();
 
-        $this->actingAs($assignedPacking)
+        $this->actingAs($assignedOperationManagement)
             ->post(
                 route('staff.packing-jobs.items.verify', [
                     'packingJob' => $job,
@@ -1049,7 +1049,7 @@ class StaffPackingWorkflowTest extends TestCase
             )
             ->assertRedirect();
 
-        $this->actingAs($assignedPacking)
+        $this->actingAs($assignedOperationManagement)
             ->post(route('staff.packing-jobs.mark-packed', $job))
             ->assertRedirect();
 
@@ -1058,7 +1058,7 @@ class StaffPackingWorkflowTest extends TestCase
 
         $this->assertSame('READY', $fulfilmentJob->status);
 
-        $response = $this->actingAs($otherPacking)->post(
+        $response = $this->actingAs($otherOperationManagement)->post(
             route('staff.packing-jobs.complete-courier', $job),
             [
                 'packing_proof' => UploadedFile::fake()->image('unauthorized-proof.jpg'),
@@ -1091,13 +1091,13 @@ class StaffPackingWorkflowTest extends TestCase
         );
     }
 
-    public function test_operation_management_cannot_complete_courier_job_assigned_to_packing_staff(): void
+    public function test_operation_management_cannot_complete_courier_job_assigned_to_another_operation_management_staff(): void
     {
         Storage::fake('local');
 
         $admin = $this->admin();
-        $operationManagement = $this->staff(User::ROLE_OM);
-        $packing = $this->staff(User::ROLE_PACKING);
+        $assignedOperationManagement = $this->staff(User::ROLE_OM);
+        $otherOperationManagement = $this->staff(User::ROLE_OM);
 
         [$order, $job] = $this->packingJob(
             1,
@@ -1106,15 +1106,15 @@ class StaffPackingWorkflowTest extends TestCase
         );
 
         app(AssignPackingJobService::class)
-            ->assign($job, $packing, $admin);
+            ->assign($job, $assignedOperationManagement, $admin);
 
-        $this->actingAs($packing)
+        $this->actingAs($assignedOperationManagement)
             ->post(route('staff.packing-jobs.start', $job))
             ->assertRedirect();
 
         $item = $job->items()->firstOrFail();
 
-        $this->actingAs($packing)
+        $this->actingAs($assignedOperationManagement)
             ->post(
                 route('staff.packing-jobs.items.verify', [
                     'packingJob' => $job,
@@ -1123,7 +1123,7 @@ class StaffPackingWorkflowTest extends TestCase
             )
             ->assertRedirect();
 
-        $this->actingAs($packing)
+        $this->actingAs($assignedOperationManagement)
             ->post(route('staff.packing-jobs.mark-packed', $job))
             ->assertRedirect();
 
@@ -1133,12 +1133,12 @@ class StaffPackingWorkflowTest extends TestCase
         $this->assertSame('READY', $fulfilmentJob->status);
 
         /*
-        * Clear the previous PACKING authentication before
+        * Clear the previous staff authentication before
         * testing OPERATION_MANAGEMENT as the actual actor.
         */
         $this->app['auth']->forgetGuards();
 
-        $response = $this->actingAs($operationManagement)->post(
+        $response = $this->actingAs($otherOperationManagement)->post(
             route('staff.packing-jobs.complete-courier', $job),
             [
                 'packing_proof' => UploadedFile::fake()->image('om-proof.jpg'),
@@ -1287,12 +1287,12 @@ class StaffPackingWorkflowTest extends TestCase
         );
     }
 
-    public function test_admin_cannot_complete_courier_job_assigned_to_packing_staff(): void
+    public function test_admin_cannot_complete_courier_job_assigned_to_operation_management_staff(): void
     {
         Storage::fake('local');
 
         $admin = $this->admin();
-        $packing = $this->staff(User::ROLE_PACKING);
+        $operationManagement = $this->staff(User::ROLE_OM);
 
         [$order, $job] = $this->packingJob(
             1,
@@ -1301,15 +1301,15 @@ class StaffPackingWorkflowTest extends TestCase
         );
 
         app(AssignPackingJobService::class)
-            ->assign($job, $packing, $admin);
+            ->assign($job, $operationManagement, $admin);
 
-        $this->actingAs($packing)
+        $this->actingAs($operationManagement)
             ->post(route('staff.packing-jobs.start', $job))
             ->assertRedirect();
 
         $item = $job->items()->firstOrFail();
 
-        $this->actingAs($packing)
+        $this->actingAs($operationManagement)
             ->post(
                 route('staff.packing-jobs.items.verify', [
                     'packingJob' => $job,
@@ -1318,7 +1318,7 @@ class StaffPackingWorkflowTest extends TestCase
             )
             ->assertRedirect();
 
-        $this->actingAs($packing)
+        $this->actingAs($operationManagement)
             ->post(route('staff.packing-jobs.mark-packed', $job))
             ->assertRedirect();
 
@@ -1329,7 +1329,7 @@ class StaffPackingWorkflowTest extends TestCase
 
         $this->app['auth']->forgetGuards();
 
-        $response = $this->actingAs($admin)->post(
+        $response = $this->actingAs($admin, 'staff')->post(
             route('staff.packing-jobs.complete-courier', $job),
             [
                 'packing_proof' => UploadedFile::fake()->image('admin-proof.jpg'),
@@ -1379,16 +1379,16 @@ class StaffPackingWorkflowTest extends TestCase
             ->assertDontSee(route('staff.packing-jobs.assign', $job))
             ->assertSee('aria-controls="packing-proof"', false);
         $this->assertSame(1, substr_count($response->getContent(), 'id="packing-proof"'));
-        $this->assertSame(1, substr_count($response->getContent(), 'Upload Bukti &amp; Mark Packed') + substr_count($response->getContent(), 'Upload Bukti & Mark Packed'));
+        $this->assertSame(1, substr_count($response->getContent(), 'Muat Naik Bukti &amp; Tandakan Selesai Dibungkus') + substr_count($response->getContent(), 'Muat Naik Bukti & Tandakan Selesai Dibungkus'));
     }
 
     public function test_packing_saves_courier_details_without_marking_parcel_shipped(): void
     {
         $admin = $this->admin();
-        $packing = $this->staff(User::ROLE_PACKING);
+        $operationManagement = $this->staff(User::ROLE_OM);
         [$order, $job] = $this->packingJob(1, 'Tracking During Packing', 'COURIER');
-        app(AssignPackingJobService::class)->assign($job, $packing, $admin);
-        $this->actingAs($packing)->post(route('staff.packing-jobs.start', $job))->assertRedirect();
+        app(AssignPackingJobService::class)->assign($job, $operationManagement, $admin);
+        $this->actingAs($operationManagement)->post(route('staff.packing-jobs.start', $job))->assertRedirect();
         $this->post(route('staff.packing-jobs.items.verify', [
             'packingJob' => $job,
             'packingItem' => $job->items()->firstOrFail(),
@@ -1410,7 +1410,7 @@ class StaffPackingWorkflowTest extends TestCase
         $this->assertSame('READY', $fulfilment->status);
         $this->assertNull($fulfilment->shipped_at);
         $this->get(route('staff.orders.show', $order->order_id))
-            ->assertSee('Sahkan Serahan kepada Courier')
+            ->assertSee('Sahkan Serahan kepada Kurier')
             ->assertSee('value="Pos Laju"', false)
             ->assertSee('value="PL001234567MY"', false)
             ->assertSee('aria-controls="courier-packing-proof"', false);
@@ -1418,12 +1418,12 @@ class StaffPackingWorkflowTest extends TestCase
             ->assertSee('Pos Laju')->assertSee('PL001234567MY');
     }
 
-    public function test_receipt_links_are_hidden_from_packing_but_visible_to_admin(): void
+    public function test_receipt_links_are_visible_to_operation_management_and_admin(): void
     {
         $admin = $this->admin();
-        $packing = $this->staff(User::ROLE_PACKING);
+        $operationManagement = $this->staff(User::ROLE_OM);
         [$order, $job] = $this->packingJob(1, 'Receipt Link Access', 'COURIER');
-        app(AssignPackingJobService::class)->assign($job, $packing, $admin);
+        app(AssignPackingJobService::class)->assign($job, $operationManagement, $admin);
         $payment = $order->payments()->create([
             'payment_type' => 'BOOKING_DEPOSIT',
             'provider' => 'MANUAL_QR',
@@ -1433,13 +1433,13 @@ class StaffPackingWorkflowTest extends TestCase
             'metadata' => ['receipt_path' => 'deposit-receipts/test.jpg'],
         ]);
 
-        $this->actingAs($packing)->get(route('staff.orders.show', $order->order_id))
+        $this->actingAs($operationManagement, 'staff')->get(route('staff.orders.show', $order->order_id))
             ->assertOk()
-            ->assertDontSee(route('staff.payments.receipt', $payment))
-            ->assertDontSee('Lihat Resit');
+            ->assertSee(route('staff.payments.receipt', $payment))
+            ->assertSee('Lihat Resit');
 
         $this->app['auth']->forgetGuards();
-        $this->actingAs($admin)->get(route('staff.orders.show', $order->order_id))
+        $this->actingAs($admin, 'staff')->get(route('staff.orders.show', $order->order_id))
             ->assertOk()
             ->assertSee(route('staff.payments.receipt', $payment));
     }
@@ -1481,10 +1481,10 @@ class StaffPackingWorkflowTest extends TestCase
         ];
     }
 
-    public function test_two_package_pickup_order_can_be_collected_by_assigned_packing_staff(): void
+    public function test_two_package_pickup_order_can_be_collected_by_assigned_operation_management_staff(): void
     {
         $admin = $this->admin();
-        $packing = $this->staff(User::ROLE_PACKING);
+        $operationManagement = $this->staff(User::ROLE_OM);
 
         [$order, $job] = $this->packingJob(
             2,
@@ -1493,9 +1493,9 @@ class StaffPackingWorkflowTest extends TestCase
         );
 
         app(AssignPackingJobService::class)
-            ->assign($job, $packing, $admin);
+            ->assign($job, $operationManagement, $admin);
 
-        $this->actingAs($packing)
+        $this->actingAs($operationManagement)
             ->post(route('staff.packing-jobs.start', $job))
             ->assertRedirect();
 
@@ -1511,7 +1511,7 @@ class StaffPackingWorkflowTest extends TestCase
         );
 
         foreach ($items as $item) {
-            $this->actingAs($packing)
+            $this->actingAs($operationManagement)
                 ->post(
                     route('staff.packing-jobs.items.verify', [
                         'packingJob' => $job,
@@ -1521,7 +1521,7 @@ class StaffPackingWorkflowTest extends TestCase
                 ->assertRedirect();
         }
 
-        $this->actingAs($packing)
+        $this->actingAs($operationManagement)
             ->post(
                 route('staff.packing-jobs.mark-packed', $job),
                 [
@@ -1536,7 +1536,7 @@ class StaffPackingWorkflowTest extends TestCase
         $this->assertSame('PICKUP', $fulfilmentJob->method);
         $this->assertSame('READY', $fulfilmentJob->status);
 
-        $response = $this->actingAs($packing)->post(
+        $response = $this->actingAs($operationManagement)->post(
             route('staff.packing-jobs.collect-pickup', $job),
             [
                 'completion_reference' => 'PICKUP-TWO-001',
@@ -1570,16 +1570,16 @@ class StaffPackingWorkflowTest extends TestCase
             ->latest('id')
             ->firstOrFail();
 
-        $this->assertSame($packing->id, $event->actor_user_id);
+        $this->assertSame($operationManagement->id, $event->actor_user_id);
         $this->assertSame('READY', $event->from_status);
         $this->assertSame('COLLECTED', $event->to_status);
     }
 
-    public function test_other_packing_staff_cannot_collect_pickup_assigned_to_another_packing_staff(): void
+    public function test_other_operation_management_staff_cannot_collect_pickup_assigned_to_another_operation_management_staff(): void
     {
         $admin = $this->admin();
-        $assignedPacking = $this->staff(User::ROLE_PACKING);
-        $otherPacking = $this->staff(User::ROLE_PACKING);
+        $assignedOperationManagement = $this->staff(User::ROLE_OM);
+        $otherOperationManagement = $this->staff(User::ROLE_OM);
 
         [$order, $job] = $this->packingJob(
             1,
@@ -1588,15 +1588,15 @@ class StaffPackingWorkflowTest extends TestCase
         );
 
         app(AssignPackingJobService::class)
-            ->assign($job, $assignedPacking, $admin);
+            ->assign($job, $assignedOperationManagement, $admin);
 
-        $this->actingAs($assignedPacking)
+        $this->actingAs($assignedOperationManagement)
             ->post(route('staff.packing-jobs.start', $job))
             ->assertRedirect();
 
         $item = $job->items()->firstOrFail();
 
-        $this->actingAs($assignedPacking)
+        $this->actingAs($assignedOperationManagement)
             ->post(
                 route('staff.packing-jobs.items.verify', [
                     'packingJob' => $job,
@@ -1605,7 +1605,7 @@ class StaffPackingWorkflowTest extends TestCase
             )
             ->assertRedirect();
 
-        $this->actingAs($assignedPacking)
+        $this->actingAs($assignedOperationManagement)
             ->post(
                 route('staff.packing-jobs.mark-packed', $job),
                 [
@@ -1621,7 +1621,7 @@ class StaffPackingWorkflowTest extends TestCase
 
         $this->app['auth']->forgetGuards();
 
-        $response = $this->actingAs($otherPacking)->post(
+        $response = $this->actingAs($otherOperationManagement)->post(
             route('staff.packing-jobs.collect-pickup', $job),
             [
                 'completion_reference' => 'UNAUTHORIZED-PICKUP',
@@ -1647,11 +1647,11 @@ class StaffPackingWorkflowTest extends TestCase
         );
     }
 
-    public function test_operation_management_cannot_collect_pickup_job_assigned_to_packing_staff(): void
+    public function test_operation_management_cannot_collect_pickup_job_assigned_to_another_operation_management_staff(): void
     {
         $admin = $this->admin();
-        $operationManagement = $this->staff(User::ROLE_OM);
-        $packing = $this->staff(User::ROLE_PACKING);
+        $assignedOperationManagement = $this->staff(User::ROLE_OM);
+        $otherOperationManagement = $this->staff(User::ROLE_OM);
 
         [$order, $job] = $this->packingJob(
             1,
@@ -1660,15 +1660,15 @@ class StaffPackingWorkflowTest extends TestCase
         );
 
         app(AssignPackingJobService::class)
-            ->assign($job, $packing, $admin);
+            ->assign($job, $assignedOperationManagement, $admin);
 
-        $this->actingAs($packing)
+        $this->actingAs($assignedOperationManagement)
             ->post(route('staff.packing-jobs.start', $job))
             ->assertRedirect();
 
         $item = $job->items()->firstOrFail();
 
-        $this->actingAs($packing)
+        $this->actingAs($assignedOperationManagement)
             ->post(
                 route('staff.packing-jobs.items.verify', [
                     'packingJob' => $job,
@@ -1677,7 +1677,7 @@ class StaffPackingWorkflowTest extends TestCase
             )
             ->assertRedirect();
 
-        $this->actingAs($packing)
+        $this->actingAs($assignedOperationManagement)
             ->post(
                 route('staff.packing-jobs.mark-packed', $job),
                 [
@@ -1693,7 +1693,7 @@ class StaffPackingWorkflowTest extends TestCase
 
         $this->app['auth']->forgetGuards();
 
-        $response = $this->actingAs($operationManagement)->post(
+        $response = $this->actingAs($otherOperationManagement)->post(
             route('staff.packing-jobs.collect-pickup', $job),
             [
                 'completion_reference' => 'OM-UNAUTHORIZED-PICKUP',

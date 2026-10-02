@@ -69,7 +69,7 @@ class AssignmentAuditSemanticsTest extends TestCase
     public function test_print_assignment_separates_assignee_from_actor(): void
     {
         $admin = $this->admin();
-        $printing = $this->staff(User::ROLE_PRINTING);
+        $production = $this->staff(User::ROLE_PRODUCTION);
 
         $order = $this->paidOrder();
 
@@ -78,10 +78,10 @@ class AssignmentAuditSemanticsTest extends TestCase
             ->first();
 
         $assigned = app(AssignPrintJobService::class)
-            ->assign($job, $printing, $admin);
+            ->assign($job, $production, $admin);
 
         $this->assertSame(
-            $printing->id,
+            $production->id,
             $assigned->assigned_user_id
         );
 
@@ -96,7 +96,7 @@ class AssignmentAuditSemanticsTest extends TestCase
         );
 
         $this->assertSame(
-            $printing->id,
+            $production->id,
             $event->metadata['assigned_user_id']
         );
     }
@@ -104,7 +104,7 @@ class AssignmentAuditSemanticsTest extends TestCase
     public function test_packing_assignment_separates_assignee_from_actor(): void
     {
         $admin = $this->admin();
-        $packing = $this->staff(User::ROLE_PACKING);
+        $packingOperationManagement = $this->staff(User::ROLE_OM);
 
         $order = $this->printedOrder();
 
@@ -112,10 +112,10 @@ class AssignmentAuditSemanticsTest extends TestCase
             ->initialize($order);
 
         $assigned = app(AssignPackingJobService::class)
-            ->assign($job, $packing, $admin);
+            ->assign($job, $packingOperationManagement, $admin);
 
         $this->assertSame(
-            $packing->id,
+            $packingOperationManagement->id,
             $assigned->assigned_user_id
         );
 
@@ -130,7 +130,7 @@ class AssignmentAuditSemanticsTest extends TestCase
         );
 
         $this->assertSame(
-            $packing->id,
+            $packingOperationManagement->id,
             $event->metadata['assigned_user_id']
         );
     }

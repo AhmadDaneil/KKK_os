@@ -25,51 +25,51 @@ class OrderProductionAssignmentTest extends TestCase
     {
         $operationManagement = $this->staff(User::ROLE_OM);
         $designer = $this->staff(User::ROLE_DESIGNER);
-        $printing = $this->staff(User::ROLE_PRINTING);
-        $otherPrinting = $this->staff(User::ROLE_PRINTING);
-        $packing = $this->staff(User::ROLE_PACKING);
+        $production = $this->staff(User::ROLE_PRODUCTION);
+        $otherProduction = $this->staff(User::ROLE_PRODUCTION);
+        $packingOperationManagement = $this->staff(User::ROLE_OM);
         $order = $this->approvedOrder();
 
         $this->actingAs($operationManagement)
             ->get(route('staff.orders.show', $order->order_id))
             ->assertOk()
-            ->assertSee('Assign Production Staff')
-            ->assertSee('Assign OM');
+            ->assertSee('Tugaskan Staf Pengeluaran')
+            ->assertSee('Tugaskan OM');
 
         $this->actingAs($operationManagement)
             ->post(route('staff.design-jobs.assign', $order->designJobs->first()), ['assigned_user_id' => $designer->id])
             ->assertRedirect();
 
         $this->actingAs($operationManagement)
-            ->post(route('staff.orders.assign-printing', $order), ['assigned_user_id' => $printing->id])
+            ->post(route('staff.orders.assign-printing', $order), ['assigned_user_id' => $production->id])
             ->assertRedirect();
 
         $this->actingAs($operationManagement)
-            ->post(route('staff.orders.assign-packing-fulfilment', $order), ['assigned_user_id' => $packing->id])
+            ->post(route('staff.orders.assign-packing-fulfilment', $order), ['assigned_user_id' => $packingOperationManagement->id])
             ->assertRedirect();
 
-        $this->assertSame($printing->id, $order->fresh()->printing_assigned_user_id);
-        $this->assertSame($packing->id, $order->fresh()->packing_assigned_user_id);
+        $this->assertSame($production->id, $order->fresh()->printing_assigned_user_id);
+        $this->assertSame($packingOperationManagement->id, $order->fresh()->packing_assigned_user_id);
 
         $managementView = $this->actingAs($operationManagement)
             ->get(route('staff.orders.show', $order->order_id));
         $managementView->assertOk()
-            ->assertSee('Reassign Production Staff')
-            ->assertSee('Reassign OM')
+            ->assertSee('Tugaskan Semula Staf Pengeluaran')
+            ->assertSee('Tugaskan Semula OM')
             ->assertDontSee(route('staff.print-jobs.assign', $order->printJobs->first()));
 
-        $this->actingAs($printing)
+        $this->actingAs($production)
             ->get(route('staff.orders.index', ['workstream' => 'printing']))
             ->assertOk()
             ->assertSee($order->order_id)
             ->assertSee('WAITING_FOR_PAYMENT');
 
-        $this->actingAs($packing)
+        $this->actingAs($packingOperationManagement)
             ->get(route('staff.orders.index', ['workstream' => 'packing']))
             ->assertOk()
             ->assertSee($order->order_id);
 
-        foreach ([$designer, $printing] as $assignee) {
+        foreach ([$designer, $production] as $assignee) {
             $this->actingAs($assignee)
                 ->get(route('staff.orders.index'))
                 ->assertOk()
@@ -82,7 +82,7 @@ class OrderProductionAssignmentTest extends TestCase
                 ->assertSee($order->order_id);
         }
 
-        $this->actingAs($otherPrinting)
+        $this->actingAs($otherProduction)
             ->get(route('staff.orders.show', $order->order_id))
             ->assertNotFound();
     }
@@ -90,28 +90,28 @@ class OrderProductionAssignmentTest extends TestCase
     public function test_order_assignments_are_inherited_when_printing_and_packing_jobs_are_created(): void
     {
         $admin = $this->staff(User::ROLE_ADMIN);
-        $printing = $this->staff(User::ROLE_PRINTING);
-        $packing = $this->staff(User::ROLE_PACKING);
+        $production = $this->staff(User::ROLE_PRODUCTION);
+        $packingOperationManagement = $this->staff(User::ROLE_OM);
         $order = $this->approvedOrder();
 
         $this->actingAs($admin)
-            ->post(route('admin.orders.assign-printing', $order), ['assigned_user_id' => $printing->id])
+            ->post(route('admin.orders.assign-printing', $order), ['assigned_user_id' => $production->id])
             ->assertRedirect();
         $this->actingAs($admin)
-            ->post(route('admin.orders.assign-packing-fulfilment', $order), ['assigned_user_id' => $packing->id])
+            ->post(route('admin.orders.assign-packing-fulfilment', $order), ['assigned_user_id' => $packingOperationManagement->id])
             ->assertRedirect();
 
         $order->update(['status' => 'PAID']);
         $printJobs = app(InitializePrintJobsForOrderService::class)->initialize($order->fresh());
 
-        $this->assertTrue($printJobs->every(fn ($job) => $job->assigned_user_id === $printing->id));
+        $this->assertTrue($printJobs->every(fn ($job) => $job->assigned_user_id === $production->id));
         $this->assertTrue($printJobs->every(fn ($job) => $job->status === 'READY_FOR_PRINT'));
 
         $printJobs->each(fn ($job) => $job->update(['status' => 'PRINTED']));
         $order->update(['status' => 'PRINTED']);
-        $packingJob = app(InitializePackingJobForOrderService::class)->initialize($order->fresh());
+        $packingOperationManagementJob = app(InitializePackingJobForOrderService::class)->initialize($order->fresh());
 
-        $this->assertSame($packing->id, $packingJob->assigned_user_id);
+        $this->assertSame($packingOperationManagement->id, $packingOperationManagementJob->assigned_user_id);
     }
 
     public function test_production_assignment_rejects_wrong_staff_role_and_unapproved_design(): void
@@ -145,8 +145,8 @@ class OrderProductionAssignmentTest extends TestCase
         $this->actingAs($manager)
             ->get(route('staff.orders.show', $order->order_id))
             ->assertOk()
-            ->assertDontSee('Assign Production Staff')
-            ->assertDontSee('Reassign Designer');
+            ->assertDontSee('Tugaskan Staf Pengeluaran')
+            ->assertDontSee('Tugaskan Semula Pereka');
 
         $this->actingAs($manager)
             ->post(route('staff.design-jobs.assign', $designJob), ['assigned_user_id' => $designer->id])
@@ -157,15 +157,15 @@ class OrderProductionAssignmentTest extends TestCase
             ->assertUnprocessable();
     }
 
-    public function test_specialist_staff_cannot_assign_an_order_to_printing(): void
+    public function test_specialist_staff_cannot_assign_production_staff(): void
     {
         $designer = $this->staff(User::ROLE_DESIGNER);
-        $printing = $this->staff(User::ROLE_PRINTING);
+        $production = $this->staff(User::ROLE_PRODUCTION);
         $order = $this->approvedOrder();
 
         $this->actingAs($designer)
             ->post(route('staff.orders.assign-printing', $order), [
-                'assigned_user_id' => $printing->id,
+                'assigned_user_id' => $production->id,
             ])
             ->assertForbidden();
 
