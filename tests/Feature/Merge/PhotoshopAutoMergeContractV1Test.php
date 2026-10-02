@@ -61,6 +61,7 @@ class PhotoshopAutoMergeContractV1Test extends TestCase
                 'design' => [
                     'theme' => 'ISLAMIC',
                     'design_code' => 'cki-820',
+                    'card_image_path' => 'orders/KKK-260910-0001/LELAKI/card-image-test.jpg',
                 ],
                 'couple' => [
                     'groom_name' => 'Mohammad Naim Iskadar Bin Zainalabidin',
@@ -111,7 +112,10 @@ class PhotoshopAutoMergeContractV1Test extends TestCase
         $this->assertSame('26', $row['tarikhhari']);
         $this->assertSame('DIS 2026', $row['bulan']);
         $this->assertSame('0139408109', $row['notel1']);
-        $this->assertSame('', $row['gambar']);
+        $this->assertSame(
+            storage_path('app/private').DIRECTORY_SEPARATOR.'orders/KKK-260910-0001/LELAKI/card-image-test.jpg',
+            $row['gambar']
+        );
         $this->assertSame('', $row['flaggambar']);
     }
 
@@ -121,6 +125,8 @@ class PhotoshopAutoMergeContractV1Test extends TestCase
         $this->assertContains('majlis', PhotoshopAutoMergeContractV1::JSX_CONSUMED_HEADERS);
         $this->assertContains('majlis', PhotoshopAutoMergeContractV1::JSX_REQUIRED_HEADERS);
         $this->assertNotContains('majlis', PhotoshopAutoMergeContractV1::COMPATIBILITY_ONLY_HEADERS);
+        $this->assertContains('gambar', PhotoshopAutoMergeContractV1::JSX_CONSUMED_HEADERS);
+        $this->assertNotContains('gambar', PhotoshopAutoMergeContractV1::COMPATIBILITY_ONLY_HEADERS);
     }
 
     public function test_row_builder_rejects_invalid_majlis_before_export(): void
@@ -148,5 +154,4 @@ class PhotoshopAutoMergeContractV1Test extends TestCase
 
         app(BuildPhotoshopAutoMergeRowService::class)->build($mergeJob, 500);
     }
-
 }
