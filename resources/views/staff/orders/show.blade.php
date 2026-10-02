@@ -1010,16 +1010,26 @@
                         </dl>
                         @if ($order->packingJob->items->isNotEmpty())
                             <div class="staff-detail-group">
-                                <h4>Items</h4>
+                                <h4>Senarai Item Pembungkusan</h4>
 
-                                <div class="staff-contact-list">
+                                <div class="staff-contact-list staff-packing-checklist">
                                     @foreach ($order->packingJob->items as $item)
-                                        <div class="staff-contact-row">
-                                            <span>{{ $item->side }}</span>
+                                        <div @class(['staff-contact-row', 'is-verified' => $item->verified_present])>
+                                            <div class="staff-packing-item-name">
+                                                <span>Pakej {{ ucfirst(strtolower($item->side)) }}</span>
+                                                <small>{{ $item->verified_present ? 'Item telah diperiksa dan disahkan lengkap' : 'Belum diperiksa' }}</small>
+                                            </div>
 
-                                            <strong>
-                                                {{ $item->verified_present ? 'Verified' : 'Not Verified' }}
-                                            </strong>
+                                            @if ($item->verified_present)
+                                                <strong class="staff-verified-badge"><span aria-hidden="true">✓</span> Disahkan</strong>
+                                            @elseif (auth()->user()->isOperationManagement() && $order->packingJob->status === 'PACKING')
+                                                <form method="POST" action="{{ route($operationRoutePrefix.'packing-jobs.items.verify', ['packingJob' => $order->packingJob, 'packingItem' => $item]) }}" class="staff-workflow-form js-staff-confirmation-form" data-confirm-title="Sahkan item {{ ucfirst(strtolower($item->side)) }}?" data-confirm-message="Pastikan semua kad untuk pakej {{ ucfirst(strtolower($item->side)) }} ada, lengkap dan dalam keadaan baik sebelum disahkan." data-confirm-button="Ya, sahkan item">
+                                                    @csrf
+                                                    <button type="submit" class="staff-button staff-verify-button"><span aria-hidden="true">✓</span> Sahkan Item</button>
+                                                </form>
+                                            @else
+                                                <strong class="staff-unverified-badge">Belum Disahkan</strong>
+                                            @endif
                                         </div>
                                     @endforeach
                                 </div>
@@ -1041,11 +1051,6 @@
                                 <form method="POST" action="{{ route($operationRoutePrefix.'packing-jobs.start', $order->packingJob) }}" class="staff-workflow-form js-staff-confirmation-form" data-confirm-title="Mulakan proses packing?" data-confirm-message="Masa mula packing akan direkodkan. Pastikan semua barang yang telah dicetak tersedia untuk diperiksa dan dibungkus." data-confirm-button="Ya, mula packing">@csrf<button type="submit" class="staff-button staff-button-primary">Mulakan Pembungkusan</button></form>
                             @endif
                             @if ($order->packingJob->status === 'PACKING')
-                                @foreach ($order->packingJob->items as $item)
-                                    @unless ($item->verified_present)
-                                        <form method="POST" action="{{ route($operationRoutePrefix.'packing-jobs.items.verify', ['packingJob' => $order->packingJob, 'packingItem' => $item]) }}" class="staff-workflow-form js-staff-confirmation-form" data-confirm-title="Verify item {{ ucfirst(strtolower($item->side)) }}?" data-confirm-message="Pastikan semua kad untuk pakej {{ ucfirst(strtolower($item->side)) }} ada, lengkap dan dalam keadaan baik sebelum ditanda Verified." data-confirm-button="Ya, verify item">@csrf<button type="submit" class="staff-button staff-button-small">Verify {{ ucfirst(strtolower($item->side)) }}</button></form>
-                                    @endunless
-                                @endforeach
                                 @if ($order->packingJob->items->every(fn ($item) => $item->verified_present))
                                     <form method="POST" enctype="multipart/form-data" action="{{ route($operationRoutePrefix.'packing-jobs.mark-packed', $order->packingJob) }}" class="staff-packing-complete-form js-staff-confirmation-form" data-confirm-title="Muat naik bukti dan tandakan pembungkusan selesai?" data-confirm-message="{{ $order->fulfilment?->method === 'COURIER' ? 'Pastikan gambar bukti pembungkusan, nama kurier dan nombor penjejakan adalah betul. Pembungkusan akan ditandakan selesai selepas dihantar.' : 'Pastikan gambar bukti menunjukkan semua barang telah dibungkus dengan lengkap. Pembungkusan akan ditandakan selesai untuk Pengambilan Sendiri.' }}" data-confirm-button="Ya, tandakan selesai dibungkus">
                                         @csrf

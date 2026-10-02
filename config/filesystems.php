@@ -47,6 +47,38 @@ return [
             'report' => false,
         ],
 
+        'backup_primary' => [
+            'driver' => 'local',
+            'root' => env('BACKUP_PRIMARY_ROOT', '/var/backups/kkk-os'),
+            'serve' => false,
+            'throw' => true,
+            'report' => true,
+            'permissions' => [
+                'file' => [
+                    'public' => 0644,
+                    'private' => 0600,
+                ],
+                'dir' => [
+                    'public' => 0755,
+                    'private' => 0700,
+                ],
+            ],
+        ],
+
+        'backup_secondary' => [
+            'driver' => 's3',
+            'key' => env('BACKUP_SECONDARY_ACCESS_KEY_ID'),
+            'secret' => env('BACKUP_SECONDARY_SECRET_ACCESS_KEY'),
+            'region' => env('BACKUP_SECONDARY_REGION'),
+            'bucket' => env('BACKUP_SECONDARY_BUCKET'),
+            'endpoint' => env('BACKUP_SECONDARY_ENDPOINT'),
+            'use_path_style_endpoint' => env('BACKUP_SECONDARY_USE_PATH_STYLE_ENDPOINT', false),
+            'root' => env('BACKUP_SECONDARY_ROOT', 'kkk-os'),
+            'visibility' => 'private',
+            'throw' => true,
+            'report' => true,
+        ],
+
         's3' => [
             'driver' => 's3',
             'key' => env('AWS_ACCESS_KEY_ID'),

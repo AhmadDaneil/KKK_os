@@ -67,6 +67,18 @@
 body[data-staff-theme]:not([data-staff-theme="default"]) .staff-correction-note{border-left-color:var(--staff-primary)}
 @media(max-width:600px){.staff-correction-note-heading{align-items:flex-start;flex-wrap:wrap}.staff-correction-note-state{margin-left:44px}.staff-correction-note footer{align-items:flex-start;flex-direction:column}}
 
+/* Prominent packing verification controls for Operation Management. */
+.staff-packing-checklist{gap:8px}.staff-packing-checklist .staff-contact-row{min-height:66px;padding:11px 12px;border:1px solid #d6dfd9;border-left:4px solid #d39a38;border-radius:9px;background:#fffaf1}
+.staff-packing-checklist .staff-contact-row.is-verified{border-color:#b9d9c6;border-left-color:#2d8a5b;background:#f3fbf6}
+.staff-packing-item-name{display:grid;min-width:0;gap:3px}.staff-packing-item-name>span{color:#24342d;font-size:13px;font-weight:850}.staff-packing-item-name>small{color:#68776f;font-size:10px;line-height:1.35}
+.staff-packing-checklist form{margin:0}.staff-verify-button{display:inline-flex;min-width:142px;min-height:42px;padding:9px 14px;align-items:center;justify-content:center;gap:7px;border-color:#17613f;color:#fff;background:#17613f;font-size:12px;font-weight:850;box-shadow:0 5px 13px rgba(23,97,63,.2)}
+.staff-verify-button:hover,.staff-verify-button:focus-visible{border-color:#104a30;color:#fff;background:#104a30;box-shadow:0 7px 17px rgba(23,97,63,.28);transform:translateY(-1px)}
+.staff-verify-button>span,.staff-verified-badge>span{display:grid;width:19px;height:19px;place-items:center;border-radius:50%;color:#17613f;background:#fff;font-size:12px}
+.staff-verified-badge,.staff-unverified-badge{display:inline-flex;padding:6px 9px;align-items:center;gap:6px;border-radius:999px;font-size:10px;font-weight:850;white-space:nowrap}
+.staff-verified-badge{color:#17613f;background:#dff3e7}.staff-unverified-badge{color:#8a5a0d;background:#fff0cc}
+.admin-operations-mode .staff-verify-button{border-color:#765315;background:#765315;box-shadow:0 5px 13px rgba(118,83,21,.22)}.admin-operations-mode .staff-verify-button:hover{border-color:#5e410e;background:#5e410e}
+@media(max-width:560px){.staff-packing-checklist .staff-contact-row{align-items:stretch;flex-direction:column}.staff-packing-checklist form,.staff-verify-button{width:100%}}
+
 @media (max-width:760px){
     .admin-main{width:min(100% - 20px,1320px);padding:12px 0 32px}
     .admin-topbar,.staff-topbar{min-height:60px;padding:9px 14px}
