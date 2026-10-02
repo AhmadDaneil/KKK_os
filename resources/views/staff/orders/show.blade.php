@@ -751,6 +751,12 @@
 
                             @if (in_array($payment->payment_type, ['BOOKING_DEPOSIT', 'BALANCE', 'ARTWORK_CORRECTION'], true) && ! empty($payment->metadata['receipt_path']))
                                 <div class="staff-payment-actions">
+                                    @if (auth()->user()->isOperationManagement())
+                                        <div class="staff-receipt-action-row">
+                                            <div><strong>Bukti pembayaran</strong><small>Semak resit sebelum mengesahkan bayaran.</small></div>
+                                            <a class="staff-button staff-receipt-button" target="_blank" rel="noopener" href="{{ route($operationRoutePrefix.'payments.receipt', $payment) }}" title="Buka resit pembayaran dalam tab baharu"><span aria-hidden="true">▤</span> Lihat Resit <small aria-hidden="true">↗</small></a>
+                                        </div>
+                                    @endif
                                     @if ($payment->payment_type === 'ARTWORK_CORRECTION')
                                         <aside class="staff-correction-note staff-correction-note--payment" aria-label="Komen pembetulan pelanggan">
                                             <div class="staff-correction-note-heading">
@@ -772,9 +778,6 @@
                                                 <button class="staff-button staff-button-danger" type="submit">Tolak Resit Pembetulan</button>
                                             </form>
                                         @endif
-                                    @endif
-                                    @if (auth()->user()->isOperationManagement())
-                                    <a class="staff-button staff-button-small" target="_blank" rel="noopener" href="{{ route($operationRoutePrefix.'payments.receipt', $payment) }}">Lihat Resit</a>
                                     @endif
                                     @if ($payment->payment_type === 'BOOKING_DEPOSIT' && auth()->user()->isOperationManagement() && $payment->status === 'PENDING')
                                         <form method="POST" action="{{ route($operationRoutePrefix.'payments.deposit.approve', $payment) }}" class="staff-field js-staff-confirmation-form" data-confirm-title="Sahkan bayaran deposit?" data-confirm-message="Pastikan jumlah bayaran pada resit telah dimasukkan dengan betul. Selepas disahkan, tempahan akan diteruskan ke proses seterusnya." data-confirm-button="Ya, sahkan deposit">
