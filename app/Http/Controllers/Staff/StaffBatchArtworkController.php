@@ -29,11 +29,13 @@ class StaffBatchArtworkController extends Controller
 
         $validated = $request->validate([
             'artworks' => ['required', 'array', 'min:2'],
-            'artworks.*' => ['required', 'array:source_artwork,customer_preview,internal_note'],
+            'artworks.*' => ['required', 'array:source_artwork,customer_preview,banner_preview,banting_preview,internal_note'],
             'artworks.*.source_artwork' => ['required', 'array', 'min:1', 'max:20'],
             'artworks.*.source_artwork.*' => ['required', 'file', 'mimes:psd,pdf', 'max:102400'],
             'artworks.*.customer_preview' => ['required', 'array', 'min:1', 'max:20'],
             'artworks.*.customer_preview.*' => ['required', 'file', 'mimes:jpg,jpeg,png', 'max:20480'],
+            'artworks.*.banner_preview' => ['nullable', 'file', 'mimes:jpg,jpeg,png', 'max:20480'],
+            'artworks.*.banting_preview' => ['nullable', 'file', 'mimes:jpg,jpeg,png', 'max:20480'],
             'artworks.*.internal_note' => ['nullable', 'string', 'max:5000'],
         ]);
 
@@ -74,6 +76,8 @@ class StaffBatchArtworkController extends Controller
                         $jobs->get((int) $jobId),
                         $files['source_artwork'],
                         $files['customer_preview'],
+                        $files['banner_preview'] ?? null,
+                        $files['banting_preview'] ?? null,
                         $files['internal_note'] ?? null,
                         $request,
                         $service,
@@ -131,6 +135,8 @@ class StaffBatchArtworkController extends Controller
         DesignJob $job,
         array $sources,
         array $previews,
+        ?UploadedFile $bannerPreview,
+        ?UploadedFile $bantingPreview,
         ?string $internalNote,
         Request $request,
         CreateArtworkVersionService $service,
@@ -147,6 +153,12 @@ class StaffBatchArtworkController extends Controller
 
         $sourceFiles = $this->storeFileCollection($sources, $directory, 'source', $storedPaths);
         $previewFiles = $this->storeFileCollection($previews, $directory, 'preview', $storedPaths, $watermark);
+        if ($bannerPreview) {
+            $previewFiles = [...$previewFiles, ...$this->storeFileCollection([$bannerPreview], $directory, 'banner-preview', $storedPaths, $watermark, 'BANNER', 2.0)];
+        }
+        if ($bantingPreview) {
+            $previewFiles = [...$previewFiles, ...$this->storeFileCollection([$bantingPreview], $directory, 'banting-preview', $storedPaths, $watermark, 'BANTING', .5)];
+        }
         $primarySource = $sourceFiles[0];
         $primaryPreview = $previewFiles[0];
 
@@ -189,7 +201,9 @@ class StaffBatchArtworkController extends Controller
         string $directory,
         string $prefix,
         array &$storedPaths,
-        ?WatermarkArtworkPreviewService $watermark = null
+        ?WatermarkArtworkPreviewService $watermark = null,
+        string $artworkType = 'CARD',
+        float $targetRatio = 2 / 3
     ): array {
         $disk = Storage::disk('local');
         $storedFiles = [];
@@ -219,7 +233,8 @@ class StaffBatchArtworkController extends Controller
             if ($watermark !== null) {
                 $watermarkedPath = $watermark->create(
                     $path,
-                    $directory.'/preview-watermarked-'.($index + 1).'.jpg'
+                    $directory.'/'.$prefix.'-watermarked-'.($index + 1).'.jpg',
+                    $targetRatio
                 );
 
                 if ($watermarkedPath !== null) {
@@ -235,6 +250,7 @@ class StaffBatchArtworkController extends Controller
                 'checksum_sha256' => $checksum,
                 'watermarked_path' => $watermarkedPath,
                 'watermark_version' => $watermarkedPath === null ? null : WatermarkArtworkPreviewService::VERSION,
+                'artwork_type' => $artworkType,
             ];
         }
 

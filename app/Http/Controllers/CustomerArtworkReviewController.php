@@ -148,7 +148,13 @@ class CustomerArtworkReviewController extends Controller
             ?: dirname($sourcePath).'/customer-preview-watermarked-'.($previewIndex + 1).'.jpg';
 
         try {
-            $path = $watermark->create($sourcePath, $watermarkedPath);
+            $artworkType = strtoupper((string) data_get($previewFile, 'artwork_type', 'CARD'));
+            $targetRatio = match ($artworkType) {
+                'BANNER' => 2.0,
+                'BANTING' => .5,
+                default => 2 / 3,
+            };
+            $path = $watermark->create($sourcePath, $watermarkedPath, $targetRatio);
         } catch (\RuntimeException) {
             // Preserve access to legacy test/corrupt files instead of exposing
             // an error page. A valid image is upgraded on its next request.

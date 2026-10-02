@@ -106,22 +106,6 @@ class PublicOrderController extends Controller
             $sessionAccess->establishFromProgressLookup($request, $order);
         }
 
-        $artworkPreviews = $artworkReady
-            ? $order->designJobs
-                ->filter(fn ($job) => in_array($job->status, [
-                    'DESIGN_READY',
-                    'CORRECTION_REQUESTED',
-                    'DESIGN_APPROVED',
-                ], true) && $job->artworkVersions->isNotEmpty())
-                ->map(fn ($job) => [
-                    'design_job_id' => $job->id,
-                    'side' => $job->side,
-                    'status' => $job->status,
-                    'version' => $job->artworkVersions->max('version_number'),
-                ])
-                ->values()
-            : collect();
-
         return view('public.order-progress', [
             'orderId' => $order->order_id,
             'orderStatus' => $order->status,
@@ -146,7 +130,6 @@ class PublicOrderController extends Controller
             'balanceQrImage' => (string) config('kingkadkahwin.balance.qr_image'),
             'artworkReady' => $artworkReady,
             'canAccessArtwork' => $sessionAccess->hasAccess($request, $order),
-            'artworkPreviews' => $artworkPreviews,
         ]);
     }
 }

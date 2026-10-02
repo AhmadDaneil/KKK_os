@@ -557,6 +557,27 @@
                                                         </span>
                                                     </div>
 
+                                                    <div class="staff-supplementary-artworks">
+                                                        <div class="staff-supplementary-heading">
+                                                            <h4>Artwork Tambahan</h4>
+                                                            <p>Muat naik jika pelanggan menempah banner atau banting. Nisbah akan dikekalkan mengikut contoh.</p>
+                                                        </div>
+                                                        <div class="staff-supplementary-grid">
+                                                            <div class="staff-field">
+                                                                <label for="banner-preview-{{ $job->id }}">Preview Banner <span class="staff-optional">(pilihan)</span></label>
+                                                                <span class="staff-artwork-ratio staff-artwork-ratio--banner" aria-hidden="true">2 : 1</span>
+                                                                <input id="banner-preview-{{ $job->id }}" type="file" name="{{ $isBatchArtworkJob ? 'artworks['.$job->id.'][banner_preview]' : 'banner_preview' }}" @if ($isBatchArtworkJob) form="batch-artwork-upload" @endif accept=".jpg,.jpeg,.png,image/jpeg,image/png">
+                                                                <span class="staff-field-help">Format melintang 2:1 seperti 1280 × 640 px.</span>
+                                                            </div>
+                                                            <div class="staff-field">
+                                                                <label for="banting-preview-{{ $job->id }}">Preview Banting <span class="staff-optional">(pilihan)</span></label>
+                                                                <span class="staff-artwork-ratio staff-artwork-ratio--banting" aria-hidden="true">1 : 2</span>
+                                                                <input id="banting-preview-{{ $job->id }}" type="file" name="{{ $isBatchArtworkJob ? 'artworks['.$job->id.'][banting_preview]' : 'banting_preview' }}" @if ($isBatchArtworkJob) form="batch-artwork-upload" @endif accept=".jpg,.jpeg,.png,image/jpeg,image/png">
+                                                                <span class="staff-field-help">Format menegak 1:2 seperti 640 × 1280 px.</span>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+
                                                     <div class="staff-field">
                                                         <label for="customer-preview-{{ $job->id }}">
                                                             Pratonton Pelanggan

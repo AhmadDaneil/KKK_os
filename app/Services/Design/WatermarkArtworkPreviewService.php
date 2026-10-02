@@ -21,7 +21,7 @@ class WatermarkArtworkPreviewService
      * Creates a watermarked customer-facing image preview. PDFs are displayed
      * through the protected customer review page instead and return null here.
      */
-    public function create(string $sourcePath, string $destinationPath): ?string
+    public function create(string $sourcePath, string $destinationPath, float $targetRatio = 2 / 3): ?string
     {
         $extension = strtolower(pathinfo($sourcePath, PATHINFO_EXTENSION));
 
@@ -42,7 +42,7 @@ class WatermarkArtworkPreviewService
         }
 
         try {
-            $image = $this->resizeForCustomerPreview($sourceImage);
+            $image = $this->resizeForCustomerPreview($sourceImage, $targetRatio);
             imagedestroy($sourceImage);
 
             $this->applyCenteredWatermark($image);
@@ -68,11 +68,11 @@ class WatermarkArtworkPreviewService
         return $destinationPath;
     }
 
-    private function resizeForCustomerPreview(\GdImage $source): \GdImage
+    private function resizeForCustomerPreview(\GdImage $source, float $targetRatio): \GdImage
     {
         $sourceWidth = imagesx($source);
         $sourceHeight = imagesy($source);
-        $targetRatio = 2 / 3;
+        $targetRatio = max(.25, min(4, $targetRatio));
         $sourceRatio = $sourceWidth / $sourceHeight;
 
         if ($sourceRatio > $targetRatio) {

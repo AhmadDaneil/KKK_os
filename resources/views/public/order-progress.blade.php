@@ -72,23 +72,6 @@
                         </div>
                         <a class="button button-primary" href="{{ route('orders.artwork.review', ['orderId' => $orderId]) }}">Buka Semakan Penuh</a>
                     </div>
-                    @if (($artworkPreviews ?? collect())->isNotEmpty())
-                        <div class="public-artwork-previews">
-                            @foreach ($artworkPreviews as $artwork)
-                                <article>
-                                    <div><strong>Kad Pihak {{ ucfirst(strtolower($artwork['side'])) }}</strong><span>Versi hasil design {{ $artwork['version'] }}</span></div>
-                                    <div class="public-artwork-preview-frame">
-                                    <img
-                                        src="{{ route('orders.artwork.preview', ['orderId' => $orderId, 'designJobId' => $artwork['design_job_id']]) }}"
-                                        title="Pratonton hasil design pihak {{ strtolower($artwork['side']) }}"
-                                        alt="Pratonton hasil design kad 4 kali 6 pihak {{ strtolower($artwork['side']) }}"
-                                        loading="lazy"
-                                    >
-                                    </div>
-                                </article>
-                            @endforeach
-                        </div>
-                    @endif
                 @endif
                 @if ($deposit)
                     <div class="deposit-public-status" data-status="{{ strtolower($deposit['status']) }}">

@@ -114,6 +114,8 @@ class StaffDesignWorkflowController extends Controller
             'source_artwork.*' => ['required', 'file', 'mimes:psd,pdf', 'max:102400'],
             'customer_preview' => ['required', 'array', 'min:1', 'max:20'],
             'customer_preview.*' => ['required', 'file', 'mimes:jpg,jpeg,png', 'max:20480'],
+            'banner_preview' => ['nullable', 'file', 'mimes:jpg,jpeg,png', 'max:20480'],
+            'banting_preview' => ['nullable', 'file', 'mimes:jpg,jpeg,png', 'max:20480'],
             'internal_note' => [
                 'nullable',
                 'string',
@@ -170,6 +172,12 @@ class StaffDesignWorkflowController extends Controller
                 $storedPaths,
                 $watermark
             );
+            if (! empty($validated['banner_preview'])) {
+                $previewFiles = [...$previewFiles, ...$this->storeFileCollection([$validated['banner_preview']], $directory, 'banner-preview', $storedPaths, $watermark, 'BANNER', 2.0)];
+            }
+            if (! empty($validated['banting_preview'])) {
+                $previewFiles = [...$previewFiles, ...$this->storeFileCollection([$validated['banting_preview']], $directory, 'banting-preview', $storedPaths, $watermark, 'BANTING', .5)];
+            }
             $primarySource = $sourceFiles[0];
             $primaryPreview = $previewFiles[0];
 
@@ -258,7 +266,9 @@ class StaffDesignWorkflowController extends Controller
         string $directory,
         string $prefix,
         array &$storedPaths,
-        ?WatermarkArtworkPreviewService $watermark = null
+        ?WatermarkArtworkPreviewService $watermark = null,
+        string $artworkType = 'CARD',
+        float $targetRatio = 2 / 3
     ): array {
         $disk = Storage::disk('local');
         $storedFiles = [];
@@ -288,7 +298,8 @@ class StaffDesignWorkflowController extends Controller
             if ($watermark !== null) {
                 $watermarkedPath = $watermark->create(
                     $path,
-                    $directory.'/preview-watermarked-'.($index + 1).'.jpg'
+                    $directory.'/'.$prefix.'-watermarked-'.($index + 1).'.jpg',
+                    $targetRatio
                 );
 
                 if ($watermarkedPath !== null) {
@@ -304,6 +315,7 @@ class StaffDesignWorkflowController extends Controller
                 'checksum_sha256' => $checksum,
                 'watermarked_path' => $watermarkedPath,
                 'watermark_version' => $watermarkedPath === null ? null : WatermarkArtworkPreviewService::VERSION,
+                'artwork_type' => $artworkType,
             ];
         }
 
