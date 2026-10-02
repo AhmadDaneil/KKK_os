@@ -439,6 +439,13 @@ try{
             if(!gambarFile.exists) gambarFile = new File(ROOT + "/" + gambarRaw);
             if(!gambarFile.exists) gambarFile = new File(ROOT + "/MASTER/" + gambarRaw);
             if(gambarFile.exists) gambarPath = gambarFile.fsName;
+            if(gambarPath === ""){
+                var selectedImage = File.openDialog(
+                    "Pilih gambar pengantin untuk " + NoInv,
+                    "Gambar:*.jpg;*.jpeg;*.png;*.webp"
+                );
+                if(selectedImage && selectedImage.exists) gambarPath = selectedImage.fsName;
+            }
         }
 
         if(majlis !== "LELAKI" && majlis !== "PEREMPUAN"){
