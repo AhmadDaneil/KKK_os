@@ -4,6 +4,7 @@ namespace App\Services\Photoshop;
 
 use App\Models\MergeJob;
 use Carbon\CarbonImmutable;
+use Illuminate\Support\Facades\Storage;
 use RuntimeException;
 
 class BuildPhotoshopAutoMergeRowService
@@ -88,8 +89,9 @@ class BuildPhotoshopAutoMergeRowService
             'tema' => $theme,
             'designcode' => $designCode,
 
-            // `gambar` remains compatibility-only.
-            'gambar' => '',
+            // Photoshop runs on the same workstation as the CSV export, so
+            // provide the absolute private-storage path when a customer image exists.
+            'gambar' => $this->cardImagePath($design['card_image_path'] ?? null),
 
             // `majlis` is now actively consumed by the approved side-aware JSX:
             // LELAKI = groom above bride; PEREMPUAN = bride above groom.
@@ -106,7 +108,7 @@ class BuildPhotoshopAutoMergeRowService
             'hari' => strtoupper($this->text($event['day_name'] ?? '')),
             'tarikh' => $date ? $this->fullMalayDate($date) : '',
             'tarikhhari' => $date ? (string) $date->day : '',
-            'bulan' => $date ? self::MONTH_SHORT_MS[$date->month] . ' ' . $date->year : '',
+            'bulan' => $date ? self::MONTH_SHORT_MS[$date->month].' '.$date->year : '',
             'bulanislam' => $this->text($event['hijri_date'] ?? ''),
 
             // Current JSX writes these values exactly; no Photoshop-side formatting.
@@ -142,9 +144,20 @@ class BuildPhotoshopAutoMergeRowService
         }
     }
 
+    private function cardImagePath(mixed $path): string
+    {
+        $path = trim((string) $path);
+
+        if ($path === '') {
+            return '';
+        }
+
+        return Storage::disk('local')->path($path);
+    }
+
     private function fullMalayDate(CarbonImmutable $date): string
     {
-        return $date->day . ' ' . self::MONTH_FULL_MS[$date->month] . ' ' . $date->year;
+        return $date->day.' '.self::MONTH_FULL_MS[$date->month].' '.$date->year;
     }
 
     private function contactsByNumber(array $contacts): array
@@ -174,7 +187,7 @@ class BuildPhotoshopAutoMergeRowService
         // because the current JSX itself appends " PCS" to output names.
         if (! preg_match('/^\s*(\d+)(?:\s*PCS)?\s*$/i', $raw, $match)) {
             throw new RuntimeException(
-                "qtykad must be a positive whole-number card quantity."
+                'qtykad must be a positive whole-number card quantity.'
             );
         }
 
@@ -198,7 +211,7 @@ class BuildPhotoshopAutoMergeRowService
 
         // Preserve optional leading + and numeric digits.
         if (str_starts_with($value, '+')) {
-            return '+' . preg_replace('/\D+/', '', substr($value, 1));
+            return '+'.preg_replace('/\D+/', '', substr($value, 1));
         }
 
         return preg_replace('/\D+/', '', $value);

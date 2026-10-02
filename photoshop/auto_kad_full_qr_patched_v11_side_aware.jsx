@@ -131,6 +131,55 @@ function setTextIfExistsInDoc(doc, layerName, value){
     return false;
 }
 
+function findLayerByNames(doc, names){
+    try{
+        function matches(name){
+            var lower = s(name).toLowerCase();
+            for(var n=0;n<names.length;n++){
+                if(lower === names[n]) return true;
+            }
+            return false;
+        }
+        function walk(container){
+            for(var i=0;i<container.layers.length;i++){
+                var L = container.layers[i];
+                if(matches(L.name)) return L;
+                if(L.typename === "LayerSet"){
+                    var nested = walk(L);
+                    if(nested) return nested;
+                }
+            }
+            return null;
+        }
+        return walk(doc);
+    }catch(e){ return null; }
+}
+
+function centerTextLayerInDocument(doc, layerName){
+    try{
+        var layer = findLayerByNames(doc, [t(layerName).toLowerCase()]);
+        if(!layer || layer.kind != LayerKind.TEXT) return false;
+        try{ layer.textItem.justification = Justification.CENTER; }catch(e){}
+        var b = _boundsPx(layer);
+        var docCenter = doc.width.as("px") / 2;
+        _translate(docCenter - b.cx, 0);
+        return true;
+    }catch(e){ return false; }
+}
+
+function replaceCardImageIfExists(doc, imagePath){
+    if(!imagePath || t(imagePath) === "") return false;
+    var imageLayer = findLayerByNames(doc, ["gambar", "cardimage", "card_image", "gambar pengantin", "pengantin", "photo", "image"]);
+    if(!imageLayer) return false;
+    try{
+        imageLayer = convertToSmartObjectIfNeeded(imageLayer);
+        var targetBox = _boundsPx(imageLayer);
+        if(!replaceSmartObjectContents(imageLayer, imagePath)) return false;
+        fitLayerToBox(imageLayer, targetBox);
+        return true;
+    }catch(e){ return false; }
+}
+
 // ---------- Smart Object replace + AUTO-FIT ----------
 function convertToSmartObjectIfNeeded(layer){
     try{
@@ -299,6 +348,7 @@ try{
     var iTema   = idx("Tema");
     var iCode   = idx("DesignCode");
     var iMajlis = idx("majlis");
+    var iGambar = idx("gambar");
     var iNamaL  = idx("namapengantinlelaki");
     var iNamaP  = idx("namapengantinperempuan");
     var iSingL  = idx("singkatanlelaki");
@@ -334,6 +384,14 @@ try{
         var tema = t(g(iTema));
         var code = t(g(iCode));
         var majlis = t(g(iMajlis)).toUpperCase();
+        var gambarRaw = t(g(iGambar));
+        var gambarPath = "";
+        if(gambarRaw !== ""){
+            var gambarFile = new File(gambarRaw);
+            if(!gambarFile.exists) gambarFile = new File(ROOT + "/" + gambarRaw);
+            if(!gambarFile.exists) gambarFile = new File(ROOT + "/MASTER/" + gambarRaw);
+            if(gambarFile.exists) gambarPath = gambarFile.fsName;
+        }
 
         if(majlis !== "LELAKI" && majlis !== "PEREMPUAN"){
             logAppend(logPath, "[SKIP] " + NoInv + " | majlis tidak sah: " + majlis);
@@ -426,6 +484,8 @@ try{
             setTextIfExistsInDoc(doc, "namapengantinperempuan", namaBawah);
             setTextIfExistsInDoc(doc, "singkatanlelaki", singAtas);
             setTextIfExistsInDoc(doc, "singkatanperempuan", singBawah);
+            centerTextLayerInDocument(doc, "namapengantinlelaki");
+            centerTextLayerInDocument(doc, "namapengantinperempuan");
             setTextIfExistsInDoc(doc, "nama1", nama1); setTextIfExistsInDoc(doc, "notel1", notel1);
             setTextIfExistsInDoc(doc, "nama2", nama2); setTextIfExistsInDoc(doc, "notel2", notel2);
             setTextIfExistsInDoc(doc, "nama3", nama3); setTextIfExistsInDoc(doc, "notel3", notel3);
@@ -454,6 +514,11 @@ try{
                 .replace(/_patched$/i,"");
 
             var itemQty = fixedQtyForItem(tplName, qty);
+            var tplLower = tplName.toLowerCase();
+            if(gambarPath !== "" && (tplLower.indexOf("banner") >= 0 || tplLower.indexOf("banting") >= 0)){
+                if(replaceCardImageIfExists(doc, gambarPath)) logBoth(logPath, custLogPath, "[IMAGE] Gambar pengantin diganti untuk " + tplName + ".");
+                else logBoth(logPath, custLogPath, "[IMAGE] Layer gambar tidak ditemui untuk " + tplName + ".");
+            }
             var outBase = safeName(
                 NoInv + " " + majlis + " " + tplName +
                 (namesShort!==""?(" " + namesShort):"") +
