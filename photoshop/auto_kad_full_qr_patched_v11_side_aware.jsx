@@ -198,7 +198,29 @@ function hasCustomerPhotoLayer(doc){
     return findLayerByNames(doc, ["gambar", "cardimage", "card_image", "gambar pengantin", "pengantin", "photo", "image"]) !== null;
 }
 
-function addCustomerPhotoOverlay(doc, imagePath, isBanner){
+function layerContainsText(layer){
+    try{
+        if(layer.kind == LayerKind.TEXT) return true;
+        if(layer.typename != "LayerSet") return false;
+        for(var i=0;i<layer.layers.length;i++){
+            if(layerContainsText(layer.layers[i])) return true;
+        }
+    }catch(e){}
+    return false;
+}
+
+function bringTextGroupsToFront(doc, photoLayer){
+    try{
+        for(var i=doc.layers.length-1;i>=0;i--){
+            var layer = doc.layers[i];
+            if(layer !== photoLayer && layerContainsText(layer)){
+                layer.move(photoLayer, ElementPlacement.PLACEBEFORE);
+            }
+        }
+    }catch(e){}
+}
+
+function addCustomerPhotoBackground(doc, imagePath){
     var photoDoc = null;
     try{
         photoDoc = app.open(new File(imagePath));
@@ -212,15 +234,13 @@ function addCustomerPhotoOverlay(doc, imagePath, isBanner){
 
         var width = doc.width.as("px");
         var height = doc.height.as("px");
-        var box = isBanner
-            ? { x: width * 0.74, y: height * 0.43, w: width * 0.22, h: height * 0.48 }
-            : { x: width * 0.18, y: height * 0.45, w: width * 0.64, h: height * 0.46 };
         var current = _boundsPx(photoLayer);
         if(current.w <= 0 || current.h <= 0) return false;
-        var scale = Math.min(box.w / current.w, box.h / current.h) * 100;
+        var scale = Math.max(width / current.w, height / current.h) * 100;
         _transformScalePercent(scale);
         current = _boundsPx(photoLayer);
-        _translate(box.x + (box.w / 2) - current.cx, box.y + (box.h / 2) - current.cy);
+        _translate((width / 2) - current.cx, (height / 2) - current.cy);
+        bringTextGroupsToFront(doc, photoLayer);
         return true;
     }catch(e){
         if(photoDoc) closeDocNoSave(photoDoc);
@@ -597,7 +617,7 @@ try{
             if(gambarPath !== "" && (tplLower.indexOf("banner") >= 0 || tplLower.indexOf("banting") >= 0)){
                 var isBanner = tplLower.indexOf("banner") >= 0;
                 var imageAdded = hasCustomerPhotoLayer(doc) && replaceCardImageIfExists(doc, gambarPath);
-                if(!imageAdded) imageAdded = addCustomerPhotoOverlay(doc, gambarPath, isBanner);
+                if(!imageAdded) imageAdded = addCustomerPhotoBackground(doc, gambarPath);
                 if(imageAdded){
                     var photoBase = safeName(outBase + " GAMBAR PENGANTIN");
                     var photoJpeg = fJPEG.fsName + "/" + photoBase + ".jpg";
