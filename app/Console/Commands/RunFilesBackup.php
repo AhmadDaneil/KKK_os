@@ -2,7 +2,7 @@
 
 namespace App\Console\Commands;
 
-use App\Services\Backup\ProductionDatabaseBackupService;
+use App\Services\Backup\ProductionFilesBackupService;
 use DateTimeInterface;
 use Illuminate\Console\Attributes\Description;
 use Illuminate\Console\Attributes\Signature;
@@ -11,14 +11,14 @@ use Illuminate\Contracts\Console\Isolatable;
 use Illuminate\Support\Facades\Log;
 use Throwable;
 
-#[Signature('backup:database {--force : Run even when BACKUP_ENABLED is false}')]
-#[Description('Create, replicate, verify, and retain a full KKK OS database backup')]
-class RunDatabaseBackup extends Command implements Isolatable
+#[Signature('backup:files {--force : Run even when BACKUP_ENABLED is false}')]
+#[Description('Archive, replicate, verify, and retain KKK OS application files')]
+class RunFilesBackup extends Command implements Isolatable
 {
-    public function handle(ProductionDatabaseBackupService $backupService): int
+    public function handle(ProductionFilesBackupService $backupService): int
     {
         if (! config('backup.enabled') && ! $this->option('force')) {
-            $this->error('Database backup is disabled. Set BACKUP_ENABLED=true after both locations are configured.');
+            $this->error('Application files backup is disabled. Set BACKUP_ENABLED=true after restore testing.');
 
             return self::FAILURE;
         }
@@ -27,7 +27,7 @@ class RunDatabaseBackup extends Command implements Isolatable
             $result = $backupService->run();
         } catch (Throwable $exception) {
             report($exception);
-            Log::error('Database backup failed.', ['exception' => $exception]);
+            Log::error('Application files backup failed.', ['exception' => $exception]);
             $this->error($exception->getMessage());
 
             if ($exception->getPrevious() !== null) {
@@ -37,7 +37,7 @@ class RunDatabaseBackup extends Command implements Isolatable
             return self::FAILURE;
         }
 
-        Log::info('Database backup completed and verified.', [
+        Log::info('Application files backup completed and verified.', [
             'backup_id' => $result['backup_id'],
             'sha256' => $result['sha256'],
             'size_bytes' => $result['size_bytes'],
@@ -45,10 +45,11 @@ class RunDatabaseBackup extends Command implements Isolatable
             'retention_errors' => $result['retention_errors'],
         ]);
 
-        $this->info('Database backup created and verified in both configured locations.');
+        $this->info('Application files backup created and verified in both configured locations.');
         $this->line('Backup ID: '.$result['backup_id']);
         $this->line('SHA-256: '.$result['sha256']);
         $this->line('Size: '.$result['size_bytes'].' bytes');
+        $this->line('Files: '.$result['file_count']);
         $this->line('Disks: '.implode(', ', $result['disks']));
 
         if ($result['retention_errors'] !== []) {
@@ -56,7 +57,7 @@ class RunDatabaseBackup extends Command implements Isolatable
                 $this->warn($error);
             }
 
-            $this->error('The new backup is safe, but retention needs operator attention.');
+            $this->error('The new files backup is safe, but retention needs operator attention.');
 
             return self::FAILURE;
         }
@@ -66,7 +67,7 @@ class RunDatabaseBackup extends Command implements Isolatable
 
     public function isolatableId(): string
     {
-        return (string) (config('backup.database.connection') ?: config('database.default'));
+        return 'application-files';
     }
 
     public function isolationLockExpiresAt(): DateTimeInterface

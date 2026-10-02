@@ -21,4 +21,16 @@ return [
             'pgsql' => env('BACKUP_PG_DUMP_BINARY', 'pg_dump'),
         ],
     ],
+
+    'files' => [
+        'disks' => $databaseDisks,
+        'path' => 'application-files',
+        'sources' => [
+            'private' => storage_path('app/private'),
+            'public' => storage_path('app/public'),
+        ],
+        'daily_at' => env('BACKUP_FILES_DAILY_AT', '02:30'),
+        'retention_days' => (int) env('BACKUP_FILES_RETENTION_DAYS', 30),
+        'temporary_directory' => env('BACKUP_FILES_TEMPORARY_DIRECTORY', storage_path('app/backup-tmp/files')),
+    ],
 ];
