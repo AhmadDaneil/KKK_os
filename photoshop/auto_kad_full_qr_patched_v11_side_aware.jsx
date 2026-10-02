@@ -131,6 +131,94 @@ function setTextIfExistsInDoc(doc, layerName, value){
     return false;
 }
 
+function findLayerByNames(doc, names){
+    try{
+        function matches(name){
+            var lower = s(name).toLowerCase();
+            for(var n=0;n<names.length;n++){
+                if(lower === names[n]) return true;
+            }
+            return false;
+        }
+        function walk(container){
+            for(var i=0;i<container.layers.length;i++){
+                var L = container.layers[i];
+                if(matches(L.name)) return L;
+                if(L.typename === "LayerSet"){
+                    var nested = walk(L);
+                    if(nested) return nested;
+                }
+            }
+            return null;
+        }
+        return walk(doc);
+    }catch(e){ return null; }
+}
+
+function centerTextLayerInDocument(doc, layerName){
+    try{
+        var layer = findLayerByNames(doc, [t(layerName).toLowerCase()]);
+        if(!layer || layer.kind != LayerKind.TEXT) return false;
+        app.activeDocument = doc;
+        doc.activeLayer = layer;
+        try{ layer.textItem.justification = Justification.CENTER; }catch(e){}
+        var b = _boundsPx(layer);
+        var docCenter = doc.width.as("px") / 2;
+        _translate(docCenter - b.cx, 0);
+        return true;
+    }catch(e){ return false; }
+}
+
+function replaceCardImageIfExists(doc, imagePath){
+    if(!imagePath || t(imagePath) === "") return false;
+    var imageLayer = findLayerByNames(doc, ["gambar", "cardimage", "card_image", "gambar pengantin", "pengantin", "photo", "image"]);
+    if(!imageLayer) return false;
+    try{
+        imageLayer = convertToSmartObjectIfNeeded(imageLayer);
+        var targetBox = _boundsPx(imageLayer);
+        if(!replaceSmartObjectContents(imageLayer, imagePath)) return false;
+        fitLayerToBox(imageLayer, targetBox);
+        return true;
+    }catch(e){ return false; }
+}
+
+function addCustomerPhoto(doc, imagePath, isBanner){
+    var photoDoc = null;
+    try{
+        photoDoc = app.open(new File(imagePath));
+        var photoLayer = photoDoc.activeLayer.duplicate(doc, ElementPlacement.PLACEATBEGINNING);
+        closeDocNoSave(photoDoc);
+        photoDoc = null;
+
+        app.activeDocument = doc;
+        doc.activeLayer = photoLayer;
+        photoLayer.name = "Gambar Pengantin";
+
+        var width = doc.width.as("px");
+        var height = doc.height.as("px");
+        var box = isBanner
+            ? { x: width * 0.60, y: height * 0.12, w: width * 0.35, h: height * 0.76 }
+            : { x: width * 0.20, y: height * 0.38, w: width * 0.60, h: height * 0.54 };
+        var current = _boundsPx(photoLayer);
+        if(current.w <= 0 || current.h <= 0) return false;
+        var scale = Math.min(box.w / current.w, box.h / current.h) * 100;
+        _transformScalePercent(scale);
+        current = _boundsPx(photoLayer);
+        _translate(box.x + (box.w / 2) - current.cx, box.y + (box.h / 2) - current.cy);
+
+        for(var i=doc.layers.length-1;i>=0;i--){
+            if(doc.layers[i] !== photoLayer){
+                photoLayer.move(doc.layers[i], ElementPlacement.PLACEBEFORE);
+                break;
+            }
+        }
+        return true;
+    }catch(e){
+        if(photoDoc) closeDocNoSave(photoDoc);
+        return false;
+    }
+}
+
 // ---------- Smart Object replace + AUTO-FIT ----------
 function convertToSmartObjectIfNeeded(layer){
     try{
@@ -299,6 +387,7 @@ try{
     var iTema   = idx("Tema");
     var iCode   = idx("DesignCode");
     var iMajlis = idx("majlis");
+    var iGambar = idx("gambar");
     var iNamaL  = idx("namapengantinlelaki");
     var iNamaP  = idx("namapengantinperempuan");
     var iSingL  = idx("singkatanlelaki");
@@ -334,6 +423,14 @@ try{
         var tema = t(g(iTema));
         var code = t(g(iCode));
         var majlis = t(g(iMajlis)).toUpperCase();
+        var gambarRaw = t(g(iGambar));
+        var gambarPath = "";
+        if(gambarRaw !== ""){
+            var gambarFile = new File(gambarRaw);
+            if(!gambarFile.exists) gambarFile = new File(ROOT + "/" + gambarRaw);
+            if(!gambarFile.exists) gambarFile = new File(ROOT + "/MASTER/" + gambarRaw);
+            if(gambarFile.exists) gambarPath = gambarFile.fsName;
+        }
 
         if(majlis !== "LELAKI" && majlis !== "PEREMPUAN"){
             logAppend(logPath, "[SKIP] " + NoInv + " | majlis tidak sah: " + majlis);
@@ -391,6 +488,7 @@ try{
         var custLogPath = custRoot.fsName + "/_customer_log.txt";
         logAppend(custLogPath, "===== " + nowStamp() + " | " + NoInv + " | " + custFolderSafe + " =====");
         logBoth(logPath, custLogPath, "---- " + nowStamp() + " | " + NoInv + " | " + custFolderSafe + " ----");
+        if(gambarRaw !== "" && gambarPath === "") logBoth(logPath, custLogPath, "[IMAGE] Fail gambar pengantin tidak ditemui: " + gambarRaw);
 
         var templates = findTemplates(ROOT, tema, code);
         if(!templates || templates.length === 0){
@@ -426,12 +524,16 @@ try{
             setTextIfExistsInDoc(doc, "namapengantinperempuan", namaBawah);
             setTextIfExistsInDoc(doc, "singkatanlelaki", singAtas);
             setTextIfExistsInDoc(doc, "singkatanperempuan", singBawah);
+            centerTextLayerInDocument(doc, "namapengantinlelaki");
+            centerTextLayerInDocument(doc, "namapengantinperempuan");
             setTextIfExistsInDoc(doc, "nama1", nama1); setTextIfExistsInDoc(doc, "notel1", notel1);
             setTextIfExistsInDoc(doc, "nama2", nama2); setTextIfExistsInDoc(doc, "notel2", notel2);
             setTextIfExistsInDoc(doc, "nama3", nama3); setTextIfExistsInDoc(doc, "notel3", notel3);
 
             setTextIfExistsInDoc(doc, "hari",       hari);
-            setTextIfExistsInDoc(doc, "tarikh",     tarikh);
+            var dateUpdated = setTextIfExistsInDoc(doc, "tarikh", tarikh);
+            if(setTextIfExistsInDoc(doc, "tarikh copy", tarikh)) dateUpdated = true;
+            if(!dateUpdated) logBoth(logPath, custLogPath, "[DATE] Layer tarikh tidak ditemui dalam " + tplPath);
             setTextIfExistsInDoc(doc, "tarikhhari", tarikhhari);
             setTextIfExistsInDoc(doc, "bulan",      bulan);
             setTextIfExistsInDoc(doc, "bulanislam", bulanislam);
@@ -454,6 +556,7 @@ try{
                 .replace(/_patched$/i,"");
 
             var itemQty = fixedQtyForItem(tplName, qty);
+            var tplLower = tplName.toLowerCase();
             var outBase = safeName(
                 NoInv + " " + majlis + " " + tplName +
                 (namesShort!==""?(" " + namesShort):"") +
@@ -475,6 +578,23 @@ try{
                 savePSDdoc(doc, psdOut);
                 logBoth(logPath, custLogPath, "[EXPORT] PSD -> " + psdOut);
             }catch(e){ logBoth(logPath, custLogPath, "[EXPORT FAIL] PSD -> " + e); }
+
+            if(gambarPath !== "" && (tplLower.indexOf("banner") >= 0 || tplLower.indexOf("banting") >= 0)){
+                var isBanner = tplLower.indexOf("banner") >= 0;
+                var imageAdded = replaceCardImageIfExists(doc, gambarPath);
+                if(!imageAdded) imageAdded = addCustomerPhoto(doc, gambarPath, isBanner);
+                if(imageAdded){
+                    var photoBase = safeName(outBase + " GAMBAR PENGANTIN");
+                    var photoJpeg = fJPEG.fsName + "/" + photoBase + ".jpg";
+                    var photoPsd = fPSD.fsName + "/" + photoBase + ".psd";
+                    if(saveJPG(doc, photoJpeg, 12)) logBoth(logPath, custLogPath, "[EXPORT] JPEG gambar pengantin -> " + photoJpeg);
+                    else logBoth(logPath, custLogPath, "[EXPORT FAIL] JPEG gambar pengantin -> " + photoJpeg);
+                    if(savePSDdoc(doc, photoPsd)) logBoth(logPath, custLogPath, "[EXPORT] PSD gambar pengantin -> " + photoPsd);
+                    else logBoth(logPath, custLogPath, "[EXPORT FAIL] PSD gambar pengantin -> " + photoPsd);
+                }else{
+                    logBoth(logPath, custLogPath, "[IMAGE] Gagal memasukkan gambar pengantin untuk " + tplName);
+                }
+            }
 
             closeDocNoSave(doc);
         }

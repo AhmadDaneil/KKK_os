@@ -48,6 +48,7 @@ final class PhotoshopAutoMergeContractV1
         'qtykad',
         'tema',
         'designcode',
+        'gambar',
         'majlis',
         'namapengantinlelaki',
         'namapengantinperempuan',
@@ -86,7 +87,6 @@ final class PhotoshopAutoMergeContractV1
      * Present in V2 for compatibility but not consumed by the current side-aware JSX.
      */
     public const COMPATIBILITY_ONLY_HEADERS = [
-        'gambar',
         'flaggambar',
     ];
 

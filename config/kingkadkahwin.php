@@ -14,7 +14,7 @@ return [
     'social' => [
         'instagram' => env('KKK_SOCIAL_INSTAGRAM', 'https://www.instagram.com/kingkadkahwin/'),
         'facebook' => env('KKK_SOCIAL_FACEBOOK', 'https://www.facebook.com/stickingbyking/'),
-        'tiktok' => env('KKK_SOCIAL_TIKTOK','https://www.tiktok.com/@kingkadkahwinhq?_r=1&_t=ZS-9A7t5VH9y9x'),
+        'tiktok' => env('KKK_SOCIAL_TIKTOK', 'https://www.tiktok.com/@kingkadkahwinhq?_r=1&_t=ZS-9A7t5VH9y9x'),
         'whatsapp' => env('KKK_SOCIAL_WHATSAPP', 'https://wa.me/60187716968'),
     ],
 
@@ -27,6 +27,6 @@ return [
             'KKK_PHOTOSHOP_SCRIPT',
             base_path('photoshop/auto_kad_full_qr_patched_v11_side_aware.jsx')
         ),
-        'script_sha256' => 'e78bf94ae791ab5affb3b273b97714e3da2c0ff0987962a90fee3bf2a8372d39',
+        'script_sha256' => '563a907db99585440463e01edf11dc06fe0fdbcb0ebab3952379dd931c83f835',
     ],
 ];
