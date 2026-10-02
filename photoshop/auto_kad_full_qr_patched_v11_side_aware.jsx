@@ -155,20 +155,6 @@ function findLayerByNames(doc, names){
     }catch(e){ return null; }
 }
 
-function centerTextLayerInDocument(doc, layerName){
-    try{
-        var layer = findLayerByNames(doc, [t(layerName).toLowerCase()]);
-        if(!layer || layer.kind != LayerKind.TEXT) return false;
-        app.activeDocument = doc;
-        doc.activeLayer = layer;
-        try{ layer.textItem.justification = Justification.CENTER; }catch(e){}
-        var b = _boundsPx(layer);
-        var docCenter = doc.width.as("px") / 2;
-        _translate(docCenter - b.cx, 0);
-        return true;
-    }catch(e){ return false; }
-}
-
 function replaceCardImageIfExists(doc, imagePath){
     if(!imagePath || t(imagePath) === "") return false;
     var imageLayer = findLayerByNames(doc, ["gambar", "cardimage", "card_image", "gambar pengantin", "pengantin", "photo", "image"]);
@@ -182,7 +168,37 @@ function replaceCardImageIfExists(doc, imagePath){
     }catch(e){ return false; }
 }
 
-function addCustomerPhoto(doc, imagePath, isBanner){
+function centerLayerGroupInDocument(doc, layerNames){
+    try{
+        var layers = [];
+        for(var i=0;i<layerNames.length;i++){
+            var layer = findLayerByNames(doc, [layerNames[i]]);
+            if(layer && layer.kind == LayerKind.TEXT) layers.push(layer);
+        }
+        if(layers.length < 2) return false;
+
+        var left = null, right = null;
+        for(var j=0;j<layers.length;j++){
+            var bounds = _boundsPx(layers[j]);
+            left = left === null ? bounds.x : Math.min(left, bounds.x);
+            right = right === null ? bounds.x + bounds.w : Math.max(right, bounds.x + bounds.w);
+        }
+        var groupCenter = left + ((right - left) / 2);
+        var offset = (doc.width.as("px") / 2) - groupCenter;
+        for(var k=0;k<layers.length;k++){
+            app.activeDocument = doc;
+            doc.activeLayer = layers[k];
+            _translate(offset, 0);
+        }
+        return true;
+    }catch(e){ return false; }
+}
+
+function hasCustomerPhotoLayer(doc){
+    return findLayerByNames(doc, ["gambar", "cardimage", "card_image", "gambar pengantin", "pengantin", "photo", "image"]) !== null;
+}
+
+function addCustomerPhotoOverlay(doc, imagePath, isBanner){
     var photoDoc = null;
     try{
         photoDoc = app.open(new File(imagePath));
@@ -197,21 +213,14 @@ function addCustomerPhoto(doc, imagePath, isBanner){
         var width = doc.width.as("px");
         var height = doc.height.as("px");
         var box = isBanner
-            ? { x: width * 0.60, y: height * 0.12, w: width * 0.35, h: height * 0.76 }
-            : { x: width * 0.20, y: height * 0.38, w: width * 0.60, h: height * 0.54 };
+            ? { x: width * 0.74, y: height * 0.43, w: width * 0.22, h: height * 0.48 }
+            : { x: width * 0.18, y: height * 0.45, w: width * 0.64, h: height * 0.46 };
         var current = _boundsPx(photoLayer);
         if(current.w <= 0 || current.h <= 0) return false;
         var scale = Math.min(box.w / current.w, box.h / current.h) * 100;
         _transformScalePercent(scale);
         current = _boundsPx(photoLayer);
         _translate(box.x + (box.w / 2) - current.cx, box.y + (box.h / 2) - current.cy);
-
-        for(var i=doc.layers.length-1;i>=0;i--){
-            if(doc.layers[i] !== photoLayer){
-                photoLayer.move(doc.layers[i], ElementPlacement.PLACEBEFORE);
-                break;
-            }
-        }
         return true;
     }catch(e){
         if(photoDoc) closeDocNoSave(photoDoc);
@@ -524,8 +533,7 @@ try{
             setTextIfExistsInDoc(doc, "namapengantinperempuan", namaBawah);
             setTextIfExistsInDoc(doc, "singkatanlelaki", singAtas);
             setTextIfExistsInDoc(doc, "singkatanperempuan", singBawah);
-            centerTextLayerInDocument(doc, "namapengantinlelaki");
-            centerTextLayerInDocument(doc, "namapengantinperempuan");
+            centerLayerGroupInDocument(doc, ["singkatanlelaki", "&", "&amp;", "singkatanperempuan"]);
             setTextIfExistsInDoc(doc, "nama1", nama1); setTextIfExistsInDoc(doc, "notel1", notel1);
             setTextIfExistsInDoc(doc, "nama2", nama2); setTextIfExistsInDoc(doc, "notel2", notel2);
             setTextIfExistsInDoc(doc, "nama3", nama3); setTextIfExistsInDoc(doc, "notel3", notel3);
@@ -581,8 +589,8 @@ try{
 
             if(gambarPath !== "" && (tplLower.indexOf("banner") >= 0 || tplLower.indexOf("banting") >= 0)){
                 var isBanner = tplLower.indexOf("banner") >= 0;
-                var imageAdded = replaceCardImageIfExists(doc, gambarPath);
-                if(!imageAdded) imageAdded = addCustomerPhoto(doc, gambarPath, isBanner);
+                var imageAdded = hasCustomerPhotoLayer(doc) && replaceCardImageIfExists(doc, gambarPath);
+                if(!imageAdded) imageAdded = addCustomerPhotoOverlay(doc, gambarPath, isBanner);
                 if(imageAdded){
                     var photoBase = safeName(outBase + " GAMBAR PENGANTIN");
                     var photoJpeg = fJPEG.fsName + "/" + photoBase + ".jpg";

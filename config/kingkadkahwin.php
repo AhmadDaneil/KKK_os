@@ -27,6 +27,6 @@ return [
             'KKK_PHOTOSHOP_SCRIPT',
             base_path('photoshop/auto_kad_full_qr_patched_v11_side_aware.jsx')
         ),
-        'script_sha256' => '563a907db99585440463e01edf11dc06fe0fdbcb0ebab3952379dd931c83f835',
+        'script_sha256' => 'f96248f9b48e932a566b53d196a7a86bbffcedfcffe4fdd91caa26ac5cbe038f',
     ],
 ];
