@@ -29,12 +29,20 @@ class CreateStaffUser extends Command
             'password_confirmation' => $passwordConfirmation,
         ];
 
-        $validator = Validator::make($input, [
-            'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'email', 'max:255', 'unique:users,email'],
-            'role' => ['required', Rule::in(User::STAFF_ROLES)],
-            'password' => ['required', 'string', 'min:12', 'confirmed'],
-        ]);
+        $validator = Validator::make(
+            $input,
+            [
+                'name' => ['required', 'string', 'max:255'],
+                'email' => ['required', 'email', 'max:255', 'unique:users,email'],
+                'role' => ['required', Rule::in(User::STAFF_ROLES)],
+                'password' => ['required', 'string', 'min:12', 'confirmed'],
+            ],
+            [
+                'password.required' => 'Password diperlukan.',
+                'password.min' => 'Password mestilah sekurang-kurangnya 12 aksara.',
+                'password.confirmed' => 'Pengesahan password tidak sepadan.',
+            ],
+        );
 
         if ($validator->fails()) {
             foreach ($validator->errors()->all() as $error) {
