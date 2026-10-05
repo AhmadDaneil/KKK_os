@@ -79,6 +79,27 @@ body[data-staff-theme]:not([data-staff-theme="default"]) .staff-correction-note{
 .admin-operations-mode .staff-verify-button{border-color:#765315;background:#765315;box-shadow:0 5px 13px rgba(118,83,21,.22)}.admin-operations-mode .staff-verify-button:hover{border-color:#5e410e;background:#5e410e}
 @media(max-width:560px){.staff-packing-checklist .staff-contact-row{align-items:stretch;flex-direction:column}.staff-packing-checklist form,.staff-verify-button{width:100%}}
 
+/* High-visibility receipt action for OM and admin payment review. */
+.staff-receipt-button{display:inline-flex;min-height:43px;padding:9px 14px;align-items:center;justify-content:center;gap:8px;border:1px solid #17613f;color:#fff;background:#17613f;font-size:12px;font-weight:850;line-height:1;box-shadow:0 5px 14px rgba(23,97,63,.22);white-space:nowrap}
+.staff-receipt-button>span{display:grid;width:23px;height:23px;place-items:center;border-radius:6px;color:#17613f;background:#fff;font-size:15px;font-weight:900}
+.staff-receipt-button>small{font-size:12px;font-weight:900;opacity:.8}
+.staff-receipt-button:hover,.staff-receipt-button:focus-visible{border-color:#104a30;color:#fff;background:#104a30;box-shadow:0 7px 18px rgba(23,97,63,.3);transform:translateY(-1px)}
+.admin-operations-mode .staff-receipt-button{border-color:#765315;color:#fff;background:#765315;box-shadow:0 5px 14px rgba(118,83,21,.24)}
+.admin-operations-mode .staff-receipt-button>span{color:#765315}.admin-operations-mode .staff-receipt-button:hover,.admin-operations-mode .staff-receipt-button:focus-visible{border-color:#5e410e;background:#5e410e;box-shadow:0 7px 18px rgba(118,83,21,.32)}
+.staff-receipt-action-row{display:flex;width:100%;padding:10px 0 13px;align-items:center;justify-content:space-between;gap:16px;border-bottom:1px solid #e0e6e2}
+.staff-receipt-action-row>div{display:grid;gap:3px}.staff-receipt-action-row>div>strong{color:#26342e;font-size:12px}.staff-receipt-action-row>div>small{color:#6b7871;font-size:10px;line-height:1.4}
+.admin-operations-mode .staff-receipt-action-row{border-bottom-color:#e3d6b7}.admin-operations-mode .staff-receipt-action-row>div>strong{color:#44361d}
+@media(max-width:560px){.staff-receipt-action-row{align-items:stretch;flex-direction:column}.staff-receipt-action-row .staff-receipt-button{width:100%}}
+
+/* Separate upload areas for optional banner and banting artwork. */
+.staff-supplementary-artworks{grid-column:1/-1;padding:14px;border:1px solid #cbd9d1;border-radius:10px;background:#f6faf7}
+.staff-supplementary-heading h4{margin:0;color:#20352b;font-size:14px}.staff-supplementary-heading p{margin:4px 0 12px;color:#66776e;font-size:11px;line-height:1.45}
+.staff-supplementary-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.staff-supplementary-grid .staff-field{position:relative;margin:0;padding:12px;border:1px solid #d7e1db;border-radius:9px;background:#fff}
+.staff-supplementary-grid input[type="file"]{width:100%;margin-top:9px}.staff-artwork-ratio{display:grid;margin-top:8px;place-items:center;border:1px dashed #91aa9c;border-radius:6px;color:#276248;background:#edf7f1;font-size:11px;font-weight:850}
+.staff-artwork-ratio--banner{width:112px;height:56px}.staff-artwork-ratio--banting{width:42px;height:84px}
+.admin-operations-mode .staff-supplementary-artworks{border-color:#d9c89c;background:#fffaf0}.admin-operations-mode .staff-artwork-ratio{border-color:#c7a962;color:#765315;background:#fff5db}
+@media(max-width:620px){.staff-supplementary-grid{grid-template-columns:1fr}}
+
 @media (max-width:760px){
     .admin-main{width:min(100% - 20px,1320px);padding:12px 0 32px}
     .admin-topbar,.staff-topbar{min-height:60px;padding:9px 14px}

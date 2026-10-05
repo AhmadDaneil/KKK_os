@@ -18,6 +18,7 @@
         <nav aria-label="Navigasi utama">
             <a href="#kelebihan">Kelebihan</a>
             <a href="#cara-tempah">Cara Tempah</a>
+            <a href="#soalan-lazim">Soalan Lazim</a>
             <a class="nav-progress" href="{{ route('public.orders.progress') }}">Semak Progress</a>
         </nav>
     </header>
@@ -117,6 +118,25 @@
                 <li><b>4</b><div><h3>Ikuti progress</h3><p>Masukkan ID Tempahan pada bila-bila masa untuk melihat perkembangan.</p></div></li>
             </ol>
         </section>
+
+        <section class="customer-information" id="soalan-lazim">
+            <div class="section-intro">
+                <p class="eyebrow">Sebelum anda menempah</p>
+                <h2>Maklumat penting dan soalan lazim.</h2>
+            </div>
+            <div class="faq-grid">
+                <details open><summary>Bagaimanakah bayaran dibuat?</summary><p>Bayaran pertama hanyalah deposit untuk memulakan kerja design. Bayaran baki dibuat selepas anda menyemak dan meluluskan hasil design, sebelum proses pengeluaran dimulakan.</p></details>
+                <details><summary>Bagaimanakah pembetulan hasil design dibuat?</summary><p>Anda boleh memilih hasil design yang terlibat, menulis arahan pembetulan dan menghantar bukti bayaran pembetulan melalui halaman Semak Progress.</p></details>
+                <details><summary>Berapa lama proses tempahan?</summary><p>Tempoh bergantung pada jumlah pakej, pembetulan, kuantiti dan kaedah penghantaran. Progress semasa dipaparkan menggunakan ID Tempahan serta nombor telefon anda.</p></details>
+                <details><summary>Adakah banner dan banting disokong?</summary><p>Ya. Anda boleh menyatakan saiz, kuantiti, bahan, orientasi dan arahan tambahan dalam borang tempahan.</p></details>
+            </div>
+        </section>
+
+        <section class="customer-policies" id="polisi">
+            <article id="privasi"><h2>Privasi</h2><p>Maklumat tempahan digunakan untuk menyiapkan, menghubungi dan menghantar tempahan anda. ID Tempahan dan nombor telefon diperlukan untuk melihat maklumat sensitif.</p></article>
+            <article id="terma"><h2>Terma Tempahan</h2><p>Pastikan semua nama, tarikh, masa, alamat dan nombor telefon diperiksa sebelum pengesahan akhir. Perubahan selepas pengesahan mungkin melibatkan caj pembetulan.</p></article>
+            <article id="pemulangan"><h2>Pembatalan dan Pemulangan</h2><p>Hubungi Khidmat Pelanggan dengan segera. Kelayakan pembatalan atau pemulangan bergantung pada tahap design dan pengeluaran semasa.</p></article>
+        </section>
     </main>
 
     <footer class="site-footer">
@@ -154,7 +174,7 @@
         </div>
         <div class="footer-bottom">
             <span>© {{ date('Y') }} KingKadKahwin</span>
-            <span>Kad indah untuk hari yang bermakna.</span>
+            <span><a href="#privasi">Privasi</a> · <a href="#terma">Terma Tempahan</a> · <a href="#pemulangan">Pembatalan & Pemulangan</a></span>
         </div>
     </footer>
     <script>

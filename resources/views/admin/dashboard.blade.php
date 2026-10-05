@@ -99,6 +99,7 @@
                             Belum ada jualan berbayar untuk tahun ini.
                         @endif
                     </li>
+                    <li>Kutipan ini hanya mengambil kira transaksi yang telah disahkan sebagai dibayar; kos operasi, pulangan wang dan keuntungan bersih belum direkodkan dalam modul ini.</li>
                 </ul>
                 @if ($sales['summary']['pending_count'] > 0)<a href="{{ route('admin.orders.index', ['attention' => 'pending_payment']) }}">Semak pembayaran sekarang →</a>@endif
             </article>

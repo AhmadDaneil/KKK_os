@@ -10,7 +10,8 @@
     }
     $customerFeedbackMessage = "Salam {$order->customer_name}, terima kasih kerana memilih King Kad Kahwin. Kami ingin mendapatkan maklum balas anda dan membantu jika ada sebarang pertanyaan tentang tempahan {$order->order_id}.";
     $customerPaymentReminder = "Salam {$order->customer_name}, ini peringatan mesra daripada King Kad Kahwin mengenai baki bayaran atau caj bagi tempahan {$order->order_id}. Sila hubungi kami jika anda perlukan bantuan.";
-    $batchArtworkJobs = $order->relationLoaded('designJobs')
+    $hasDesignJobs = $order->relationLoaded('designJobs');
+    $batchArtworkJobs = $hasDesignJobs
         ? $order->designJobs->filter(fn ($job) =>
             auth()->user()->hasStaffRole(\App\Models\User::ROLE_DESIGNER)
             && $job->assigned_user_id === auth()->id()
@@ -19,7 +20,7 @@
         : collect();
     $usesBatchArtworkUpload = $batchArtworkJobs->count() > 1;
     $canUsePhotoshop = auth()->user()->hasStaffRole(\App\Models\User::ROLE_DESIGNER)
-        && $order->relationLoaded('designJobs')
+        && $hasDesignJobs
         && $order->designJobs->contains('assigned_user_id', auth()->id());
     $statusLabels = [
         'DETAILS_INCOMPLETE' => 'Maklumat belum lengkap', 'READY_FOR_DESIGN' => 'Sedia untuk design',
@@ -151,7 +152,7 @@
             @endif
 
             @if (! auth()->user()->isOperationManagement())
-                <p class="staff-work-message">Read-only order details.</p>
+                <p class="staff-work-message">Maklumat tempahan ini untuk bacaan sahaja.</p>
             @endif
 
             @if ($hasFullQueueView)
@@ -166,12 +167,12 @@
                         </div>
 
                         <div>
-                            <dt>Packages</dt>
+                            <dt>Pakej</dt>
                             <dd>{{ $order->package_count }}</dd>
                         </div>
 
                         <div>
-                            <dt>Card Quantity</dt>
+                            <dt>Jumlah kad</dt>
                             <dd>{{ $order->card_quantity ?? '-' }}</dd>
                         </div>
 
@@ -187,7 +188,7 @@
 
                     <dl class="staff-detail-list">
                         <div>
-                            <dt>Name</dt>
+                            <dt>Nama</dt>
                             <dd>{{ $order->customer_name ?: '-' }}</dd>
                         </div>
 
@@ -197,7 +198,7 @@
                         </div>
 
                         <div>
-                            <dt>Phone</dt>
+                            <dt>Telefon</dt>
                             <dd>{{ $order->customer_phone ?: '-' }}</dd>
                         </div>
                     </dl>
@@ -251,7 +252,7 @@
             @endif
 
             <section class="staff-section">
-                <h2 class="staff-section-title">Packages</h2>
+                <h2 class="staff-section-title">Pakej</h2>
 
                 <div class="staff-package-grid">
                     @foreach ($order->packageSides as $packageSide)
@@ -272,7 +273,7 @@
 
                                     <dl class="staff-detail-list">
                                         <div>
-                                            <dt>Theme</dt>
+                                            <dt>Tema Kad</dt>
                                             <dd>{{ $packageSide->design->theme ?? '-' }}</dd>
                                         </div>
 
@@ -282,25 +283,43 @@
                                         </div>
 
                                         <div>
-                                            <dt>Card Title</dt>
+                                            <dt>Tajuk Kad</dt>
                                             <dd>{{ $packageSide->design->card_title ?? '-' }}</dd>
                                         </div>
                                     </dl>
                                 </div>
                             @endif
 
+                            @php
+                                $selectedProducts = collect($packageSide->additional_products ?? [])
+                                    ->filter(fn ($product) => data_get($product, 'enabled'));
+                            @endphp
+                            @if ($selectedProducts->isNotEmpty())
+                                <div class="staff-detail-group">
+                                    <h4>Produk Tambahan</h4>
+                                    <dl class="staff-detail-list">
+                                        @foreach ($selectedProducts as $productKey => $product)
+                                            <div class="staff-detail-wide">
+                                                <dt>{{ $productKey === 'banner' ? 'Banner' : 'Banting' }}</dt>
+                                                <dd>{{ data_get($product, 'quantity', 1) }} unit · {{ data_get($product, 'size') ?: 'Saiz belum dinyatakan' }} · {{ data_get($product, 'orientation') === 'LANDSCAPE' ? 'Melintang' : (data_get($product, 'orientation') === 'PORTRAIT' ? 'Menegak' : 'Orientasi belum dinyatakan') }}@if(data_get($product, 'material')) · {{ data_get($product, 'material') }}@endif @if(data_get($product, 'instructions'))<br>{{ data_get($product, 'instructions') }}@endif</dd>
+                                            </div>
+                                        @endforeach
+                                    </dl>
+                                </div>
+                            @endif
+
                             @if ($packageSide->parents)
                                 <div class="staff-detail-group">
-                                    <h4>Parents</h4>
+                                    <h4>Ibu Bapa</h4>
 
                                     <dl class="staff-detail-list">
                                         <div>
-                                            <dt>Father</dt>
+                                            <dt>Nama Bapa</dt>
                                             <dd>{{ $packageSide->parents->father_name ?? '-' }}</dd>
                                         </div>
 
                                         <div>
-                                            <dt>Mother</dt>
+                                            <dt>Nama Ibu</dt>
                                             <dd>{{ $packageSide->parents->mother_name ?? '-' }}</dd>
                                         </div>
                                     </dl>
@@ -309,26 +328,26 @@
 
                             @if ($packageSide->event)
                                 <div class="staff-detail-group">
-                                    <h4>Event</h4>
+                                    <h4>Majlis</h4>
 
                                     <dl class="staff-detail-list">
                                         <div>
-                                            <dt>Day</dt>
+                                            <dt>Hari</dt>
                                             <dd>{{ $packageSide->event->day_name ?? '-' }}</dd>
                                         </div>
 
                                         <div>
-                                            <dt>Date</dt>
+                                            <dt>Tarikh</dt>
                                             <dd>{{ $packageSide->event->event_date?->format('Y-m-d') ?? '-' }}</dd>
                                         </div>
 
                                         <div>
-                                            <dt>Hijri Date</dt>
+                                            <dt>Tarikh Hijrah</dt>
                                             <dd>{{ $packageSide->event->hijri_date ?? '-' }}</dd>
                                         </div>
 
                                         <div>
-                                            <dt>Meal Time</dt>
+                                            <dt>Masa Jamuan</dt>
                                             <dd>{{ $packageSide->event->meal_time ?? '-' }}</dd>
                                         </div>
 
@@ -338,12 +357,12 @@
                                         </div>
 
                                         <div>
-                                            <dt>Venue</dt>
+                                            <dt>Tempat Majlis</dt>
                                             <dd>{{ $packageSide->event->venue_name ?? '-' }}</dd>
                                         </div>
 
                                         <div class="staff-detail-wide">
-                                            <dt>Address</dt>
+                                            <dt>Alamat</dt>
                                             <dd>{{ $packageSide->event->full_address ?? '-' }}</dd>
                                         </div>
                                     </dl>
@@ -382,7 +401,7 @@
                 </div>
             </section>
 
-            @if ($order->relationLoaded('designJobs'))
+            @if ($hasDesignJobs)
                 <section id="design-work" class="staff-section">
                     <h2 class="staff-section-title">Kerja Design</h2>
 
@@ -390,14 +409,14 @@
                         <div class="staff-design-tools">
                             <div>
                                 <p class="staff-kicker">Photoshop Auto Merge V11</p>
-                                <h3>Prepare this customer order in Photoshop</h3>
+                                <h3>Sediakan tempahan pelanggan ini dalam Photoshop</h3>
                                 <ol>
                                     <li>Muat turun fail CSV tempahan pelanggan.</li>
-                                    <li>Open Photoshop; the approved JavaScript starts automatically.</li>
-                                    <li>Select the ROOT folder, then select the downloaded CSV file.</li>
+                                    <li>Buka Photoshop; JavaScript yang diluluskan akan bermula secara automatik.</li>
+                                    <li>Pilih folder ROOT, kemudian pilih fail CSV yang telah dimuat turun.</li>
                                 </ol>
                                 <p class="staff-design-tools-note">
-                                    Photoshop opens on the Windows workstation running KKK OS.
+                                    Photoshop akan dibuka pada komputer Windows yang menjalankan KKK OS.
                                 </p>
                             </div>
 
@@ -416,7 +435,7 @@
                                     @csrf
 
                                     <button type="submit" class="staff-button staff-button-primary">
-                                        Open Photoshop
+                                        Buka Photoshop
                                     </button>
                                 </form>
                             </div>
@@ -469,6 +488,8 @@
                                         ?: ($latestCorrectionPayment?->metadata['correction_comment'] ?? null);
                                     $correctionSubmittedAt = $latestCorrectionAction?->acted_at
                                         ?: $latestCorrectionPayment?->created_at;
+                                    $correctionAssets = $latestCorrectionAction?->affected_assets
+                                        ?: ($latestCorrectionPayment?->metadata['affected_assets'] ?? ['CARD']);
                                 @endphp
 
                                 @if (filled($correctionComment))
@@ -483,6 +504,7 @@
                                                 {{ $latestCorrectionPayment?->status === 'PENDING' ? 'Menunggu semakan bayaran' : 'Untuk tindakan designer' }}
                                             </span>
                                         </div>
+                                        <p><strong>Bahagian terlibat:</strong> {{ collect($correctionAssets)->map(fn ($asset) => ['CARD' => 'Kad Kahwin', 'BANNER' => 'Banner', 'BANTING' => 'Banting'][$asset] ?? $asset)->join(', ') }}</p>
                                         <blockquote>{{ $correctionComment }}</blockquote>
                                         <footer>
                                             <span>Pakej {{ ucfirst(strtolower($job->side)) }}</span>
@@ -526,7 +548,7 @@
                                                     type="submit"
                                                     class="staff-button staff-button-primary"
                                                 >
-                                                    Resume Correction
+                                                    Sambung Pembetulan
                                                 </button>
                                             </form>
                                         @elseif ($job->status === 'DESIGN_IN_PROGRESS')
@@ -540,7 +562,7 @@
 
                                                     <p>
                                                         Muat naik fail sumber yang boleh disunting dan
-                                                        customer preview.
+                                                        preview pelanggan.
                                                     </p>
                                                 </div>
 
@@ -579,8 +601,33 @@
                                                         </div>
 
                                                         <span class="staff-field-help">
-                                                            PSD or PDF. Maximum 100 MB.
+                                                            PSD atau PDF. Maksimum 100 MB.
                                                         </span>
+                                                    </div>
+
+                                                    @php
+                                                        $jobProducts = $order->packageSides
+                                                            ->firstWhere('id', $job->order_package_side_id)?->additional_products ?? [];
+                                                    @endphp
+                                                    <div class="staff-supplementary-artworks">
+                                                        <div class="staff-supplementary-heading">
+                                                            <h4>Artwork Tambahan</h4>
+                                                            <p>@if(collect($jobProducts)->contains(fn ($product) => data_get($product, 'enabled'))) Pelanggan telah meminta produk tambahan. Semak spesifikasi pada bahagian Pakej di atas. @else Pelanggan tidak memilih banner atau banting untuk pakej ini. @endif</p>
+                                                        </div>
+                                                        <div class="staff-supplementary-grid">
+                                                            <div class="staff-field">
+                                                                <label for="banner-preview-{{ $job->id }}">Preview Banner <span class="staff-optional">{{ data_get($jobProducts, 'banner.enabled') ? '(diminta pelanggan)' : '(pilihan)' }}</span></label>
+                                                                <span class="staff-artwork-ratio staff-artwork-ratio--banner" aria-hidden="true">2 : 1</span>
+                                                                <input id="banner-preview-{{ $job->id }}" type="file" name="{{ $isBatchArtworkJob ? 'artworks['.$job->id.'][banner_preview]' : 'banner_preview' }}" @if ($isBatchArtworkJob) form="batch-artwork-upload" @endif accept=".jpg,.jpeg,.png,image/jpeg,image/png">
+                                                                <span class="staff-field-help">Format melintang 2:1 seperti 1280 × 640 px.</span>
+                                                            </div>
+                                                            <div class="staff-field">
+                                                                <label for="banting-preview-{{ $job->id }}">Preview Banting <span class="staff-optional">{{ data_get($jobProducts, 'banting.enabled') ? '(diminta pelanggan)' : '(pilihan)' }}</span></label>
+                                                                <span class="staff-artwork-ratio staff-artwork-ratio--banting" aria-hidden="true">1 : 2</span>
+                                                                <input id="banting-preview-{{ $job->id }}" type="file" name="{{ $isBatchArtworkJob ? 'artworks['.$job->id.'][banting_preview]' : 'banting_preview' }}" @if ($isBatchArtworkJob) form="batch-artwork-upload" @endif accept=".jpg,.jpeg,.png,image/jpeg,image/png">
+                                                                <span class="staff-field-help">Format menegak 1:2 seperti 640 × 1280 px.</span>
+                                                            </div>
+                                                        </div>
                                                     </div>
 
                                                     <div class="staff-field">
@@ -609,8 +656,8 @@
 
                                                     <div class="staff-field">
                                                         <label for="internal-note-{{ $job->id }}">
-                                                            Internal Note
-                                                            <span class="staff-optional">(optional)</span>
+                                                            Nota Dalaman
+                                                            <span class="staff-optional">(pilihan)</span>
                                                         </label>
 
                                                         <textarea
@@ -693,7 +740,7 @@
                 name="assigned_user_id"
                 required
             >
-                <option value="">Select designer</option>
+                <option value="">Pilih pereka</option>
 
                 @foreach ($designers as $designer)
                     <option
@@ -717,7 +764,7 @@
                             </article>
                         @empty
                             <div class="staff-empty">
-                                No design jobs available.
+                                Tiada tugasan design tersedia.
                             </div>
                         @endforelse
                     </div>
@@ -760,23 +807,29 @@
 
                             <dl class="staff-detail-list">
                                 <div>
-                                    <dt>Amount</dt>
+                                    <dt>Jumlah</dt>
                                     <dd>{{ $payment->currency }} {{ $payment->amount }}</dd>
                                 </div>
 
                                 <div>
-                                    <dt>Provider</dt>
+                                    <dt>Kaedah</dt>
                                     <dd>{{ $payment->provider ?: '-' }}</dd>
                                 </div>
 
                                 <div>
-                                    <dt>Paid At</dt>
+                                    <dt>Tarikh Bayaran</dt>
                                     <dd>{{ $payment->paid_at?->timezone(config('app.display_timezone'))->format('Y-m-d H:i') ?? '-' }}</dd>
                                 </div>
                             </dl>
 
                             @if (in_array($payment->payment_type, ['BOOKING_DEPOSIT', 'BALANCE', 'ARTWORK_CORRECTION'], true) && ! empty($payment->metadata['receipt_path']))
                                 <div class="staff-payment-actions">
+                                    @if (auth()->user()->isOperationManagement())
+                                        <div class="staff-receipt-action-row">
+                                            <div><strong>Bukti pembayaran</strong><small>Semak resit sebelum mengesahkan bayaran.</small></div>
+                                            <a class="staff-button staff-receipt-button" target="_blank" rel="noopener" href="{{ route($operationRoutePrefix.'payments.receipt', $payment) }}" title="Buka resit pembayaran dalam tab baharu"><span aria-hidden="true">▤</span> Lihat Resit <small aria-hidden="true">↗</small></a>
+                                        </div>
+                                    @endif
                                     @if ($payment->payment_type === 'ARTWORK_CORRECTION')
                                         <aside class="staff-correction-note staff-correction-note--payment" aria-label="Komen pembetulan pelanggan">
                                             <div class="staff-correction-note-heading">
@@ -798,9 +851,6 @@
                                                 <button class="staff-button staff-button-danger" type="submit">Tolak Resit Pembetulan</button>
                                             </form>
                                         @endif
-                                    @endif
-                                    @if (auth()->user()->isOperationManagement())
-                                    <a class="staff-button staff-button-small" target="_blank" rel="noopener" href="{{ route($operationRoutePrefix.'payments.receipt', $payment) }}">Lihat Resit</a>
                                     @endif
                                     @if ($payment->payment_type === 'BOOKING_DEPOSIT' && auth()->user()->isOperationManagement() && $payment->status === 'PENDING')
                                         <form method="POST" action="{{ route($operationRoutePrefix.'payments.deposit.approve', $payment) }}" class="staff-field js-staff-confirmation-form" data-confirm-title="Sahkan bayaran deposit?" data-confirm-message="Pastikan jumlah bayaran pada resit telah dimasukkan dengan betul. Selepas disahkan, tempahan akan diteruskan ke proses seterusnya." data-confirm-button="Ya, sahkan deposit">
@@ -859,7 +909,7 @@
                             <label for="order-printing-assignee">{{ $order->printing_assigned_user_id ? 'Tugaskan Semula Staf Pengeluaran' : 'Tugaskan Staf Pengeluaran' }}</label>
                             <div class="staff-assignment-controls">
                                 <select id="order-printing-assignee" name="assigned_user_id" required>
-                                    <option value="">Select production staff</option>
+                                    <option value="">Pilih staf pengeluaran</option>
                                     @foreach ($printingStaff as $staff)
                                         <option value="{{ $staff->id }}" @selected($order->printing_assigned_user_id === $staff->id)>{{ $staff->name }}</option>
                                     @endforeach
@@ -990,7 +1040,7 @@
                                             <button type="submit" class="staff-button staff-button-secondary">Muat Naik Progress</button>
                                             <p class="staff-upload-notice" role="status" aria-live="polite" hidden></p>
                                         </form>
-                                        <form method="POST" action="{{ route($operationRoutePrefix.'print-jobs.mark-printed', $job) }}" class="staff-workflow-form js-staff-confirmation-form" data-confirm-title="Tandakan cetakan {{ ucfirst(strtolower($job->side)) }} sebagai siap?" data-confirm-message="Pastikan semua {{ $job->quantity ?? $order->card_quantity ?? '-' }} keping kad telah selesai dicetak dan diperiksa sebelum meneruskan." data-confirm-button="Ya, tandakan siap" data-confirm-tone="danger">@csrf<button type="submit" class="staff-button staff-button-primary">Mark Printed</button></form>
+                                        <form method="POST" action="{{ route($operationRoutePrefix.'print-jobs.mark-printed', $job) }}" class="staff-workflow-form js-staff-confirmation-form" data-confirm-title="Tandakan cetakan {{ ucfirst(strtolower($job->side)) }} sebagai siap?" data-confirm-message="Pastikan semua {{ $job->quantity ?? $order->card_quantity ?? '-' }} keping kad telah selesai dicetak dan diperiksa sebelum meneruskan." data-confirm-button="Ya, tandakan siap" data-confirm-tone="danger">@csrf<button type="submit" class="staff-button staff-button-primary">Tandakan Cetakan Siap</button></form>
                                     @elseif ($job->status === 'PRINTED')
                                         <p class="staff-work-message">Cetakan untuk pakej ini telah siap.</p>
                                     @endif
@@ -998,7 +1048,7 @@
                             </article>
                         @empty
                             <div class="staff-empty">
-                                No print jobs available.
+                                Tiada tugasan cetakan tersedia.
                             </div>
                         @endforelse
                     </div>
@@ -1087,7 +1137,7 @@
                                         </div>
                                         @if ($order->fulfilment?->method === 'COURIER')
                                             <label for="courier-provider">Nama courier</label><input id="courier-provider" name="courier_provider" value="{{ old('courier_provider') }}" placeholder="Contoh: Pos Laju" required>
-                                            <label for="tracking-number">Tracking number</label><input id="tracking-number" name="tracking_number" value="{{ old('tracking_number') }}" required>
+                                            <label for="tracking-number">Nombor Tracking</label><input id="tracking-number" name="tracking_number" value="{{ old('tracking_number') }}" required>
                                         @endif
                                         <button type="submit" class="staff-button staff-button-primary">Muat Naik Bukti & Tandakan Selesai Dibungkus</button>
                                     </form>
@@ -1113,28 +1163,28 @@
                     @if ($order->fulfilment)
                         <dl class="staff-detail-list">
                             <div>
-                                <dt>Method</dt>
+                                <dt>Kaedah</dt>
                                 <dd>{{ $order->fulfilment->method }}</dd>
                             </div>
 
                             <div>
-                                <dt>Recipient</dt>
+                                <dt>Penerima</dt>
                                 <dd>{{ $order->fulfilment->recipient_name ?? '-' }}</dd>
                             </div>
 
                             <div>
-                                <dt>Phone</dt>
+                                <dt>Telefon</dt>
                                 <dd>{{ $order->fulfilment->recipient_phone ?? '-' }}</dd>
                             </div>
 
                             <div class="staff-detail-wide">
-                                <dt>Shipping Address</dt>
+                                <dt>Alamat Penghantaran</dt>
                                 <dd>{{ $order->fulfilment->shipping_address ?? '-' }}</dd>
                             </div>
                         </dl>
                     @else
                         <p class="staff-muted-text">
-                            No fulfilment details.
+                            Tiada maklumat pemenuhan tempahan.
                         </p>
                     @endif
 
@@ -1154,12 +1204,12 @@
                                 </div>
 
                                 <div>
-                                    <dt>Tracking</dt>
+                                    <dt>Nombor Tracking</dt>
                                     <dd>{{ $order->fulfilmentJob->tracking_number ?? '-' }}</dd>
                                 </div>
 
                                 <div>
-                                    <dt>Completion Reference</dt>
+                                    <dt>Rujukan Penyelesaian</dt>
                                     <dd>{{ $order->fulfilmentJob->completion_reference ?? '-' }}</dd>
                                 </div>
                             </dl>
@@ -1180,7 +1230,7 @@
                                             @csrf
 
                                             <label for="completion-reference">
-                                                Completion Reference
+                                                Rujukan Penyelesaian
                                             </label>
 
                                             <input
@@ -1252,7 +1302,7 @@
                                             >
 
                                             <label for="tracking-number">
-                                                Tracking number
+                                                Nombor Tracking
                                             </label>
 
                                             <input
@@ -1327,7 +1377,7 @@
 
                     remove.type = 'button';
                     remove.className = 'staff-file-delete';
-                    remove.textContent = 'Delete';
+                    remove.textContent = 'Padam';
                     remove.setAttribute('aria-label', 'Padam ' + file.name);
                     remove.addEventListener('click', function () {
                         selectedFiles.splice(index, 1);
@@ -1416,17 +1466,17 @@
                     const trackingNumber = form.querySelector('[name="tracking_number"]').value.trim();
 
                     title.textContent = 'Sahkan serahan kepada ' + courierName + '?';
-                    message.textContent = 'Tracking number ' + trackingNumber + ' akan dipaparkan kepada customer dan parcel akan ditandakan telah diserahkan. Pastikan bukti serta maklumat tracking adalah betul.';
+                    message.textContent = 'Nombor tracking ' + trackingNumber + ' akan dipaparkan kepada pelanggan dan bungkusan akan ditandakan telah diserahkan. Pastikan bukti serta maklumat tracking adalah betul.';
                     confirmButton.textContent = 'Ya, sahkan serahan';
                 } else if (form.dataset.confirmAssignment) {
                     const assignee = form.querySelector('[name="assigned_user_id"]');
                     const assigneeName = assignee.options[assignee.selectedIndex].text.trim();
                     const isReassignment = form.dataset.confirmMode === 'reassign';
-                    const actionLabel = isReassignment ? 'Tukar' : 'Assign';
+                    const actionLabel = isReassignment ? 'Tukar' : 'Tugaskan';
 
-                    title.textContent = actionLabel + ' staff ' + form.dataset.confirmAssignment + '?';
+                    title.textContent = actionLabel + ' staf ' + form.dataset.confirmAssignment + '?';
                     message.textContent = 'Tugasan ini akan diberikan kepada ' + assigneeName + '. Pastikan staff yang dipilih adalah betul.';
-                    confirmButton.textContent = 'Ya, ' + actionLabel.toLowerCase() + ' staff';
+                    confirmButton.textContent = 'Ya, ' + actionLabel.toLowerCase() + ' staf';
                 } else {
                     title.textContent = form.dataset.confirmTitle;
                     message.textContent = form.dataset.confirmMessage;
@@ -1487,14 +1537,14 @@
                 const status = form.querySelector('.staff-status');
 
                 if (label) {
-                    label.textContent = label.textContent.replace(/^Assign\b/i, 'Reassign');
+                        label.textContent = label.textContent.replace(/^Tugaskan\b/i, 'Tukar tugasan');
                 }
 
                 if (status) {
                     status.textContent = 'DITUGASKAN';
                 }
 
-                submitButton.textContent = 'Reassign';
+                    submitButton.textContent = 'Tukar Tugasan';
                 showAssignmentNotice(form, payload.message || 'Staf berjaya ditugaskan.', false);
             } catch (error) {
                 submitButton.textContent = originalButtonText;

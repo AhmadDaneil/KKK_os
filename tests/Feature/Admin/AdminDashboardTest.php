@@ -335,6 +335,10 @@ class AdminDashboardTest extends TestCase
             ->assertSessionHas('admin_success');
 
         $this->assertDatabaseMissing('users', ['id' => $designer->id]);
+        $this->assertDatabaseHas('staff_audit_logs', [
+            'event_type' => 'STAFF_ACCOUNT_DELETED',
+            'actor_user_id' => $admin->id,
+        ]);
     }
 
     public function test_admin_cannot_delete_their_own_account(): void

@@ -225,6 +225,7 @@ Route::get('/staff/login', [StaffAuthController::class, 'create'])
     ->name('staff.login');
 
 Route::post('/staff/login', [StaffAuthController::class, 'store'])
+    ->middleware('throttle:10,1')
     ->name('staff.login.store');
 
 Route::middleware(['auth:staff', 'active.staff'])

@@ -23,7 +23,7 @@ class BuildFinalReviewService
             'order_id' => $order->order_id,
             'customer_name' => $order->customer_name,
             'package_count' => $order->package_count,
-	    'card_quantity' => $order->card_quantity,
+            'card_quantity' => $order->card_quantity,
             'package_format' => $order->package_format,
             'first_event_side' => $order->first_event_side,
             'status' => $order->status,
@@ -54,6 +54,8 @@ class BuildFinalReviewService
                             'card_title' => $side->design?->card_title,
                             'has_card_image' => filled($side->design?->card_image_path),
                         ],
+
+                        'additional_products' => $side->additional_products ?? [],
 
                         'parents' => [
                             'father_name' => $side->parents?->father_name,

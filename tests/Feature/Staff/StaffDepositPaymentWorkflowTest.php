@@ -43,7 +43,10 @@ class StaffDepositPaymentWorkflowTest extends TestCase
             ->assertSee('Resit Ditolak')
             ->assertSee('Jumlah pada resit tidak jelas.')
             ->assertSee('Hantar Semula Resit');
-        $this->post(route('public.orders.progress.lookup'), ['order_id' => $order->order_id])
+        $this->post(route('public.orders.progress.lookup'), [
+            'order_id' => $order->order_id,
+            'customer_phone' => $order->customer_phone,
+        ])
             ->assertOk()
             ->assertSee('Resit Ditolak')
             ->assertSee('Jumlah pada resit tidak jelas.');

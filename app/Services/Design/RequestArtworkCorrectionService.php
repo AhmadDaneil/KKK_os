@@ -9,17 +9,18 @@ use RuntimeException;
 
 class RequestArtworkCorrectionService
 {
-    public function request(DesignJob $designJob, string $comment): DesignJob
+    /** @param array<int, string> $affectedAssets */
+    public function request(DesignJob $designJob, string $comment, array $affectedAssets = ['CARD']): DesignJob
     {
-        return DB::transaction(function () use ($designJob, $comment) {
+        return DB::transaction(function () use ($designJob, $comment, $affectedAssets) {
             $designJob->refresh();
 
             $designJob->loadMissing('order');
 
             if ($designJob->order->isTerminalOperationalStatus()) {
-            throw new RuntimeException(
-            "Correction cannot be requested because order {$designJob->order->order_id} is terminal."
-            );
+                throw new RuntimeException(
+                    "Correction cannot be requested because order {$designJob->order->order_id} is terminal."
+                );
             }
 
             if ($designJob->status !== 'DESIGN_READY') {
@@ -50,6 +51,7 @@ class RequestArtworkCorrectionService
                 'artwork_version_id' => $latestArtwork->id,
                 'action' => 'CORRECTION_REQUESTED',
                 'customer_comment' => $comment,
+                'affected_assets' => array_values(array_unique($affectedAssets)),
                 'acted_at' => now(),
             ]);
 
@@ -62,6 +64,7 @@ class RequestArtworkCorrectionService
                     'artwork_version_id' => $latestArtwork->id,
                     'version_number' => $latestArtwork->version_number,
                     'customer_comment' => $comment,
+                    'affected_assets' => array_values(array_unique($affectedAssets)),
                 ],
             ]);
 

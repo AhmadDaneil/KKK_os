@@ -24,7 +24,7 @@ class StaffCorrectionPaymentController extends Controller
             $job = $order->designJobs()->findOrFail($metadata['design_job_id']);
             abort_unless($job->status === 'DESIGN_READY'
                 && $job->artworkVersions()->latest('version_number')->value('id') === $metadata['artwork_version_id'], 422);
-            $correction->request($job, $metadata['correction_comment']);
+            $correction->request($job, $metadata['correction_comment'], $metadata['affected_assets'] ?? ['CARD']);
             $sync->sync($order);
             $metadata['reviewed_by_user_id'] = $request->user()->id;
             $metadata['reviewed_at'] = now()->toIso8601String();

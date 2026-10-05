@@ -15,8 +15,32 @@
     @endphp
 
     <section class="admin-page-intro">
-        <div><p class="admin-eyebrow">Access Control</p><h2>Urus akaun dan jabatan staff</h2><p>Nyahaktifkan akaun untuk akses sementara, atau padam akaun yang tidak lagi diperlukan. Rekod kerja lama kekal disimpan.</p></div>
+        <div><p class="admin-eyebrow">Kawalan Akses</p><h2>Urus akaun dan jabatan staf</h2><p>Nyahaktifkan akaun untuk akses sementara, atau padam akaun yang tidak lagi diperlukan. Rekod kerja lama kekal disimpan.</p></div>
         <a href="#create-staff" class="admin-button admin-button-primary admin-staff-create-cta">+ Tambah Staf</a>
+    </section>
+
+    <section class="admin-panel">
+        <div class="admin-panel-heading">
+            <div><p class="admin-eyebrow">Jejak Keselamatan</p><h2>Aktiviti akaun terkini</h2></div>
+        </div>
+        <div class="admin-table-wrap">
+            <table class="admin-table">
+                <thead><tr><th>Masa</th><th>Aktiviti</th><th>Pelaksana</th><th>Akaun Berkaitan</th><th>Alamat IP</th></tr></thead>
+                <tbody>
+                    @forelse ($recentAuditLogs as $auditLog)
+                        <tr>
+                            <td>{{ $auditLog->created_at->timezone(config('app.display_timezone'))->format('d/m/Y, H:i') }}</td>
+                            <td>{{ str($auditLog->event_type)->replace('_', ' ')->title() }}</td>
+                            <td>{{ $auditLog->actor?->name ?? 'Sistem / Tidak dikenal pasti' }}</td>
+                            <td>{{ $auditLog->target?->name ?? ($auditLog->metadata['email'] ?? '-') }}</td>
+                            <td>{{ $auditLog->ip_address ?: '-' }}</td>
+                        </tr>
+                    @empty
+                        <tr><td colspan="5">Belum ada rekod keselamatan.</td></tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
     </section>
 
     <section class="admin-panel" id="create-staff">
@@ -66,9 +90,12 @@
                         </form>
 
                         @unless (auth()->user()->is($staff))
-                            <form class="admin-delete-form" method="POST" action="{{ route('admin.staff.destroy', $staff) }}" onsubmit="return confirm('Padam akaun {{ addslashes($staff->name) }}? Tindakan ini tidak boleh dibatalkan. Tugasan aktif akan menjadi belum di-assign.');">
+                            <form class="admin-delete-form" method="POST" action="{{ route('admin.staff.destroy', $staff) }}" onsubmit="return confirm('Adakah anda ingin memadam akaun ini?');">
                                 @csrf @method('DELETE')
-                                <div><strong>Padam akaun</strong><small>Rekod operasi dikekalkan, tetapi pengguna ini tidak boleh log masuk semula.</small></div>
+                                <div>
+                                    <strong>Padam akaun</strong>
+                                    <small>Rekod operasi dikekalkan, tetapi pengguna ini tidak boleh log masuk semula.</small>
+                                </div>
                                 <button class="admin-button admin-button-danger admin-action-hover admin-action-hover-danger" type="submit">Padam Akaun</button>
                             </form>
                         @endunless

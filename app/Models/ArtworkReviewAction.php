@@ -11,12 +11,14 @@ class ArtworkReviewAction extends Model
         'artwork_version_id',
         'action',
         'customer_comment',
+        'affected_assets',
         'actor_user_id',
         'acted_at',
     ];
 
     protected $casts = [
         'acted_at' => 'datetime',
+        'affected_assets' => 'array',
     ];
 
     public function designJob()
