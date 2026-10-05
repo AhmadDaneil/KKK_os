@@ -134,6 +134,11 @@ class StaffDesignWorkflowController extends Controller
                 'string',
                 'max:5000',
             ],
+        ], [
+            'source_artwork.*.uploaded' => 'Fail sumber tidak berjaya dimuat naik. Sila pastikan saiz fail tidak melebihi had server.',
+            'customer_preview.*.uploaded' => 'Pratonton pelanggan tidak berjaya dimuat naik. Sila pastikan saiz fail tidak melebihi had server.',
+            'banner_preview.uploaded' => 'Pratonton banner tidak berjaya dimuat naik. Sila pastikan saiz fail tidak melebihi had server.',
+            'banting_preview.uploaded' => 'Pratonton banting tidak berjaya dimuat naik. Sila pastikan saiz fail tidak melebihi had server.',
         ]);
 
         /*
