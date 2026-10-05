@@ -36,6 +36,23 @@ Operational access is controlled by both:
 - staff role; and
 - assignment to the relevant operational job where required.
 
+### Secure staff provisioning
+
+Create each named staff account from the application directory:
+
+```text
+php artisan staff:create "FULL NAME" "EMAIL" "ROLE"
+```
+
+Allowed roles are `ADMIN`, `OPERATION_MANAGEMENT`, `CUSTOMER_SERVICE`,
+`DESIGNER`, and `PRODUCTION`. The command requests the password through hidden
+interactive prompts, requires at least 12 characters, and does not print or
+store the plaintext password in Git or command history. Use `--inactive` when
+an account must be prepared before access is authorized.
+
+Do not use `db:seed` to provision staff. The default seeder intentionally
+creates no account.
+
 ### ADMIN
 
 ADMIN is responsible for administrative control such as:
@@ -43,7 +60,7 @@ ADMIN is responsible for administrative control such as:
 - staff management;
 - assigning or reassigning Design jobs;
 - assigning or reassigning Printing jobs;
-- assigning or reassigning Packing jobs;
+- assigning or reassigning Packing jobs to OM;
 - monitoring operational orders.
 
 ADMIN assignment authority does not automatically mean the ADMIN performs an assigned operational task.
@@ -54,21 +71,17 @@ DESIGNER performs assigned design work.
 
 A Designer may operate only on the Design jobs assigned to that Designer.
 
-### PRINTING
+### PRODUCTION
 
-PRINTING staff performs assigned printing work.
+PRODUCTION staff performs assigned printing work.
 
 A Printing staff member may operate only on Print jobs assigned to that staff member.
 
-### PACKING
-
-PACKING staff performs assigned packing and fulfilment work.
-
-Packing and final fulfilment actions remain subject to assignment rules.
-
 ### OPERATION_MANAGEMENT
 
-OPERATION_MANAGEMENT may perform the operational functions explicitly permitted by KKK OS V1, including payment review and applicable packing/fulfilment operations.
+OPERATION_MANAGEMENT may assign operational jobs, view/review private payment receipts, and perform Packing/fulfilment operations.
+
+Packing is owned by OPERATION_MANAGEMENT. There is no separate active PACKING role in V1.
 
 Where an operation requires assignment, the staff member must still be assigned to the relevant job.
 
@@ -272,10 +285,10 @@ Initialization must be idempotent and must not create duplicate jobs.
 Typical sequence:
 
 1. ADMIN assigns the Print job.
-2. Assigned PRINTING staff opens the order.
-3. PRINTING staff starts the job.
+2. Assigned PRODUCTION staff opens the order.
+3. PRODUCTION staff starts the job.
 4. Printing is performed using the correct approved artwork.
-5. PRINTING staff marks the job printed.
+5. PRODUCTION staff marks the job printed.
 
 For a 2-package order, both independent Print jobs must reach the required completed printing state before the order proceeds into packing.
 
@@ -296,8 +309,8 @@ Typical sequence:
 
 1. all required Print jobs reach PRINTED;
 2. Packing job becomes available;
-3. ADMIN assigns the Packing job;
-4. assigned PACKING/authorized operational staff starts packing;
+3. ADMIN or OPERATION_MANAGEMENT assigns the Packing job to OM;
+4. OPERATION_MANAGEMENT starts packing;
 5. every required Packing item is verified;
 6. staff marks the Packing job packed.
 
@@ -464,7 +477,7 @@ The following are known limitations or deliberately excluded automation in the c
 - no mandatory automated pickup identity-verification process;
 - uploaded courier proof is validated as an accepted upload but KKK OS does not automatically inspect the image contents to confirm that the parcel and tracking label are visibly correct.
 
-PACKING staff remains operationally responsible for ensuring the courier proof satisfies the required operational evidence.
+OPERATION_MANAGEMENT remains operationally responsible for ensuring the courier proof satisfies the required operational evidence.
 
 These limitations must not be silently converted into new V1 business rules or V2 features.
 

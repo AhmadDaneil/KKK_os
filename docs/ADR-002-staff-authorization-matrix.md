@@ -4,6 +4,10 @@
 
 Accepted — KKK OS V1
 
+Updated 2026-10-05 following Project Owner approval that Packing belongs to
+Operation Management, OM may view private payment receipts, and OM may assign
+operational jobs.
+
 ## Context
 
 KKK OS V1 separates staff visibility, assignment authority, and operational
@@ -20,36 +24,31 @@ role checks from unintentionally granting operational permissions.
 
 - ADMIN
 - OPERATION_MANAGEMENT
+- CUSTOMER_SERVICE
 - DESIGNER
-- PRINTING
-- PACKING
+- PRODUCTION
 
-There is no separate FULFILMENT role in V1.
+There is no separate PACKING or FULFILMENT role in V1. `ROLE_PRINTING` and
+`ROLE_PACKING` remain deprecated code aliases only; new accounts must use
+`PRODUCTION` or `OPERATION_MANAGEMENT`.
 
 ## Authorization Matrix
 
-| Capability | ADMIN | OPERATION_MANAGEMENT | DESIGNER | PRINTING | PACKING |
+| Capability | ADMIN | OPERATION_MANAGEMENT | CUSTOMER_SERVICE | DESIGNER | PRODUCTION |
 |---|---|---|---|---|---|
-| Monitor all orders | YES | YES | NO | NO | NO |
+| Monitor all departments | YES | YES | YES | NO | NO |
+| View private payment receipts | YES | YES | NO | NO | NO |
 | Approve / verify payment | YES | YES | NO | NO | NO |
-| Assign / reassign Design jobs | YES | NO | NO | NO | NO |
-| Assign / reassign Printing jobs | YES | NO | NO | NO | NO |
-| Assign / reassign Packing jobs | YES | NO | NO | NO | NO |
-| Operate Design jobs | NO | NO | Assigned only | NO | NO |
-| Operate Printing jobs | NO | NO | NO | Assigned only | NO |
-| Operate normal Packing workflow | NO | Any Packing job | NO | NO | Assigned only |
-| Complete courier fulfilment | NO | Own assigned Packing job only | NO | NO | Own assigned Packing job only |
+| Assign / reassign operational jobs | YES | YES | NO | NO | NO |
+| Cancel / archive with audit reason | YES | YES | NO | NO | NO |
+| Operate Design jobs | NO | NO | NO | Assigned only | NO |
+| Operate Printing jobs | NO | NO | NO | NO | Assigned only |
+| Operate Packing / fulfilment | NO | Any Packing job | NO | NO | NO |
 
 ## Packing Assignment
 
-ADMIN may assign or reassign a Packing job to:
-
-- an active PACKING staff member; or
-- an active OPERATION_MANAGEMENT staff member.
-
-This is required because OPERATION_MANAGEMENT is allowed to complete courier
-fulfilment only when the Packing job is assigned to that OPERATION_MANAGEMENT
-user.
+ADMIN or OPERATION_MANAGEMENT may assign or reassign a Packing job to an
+active OPERATION_MANAGEMENT staff member.
 
 ## Packing Operational Rules
 
@@ -59,32 +58,23 @@ Normal Packing operations are:
 - verify Packing items;
 - mark Packing as PACKED.
 
-For these operations:
-
-- PACKING staff may operate only their assigned Packing job.
-- OPERATION_MANAGEMENT may operate any Packing job.
-- ADMIN may not perform Packing operations.
-
-Courier completion has a stricter authorization boundary:
-
-- PACKING may complete only their own assigned Packing job.
-- OPERATION_MANAGEMENT may complete only a Packing job assigned to themselves.
-- ADMIN may not complete courier fulfilment.
+OPERATION_MANAGEMENT may operate Packing and fulfilment jobs. ADMIN retains
+monitoring and assignment authority but does not perform the specialist
+Packing workflow through the staff role.
 
 ## Design and Printing Rules
 
 DESIGNER may operate only Design jobs assigned to themselves.
 
-PRINTING may operate only Printing jobs assigned to themselves.
+PRODUCTION may operate only Printing jobs assigned to themselves.
 
 ADMIN and OPERATION_MANAGEMENT must not receive an operational bypass for
 Design or Printing jobs.
 
 ## Assignment Authority
 
-Only ADMIN may assign or reassign Design, Printing, or Packing jobs.
-
-OPERATION_MANAGEMENT must not assign or reassign operational jobs.
+ADMIN and OPERATION_MANAGEMENT may assign or reassign Design, Printing,
+Packing and fulfilment work.
 
 ## Route Access vs Operational Authorization
 
@@ -98,15 +88,15 @@ actions.
 Do not use a broad ADMIN or operation-management helper as an operational
 bypass where the approved matrix requires assigned-only access.
 
-In particular, `User::isOperationManagement()` includes ADMIN and therefore
-must not be used for Packing operational authorization where ADMIN must be
-excluded.
+`User::isOperationManagement()` includes ADMIN and is appropriate for shared
+management actions. Specialist workflow controllers must still enforce the
+specific operational role and job ownership where applicable.
 
 ## Courier Ownership
 
 There is no separate FULFILMENT staff role in KKK OS V1.
 
-PACKING owns the post-packing courier update:
+OPERATION_MANAGEMENT owns the post-packing courier update:
 
 PACKED
 → proof photo
@@ -126,32 +116,26 @@ Authorization changes must retain regression coverage for:
 - ADMIN monitoring without operational job execution;
 - OPERATION_MANAGEMENT monitoring all orders;
 - OPERATION_MANAGEMENT payment approval / verification;
-- ADMIN-only Design / Printing / Packing assignment and reassignment;
-- ADMIN assigning Packing jobs to active OPERATION_MANAGEMENT staff;
+- ADMIN and OPERATION_MANAGEMENT assignment and reassignment;
+- Packing jobs assigned to active OPERATION_MANAGEMENT staff;
 - OPERATION_MANAGEMENT denied Design operations;
 - OPERATION_MANAGEMENT denied Printing operations;
 - OPERATION_MANAGEMENT allowed normal operations on any Packing job;
-- OPERATION_MANAGEMENT courier completion allowed only on their own assigned job;
-- PACKING assigned-only authorization;
+- OPERATION_MANAGEMENT Packing and fulfilment authorization;
 - DESIGNER assigned-only authorization;
-- PRINTING assigned-only authorization;
+- PRODUCTION assigned-only authorization;
 - both 1-package and 2-package workflow paths.
 
 ## Verification
 
-Authorization contract regression checkpoint:
+Authorization contract regression checkpoint on 2026-10-05:
 
-- Staff suite: 101 tests passed, 605 assertions.
-- Full backend suite: 262 tests passed, 1302 assertions.
+- Full suite: 363 tests passed, 2,053 assertions.
 
 ## Known Frontend Integration Note
 
 Frontend ownership is handled separately from this backend authorization
 contract.
 
-A frontend test currently exposes ADMIN designer operational controls in the
-admin layout. Backend authorization remains authoritative: ADMIN must not be
-allowed to execute Design, Printing, or Packing operational actions.
-
-Frontend controls must eventually reflect the same authorization matrix, but
-frontend changes are outside the scope of this backend authorization patch.
+Frontend controls and backend authorization must reflect the same matrix.
+Backend middleware/controller authorization remains authoritative.
