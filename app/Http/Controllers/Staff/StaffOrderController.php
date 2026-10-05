@@ -211,6 +211,8 @@ class StaffOrderController extends Controller
         $query->where('status', '!=', 'DETAILS_INCOMPLETE');
 
         return match ($user->role) {
+            User::ROLE_ADMIN => $query,
+
             User::ROLE_DESIGNER => $query->whereHas(
                 'designJobs',
                 fn (Builder $jobQuery) => $jobQuery

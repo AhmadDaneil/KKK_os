@@ -272,7 +272,11 @@
                                 Buka &rarr;
                             </a>
 
-                            @if (auth()->user()->isOperationManagement())
+                            @if (
+                                $isAdminPortal
+                                    ? auth('admin')->user()?->isAdmin()
+                                    : auth('staff')->user()?->isOperationManagement()
+                            )
                                 <form
                                     method="POST"
                                     action="{{ route($isAdminPortal ? 'admin.orders.destroy' : 'staff.orders.destroy', $order) }}"

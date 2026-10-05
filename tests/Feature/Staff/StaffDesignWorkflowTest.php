@@ -94,17 +94,8 @@ class StaffDesignWorkflowTest extends TestCase
         );
     }
 
-    private function authorizeAssignedPrintingStaff(
-        Request $request,
-        PrintJob $printJob
-    ): void {
-        abort_unless(
-            $printJob->assigned_user_id === $request->user()->id,
-            404
-        );
-    }
 
-    public function test_printing_and_packing_staff_cannot_start_design_job(): void
+    public function test_production_and_operation_management_staff_cannot_start_design_job(): void
     {
         $designer = $this->designer();
         $job = $this->designJob();
@@ -112,8 +103,8 @@ class StaffDesignWorkflowTest extends TestCase
         $this->assign($job, $designer);
 
         foreach ([
-            User::ROLE_PRINTING,
-            User::ROLE_PACKING,
+            User::ROLE_PRODUCTION,
+            User::ROLE_OM,
         ] as $role) {
             $staff = $this->staff($role);
 
@@ -1242,7 +1233,7 @@ class StaffDesignWorkflowTest extends TestCase
 
         $this->actingAs($admin, 'staff')
             ->post(
-                route('staff.design-jobs.mark-ready', $job)
+                route('admin.design-jobs.mark-ready', $job)
             )
             ->assertNotFound();
 

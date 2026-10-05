@@ -54,9 +54,10 @@ class StaffIdentityTest extends TestCase
     public function test_supported_operational_roles_are_active_staff_when_enabled(): void
     {
         foreach ([
+            User::ROLE_OM,
+            User::ROLE_CUSTOMER_SERVICE,
             User::ROLE_DESIGNER,
-            User::ROLE_PRINTING,
-            User::ROLE_PACKING,
+            User::ROLE_PRODUCTION,
         ] as $role) {
             $user = new User([
                 'role' => $role,

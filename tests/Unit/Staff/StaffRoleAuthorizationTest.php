@@ -16,13 +16,12 @@ class StaffRoleAuthorizationTest extends TestCase
         $user = $this->staffUser(User::ROLE_ADMIN);
 
         foreach ([
+            User::ROLE_OM,
+            User::ROLE_CUSTOMER_SERVICE,
             User::ROLE_DESIGNER,
-            User::ROLE_PRINTING,
-            User::ROLE_PACKING,
+            User::ROLE_PRODUCTION,
         ] as $requiredRole) {
-            $response = $this->runMiddleware($user, $requiredRole);
-
-            $this->assertSame(200, $response->getStatusCode());
+            $this->assertAllowed($user, $requiredRole);
         }
     }
 
@@ -31,48 +30,42 @@ class StaffRoleAuthorizationTest extends TestCase
         $user = $this->staffUser(User::ROLE_DESIGNER);
 
         $this->assertAllowed($user, User::ROLE_DESIGNER);
-        $this->assertForbidden($user, User::ROLE_PRINTING);
-        $this->assertForbidden($user, User::ROLE_PACKING);
+        $this->assertForbidden($user, User::ROLE_OM);
+        $this->assertForbidden($user, User::ROLE_PRODUCTION);
     }
 
-    public function test_operation_management_is_a_valid_staff_role(): void
+    public function test_operation_management_can_access_operation_management_role_only(): void
     {
         $user = $this->staffUser(User::ROLE_OM);
 
         $this->assertTrue($user->isActiveStaff());
         $this->assertAllowed($user, User::ROLE_OM);
-        $this->assertAllowed(
-            $user,
-            User::ROLE_PACKING,
-            User::ROLE_OM
-        );
         $this->assertForbidden($user, User::ROLE_DESIGNER);
+        $this->assertForbidden($user, User::ROLE_PRODUCTION);
     }
 
-    public function test_printing_can_access_printing_role_only(): void
+    public function test_production_can_access_production_role_only(): void
     {
-        $user = $this->staffUser(User::ROLE_PRINTING);
+        $user = $this->staffUser(User::ROLE_PRODUCTION);
 
         $this->assertForbidden($user, User::ROLE_DESIGNER);
-        $this->assertAllowed($user, User::ROLE_PRINTING);
-        $this->assertForbidden($user, User::ROLE_PACKING);
+        $this->assertForbidden($user, User::ROLE_OM);
+        $this->assertAllowed($user, User::ROLE_PRODUCTION);
     }
 
-    public function test_packing_can_access_packing_role_only(): void
+    public function test_customer_service_can_access_customer_service_role_only(): void
     {
-        $user = $this->staffUser(User::ROLE_PACKING);
+        $user = $this->staffUser(User::ROLE_CUSTOMER_SERVICE);
 
+        $this->assertAllowed($user, User::ROLE_CUSTOMER_SERVICE);
         $this->assertForbidden($user, User::ROLE_DESIGNER);
-        $this->assertForbidden($user, User::ROLE_PRINTING);
-        $this->assertAllowed($user, User::ROLE_PACKING);
+        $this->assertForbidden($user, User::ROLE_OM);
+        $this->assertForbidden($user, User::ROLE_PRODUCTION);
     }
 
     public function test_inactive_staff_is_forbidden(): void
     {
-        $user = $this->staffUser(
-            User::ROLE_DESIGNER,
-            false
-        );
+        $user = $this->staffUser(User::ROLE_DESIGNER, false);
 
         $this->assertForbidden($user, User::ROLE_DESIGNER);
     }
@@ -91,25 +84,18 @@ class StaffRoleAuthorizationTest extends TestCase
         $this->assertForbidden($user, User::ROLE_DESIGNER);
     }
 
-    private function staffUser(
-        ?string $role,
-        bool $isActive = true
-    ): User {
+    private function staffUser(?string $role, bool $isActive = true): User
+    {
         return User::factory()->make([
             'role' => $role,
             'is_active' => $isActive,
         ]);
     }
 
-    private function runMiddleware(
-        User $user,
-        string ...$roles
-    ): Response {
+    private function runMiddleware(User $user, string ...$roles): Response
+    {
         $request = Request::create('/staff/test', 'GET');
-
-        $request->setUserResolver(
-            fn () => $user
-        );
+        $request->setUserResolver(fn () => $user);
 
         return (new EnsureStaffRole())->handle(
             $request,
@@ -118,25 +104,19 @@ class StaffRoleAuthorizationTest extends TestCase
         );
     }
 
-    private function assertAllowed(
-        User $user,
-        string ...$roles
-    ): void {
+    private function assertAllowed(User $user, string ...$roles): void
+    {
         $response = $this->runMiddleware($user, ...$roles);
 
         $this->assertSame(200, $response->getStatusCode());
     }
 
-    private function assertForbidden(
-        User $user,
-        string ...$roles
-    ): void {
+    private function assertForbidden(User $user, string ...$roles): void
+    {
         try {
             $this->runMiddleware($user, ...$roles);
 
-            $this->fail(
-                'Expected staff role authorization to return HTTP 403.'
-            );
+            $this->fail('Expected staff role authorization to return HTTP 403.');
         } catch (HttpException $exception) {
             $this->assertSame(403, $exception->getStatusCode());
         }

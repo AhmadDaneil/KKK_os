@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Staff;
 
+use App\Models\PaymentTransaction;
 use App\Models\User;
 use App\Services\Orders\CreateOrderService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -11,7 +12,7 @@ class StaffOrderDeletionTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_admin_can_delete_an_incomplete_order_from_admin_orders(): void
+    public function test_admin_can_delete_an_incomplete_order(): void
     {
         $admin = $this->staff(User::ROLE_ADMIN);
         $order = $this->incompleteOrder();
@@ -48,6 +49,30 @@ class StaffOrderDeletionTest extends TestCase
             ->assertSessionHasErrors('order_delete');
 
         $this->assertDatabaseHas('orders', ['id' => $order->id]);
+    }
+
+    public function test_incomplete_order_with_payment_record_cannot_be_deleted(): void
+    {
+        $manager = $this->staff(User::ROLE_OM);
+        $order = $this->incompleteOrder();
+
+        $payment = PaymentTransaction::create([
+            'order_id' => $order->id,
+            'payment_type' => 'BOOKING_DEPOSIT',
+            'provider' => 'MANUAL_RECEIPT',
+            'provider_reference' => 'DELETE-GUARD-TEST',
+            'amount' => 100.00,
+            'currency' => 'MYR',
+            'status' => 'PENDING',
+        ]);
+
+        $this->actingAs($manager)
+            ->delete(route('staff.orders.destroy', $order))
+            ->assertRedirect()
+            ->assertSessionHasErrors('order_delete');
+
+        $this->assertDatabaseHas('orders', ['id' => $order->id]);
+        $this->assertDatabaseHas('payment_transactions', ['id' => $payment->id]);
     }
 
     public function test_specialist_staff_cannot_delete_orders(): void

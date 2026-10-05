@@ -154,10 +154,10 @@ class StaffOrderVisibilityTest extends TestCase
         $response->assertDontSee($other->order_id);
     }
 
-    public function test_printing_only_sees_orders_assigned_to_them(): void
+    public function test_production_only_sees_orders_assigned_to_them(): void
     {
-        $printing = $this->staff(User::ROLE_PRINTING);
-        $otherPrinting = $this->staff(User::ROLE_PRINTING);
+        $production = $this->staff(User::ROLE_PRODUCTION);
+        $otherProduction = $this->staff(User::ROLE_PRODUCTION);
         $admin = $this->staff(User::ROLE_ADMIN);
 
         $mine = $this->paidOrder('Printing Mine');
@@ -172,13 +172,13 @@ class StaffOrderVisibilityTest extends TestCase
             ->first();
 
         app(AssignPrintJobService::class)
-            ->assign($mineJob, $printing, $admin);
+            ->assign($mineJob, $production, $admin);
 
         app(AssignPrintJobService::class)
-            ->assign($otherJob, $otherPrinting, $admin);
+            ->assign($otherJob, $otherProduction, $admin);
 
         $response = $this
-            ->actingAs($printing)
+            ->actingAs($production)
             ->get(route('staff.orders.index'));
 
         $response->assertOk();
@@ -188,8 +188,8 @@ class StaffOrderVisibilityTest extends TestCase
 
     public function test_operation_management_sees_all_packing_orders(): void
     {
-        $packing = $this->staff(User::ROLE_PACKING);
-        $otherPacking = $this->staff(User::ROLE_PACKING);
+        $operationManagement = $this->staff(User::ROLE_OM);
+        $otherOperationManagement = $this->staff(User::ROLE_OM);
         $admin = $this->staff(User::ROLE_ADMIN);
 
         $mine = $this->printedOrder('Packing Mine');
@@ -202,13 +202,13 @@ class StaffOrderVisibilityTest extends TestCase
             ->initialize($other);
 
         app(AssignPackingJobService::class)
-            ->assign($mineJob, $packing, $admin);
+            ->assign($mineJob, $operationManagement, $admin);
 
         app(AssignPackingJobService::class)
-            ->assign($otherJob, $otherPacking, $admin);
+            ->assign($otherJob, $otherOperationManagement, $admin);
 
         $response = $this
-            ->actingAs($packing)
+            ->actingAs($operationManagement)
             ->get(route('staff.orders.index'));
 
         $response->assertOk();
@@ -391,9 +391,9 @@ class StaffOrderVisibilityTest extends TestCase
             ->assertSee($order->order_id);
     }
 
-    public function test_printing_can_open_order_assigned_to_them(): void
+    public function test_production_can_open_order_assigned_to_them(): void
     {
-        $printing = $this->staff(User::ROLE_PRINTING);
+        $production = $this->staff(User::ROLE_PRODUCTION);
         $admin = $this->staff(User::ROLE_ADMIN);
 
         $order = $this->paidOrder('Printing Detail Mine');
@@ -403,18 +403,18 @@ class StaffOrderVisibilityTest extends TestCase
             ->first();
 
         app(AssignPrintJobService::class)
-            ->assign($job, $printing, $admin);
+            ->assign($job, $production, $admin);
 
-        $this->actingAs($printing)
+        $this->actingAs($production, 'staff')
             ->get(route('staff.orders.show', $order->order_id))
             ->assertOk()
             ->assertSee($order->order_id);
     }
 
-    public function test_printing_gets_404_for_order_assigned_to_another_printing_staff(): void
+    public function test_production_gets_404_for_order_assigned_to_another_production_staff(): void
     {
-        $printing = $this->staff(User::ROLE_PRINTING);
-        $otherPrinting = $this->staff(User::ROLE_PRINTING);
+        $production = $this->staff(User::ROLE_PRODUCTION);
+        $otherProduction = $this->staff(User::ROLE_PRODUCTION);
         $admin = $this->staff(User::ROLE_ADMIN);
 
         $order = $this->paidOrder('Printing Detail Other');
@@ -424,16 +424,16 @@ class StaffOrderVisibilityTest extends TestCase
             ->first();
 
         app(AssignPrintJobService::class)
-            ->assign($job, $otherPrinting, $admin);
+            ->assign($job, $otherProduction, $admin);
 
-        $this->actingAs($printing)
+        $this->actingAs($production)
             ->get(route('staff.orders.show', $order->order_id))
             ->assertNotFound();
     }
 
-    public function test_packing_can_open_order_assigned_to_them(): void
+    public function test_operation_management_can_open_order_with_packing_assignment(): void
     {
-        $packing = $this->staff(User::ROLE_PACKING);
+        $operationManagement = $this->staff(User::ROLE_OM);
         $admin = $this->staff(User::ROLE_ADMIN);
 
         $order = $this->printedOrder('Packing Detail Mine');
@@ -442,9 +442,9 @@ class StaffOrderVisibilityTest extends TestCase
             ->initialize($order);
 
         app(AssignPackingJobService::class)
-            ->assign($job, $packing, $admin);
+            ->assign($job, $operationManagement, $admin);
 
-        $this->actingAs($packing)
+        $this->actingAs($operationManagement)
             ->get(route('staff.orders.show', $order->order_id))
             ->assertOk()
             ->assertSee($order->order_id);
@@ -452,8 +452,8 @@ class StaffOrderVisibilityTest extends TestCase
 
     public function test_operation_management_can_open_order_assigned_to_another_manager(): void
     {
-        $packing = $this->staff(User::ROLE_PACKING);
-        $otherPacking = $this->staff(User::ROLE_PACKING);
+        $operationManagement = $this->staff(User::ROLE_OM);
+        $otherOperationManagement = $this->staff(User::ROLE_OM);
         $admin = $this->staff(User::ROLE_ADMIN);
 
         $order = $this->printedOrder('Packing Detail Other');
@@ -462,9 +462,9 @@ class StaffOrderVisibilityTest extends TestCase
             ->initialize($order);
 
         app(AssignPackingJobService::class)
-            ->assign($job, $otherPacking, $admin);
+            ->assign($job, $otherOperationManagement, $admin);
 
-        $this->actingAs($packing)
+        $this->actingAs($operationManagement)
             ->get(route('staff.orders.show', $order->order_id))
             ->assertOk();
     }
@@ -576,7 +576,7 @@ class StaffOrderVisibilityTest extends TestCase
         app(AssignDesignJobService::class)
             ->assign($job, $designer, $admin);
 
-        $this->actingAs($designer)
+        $this->actingAs($designer, 'staff')
             ->get(route('staff.orders.show', $order->order_id))
             ->assertOk()
             ->assertSee('Packages')
@@ -590,9 +590,9 @@ class StaffOrderVisibilityTest extends TestCase
             ->assertDontSee('Pembungkusan');
     }
 
-    public function test_printing_detail_renders_printing_work_but_not_design_or_packing_work(): void
+    public function test_production_detail_renders_printing_work_but_not_design_or_packing_work(): void
     {
-        $printing = $this->staff(User::ROLE_PRINTING);
+        $production = $this->staff(User::ROLE_PRODUCTION);
         $admin = $this->staff(User::ROLE_ADMIN);
 
         $order = $this->paidOrder('Printing Render Contract');
@@ -602,9 +602,9 @@ class StaffOrderVisibilityTest extends TestCase
             ->first();
 
         app(AssignPrintJobService::class)
-            ->assign($job, $printing, $admin);
+            ->assign($job, $production, $admin);
 
-        $this->actingAs($printing)
+        $this->actingAs($production)
             ->get(route('staff.orders.show', $order->order_id))
             ->assertOk()
             ->assertSee('Packages')
@@ -613,14 +613,14 @@ class StaffOrderVisibilityTest extends TestCase
             ->assertDontSee('<h2>Customer</h2>', false)
             ->assertDontSee('Timeline Order')
             ->assertDontSee('Payment')
-            ->assertDontSee('Fulfilment')
-            ->assertDontSee('Design Work')
-            ->assertDontSee('Packing');
+            ->assertDontSee('Pemenuhan Tempahan')
+            ->assertDontSee('Kerja Design')
+            ->assertDontSee('Pembungkusan');
     }
 
-    public function test_packing_detail_renders_packing_work_but_not_design_or_printing_work(): void
+    public function test_operation_management_detail_renders_packing_and_design_work(): void
     {
-        $packing = $this->staff(User::ROLE_PACKING);
+        $operationManagement = $this->staff(User::ROLE_OM);
         $admin = $this->staff(User::ROLE_ADMIN);
 
         $order = $this->printedOrder('Packing Render Contract');
@@ -629,13 +629,13 @@ class StaffOrderVisibilityTest extends TestCase
             ->initialize($order);
 
         app(AssignPackingJobService::class)
-            ->assign($job, $packing, $admin);
+            ->assign($job, $operationManagement, $admin);
 
-        $this->actingAs($packing)
+        $this->actingAs($operationManagement, 'staff')
             ->get(route('staff.orders.show', $order->order_id))
             ->assertOk()
-            ->assertSee('Packing')
-            ->assertDontSee('Design Work')
+            ->assertSee('Pembungkusan')
+            ->assertSee('Kerja Design')
             ->assertDontSee('Printing');
     }
 
@@ -650,7 +650,7 @@ class StaffOrderVisibilityTest extends TestCase
             'customer_phone' => '012-345 6789',
         ]);
 
-        $this->actingAs($customerService)
+        $this->actingAs($customerService, 'staff')
             ->get(route('staff.dashboard'))
             ->assertOk()
             ->assertSee('Semua Tempahan')
