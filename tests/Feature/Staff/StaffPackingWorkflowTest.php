@@ -454,7 +454,7 @@ class StaffPackingWorkflowTest extends TestCase
         );
     }
 
-    public function test_operation_management_can_operate_job_assigned_to_another_operation_management_staff(): void
+    public function test_operation_management_can_operate_a_job_assigned_to_another_manager(): void
     {
         $admin = $this->admin();
         $assigned = $this->staff(User::ROLE_OM);

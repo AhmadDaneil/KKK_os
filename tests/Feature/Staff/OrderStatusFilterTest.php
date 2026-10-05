@@ -42,10 +42,10 @@ class OrderStatusFilterTest extends TestCase
         ]);
 
         foreach ([
-            'design' => 'Design',
-            'printing' => 'Pengeluaran',
-            'packing' => 'Pembungkusan',
-            'fulfilment' => 'Pemenuhan Tempahan',
+            'design' => 'Senarai Design',
+            'printing' => 'Senarai Pengeluaran',
+            'packing' => 'Senarai Pembungkusan',
+            'fulfilment' => 'Senarai Pemenuhan Tempahan',
         ] as $workstream => $heading) {
             $this->actingAs($manager, 'staff')
                 ->get(route('staff.orders.index', ['workstream' => $workstream]))
@@ -126,7 +126,7 @@ class OrderStatusFilterTest extends TestCase
         $this->actingAs($admin, 'admin')
             ->get(route('admin.orders.index', ['workstream' => 'packing']))
             ->assertOk()
-            ->assertSee('Pembungkusan')
+            ->assertSee('Senarai Pembungkusan')
             ->assertSee($activeOrder->order_id)
             ->assertDontSee($packedOrder->order_id);
     }
@@ -147,7 +147,7 @@ class OrderStatusFilterTest extends TestCase
         $this->actingAs($admin, 'admin')
             ->get(route('admin.orders.index', ['workstream' => 'fulfilment']))
             ->assertOk()
-            ->assertSee('Pemenuhan Tempahan')
+            ->assertSee('Senarai Pemenuhan Tempahan')
             ->assertSee($activeOrder->order_id)
             ->assertDontSee($collectedOrder->order_id);
     }

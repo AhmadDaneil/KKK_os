@@ -30,6 +30,7 @@ use App\Http\Controllers\Staff\StaffDesignWorkflowController;
 use App\Http\Controllers\Staff\StaffJobAssignmentController;
 use App\Http\Controllers\Staff\StaffOrderController;
 use App\Http\Controllers\Staff\StaffOrderDeletionController;
+use App\Http\Controllers\Staff\StaffOrderLifecycleController;
 use App\Http\Controllers\Staff\StaffOrderProductionAssignmentController;
 use App\Http\Controllers\Staff\StaffPackingWorkflowController;
 use App\Http\Controllers\Staff\StaffPhotoshopController;
@@ -93,6 +94,10 @@ Route::middleware(['auth:admin', 'active.staff', 'staff.role:ADMIN'])
         Route::get('/orders/{orderId}', [StaffOrderController::class, 'show'])->name('orders.show');
         Route::delete('/orders/{order}', [StaffOrderDeletionController::class, 'destroy'])
             ->name('orders.destroy');
+        Route::post('/orders/{order}/cancel', [StaffOrderLifecycleController::class, 'cancel'])
+            ->name('orders.cancel');
+        Route::post('/orders/{order}/archive', [StaffOrderLifecycleController::class, 'archive'])
+            ->name('orders.archive');
         Route::post('/orders/{order}/assign-printing', [StaffOrderProductionAssignmentController::class, 'assignPrinting'])
             ->name('orders.assign-printing');
         Route::post('/orders/{order}/assign-packing-fulfilment', [StaffOrderProductionAssignmentController::class, 'assignPackingAndFulfilment'])
@@ -252,6 +257,10 @@ Route::middleware(['auth:staff', 'active.staff'])
         Route::middleware('staff.role:ADMIN,'.User::ROLE_OM)->group(function () {
             Route::delete('/orders/{order}', [StaffOrderDeletionController::class, 'destroy'])
                 ->name('orders.destroy');
+            Route::post('/orders/{order}/cancel', [StaffOrderLifecycleController::class, 'cancel'])
+                ->name('orders.cancel');
+            Route::post('/orders/{order}/archive', [StaffOrderLifecycleController::class, 'archive'])
+                ->name('orders.archive');
             Route::post('/orders/{order}/assign-printing', [StaffOrderProductionAssignmentController::class, 'assignPrinting'])
                 ->name('orders.assign-printing');
             Route::post('/orders/{order}/assign-packing-fulfilment', [StaffOrderProductionAssignmentController::class, 'assignPackingAndFulfilment'])
@@ -278,12 +287,12 @@ Route::middleware(['auth:staff', 'active.staff'])
                 ->name('payments.balance.reject');
         });
 
-        Route::middleware('staff.role:ADMIN')->group(function () {
-            Route::post(
-                '/packing-jobs/{packingJob}/assign',
-                [StaffJobAssignmentController::class, 'assignPacking']
-            )->name('packing-jobs.assign');
-        });
+        Route::post(
+            '/packing-jobs/{packingJob}/assign',
+            [StaffJobAssignmentController::class, 'assignPacking']
+        )
+            ->middleware('staff.role:ADMIN,'.User::ROLE_OM)
+            ->name('packing-jobs.assign');
 
         /*
         |--------------------------------------------------------------------------

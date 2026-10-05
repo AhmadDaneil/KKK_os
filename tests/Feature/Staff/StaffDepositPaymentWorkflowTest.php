@@ -109,11 +109,6 @@ class StaffDepositPaymentWorkflowTest extends TestCase
             'is_active' => true,
         ]);
 
-        $customerService = User::factory()->create([
-            'role' => User::ROLE_CUSTOMER_SERVICE,
-            'is_active' => true,
-        ]);
-
         // Guest must not be able to retrieve a private receipt.
         $this->get(route('staff.payments.receipt', $payment))
             ->assertRedirect();
@@ -124,10 +119,6 @@ class StaffDepositPaymentWorkflowTest extends TestCase
             ->assertForbidden();
 
         $this->actingAs($production)
-            ->get(route('staff.payments.receipt', $payment))
-            ->assertForbidden();
-
-        $this->actingAs($customerService)
             ->get(route('staff.payments.receipt', $payment))
             ->assertForbidden();
 

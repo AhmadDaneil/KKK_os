@@ -62,6 +62,63 @@ class BackupCommandsAndScheduleTest extends TestCase
         $this->assertSame(['production'], $event->environments);
     }
 
+    public function test_daily_production_schedule_registers_the_files_backup_after_database(): void
+    {
+        $event = collect(app(Schedule::class)->events())
+            ->first(static fn ($event): bool => str_contains((string) $event->command, 'backup:files --isolated'));
+
+        $this->assertNotNull($event);
+        $this->assertSame('30 2 * * *', $event->expression);
+        $this->assertSame(['production'], $event->environments);
+    }
+
+    public function test_application_files_backup_archives_private_and_public_storage_to_two_locations(): void
+    {
+        Storage::fake('backup-primary');
+        Storage::fake('backup-secondary');
+        $sourceRoot = storage_path('framework/testing/files-backup-sources');
+        @mkdir($sourceRoot.'/private', 0700, true);
+        @mkdir($sourceRoot.'/public', 0700, true);
+        file_put_contents($sourceRoot.'/private/customer.txt', 'private customer file');
+        file_put_contents($sourceRoot.'/public/output.txt', 'public generated file');
+
+        config([
+            'backup.enabled' => true,
+            'backup.files.disks' => ['backup-primary', 'backup-secondary'],
+            'backup.files.path' => 'application-files',
+            'backup.files.sources' => [
+                'private' => $sourceRoot.'/private',
+                'public' => $sourceRoot.'/public',
+            ],
+            'backup.files.retention_days' => 30,
+            'backup.files.temporary_directory' => storage_path('framework/testing/files-backup-temp'),
+            'filesystems.disks.backup-primary' => [
+                'driver' => 'local',
+                'root' => storage_path('framework/testing/disks/files-backup-primary'),
+            ],
+            'filesystems.disks.backup-secondary' => [
+                'driver' => 'local',
+                'root' => storage_path('framework/testing/disks/files-backup-secondary'),
+            ],
+        ]);
+
+        $this->artisan('backup:files')
+            ->expectsOutputToContain('created and verified')
+            ->expectsOutputToContain('Files: 2')
+            ->assertExitCode(0);
+
+        $primaryFiles = Storage::disk('backup-primary')->allFiles('application-files');
+        $secondaryFiles = Storage::disk('backup-secondary')->allFiles('application-files');
+        $this->assertCount(2, $primaryFiles);
+        $this->assertSame($primaryFiles, $secondaryFiles);
+        $this->assertTrue(collect($primaryFiles)->contains(
+            static fn (string $path): bool => str_ends_with($path, '.manifest.json'),
+        ));
+        $this->assertTrue(collect($primaryFiles)->contains(
+            static fn (string $path): bool => str_ends_with($path, '.tar.gz'),
+        ));
+    }
+
     public function test_production_backup_disks_use_private_local_and_s3_storage(): void
     {
         $primary = config('filesystems.disks.backup_primary');

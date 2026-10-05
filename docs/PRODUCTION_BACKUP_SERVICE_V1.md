@@ -1,18 +1,20 @@
-# Production Database Backup Service V1
+# Production Backup Service V1
 
 ## Decision and scope
 
 KKK OS creates one full database snapshot every day and keeps rolling restore points for 30 days. A backup is successful only after the same artifact and manifest have been written to, read back from, and SHA-256 verified on exactly two distinct Laravel filesystem disks.
 
-This service backs up the application database only. Private customer uploads, artwork, generated PSD/JPEG files, and other private storage require a separate backup process with its own schedule, retention, verification, and restore drill. They are intentionally not included in the database archive.
+Database snapshots and application files are separate artifacts so either layer can be restored independently. Application files include the Laravel `local` and `public` disk roots under `storage/app/private` and `storage/app/public`.
 
-On 2026-10-01, the KKK Systems Team selected a protected local VPS directory as the proposed primary destination and S3-compatible object storage as the physically separate secondary destination. Production activation remains pending Project Owner approval of the provider and cost, followed by configuration of the region, bucket, credentials, encryption-at-rest evidence, and recovery access. Until both destinations pass a supervised backup and restore test, `BACKUP_ENABLED` must remain `false`.
+The primary destination is a protected VPS directory. The physically separate secondary destination is the private Cloudflare R2 bucket `kkk-os-v1-backup`, accessed with bucket-restricted S3 credentials stored only in the permission-restricted production environment file. Until both database and application-file artifacts pass a supervised restore test, `BACKUP_ENABLED` must remain `false`.
 
 ## Components
 
 - `backup:database` creates a native full snapshot, compresses it, replicates it to two disks, verifies byte length and SHA-256, writes a versioned manifest, and then applies retention.
 - `backup:verify [backupId]` verifies the requested backup, or the latest backup present in both locations.
+- `backup:files` archives private uploads and generated/public files, replicates the archive to both locations, verifies byte length and SHA-256, writes a versioned manifest, applies retention, and logs the outcome.
 - The scheduler runs `backup:database --isolated` daily at `BACKUP_DAILY_AT` in the production environment. Laravel overlap and one-server locks are also enabled.
+- The scheduler runs `backup:files --isolated` at `BACKUP_FILES_DAILY_AT`, after the database backup window.
 - MySQL and MariaDB use `mysqldump`; PostgreSQL uses `pg_dump`; SQLite uses a consistent `VACUUM INTO` snapshot. Unsupported database drivers fail closed.
 
 The MySQL dump includes the selected database, routines, triggers, events, and binary-safe data. PostgreSQL produces a plain SQL dump with clean statements and without restoring object ownership or privileges. Temporary database credentials are written to a mode `0600` client file and deleted after the native process finishes; passwords are not placed in process arguments.
@@ -38,6 +40,9 @@ BACKUP_RETENTION_DAYS=30
 BACKUP_PROCESS_TIMEOUT_SECONDS=3600
 BACKUP_MYSQLDUMP_BINARY=mysqldump
 BACKUP_PG_DUMP_BINARY=pg_dump
+BACKUP_FILES_DAILY_AT=02:30
+BACKUP_FILES_RETENTION_DAYS=30
+BACKUP_FILES_TEMPORARY_DIRECTORY=
 ```
 
 `backup_primary` is a private local disk rooted at `/var/backups/kkk-os`. The directory must be owned by the application service account and must not be under the web root. `backup_secondary` is private S3-compatible object storage using dedicated least-privilege credentials and the `kkk-os` object prefix. Both disks throw write/read errors. Confirm provider-side encryption at rest, restricted service credentials, access logging, object visibility, and recovery access before enabling the schedule.
@@ -58,6 +63,7 @@ Then perform the first supervised run:
 ```text
 php artisan backup:database --force --isolated
 php artisan backup:verify
+php artisan backup:files --force --isolated
 ```
 
 Remove `--force` after `BACKUP_ENABLED=true` is deployed. A successful command identifies the backup ID, checksum, size, and both logical disk names without printing credentials.
@@ -77,19 +83,19 @@ The scheduled command is isolated for up to six hours and uses a six-hour schedu
 Restoration is deliberately not automated because it is destructive and must be supervised.
 
 1. Identify the required restore point and run `php artisan backup:verify BACKUP_ID`. Stop if either location fails verification.
-2. Copy the artifact and its manifest from one verified private location into a restricted recovery workspace. Recalculate SHA-256 and compare it with the manifest after transfer.
+2. Copy the database artifact, application-files artifact, and their manifests from one verified private location into a restricted recovery workspace. Recalculate SHA-256 and compare each artifact with its manifest after transfer.
 3. Restore into an isolated staging database first. Do not restore directly over production. Use credentials supplied through a protected client configuration or secret store, never a password in command history.
 4. Decompress the `.gz` artifact. For MySQL or MariaDB, import the SQL with the matching `mysql` client. For PostgreSQL, import it with `psql` using `ON_ERROR_STOP=1`. For SQLite, stop all writers and restore the decompressed database file to a staging copy.
 5. Run migrations only if the application release being tested requires them. Prefer restoring with the application release that produced the backup before attempting an upgrade.
-6. Validate table counts, recent known orders, order relationships, staff-independent customer access behavior, one-package and two-package orders, and a Photoshop CSV export from representative restored data.
-7. Record the backup ID, source location, checksum, database client versions, validation evidence, duration, and any errors in the restore-drill record.
-8. Only after staging validation and explicit incident approval may the production database be placed in maintenance mode and replaced using the approved incident runbook. Preserve the pre-restore production database as a rollback snapshot.
-9. After production recovery, run application smoke tests and start a new supervised backup. Do not remove the incident restore point as part of normal cleanup until the incident is closed.
+6. Extract the application-files `.tar.gz` only into an isolated recovery directory. Confirm archive entries remain under `private/` or `public/`, compare representative restored files with their source checksums, and never extract directly over production during a drill.
+7. Validate table counts, recent known orders, order relationships, staff-independent customer access behavior, one-package and two-package orders, and a Photoshop CSV export from representative restored data.
+8. Record both backup IDs, source location, checksums, database client versions, validation evidence, duration, and any errors in the restore-drill record.
+9. Only after staging validation and explicit incident approval may production data be replaced using the approved incident runbook. Preserve the pre-restore production state as a rollback snapshot.
+10. After production recovery, run application smoke tests and start a new supervised backup. Do not remove the incident restore points as part of normal cleanup until the incident is closed.
 
 ## Known limitations and pending decisions
 
-- The primary/secondary architecture is technically proposed, but production activation, S3-compatible vendor and cost require Project Owner approval; region, bucket, storage class, credential lifecycle, encryption evidence, and recovery access are not yet configured.
-- The service does not back up private uploads or artwork. A separate private-storage backup service remains required before go-live.
+- Cloudflare R2 connectivity and bucket-scoped credentials are configured, but automated production activation remains blocked until the restore drill succeeds.
 - Integrity verification proves that stored bytes match the manifest; it does not prove that SQL is logically restorable. A supervised restore drill is required before go-live and should be repeated on a defined operational schedule.
 - Application-level archive encryption is not implemented. Production enablement is blocked until both approved destinations provide verified encryption at rest and access controls, or the Project Owner approves a separate application-level encryption design and key-recovery procedure.
 - Native database client binaries must be installed and compatible with the production database server. Their paths are configuration values, not hardcoded assumptions.
@@ -99,4 +105,4 @@ Restoration is deliberately not automated because it is destructive and must be 
 
 ## Test coverage
 
-Automated tests cover successful replication and verification in two locations, rolling 30-day retention, retention safety when the second destination fails, rejection of duplicate disk configuration, checksum corruption detection, command wiring, and the daily production schedule. Native `mysqldump` and `pg_dump` execution must additionally be exercised in the production-like restore drill because the test suite does not depend on external database client binaries.
+Automated tests cover database replication and verification, application-file archiving of both private and public roots, rolling 30-day retention, retention safety when the second destination fails, rejection of duplicate disk configuration, checksum corruption detection, command wiring, and both daily production schedules. Native database clients and archive extraction must additionally be exercised in the production-like restore drill.

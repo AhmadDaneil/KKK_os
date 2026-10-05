@@ -13,19 +13,7 @@ class DeleteIncompleteOrderService
         $order->refresh();
 
         if ($order->status !== 'DETAILS_INCOMPLETE') {
-            throw new RuntimeException(
-                'Only orders with incomplete details can be deleted.'
-            );
-        }
-
-        if ($order->payments()->exists()
-            || $order->designJobs()->exists()
-            || $order->printJobs()->exists()
-            || $order->packingJob()->exists()
-            || $order->fulfilmentJob()->exists()) {
-            throw new RuntimeException(
-                'This order already has payment or production records and cannot be deleted.'
-            );
+            throw new RuntimeException('Hanya tempahan dengan maklumat belum lengkap boleh dipadam.');
         }
 
         DB::transaction(function () use ($order): void {

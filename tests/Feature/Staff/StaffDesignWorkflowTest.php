@@ -1231,7 +1231,7 @@ class StaffDesignWorkflowTest extends TestCase
             $designer
         );
 
-        $this->actingAs($admin)
+        $this->actingAs($admin, 'staff')
             ->post(
                 route('admin.design-jobs.mark-ready', $job)
             )

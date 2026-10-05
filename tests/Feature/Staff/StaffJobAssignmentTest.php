@@ -5,10 +5,10 @@ namespace Tests\Feature\Staff;
 use App\Models\User;
 use App\Services\Design\ApproveArtworkService;
 use App\Services\Design\CreateArtworkVersionService;
-use App\Services\Design\GenerateMergeJobsForOrderService;
 use App\Services\Design\InitializeDesignJobsForOrderService;
 use App\Services\Design\MarkDesignReadyService;
 use App\Services\Design\StartDesignJobService;
+use App\Services\Merge\GenerateMergeJobsForOrderService;
 use App\Services\Orders\ConfirmOrderDetailsService;
 use App\Services\Orders\CreateOrderService;
 use App\Services\Orders\SaveOrderDraftService;
@@ -33,8 +33,8 @@ class StaffJobAssignmentTest extends TestCase
 
         $job = $this->designJob();
 
-        $response = $this->actingAs($admin, 'admin')->post(
-            route('admin.design-jobs.assign', $job),
+        $response = $this->actingAs($admin, 'staff')->post(
+            route('staff.design-jobs.assign', $job),
             ['assigned_user_id' => $designer->id]
         );
 
@@ -63,9 +63,9 @@ class StaffJobAssignmentTest extends TestCase
 
         $job = $this->printJob();
 
-        $response = $this->actingAs($admin, 'admin')->post(
-            route('admin.print-jobs.assign', $job),
-            ['assigned_user_id' => $production->id]
+        $response = $this->actingAs($admin, 'staff')->post(
+            route('staff.print-jobs.assign', $job),
+            ['assigned_user_id' => $printing->id]
         );
 
         $response->assertRedirect();
@@ -82,6 +82,31 @@ class StaffJobAssignmentTest extends TestCase
         $this->assertSame($admin->id, $event->actor_user_id);
     }
 
+    public function test_admin_can_assign_packing_job_to_active_packing_staff(): void
+    {
+        $admin = $this->admin();
+        $packing = $this->staff(User::ROLE_PACKING);
+
+        $job = $this->packingJob();
+
+        $response = $this->actingAs($admin, 'staff')->post(
+            route('staff.packing-jobs.assign', $job),
+            ['assigned_user_id' => $packing->id]
+        );
+
+        $response->assertRedirect();
+
+        $job->refresh();
+
+        $this->assertSame($packing->id, $job->assigned_user_id);
+
+        $event = $job->events()
+            ->where('event_type', 'PACKING_JOB_ASSIGNED')
+            ->latest('id')
+            ->firstOrFail();
+
+        $this->assertSame($admin->id, $event->actor_user_id);
+    }
 
     public function test_admin_can_assign_packing_job_to_active_operation_management(): void
     {
@@ -90,8 +115,8 @@ class StaffJobAssignmentTest extends TestCase
 
         $job = $this->packingJob();
 
-        $response = $this->actingAs($admin, 'admin')->post(
-            route('admin.packing-jobs.assign', $job),
+        $response = $this->actingAs($admin, 'staff')->post(
+            route('staff.packing-jobs.assign', $job),
             ['assigned_user_id' => $operationManagement->id]
         );
 
@@ -128,13 +153,13 @@ class StaffJobAssignmentTest extends TestCase
 
         $job = $this->designJob();
 
-        $this->actingAs($admin, 'admin')->post(
-            route('admin.design-jobs.assign', $job),
+        $this->actingAs($admin, 'staff')->post(
+            route('staff.design-jobs.assign', $job),
             ['assigned_user_id' => $first->id]
         )->assertRedirect();
 
-        $this->actingAs($admin, 'admin')->post(
-            route('admin.design-jobs.assign', $job),
+        $this->actingAs($admin, 'staff')->post(
+            route('staff.design-jobs.assign', $job),
             ['assigned_user_id' => $second->id]
         )->assertRedirect();
 
@@ -166,13 +191,13 @@ class StaffJobAssignmentTest extends TestCase
 
         $job = $this->printJob();
 
-        $this->actingAs($admin, 'admin')->post(
-            route('admin.print-jobs.assign', $job),
+        $this->actingAs($admin, 'staff')->post(
+            route('staff.print-jobs.assign', $job),
             ['assigned_user_id' => $first->id]
         )->assertRedirect();
 
-        $this->actingAs($admin, 'admin')->post(
-            route('admin.print-jobs.assign', $job),
+        $this->actingAs($admin, 'staff')->post(
+            route('staff.print-jobs.assign', $job),
             ['assigned_user_id' => $second->id]
         )->assertRedirect();
 
@@ -206,13 +231,13 @@ class StaffJobAssignmentTest extends TestCase
 
         $job = $this->packingJob();
 
-        $this->actingAs($admin, 'admin')->post(
-            route('admin.packing-jobs.assign', $job),
+        $this->actingAs($admin, 'staff')->post(
+            route('staff.packing-jobs.assign', $job),
             ['assigned_user_id' => $first->id]
         )->assertRedirect();
 
-        $this->actingAs($admin, 'admin')->post(
-            route('admin.packing-jobs.assign', $job),
+        $this->actingAs($admin, 'staff')->post(
+            route('staff.packing-jobs.assign', $job),
             ['assigned_user_id' => $second->id]
         )->assertRedirect();
 
@@ -245,7 +270,7 @@ class StaffJobAssignmentTest extends TestCase
 
         $job = $this->designJob();
 
-        $response = $this->actingAs($admin, 'admin')
+        $response = $this->actingAs($admin, 'staff')
             ->from(route('staff.orders.index'))
             ->post(
                 route('admin.design-jobs.assign', $job),
@@ -270,7 +295,7 @@ class StaffJobAssignmentTest extends TestCase
 
         $job = $this->designJob();
 
-        $response = $this->actingAs($admin, 'admin')
+        $response = $this->actingAs($admin, 'staff')
             ->from(route('staff.orders.index'))
             ->post(
                 route('admin.design-jobs.assign', $job),
@@ -284,16 +309,15 @@ class StaffJobAssignmentTest extends TestCase
         $this->assertNull($job->fresh()->assigned_user_id);
     }
 
-    public function test_operational_staff_cannot_use_admin_assignment_endpoint(): void
+    public function test_non_management_staff_cannot_use_assignment_endpoint(): void
     {
         $job = $this->designJob();
         $target = $this->staff(User::ROLE_DESIGNER);
 
         foreach ([
-            User::ROLE_OM,
-            User::ROLE_CUSTOMER_SERVICE,
             User::ROLE_DESIGNER,
             User::ROLE_PRODUCTION,
+            User::ROLE_CUSTOMER_SERVICE,
         ] as $role) {
             $actor = $this->staff($role);
 
@@ -306,15 +330,15 @@ class StaffJobAssignmentTest extends TestCase
         }
     }
 
-    public function test_operation_management_can_assign_design_and_print_but_not_packing_jobs(): void
+    public function test_operation_management_can_assign_operational_jobs(): void
     {
         $operationManagement = $this->staff(User::ROLE_OM);
-
         $designer = $this->staff(User::ROLE_DESIGNER);
         $production = $this->staff(User::ROLE_PRODUCTION);
-        $packingOperationManagement = $this->staff(User::ROLE_OM);
-
+        $packingOperationManager = $this->staff(User::ROLE_OM);
         $designJob = $this->designJob();
+        $printJob = $this->printJob();
+        $packingJob = $this->packingJob();
 
         $this->actingAs($operationManagement)
             ->post(
@@ -323,13 +347,6 @@ class StaffJobAssignmentTest extends TestCase
             )
             ->assertRedirect();
 
-        $this->assertSame(
-            $designer->id,
-            $designJob->fresh()->assigned_user_id
-        );
-
-        $printJob = $this->printJob();
-
         $this->actingAs($operationManagement)
             ->post(
                 route('staff.print-jobs.assign', $printJob),
@@ -337,23 +354,16 @@ class StaffJobAssignmentTest extends TestCase
             )
             ->assertRedirect();
 
-        $this->assertSame(
-            $production->id,
-            $printJob->fresh()->assigned_user_id
-        );
-
-        $packingJob = $this->packingJob();
-
         $this->actingAs($operationManagement)
             ->post(
                 route('staff.packing-jobs.assign', $packingJob),
-                ['assigned_user_id' => $packingOperationManagement->id]
+                ['assigned_user_id' => $packingOperationManager->id]
             )
-            ->assertForbidden();
+            ->assertRedirect();
 
-        $this->assertNull(
-            $packingJob->fresh()->assigned_user_id
-        );
+        $this->assertSame($designer->id, $designJob->fresh()->assigned_user_id);
+        $this->assertSame($production->id, $printJob->fresh()->assigned_user_id);
+        $this->assertSame($packingOperationManager->id, $packingJob->fresh()->assigned_user_id);
     }
 
     public function test_guest_cannot_assign_job(): void
@@ -377,7 +387,7 @@ class StaffJobAssignmentTest extends TestCase
 
         $order = $this->confirmedOrder(2);
 
-        app(\App\Services\Merge\GenerateMergeJobsForOrderService::class)
+        app(GenerateMergeJobsForOrderService::class)
             ->generate($order);
 
         $jobs = app(InitializeDesignJobsForOrderService::class)
@@ -391,13 +401,13 @@ class StaffJobAssignmentTest extends TestCase
         $this->assertNotNull($lelaki);
         $this->assertNotNull($perempuan);
 
-        $this->actingAs($admin, 'admin')->post(
-            route('admin.design-jobs.assign', $lelaki),
+        $this->actingAs($admin, 'staff')->post(
+            route('staff.design-jobs.assign', $lelaki),
             ['assigned_user_id' => $lelakiDesigner->id]
         )->assertRedirect();
 
-        $this->actingAs($admin, 'admin')->post(
-            route('admin.design-jobs.assign', $perempuan),
+        $this->actingAs($admin, 'staff')->post(
+            route('staff.design-jobs.assign', $perempuan),
             ['assigned_user_id' => $perempuanDesigner->id]
         )->assertRedirect();
 
@@ -432,7 +442,7 @@ class StaffJobAssignmentTest extends TestCase
     {
         $order = $this->confirmedOrder();
 
-        app(\App\Services\Merge\GenerateMergeJobsForOrderService::class)
+        app(GenerateMergeJobsForOrderService::class)
             ->generate($order);
 
         return app(InitializeDesignJobsForOrderService::class)
@@ -536,7 +546,7 @@ class StaffJobAssignmentTest extends TestCase
     {
         $order = $this->confirmedOrder();
 
-        app(\App\Services\Merge\GenerateMergeJobsForOrderService::class)
+        app(GenerateMergeJobsForOrderService::class)
             ->generate($order);
 
         $designJobs = app(InitializeDesignJobsForOrderService::class)
@@ -579,13 +589,13 @@ class StaffJobAssignmentTest extends TestCase
 
         $payment->update([
             'provider' => 'TEST',
-            'provider_reference' => 'STAFF-ASSIGN-' . $payment->id,
+            'provider_reference' => 'STAFF-ASSIGN-'.$payment->id,
         ]);
 
         app(HandlePaymentCallbackService::class)->handle([
             'provider' => 'TEST',
             'provider_reference' => $payment->provider_reference,
-            'provider_event_id' => 'STAFF-ASSIGN-EVENT-' . $payment->id,
+            'provider_event_id' => 'STAFF-ASSIGN-EVENT-'.$payment->id,
             'status' => 'PAID',
         ]);
 

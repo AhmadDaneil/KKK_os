@@ -186,7 +186,7 @@ class StaffOrderVisibilityTest extends TestCase
         $response->assertDontSee($other->order_id);
     }
 
-    public function test_operation_management_sees_orders_regardless_of_packing_assignment(): void
+    public function test_operation_management_sees_all_packing_orders(): void
     {
         $operationManagement = $this->staff(User::ROLE_OM);
         $otherOperationManagement = $this->staff(User::ROLE_OM);
@@ -450,7 +450,7 @@ class StaffOrderVisibilityTest extends TestCase
             ->assertSee($order->order_id);
     }
 
-    public function test_operation_management_can_open_order_assigned_to_another_operation_management_staff(): void
+    public function test_operation_management_can_open_order_assigned_to_another_manager(): void
     {
         $operationManagement = $this->staff(User::ROLE_OM);
         $otherOperationManagement = $this->staff(User::ROLE_OM);
@@ -581,12 +581,12 @@ class StaffOrderVisibilityTest extends TestCase
             ->assertOk()
             ->assertSee('Packages')
             ->assertSee('Kerja Design')
-            ->assertDontSee('Order Summary')
-            ->assertDontSee('<h2>Customer</h2>', false)
-            ->assertDontSee('Timeline Order')
-            ->assertDontSee('Payment')
+            ->assertDontSee('Ringkasan Tempahan')
+            ->assertDontSee('<h2>Pelanggan</h2>', false)
+            ->assertDontSee('Progress tempahan')
+            ->assertDontSee('Pembayaran')
             ->assertDontSee('Pemenuhan Tempahan')
-            ->assertDontSee('Printing')
+            ->assertDontSee('Pengeluaran')
             ->assertDontSee('Pembungkusan');
     }
 
@@ -677,7 +677,7 @@ class StaffOrderVisibilityTest extends TestCase
             ->assertSee('Mesej')
             ->assertSee('Peringatan Bayaran')
             ->assertSee('https://wa.me/60123456789', false)
-            ->assertDontSee('Assign Production Staff');
+            ->assertDontSee('Tugaskan Staf Pengeluaran');
     }
 
     public function test_assigned_designer_sees_start_design_action_when_job_is_ready(): void
@@ -746,7 +746,7 @@ class StaffOrderVisibilityTest extends TestCase
             ->assertDontSee('Resume Correction');
     }
 
-    public function test_admin_only_sees_assignment_controls_for_designer_job(): void
+    public function test_admin_portal_shows_order_without_designer_workflow_controls(): void
     {
         $admin = $this->staff(User::ROLE_ADMIN);
         $designer = $this->staff(User::ROLE_DESIGNER);
@@ -765,7 +765,7 @@ class StaffOrderVisibilityTest extends TestCase
         $this->actingAs($admin, 'admin')
             ->get(route('admin.orders.show', $order->order_id))
             ->assertOk()
-            ->assertSee('Assign')
+            ->assertDontSee('Tugaskan Pereka')
             ->assertDontSee('Mulakan Design')
             ->assertDontSee(
                 route('admin.design-jobs.start', $job),

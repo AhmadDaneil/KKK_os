@@ -78,7 +78,7 @@ class OrderProductionAssignmentTest extends TestCase
             $this->actingAs($assignee)
                 ->get(route('staff.orders.show', $order->order_id))
                 ->assertOk()
-                ->assertSee('Read-only order details.')
+                ->assertDontSee('Tugaskan Staf Pengeluaran')
                 ->assertSee($order->order_id);
         }
 

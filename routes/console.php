@@ -15,3 +15,11 @@ Schedule::command('backup:database --isolated')
     ->withoutOverlapping(360)
     ->onOneServer()
     ->when(static fn (): bool => (bool) config('backup.enabled'));
+
+Schedule::command('backup:files --isolated')
+    ->dailyAt((string) config('backup.files.daily_at', '02:30'))
+    ->timezone((string) config('app.timezone'))
+    ->environments(['production'])
+    ->withoutOverlapping(360)
+    ->onOneServer()
+    ->when(static fn (): bool => (bool) config('backup.enabled'));
