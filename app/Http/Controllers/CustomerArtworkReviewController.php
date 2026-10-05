@@ -183,6 +183,11 @@ class CustomerArtworkReviewController extends Controller
         $designJob = DesignJob::where('order_id', $order->id)->findOrFail($designJobId);
 
         $validated = $request->validate([
+            // Older artwork-review links did not include this field. Treat those
+            // as a card-only correction, while the current review screen lets the
+            // customer explicitly select every affected asset.
+            'affected_assets' => ['nullable', 'array', 'min:1'],
+            'affected_assets.*' => ['required', 'string', 'in:CARD,BANNER,BANTING'],
             'correction_fee_agreed' => ['accepted'],
             'correction_receipt' => ['required', 'file', 'mimes:jpg,jpeg,png,webp,pdf', 'max:10240'],
             'correction_comment' => [
@@ -198,9 +203,10 @@ class CustomerArtworkReviewController extends Controller
         ]);
 
         $receipt = $validated['correction_receipt'];
+        $affectedAssets = array_values(array_unique($validated['affected_assets'] ?? ['CARD']));
         $path = null;
         try {
-            DB::transaction(function () use ($order, $designJob, $validated, $receipt, &$path) {
+            DB::transaction(function () use ($order, $designJob, $validated, $receipt, $affectedAssets, &$path) {
                 $order = Order::whereKey($order->id)->lockForUpdate()->firstOrFail();
                 $designJob->refresh();
                 abort_unless(! $order->isTerminalOperationalStatus() && $designJob->status === 'DESIGN_READY', 422);
@@ -216,6 +222,7 @@ class CustomerArtworkReviewController extends Controller
                     'metadata' => [
                         'design_job_id' => $designJob->id, 'artwork_version_id' => $artwork->id,
                         'correction_comment' => trim($validated['correction_comment']),
+                        'affected_assets' => $affectedAssets,
                         'receipt_path' => $path, 'receipt_original_name' => $receipt->getClientOriginalName(),
                         'receipt_mime_type' => $receipt->getMimeType(),
                         'fee_agreed_at' => now()->toIso8601String(),

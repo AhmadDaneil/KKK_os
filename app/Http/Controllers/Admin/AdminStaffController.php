@@ -3,7 +3,9 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\StaffAuditLog;
 use App\Models\User;
+use App\Services\Audit\RecordStaffAuditLogService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -30,11 +32,16 @@ class AdminStaffController extends Controller
         }
 
         $staffMembers = $query->orderByDesc('is_active')->orderBy('name')->paginate(15)->withQueryString();
+        $recentAuditLogs = StaffAuditLog::query()
+            ->with(['actor:id,name', 'target:id,name'])
+            ->latest()
+            ->limit(20)
+            ->get();
 
-        return view('admin.staff.index', compact('staffMembers'));
+        return view('admin.staff.index', compact('staffMembers', 'recentAuditLogs'));
     }
 
-    public function store(Request $request): RedirectResponse
+    public function store(Request $request, RecordStaffAuditLogService $auditLog): RedirectResponse
     {
         $data = $request->validate([
             'name' => ['required', 'string', 'max:255'],
@@ -43,12 +50,15 @@ class AdminStaffController extends Controller
             'password' => ['required', 'confirmed', Password::min(8)],
         ]);
 
-        User::create($data + ['is_active' => true]);
+        $staff = User::create($data + ['is_active' => true]);
+        $auditLog->record($request, 'STAFF_ACCOUNT_CREATED', $request->user(), $staff, [
+            'role' => $staff->role,
+        ]);
 
         return back()->with('admin_success', 'Akaun staff berjaya dicipta.');
     }
 
-    public function update(Request $request, User $user): RedirectResponse
+    public function update(Request $request, User $user, RecordStaffAuditLogService $auditLog): RedirectResponse
     {
         $this->ensureStaffUser($user);
 
@@ -75,12 +85,17 @@ class AdminStaffController extends Controller
             }
         }
 
+        $before = $user->only(['name', 'email', 'role', 'is_active']);
         $user->update($data);
+        $auditLog->record($request, 'STAFF_ACCOUNT_UPDATED', $request->user(), $user, [
+            'before' => $before,
+            'after' => $user->only(['name', 'email', 'role', 'is_active']),
+        ]);
 
         return back()->with('admin_success', 'Maklumat staff berjaya dikemas kini.');
     }
 
-    public function updatePassword(Request $request, User $user): RedirectResponse
+    public function updatePassword(Request $request, User $user, RecordStaffAuditLogService $auditLog): RedirectResponse
     {
         $this->ensureStaffUser($user);
 
@@ -89,11 +104,12 @@ class AdminStaffController extends Controller
         ]);
 
         $user->update(['password' => Hash::make($data['password'])]);
+        $auditLog->record($request, 'STAFF_PASSWORD_RESET', $request->user(), $user);
 
         return back()->with('admin_success', "Kata laluan {$user->name} berjaya ditetapkan semula.");
     }
 
-    public function destroy(Request $request, User $user): RedirectResponse
+    public function destroy(Request $request, User $user, RecordStaffAuditLogService $auditLog): RedirectResponse
     {
         $this->ensureStaffUser($user);
 
@@ -114,6 +130,10 @@ class AdminStaffController extends Controller
         }
 
         $staffName = $user->name;
+        $staffSnapshot = $user->only(['id', 'name', 'email', 'role']);
+        $auditLog->record($request, 'STAFF_ACCOUNT_DELETED', $request->user(), $user, [
+            'deleted_staff' => $staffSnapshot,
+        ]);
         $user->delete();
 
         return redirect()

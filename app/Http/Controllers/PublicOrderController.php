@@ -80,7 +80,7 @@ class PublicOrderController extends Controller
         if (! $order) {
             return back()
                 ->withInput()
-                ->withErrors(['order_id' => 'Order ID tidak ditemui. Sila semak dan cuba lagi.']);
+                ->withErrors(['order_id' => 'ID Tempahan tidak ditemui. Sila semak dan cuba lagi.']);
         }
 
         $order->load(['fulfilmentJob', 'payments', 'designJobs.artworkVersions']);

@@ -392,7 +392,10 @@ class StaffPackingWorkflowTest extends TestCase
 
         $this->get(route('staff.orders.show', $order->order_id))
             ->assertDontSee('Sahkan Serahan kepada Courier');
-        $this->post(route('public.orders.progress.lookup'), ['order_id' => $order->order_id])
+        $this->post(route('public.orders.progress.lookup'), [
+            'order_id' => $order->order_id,
+            'customer_phone' => $order->customer_phone,
+        ])
             ->assertSee('100%')
             ->assertSee('Tempahan Selesai');
 
@@ -1414,7 +1417,10 @@ class StaffPackingWorkflowTest extends TestCase
             ->assertSee('value="Pos Laju"', false)
             ->assertSee('value="PL001234567MY"', false)
             ->assertSee('aria-controls="courier-packing-proof"', false);
-        $this->post(route('public.orders.progress.lookup'), ['order_id' => $order->order_id])
+        $this->post(route('public.orders.progress.lookup'), [
+            'order_id' => $order->order_id,
+            'customer_phone' => $order->customer_phone,
+        ])
             ->assertSee('Pos Laju')->assertSee('PL001234567MY');
     }
 

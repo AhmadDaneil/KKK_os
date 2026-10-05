@@ -133,6 +133,24 @@ class SaveOrderDraftService
                         $packageSide->design->update($designData);
                     }
 
+                    if (array_key_exists('additional_products', $sideData)) {
+                        $products = collect((array) $sideData['additional_products'])
+                            ->only(['banner', 'banting'])
+                            ->map(function (array $product): array {
+                                return [
+                                    'enabled' => (bool) ($product['enabled'] ?? false),
+                                    'size' => $this->cleanString($product['size'] ?? null),
+                                    'quantity' => isset($product['quantity']) ? (int) $product['quantity'] : 1,
+                                    'material' => $this->cleanString($product['material'] ?? null),
+                                    'orientation' => $this->cleanString($product['orientation'] ?? null),
+                                    'instructions' => $this->cleanString($product['instructions'] ?? null),
+                                ];
+                            })
+                            ->all();
+
+                        $packageSide->update(['additional_products' => $products ?: null]);
+                    }
+
                     if (array_key_exists('parents', $sideData)) {
                         $packageSide->parents->update([
                             'father_name' => $this->cleanString(Arr::get($sideData, 'parents.father_name')),

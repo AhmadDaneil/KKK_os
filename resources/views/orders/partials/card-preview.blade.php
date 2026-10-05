@@ -13,7 +13,7 @@
         <span class="live-preview-avatar" aria-hidden="true">K</span>
 
         <div>
-                <strong id="live-preview-title">Pratonton Kad Langsung</strong>
+                <strong id="live-preview-title">Preview Kad Langsung</strong>
             <small><span aria-hidden="true"></span> Kad 4 × 6 · dikemas kini secara langsung</small>
         </div>
 

@@ -225,6 +225,16 @@
                             >
                                 @csrf
                                 <input type="hidden" name="correction_job_id" value="{{ $designJob->id }}">
+                                <fieldset class="correction-assets">
+                                    <legend>Hasil design yang perlu dibetulkan</legend>
+                                    <label><input type="checkbox" name="affected_assets[]" value="CARD" checked> Kad Kahwin</label>
+                                    @if (collect($latestArtwork?->preview_files ?? [])->contains(fn ($file) => data_get($file, 'artwork_type') === 'BANNER'))
+                                        <label><input type="checkbox" name="affected_assets[]" value="BANNER"> Banner</label>
+                                    @endif
+                                    @if (collect($latestArtwork?->preview_files ?? [])->contains(fn ($file) => data_get($file, 'artwork_type') === 'BANTING'))
+                                        <label><input type="checkbox" name="affected_assets[]" value="BANTING"> Banting</label>
+                                    @endif
+                                </fieldset>
                                 <label for="correction-{{ $designJob->id }}">Maklumat pembetulan</label>
                                 <textarea
                                     id="correction-{{ $designJob->id }}"

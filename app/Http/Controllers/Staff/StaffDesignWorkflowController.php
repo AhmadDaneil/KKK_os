@@ -82,6 +82,19 @@ class StaffDesignWorkflowController extends Controller
         $this->authorizeAssignedDesigner($request, $designJob);
 
         try {
+            $designJob->load(['packageSide', 'artworkVersions' => fn ($query) => $query->latest('version_number')]);
+            $requestedProducts = collect($designJob->packageSide?->additional_products ?? [])
+                ->filter(fn (array $product): bool => (bool) ($product['enabled'] ?? false))
+                ->keys();
+            $previewTypes = collect($designJob->artworkVersions->first()?->preview_files ?? [])
+                ->pluck('artwork_type')
+                ->map(fn (string $type): string => mb_strtolower($type));
+            $missingProducts = $requestedProducts->reject(fn (string $product): bool => $previewTypes->contains($product));
+
+            if ($missingProducts->isNotEmpty()) {
+                throw new RuntimeException('Muat naik preview untuk '.implode(' dan ', $missingProducts->all()).' sebelum menghantar hasil design kepada pelanggan.');
+            }
+
             $service->markReady(
                 $designJob,
                 $request->user()
@@ -95,7 +108,7 @@ class StaffDesignWorkflowController extends Controller
 
         return back()->with(
             'status',
-            'Artwork marked ready for customer review.'
+            'Hasil design sedia untuk semakan pelanggan.'
         );
     }
 
