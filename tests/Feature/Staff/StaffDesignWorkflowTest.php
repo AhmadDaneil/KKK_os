@@ -908,12 +908,12 @@ class StaffDesignWorkflowTest extends TestCase
             ->get(route('staff.orders.show', $order->order_id));
 
         $page->assertOk()
-            ->assertSee('Upload Both Artwork')
+            ->assertSee('Muat Naik Kedua-dua Hasil Design')
             ->assertSee(route('staff.orders.design-artworks.store', $order), false);
 
         $this->assertSame(
             1,
-            substr_count($page->getContent(), 'Upload Both Artwork')
+            substr_count($page->getContent(), 'Muat Naik Kedua-dua Hasil Design')
         );
 
         $payload = [];
@@ -1240,7 +1240,7 @@ class StaffDesignWorkflowTest extends TestCase
             $designer
         );
 
-        $this->actingAs($admin)
+        $this->actingAs($admin, 'staff')
             ->post(
                 route('staff.design-jobs.mark-ready', $job)
             )

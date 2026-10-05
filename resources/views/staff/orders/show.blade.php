@@ -30,11 +30,12 @@
         'READY_FOR_PACKING' => 'Sedia untuk pembungkusan', 'PACKING' => 'Pembungkusan sedang berjalan',
         'PACKED' => 'Pembungkusan siap', 'READY_FOR_PICKUP' => 'Sedia untuk pengambilan',
         'SHIPPED' => 'Telah dihantar', 'COMPLETED' => 'Tempahan selesai',
+        'CANCELLED' => 'Tempahan dibatalkan', 'ARCHIVED' => 'Tempahan diarkibkan',
     ];
     $statusTone = static fn (string $status): string => match ($status) {
         'DETAILS_INCOMPLETE', 'CORRECTION_REQUESTED' => 'attention',
         'DESIGN_READY', 'BALANCE_PENDING', 'READY_FOR_PICKUP', 'SHIPPED' => 'waiting',
-        'COMPLETED' => 'complete', default => 'active',
+        'COMPLETED', 'ARCHIVED' => 'complete', 'CANCELLED' => 'attention', default => 'active',
     };
     $nextActions = [
         'DETAILS_INCOMPLETE' => 'Dapatkan maklumat customer yang belum lengkap',
@@ -46,6 +47,8 @@
         'PACKING' => 'Sahkan item dan siapkan packing', 'PACKED' => 'Aturkan serahan atau pickup',
         'READY_FOR_PICKUP' => 'Maklumkan customer untuk pickup', 'SHIPPED' => 'Pantau penghantaran',
         'COMPLETED' => 'Tiada tindakan lanjut diperlukan',
+        'CANCELLED' => 'Tiada tindakan operasi; rekod dikekalkan untuk audit',
+        'ARCHIVED' => 'Tiada tindakan lanjut; rekod disimpan dalam arkib',
     ];
 @endphp
 <!DOCTYPE html>
@@ -117,6 +120,29 @@
                 <div><span>Status semasa</span><strong>{{ $statusLabels[$order->status] ?? str_replace('_', ' ', $order->status) }}</strong></div>
                 <div><span>Tindakan seterusnya</span><strong>{{ $nextActions[$order->status] ?? 'Buka setiap bahagian untuk semakan' }}</strong></div>
             </section>
+
+            @if (auth()->user()->isOperationManagement() && ! $order->isTerminalOperationalStatus())
+                <section class="staff-card" aria-labelledby="order-lifecycle-heading">
+                    <h2 id="order-lifecycle-heading">Tutup Tempahan Tanpa Memadam Rekod</h2>
+                    <p>Gunakan tindakan ini hanya selepas semakan operasi. Tempahan dan audit trail akan dikekalkan.</p>
+
+                    <div class="staff-payment-actions">
+                        <form method="POST" action="{{ route($operationRoutePrefix.'orders.cancel', $order) }}" class="staff-reject-payment-form js-staff-confirmation-form" data-confirm-title="Batalkan tempahan {{ $order->order_id }}?" data-confirm-message="Rekod tempahan akan dikekalkan dengan status CANCELLED dan tidak boleh diaktifkan semula." data-confirm-button="Ya, batalkan tempahan" data-confirm-tone="danger">
+                            @csrf
+                            <label for="cancel-reason">Sebab pembatalan</label>
+                            <textarea id="cancel-reason" name="reason" maxlength="1000" required>{{ old('reason') }}</textarea>
+                            <button class="staff-button staff-button-danger" type="submit">Batalkan Tempahan</button>
+                        </form>
+
+                        <form method="POST" action="{{ route($operationRoutePrefix.'orders.archive', $order) }}" class="staff-reject-payment-form js-staff-confirmation-form" data-confirm-title="Arkibkan tempahan {{ $order->order_id }}?" data-confirm-message="Rekod tempahan akan dikekalkan dengan status ARCHIVED dan tidak boleh diaktifkan semula." data-confirm-button="Ya, arkibkan tempahan">
+                            @csrf
+                            <label for="archive-reason">Sebab arkib</label>
+                            <textarea id="archive-reason" name="reason" maxlength="1000" required>{{ old('reason') }}</textarea>
+                            <button class="staff-button staff-button-secondary" type="submit">Arkibkan Tempahan</button>
+                        </form>
+                    </div>
+                </section>
+            @endif
 
             @if ($hasFullQueueView)
                 <nav class="staff-order-sections" aria-label="Bahagian order">

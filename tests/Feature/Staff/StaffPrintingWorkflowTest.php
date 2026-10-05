@@ -121,7 +121,7 @@ class StaffPrintingWorkflowTest extends TestCase
             ])
             ->assertRedirect()
             ->assertSessionHasNoErrors()
-            ->assertSessionHas('status', 'Production progress uploaded successfully.');
+            ->assertSessionHas('status', 'Progress production berjaya dimuat naik.');
 
         $job->refresh();
 
@@ -173,7 +173,7 @@ class StaffPrintingWorkflowTest extends TestCase
                 ],
             ])
             ->assertOk()
-            ->assertJsonPath('message', 'Production progress uploaded successfully.')
+            ->assertJsonPath('message', 'Progress production berjaya dimuat naik.')
             ->assertJsonCount(1, 'files')
             ->assertJsonPath('files.0.original_name', 'printing-stage-async.jpg');
 
@@ -408,13 +408,13 @@ class StaffPrintingWorkflowTest extends TestCase
 
         $this->actingAs($admin, 'staff')->get(route('staff.orders.show', $order->order_id))
             ->assertOk()
-            ->assertSee('Assign Production Staff')
-            ->assertDontSee('Start Printing');
+            ->assertSee('Tugaskan Staf Pengeluaran')
+            ->assertDontSee('Mulakan Cetakan');
 
         app(AssignPrintJobService::class)->assign($job, $printing, $admin);
 
         $this->actingAs($printing, 'staff')->get(route('staff.orders.show', $order->order_id))
-            ->assertOk()->assertSee('Start Printing');
+            ->assertOk()->assertSee('Mulakan Cetakan');
         $this->actingAs($printing, 'staff')->post(route('staff.print-jobs.start', $job))
             ->assertRedirect();
         $this->actingAs($printing, 'staff')->get(route('staff.orders.show', $order->order_id))

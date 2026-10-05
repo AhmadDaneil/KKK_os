@@ -48,7 +48,7 @@ class StaffOrderVisibilityTest extends TestCase
         );
 
         $response = $this
-            ->actingAs($admin)
+            ->actingAs($admin, 'staff')
             ->get(route('staff.orders.index'));
 
         $response->assertOk();
@@ -77,7 +77,7 @@ class StaffOrderVisibilityTest extends TestCase
             ->get(route('staff.orders.index'))
             ->assertOk()
             ->assertSee($draft->order_id)
-            ->assertSee('DETAILS INCOMPLETE');
+            ->assertSee('Maklumat belum lengkap');
     }
 
     public function test_operation_management_can_see_all_orders(): void
@@ -111,7 +111,7 @@ class StaffOrderVisibilityTest extends TestCase
         $matching = $this->confirmedOrder(1, 'LELAKI', 'Nur Aisyah Searchable');
         $other = $this->confirmedOrder(1, 'PEREMPUAN', 'Customer Lain');
 
-        $this->actingAs($admin)
+        $this->actingAs($admin, 'staff')
             ->get(route('staff.orders.index', ['search' => 'Nur Aisyah']))
             ->assertOk()
             ->assertSee($matching->order_id)
@@ -186,7 +186,7 @@ class StaffOrderVisibilityTest extends TestCase
         $response->assertDontSee($other->order_id);
     }
 
-    public function test_packing_only_sees_orders_assigned_to_them(): void
+    public function test_operation_management_sees_all_packing_orders(): void
     {
         $packing = $this->staff(User::ROLE_PACKING);
         $otherPacking = $this->staff(User::ROLE_PACKING);
@@ -213,7 +213,7 @@ class StaffOrderVisibilityTest extends TestCase
 
         $response->assertOk();
         $response->assertSee($mine->order_id);
-        $response->assertDontSee($other->order_id);
+        $response->assertSee($other->order_id);
     }
 
     public function test_unassigned_work_is_not_visible_to_operational_staff(): void
@@ -291,7 +291,7 @@ class StaffOrderVisibilityTest extends TestCase
             'Admin Detail'
         );
 
-        $this->actingAs($admin)
+        $this->actingAs($admin, 'staff')
             ->get(route('staff.orders.show', $order->order_id))
             ->assertOk()
             ->assertSee($order->order_id);
@@ -450,7 +450,7 @@ class StaffOrderVisibilityTest extends TestCase
             ->assertSee($order->order_id);
     }
 
-    public function test_packing_gets_404_for_order_assigned_to_another_packing_staff(): void
+    public function test_operation_management_can_open_order_assigned_to_another_manager(): void
     {
         $packing = $this->staff(User::ROLE_PACKING);
         $otherPacking = $this->staff(User::ROLE_PACKING);
@@ -466,7 +466,7 @@ class StaffOrderVisibilityTest extends TestCase
 
         $this->actingAs($packing)
             ->get(route('staff.orders.show', $order->order_id))
-            ->assertNotFound();
+            ->assertOk();
     }
 
     public function test_guest_is_redirected_before_opening_order_detail(): void
@@ -547,7 +547,7 @@ class StaffOrderVisibilityTest extends TestCase
         app(AssignDesignJobService::class)
             ->assign($perempuanJob, $designerPerempuan, $admin);
 
-        $this->actingAs($admin)
+        $this->actingAs($admin, 'staff')
             ->get(route('staff.orders.show', $order->order_id))
             ->assertOk()
             ->assertViewHas('order', function (Order $viewOrder): bool {
@@ -580,14 +580,14 @@ class StaffOrderVisibilityTest extends TestCase
             ->get(route('staff.orders.show', $order->order_id))
             ->assertOk()
             ->assertSee('Packages')
-            ->assertSee('Design Work')
-            ->assertDontSee('Order Summary')
-            ->assertDontSee('<h2>Customer</h2>', false)
-            ->assertDontSee('Timeline Order')
-            ->assertDontSee('Payment')
-            ->assertDontSee('Fulfilment')
-            ->assertDontSee('Printing')
-            ->assertDontSee('Packing');
+            ->assertSee('Kerja Design')
+            ->assertDontSee('Ringkasan Tempahan')
+            ->assertDontSee('<h2>Pelanggan</h2>', false)
+            ->assertDontSee('Progress tempahan')
+            ->assertDontSee('Pembayaran')
+            ->assertDontSee('Pemenuhan Tempahan')
+            ->assertDontSee('Pengeluaran')
+            ->assertDontSee('Pembungkusan');
     }
 
     public function test_printing_detail_renders_printing_work_but_not_design_or_packing_work(): void
@@ -653,11 +653,11 @@ class StaffOrderVisibilityTest extends TestCase
         $this->actingAs($customerService)
             ->get(route('staff.dashboard'))
             ->assertOk()
-            ->assertSee('Semua Orders')
-            ->assertSee('Design Queue')
-            ->assertSee('Production')
-            ->assertSee('Packing')
-            ->assertSee('Fulfilment');
+            ->assertSee('Semua Tempahan')
+            ->assertSee('Senarai Design')
+            ->assertSee('Pengeluaran')
+            ->assertSee('Pembungkusan')
+            ->assertSee('Pemenuhan Tempahan');
 
         $this->actingAs($customerService)
             ->get(route('staff.orders.index'))
@@ -667,17 +667,17 @@ class StaffOrderVisibilityTest extends TestCase
         $this->actingAs($customerService)
             ->get(route('staff.orders.show', $order->order_id))
             ->assertOk()
-            ->assertSee('Order Summary')
-            ->assertSee('<h2>Customer</h2>', false)
-            ->assertSee('Timeline Order')
-            ->assertSee('Design Work')
-            ->assertSee('Production')
-            ->assertSee('Packing')
-            ->assertSee('Fulfilment')
+            ->assertSee('Ringkasan Tempahan')
+            ->assertSee('<h2>Pelanggan</h2>', false)
+            ->assertSee('Progress tempahan')
+            ->assertSee('Kerja Design')
+            ->assertSee('Pengeluaran')
+            ->assertSee('Pembungkusan')
+            ->assertSee('Pemenuhan Tempahan')
             ->assertSee('Mesej')
             ->assertSee('Peringatan Bayaran')
             ->assertSee('https://wa.me/60123456789', false)
-            ->assertDontSee('Assign Production Staff');
+            ->assertDontSee('Tugaskan Staf Pengeluaran');
     }
 
     public function test_assigned_designer_sees_start_design_action_when_job_is_ready(): void
@@ -699,12 +699,12 @@ class StaffOrderVisibilityTest extends TestCase
         $this->actingAs($designer)
             ->get(route('staff.orders.show', $order->order_id))
             ->assertOk()
-            ->assertSee('Start Design')
+            ->assertSee('Mulakan Design')
             ->assertSee(
                 route('staff.design-jobs.start', $job),
                 false
             )
-            ->assertDontSee('Upload Artwork Version')
+            ->assertDontSee('Muat Naik Versi Hasil Design')
             ->assertDontSee('Resume Correction');
     }
 
@@ -730,9 +730,9 @@ class StaffOrderVisibilityTest extends TestCase
         $this->actingAs($designer)
             ->get(route('staff.orders.show', $order->order_id))
             ->assertOk()
-            ->assertSee('Upload Artwork Version')
-            ->assertSee('Source Artwork')
-            ->assertSee('Customer Preview')
+            ->assertSee('Muat Naik Versi Hasil Design')
+            ->assertSee('Fail Sumber Hasil Design')
+            ->assertSee('Pratonton Pelanggan')
             ->assertSee('Internal Note')
             ->assertSee(
                 route('staff.design-jobs.artwork.store', $job),
@@ -740,13 +740,13 @@ class StaffOrderVisibilityTest extends TestCase
             )
             ->assertSee('name="source_artwork[]"', false)
             ->assertSee('name="customer_preview[]"', false)
-            ->assertSee('+ Add File')
+            ->assertSee('+ Tambah Fail')
             ->assertSee('staff-file-delete', false)
-            ->assertDontSee('Start Design')
+            ->assertDontSee('Mulakan Design')
             ->assertDontSee('Resume Correction');
     }
 
-    public function test_admin_only_sees_assignment_controls_for_designer_job(): void
+    public function test_admin_portal_shows_order_without_designer_workflow_controls(): void
     {
         $admin = $this->staff(User::ROLE_ADMIN);
         $designer = $this->staff(User::ROLE_DESIGNER);
@@ -765,15 +765,15 @@ class StaffOrderVisibilityTest extends TestCase
         $this->actingAs($admin, 'admin')
             ->get(route('admin.orders.show', $order->order_id))
             ->assertOk()
-            ->assertSee('Assign')
-            ->assertDontSee('Start Design')
+            ->assertDontSee('Tugaskan Pereka')
+            ->assertDontSee('Mulakan Design')
             ->assertDontSee(
                 route('admin.design-jobs.start', $job),
                 false
             )
-            ->assertSee('Admin Operations')
+            ->assertSee('Operasi Admin')
             ->assertSee('admin-operations-mode', false)
-            ->assertDontSee('Upload Artwork Version')
+            ->assertDontSee('Muat Naik Versi Hasil Design')
             ->assertDontSee('Resume Correction');
     }
 
@@ -824,7 +824,7 @@ class StaffOrderVisibilityTest extends TestCase
             1,
             substr_count(
                 $response->getContent(),
-                'Start Design'
+                'Mulakan Design'
             )
         );
     }
@@ -847,7 +847,7 @@ class StaffOrderVisibilityTest extends TestCase
 
         $this->initializeDesignJobs($designOrder);
 
-        $this->actingAs($admin)
+        $this->actingAs($admin, 'staff')
             ->get(route('staff.orders.index', ['workstream' => 'design']))
             ->assertOk()
             ->assertSee($designOrder->order_id)
@@ -869,7 +869,7 @@ class StaffOrderVisibilityTest extends TestCase
         app(InitializePrintJobsForOrderService::class)
             ->initialize($printingOrder);
 
-        $this->actingAs($admin)
+        $this->actingAs($admin, 'staff')
             ->get(route('staff.orders.index', ['workstream' => 'printing']))
             ->assertOk()
             ->assertSee($printingOrder->order_id)
@@ -891,7 +891,7 @@ class StaffOrderVisibilityTest extends TestCase
         app(InitializePackingJobForOrderService::class)
             ->initialize($packingOrder);
 
-        $this->actingAs($admin)
+        $this->actingAs($admin, 'staff')
             ->get(route('staff.orders.index', ['workstream' => 'packing']))
             ->assertOk()
             ->assertSee($packingOrder->order_id)
@@ -911,7 +911,7 @@ class StaffOrderVisibilityTest extends TestCase
             ->get(route('staff.orders.show', $order->order_id))
             ->assertOk()
             ->assertSee('Photoshop Auto Merge V11')
-            ->assertSee('Download Customer CSV')
+            ->assertSee('Muat Turun CSV Pelanggan')
             ->assertSee('Open Photoshop')
             ->assertSee(route('staff.orders.photoshop.csv', $order), false)
             ->assertSee(route('staff.orders.photoshop.launch', $order), false);

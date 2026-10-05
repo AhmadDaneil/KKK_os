@@ -33,8 +33,8 @@ class OrderProductionAssignmentTest extends TestCase
         $this->actingAs($operationManagement)
             ->get(route('staff.orders.show', $order->order_id))
             ->assertOk()
-            ->assertSee('Assign Production Staff')
-            ->assertSee('Assign OM');
+            ->assertSee('Tugaskan Staf Pengeluaran')
+            ->assertSee('Tugaskan OM');
 
         $this->actingAs($operationManagement)
             ->post(route('staff.design-jobs.assign', $order->designJobs->first()), ['assigned_user_id' => $designer->id])
@@ -54,8 +54,8 @@ class OrderProductionAssignmentTest extends TestCase
         $managementView = $this->actingAs($operationManagement)
             ->get(route('staff.orders.show', $order->order_id));
         $managementView->assertOk()
-            ->assertSee('Reassign Production Staff')
-            ->assertSee('Reassign OM')
+            ->assertSee('Tugaskan Semula Staf Pengeluaran')
+            ->assertSee('Tugaskan Semula OM')
             ->assertDontSee(route('staff.print-jobs.assign', $order->printJobs->first()));
 
         $this->actingAs($printing)
@@ -78,7 +78,7 @@ class OrderProductionAssignmentTest extends TestCase
             $this->actingAs($assignee)
                 ->get(route('staff.orders.show', $order->order_id))
                 ->assertOk()
-                ->assertSee('Read-only order details.')
+                ->assertDontSee('Tugaskan Staf Pengeluaran')
                 ->assertSee($order->order_id);
         }
 
@@ -145,8 +145,8 @@ class OrderProductionAssignmentTest extends TestCase
         $this->actingAs($manager)
             ->get(route('staff.orders.show', $order->order_id))
             ->assertOk()
-            ->assertDontSee('Assign Production Staff')
-            ->assertDontSee('Reassign Designer');
+            ->assertDontSee('Tugaskan Staf Pengeluaran')
+            ->assertDontSee('Tugaskan Semula Pereka');
 
         $this->actingAs($manager)
             ->post(route('staff.design-jobs.assign', $designJob), ['assigned_user_id' => $designer->id])

@@ -4,12 +4,17 @@ namespace App\Services\Orders;
 
 use App\Models\Order;
 use Illuminate\Support\Facades\DB;
+use RuntimeException;
 
 class DeleteIncompleteOrderService
 {
     public function delete(Order $order): void
     {
         $order->refresh();
+
+        if ($order->status !== 'DETAILS_INCOMPLETE') {
+            throw new RuntimeException('Hanya tempahan dengan maklumat belum lengkap boleh dipadam.');
+        }
 
         DB::transaction(function () use ($order): void {
             $sideIds = $order->packageSides()->pluck('id');

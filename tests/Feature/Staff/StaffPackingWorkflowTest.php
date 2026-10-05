@@ -454,7 +454,7 @@ class StaffPackingWorkflowTest extends TestCase
         );
     }
 
-    public function test_other_packing_staff_cannot_operate_assigned_job(): void
+    public function test_operation_management_can_operate_a_job_assigned_to_another_manager(): void
     {
         $admin = $this->admin();
         $assigned = $this->staff(User::ROLE_PACKING);
@@ -467,10 +467,10 @@ class StaffPackingWorkflowTest extends TestCase
 
         $this->actingAs($other)
             ->post(route('staff.packing-jobs.start', $job))
-            ->assertNotFound();
+            ->assertRedirect();
 
         $this->assertSame(
-            'READY_FOR_PACKING',
+            'PACKING',
             $job->fresh()->status
         );
     }
@@ -485,7 +485,7 @@ class StaffPackingWorkflowTest extends TestCase
         app(AssignPackingJobService::class)
             ->assign($job, $packing, $admin);
 
-        $this->actingAs($admin)
+        $this->actingAs($admin, 'staff')
             ->post(route('staff.packing-jobs.start', $job))
             ->assertNotFound();
 
@@ -1329,7 +1329,7 @@ class StaffPackingWorkflowTest extends TestCase
 
         $this->app['auth']->forgetGuards();
 
-        $response = $this->actingAs($admin)->post(
+        $response = $this->actingAs($admin, 'staff')->post(
             route('staff.packing-jobs.complete-courier', $job),
             [
                 'packing_proof' => UploadedFile::fake()->image('admin-proof.jpg'),
@@ -1379,7 +1379,7 @@ class StaffPackingWorkflowTest extends TestCase
             ->assertDontSee(route('staff.packing-jobs.assign', $job))
             ->assertSee('aria-controls="packing-proof"', false);
         $this->assertSame(1, substr_count($response->getContent(), 'id="packing-proof"'));
-        $this->assertSame(1, substr_count($response->getContent(), 'Upload Bukti &amp; Mark Packed') + substr_count($response->getContent(), 'Upload Bukti & Mark Packed'));
+        $this->assertSame(1, substr_count($response->getContent(), 'Muat Naik Bukti &amp; Tandakan Selesai Dibungkus') + substr_count($response->getContent(), 'Muat Naik Bukti & Tandakan Selesai Dibungkus'));
     }
 
     public function test_packing_saves_courier_details_without_marking_parcel_shipped(): void
@@ -1410,7 +1410,7 @@ class StaffPackingWorkflowTest extends TestCase
         $this->assertSame('READY', $fulfilment->status);
         $this->assertNull($fulfilment->shipped_at);
         $this->get(route('staff.orders.show', $order->order_id))
-            ->assertSee('Sahkan Serahan kepada Courier')
+            ->assertSee('Sahkan Serahan kepada Kurier')
             ->assertSee('value="Pos Laju"', false)
             ->assertSee('value="PL001234567MY"', false)
             ->assertSee('aria-controls="courier-packing-proof"', false);
@@ -1418,7 +1418,7 @@ class StaffPackingWorkflowTest extends TestCase
             ->assertSee('Pos Laju')->assertSee('PL001234567MY');
     }
 
-    public function test_receipt_links_are_hidden_from_packing_but_visible_to_admin(): void
+    public function test_receipt_links_are_visible_to_operation_management_and_admin(): void
     {
         $admin = $this->admin();
         $packing = $this->staff(User::ROLE_PACKING);
@@ -1435,11 +1435,11 @@ class StaffPackingWorkflowTest extends TestCase
 
         $this->actingAs($packing)->get(route('staff.orders.show', $order->order_id))
             ->assertOk()
-            ->assertDontSee(route('staff.payments.receipt', $payment))
-            ->assertDontSee('Lihat Resit');
+            ->assertSee(route('staff.payments.receipt', $payment))
+            ->assertSee('Lihat Resit');
 
         $this->app['auth']->forgetGuards();
-        $this->actingAs($admin)->get(route('staff.orders.show', $order->order_id))
+        $this->actingAs($admin, 'staff')->get(route('staff.orders.show', $order->order_id))
             ->assertOk()
             ->assertSee(route('staff.payments.receipt', $payment));
     }

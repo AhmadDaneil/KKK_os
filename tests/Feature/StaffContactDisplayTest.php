@@ -14,7 +14,7 @@ class StaffContactDisplayTest extends TestCase
 
     public function test_saved_contact_names_and_phones_appear_in_order_details(): void
     {
-        $admin = User::factory()->create(['role' => User::ROLE_ADMIN, 'is_active' => true]);
+        $customerService = User::factory()->create(['role' => User::ROLE_CUSTOMER_SERVICE, 'is_active' => true]);
         $order = app(CreateOrderService::class)->create(['package_count' => 1, 'side' => 'LELAKI']);
         app(SaveOrderDraftService::class)->save($order, [
             'sides' => [
@@ -30,8 +30,8 @@ class StaffContactDisplayTest extends TestCase
             ],
         ]);
 
-        $this->actingAs($admin)
+        $this->actingAs($customerService, 'staff')
             ->get(route('staff.orders.show', $order->order_id))
-            ->assertSeeTextInOrder(['Contacts', 'Awi', '0123456789', 'Ayie', '0198765432', 'Liya', '01122334455']);
+            ->assertSeeTextInOrder(['Wakil Untuk Dihubungi', 'Awi', '0123456789', 'Ayie', '0198765432', 'Liya', '01122334455']);
     }
 }

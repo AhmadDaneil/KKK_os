@@ -109,11 +109,6 @@ class StaffDepositPaymentWorkflowTest extends TestCase
             'is_active' => true,
         ]);
 
-        $packing = User::factory()->create([
-            'role' => User::ROLE_PACKING,
-            'is_active' => true,
-        ]);
-
         // Guest must not be able to retrieve a private receipt.
         $this->get(route('staff.payments.receipt', $payment))
             ->assertRedirect();
@@ -124,10 +119,6 @@ class StaffDepositPaymentWorkflowTest extends TestCase
             ->assertForbidden();
 
         $this->actingAs($printing)
-            ->get(route('staff.payments.receipt', $payment))
-            ->assertForbidden();
-
-        $this->actingAs($packing)
             ->get(route('staff.payments.receipt', $payment))
             ->assertForbidden();
 

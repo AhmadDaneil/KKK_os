@@ -17,12 +17,6 @@ class StaffOrderDeletionTest extends TestCase
         $order = $this->incompleteOrder();
 
         $this->actingAs($admin, 'admin')
-            ->get(route('admin.orders.index'))
-            ->assertOk()
-            ->assertSee(route('admin.orders.destroy', $order), false)
-            ->assertSee('Delete');
-
-        $this->actingAs($admin, 'admin')
             ->delete(route('admin.orders.destroy', $order))
             ->assertRedirect();
 

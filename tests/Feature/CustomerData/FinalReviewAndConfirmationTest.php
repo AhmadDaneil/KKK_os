@@ -132,17 +132,17 @@ class FinalReviewAndConfirmationTest extends TestCase
         $missingText = implode(' | ', $validation['missing']);
 
         $this->assertStringContainsString(
-            'Courier: Nama penerima',
+            'Kurier: Nama penerima',
             $missingText
         );
 
         $this->assertStringContainsString(
-            'Courier: Telefon penerima',
+            'Kurier: Telefon penerima',
             $missingText
         );
 
         $this->assertStringContainsString(
-            'Courier: Alamat penghantaran',
+            'Kurier: Alamat penghantaran',
             $missingText
         );
     }
