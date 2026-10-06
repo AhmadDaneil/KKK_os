@@ -40,7 +40,12 @@
                 </div>
                 <div class="login-field">
                     <label for="password">Kata Laluan</label>
-                    <input id="password" type="password" name="password" placeholder="Masukkan kata laluan anda" required autocomplete="current-password">
+                    <div class="password-field">
+                        <input id="password" type="password" name="password" placeholder="Masukkan kata laluan anda" required autocomplete="current-password">
+                        <button type="button" class="password-visibility-toggle" data-password-toggle aria-controls="password" aria-label="Tunjukkan kata laluan" aria-pressed="false">
+                            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2.5 12s3.5-6 9.5-6 9.5 6 9.5 6-3.5 6-9.5 6-9.5-6-9.5-6Z"></path><circle cx="12" cy="12" r="2.75"></circle></svg>
+                        </button>
+                    </div>
                 </div>
                 <button type="submit" class="login-submit">Log Masuk <span aria-hidden="true">→</span></button>
             </form>
@@ -49,5 +54,17 @@
     </main>
     <footer class="login-footer">KING KAD KAHWIN <span>·</span> Ruang kerja pasukan anda</footer>
     @include('partials.malay-validation')
+    <script>
+        document.querySelectorAll('[data-password-toggle]').forEach((button) => {
+            button.addEventListener('click', () => {
+                const passwordInput = document.getElementById(button.getAttribute('aria-controls'));
+                const willShowPassword = passwordInput.type === 'password';
+
+                passwordInput.type = willShowPassword ? 'text' : 'password';
+                button.setAttribute('aria-pressed', String(willShowPassword));
+                button.setAttribute('aria-label', willShowPassword ? 'Sembunyikan kata laluan' : 'Tunjukkan kata laluan');
+            });
+        });
+    </script>
 </body>
 </html>
