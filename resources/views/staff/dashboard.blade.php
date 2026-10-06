@@ -60,7 +60,7 @@
                                 </a>
                             @endforeach
                             @php($packingTotal = array_sum($packingAttention))
-                            <div class="staff-attention-card @if ($packingTotal > 0) has-alert @else is-clear @endif"><span class="staff-attention-icon">PK</span><span><strong>Pembungkusan & Pemenuhan Tempahan Perlu Tindakan</strong><small>{{ $packingTotal > 0 ? $packingAttention['ready'].' belum mula · '.$packingAttention['packing'].' sedang dibungkus · '.$packingAttention['fulfilment'].' perlu diserah' : 'Semua pembungkusan dan pemenuhan tempahan telah selesai' }}</small></span><b>{{ $packingTotal }}</b></div>
+                            <a href="{{ route('staff.orders.index', ['attention' => 'packing_fulfilment']) }}" class="staff-attention-card @if ($packingTotal > 0) has-alert @else is-clear @endif"><span class="staff-attention-icon">PK</span><span><strong>Pembungkusan & Pemenuhan Tempahan Perlu Tindakan</strong><small>{{ $packingTotal > 0 ? $packingAttention['ready'].' belum mula · '.$packingAttention['packing'].' sedang dibungkus · '.$packingAttention['fulfilment'].' perlu diserah' : 'Semua pembungkusan dan pemenuhan tempahan telah selesai' }}</small></span><b>{{ $packingTotal }}</b></a>
                         </div>
                     </section>
                 @endif
@@ -71,9 +71,9 @@
                             <div><p class="staff-kicker">Tindakan Pereka</p><h2 id="designer-attention-title">Memerlukan Perhatian</h2></div>
                             <span class="staff-attention-total @if ($designerAttention > 0) has-alert @endif">{{ $designerAttention > 0 ? $designerAttention.' tugasan' : 'Tiada tindakan diperlukan' }}</span>
                         </div>
-                        <div class="staff-attention-card @if ($designerAttention > 0) has-alert @else is-clear @endif">
+                        <a href="{{ route('staff.orders.index', ['workstream' => 'design']) }}" class="staff-attention-card @if ($designerAttention > 0) has-alert @else is-clear @endif">
                             <span class="staff-attention-icon">RB</span><span><strong>{{ __('ui.design_queue') }}</strong><small>{{ $designerAttention > 0 ? 'Tempahan sedia untuk dimulakan atau memerlukan pembetulan' : 'Semua tugasan design telah dikemas kini' }}</small></span><b>{{ $designerAttention }}</b>
-                        </div>
+                        </a>
                     </section>
                 @endif
 
@@ -85,8 +85,8 @@
                             <span class="staff-attention-total @if ($productionTotal > 0) has-alert @endif">{{ $productionTotal > 0 ? $productionTotal.' tugasan' : 'Tiada tindakan diperlukan' }}</span>
                         </div>
                         <div class="staff-attention-grid">
-                            <div class="staff-attention-card @if ($productionAttention['ready'] > 0) has-alert @else is-clear @endif"><span class="staff-attention-icon">CT</span><span><strong>Cetakan Belum Mula</strong><small>Kerja cetakan yang boleh dimulakan</small></span><b>{{ $productionAttention['ready'] }}</b></div>
-                            <div class="staff-attention-card @if ($productionAttention['printing'] > 0) has-alert @else is-clear @endif"><span class="staff-attention-icon">CT</span><span><strong>Cetakan Sedang Berjalan</strong><small>Muat naik progress dan tandakan selesai dicetak</small></span><b>{{ $productionAttention['printing'] }}</b></div>
+                            <a href="{{ route('staff.orders.index', ['workstream' => 'printing', 'status' => 'READY_FOR_PRINT']) }}" class="staff-attention-card @if ($productionAttention['ready'] > 0) has-alert @else is-clear @endif"><span class="staff-attention-icon">CT</span><span><strong>Cetakan Belum Mula</strong><small>Kerja cetakan yang boleh dimulakan</small></span><b>{{ $productionAttention['ready'] }}</b></a>
+                            <a href="{{ route('staff.orders.index', ['workstream' => 'printing', 'status' => 'PRINTING']) }}" class="staff-attention-card @if ($productionAttention['printing'] > 0) has-alert @else is-clear @endif"><span class="staff-attention-icon">CT</span><span><strong>Cetakan Sedang Berjalan</strong><small>Muat naik progress dan tandakan selesai dicetak</small></span><b>{{ $productionAttention['printing'] }}</b></a>
                         </div>
                     </section>
                 @endif

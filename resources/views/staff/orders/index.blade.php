@@ -22,9 +22,11 @@
         'unassigned_design' => 'Design Belum Ditugaskan',
         'unassigned_printing' => 'Pengeluaran Belum Ditugaskan',
         'unassigned_packing' => 'Pembungkusan Belum Ditugaskan',
+        'packing_fulfilment' => 'Pembungkusan & Pemenuhan Tempahan Perlu Tindakan',
     ];
     $attentionDescriptions = [
         'pending_payment' => 'Semak deposit dan bayaran penuh yang masih menunggu pengesahan.',
+        'packing_fulfilment' => 'Semak tempahan yang perlu dibungkus, diserahkan kepada kurier atau disediakan untuk kutipan.',
     ];
     $attention = request('attention');
     $attentionLabel = $attentionLabels[$attention] ?? null;
