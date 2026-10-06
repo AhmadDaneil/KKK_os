@@ -341,9 +341,6 @@
         </option>
     @endforeach
 </select>
-<p class="field-help">
-    Gambar pengantin hanya digunakan untuk tema <strong>PORTRAIT</strong>. Tema lain, termasuk NOSTALGIA, menggunakan design tanpa gambar pengantin pada banner dan banting.
-</p>
     </div>
 
     <div>
@@ -410,7 +407,7 @@
                 </div>
                 <section class="additional-products" aria-labelledby="included-design-items-{{ strtolower($side) }}">
                     <h3 id="included-design-items-{{ strtolower($side) }}">Termasuk Dalam Pakej Kad</h3>
-                    <p class="field-help">Setiap pakej kad kahwin termasuk preview Banner dan Banting. Designer akan menggunakan nama singkatan serta tema Design kad yang dipilih. Gambar pengantin hanya digunakan untuk tema PORTRAIT.</p>
+                    <p class="field-help">Setiap pakej kad kahwin termasuk preview banner dan banting. Designer akan menggunakan nama singkatan serta tema design kad yang dipilih. Gambar pengantin hanya digunakan untuk tema PORTRAIT.</p>
                 </section>
                 <h3>Ibu Bapa Pengantin {{ ucfirst(strtolower($side)) }}</h3>
                 <p class="field-help">Masukkan nama ibu bapa bagi pihak yang menjadi tuan rumah majlis ini.</p>
