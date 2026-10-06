@@ -131,123 +131,6 @@ function setTextIfExistsInDoc(doc, layerName, value){
     return false;
 }
 
-function findLayerByNames(doc, names){
-    try{
-        function matches(name){
-            var lower = s(name).toLowerCase();
-            for(var n=0;n<names.length;n++){
-                if(lower === names[n]) return true;
-            }
-            return false;
-        }
-        function walk(container){
-            for(var i=0;i<container.layers.length;i++){
-                var L = container.layers[i];
-                if(matches(L.name)) return L;
-                if(L.typename === "LayerSet"){
-                    var nested = walk(L);
-                    if(nested) return nested;
-                }
-            }
-            return null;
-        }
-        return walk(doc);
-    }catch(e){ return null; }
-}
-
-function replaceCardImageIfExists(doc, imagePath){
-    if(!imagePath || t(imagePath) === "") return false;
-    var imageLayer = findLayerByNames(doc, ["gambar", "cardimage", "card_image", "gambar pengantin", "pengantin", "photo", "image"]);
-    if(!imageLayer) return false;
-    try{
-        imageLayer = convertToSmartObjectIfNeeded(imageLayer);
-        var targetBox = _boundsPx(imageLayer);
-        if(!replaceSmartObjectContents(imageLayer, imagePath)) return false;
-        fitLayerToBox(imageLayer, targetBox);
-        return true;
-    }catch(e){ return false; }
-}
-
-function centerLayerGroupInDocument(doc, layerNames){
-    try{
-        var layers = [];
-        for(var i=0;i<layerNames.length;i++){
-            var layer = findLayerByNames(doc, [layerNames[i]]);
-            if(layer && layer.kind == LayerKind.TEXT) layers.push(layer);
-        }
-        if(layers.length < 2) return false;
-
-        var left = null, right = null;
-        for(var j=0;j<layers.length;j++){
-            var bounds = _boundsPx(layers[j]);
-            left = left === null ? bounds.x : Math.min(left, bounds.x);
-            right = right === null ? bounds.x + bounds.w : Math.max(right, bounds.x + bounds.w);
-        }
-        var groupCenter = left + ((right - left) / 2);
-        var offset = (doc.width.as("px") / 2) - groupCenter;
-        for(var k=0;k<layers.length;k++){
-            app.activeDocument = doc;
-            doc.activeLayer = layers[k];
-            _translate(offset, 0);
-        }
-        return true;
-    }catch(e){ return false; }
-}
-
-function hasCustomerPhotoLayer(doc){
-    return findLayerByNames(doc, ["gambar", "cardimage", "card_image", "gambar pengantin", "pengantin", "photo", "image"]) !== null;
-}
-
-function layerContainsText(layer){
-    try{
-        if(layer.kind == LayerKind.TEXT) return true;
-        if(layer.typename != "LayerSet") return false;
-        for(var i=0;i<layer.layers.length;i++){
-            if(layerContainsText(layer.layers[i])) return true;
-        }
-    }catch(e){}
-    return false;
-}
-
-function bringTextGroupsToFront(doc, photoLayer){
-    try{
-        for(var i=doc.layers.length-1;i>=0;i--){
-            var layer = doc.layers[i];
-            if(layer !== photoLayer && layerContainsText(layer)){
-                layer.move(photoLayer, ElementPlacement.PLACEBEFORE);
-            }
-        }
-    }catch(e){}
-}
-
-function addCustomerPhotoBackground(doc, imagePath){
-    var photoDoc = null;
-    try{
-        photoDoc = app.open(new File(imagePath));
-        var photoLayer = photoDoc.activeLayer.duplicate(doc, ElementPlacement.PLACEATBEGINNING);
-        closeDocNoSave(photoDoc);
-        photoDoc = null;
-
-        app.activeDocument = doc;
-        doc.activeLayer = photoLayer;
-        photoLayer.name = "Gambar Pengantin";
-
-        var width = doc.width.as("px");
-        var height = doc.height.as("px");
-        var current = _boundsPx(photoLayer);
-        if(current.w <= 0 || current.h <= 0) return false;
-        var scale = Math.max(width / current.w, height / current.h) * 100;
-        _transformScalePercent(scale);
-        current = _boundsPx(photoLayer);
-        _translate((width / 2) - current.cx, (height / 2) - current.cy);
-        bringTextGroupsToFront(doc, photoLayer);
-        return true;
-    }catch(e){
-        if(photoDoc) closeDocNoSave(photoDoc);
-        return false;
-    }
-}
-
 // ---------- Smart Object replace + AUTO-FIT ----------
 function convertToSmartObjectIfNeeded(layer){
     try{
@@ -415,8 +298,6 @@ try{
     var iQty    = idx("qtykad");
     var iTema   = idx("Tema");
     var iCode   = idx("DesignCode");
-    var iMajlis = idx("majlis");
-    var iGambar = idx("gambar");
     var iNamaL  = idx("namapengantinlelaki");
     var iNamaP  = idx("namapengantinperempuan");
     var iSingL  = idx("singkatanlelaki");
@@ -435,8 +316,8 @@ try{
     var iBulan      = idx("bulan");
     var iBulanIslam = idx("bulanislam");
 
-    if(iNoInv < 0 || iTema < 0 || iCode < 0 || iMajlis < 0){
-        alert("CSV mesti ada kolum NoInvoice, Tema, DesignCode, dan majlis.");
+    if(iNoInv < 0 || iTema < 0 || iCode < 0){
+        alert("CSV mesti ada kolum NoInvoice, Tema, dan DesignCode.");
         throw "Missing headers";
     }
 
@@ -451,28 +332,6 @@ try{
         var qty = t(g(iQty));
         var tema = t(g(iTema));
         var code = t(g(iCode));
-        var majlis = t(g(iMajlis)).toUpperCase();
-        var gambarRaw = t(g(iGambar));
-        var gambarPath = "";
-        if(gambarRaw !== ""){
-            var gambarFile = new File(gambarRaw);
-            if(!gambarFile.exists) gambarFile = new File(ROOT + "/" + gambarRaw);
-            if(!gambarFile.exists) gambarFile = new File(ROOT + "/MASTER/" + gambarRaw);
-            if(gambarFile.exists) gambarPath = gambarFile.fsName;
-            if(gambarPath === ""){
-                var selectedImage = File.openDialog(
-                    "Pilih gambar pengantin untuk " + NoInv,
-                    "Gambar:*.jpg;*.jpeg;*.png;*.webp"
-                );
-                if(selectedImage && selectedImage.exists) gambarPath = selectedImage.fsName;
-            }
-        }
-
-        if(majlis !== "LELAKI" && majlis !== "PEREMPUAN"){
-            logAppend(logPath, "[SKIP] " + NoInv + " | majlis tidak sah: " + majlis);
-            continue;
-        }
-
         var namaL = t(g(iNamaL));
         var namaP = t(g(iNamaP));
         var singL = t(g(iSingL));
@@ -495,24 +354,11 @@ try{
         var qrlinkRaw = g(iQRLink); if(/^".*"$/.test(qrlinkRaw)) qrlinkRaw = qrlinkRaw.replace(/^"|"$/g,"");
         var qrlink = t(qrlinkRaw);
 
-        // APPROVED KKK OS V1 DISPLAY RULE (2026-09-11):
-        // LELAKI    = groom above bride.
-        // PEREMPUAN = bride above groom.
-        // CSV semantics remain unchanged; only template presentation is side-aware.
-        var isPerempuan = (majlis === "PEREMPUAN");
-
-        var namaAtas  = isPerempuan ? namaP : namaL;
-        var namaBawah = isPerempuan ? namaL : namaP;
-        var singAtas  = isPerempuan ? singP : singL;
-        var singBawah = isPerempuan ? singL : singP;
-
         var namesShort = "";
-        if (t(singAtas) !== "") namesShort += t(singAtas);
-        if (t(singBawah) !== "") namesShort += (namesShort!=="" ? " & " : "") + t(singBawah);
+        if (t(singL) !== "") namesShort += t(singL);
+        if (t(singP) !== "") namesShort += (namesShort!=="" ? " & " : "") + t(singP);
 
-        // Include side in folder identity so two-package rows can never share
-        // the same output folder and accidentally overwrite each other.
-        var custFolderNameBase = NoInv + " " + majlis + (namesShort!=="" ? (" " + namesShort) : "") + (t(qty)!=="" ? (" " + t(qty) + " PCS") : "");
+        var custFolderNameBase = NoInv + (namesShort!=="" ? (" " + namesShort) : "") + (t(qty)!=="" ? (" " + t(qty) + " PCS") : "");
         var custFolderSafe = safeName(custFolderNameBase);
 
         var custRoot = ensureFolderObj(customerParent.fsName + "/" + custFolderSafe);
@@ -524,7 +370,6 @@ try{
         var custLogPath = custRoot.fsName + "/_customer_log.txt";
         logAppend(custLogPath, "===== " + nowStamp() + " | " + NoInv + " | " + custFolderSafe + " =====");
         logBoth(logPath, custLogPath, "---- " + nowStamp() + " | " + NoInv + " | " + custFolderSafe + " ----");
-        if(gambarRaw !== "" && gambarPath === "") logBoth(logPath, custLogPath, "[IMAGE] Fail gambar pengantin tidak ditemui: " + gambarRaw);
 
         var templates = findTemplates(ROOT, tema, code);
         if(!templates || templates.length === 0){
@@ -532,7 +377,7 @@ try{
             continue;
         }
 
-        var qrFileName = safeName(NoInv + " " + majlis + (namesShort!==""?(" " + namesShort):"")) + "_QR.png";
+        var qrFileName = safeName(NoInv + (namesShort!==""?(" " + namesShort):"")) + "_QR.png";
         var qrOutPath = fQR.fsName + "/" + qrFileName;
         var qrOK = false;
         if(qrlink && qrlink !== ""){
@@ -551,24 +396,16 @@ try{
             // set text layers
             setTextIfExistsInDoc(doc, "namaayah", namaayah);
             setTextIfExistsInDoc(doc, "namaibu", namaibu);
-
-            // Existing template layer positions are kept:
-            // "namapengantinlelaki" / "singkatanlelaki" = TOP position
-            // "namapengantinperempuan" / "singkatanperempuan" = BOTTOM position
-            // Values are swapped only for PEREMPUAN.
-            setTextIfExistsInDoc(doc, "namapengantinlelaki", namaAtas);
-            setTextIfExistsInDoc(doc, "namapengantinperempuan", namaBawah);
-            setTextIfExistsInDoc(doc, "singkatanlelaki", singAtas);
-            setTextIfExistsInDoc(doc, "singkatanperempuan", singBawah);
-            centerLayerGroupInDocument(doc, ["singkatanlelaki", "&", "&amp;", "singkatanperempuan"]);
+            setTextIfExistsInDoc(doc, "namapengantinlelaki", namaL);
+            setTextIfExistsInDoc(doc, "namapengantinperempuan", namaP);
+            setTextIfExistsInDoc(doc, "singkatanlelaki", singL);
+            setTextIfExistsInDoc(doc, "singkatanperempuan", singP);
             setTextIfExistsInDoc(doc, "nama1", nama1); setTextIfExistsInDoc(doc, "notel1", notel1);
             setTextIfExistsInDoc(doc, "nama2", nama2); setTextIfExistsInDoc(doc, "notel2", notel2);
             setTextIfExistsInDoc(doc, "nama3", nama3); setTextIfExistsInDoc(doc, "notel3", notel3);
 
             setTextIfExistsInDoc(doc, "hari",       hari);
-            var dateUpdated = setTextIfExistsInDoc(doc, "tarikh", tarikh);
-            if(setTextIfExistsInDoc(doc, "tarikh copy", tarikh)) dateUpdated = true;
-            if(!dateUpdated) logBoth(logPath, custLogPath, "[DATE] Layer tarikh tidak ditemui dalam " + tplPath);
+            setTextIfExistsInDoc(doc, "tarikh",     tarikh);
             setTextIfExistsInDoc(doc, "tarikhhari", tarikhhari);
             setTextIfExistsInDoc(doc, "bulan",      bulan);
             setTextIfExistsInDoc(doc, "bulanislam", bulanislam);
@@ -591,9 +428,8 @@ try{
                 .replace(/_patched$/i,"");
 
             var itemQty = fixedQtyForItem(tplName, qty);
-            var tplLower = tplName.toLowerCase();
             var outBase = safeName(
-                NoInv + " " + majlis + " " + tplName +
+                NoInv + " " + tplName +
                 (namesShort!==""?(" " + namesShort):"") +
                 (itemQty?(" " + itemQty + " PCS"):"")
             );
@@ -613,23 +449,6 @@ try{
                 savePSDdoc(doc, psdOut);
                 logBoth(logPath, custLogPath, "[EXPORT] PSD -> " + psdOut);
             }catch(e){ logBoth(logPath, custLogPath, "[EXPORT FAIL] PSD -> " + e); }
-
-            if(gambarPath !== "" && (tplLower.indexOf("banner") >= 0 || tplLower.indexOf("banting") >= 0)){
-                var isBanner = tplLower.indexOf("banner") >= 0;
-                var imageAdded = hasCustomerPhotoLayer(doc) && replaceCardImageIfExists(doc, gambarPath);
-                if(!imageAdded) imageAdded = addCustomerPhotoBackground(doc, gambarPath);
-                if(imageAdded){
-                    var photoBase = safeName(outBase + " GAMBAR PENGANTIN");
-                    var photoJpeg = fJPEG.fsName + "/" + photoBase + ".jpg";
-                    var photoPsd = fPSD.fsName + "/" + photoBase + ".psd";
-                    if(saveJPG(doc, photoJpeg, 12)) logBoth(logPath, custLogPath, "[EXPORT] JPEG gambar pengantin -> " + photoJpeg);
-                    else logBoth(logPath, custLogPath, "[EXPORT FAIL] JPEG gambar pengantin -> " + photoJpeg);
-                    if(savePSDdoc(doc, photoPsd)) logBoth(logPath, custLogPath, "[EXPORT] PSD gambar pengantin -> " + photoPsd);
-                    else logBoth(logPath, custLogPath, "[EXPORT FAIL] PSD gambar pengantin -> " + photoPsd);
-                }else{
-                    logBoth(logPath, custLogPath, "[IMAGE] Gagal memasukkan gambar pengantin untuk " + tplName);
-                }
-            }
 
             closeDocNoSave(doc);
         }
