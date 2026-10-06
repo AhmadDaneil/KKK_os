@@ -194,6 +194,7 @@ public function test_one_package_card_image_is_stored_privately_and_path_is_pers
         'sides' => [
             'LELAKI' => [
                 'design' => [
+                    'theme' => 'PORTRAIT',
                     'card_image' => $image,
                 ],
             ],
@@ -231,6 +232,7 @@ public function test_reuploading_card_image_replaces_old_file_for_same_side(): v
         'sides' => [
             'LELAKI' => [
                 'design' => [
+                    'theme' => 'PORTRAIT',
                     'card_image' => UploadedFile::fake()->image('first.jpg'),
                 ],
             ],
@@ -248,6 +250,7 @@ public function test_reuploading_card_image_replaces_old_file_for_same_side(): v
         'sides' => [
             'LELAKI' => [
                 'design' => [
+                    'theme' => 'PORTRAIT',
                     'card_image' => UploadedFile::fake()->image('second.jpg'),
                 ],
             ],
@@ -273,6 +276,71 @@ public function test_reuploading_card_image_replaces_old_file_for_same_side(): v
     ]);
 }
 
+public function test_portrait_card_image_is_standardized_to_a_three_by_four_portrait_image(): void
+{
+    Storage::fake('local');
+
+    $order = app(CreateOrderService::class)->create([
+        'package_count' => 1,
+        'side' => 'LELAKI',
+        'status' => 'DETAILS_INCOMPLETE',
+    ]);
+
+    $saved = app(SaveOrderDraftService::class)->save($order, [
+        'sides' => [
+            'LELAKI' => [
+                'design' => [
+                    'theme' => 'PORTRAIT',
+                    'card_image' => UploadedFile::fake()->image('landscape.jpg', 600, 300),
+                ],
+            ],
+        ],
+    ]);
+
+    $path = $saved->packageSides
+        ->firstWhere('side', 'LELAKI')
+        ->design
+        ->card_image_path;
+    $dimensions = getimagesize(Storage::disk('local')->path($path));
+
+    $this->assertSame(900, $dimensions[0]);
+    $this->assertSame(1200, $dimensions[1]);
+    $this->assertSame('image/jpeg', $dimensions['mime']);
+}
+
+public function test_switching_from_portrait_to_another_theme_removes_the_customer_photo(): void
+{
+    Storage::fake('local');
+
+    $order = app(CreateOrderService::class)->create([
+        'package_count' => 1,
+        'side' => 'LELAKI',
+    ]);
+
+    $portraitOrder = app(SaveOrderDraftService::class)->save($order, [
+        'sides' => [
+            'LELAKI' => [
+                'design' => [
+                    'theme' => 'PORTRAIT',
+                    'card_image' => UploadedFile::fake()->image('portrait.jpg', 300, 450),
+                ],
+            ],
+        ],
+    ]);
+    $photoPath = $portraitOrder->packageSides->firstWhere('side', 'LELAKI')->design->card_image_path;
+
+    $updatedOrder = app(SaveOrderDraftService::class)->save($portraitOrder->fresh(), [
+        'sides' => [
+            'LELAKI' => [
+                'design' => ['theme' => 'NOSTALGIA'],
+            ],
+        ],
+    ]);
+
+    $this->assertNull($updatedOrder->packageSides->firstWhere('side', 'LELAKI')->design->card_image_path);
+    Storage::disk('local')->assertMissing($photoPath);
+}
+
 public function test_two_package_card_images_are_stored_independently_by_side(): void
 {
     Storage::fake('local');
@@ -285,11 +353,13 @@ public function test_two_package_card_images_are_stored_independently_by_side():
         'sides' => [
             'LELAKI' => [
                 'design' => [
+                    'theme' => 'PORTRAIT',
                     'card_image' => UploadedFile::fake()->image('lelaki.jpg'),
                 ],
             ],
             'PEREMPUAN' => [
                 'design' => [
+                    'theme' => 'PORTRAIT',
                     'card_image' => UploadedFile::fake()->image('perempuan.jpg'),
                 ],
             ],

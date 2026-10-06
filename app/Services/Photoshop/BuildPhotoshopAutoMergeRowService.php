@@ -89,9 +89,11 @@ class BuildPhotoshopAutoMergeRowService
             'tema' => $theme,
             'designcode' => $designCode,
 
-            // Photoshop runs on the same workstation as the CSV export, so
-            // provide the absolute private-storage path when a customer image exists.
-            'gambar' => $this->cardImagePath($design['card_image_path'] ?? null),
+            // Customer photos are used exclusively with the PORTRAIT theme.
+            // A non-portrait design must reach Photoshop without a customer photo.
+            'gambar' => strtoupper($theme) === 'PORTRAIT'
+                ? $this->cardImagePath($design['card_image_path'] ?? null)
+                : '',
 
             // `majlis` is now actively consumed by the approved side-aware JSX:
             // LELAKI = groom above bride; PEREMPUAN = bride above groom.
