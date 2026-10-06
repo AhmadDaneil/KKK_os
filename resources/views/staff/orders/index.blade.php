@@ -184,86 +184,11 @@
                                 @endif
                             </div>
 
-                            <div class="staff-order-next-action">
-                                <span>Tindakan seterusnya</span>
-                                <strong>{{ $nextActions[$order->status] ?? 'Buka tempahan untuk semakan' }}</strong>
-                            </div>
                         </div>
 
-                        <div class="staff-order-work">
-                            @if (auth()->user()->canMonitorAllDepartments())
-                                @if ((! $workstream || $workstream === 'design') && $order->relationLoaded('designJobs') && $order->designJobs->isNotEmpty())
-                                    <div class="staff-work-row">
-                                        <span>Design</span>
-                                        <strong>
-                                            {{ $order->designJobs->pluck('status')->unique()->implode(', ') }}
-                                        </strong>
-                                    </div>
-                                @endif
-
-                                @if ((! $workstream || $workstream === 'printing') && $order->relationLoaded('printJobs') && $order->printJobs->isNotEmpty())
-                                    <div class="staff-work-row">
-                                        <span>Pengeluaran</span>
-                                        <strong>
-                                            {{ $order->printJobs->pluck('status')->unique()->implode(', ') }}
-                                        </strong>
-                                    </div>
-                                @endif
-
-                                @if ((! $workstream || $workstream === 'packing') && $order->relationLoaded('packingJob') && $order->packingJob)
-                                    <div class="staff-work-row">
-                                        <span>Pembungkusan</span>
-                                        <strong>
-                                            {{ $order->packingJob->status }}
-                                        </strong>
-                                    </div>
-                                @endif
-
-                                @if ((! $workstream || $workstream === 'fulfilment') && $order->relationLoaded('fulfilmentJob') && $order->fulfilmentJob)
-                                    <div class="staff-work-row">
-                                        <span>Pemenuhan Tempahan</span>
-                                        <strong>{{ $order->fulfilmentJob->status }}</strong>
-                                    </div>
-                                @endif
-                            @elseif (auth()->user()->hasStaffRole(\App\Models\User::ROLE_DESIGNER))
-                                @foreach ($order->designJobs as $job)
-                                    @if ($job->assigned_user_id === auth()->id())
-                                        <div class="staff-work-row">
-                                            <span>Design {{ $job->side }}</span>
-                                            <strong>{{ $job->status }}</strong>
-                                        </div>
-                                    @endif
-                                @endforeach
-                            @elseif (auth()->user()->hasStaffRole(\App\Models\User::ROLE_PRODUCTION))
-                                @if ($order->printJobs->where('assigned_user_id', auth()->id())->isNotEmpty())
-                                    @foreach ($order->printJobs->where('assigned_user_id', auth()->id()) as $job)
-                                            <div class="staff-work-row">
-                                        <span>Pengeluaran {{ $job->side }}</span>
-                                                <strong>{{ $job->status }}</strong>
-                                            </div>
-                                    @endforeach
-                                @elseif ($order->printing_assigned_user_id === auth()->id())
-                                    <div class="staff-work-row">
-                                        <span>Pengeluaran</span>
-                                        <strong>DITUGASKAN · MENUNGGU KELULUSAN ARTWORK</strong>
-                                    </div>
-                                @endif
-                            @elseif (auth()->user()->hasStaffRole(\App\Models\User::ROLE_OM))
-                                @if (
-                                    $order->packingJob &&
-                                    $order->packingJob->assigned_user_id === auth()->id()
-                                )
-                                    <div class="staff-work-row">
-                                        <span>Pembungkusan</span>
-                                        <strong>{{ $order->packingJob->status }}</strong>
-                                    </div>
-                                @elseif ($order->packing_assigned_user_id === auth()->id())
-                                    <div class="staff-work-row">
-                                        <span>Pembungkusan</span>
-                                        <strong>DITUGASKAN · MENUNGGU KERJA PEMBUNGKUSAN</strong>
-                                    </div>
-                                @endif
-                            @endif
+                        <div class="staff-order-next-action">
+                            <span>Tindakan seterusnya</span>
+                            <strong>{{ $nextActions[$order->status] ?? 'Buka tempahan untuk semakan' }}</strong>
                         </div>
 
                         <div class="staff-order-actions">
@@ -275,9 +200,10 @@
                             </a>
 
                             @if (
-                                $isAdminPortal
+                                $order->status === 'DETAILS_INCOMPLETE'
+                                    && ($isAdminPortal
                                     ? auth('admin')->user()?->isAdmin()
-                                    : auth('staff')->user()?->isOperationManagement()
+                                    : auth('staff')->user()?->isOperationManagement())
                             )
                                 <form
                                     method="POST"
