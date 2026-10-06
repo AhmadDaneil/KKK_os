@@ -83,13 +83,13 @@
                 <label for="staff-sidebar-theme">{{ __('ui.display_theme') }}</label>
                 <div>
                     <select id="staff-sidebar-theme" name="staff_theme">
-                        <option value="default" @selected($staffUser->staff_theme === 'default')>Hijau Lalai</option>
-                        <option value="modern_blue" @selected($staffUser->staff_theme === 'modern_blue')>Biru Moden</option>
-                        <option value="indigo_violet" @selected($staffUser->staff_theme === 'indigo_violet')>Indigo &amp; Ungu</option>
-                        <option value="warm_orange" @selected($staffUser->staff_theme === 'warm_orange')>Jingga Hangat</option>
-                        <option value="amber_gold" @selected($staffUser->staff_theme === 'amber_gold')>Ambar / Emas</option>
-                        <option value="dusty_rose" @selected($staffUser->staff_theme === 'dusty_rose')>Kelabu Arang / Hijau Limau</option>
-                        <option value="rose_burgundy" @selected($staffUser->staff_theme === 'rose_burgundy')>Ros / Burgundy</option>
+                        <option value="default" @selected($staffUser->staff_theme === 'default')>Hijau</option>
+                        <option value="modern_blue" @selected($staffUser->staff_theme === 'modern_blue')>Biru</option>
+                        <option value="indigo_violet" @selected($staffUser->staff_theme === 'indigo_violet')>Indigo</option>
+                        <option value="warm_orange" @selected($staffUser->staff_theme === 'warm_orange')>Jingga</option>
+                        <option value="amber_gold" @selected($staffUser->staff_theme === 'amber_gold')>Emas</option>
+                        <option value="dusty_rose" @selected($staffUser->staff_theme === 'dusty_rose')>Limau</option>
+                        <option value="rose_burgundy" @selected($staffUser->staff_theme === 'rose_burgundy')>Burgundy</option>
                     </select>
                     <button type="submit">{{ __('ui.save') }}</button>
                 </div>

@@ -1516,6 +1516,8 @@ body[data-staff-theme]:not([data-staff-theme="default"]) :is(.staff-brand-mark,.
 body[data-staff-theme]:not([data-staff-theme="default"]) .staff-nav-link.is-active{background:var(--staff-primary-hover)}
 body[data-staff-theme]:not([data-staff-theme="default"]) .staff-topbar{border-color:var(--staff-border);background:rgba(255,255,255,.94)}
 body[data-staff-theme]:not([data-staff-theme="default"]) .staff-hero{background:linear-gradient(135deg,var(--staff-primary),var(--staff-primary-hover))}
+body[data-staff-theme] .staff-button:not(.staff-button-danger){border-color:var(--staff-primary);color:#fff;background:var(--staff-primary)}
+body[data-staff-theme] .staff-button:not(.staff-button-danger):hover:not(:disabled){border-color:var(--staff-primary-hover);color:#fff;background:var(--staff-primary-hover)}
 body[data-staff-theme]:not([data-staff-theme="default"]) .staff-button-primary{border-color:var(--staff-primary);background:var(--staff-primary)}
 body[data-staff-theme]:not([data-staff-theme="default"]) .staff-button-primary:hover{border-color:var(--staff-primary-hover);background:var(--staff-primary-hover)}
 body[data-staff-theme]:not([data-staff-theme="default"]) :is(.staff-card,.staff-feature-card,.staff-order-card,.staff-order-filter,.staff-timeline-content){border-color:var(--staff-border);background:var(--staff-surface)}

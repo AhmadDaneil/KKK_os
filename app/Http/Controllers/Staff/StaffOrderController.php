@@ -379,6 +379,17 @@ class StaffOrderController extends Controller
                     ->whereNull('assigned_user_id')
                     ->where('status', 'READY_FOR_PACKING')
             ),
+            'packing_fulfilment' => $query->where(
+                fn (Builder $attentionQuery) => $attentionQuery
+                    ->whereHas(
+                        'packingJob',
+                        fn (Builder $job) => $job->whereIn('status', ['READY_FOR_PACKING', 'PACKING'])
+                    )
+                    ->orWhereHas(
+                        'fulfilmentJob',
+                        fn (Builder $job) => $job->whereIn('status', ['READY', 'IN_TRANSIT'])
+                    )
+            ),
             default => null,
         };
     }
