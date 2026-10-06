@@ -173,22 +173,13 @@
                     </div>
                 </div>
 
-                @php($selectedProducts = collect($side['additional_products'] ?? [])->filter(fn ($product) => data_get($product, 'enabled')))
-                @if ($selectedProducts->isNotEmpty())
-                    <h3>Produk Tambahan</h3>
-                    <div class="review-grid">
-                        @foreach ($selectedProducts as $productKey => $product)
-                            <div class="review-item">
-                                <span class="review-label">{{ $productKey === 'banner' ? 'Banner' : 'Banting' }}</span>
-                                <span class="review-value">
-                                    {{ data_get($product, 'quantity', 1) }} unit · {{ data_get($product, 'size') ?: 'Saiz belum dinyatakan' }} · {{ data_get($product, 'orientation') === 'LANDSCAPE' ? 'Melintang' : (data_get($product, 'orientation') === 'PORTRAIT' ? 'Menegak' : 'Orientasi belum dinyatakan') }}
-                                    @if (data_get($product, 'material'))<br>{{ data_get($product, 'material') }}@endif
-                                    @if (data_get($product, 'instructions'))<br>{{ data_get($product, 'instructions') }}@endif
-                                </span>
-                            </div>
-                        @endforeach
+                <h3>Termasuk Dalam Pakej Kad</h3>
+                <div class="review-grid">
+                    <div class="review-item">
+                        <span class="review-label">Banner & Banting</span>
+                        <span class="review-value">Termasuk secara automatik. Preview menggunakan nama singkatan dan tema Design kad yang dipilih. Gambar pengantin hanya digunakan untuk tema PORTRAIT.</span>
                     </div>
-                @endif
+                </div>
 
                 <h3>Maklumat Ibu Bapa</h3>
                 <div class="review-grid">

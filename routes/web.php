@@ -92,6 +92,8 @@ Route::middleware(['auth:admin', 'active.staff', 'staff.role:ADMIN'])
         Route::get('/orders', [StaffOrderController::class, 'index'])->name('orders.index');
         Route::get('/orders/find', [AdminDashboardController::class, 'findOrder'])->name('orders.find');
         Route::get('/orders/{orderId}', [StaffOrderController::class, 'show'])->name('orders.show');
+        Route::get('/orders/{orderId}/gambar-pengantin/{side}', [StaffOrderController::class, 'downloadCustomerPhoto'])
+            ->name('orders.customer-photo');
         Route::delete('/orders/{order}', [StaffOrderDeletionController::class, 'destroy'])
             ->name('orders.destroy');
         Route::post('/orders/{order}/cancel', [StaffOrderLifecycleController::class, 'cancel'])
@@ -245,6 +247,8 @@ Route::middleware(['auth:staff', 'active.staff'])
 
         Route::get('/orders/{orderId}', [StaffOrderController::class, 'show'])
             ->name('orders.show');
+        Route::get('/orders/{orderId}/gambar-pengantin/{side}', [StaffOrderController::class, 'downloadCustomerPhoto'])
+            ->name('orders.customer-photo');
 
         /*
         |--------------------------------------------------------------------------

@@ -341,6 +341,9 @@
         </option>
     @endforeach
 </select>
+<p class="field-help">
+    Gambar pengantin hanya digunakan untuk tema <strong>PORTRAIT</strong>. Tema lain, termasuk NOSTALGIA, menggunakan design tanpa gambar pengantin pada banner dan banting.
+</p>
     </div>
 
     <div>
@@ -372,13 +375,14 @@
 </div>
 </div>
 
-<div class="image-upload-field">
+<div class="image-upload-field" data-card-image-upload @if (strtoupper((string) $selectedTheme) !== 'PORTRAIT') hidden @endif>
     <label for="card-image-{{ strtolower($side) }}">
         Gambar Pengantin
     </label>
 
     <p class="field-help">
-        Muat naik jika design yang dipilih memerlukan gambar pengantin.
+        Untuk tema PORTRAIT sahaja. Gunakan gambar menegak/portrait yang jelas, sebaiknya nisbah 3:4.
+        Gambar mendatar atau petak akan dipotong dan diseragamkan kepada 900 × 1200 px (3:4).
         Format JPG, JPEG, PNG atau WEBP. Maksimum 10 MB.
     </p>
 
@@ -404,28 +408,9 @@
     @enderror
 </div>
                 </div>
-                @php($additionalProducts = $packageSide->additional_products ?? [])
-                <section class="additional-products" aria-labelledby="additional-products-{{ strtolower($side) }}">
-                    <h3 id="additional-products-{{ strtolower($side) }}">Produk Tambahan Untuk Majlis Ini</h3>
-                    <p class="field-help">Pilih hanya jika anda memerlukan banner atau banting. Maklumat ini akan dihantar kepada designer dan bahagian pengeluaran.</p>
-                    @foreach (['banner' => 'Banner', 'banting' => 'Banting'] as $productKey => $productLabel)
-                        @php($product = data_get($additionalProducts, $productKey, []))
-                        <fieldset class="additional-product-card">
-                            <label class="product-toggle">
-                                <input type="hidden" name="sides[{{ $side }}][additional_products][{{ $productKey }}][enabled]" value="0">
-                                <input type="checkbox" name="sides[{{ $side }}][additional_products][{{ $productKey }}][enabled]" value="1" @checked(old("sides.$side.additional_products.$productKey.enabled", data_get($product, 'enabled', false)))>
-                                <strong>Tambah {{ $productLabel }}</strong>
-                            </label>
-                            <div class="grid">
-                                <div><label>Saiz</label><input name="sides[{{ $side }}][additional_products][{{ $productKey }}][size]" value="{{ old("sides.$side.additional_products.$productKey.size", data_get($product, 'size')) }}" placeholder="Contoh: 2 × 5 kaki"></div>
-                                <div><label>Kuantiti</label><input type="number" min="1" max="100" name="sides[{{ $side }}][additional_products][{{ $productKey }}][quantity]" value="{{ old("sides.$side.additional_products.$productKey.quantity", data_get($product, 'quantity', 1)) }}"></div>
-                                <div><label>Bahan</label><input name="sides[{{ $side }}][additional_products][{{ $productKey }}][material]" value="{{ old("sides.$side.additional_products.$productKey.material", data_get($product, 'material')) }}" placeholder="Contoh: Tarpaulin"></div>
-                                <div><label>Orientasi</label><select name="sides[{{ $side }}][additional_products][{{ $productKey }}][orientation]"><option value="">Pilih orientasi</option><option value="LANDSCAPE" @selected(old("sides.$side.additional_products.$productKey.orientation", data_get($product, 'orientation')) === 'LANDSCAPE')>Melintang</option><option value="PORTRAIT" @selected(old("sides.$side.additional_products.$productKey.orientation", data_get($product, 'orientation')) === 'PORTRAIT')>Menegak</option></select></div>
-                            </div>
-                            <label>Arahan Tambahan</label>
-                            <textarea rows="3" name="sides[{{ $side }}][additional_products][{{ $productKey }}][instructions]" placeholder="Contoh: Letakkan nombor telefon di bahagian bawah">{{ old("sides.$side.additional_products.$productKey.instructions", data_get($product, 'instructions')) }}</textarea>
-                        </fieldset>
-                    @endforeach
+                <section class="additional-products" aria-labelledby="included-design-items-{{ strtolower($side) }}">
+                    <h3 id="included-design-items-{{ strtolower($side) }}">Termasuk Dalam Pakej Kad</h3>
+                    <p class="field-help">Setiap pakej kad kahwin termasuk preview Banner dan Banting. Designer akan menggunakan nama singkatan serta tema Design kad yang dipilih. Gambar pengantin hanya digunakan untuk tema PORTRAIT.</p>
                 </section>
                 <h3>Ibu Bapa Pengantin {{ ucfirst(strtolower($side)) }}</h3>
                 <p class="field-help">Masukkan nama ibu bapa bagi pihak yang menjadi tuan rumah majlis ini.</p>
@@ -1194,6 +1179,19 @@ document.addEventListener('DOMContentLoaded', function () {
             updateTwoPackageOrder();
         }
 
+        function updatePortraitImageFields() {
+            form.querySelectorAll('[data-card-image-upload]').forEach(function (uploadField) {
+                const packageSide = uploadField.closest('[data-package-side]')?.dataset.packageSide;
+
+                if (!packageSide) {
+                    return;
+                }
+
+                const theme = value('sides[' + packageSide + '][design][theme]', '').toUpperCase();
+                uploadField.hidden = theme !== 'PORTRAIT';
+            });
+        }
+
         preview.querySelectorAll('[data-preview-side-target]').forEach(function (button) {
             button.addEventListener('click', function () {
                 activeSide = button.dataset.previewSideTarget;
@@ -1238,12 +1236,16 @@ document.addEventListener('DOMContentLoaded', function () {
             if (event.target.name === 'package_format') {
                 updatePackageFormatPreview();
             }
+            if (event.target.name?.endsWith('[design][theme]')) {
+                updatePortraitImageFields();
+            }
         });
 
         preview.querySelectorAll('[data-card-preview]').forEach(function (card) {
             syncCard(card.dataset.cardPreview);
         });
         updatePackageFormatPreview();
+        updatePortraitImageFields();
         showSelection();
     });
 </script>

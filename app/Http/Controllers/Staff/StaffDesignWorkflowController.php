@@ -83,9 +83,7 @@ class StaffDesignWorkflowController extends Controller
 
         try {
             $designJob->load(['packageSide', 'artworkVersions' => fn ($query) => $query->latest('version_number')]);
-            $requestedProducts = collect($designJob->packageSide?->additional_products ?? [])
-                ->filter(fn (array $product): bool => (bool) ($product['enabled'] ?? false))
-                ->keys();
+            $requestedProducts = collect(['banner', 'banting']);
             $previewTypes = collect($designJob->artworkVersions->first()?->preview_files ?? [])
                 ->pluck('artwork_type')
                 ->map(fn (string $type): string => mb_strtolower($type));

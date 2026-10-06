@@ -8,6 +8,7 @@ use App\Models\User;
 use App\Services\Orders\BuildCustomerProgressService;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
 
 class StaffOrderController extends Controller
@@ -193,6 +194,34 @@ class StaffOrderController extends Controller
                     ->doesntExist(),
             ...$assignmentOptions,
         ]);
+    }
+
+    public function downloadCustomerPhoto(Request $request, string $orderId, string $side)
+    {
+        /** @var User $user */
+        $user = $request->user();
+
+        $order = $this->visibleOrdersFor($user)
+            ->where('order_id', $orderId)
+            ->with('packageSides.design')
+            ->firstOrFail();
+
+        $packageSide = $order->packageSides
+            ->firstWhere('side', strtoupper($side));
+        $photoPath = $packageSide?->design?->card_image_path;
+
+        abort_unless(
+            strtoupper((string) $packageSide?->design?->theme) === 'PORTRAIT'
+                && is_string($photoPath)
+                && $photoPath !== ''
+                && Storage::disk('local')->exists($photoPath),
+            404
+        );
+
+        return Storage::disk('local')->download(
+            $photoPath,
+            'gambar-pengantin-'.$order->order_id.'-'.strtolower($packageSide->side).'.jpg'
+        );
     }
 
     private function visibleOrdersFor(User $user): Builder
