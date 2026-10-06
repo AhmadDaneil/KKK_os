@@ -25,12 +25,6 @@ class StaffOrderController extends Controller
         $this->applyFilters($query, $request, $user);
 
         $orders = $query
-            ->with([
-                'designJobs.assignedUser',
-                'printJobs.assignedUser',
-                'packingJob.assignedUser',
-                'fulfilmentJob',
-            ])
             ->latest('id')
             ->paginate(25)
             ->withQueryString();
@@ -378,6 +372,17 @@ class StaffOrderController extends Controller
                 fn (Builder $job) => $job
                     ->whereNull('assigned_user_id')
                     ->where('status', 'READY_FOR_PACKING')
+            ),
+            'packing_fulfilment' => $query->where(
+                fn (Builder $attentionQuery) => $attentionQuery
+                    ->whereHas(
+                        'packingJob',
+                        fn (Builder $job) => $job->whereIn('status', ['READY_FOR_PACKING', 'PACKING'])
+                    )
+                    ->orWhereHas(
+                        'fulfilmentJob',
+                        fn (Builder $job) => $job->whereIn('status', ['READY', 'IN_TRANSIT'])
+                    )
             ),
             default => null,
         };

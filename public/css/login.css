@@ -78,14 +78,20 @@ button, input { font: inherit; }
 .login-form { display: grid; gap: 20px; margin-top: 29px; }
 .login-field { display: grid; gap: 8px; }
 .login-field label { font-size: 12px; font-weight: 650; }
+.password-field { position: relative; }
 .login-field input { min-width: 0; width: 100%; min-height: 49px; padding: 12px 14px; border: 1px solid #dce2dc; border-radius: 9px; background: #fcfdfb; color: #23352e; font-size: 14px; transition: border-color .15s, box-shadow .15s; }
+.password-field input { padding-right: 48px; }
 .login-field input::placeholder { color: #949c95; font-size: 12px; }
 .login-field input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--tint); background: #fff; }
+.password-visibility-toggle { position: absolute; top: 50%; right: 7px; display: grid; width: 36px; height: 36px; padding: 0; place-items: center; transform: translateY(-50%); border: 0; border-radius: 7px; color: #69746d; background: transparent; cursor: pointer; }
+.password-visibility-toggle:hover, .password-visibility-toggle[aria-pressed="true"] { color: var(--accent); background: var(--tint); }
+.password-visibility-toggle svg { width: 19px; height: 19px; fill: none; stroke: currentColor; stroke-linecap: round; stroke-linejoin: round; stroke-width: 1.8; }
+.password-visibility-toggle[aria-pressed="true"]::after { position: absolute; width: 22px; height: 1.8px; border-radius: 2px; content: ""; transform: rotate(-45deg); background: currentColor; }
 .login-submit { display: flex; align-items: center; justify-content: space-between; width: 100%; min-height: 49px; margin-top: 3px; padding: 12px 18px; border: 0; border-radius: 9px; color: #fff; background: var(--accent); font-size: 13px; font-weight: 650; cursor: pointer; transition: background .15s; }
 .login-submit:hover { background: var(--accent-hover); }
 .login-submit span { font-size: 20px; font-weight: 400; }
 a:focus-visible, button:focus-visible { outline: 3px solid var(--accent); outline-offset: 4px; }
-.login-help { margin: 18px 0 28px; text-align: center; font-size: 10px; line-height: 1.7; color: #7b837d; }
+.login-help { margin: 18px 0 28px; text-align: center; font-size: 12px; line-height: 1.7; color: #5f6a62; }
 .login-switch { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; padding-top: 22px; border-top: 1px solid #e9ede7; color: #7b837d; font-size: 11px; }
 .login-switch a { color: var(--accent); font-weight: 700; text-decoration: none; }
 .login-switch a:hover { text-decoration: underline; }

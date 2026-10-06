@@ -19,7 +19,6 @@
             <a href="#kelebihan">Kelebihan</a>
             <a href="#cara-tempah">Cara Tempah</a>
             <a href="#soalan-lazim">Soalan Lazim</a>
-            <a class="nav-progress" href="{{ route('public.orders.progress') }}">Semak Progress</a>
         </nav>
     </header>
 
@@ -99,11 +98,6 @@
             <article><span>01</span><div><h2>Pilihan design</h2><p>Tema untuk pelbagai gaya majlis, daripada minimal hingga klasik.</p></div></article>
             <article><span>02</span><div><h2>Semakan lebih mudah</h2><p>Lihat nama dan maklumat majlis pada kad sambil mengisi borang.</p></div></article>
             <article><span>03</span><div><h2>Status yang jelas</h2><p>Ikuti progress design, cetakan, pembungkusan dan penghantaran.</p></div></article>
-        </section>
-
-        <section class="final-cta">
-            <div><p class="eyebrow">Hari bahagia bermula di sini</p><h2>Sedia mencipta kad kahwin anda?</h2></div>
-            <a class="button button-light" href="{{ route('public.orders.create') }}"><span>Mulakan Tempahan</span><span class="button-arrow" aria-hidden="true">→</span></a>
         </section>
 
         <section class="journey" id="cara-tempah">
