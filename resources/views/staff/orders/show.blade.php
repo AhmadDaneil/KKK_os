@@ -294,11 +294,11 @@
                                 <h4>Termasuk Dalam Pakej Kad</h4>
                                 <dl class="staff-detail-list">
                                     <div class="staff-detail-wide">
-                                        <dt>Banner & Banting</dt>
-                                        <dd>Termasuk untuk setiap pakej. Gunakan nama singkatan dan tema Design kad yang sama. Gambar pengantin hanya digunakan untuk tema PORTRAIT.</dd>
+                                        <dt>banner & banting</dt>
+                                        <dd>Termasuk untuk setiap pakej. Gunakan nama singkatan dan tema design kad yang sama. Gambar pengantin hanya digunakan untuk tema PORTRAIT.</dd>
                                     </div>
                                     <div class="staff-detail-wide">
-                                        <dt>Nama pada Banner & Banting</dt>
+                                        <dt>Nama pada banner & banting</dt>
                                         @php($packageCouple = $order->couples->firstWhere('couple_number', 1))
                                         <dd>{{ collect([$packageCouple?->groom_abbreviation ?: $packageCouple?->groom_name, $packageCouple?->bride_abbreviation ?: $packageCouple?->bride_name])->filter()->join(' & ') ?: '-' }}</dd>
                                     </div>
@@ -610,22 +610,22 @@
                                                     <div class="staff-supplementary-artworks">
                                                         <div class="staff-supplementary-heading">
                                                             <h4>Preview Pakej Kad</h4>
-                                                            <p>Banner dan Banting termasuk secara automatik dalam setiap pakej kad kahwin. Gunakan nama singkatan serta tema Design kad yang sama.</p>
+                                                            <p>Banner dan banting termasuk secara automatik dalam setiap pakej kad kahwin. Gunakan nama singkatan serta tema design kad yang sama.</p>
                                                             @if ($jobTheme === 'PORTRAIT' && $jobPackageSide?->design?->card_image_path)
-                                                                <p class="staff-field-help"><strong>Tema PORTRAIT:</strong> gunakan gambar pengantin yang telah dimuat naik untuk artwork Banner dan Banting. <a href="{{ route($operationRoutePrefix.'orders.customer-photo', ['orderId' => $order->order_id, 'side' => $jobPackageSide->side]) }}">Muat turun gambar pengantin</a></p>
+                                                                <p class="staff-field-help"><strong>Tema PORTRAIT:</strong> gunakan gambar pengantin yang telah dimuat naik untuk artwork banner dan banting. <a href="{{ route($operationRoutePrefix.'orders.customer-photo', ['orderId' => $order->order_id, 'side' => $jobPackageSide->side]) }}">Muat turun gambar pengantin</a></p>
                                                             @else
-                                                                <p class="staff-field-help"><strong>Tema {{ $jobTheme ?: '-' }}:</strong> sediakan Banner dan Banting menggunakan design tema sahaja, tanpa gambar pengantin.</p>
+                                                                <p class="staff-field-help"><strong>Tema {{ $jobTheme ?: '-' }}:</strong> sediakan banner dan banting menggunakan design tema sahaja, tanpa gambar pengantin.</p>
                                                             @endif
                                                         </div>
                                                         <div class="staff-supplementary-grid">
                                                             <div class="staff-field">
-                                                                <label for="banner-preview-{{ $job->id }}">Preview Banner <span class="staff-optional">(wajib)</span></label>
+                                                                <label for="banner-preview-{{ $job->id }}">Preview banner <span class="staff-optional">(wajib)</span></label>
                                                                 <span class="staff-artwork-ratio staff-artwork-ratio--banner" aria-hidden="true">2 : 1</span>
                                                                 <input id="banner-preview-{{ $job->id }}" type="file" name="{{ $isBatchArtworkJob ? 'artworks['.$job->id.'][banner_preview]' : 'banner_preview' }}" @if ($isBatchArtworkJob) form="batch-artwork-upload" @endif accept=".jpg,.jpeg,.png,image/jpeg,image/png" required>
                                                                 <span class="staff-field-help">Format melintang 2:1 seperti 1280 × 640 px. Gunakan nama singkatan dan tema kad.</span>
                                                             </div>
                                                             <div class="staff-field">
-                                                                <label for="banting-preview-{{ $job->id }}">Preview Banting <span class="staff-optional">(wajib)</span></label>
+                                                                <label for="banting-preview-{{ $job->id }}">Preview banting <span class="staff-optional">(wajib)</span></label>
                                                                 <span class="staff-artwork-ratio staff-artwork-ratio--banting" aria-hidden="true">1 : 2</span>
                                                                 <input id="banting-preview-{{ $job->id }}" type="file" name="{{ $isBatchArtworkJob ? 'artworks['.$job->id.'][banting_preview]' : 'banting_preview' }}" @if ($isBatchArtworkJob) form="batch-artwork-upload" @endif accept=".jpg,.jpeg,.png,image/jpeg,image/png" required>
                                                                 <span class="staff-field-help">Format menegak 1:2 seperti 640 × 1280 px. Gunakan nama singkatan dan tema kad.</span>

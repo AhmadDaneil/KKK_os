@@ -133,7 +133,7 @@
                         <section class="artwork-preview-section" aria-label="Preview artwork pakej {{ strtolower($designJob->side) }}">
                             <div class="artwork-preview-heading">
                                 <div><span class="meta-label">Semakan visual</span><h3>Preview Artwork</h3></div>
-                                <p>Setiap pakej termasuk Banner dan Banting yang menggunakan nama singkatan serta tema Design kad yang sama. Klik mana-mana gambar untuk melihat saiz lebih besar.</p>
+                                <p>Setiap pakej termasuk banner dan banting yang menggunakan nama singkatan serta tema design kad yang sama. Klik mana-mana gambar untuk melihat saiz lebih besar.</p>
                             </div>
                             <div class="artwork-preview-gallery">
                                 @foreach ($previewFiles as $previewIndex => $previewFile)
@@ -142,8 +142,8 @@
                                         $sameTypePosition = collect($previewFiles)->take($previewIndex + 1)
                                             ->filter(fn ($file) => strtoupper($file['artwork_type'] ?? 'CARD') === $previewType)->count();
                                         $previewLabel = match ($previewType) {
-                                            'BANNER' => 'Banner',
-                                            'BANTING' => 'Banting',
+                                            'BANNER' => 'banner',
+                                            'BANTING' => 'banting',
                                             default => 'Kad Kahwin'.($sameTypePosition > 1 ? ' '.$sameTypePosition : ''),
                                         };
                                         $previewUrl = route('orders.artwork.preview', [

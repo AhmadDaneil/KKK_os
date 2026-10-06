@@ -176,8 +176,8 @@
                 <h3>Termasuk Dalam Pakej Kad</h3>
                 <div class="review-grid">
                     <div class="review-item">
-                        <span class="review-label">Banner & Banting</span>
-                        <span class="review-value">Termasuk secara automatik. Preview menggunakan nama singkatan dan tema Design kad yang dipilih. Gambar pengantin hanya digunakan untuk tema PORTRAIT.</span>
+                        <span class="review-label">banner & banting</span>
+                        <span class="review-value">Termasuk secara automatik. Preview menggunakan nama singkatan dan tema design kad yang dipilih. Gambar pengantin hanya digunakan untuk tema PORTRAIT.</span>
                     </div>
                 </div>
 

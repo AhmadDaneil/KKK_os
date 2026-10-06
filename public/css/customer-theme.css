@@ -80,6 +80,9 @@ html[data-customer-theme="dark"] .wedding-card-front .card-couple-names b {
 }
 /* Customer dashboard, preview, and date-picker surfaces. */
 html[data-customer-theme="dark"] :is(.order-summary-grid,.order-status-message,.form-actions,.dashboard-action-card,.live-preview,.live-preview-toggle,.live-preview-body,.date-picker-panel,.hijri-picker-panel,.date-picker-nav,.hijri-picker-clear) { border-color:#40554a!important; background:#1c2923!important; color:#e5ece7!important; }
+html[data-customer-theme="dark"] .additional-products { border-color:#6d8979!important; background:linear-gradient(135deg,#254235,#1b3027)!important; box-shadow:0 10px 24px rgba(0,0,0,.28)!important; }
+html[data-customer-theme="dark"] .additional-products h3 { color:#f6fbf7!important; }
+html[data-customer-theme="dark"] .additional-products .field-help { color:#d0e2d7!important; }
 html[data-customer-theme="dark"] :is(.date-picker-trigger,.date-picker-day,.hijri-date-option) { border-color:#50675b!important; color:#e5ece7!important; background:#142019!important; }
 html[data-customer-theme="dark"] .date-picker-trigger.has-value { color:#eef4ef!important; }
 html[data-customer-theme="dark"] :is(.date-picker-icon,.date-picker-heading strong,.date-picker-weekdays span,.date-picker-note,.date-picker-help,.field-help,.live-preview-toggle small,.live-preview-heading>span,.autosave-status) { color:#b8c9c0!important; }
