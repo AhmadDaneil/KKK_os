@@ -91,7 +91,7 @@ button, input { font: inherit; }
 .login-submit:hover { background: var(--accent-hover); }
 .login-submit span { font-size: 20px; font-weight: 400; }
 a:focus-visible, button:focus-visible { outline: 3px solid var(--accent); outline-offset: 4px; }
-.login-help { margin: 18px 0 28px; text-align: center; font-size: 10px; line-height: 1.7; color: #7b837d; }
+.login-help { margin: 18px 0 28px; text-align: center; font-size: 12px; line-height: 1.7; color: #5f6a62; }
 .login-switch { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; padding-top: 22px; border-top: 1px solid #e9ede7; color: #7b837d; font-size: 11px; }
 .login-switch a { color: var(--accent); font-weight: 700; text-decoration: none; }
 .login-switch a:hover { text-decoration: underline; }
