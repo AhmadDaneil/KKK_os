@@ -91,6 +91,9 @@ a:focus-visible, button:focus-visible { outline: 3px solid var(--accent); outlin
 .login-switch a:hover { text-decoration: underline; }
 .login-footer { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin-top: 24px; color: #7b837d; font-size: 9px; letter-spacing: 1px; text-align: center; }
 .login-alert { padding: 12px 14px; margin-top: 20px; border: 1px solid #f0cccc; border-radius: 9px; color: #9c3030; background: #fff4f4; font-size: 12px; line-height: 1.6; }
+.login-alert--success { border-color: #b8dcc7; color: #1f6941; background: #eef9f1; }
+.login-help a { color: var(--accent); font-weight: 700; text-decoration: none; }
+.login-help a:hover { text-decoration: underline; }
 @media (max-width: 760px) {
     .login-page { padding: 24px 16px; }
     .login-shell { max-width: 460px; grid-template-columns: 1fr; border-radius: 19px; }

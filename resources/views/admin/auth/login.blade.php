@@ -32,6 +32,9 @@
             @if ($errors->any())
                 <div class="login-alert" role="alert">{{ $errors->first() }}</div>
             @endif
+            @if (session('status'))
+                <div class="login-alert login-alert--success" role="status">{{ session('status') }}</div>
+            @endif
             <form method="POST" action="{{ route('admin.login.store') }}" class="login-form">
                 @csrf
                 <div class="login-field">
@@ -44,7 +47,7 @@
                 </div>
                 <button type="submit" class="login-submit">Log Masuk <span aria-hidden="true">→</span></button>
             </form>
-            <p class="login-help">Masalah untuk log masuk? Hubungi pentadbir sistem.</p>
+            <p class="login-help"><a href="{{ route('admin.password.request') }}">Lupa kata laluan?</a></p>
         </section>
     </main>
     <footer class="login-footer">KING KAD KAHWIN <span>·</span> Ruang kerja pasukan anda</footer>
