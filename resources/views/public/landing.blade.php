@@ -182,6 +182,32 @@
             card.addEventListener('contextmenu', function (event) { event.preventDefault(); });
             card.addEventListener('dragstart', function (event) { event.preventDefault(); });
         });
+
+        const faqGrid = document.querySelector('.faq-grid');
+        const faqCards = faqGrid ? Array.from(faqGrid.querySelectorAll('details')) : [];
+        const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+        if (faqGrid && faqCards.length && 'IntersectionObserver' in window && ! prefersReducedMotion) {
+            faqGrid.classList.add('faq-motion-ready');
+
+            const faqObserver = new IntersectionObserver(function (entries, observer) {
+                entries.forEach(function (entry) {
+                    if (! entry.isIntersecting) {
+                        return;
+                    }
+
+                    const cardIndex = faqCards.indexOf(entry.target);
+                    window.setTimeout(function () {
+                        entry.target.classList.add('is-visible');
+                    }, Math.max(cardIndex, 0) * 110);
+                    observer.unobserve(entry.target);
+                });
+            }, { threshold: 0.18, rootMargin: '0px 0px -40px' });
+
+            faqCards.forEach(function (card) {
+                faqObserver.observe(card);
+            });
+        }
     </script>
     @include('public.partials.customer-service')
     @include('public.partials.theme-toggle')
