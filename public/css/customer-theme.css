@@ -21,6 +21,11 @@ html[data-customer-theme="dark"] .choice-card:has(input:checked) b { color:#fff!
 html[data-customer-theme="dark"] .choice-card:has(input:checked) small { color:#dcebe3!important; }
 html[data-customer-theme="dark"] .choice-card input { accent-color:#e4b85e; }
 html[data-customer-theme="dark"] :is(.button-secondary,.header-link,.nav-progress,.back-home-button) { border-color:#739181!important; color:#edf5ef!important; background:#1b2b23!important; }
+html[data-customer-theme="dark"] .artwork-preview-section { border-color:#40554a!important; background:#16231d!important; }
+html[data-customer-theme="dark"] .artwork-preview-item { border-color:#40554a!important; background:#1c2923!important; box-shadow:0 5px 18px rgba(0,0,0,.24)!important; }
+html[data-customer-theme="dark"] .artwork-preview-item figcaption { border-color:#40554a!important; }
+html[data-customer-theme="dark"] .artwork-preview-item>a { border-color:#50675b!important; background:#0f1814!important; }
+html[data-customer-theme="dark"] .artwork-preview-count { color:#d7e6dc!important; background:#284438!important; }
 html[data-customer-theme="dark"] :is(.button-light) { color:#143528!important; background:#f8f5ed!important; }
 html[data-customer-theme="dark"] .button-primary,
 html[data-customer-theme="dark"] .button-primary span { color:#fff!important; }
@@ -75,6 +80,9 @@ html[data-customer-theme="dark"] .wedding-card-front .card-couple-names b {
 }
 /* Customer dashboard, preview, and date-picker surfaces. */
 html[data-customer-theme="dark"] :is(.order-summary-grid,.order-status-message,.form-actions,.dashboard-action-card,.live-preview,.live-preview-toggle,.live-preview-body,.date-picker-panel,.hijri-picker-panel,.date-picker-nav,.hijri-picker-clear) { border-color:#40554a!important; background:#1c2923!important; color:#e5ece7!important; }
+html[data-customer-theme="dark"] .additional-products { border-color:#6d8979!important; background:linear-gradient(135deg,#254235,#1b3027)!important; box-shadow:0 10px 24px rgba(0,0,0,.28)!important; }
+html[data-customer-theme="dark"] .additional-products h3 { color:#f6fbf7!important; }
+html[data-customer-theme="dark"] .additional-products .field-help { color:#d0e2d7!important; }
 html[data-customer-theme="dark"] :is(.date-picker-trigger,.date-picker-day,.hijri-date-option) { border-color:#50675b!important; color:#e5ece7!important; background:#142019!important; }
 html[data-customer-theme="dark"] .date-picker-trigger.has-value { color:#eef4ef!important; }
 html[data-customer-theme="dark"] :is(.date-picker-icon,.date-picker-heading strong,.date-picker-weekdays span,.date-picker-note,.date-picker-help,.field-help,.live-preview-toggle small,.live-preview-heading>span,.autosave-status) { color:#b8c9c0!important; }
@@ -156,6 +164,10 @@ html[data-customer-theme="dark"] .artwork-confirmation-dialog h2 { color:#f4f1e9
 html[data-customer-theme="dark"] .artwork-confirmation-dialog p { color:#c3d2ca!important; }
 html[data-customer-theme="dark"] .customer-theme-toggle { border-color:#647c6e; color:#f7efcf; background:#25372d; }.customer-theme-toggle-sun { color:#a56f14; }
 html[data-customer-theme="dark"] .customer-theme-toggle-sun { display:none; } html[data-customer-theme="dark"] .customer-theme-toggle-moon { display:block; }
+html[data-customer-theme="dark"] :is(.faq-grid details,.customer-policies article) { border-color:#40554a!important; color:#e8f1eb!important; background:#1c2923!important; box-shadow:0 10px 28px rgba(0,0,0,.2); }
+html[data-customer-theme="dark"] :is(.faq-grid summary,.customer-policies h2) { color:#f4f1e9!important; }
+html[data-customer-theme="dark"] .faq-grid details > p,
+html[data-customer-theme="dark"] .customer-policies article > p { color:#c3d2ca!important; }
 @media (max-width:560px) { .customer-theme-toggle { right:14px; bottom:14px; width:38px; height:38px; } }
 @media (max-width:560px) { html[data-customer-theme="dark"] .site-footer { width:calc(100% - 28px); } }
 @media (prefers-reduced-motion:reduce) { .customer-theme-toggle { transition:none; }.customer-theme-toggle:hover { transform:none; } }

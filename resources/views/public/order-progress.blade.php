@@ -21,11 +21,16 @@
         <section class="progress-search">
             <p class="eyebrow">Status tempahan anda</p>
             <h1>Semak progress</h1>
-            <p>Tampal atau masukkan ID tempahan yang diterima semasa membuat tempahan.</p>
+            <p>Masukkan ID Tempahan yang diterima semasa membuat tempahan.</p>
             <form method="POST" action="{{ route('public.orders.progress.lookup') }}">
                 @csrf
-                <label for="order_id">ID Tempahan</label>
-                <div class="search-row"><input id="order_id" name="order_id" value="{{ old('order_id', $orderId ?? '') }}" placeholder="Contoh: KKK-260917-0001" autocomplete="off" required><button class="button button-primary" type="submit">Semak</button></div>
+                <div class="progress-lookup-fields">
+                    <div>
+                        <label for="order_id">ID Tempahan</label>
+                        <input id="order_id" name="order_id" value="{{ old('order_id', $orderId ?? '') }}" placeholder="Contoh: KKK-260917-0001" autocomplete="off" required>
+                    </div>
+                    <button class="button button-primary" type="submit">Semak</button>
+                </div>
                 @error('order_id')<p class="field-error" role="alert">{{ $message }}</p>@enderror
             </form>
         </section>
@@ -72,23 +77,6 @@
                         </div>
                         <a class="button button-primary" href="{{ route('orders.artwork.review', ['orderId' => $orderId]) }}">Buka Semakan Penuh</a>
                     </div>
-                    @if (($artworkPreviews ?? collect())->isNotEmpty())
-                        <div class="public-artwork-previews">
-                            @foreach ($artworkPreviews as $artwork)
-                                <article>
-                                    <div><strong>Kad Pihak {{ ucfirst(strtolower($artwork['side'])) }}</strong><span>Versi hasil design {{ $artwork['version'] }}</span></div>
-                                    <div class="public-artwork-preview-frame">
-                                    <img
-                                        src="{{ route('orders.artwork.preview', ['orderId' => $orderId, 'designJobId' => $artwork['design_job_id']]) }}"
-                                        title="Pratonton hasil design pihak {{ strtolower($artwork['side']) }}"
-                                        alt="Pratonton hasil design kad 4 kali 6 pihak {{ strtolower($artwork['side']) }}"
-                                        loading="lazy"
-                                    >
-                                    </div>
-                                </article>
-                            @endforeach
-                        </div>
-                    @endif
                 @endif
                 @if ($deposit)
                     <div class="deposit-public-status" data-status="{{ strtolower($deposit['status']) }}">
@@ -140,7 +128,7 @@
                     <div class="tracking-card">
                         <small>MAKLUMAT PENGHANTARAN</small>
                         <div><span>Kurier</span><strong>{{ $shipment['courier_provider'] ?: '-' }}</strong></div>
-                        <div><span>Tracking Number</span><strong class="tracking-number">{{ $shipment['tracking_number'] }}</strong></div>
+                        <div><span>Nombor Tracking</span><strong class="tracking-number">{{ $shipment['tracking_number'] }}</strong></div>
                         @if ($shipment['shipped_at'])<p>Dihantar pada {{ $shipment['shipped_at']->timezone(config('app.display_timezone'))->format('d/m/Y, h:i A') }}</p>@endif
                     </div>
                 @endif

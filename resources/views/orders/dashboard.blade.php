@@ -372,13 +372,14 @@
 </div>
 </div>
 
-<div class="image-upload-field">
+<div class="image-upload-field" data-card-image-upload @if (strtoupper((string) $selectedTheme) !== 'PORTRAIT') hidden @endif>
     <label for="card-image-{{ strtolower($side) }}">
         Gambar Pengantin
     </label>
 
     <p class="field-help">
-        Muat naik jika design yang dipilih memerlukan gambar pengantin.
+        Untuk tema PORTRAIT sahaja. Gunakan gambar menegak/portrait yang jelas, sebaiknya nisbah 3:4.
+        Gambar mendatar atau petak akan dipotong dan diseragamkan kepada 900 × 1200 px (3:4).
         Format JPG, JPEG, PNG atau WEBP. Maksimum 10 MB.
     </p>
 
@@ -404,6 +405,10 @@
     @enderror
 </div>
                 </div>
+                <section class="additional-products" aria-labelledby="included-design-items-{{ strtolower($side) }}">
+                    <h3 id="included-design-items-{{ strtolower($side) }}">Termasuk Dalam Pakej Kad</h3>
+                    <p class="field-help">Setiap pakej kad kahwin termasuk preview banner dan banting. Designer akan menggunakan nama singkatan serta tema design kad yang dipilih. Gambar pengantin hanya digunakan untuk tema PORTRAIT.</p>
+                </section>
                 <h3>Ibu Bapa Pengantin {{ ucfirst(strtolower($side)) }}</h3>
                 <p class="field-help">Masukkan nama ibu bapa bagi pihak yang menjadi tuan rumah majlis ini.</p>
                 <div class="grid">
@@ -1171,6 +1176,19 @@ document.addEventListener('DOMContentLoaded', function () {
             updateTwoPackageOrder();
         }
 
+        function updatePortraitImageFields() {
+            form.querySelectorAll('[data-card-image-upload]').forEach(function (uploadField) {
+                const packageSide = uploadField.closest('[data-package-side]')?.dataset.packageSide;
+
+                if (!packageSide) {
+                    return;
+                }
+
+                const theme = value('sides[' + packageSide + '][design][theme]', '').toUpperCase();
+                uploadField.hidden = theme !== 'PORTRAIT';
+            });
+        }
+
         preview.querySelectorAll('[data-preview-side-target]').forEach(function (button) {
             button.addEventListener('click', function () {
                 activeSide = button.dataset.previewSideTarget;
@@ -1215,12 +1233,16 @@ document.addEventListener('DOMContentLoaded', function () {
             if (event.target.name === 'package_format') {
                 updatePackageFormatPreview();
             }
+            if (event.target.name?.endsWith('[design][theme]')) {
+                updatePortraitImageFields();
+            }
         });
 
         preview.querySelectorAll('[data-card-preview]').forEach(function (card) {
             syncCard(card.dataset.cardPreview);
         });
         updatePackageFormatPreview();
+        updatePortraitImageFields();
         showSelection();
     });
 </script>

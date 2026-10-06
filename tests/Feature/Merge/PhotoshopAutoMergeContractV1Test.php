@@ -112,11 +112,34 @@ class PhotoshopAutoMergeContractV1Test extends TestCase
         $this->assertSame('26', $row['tarikhhari']);
         $this->assertSame('DIS 2026', $row['bulan']);
         $this->assertSame('0139408109', $row['notel1']);
+        $this->assertSame('', $row['gambar']);
+        $this->assertSame('', $row['flaggambar']);
+    }
+
+    public function test_row_builder_only_exports_customer_photo_for_portrait_theme(): void
+    {
+        $mergeJob = new MergeJob([
+            'job_id' => 'KKK-261006-0001-L',
+            'side' => 'LELAKI',
+            'canonical_payload' => [
+                'source' => ['order_id' => 'KKK-261006-0001', 'side' => 'LELAKI'],
+                'design' => [
+                    'theme' => 'PORTRAIT',
+                    'design_code' => 'CKP-001',
+                    'card_image_path' => 'orders/KKK-261006-0001/LELAKI/card-image.jpg',
+                ],
+                'couple' => [],
+                'parents' => [],
+                'event' => [],
+            ],
+        ]);
+
+        $row = app(BuildPhotoshopAutoMergeRowService::class)->build($mergeJob, 100);
+
         $this->assertSame(
-            storage_path('app/private').DIRECTORY_SEPARATOR.'orders/KKK-260910-0001/LELAKI/card-image-test.jpg',
+            storage_path('app/private').DIRECTORY_SEPARATOR.'orders/KKK-261006-0001/LELAKI/card-image.jpg',
             $row['gambar']
         );
-        $this->assertSame('', $row['flaggambar']);
     }
 
     public function test_side_aware_contract_requires_majlis_for_photoshop_runtime(): void

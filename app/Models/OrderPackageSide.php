@@ -6,35 +6,44 @@ use Illuminate\Database\Eloquent\Model;
 
 class OrderPackageSide extends Model
 {
-    protected $fillable = ['order_id', 'side'];
+    protected $fillable = ['order_id', 'side', 'additional_products'];
 
-    public function order() 
-    { 
-        return $this->belongsTo(Order::class); 
+    protected $casts = [
+        'additional_products' => 'array',
+    ];
+
+    public function order()
+    {
+        return $this->belongsTo(Order::class);
     }
-    public function design() 
-    { 
-        return $this->hasOne(OrderDesign::class); 
+
+    public function design()
+    {
+        return $this->hasOne(OrderDesign::class);
     }
-    public function parents() 
-    { 
-        return $this->hasOne(OrderParent::class); 
+
+    public function parents()
+    {
+        return $this->hasOne(OrderParent::class);
     }
-    public function event() 
-    { 
-        return $this->hasOne(OrderEvent::class); 
+
+    public function event()
+    {
+        return $this->hasOne(OrderEvent::class);
     }
+
     public function mergeJob()
     {
-    return $this->hasOne(\App\Models\MergeJob::class);
-    }
-    public function designJob()
-    {
-        return $this->hasOne(\App\Models\DesignJob::class);
-    }
-    public function packingItem()
-    {
-        return $this->hasOne(\App\Models\PackingJobItem::class);
+        return $this->hasOne(MergeJob::class);
     }
 
+    public function designJob()
+    {
+        return $this->hasOne(DesignJob::class);
+    }
+
+    public function packingItem()
+    {
+        return $this->hasOne(PackingJobItem::class);
+    }
 }

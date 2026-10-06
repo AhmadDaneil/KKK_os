@@ -7,9 +7,9 @@ use RuntimeException;
 
 class WatermarkArtworkPreviewService
 {
-    public const VERSION = 4;
+    public const VERSION = 7;
 
-    private const TEXT = 'KING KAD KAHWIN · PREVIEW';
+    private const TEXT = 'King Kad Kahwin . Preview';
 
     private const MAX_PREVIEW_DIMENSION = 900;
 
@@ -21,7 +21,7 @@ class WatermarkArtworkPreviewService
      * Creates a watermarked customer-facing image preview. PDFs are displayed
      * through the protected customer review page instead and return null here.
      */
-    public function create(string $sourcePath, string $destinationPath): ?string
+    public function create(string $sourcePath, string $destinationPath, float $targetRatio = 2 / 3): ?string
     {
         $extension = strtolower(pathinfo($sourcePath, PATHINFO_EXTENSION));
 
@@ -42,7 +42,7 @@ class WatermarkArtworkPreviewService
         }
 
         try {
-            $image = $this->resizeForCustomerPreview($sourceImage);
+            $image = $this->resizeForCustomerPreview($sourceImage, $targetRatio);
             imagedestroy($sourceImage);
 
             $this->applyCenteredWatermark($image);
@@ -68,11 +68,11 @@ class WatermarkArtworkPreviewService
         return $destinationPath;
     }
 
-    private function resizeForCustomerPreview(\GdImage $source): \GdImage
+    private function resizeForCustomerPreview(\GdImage $source, float $targetRatio): \GdImage
     {
         $sourceWidth = imagesx($source);
         $sourceHeight = imagesy($source);
-        $targetRatio = 2 / 3;
+        $targetRatio = max(.25, min(4, $targetRatio));
         $sourceRatio = $sourceWidth / $sourceHeight;
 
         if ($sourceRatio > $targetRatio) {
@@ -126,11 +126,25 @@ class WatermarkArtworkPreviewService
         $font = $this->watermarkFont();
 
         if ($font !== null && function_exists('imagettftext')) {
-            $fontSize = max(18, min(72, (int) round(min($width, $height) / 15)));
-            $angle = -30;
+            $fontSize = max(8, min(19, (int) round(min($width, $height) / 40)));
+            $angle = -7;
             $shadow = imagecolorallocatealpha($image, 0, 0, 0, 84);
-            $ink = imagecolorallocatealpha($image, 255, 255, 255, 64);
-            $shadowOffset = max(2, (int) round($fontSize / 18));
+            $ink = imagecolorallocatealpha($image, 255, 255, 255, 58);
+            $shadowOffset = max(1, (int) round($fontSize / 20));
+
+            // Keep the complete label inside the card, even on narrow 4 x 6 previews.
+            do {
+                $box = imagettfbbox($fontSize, $angle, $font, self::TEXT);
+                $minX = min($box[0], $box[2], $box[4], $box[6]);
+                $maxX = max($box[0], $box[2], $box[4], $box[6]);
+                $textWidth = $maxX - $minX;
+
+                if ($textWidth <= $width * .42 || $fontSize <= 8) {
+                    break;
+                }
+
+                $fontSize--;
+            } while (true);
 
             $box = imagettfbbox($fontSize, $angle, $font, self::TEXT);
             $minX = min($box[0], $box[2], $box[4], $box[6]);

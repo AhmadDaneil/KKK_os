@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Admin\AdminAuthController;
 use App\Http\Controllers\Admin\AdminDashboardController;
+use App\Http\Controllers\Admin\AdminPasswordResetController;
 use App\Http\Controllers\Admin\AdminStaffController;
 use App\Http\Controllers\CustomerArtworkReviewController;
 use App\Http\Controllers\CustomerBalanceReceiptController;
@@ -76,6 +77,17 @@ Route::post('/admin/login', [AdminAuthController::class, 'store'])
     ->middleware('throttle:10,1')
     ->name('admin.login.store');
 
+Route::middleware('guest:admin')->prefix('admin')->name('admin.password.')->group(function () {
+    Route::get('/forgot-password', [AdminPasswordResetController::class, 'createRequest'])->name('request');
+    Route::post('/forgot-password', [AdminPasswordResetController::class, 'storeRequest'])
+        ->middleware('throttle:5,1')
+        ->name('email');
+    Route::get('/reset-password/{token}', [AdminPasswordResetController::class, 'createReset'])->name('reset');
+    Route::post('/reset-password', [AdminPasswordResetController::class, 'storeReset'])
+        ->middleware('throttle:5,1')
+        ->name('update');
+});
+
 Route::middleware(['auth:admin', 'active.staff', 'staff.role:ADMIN'])
     ->prefix('admin')
     ->name('admin.')
@@ -92,6 +104,8 @@ Route::middleware(['auth:admin', 'active.staff', 'staff.role:ADMIN'])
         Route::get('/orders', [StaffOrderController::class, 'index'])->name('orders.index');
         Route::get('/orders/find', [AdminDashboardController::class, 'findOrder'])->name('orders.find');
         Route::get('/orders/{orderId}', [StaffOrderController::class, 'show'])->name('orders.show');
+        Route::get('/orders/{orderId}/gambar-pengantin/{side}', [StaffOrderController::class, 'downloadCustomerPhoto'])
+            ->name('orders.customer-photo');
         Route::delete('/orders/{order}', [StaffOrderDeletionController::class, 'destroy'])
             ->name('orders.destroy');
         Route::post('/orders/{order}/cancel', [StaffOrderLifecycleController::class, 'cancel'])
@@ -225,6 +239,7 @@ Route::get('/staff/login', [StaffAuthController::class, 'create'])
     ->name('staff.login');
 
 Route::post('/staff/login', [StaffAuthController::class, 'store'])
+    ->middleware('throttle:10,1')
     ->name('staff.login.store');
 
 Route::middleware(['auth:staff', 'active.staff'])
@@ -244,6 +259,8 @@ Route::middleware(['auth:staff', 'active.staff'])
 
         Route::get('/orders/{orderId}', [StaffOrderController::class, 'show'])
             ->name('orders.show');
+        Route::get('/orders/{orderId}/gambar-pengantin/{side}', [StaffOrderController::class, 'downloadCustomerPhoto'])
+            ->name('orders.customer-photo');
 
         /*
         |--------------------------------------------------------------------------

@@ -113,9 +113,13 @@ class SaveOrderDraftService
                         ];
 
                         $cardImage = Arr::get($sideData, 'design.card_image');
+                        $oldPath = $packageSide->design->card_image_path;
+                        $effectiveTheme = Arr::has($sideData, 'design.theme')
+                            ? $designData['theme']
+                            : $packageSide->design->theme;
+                        $isPortraitTheme = strtoupper((string) $effectiveTheme) === 'PORTRAIT';
 
-                        if ($cardImage instanceof UploadedFile) {
-                            $oldPath = $packageSide->design->card_image_path;
+                        if ($isPortraitTheme && $cardImage instanceof UploadedFile) {
                             $newPath = $this->storeCardImage(
                                 $order->order_id,
                                 $sideName,
@@ -128,9 +132,32 @@ class SaveOrderDraftService
                             if (is_string($oldPath) && $oldPath !== '') {
                                 $oldPathsToDelete[] = $oldPath;
                             }
+                        } elseif (! $isPortraitTheme && is_string($oldPath) && $oldPath !== '') {
+                            // Customer photos are reserved for the PORTRAIT theme. Remove an
+                            // old portrait image when the customer switches to another theme.
+                            $designData['card_image_path'] = null;
+                            $oldPathsToDelete[] = $oldPath;
                         }
 
                         $packageSide->design->update($designData);
+                    }
+
+                    if (array_key_exists('additional_products', $sideData)) {
+                        $products = collect((array) $sideData['additional_products'])
+                            ->only(['banner', 'banting'])
+                            ->map(function (array $product): array {
+                                return [
+                                    'enabled' => (bool) ($product['enabled'] ?? false),
+                                    'size' => $this->cleanString($product['size'] ?? null),
+                                    'quantity' => isset($product['quantity']) ? (int) $product['quantity'] : 1,
+                                    'material' => $this->cleanString($product['material'] ?? null),
+                                    'orientation' => $this->cleanString($product['orientation'] ?? null),
+                                    'instructions' => $this->cleanString($product['instructions'] ?? null),
+                                ];
+                            })
+                            ->all();
+
+                        $packageSide->update(['additional_products' => $products ?: null]);
                     }
 
                     if (array_key_exists('parents', $sideData)) {
@@ -274,17 +301,79 @@ class SaveOrderDraftService
         string $sideName,
         UploadedFile $image
     ): string {
-        $directory = "orders/{$orderId}/{$sideName}";
-        $extension = strtolower($image->extension() ?: 'jpg');
-        $filename = 'card-image-'.Str::uuid().'.'.$extension;
+        $sourcePath = $image->getRealPath();
 
-        $storedPath = Storage::disk('local')->putFileAs(
-            $directory,
-            $image,
-            $filename
+        if (! is_string($sourcePath) || $sourcePath === '') {
+            throw new RuntimeException('Unable to read card image file.');
+        }
+
+        $imageInfo = @getimagesize($sourcePath);
+
+        if (! is_array($imageInfo)) {
+            throw new RuntimeException('Unable to read card image dimensions.');
+        }
+
+        $source = match ($imageInfo[2] ?? null) {
+            IMAGETYPE_JPEG => @imagecreatefromjpeg($sourcePath),
+            IMAGETYPE_PNG => @imagecreatefrompng($sourcePath),
+            IMAGETYPE_WEBP => function_exists('imagecreatefromwebp')
+                ? @imagecreatefromwebp($sourcePath)
+                : false,
+            default => false,
+        };
+
+        if ($source === false) {
+            throw new RuntimeException('Unable to process card image.');
+        }
+
+        $targetWidth = 900;
+        $targetHeight = 1200;
+        $sourceWidth = (int) $imageInfo[0];
+        $sourceHeight = (int) $imageInfo[1];
+        $sourceRatio = $sourceWidth / $sourceHeight;
+        $targetRatio = $targetWidth / $targetHeight;
+
+        if ($sourceRatio > $targetRatio) {
+            $cropHeight = $sourceHeight;
+            $cropWidth = (int) round($sourceHeight * $targetRatio);
+            $sourceX = (int) floor(($sourceWidth - $cropWidth) / 2);
+            $sourceY = 0;
+        } else {
+            $cropWidth = $sourceWidth;
+            $cropHeight = (int) round($sourceWidth / $targetRatio);
+            $sourceX = 0;
+            $sourceY = (int) floor(($sourceHeight - $cropHeight) / 2);
+        }
+
+        $target = imagecreatetruecolor($targetWidth, $targetHeight);
+        imagefill($target, 0, 0, imagecolorallocate($target, 255, 255, 255));
+        imagecopyresampled(
+            $target,
+            $source,
+            0,
+            0,
+            $sourceX,
+            $sourceY,
+            $targetWidth,
+            $targetHeight,
+            $cropWidth,
+            $cropHeight
         );
 
-        if (! is_string($storedPath) || $storedPath === '') {
+        ob_start();
+        $encoded = imagejpeg($target, null, 90);
+        $contents = ob_get_clean();
+        imagedestroy($target);
+        imagedestroy($source);
+
+        if (! $encoded || ! is_string($contents)) {
+            throw new RuntimeException('Unable to standardize card image.');
+        }
+
+        $directory = "orders/{$orderId}/{$sideName}";
+        $storedPath = $directory.'/card-image-'.Str::uuid().'.jpg';
+
+        if (! Storage::disk('local')->put($storedPath, $contents)) {
             throw new RuntimeException('Unable to store card image.');
         }
 

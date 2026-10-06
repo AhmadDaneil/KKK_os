@@ -142,6 +142,7 @@ class PublicOrderJourneyTest extends TestCase
 
         $this->post(route('public.orders.progress.lookup'), [
             'order_id' => strtolower($order->order_id),
+            'customer_phone' => $order->customer_phone,
         ])
             ->assertOk()
             ->assertSee($order->order_id)
@@ -157,10 +158,14 @@ class PublicOrderJourneyTest extends TestCase
         $order = app(CreateOrderService::class)->create([
             'package_count' => 1,
             'side' => 'LELAKI',
+            'customer_phone' => '0123456789',
         ]);
         $order->update(['status' => 'PRINTED']);
 
-        $this->post(route('public.orders.progress.lookup'), ['order_id' => $order->order_id])
+        $this->post(route('public.orders.progress.lookup'), [
+            'order_id' => $order->order_id,
+            'customer_phone' => $order->customer_phone,
+        ])
             ->assertOk()
             ->assertSee('88%')
             ->assertSee('Cetakan Selesai')
@@ -172,6 +177,7 @@ class PublicOrderJourneyTest extends TestCase
         $this->from(route('public.orders.progress'))
             ->post(route('public.orders.progress.lookup'), [
                 'order_id' => 'KKK-260917-9999',
+                'customer_phone' => '0123456789',
             ])
             ->assertRedirect(route('public.orders.progress'))
             ->assertSessionHasErrors('order_id');
@@ -193,6 +199,7 @@ class PublicOrderJourneyTest extends TestCase
 
         $this->post(route('public.orders.progress.lookup'), [
             'order_id' => $order->order_id,
+            'customer_phone' => $order->customer_phone,
         ])
             ->assertOk()
             ->assertSee('Buka Semakan Penuh')
@@ -212,10 +219,29 @@ class PublicOrderJourneyTest extends TestCase
 
         $this->post(route('public.orders.progress.lookup'), [
             'order_id' => $order->order_id,
+            'customer_phone' => $order->customer_phone,
         ])
             ->assertOk()
             ->assertSee('Buka Semakan Penuh')
             ->assertSee(route('orders.artwork.review', $order->order_id));
+
+        $this->get(route('orders.artwork.review', $order->order_id))->assertOk();
+    }
+
+    public function test_progress_lookup_uses_order_id_without_requiring_a_phone_number(): void
+    {
+        $order = app(CreateOrderService::class)->create([
+            'package_count' => 1,
+            'side' => 'LELAKI',
+            'customer_name' => 'Pelanggan Selamat',
+            'customer_email' => 'selamat@example.com',
+            'customer_phone' => '0123456789',
+        ]);
+        $order->update(['status' => 'DESIGN_READY']);
+
+        $this->post(route('public.orders.progress.lookup'), [
+            'order_id' => $order->order_id,
+        ])->assertOk();
 
         $this->get(route('orders.artwork.review', $order->order_id))->assertOk();
     }

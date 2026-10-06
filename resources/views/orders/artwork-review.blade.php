@@ -126,26 +126,42 @@
                             <span class="meta-label">Versi Hasil Design</span>
                             <strong>v{{ $latestArtwork->version_number }}</strong>
                         </div>
+                        <span class="artwork-preview-count">{{ count($previewFiles) }} preview untuk disemak</span>
+                    </div>
 
-                        @if ($canPreview)
-                            <div class="artwork-preview-links">
+                    @if ($canPreview)
+                        <section class="artwork-preview-section" aria-label="Preview artwork pakej {{ strtolower($designJob->side) }}">
+                            <div class="artwork-preview-heading">
+                                <div><span class="meta-label">Semakan visual</span><h3>Preview Artwork</h3></div>
+                                <p>Setiap pakej termasuk banner dan banting yang menggunakan nama singkatan serta tema design kad yang sama. Klik mana-mana gambar untuk melihat saiz lebih besar.</p>
+                            </div>
+                            <div class="artwork-preview-gallery">
                                 @foreach ($previewFiles as $previewIndex => $previewFile)
-                                    <a
-                                        class="button button-secondary"
-                                        href="{{ route('orders.artwork.preview', [
+                                    @php
+                                        $previewType = strtoupper($previewFile['artwork_type'] ?? 'CARD');
+                                        $sameTypePosition = collect($previewFiles)->take($previewIndex + 1)
+                                            ->filter(fn ($file) => strtoupper($file['artwork_type'] ?? 'CARD') === $previewType)->count();
+                                        $previewLabel = match ($previewType) {
+                                            'BANNER' => 'banner',
+                                            'BANTING' => 'banting',
+                                            default => 'Kad Kahwin'.($sameTypePosition > 1 ? ' '.$sameTypePosition : ''),
+                                        };
+                                        $previewUrl = route('orders.artwork.preview', [
                                             'orderId' => $order->order_id,
                                             'designJobId' => $designJob->id,
                                             'file' => $previewIndex,
-                                        ]) }}"
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                    >
-                                        {{ count($previewFiles) > 1 ? 'Lihat Hasil Design '.($previewIndex + 1) : 'Lihat Hasil Design' }}
-                                    </a>
+                                        ]);
+                                    @endphp
+                                    <figure class="artwork-preview-item artwork-preview-item--{{ strtolower($previewType) }}">
+                                        <figcaption><strong>{{ $previewLabel }}</strong><span>Pihak {{ ucfirst(strtolower($designJob->side)) }}</span></figcaption>
+                                        <a href="{{ $previewUrl }}" target="_blank" rel="noopener noreferrer" aria-label="Buka preview {{ strtolower($previewLabel) }} dalam saiz penuh">
+                                            <img src="{{ $previewUrl }}" alt="Preview {{ strtolower($previewLabel) }} pihak {{ strtolower($designJob->side) }}" loading="lazy">
+                                        </a>
+                                    </figure>
                                 @endforeach
                             </div>
-                        @endif
-                    </div>
+                        </section>
+                    @endif
                 @else
                     <div class="empty-state customer-empty-state">
                         <span class="customer-empty-icon" aria-hidden="true">✦</span>
@@ -209,6 +225,16 @@
                             >
                                 @csrf
                                 <input type="hidden" name="correction_job_id" value="{{ $designJob->id }}">
+                                <fieldset class="correction-assets">
+                                    <legend>Hasil design yang perlu dibetulkan</legend>
+                                    <label><input type="checkbox" name="affected_assets[]" value="CARD" checked> Kad Kahwin</label>
+                                    @if (collect($latestArtwork?->preview_files ?? [])->contains(fn ($file) => data_get($file, 'artwork_type') === 'BANNER'))
+                                        <label><input type="checkbox" name="affected_assets[]" value="BANNER"> Banner</label>
+                                    @endif
+                                    @if (collect($latestArtwork?->preview_files ?? [])->contains(fn ($file) => data_get($file, 'artwork_type') === 'BANTING'))
+                                        <label><input type="checkbox" name="affected_assets[]" value="BANTING"> Banting</label>
+                                    @endif
+                                </fieldset>
                                 <label for="correction-{{ $designJob->id }}">Maklumat pembetulan</label>
                                 <textarea
                                     id="correction-{{ $designJob->id }}"

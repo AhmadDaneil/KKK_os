@@ -54,7 +54,10 @@ class BalanceReceiptWorkflowTest extends TestCase
         ]);
         $order->update(['status' => 'DESIGN_APPROVED']);
 
-        $this->post(route('public.orders.progress.lookup'), ['order_id' => $order->order_id])->assertOk();
+        $this->post(route('public.orders.progress.lookup'), [
+            'order_id' => $order->order_id,
+            'customer_phone' => $order->customer_phone,
+        ])->assertOk();
         $this->post(route('orders.balance-receipt.store', $order->order_id), [
             'balance_receipt' => UploadedFile::fake()->image('resit.jpg'),
         ])->assertRedirect(route('public.orders.progress', ['order_id' => $order->order_id]));
