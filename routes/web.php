@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Admin\AdminAuthController;
 use App\Http\Controllers\Admin\AdminDashboardController;
+use App\Http\Controllers\Admin\AdminPasswordResetController;
 use App\Http\Controllers\Admin\AdminStaffController;
 use App\Http\Controllers\CustomerArtworkReviewController;
 use App\Http\Controllers\CustomerBalanceReceiptController;
@@ -75,6 +76,17 @@ Route::get('/admin/login', [AdminAuthController::class, 'create'])
 Route::post('/admin/login', [AdminAuthController::class, 'store'])
     ->middleware('throttle:10,1')
     ->name('admin.login.store');
+
+Route::middleware('guest:admin')->prefix('admin')->name('admin.password.')->group(function () {
+    Route::get('/forgot-password', [AdminPasswordResetController::class, 'createRequest'])->name('request');
+    Route::post('/forgot-password', [AdminPasswordResetController::class, 'storeRequest'])
+        ->middleware('throttle:5,1')
+        ->name('email');
+    Route::get('/reset-password/{token}', [AdminPasswordResetController::class, 'createReset'])->name('reset');
+    Route::post('/reset-password', [AdminPasswordResetController::class, 'storeReset'])
+        ->middleware('throttle:5,1')
+        ->name('update');
+});
 
 Route::middleware(['auth:admin', 'active.staff', 'staff.role:ADMIN'])
     ->prefix('admin')

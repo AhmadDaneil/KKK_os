@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tetapkan Kata Laluan Admin — KKK OS</title>
+    <link rel="stylesheet" href="{{ asset('css/login.css') }}">
+</head>
+<body class="login-page login-page--admin">
+    <main class="login-shell">
+        <section class="login-story" aria-label="King Kad Kahwin">
+            <div class="login-brand"><span class="login-mark">KKK</span><div><strong>King Kad Kahwin</strong><span>SISTEM OPERASI</span></div></div>
+            <div class="login-story-content"><span class="login-eyebrow">AKSES SELAMAT</span><h2>Kata laluan baru. <br>Akses dipulihkan.</h2><p>Pilih kata laluan yang kuat dan simpan dengan selamat.</p></div>
+            <div class="login-story-footer"><span class="login-dot"></span> Satu pasukan. Satu tujuan.</div>
+            <div class="login-orbit login-orbit--one" aria-hidden="true"></div><div class="login-orbit login-orbit--two" aria-hidden="true"></div>
+        </section>
+        <section class="login-panel" aria-labelledby="reset-password-title">
+            <div class="login-heading"><span class="login-eyebrow">TETAPKAN SEMULA</span><h1 id="reset-password-title">Kata laluan baru<span>.</span></h1><p>Kata laluan perlu mempunyai sekurang-kurangnya 8 aksara.</p></div>
+            @if ($errors->any())<div class="login-alert" role="alert">{{ $errors->first() }}</div>@endif
+            <form method="POST" action="{{ route('admin.password.update') }}" class="login-form">
+                @csrf
+                <input type="hidden" name="token" value="{{ $token }}">
+                <div class="login-field"><label for="email">E-mel Admin</label><input id="email" type="email" name="email" value="{{ old('email', $email) }}" required autocomplete="email"></div>
+                <div class="login-field"><label for="password">Kata Laluan Baru</label><input id="password" type="password" name="password" required autocomplete="new-password"></div>
+                <div class="login-field"><label for="password_confirmation">Sahkan Kata Laluan Baru</label><input id="password_confirmation" type="password" name="password_confirmation" required autocomplete="new-password"></div>
+                <button type="submit" class="login-submit">Simpan Kata Laluan <span aria-hidden="true">→</span></button>
+            </form>
+        </section>
+    </main>
+    <footer class="login-footer">KING KAD KAHWIN <span>·</span> Ruang kerja pasukan anda</footer>
+    @include('partials.malay-validation')
+</body>
+</html>
