@@ -25,12 +25,6 @@ class StaffOrderController extends Controller
         $this->applyFilters($query, $request, $user);
 
         $orders = $query
-            ->with([
-                'designJobs.assignedUser',
-                'printJobs.assignedUser',
-                'packingJob.assignedUser',
-                'fulfilmentJob',
-            ])
             ->latest('id')
             ->paginate(25)
             ->withQueryString();
