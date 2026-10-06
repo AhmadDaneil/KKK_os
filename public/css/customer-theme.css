@@ -163,7 +163,8 @@ html[data-customer-theme="dark"] .customer-theme-toggle { border-color:#647c6e; 
 html[data-customer-theme="dark"] .customer-theme-toggle-sun { display:none; } html[data-customer-theme="dark"] .customer-theme-toggle-moon { display:block; }
 html[data-customer-theme="dark"] :is(.faq-grid details,.customer-policies article) { border-color:#d6ddd8!important; color:#173228!important; background:#fffdf8!important; }
 html[data-customer-theme="dark"] :is(.faq-grid summary,.customer-policies h2) { color:#173228!important; }
-html[data-customer-theme="dark"] :is(.faq-grid p,.customer-policies p) { color:#58675f!important; }
+html[data-customer-theme="dark"] .faq-grid details > p,
+html[data-customer-theme="dark"] .customer-policies article > p { color:#4a5c53!important; }
 @media (max-width:560px) { .customer-theme-toggle { right:14px; bottom:14px; width:38px; height:38px; } }
 @media (max-width:560px) { html[data-customer-theme="dark"] .site-footer { width:calc(100% - 28px); } }
 @media (prefers-reduced-motion:reduce) { .customer-theme-toggle { transition:none; }.customer-theme-toggle:hover { transform:none; } }
