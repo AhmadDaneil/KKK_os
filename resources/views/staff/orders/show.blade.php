@@ -299,7 +299,9 @@
                                     </div>
                                     <div class="staff-detail-wide">
                                         <dt>Nama pada banner & banting</dt>
-                                        @php($packageCouple = $order->couples->firstWhere('couple_number', 1))
+                                        @php
+                                            $packageCouple = $order->couples->firstWhere('couple_number', 1);
+                                        @endphp
                                         <dd>{{ collect([$packageCouple?->groom_abbreviation ?: $packageCouple?->groom_name, $packageCouple?->bride_abbreviation ?: $packageCouple?->bride_name])->filter()->join(' & ') ?: '-' }}</dd>
                                     </div>
                                 </dl>
