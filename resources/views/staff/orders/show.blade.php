@@ -290,19 +290,19 @@
                                 </div>
                             @endif
 
+                            @php
+                                $packageCouple = $order->couples->firstWhere('couple_number', 1);
+                            @endphp
                             <div class="staff-detail-group">
-                                <h4>Termasuk Dalam Pakej Kad</h4>
+                                <h4>Nama Singkatan Pengantin</h4>
                                 <dl class="staff-detail-list">
-                                    <div class="staff-detail-wide">
-                                        <dt>banner & banting</dt>
-                                        <dd>Termasuk untuk setiap pakej. Gunakan nama singkatan dan tema design kad yang sama. Gambar pengantin hanya digunakan untuk tema PORTRAIT.</dd>
+                                    <div>
+                                        <dt>Pengantin Lelaki</dt>
+                                        <dd>{{ $packageCouple?->groom_abbreviation ?: $packageCouple?->groom_name ?: '-' }}</dd>
                                     </div>
-                                    <div class="staff-detail-wide">
-                                        <dt>Nama pada banner & banting</dt>
-                                        @php
-                                            $packageCouple = $order->couples->firstWhere('couple_number', 1);
-                                        @endphp
-                                        <dd>{{ collect([$packageCouple?->groom_abbreviation ?: $packageCouple?->groom_name, $packageCouple?->bride_abbreviation ?: $packageCouple?->bride_name])->filter()->join(' & ') ?: '-' }}</dd>
+                                    <div>
+                                        <dt>Pengantin Perempuan</dt>
+                                        <dd>{{ $packageCouple?->bride_abbreviation ?: $packageCouple?->bride_name ?: '-' }}</dd>
                                     </div>
                                 </dl>
                             </div>
