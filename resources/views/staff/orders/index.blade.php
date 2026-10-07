@@ -129,12 +129,12 @@
                     </p>
                 </div>
 
-                <div class="staff-page-count">
+                <div id="staff-order-count" class="staff-page-count" data-live-search-count>
                     {{ $orders->total() }} tempahan
                 </div>
             </div>
 
-            <form class="staff-order-filter" method="GET" action="{{ route($ordersIndexRoute) }}">
+            <form class="staff-order-filter" method="GET" action="{{ route($ordersIndexRoute) }}" data-live-search data-live-search-list="staff-order-list" data-live-search-pagination="staff-order-pagination" data-live-search-count="staff-order-count" data-live-search-notice="staff-order-filter-notice">
                 @if ($workstream)<input type="hidden" name="workstream" value="{{ $workstream }}">@endif
                 @if (request('attention'))<input type="hidden" name="attention" value="{{ request('attention') }}">@endif
                 <label><span>Cari tempahan atau pelanggan</span><input type="search" name="search" value="{{ request('search') }}" placeholder="ID Tempahan, nama, e-mel atau telefon"></label>
@@ -142,17 +142,19 @@
                 <div class="staff-filter-actions"><button class="staff-button staff-button-primary" type="submit">Tapis tempahan</button>@if (request()->hasAny(['search', 'status', 'attention']))<a class="staff-button" href="{{ route($ordersIndexRoute, array_filter(['workstream' => $workstream])) }}">Kosongkan</a>@endif</div>
             </form>
 
-            @if (request()->hasAny(['search', 'status', 'attention']))
-                <div class="staff-filter-notice">
-                    <span>Penapis aktif:</span>
-                    @if (request('search'))<strong>“{{ request('search') }}”</strong>@endif
-                    @if (request('status'))<strong>{{ $statusLabels[request('status')] ?? str_replace('_', ' ', request('status')) }}</strong>@endif
-                    @if ($attention)<strong>{{ $attentionLabel ?? str_replace('_', ' ', $attention) }}</strong>@endif
-                    <a href="{{ route($ordersIndexRoute, array_filter(['workstream' => $workstream])) }}">Kosongkan penapis</a>
-                </div>
-            @endif
+            <div id="staff-order-filter-notice">
+                @if (request()->hasAny(['search', 'status', 'attention']))
+                    <div class="staff-filter-notice">
+                        <span>Penapis aktif:</span>
+                        @if (request('search'))<strong>“{{ request('search') }}”</strong>@endif
+                        @if (request('status'))<strong>{{ $statusLabels[request('status')] ?? str_replace('_', ' ', request('status')) }}</strong>@endif
+                        @if ($attention)<strong>{{ $attentionLabel ?? str_replace('_', ' ', $attention) }}</strong>@endif
+                        <a href="{{ route($ordersIndexRoute, array_filter(['workstream' => $workstream])) }}">Kosongkan penapis</a>
+                    </div>
+                @endif
+            </div>
 
-            <div class="staff-order-list">
+            <div id="staff-order-list" class="staff-order-list">
                 @forelse ($orders as $order)
                     <article class="staff-order-card">
                         <div class="staff-order-primary">
@@ -229,8 +231,9 @@
                 @endforelse
             </div>
 
-            @if ($orders->hasPages())
-                <nav class="staff-pagination" aria-label="Penomboran halaman tempahan">
+            <div id="staff-order-pagination">
+                @if ($orders->hasPages())
+                    <nav class="staff-pagination" aria-label="Penomboran halaman tempahan">
                     <div class="staff-pagination-summary">
                         Memaparkan {{ $orders->firstItem() }}
                         hingga {{ $orders->lastItem() }}
@@ -282,11 +285,13 @@
                             </span>
                         @endif
                     </div>
-                </nav>
-            @endif
+                    </nav>
+                @endif
+            </div>
         </main>
         </div>
     </div>
     @include('staff.partials.logout-confirmation')
+    <script src="{{ asset('js/live-search.js') }}?v={{ filemtime(public_path('js/live-search.js')) }}" defer></script>
 </body>
 </html>

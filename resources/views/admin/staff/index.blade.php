@@ -58,14 +58,14 @@
 
     <section class="admin-panel">
         <div class="admin-panel-heading"><div><p class="admin-eyebrow">Direktori</p><h2>Senarai Staf</h2></div></div>
-        <form class="admin-filter" method="GET" action="{{ route('admin.staff.index') }}">
+        <form class="admin-filter" method="GET" action="{{ route('admin.staff.index') }}" data-live-search data-live-search-list="admin-staff-list" data-live-search-pagination="admin-staff-pagination">
             <input name="search" value="{{ request('search') }}" placeholder="Cari nama atau email">
             <select name="role"><option value="">Semua jabatan</option>@foreach ($roleLabels as $value => $label)<option value="{{ $value }}" @selected(request('role') === $value)>{{ $label }}</option>@endforeach</select>
             <button class="admin-button admin-button-secondary" type="submit">Tapis</button>
             @if (request()->hasAny(['search', 'role']))<a href="{{ route('admin.staff.index') }}">Tetapkan Semula</a>@endif
         </form>
 
-        <div class="admin-staff-list">
+        <div id="admin-staff-list" class="admin-staff-list">
             @forelse ($staffMembers as $staff)
                 <article class="admin-staff-card" @if (! $staff->is_active) data-inactive @endif>
                     <header><div class="admin-staff-identity"><span>{{ strtoupper(substr($staff->name, 0, 1)) }}</span><div><h3>{{ $staff->name }}</h3><p>{{ $staff->email }}</p></div></div><span class="admin-account-status">{{ $staff->is_active ? 'Aktif' : 'Tidak Aktif' }}</span></header>
@@ -106,6 +106,6 @@
             @endforelse
         </div>
 
-        {{ $staffMembers->links() }}
+        <div id="admin-staff-pagination">{{ $staffMembers->links() }}</div>
     </section>
 @endsection

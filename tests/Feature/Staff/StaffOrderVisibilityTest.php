@@ -118,6 +118,19 @@ class StaffOrderVisibilityTest extends TestCase
             ->assertDontSee($other->order_id);
     }
 
+    public function test_admin_can_search_an_order_id_without_hyphens(): void
+    {
+        $admin = $this->staff(User::ROLE_ADMIN);
+        $matching = $this->confirmedOrder(1, 'LELAKI', 'Order ID Without Hyphens');
+        $other = $this->confirmedOrder(1, 'PEREMPUAN', 'Order ID Not Matching');
+        $search = str_replace('-', '', $matching->order_id);
+
+        $this->actingAs($admin, 'staff')
+            ->get(route('staff.orders.index', ['search' => $search]))
+            ->assertSee($matching->order_id)
+            ->assertDontSee($other->order_id);
+    }
+
     public function test_designer_only_sees_orders_assigned_to_them(): void
     {
         $designer = $this->staff(User::ROLE_DESIGNER);
