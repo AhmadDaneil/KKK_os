@@ -739,6 +739,7 @@ class StaffOrderVisibilityTest extends TestCase
                 false
             )
             ->assertSee('name="source_artwork[]"', false)
+            ->assertSee('accept=".psd,.pdf,image/vnd.adobe.photoshop,application/photoshop,application/x-photoshop,application/pdf"', false)
             ->assertSee('name="customer_preview[]"', false)
             ->assertSee('+ Tambah Fail')
             ->assertSee('staff-file-delete', false)

@@ -1,5 +1,5 @@
 /* auto_kad_full_qr_patched.jsx
-   Full pipeline: Auto Kad Full (patched V23 - ask ROOT + robust template discovery + export validation + POTRAIT customer image)
+   Full pipeline: Auto Kad Full (patched V28 - V27 preserved + KAD BELAKANG portrait-only fix)
    - Ask operator to choose ROOT folder
    - MASTER template path = <ROOT>/MASTER
    - OUTPUT path = <ROOT>/OUTPUT
@@ -279,70 +279,410 @@ function isPortraitDesign(tema, tplPath, tplName){
     return containsPortraitWord(tema) || containsPortraitWord(tplPath) || containsPortraitWord(tplName);
 }
 
-function findPortraitImageLayer(doc){
-    // 1) Exact layer names first.
-    var exact = findLayerByNames(doc, [
-        "potrait", "portrait", "potret",
-        "gambar potrait", "gambar portrait", "gambar potret",
-        "potrait picture", "portrait picture", "potret picture",
-        "gambar customer", "customer photo", "customer image",
-        "gambar", "cardimage", "card_image", "gambar pengantin", "pengantin", "photo", "image"
-    ]);
-    if(exact) return exact;
+function _containsAnyKeyword(text, keywords){
+    var nm = s(text).toLowerCase();
+    for(var i=0;i<keywords.length;i++){
+        if(nm.indexOf(keywords[i]) >= 0) return true;
+    }
+    return false;
+}
 
-    // 2) Then accept common variants such as "Gambar Pengantin Copy",
-    //    "Portrait Photo 1", "GAMBAR CUSTOMER", etc.
-    var keywords = [
-        "potrait", "portrait", "potret",
-        "gambar pengantin", "gambar customer",
-        "customer photo", "customer image",
-        "cardimage", "card_image", "photo pengantin"
+// V27: robustly locate the customer-photo placeholder.
+// Important changes from V26:
+// - never returns a LayerSet/group as the replacement target;
+// - considers parent-group names (many templates keep the real photo layer inside a group named GAMBAR/PHOTO);
+// - scores multiple Smart Objects instead of giving up when more than one exists;
+// - excludes QR/text/decorative candidates as much as possible.
+var LAST_PORTRAIT_IMAGE_LAYER = "";
+var LAST_PORTRAIT_IMAGE_METHOD = "";
+
+function findPortraitImageLayer(doc){
+    LAST_PORTRAIT_IMAGE_LAYER = "";
+    LAST_PORTRAIT_IMAGE_METHOD = "";
+
+    var positive = [
+        "potrait", "portrait", "potret", "foto", "photo", "picture", "pic",
+        "gambar pengantin", "gambar customer", "gambar", "pengantin", "customer image",
+        "customer photo", "cardimage", "card_image", "couple", "model", "subject"
+    ];
+    var negative = [
+        "qrlocation", "qr code", "qrcode", "logo", "watermark", "frame", "border",
+        "ornament", "hiasan", "decoration", "decor", "icon", "arrow", "anak panah",
+        "text", "teks", "nama", "tarikh", "bulan", "hari", "alamat"
     ];
 
-    function walk(container){
+    var docW = 0, docH = 0, docArea = 0;
+    try{
+        docW = doc.width.as("px");
+        docH = doc.height.as("px");
+        docArea = docW * docH;
+    }catch(e){}
+
+    var candidates = [];
+
+    function scoreArtLayer(L, parentPath){
+        try{
+            if(!L || L.typename !== "ArtLayer") return;
+            var nm = s(L.name).toLowerCase();
+            var path = s(parentPath).toLowerCase();
+
+            if(nm === "qrlocation" || _containsAnyKeyword(nm, ["qrlocation", "qr code", "qrcode"])) return;
+            if(L.kind == LayerKind.TEXT) return;
+
+            var score = 0;
+            var method = [];
+
+            if(_containsAnyKeyword(nm, positive)){
+                score += 120;
+                method.push("layer-name");
+            }
+            if(_containsAnyKeyword(path, positive)){
+                score += 90;
+                method.push("parent-group");
+            }
+            if(_containsAnyKeyword(nm, negative)) score -= 140;
+            if(_containsAnyKeyword(path, ["qr", "logo", "watermark"])) score -= 100;
+
+            try{
+                if(L.kind == LayerKind.SMARTOBJECT){
+                    score += 45;
+                    method.push("smart-object");
+                }else if(L.kind == LayerKind.NORMAL){
+                    score += 15;
+                    method.push("pixel-layer");
+                }
+            }catch(kindErr){}
+
+            try{
+                var b = _boundsPx(L);
+                var area = Math.max(0, b.w) * Math.max(0, b.h);
+                var ratio = docArea > 0 ? area / docArea : 0;
+
+                // A portrait placeholder is usually a meaningful visual area,
+                // not a tiny icon. Give larger visual layers a controlled bonus.
+                if(ratio >= 0.02) score += 10;
+                if(ratio >= 0.08) score += 12;
+                if(ratio >= 0.20) score += 12;
+                if(ratio >= 0.45) score += 8;
+                if(ratio < 0.004) score -= 35;
+
+                candidates.push({layer:L, score:score, ratio:ratio, method:method.join("+")});
+            }catch(boundsErr){
+                candidates.push({layer:L, score:score, ratio:0, method:method.join("+")});
+            }
+        }catch(e){}
+    }
+
+    function walk(container, parentPath){
         for(var i=0;i<container.layers.length;i++){
             var L = container.layers[i];
-            var nm = s(L.name).toLowerCase();
-
-            // Never treat the QR layer as a portrait image.
-            if(nm !== "qrlocation"){
-                for(var k=0;k<keywords.length;k++){
-                    if(nm.indexOf(keywords[k]) >= 0) return L;
-                }
-            }
-
+            var nextPath = parentPath;
             if(L.typename === "LayerSet"){
-                var nested = walk(L);
-                if(nested) return nested;
-            }
-        }
-        return null;
-    }
-
-    var fuzzy = walk(doc);
-    if(fuzzy) return fuzzy;
-
-    // 3) Conservative fallback:
-    //    If there is exactly ONE non-QR Smart Object in the whole template,
-    //    use it as the portrait placeholder. Do not guess when there are many.
-    var candidates = [];
-    function collectSO(container){
-        for(var j=0;j<container.layers.length;j++){
-            var X = container.layers[j];
-            if(X.typename === "LayerSet"){
-                collectSO(X);
+                nextPath = parentPath === "" ? s(L.name) : (parentPath + "/" + s(L.name));
+                walk(L, nextPath);
             }else{
-                try{
-                    var xn = s(X.name).toLowerCase();
-                    if(X.kind == LayerKind.SMARTOBJECT && xn !== "qrlocation"){
-                        candidates.push(X);
-                    }
-                }catch(e){}
+                scoreArtLayer(L, parentPath);
             }
         }
     }
-    collectSO(doc);
-    return candidates.length === 1 ? candidates[0] : null;
+    walk(doc, "");
+
+    if(candidates.length === 0) return null;
+
+    candidates.sort(function(a,b){
+        if(a.score > b.score) return -1;
+        if(a.score < b.score) return 1;
+        if(a.ratio > b.ratio) return -1;
+        if(a.ratio < b.ratio) return 1;
+        return 0;
+    });
+
+    var best = candidates[0];
+
+    // Named/grouped photo candidates easily pass this threshold.
+    // For generic Smart Objects, allow the largest meaningful candidate as fallback.
+    if(best.score < 48){
+        var genericBest = null;
+        for(var c=0;c<candidates.length;c++){
+            try{
+                if(candidates[c].layer.kind == LayerKind.SMARTOBJECT && candidates[c].ratio >= 0.03){
+                    if(!genericBest || candidates[c].ratio > genericBest.ratio) genericBest = candidates[c];
+                }
+            }catch(e){}
+        }
+        if(genericBest){
+            best = genericBest;
+            best.method = (best.method ? best.method + "+" : "") + "largest-smart-object-fallback";
+        }else{
+            return null;
+        }
+    }
+
+    LAST_PORTRAIT_IMAGE_LAYER = s(best.layer.name);
+    LAST_PORTRAIT_IMAGE_METHOD = best.method || "scored-candidate";
+    return best.layer;
+}
+
+
+// ------------------ V28: KAD BELAKANG ONLY ------------------
+// Preserve all V27 behaviour for every other template.
+// KAD BELAKANG needs a stricter photo-target rule because generic "largest smart object"
+// detection can select the dark/base artwork instead of the actual portrait area.
+// Strategy:
+//   1) Prefer a real photo/portrait layer located in the UPPER section of KAD BELAKANG.
+//   2) Reject full-canvas/background/QR/decor candidates aggressively.
+//   3) If no reliable placeholder exists, add the customer photo only into a masked
+//      upper portrait region (never full-canvas), above the base background.
+function findKadBelakangPortraitLayer(doc){
+    LAST_PORTRAIT_IMAGE_LAYER = "";
+    LAST_PORTRAIT_IMAGE_METHOD = "";
+
+    var positive = [
+        "potrait", "portrait", "potret", "foto", "photo", "picture", "pic",
+        "gambar pengantin", "gambar customer", "gambar", "pengantin", "customer image",
+        "customer photo", "cardimage", "card_image", "couple", "model", "subject"
+    ];
+    var negative = [
+        "qrlocation", "qr code", "qrcode", "logo", "watermark",
+        "background", "bg", "base", "frame", "border", "bingkai", "overlay",
+        "texture", "tekstur", "shadow", "bayang", "ornament", "hiasan",
+        "decoration", "decor", "icon", "arrow", "anak panah", "line", "garisan",
+        "flower", "bunga", "daun", "leaf", "text", "teks", "nama", "tarikh",
+        "bulan", "hari", "alamat"
+    ];
+
+    var docW = 0, docH = 0, docArea = 0;
+    try{
+        docW = doc.width.as("px");
+        docH = doc.height.as("px");
+        docArea = docW * docH;
+    }catch(e){}
+
+    var candidates = [];
+
+    function scoreLayer(L, parentPath){
+        try{
+            if(!L || L.typename !== "ArtLayer") return;
+            if(L.kind == LayerKind.TEXT) return;
+
+            var nm = s(L.name).toLowerCase();
+            var path = s(parentPath).toLowerCase();
+            if(nm === "qrlocation" || _containsAnyKeyword(nm, ["qrlocation", "qr code", "qrcode"])) return;
+
+            var b = _boundsPx(L);
+            if(b.w <= 0 || b.h <= 0) return;
+
+            var area = b.w * b.h;
+            var ratio = docArea > 0 ? area / docArea : 0;
+            var wRatio = docW > 0 ? b.w / docW : 0;
+            var hRatio = docH > 0 ? b.h / docH : 0;
+            var cyRatio = docH > 0 ? b.cy / docH : 1;
+            var bottomRatio = docH > 0 ? (b.y + b.h) / docH : 1;
+
+            // Ignore tiny items outright.
+            if(ratio < 0.008) return;
+
+            var score = 0;
+            var method = [];
+
+            if(_containsAnyKeyword(nm, positive)){
+                score += 190;
+                method.push("photo-layer-name");
+            }
+            if(_containsAnyKeyword(path, positive)){
+                score += 135;
+                method.push("photo-parent-group");
+            }
+            if(_containsAnyKeyword(nm, negative)) score -= 210;
+            if(_containsAnyKeyword(path, ["qr", "logo", "background", "bg", "base", "frame", "border"])) score -= 120;
+
+            try{
+                if(L.kind == LayerKind.SMARTOBJECT){
+                    score += 55;
+                    method.push("smart-object");
+                }else if(L.kind == LayerKind.NORMAL){
+                    score += 18;
+                    method.push("pixel-layer");
+                }
+            }catch(kindErr){}
+
+            // KAD BELAKANG portrait is visually in the upper portion of the card.
+            if(cyRatio <= 0.42){ score += 80; method.push("upper-zone"); }
+            else if(cyRatio <= 0.55){ score += 40; method.push("upper-mid-zone"); }
+            else if(cyRatio >= 0.68){ score -= 110; }
+
+            if(b.y <= docH * 0.12) score += 20;
+            if(bottomRatio <= 0.62) score += 35;
+            if(bottomRatio > 0.82) score -= 60;
+
+            // Typical photo area: meaningful width, but not a full-canvas background.
+            if(wRatio >= 0.45) score += 28;
+            if(wRatio >= 0.70) score += 12;
+            if(hRatio >= 0.16 && hRatio <= 0.58) score += 32;
+            if(ratio >= 0.08 && ratio <= 0.58) score += 30;
+            if(ratio > 0.72 || (wRatio > 0.93 && hRatio > 0.82)) score -= 190;
+
+            candidates.push({
+                layer:L,
+                score:score,
+                ratio:ratio,
+                cyRatio:cyRatio,
+                method:method.join("+")
+            });
+        }catch(e){}
+    }
+
+    function walk(container, parentPath){
+        for(var i=0;i<container.layers.length;i++){
+            var L = container.layers[i];
+            if(L.typename === "LayerSet"){
+                var nextPath = parentPath === "" ? s(L.name) : (parentPath + "/" + s(L.name));
+                walk(L, nextPath);
+            }else{
+                scoreLayer(L, parentPath);
+            }
+        }
+    }
+    walk(doc, "");
+
+    if(candidates.length === 0) return null;
+
+    candidates.sort(function(a,b){
+        if(a.score > b.score) return -1;
+        if(a.score < b.score) return 1;
+        if(a.cyRatio < b.cyRatio) return -1;
+        if(a.cyRatio > b.cyRatio) return 1;
+        if(a.ratio > b.ratio) return -1;
+        if(a.ratio < b.ratio) return 1;
+        return 0;
+    });
+
+    var best = candidates[0];
+    // High enough to avoid replacing a dark/background layer by mistake.
+    if(best.score < 72) return null;
+
+    LAST_PORTRAIT_IMAGE_LAYER = s(best.layer.name);
+    LAST_PORTRAIT_IMAGE_METHOD = "kad-belakang-target:" + (best.method || "upper-geometry");
+    return best.layer;
+}
+
+function replaceKadBelakangPortraitImageIfExists(doc, imagePath){
+    if(!imagePath || t(imagePath) === "") return false;
+
+    var imageLayer = findKadBelakangPortraitLayer(doc);
+    if(!imageLayer) return false;
+
+    try{
+        app.activeDocument = doc;
+        imageLayer = convertToSmartObjectIfNeeded(imageLayer);
+        var targetBox = _boundsPx(imageLayer);
+
+        if(!replaceSmartObjectContents(imageLayer, imagePath)) return false;
+
+        fitLayerToBox(imageLayer, targetBox);
+        LAST_PORTRAIT_IMAGE_LAYER = s(imageLayer.name);
+        return true;
+    }catch(e){
+        return false;
+    }
+}
+
+function _addRevealSelectionMask(){
+    try{
+        var idMk = charIDToTypeID("Mk  ");
+        var desc = new ActionDescriptor();
+        var ref = new ActionReference();
+        ref.putClass(charIDToTypeID("Chnl"));
+        desc.putReference(charIDToTypeID("null"), ref);
+        var atRef = new ActionReference();
+        atRef.putEnumerated(charIDToTypeID("Chnl"), charIDToTypeID("Chnl"), charIDToTypeID("Msk "));
+        desc.putReference(charIDToTypeID("At  "), atRef);
+        desc.putEnumerated(charIDToTypeID("Usng"), charIDToTypeID("UsrM"), charIDToTypeID("RvlS"));
+        executeAction(idMk, desc, DialogModes.NO);
+        return true;
+    }catch(e){ return false; }
+}
+
+function addKadBelakangPortraitTopRegion(doc, imagePath){
+    var photoDoc = null;
+    var oldUnits = null;
+    try{
+        app.activeDocument = doc;
+        try{
+            oldUnits = app.preferences.rulerUnits;
+            app.preferences.rulerUnits = Units.PIXELS;
+        }catch(unitErr){}
+
+        var bottomAnchor = null;
+        try{
+            if(doc.layers.length > 0) bottomAnchor = doc.layers[doc.layers.length - 1];
+        }catch(anchorErr){}
+
+        photoDoc = app.open(new File(imagePath));
+        var photoLayer = photoDoc.activeLayer.duplicate(doc, ElementPlacement.PLACEATEND);
+        closeDocNoSave(photoDoc);
+        photoDoc = null;
+
+        app.activeDocument = doc;
+        doc.activeLayer = photoLayer;
+        photoLayer.name = "Gambar Pengantin - V28 Kad Belakang";
+
+        var width = doc.width.as("px");
+        var height = doc.height.as("px");
+
+        // Based on KAD BELAKANG composition: customer portrait occupies only the upper section.
+        // Small side inset keeps the existing outer/frame design visible.
+        var insetX = width * 0.035;
+        var topY = height * 0.035;
+        var targetW = width - (insetX * 2);
+        var targetH = height * 0.43;
+        var targetBox = {
+            x: insetX,
+            y: topY,
+            w: targetW,
+            h: targetH,
+            cx: insetX + targetW/2,
+            cy: topY + targetH/2
+        };
+
+        var current = _boundsPx(photoLayer);
+        if(current.w <= 0 || current.h <= 0) return false;
+        var scale = Math.max(targetBox.w / current.w, targetBox.h / current.h) * 100;
+        _transformScalePercent(scale);
+        current = _boundsPx(photoLayer);
+        _translate(targetBox.cx - current.cx, targetBox.cy - current.cy);
+
+        // Clip the photo strictly to the upper portrait area.
+        doc.selection.select([
+            [targetBox.x, targetBox.y],
+            [targetBox.x + targetBox.w, targetBox.y],
+            [targetBox.x + targetBox.w, targetBox.y + targetBox.h],
+            [targetBox.x, targetBox.y + targetBox.h]
+        ]);
+        _addRevealSelectionMask();
+        try{ doc.selection.deselect(); }catch(deselectErr){}
+
+        // Keep it above the original base/background while leaving the existing
+        // KAD BELAKANG information, QR, frame and decorative layers untouched above it.
+        if(bottomAnchor && bottomAnchor !== photoLayer){
+            try{ photoLayer.move(bottomAnchor, ElementPlacement.PLACEBEFORE); }catch(moveErr){}
+        }
+        bringTextGroupsToFront(doc, photoLayer);
+
+        LAST_PORTRAIT_IMAGE_LAYER = s(photoLayer.name);
+        LAST_PORTRAIT_IMAGE_METHOD = "kad-belakang-masked-upper-fallback";
+
+        if(oldUnits !== null){
+            try{ app.preferences.rulerUnits = oldUnits; }catch(restoreErr){}
+        }
+        return true;
+    }catch(e){
+        if(photoDoc) closeDocNoSave(photoDoc);
+        if(oldUnits !== null){
+            try{ app.preferences.rulerUnits = oldUnits; }catch(restoreErr2){}
+        }
+        return false;
+    }
 }
 
 function replacePortraitImageIfExists(doc, imagePath){
@@ -352,12 +692,14 @@ function replacePortraitImageIfExists(doc, imagePath){
     if(!imageLayer) return false;
 
     try{
+        app.activeDocument = doc;
         imageLayer = convertToSmartObjectIfNeeded(imageLayer);
         var targetBox = _boundsPx(imageLayer);
 
         if(!replaceSmartObjectContents(imageLayer, imagePath)) return false;
 
         fitLayerToBox(imageLayer, targetBox);
+        LAST_PORTRAIT_IMAGE_LAYER = s(imageLayer.name);
         return true;
     }catch(e){
         return false;
@@ -493,24 +835,45 @@ function bringTextGroupsToFront(doc, photoLayer){
 function addCustomerPhotoBackground(doc, imagePath){
     var photoDoc = null;
     try{
+        app.activeDocument = doc;
+
+        // Remember the original bottom layer before adding the customer photo.
+        // The fallback photo will be placed just ABOVE this base layer so the
+        // template text/QR/decor remain above it.
+        var bottomAnchor = null;
+        try{
+            if(doc.layers.length > 0) bottomAnchor = doc.layers[doc.layers.length - 1];
+        }catch(anchorErr){}
+
         photoDoc = app.open(new File(imagePath));
-        var photoLayer = photoDoc.activeLayer.duplicate(doc, ElementPlacement.PLACEATBEGINNING);
+        var photoLayer = photoDoc.activeLayer.duplicate(doc, ElementPlacement.PLACEATEND);
         closeDocNoSave(photoDoc);
         photoDoc = null;
 
         app.activeDocument = doc;
         doc.activeLayer = photoLayer;
-        photoLayer.name = "Gambar Pengantin";
+        photoLayer.name = "Gambar Pengantin - V27 Fallback";
 
         var width = doc.width.as("px");
         var height = doc.height.as("px");
         var current = _boundsPx(photoLayer);
         if(current.w <= 0 || current.h <= 0) return false;
+
+        // Cover canvas while preserving aspect ratio.
         var scale = Math.max(width / current.w, height / current.h) * 100;
         _transformScalePercent(scale);
         current = _boundsPx(photoLayer);
         _translate((width / 2) - current.cx, (height / 2) - current.cy);
+
+        // Put it above the original base/background, not on top of the design.
+        if(bottomAnchor && bottomAnchor !== photoLayer){
+            try{ photoLayer.move(bottomAnchor, ElementPlacement.PLACEBEFORE); }catch(moveErr){}
+        }
+
+        // Extra guard: text groups must stay above the fallback customer photo.
         bringTextGroupsToFront(doc, photoLayer);
+        LAST_PORTRAIT_IMAGE_LAYER = s(photoLayer.name);
+        LAST_PORTRAIT_IMAGE_METHOD = "fallback-background-above-base";
         return true;
     }catch(e){
         if(photoDoc) closeDocNoSave(photoDoc);
@@ -1047,22 +1410,71 @@ try{
             var portraitDesign = isPortraitDesign(tema, tplPath, tplName);
 
             if(portraitDesign){
-                var skipPortraitCustomerImage = (tplLower.indexOf("wooden hanger") >= 0);
+                // V28: Keep V27 behaviour unchanged for every item EXCEPT KAD BELAKANG.
+                // KAD BELAKANG uses a dedicated upper-photo detector/fallback so that
+                // the dark card/base artwork is never mistaken for the portrait layer.
+                var isWoodenHanger = (tplLower.indexOf("wooden hanger") >= 0);
+                var isKadBelakangV28 = (tplLower.indexOf("kad belakang") >= 0);
 
-                if(skipPortraitCustomerImage){
-                    logBoth(logPath, custLogPath, "[POTRAIT] SKIP CUSTOMER IMAGE FOR WOODEN HANGER -> " + tplName);
+                if(isWoodenHanger){
+                    logBoth(logPath, custLogPath, "[POTRAIT V27] SKIP CUSTOMER IMAGE FOR WOODEN HANGER -> " + tplName);
                 }else if(gambarPath !== ""){
-                    var portraitReplaced = replacePortraitImageIfExists(doc, gambarPath);
-                    if(portraitReplaced){
-                        logBoth(logPath, custLogPath, "[POTRAIT] CUSTOMER IMAGE OK -> " + tplName);
+                    if(isKadBelakangV28){
+                        var kadBelakangReplaced = replaceKadBelakangPortraitImageIfExists(doc, gambarPath);
+                        if(kadBelakangReplaced){
+                            logBoth(
+                                logPath,
+                                custLogPath,
+                                "[KAD BELAKANG V28] CUSTOMER IMAGE REPLACED -> " + tplName +
+                                " | layer=" + LAST_PORTRAIT_IMAGE_LAYER +
+                                " | method=" + LAST_PORTRAIT_IMAGE_METHOD
+                            );
+                        }else{
+                            var kadBelakangFallback = addKadBelakangPortraitTopRegion(doc, gambarPath);
+                            if(kadBelakangFallback){
+                                logBoth(
+                                    logPath,
+                                    custLogPath,
+                                    "[KAD BELAKANG V28] CUSTOMER IMAGE MASKED FALLBACK -> " + tplName +
+                                    " | layer=" + LAST_PORTRAIT_IMAGE_LAYER +
+                                    " | method=" + LAST_PORTRAIT_IMAGE_METHOD
+                                );
+                            }else{
+                                logBoth(logPath, custLogPath, "[KAD BELAKANG V28] CUSTOMER IMAGE FAILED -> " + tplName);
+                            }
+                        }
                     }else{
-                        // Important: do not silently claim success.
-                        // The template may genuinely have no portrait image layer
-                        // (e.g. some arrows/stickers), so continue but log clearly.
-                        logBoth(logPath, custLogPath, "[POTRAIT] NO REPLACEABLE CUSTOMER IMAGE LAYER -> " + tplName);
+                        // EXACT V27 path for ARROW/BANNER/BANTING/KAD DEPAN/STICKER/VIP CARD.
+                        var portraitReplaced = replacePortraitImageIfExists(doc, gambarPath);
+
+                        if(portraitReplaced){
+                            logBoth(
+                                logPath,
+                                custLogPath,
+                                "[POTRAIT V27] CUSTOMER IMAGE REPLACED -> " + tplName +
+                                " | layer=" + LAST_PORTRAIT_IMAGE_LAYER +
+                                " | method=" + LAST_PORTRAIT_IMAGE_METHOD
+                            );
+                        }else{
+                            var portraitFallback = addCustomerPhotoBackground(doc, gambarPath);
+                            if(portraitFallback){
+                                logBoth(
+                                    logPath,
+                                    custLogPath,
+                                    "[POTRAIT V27] CUSTOMER IMAGE FALLBACK ADDED -> " + tplName +
+                                    " | method=" + LAST_PORTRAIT_IMAGE_METHOD
+                                );
+                            }else{
+                                logBoth(logPath, custLogPath, "[POTRAIT V27] CUSTOMER IMAGE FAILED -> " + tplName);
+                            }
+                        }
                     }
                 }else{
-                    logBoth(logPath, custLogPath, "[POTRAIT] CUSTOMER IMAGE MISSING -> " + tplName);
+                    if(isKadBelakangV28){
+                        logBoth(logPath, custLogPath, "[KAD BELAKANG V28] CUSTOMER IMAGE MISSING -> " + tplName);
+                    }else{
+                        logBoth(logPath, custLogPath, "[POTRAIT V27] CUSTOMER IMAGE MISSING -> " + tplName);
+                    }
                 }
             }
 
