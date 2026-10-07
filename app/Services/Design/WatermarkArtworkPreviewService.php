@@ -7,7 +7,7 @@ use RuntimeException;
 
 class WatermarkArtworkPreviewService
 {
-    public const VERSION = 7;
+    public const VERSION = 8;
 
     private const TEXT = 'King Kad Kahwin . Preview';
 
@@ -126,7 +126,7 @@ class WatermarkArtworkPreviewService
         $font = $this->watermarkFont();
 
         if ($font !== null && function_exists('imagettftext')) {
-            $fontSize = max(8, min(19, (int) round(min($width, $height) / 40)));
+            $fontSize = max(10, min(28, (int) round(min($width, $height) / 23)));
             $angle = -7;
             $shadow = imagecolorallocatealpha($image, 0, 0, 0, 84);
             $ink = imagecolorallocatealpha($image, 255, 255, 255, 58);
@@ -139,7 +139,7 @@ class WatermarkArtworkPreviewService
                 $maxX = max($box[0], $box[2], $box[4], $box[6]);
                 $textWidth = $maxX - $minX;
 
-                if ($textWidth <= $width * .42 || $fontSize <= 8) {
+                if ($textWidth <= $width * .62 || $fontSize <= 10) {
                     break;
                 }
 
