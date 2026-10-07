@@ -591,7 +591,7 @@
                                                             type="file"
                                                             name="{{ $isBatchArtworkJob ? 'artworks['.$job->id.'][source_artwork][]' : 'source_artwork[]' }}"
                                                             @if ($isBatchArtworkJob) form="batch-artwork-upload" @endif
-                                                            accept=".psd,.pdf"
+                                                            accept=".psd,.pdf,image/vnd.adobe.photoshop,application/photoshop,application/x-photoshop,application/pdf"
                                                             multiple
                                                             required
                                                         >
