@@ -94,7 +94,7 @@
         @include('staff.partials.sidebar')
         <div class="staff-workspace">
             <header class="staff-topbar">
-                <div><p class="staff-kicker">{{ auth()->user()->isAdmin() ? 'Operasi Admin' : ($workstreamLabel ?? 'Pengurusan Operasi') }}</p><h1>{{ $pageLabel }}</h1></div>
+                <div><p class="staff-kicker">{{ auth()->user()->isAdmin() ? 'Operasi Admin' : ($workstreamLabel ?? 'Pengurusan Operasi') }}</p><h1>Tempahan</h1></div>
                 <div class="staff-topbar-actions">
                     <form class="js-logout-form staff-logout-profile" method="POST" action="{{ route($logoutRoute) }}">@csrf<button type="submit"><span class="staff-topbar-avatar" aria-hidden="true"></span><span>{{ __('ui.logout') }}</span></button></form>
                 </div>
@@ -137,7 +137,6 @@
             <form class="staff-order-filter" method="GET" action="{{ route($ordersIndexRoute) }}">
                 @if ($workstream)<input type="hidden" name="workstream" value="{{ $workstream }}">@endif
                 @if (request('attention'))<input type="hidden" name="attention" value="{{ request('attention') }}">@endif
-                <div class="staff-filter-heading"><strong>Cari &amp; tapis tempahan</strong><small>Gunakan ID Tempahan, nama pelanggan atau status kerja.</small></div>
                 <label><span>Cari tempahan atau pelanggan</span><input type="search" name="search" value="{{ request('search') }}" placeholder="ID Tempahan, nama, e-mel atau telefon"></label>
                 <label><span>Status tempahan</span><select name="status"><option value="">Semua status</option><option value="{{ \App\Models\Order::STATUS_FILTER_NOT_COMPLETED }}" @selected(request('status') === \App\Models\Order::STATUS_FILTER_NOT_COMPLETED)>Belum selesai</option>@foreach ($statusOptions as $status)<option value="{{ $status }}" @selected(request('status') === $status)>{{ $statusLabels[$status] ?? str_replace('_', ' ', $status) }}</option>@endforeach</select></label>
                 <div class="staff-filter-actions"><button class="staff-button staff-button-primary" type="submit">Tapis tempahan</button>@if (request()->hasAny(['search', 'status', 'attention']))<a class="staff-button" href="{{ route($ordersIndexRoute, array_filter(['workstream' => $workstream])) }}">Kosongkan</a>@endif</div>
