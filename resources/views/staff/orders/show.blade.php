@@ -604,6 +604,27 @@
                                                         </span>
                                                     </div>
 
+                                                    <div class="staff-supplementary-artworks">
+                                                        <div class="staff-supplementary-heading">
+                                                            <h4>Preview Kad Kahwin</h4>
+                                                            <p>Muat naik kedua-dua bahagian kad untuk semakan pelanggan.</p>
+                                                        </div>
+                                                        <div class="staff-supplementary-grid">
+                                                            <div class="staff-field">
+                                                                <label for="card-front-preview-{{ $job->id }}">Bahagian Hadapan <span class="staff-optional">(wajib)</span></label>
+                                                                <span class="staff-artwork-ratio staff-artwork-ratio--card" aria-hidden="true">2 : 3</span>
+                                                                <input id="card-front-preview-{{ $job->id }}" type="file" name="{{ $isBatchArtworkJob ? 'artworks['.$job->id.'][customer_preview][]' : 'customer_preview[]' }}" @if ($isBatchArtworkJob) form="batch-artwork-upload" @endif accept=".jpg,.jpeg,.png,image/jpeg,image/png" required>
+                                                                <span class="staff-field-help">Format menegak 2:3 seperti 800 × 1200 px.</span>
+                                                            </div>
+                                                            <div class="staff-field">
+                                                                <label for="card-back-preview-{{ $job->id }}">Bahagian Belakang <span class="staff-optional">(wajib)</span></label>
+                                                                <span class="staff-artwork-ratio staff-artwork-ratio--card" aria-hidden="true">2 : 3</span>
+                                                                <input id="card-back-preview-{{ $job->id }}" type="file" name="{{ $isBatchArtworkJob ? 'artworks['.$job->id.'][customer_preview][]' : 'customer_preview[]' }}" @if ($isBatchArtworkJob) form="batch-artwork-upload" @endif accept=".jpg,.jpeg,.png,image/jpeg,image/png" required>
+                                                                <span class="staff-field-help">Format menegak 2:3 seperti 800 × 1200 px.</span>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+
                                                     @php
                                                         $jobPackageSide = $order->packageSides
                                                             ->firstWhere('id', $job->order_package_side_id);
@@ -635,29 +656,6 @@
                                                         </div>
                                                     </div>
 
-                                                    <div class="staff-field">
-                                                        <label for="customer-preview-{{ $job->id }}">
-                                                            Pratonton Pelanggan
-                                                        </label>
-
-                                                        <div class="staff-multi-file-picker" data-file-kind="customer preview">
-                                                        <input
-                                                            id="customer-preview-{{ $job->id }}"
-                                                            type="file"
-                                                            name="{{ $isBatchArtworkJob ? 'artworks['.$job->id.'][customer_preview][]' : 'customer_preview[]' }}"
-                                                            @if ($isBatchArtworkJob) form="batch-artwork-upload" @endif
-                                                            accept=".jpg,.jpeg,.png"
-                                                            multiple
-                                                            required
-                                                        >
-                                                            <button type="button" class="staff-file-add" aria-controls="customer-preview-{{ $job->id }}">+ Tambah Fail</button>
-                                                            <ul class="staff-selected-files" aria-live="polite"></ul>
-                                                        </div>
-
-                                                        <span class="staff-field-help">
-                                                            Format JPG atau PNG sahaja. Saiz maksimum 20 MB. Saiz dan kualiti pratonton pelanggan akan dikurangkan, kemudian dilindungi dengan tera air King Kad Kahwin.
-                                                        </span>
-                                                    </div>
 
                                                     <div class="staff-field">
                                                         <label for="internal-note-{{ $job->id }}">

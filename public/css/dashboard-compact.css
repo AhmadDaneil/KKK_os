@@ -99,7 +99,7 @@ body[data-staff-theme] .staff-receipt-button:hover,body[data-staff-theme] .staff
 .staff-supplementary-heading h4{margin:0;color:#20352b;font-size:14px}.staff-supplementary-heading p{margin:4px 0 12px;color:#66776e;font-size:11px;line-height:1.45}
 .staff-supplementary-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.staff-supplementary-grid .staff-field{position:relative;margin:0;padding:12px;border:1px solid #d7e1db;border-radius:9px;background:#fff}
 .staff-supplementary-grid input[type="file"]{width:100%;margin-top:9px}.staff-artwork-ratio{display:grid;margin-top:8px;place-items:center;border:1px dashed #91aa9c;border-radius:6px;color:#276248;background:#edf7f1;font-size:11px;font-weight:850}
-.staff-artwork-ratio--banner{width:112px;height:56px}.staff-artwork-ratio--banting{width:42px;height:84px}
+.staff-artwork-ratio--card{width:60px;height:90px}.staff-artwork-ratio--banner{width:112px;height:56px}.staff-artwork-ratio--banting{width:42px;height:84px}
 .admin-operations-mode .staff-supplementary-artworks{border-color:#d9c89c;background:#fffaf0}.admin-operations-mode .staff-artwork-ratio{border-color:#c7a962;color:#765315;background:#fff5db}
 @media(max-width:620px){.staff-supplementary-grid{grid-template-columns:1fr}}
 
