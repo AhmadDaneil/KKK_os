@@ -798,7 +798,7 @@
                         <form
                             method="POST"
                             action="{{ route('staff.orders.design-jobs.mark-ready', $order) }}"
-                            class="js-staff-confirmation-form"
+                            class="staff-batch-review-form js-staff-confirmation-form"
                             data-confirm-title="Hantar kedua-dua hasil design untuk semakan pelanggan?"
                             data-confirm-message="Kedua-dua pakej akan dihantar serentak. Pastikan preview kad, banner dan banting bagi setiap pakej sudah dimuat naik dan diperiksa."
                             data-confirm-button="Ya, hantar kedua-duanya"
