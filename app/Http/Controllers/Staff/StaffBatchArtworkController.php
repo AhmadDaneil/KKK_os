@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Models\DesignJob;
 use App\Models\Order;
 use App\Services\Design\CreateArtworkVersionService;
+use App\Services\Design\MarkDesignReadyService;
+use App\Services\Design\SyncOrderDesignStatusService;
 use App\Services\Design\WatermarkArtworkPreviewService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
@@ -19,6 +21,79 @@ use Throwable;
 
 class StaffBatchArtworkController extends Controller
 {
+    public function markReady(
+        Request $request,
+        Order $order,
+        MarkDesignReadyService $service,
+        SyncOrderDesignStatusService $sync
+    ): RedirectResponse {
+        $jobs = $order->designJobs()
+            ->where('assigned_user_id', $request->user()->id)
+            ->where('status', 'DESIGN_IN_PROGRESS')
+            ->with([
+                'packageSide',
+                'artworkVersions' => fn ($query) => $query->latest('version_number'),
+            ])
+            ->orderBy('id')
+            ->get();
+
+        if ($jobs->count() !== 2) {
+            return back()->withErrors([
+                'design_job' => 'Penghantaran bersama hanya tersedia apabila kedua-dua tugasan design pakej ditugaskan kepada anda.',
+            ]);
+        }
+
+        foreach ($jobs as $job) {
+            if ($job->status !== 'DESIGN_IN_PROGRESS') {
+                return back()->withErrors([
+                    'design_job' => 'Kedua-dua tugasan perlu berada dalam status reka bentuk sedang berjalan sebelum dihantar bersama.',
+                ]);
+            }
+
+            $latestArtwork = $job->artworkVersions->first();
+
+            if (! $latestArtwork) {
+                return back()->withErrors([
+                    'design_job' => 'Muat naik hasil design terkini untuk pakej '.ucfirst(strtolower($job->side)).' sebelum menghantar kedua-duanya.',
+                ]);
+            }
+
+            $previewTypes = collect($latestArtwork->preview_files ?? [])
+                ->pluck('artwork_type')
+                ->map(fn (?string $type): string => mb_strtoupper(trim((string) $type)));
+            $requiredPreviewTypes = collect(['CARD', 'BANNER', 'BANTING']);
+            $missingTypes = $requiredPreviewTypes->reject(fn (string $type): bool => $previewTypes->contains($type));
+
+            if ($missingTypes->isNotEmpty()) {
+                $missingLabels = $missingTypes->map(fn (string $type): string => match ($type) {
+                    'CARD' => 'kad',
+                    'BANNER' => 'banner',
+                    'BANTING' => 'banting',
+                });
+
+                return back()->withErrors([
+                    'design_job' => 'Preview '. $missingLabels->join(' dan ').' untuk pakej '.ucfirst(strtolower($job->side)).' tiada dalam versi terkini. Muat naik versi design baharu bersama semua preview sebelum menghantar kedua-dua pakej.',
+                ]);
+            }
+        }
+
+        try {
+            DB::transaction(function () use ($jobs, $service, $request): void {
+                foreach ($jobs as $job) {
+                    $service->markReady($job, $request->user());
+                }
+            });
+
+            $sync->sync($order);
+        } catch (RuntimeException $exception) {
+            return back()->withErrors([
+                'design_job' => $exception->getMessage(),
+            ]);
+        }
+
+        return back()->with('status', 'Kedua-dua hasil design telah dihantar untuk semakan pelanggan.');
+    }
+
     public function store(
         Request $request,
         Order $order,
@@ -34,9 +109,14 @@ class StaffBatchArtworkController extends Controller
             'artworks.*.source_artwork.*' => ['required', 'file', 'mimes:psd,pdf', 'max:102400'],
             'artworks.*.customer_preview' => ['required', 'array', 'min:1', 'max:20'],
             'artworks.*.customer_preview.*' => ['required', 'file', 'mimes:jpg,jpeg,png', 'max:20480'],
-            'artworks.*.banner_preview' => ['nullable', 'file', 'mimes:jpg,jpeg,png', 'max:20480'],
-            'artworks.*.banting_preview' => ['nullable', 'file', 'mimes:jpg,jpeg,png', 'max:20480'],
+            'artworks.*.banner_preview' => ['required', 'file', 'mimes:jpg,jpeg,png', 'max:20480'],
+            'artworks.*.banting_preview' => ['required', 'file', 'mimes:jpg,jpeg,png', 'max:20480'],
             'artworks.*.internal_note' => ['nullable', 'string', 'max:5000'],
+        ], [
+            'artworks.*.banner_preview.required' => 'Muat naik preview banner untuk setiap pakej.',
+            'artworks.*.banting_preview.required' => 'Muat naik preview banting untuk setiap pakej.',
+            'artworks.*.banner_preview.uploaded' => 'Preview banner tidak berjaya dimuat naik. Pastikan saiz fail tidak melebihi 20 MB.',
+            'artworks.*.banting_preview.uploaded' => 'Preview banting tidak berjaya dimuat naik. Pastikan saiz fail tidak melebihi 20 MB.',
         ]);
 
         $jobIds = collect(array_keys($validated['artworks']))

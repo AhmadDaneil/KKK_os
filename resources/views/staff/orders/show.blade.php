@@ -19,6 +19,7 @@
         )
         : collect();
     $usesBatchArtworkUpload = $batchArtworkJobs->count() > 1;
+    $hasTwoBatchArtworkJobs = $batchArtworkJobs->count() === 2;
     $canUsePhotoshop = auth()->user()->hasStaffRole(\App\Models\User::ROLE_DESIGNER)
         && $hasDesignJobs
         && $order->designJobs->contains('assigned_user_id', auth()->id());
@@ -747,6 +748,22 @@
                                 Muat Naik Kedua-dua Hasil Design
                             </button>
                             <p class="staff-upload-notice" role="status" aria-live="polite" hidden></p>
+                        </form>
+                    @endif
+
+                    @if ($hasTwoBatchArtworkJobs)
+                        <form
+                            method="POST"
+                            action="{{ route('staff.orders.design-jobs.mark-ready', $order) }}"
+                            class="staff-batch-review-form js-staff-confirmation-form"
+                            data-confirm-title="Hantar kedua-dua hasil design untuk semakan pelanggan?"
+                            data-confirm-message="Kedua-dua pakej akan dihantar serentak. Pastikan preview kad, banner dan banting bagi setiap pakej sudah dimuat naik dan diperiksa."
+                            data-confirm-button="Ya, hantar kedua-duanya"
+                        >
+                            @csrf
+                            <button type="submit" class="staff-button staff-button-primary">
+                                Hantar Kedua-dua Untuk Semakan Pelanggan
+                            </button>
                         </form>
                     @endif
                 </section>
