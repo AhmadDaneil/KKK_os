@@ -4,12 +4,15 @@ namespace App\Services\Design;
 
 use App\Models\DesignJob;
 use App\Models\Order;
+use App\Services\Workflow\ResolveAutomaticAssigneeService;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use RuntimeException;
 
 class InitializeDesignJobsForOrderService
 {
+    public function __construct(private ResolveAutomaticAssigneeService $assignees) {}
+
     public function initialize(Order $order): Collection
     {
         return DB::transaction(function () use ($order) {
@@ -29,6 +32,7 @@ class InitializeDesignJobsForOrderService
             }
 
             $jobs = collect();
+            $designLead = $this->assignees->designLead();
 
             foreach ($order->mergeJobs as $mergeJob) {
                 $designJob = DesignJob::firstOrCreate(
@@ -38,6 +42,8 @@ class InitializeDesignJobsForOrderService
                         'order_package_side_id' => $mergeJob->order_package_side_id,
                         'side' => $mergeJob->side,
                         'status' => 'READY_FOR_DESIGN',
+                        'assigned_user_id' => $designLead->id,
+                        'assigned_at' => now(),
                     ]
                 );
 
@@ -50,6 +56,29 @@ class InitializeDesignJobsForOrderService
                         'metadata' => [
                             'merge_job_database_id' => $mergeJob->id,
                             'merge_job_public_id' => $mergeJob->job_id,
+                        ],
+                    ]);
+                    $designJob->events()->create([
+                        'event_type' => 'DESIGNER_AUTO_ASSIGNED',
+                        'to_status' => 'READY_FOR_DESIGN',
+                        'occurred_at' => now(),
+                        'metadata' => [
+                            'assigned_user_id' => $designLead->id,
+                            'assignment_mode' => 'AUTOMATIC_DESIGN_LEAD',
+                        ],
+                    ]);
+                } elseif ($designJob->assigned_user_id === null) {
+                    $designJob->update([
+                        'assigned_user_id' => $designLead->id,
+                        'assigned_at' => now(),
+                    ]);
+                    $designJob->events()->create([
+                        'event_type' => 'DESIGNER_AUTO_ASSIGNED',
+                        'to_status' => $designJob->status,
+                        'occurred_at' => now(),
+                        'metadata' => [
+                            'assigned_user_id' => $designLead->id,
+                            'assignment_mode' => 'AUTOMATIC_DESIGN_LEAD',
                         ],
                     ]);
                 }

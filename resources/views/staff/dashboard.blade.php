@@ -51,8 +51,8 @@
                         <div class="staff-attention-grid">
                             @foreach ([
                                 ['key' => 'pending_payments', 'label' => 'Semakan Bayaran', 'description' => 'Bayaran yang perlu diluluskan atau ditolak', 'icon' => 'RM', 'params' => ['attention' => 'pending_payment']],
-                                ['key' => 'unassigned_design', 'label' => 'Design Belum Ditugaskan', 'description' => 'Tugaskan pereka untuk memulakan hasil design', 'icon' => 'RB', 'params' => ['workstream' => 'design', 'attention' => 'unassigned_design']],
-                                ['key' => 'unassigned_printing', 'label' => 'Pengeluaran Belum Ditugaskan', 'description' => 'Tugaskan staf cetakan untuk memulakan pengeluaran', 'icon' => 'CT', 'params' => ['workstream' => 'printing', 'attention' => 'unassigned_printing']],
+                                ['key' => 'design_queue', 'label' => 'Tugasan Design', 'description' => 'Diterima secara automatik oleh ketua designer', 'icon' => 'RB', 'params' => ['workstream' => 'design']],
+                                ['key' => 'printing_queue', 'label' => 'Tugasan Pengeluaran', 'description' => 'Diterima secara automatik oleh staf pengeluaran utama', 'icon' => 'CT', 'params' => ['workstream' => 'printing']],
                                 ['key' => 'unassigned_packing', 'label' => 'Pembungkusan Belum Ditugaskan', 'description' => 'Tugaskan OM untuk pembungkusan dan pemenuhan tempahan', 'icon' => 'PK', 'params' => ['workstream' => 'packing', 'attention' => 'unassigned_packing']],
                             ] as $item)
                                 <a href="{{ route('staff.orders.index', $item['params']) }}" class="staff-attention-card @if ($attention[$item['key']] > 0) has-alert @else is-clear @endif">

@@ -16,6 +16,8 @@ use Illuminate\Notifications\Notifiable;
     'password',
     'role',
     'is_active',
+    'is_design_lead',
+    'is_primary_production',
     'staff_theme',
 ])]
 #[Hidden(['password', 'remember_token'])]
@@ -108,6 +110,8 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
             'is_active' => 'boolean',
+            'is_design_lead' => 'boolean',
+            'is_primary_production' => 'boolean',
         ];
     }
 }

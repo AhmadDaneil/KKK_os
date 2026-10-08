@@ -24,8 +24,8 @@ class StaffDashboardController extends Controller
         if ($user->canMonitorAllDepartments()) {
             $attention = [
                 'pending_payments' => PaymentTransaction::where('status', 'PENDING')->count(),
-                'unassigned_design' => DesignJob::whereNull('assigned_user_id')->whereIn('status', ['READY_FOR_DESIGN', 'CORRECTION_REQUESTED'])->count(),
-                'unassigned_printing' => PrintJob::whereNull('assigned_user_id')->where('status', 'READY_FOR_PRINT')->count(),
+                'design_queue' => DesignJob::whereIn('status', ['READY_FOR_DESIGN', 'CORRECTION_REQUESTED'])->count(),
+                'printing_queue' => PrintJob::where('status', 'READY_FOR_PRINT')->count(),
                 'unassigned_packing' => PackingJob::whereNull('assigned_user_id')->where('status', 'READY_FOR_PACKING')->count(),
             ];
         }
