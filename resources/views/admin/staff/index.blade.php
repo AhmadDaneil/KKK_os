@@ -50,6 +50,8 @@
             <div><label for="new-name">Nama penuh</label><input id="new-name" name="name" value="{{ old('name') }}" placeholder="Contoh: Nur Aisyah" required></div>
             <div><label for="new-email">E-mel</label><input id="new-email" type="email" name="email" value="{{ old('email') }}" placeholder="Contoh: aisyah@kkk.local" required></div>
             <div><label for="new-role">Jabatan / Role</label><select id="new-role" name="role" required>@foreach ($roleLabels as $value => $label)<option value="{{ $value }}" @selected(old('role') === $value)>{{ $label }}</option>@endforeach</select></div>
+            <label><input type="checkbox" name="is_design_lead" value="1" @checked(old('is_design_lead'))> Ketua designer untuk tugasan design automatik</label>
+            <label><input type="checkbox" name="is_primary_production" value="1" @checked(old('is_primary_production'))> Staf pengeluaran utama untuk tugasan cetakan automatik</label>
             <div><label for="new-password">Kata laluan sementara</label><input id="new-password" type="password" name="password" minlength="8" required></div>
             <div><label for="new-password-confirmation">Ulang kata laluan</label><input id="new-password-confirmation" type="password" name="password_confirmation" minlength="8" required></div>
             <div class="admin-form-submit"><button class="admin-button admin-button-primary admin-staff-create-submit" type="submit">Cipta Akaun</button></div>
@@ -78,6 +80,8 @@
                             <div><label>E-mel</label><input type="email" name="email" value="{{ $staff->email }}" required></div>
                             <div><label>Jabatan / Role</label><select name="role" @disabled(auth()->user()->is($staff))>@foreach ($roleLabels as $value => $label)<option value="{{ $value }}" @selected($staff->role === $value)>{{ $label }}</option>@endforeach</select>@if (auth()->user()->is($staff))<input type="hidden" name="role" value="ADMIN">@endif</div>
                             <div><label>Status akaun</label><select name="is_active" @disabled(auth()->user()->is($staff))><option value="1" @selected($staff->is_active)>Aktif</option><option value="0" @selected(! $staff->is_active)>Tidak Aktif</option></select>@if (auth()->user()->is($staff))<input type="hidden" name="is_active" value="1">@endif</div>
+                            <label><input type="checkbox" name="is_design_lead" value="1" @checked($staff->is_design_lead)> Ketua designer untuk tugasan design automatik</label>
+                            <label><input type="checkbox" name="is_primary_production" value="1" @checked($staff->is_primary_production)> Staf pengeluaran utama untuk tugasan cetakan automatik</label>
                             <div class="admin-form-submit"><button class="admin-button admin-button-primary admin-action-hover" type="submit">Simpan Perubahan</button></div>
                         </form>
 

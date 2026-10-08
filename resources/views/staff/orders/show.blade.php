@@ -723,47 +723,6 @@
                                         @endif
                                     </div>
                                 @endif
-                                @if (auth()->user()->isOperationManagement() && ! $order->isAssignmentLocked() && ! request()->attributes->get('staff_overview_mode', false))
-    <form
-        method="POST"
-        action="{{ route($operationRoutePrefix.'design-jobs.assign', $job) }}"
-        class="staff-assignment-form js-staff-confirmation-form js-async-assignment"
-        data-confirm-assignment="Pereka"
-        data-confirm-mode="{{ $job->assigned_user_id ? 'reassign' : 'assign' }}"
-    >
-        @csrf
-
-        <label for="design-assignee-{{ $job->id }}">
-            {{ $job->assigned_user_id ? 'Tugaskan Semula Pereka' : 'Tugaskan Pereka' }}
-        </label>
-
-        <div class="staff-assignment-controls">
-            <select
-                id="design-assignee-{{ $job->id }}"
-                name="assigned_user_id"
-                required
-            >
-                <option value="">Pilih pereka</option>
-
-                @foreach ($designers as $designer)
-                    <option
-                        value="{{ $designer->id }}"
-                        @selected($job->assigned_user_id === $designer->id)
-                    >
-                        {{ $designer->name }}
-                    </option>
-                @endforeach
-            </select>
-
-            <button
-                type="submit"
-                class="staff-button staff-button-small"
-            >
-                {{ $job->assigned_user_id ? 'Tugaskan Semula' : 'Tugaskan' }}
-            </button>
-        </div>
-    </form>
-@endif
                             </article>
                         @empty
                             <div class="staff-empty">
@@ -900,27 +859,9 @@
 
             @if (($canAssignProduction ?? false) && ! $order->isAssignmentLocked() && auth()->user()->isOperationManagement() && ! request()->attributes->get('staff_overview_mode', false))
                 <section class="staff-section">
-                    <h2 class="staff-section-title">Tugaskan Staf Pengeluaran</h2>
+                    <h2 class="staff-section-title">Tugaskan OM untuk Pembungkusan</h2>
 
                     <div class="staff-work-grid">
-                        <form method="POST" action="{{ route($operationRoutePrefix.'orders.assign-printing', $order) }}" class="staff-card staff-assignment-form js-staff-confirmation-form js-async-assignment" data-confirm-assignment="Pengeluaran" data-confirm-mode="{{ $order->printing_assigned_user_id ? 'reassign' : 'assign' }}">
-                            @csrf
-                            <div class="staff-card-heading">
-                                <h3>Pengeluaran</h3>
-                                <span class="staff-status">{{ $order->printingAssignedUser ? 'DITUGASKAN' : 'BELUM DITUGASKAN' }}</span>
-                            </div>
-                            <label for="order-printing-assignee">{{ $order->printing_assigned_user_id ? 'Tugaskan Semula Staf Pengeluaran' : 'Tugaskan Staf Pengeluaran' }}</label>
-                            <div class="staff-assignment-controls">
-                                <select id="order-printing-assignee" name="assigned_user_id" required>
-                                    <option value="">Pilih staf pengeluaran</option>
-                                    @foreach ($printingStaff as $staff)
-                                        <option value="{{ $staff->id }}" @selected($order->printing_assigned_user_id === $staff->id)>{{ $staff->name }}</option>
-                                    @endforeach
-                                </select>
-                                <button type="submit" class="staff-button staff-button-small">{{ $order->printing_assigned_user_id ? 'Tugaskan Semula' : 'Tugaskan' }}</button>
-                            </div>
-                        </form>
-
                         <form method="POST" action="{{ route($operationRoutePrefix.'orders.assign-packing-fulfilment', $order) }}" class="staff-card staff-assignment-form js-staff-confirmation-form js-async-assignment" data-confirm-assignment="OM (Pembungkusan & Pemenuhan Tempahan)" data-confirm-mode="{{ $order->packing_assigned_user_id ? 'reassign' : 'assign' }}">
                             @csrf
                             <div class="staff-card-heading">

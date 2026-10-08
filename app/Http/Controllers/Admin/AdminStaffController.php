@@ -48,9 +48,13 @@ class AdminStaffController extends Controller
             'email' => ['required', 'email', 'max:255', 'unique:users,email'],
             'role' => ['required', Rule::in(User::STAFF_ROLES)],
             'password' => ['required', 'confirmed', Password::min(8)],
+            'is_design_lead' => ['nullable', 'boolean'],
+            'is_primary_production' => ['nullable', 'boolean'],
         ]);
 
+        $data = $this->normaliseWorkflowRoles($request, $data, true);
         $staff = User::create($data + ['is_active' => true]);
+        $this->ensureExclusiveWorkflowRoles($staff);
         $auditLog->record($request, 'STAFF_ACCOUNT_CREATED', $request->user(), $staff, [
             'role' => $staff->role,
         ]);
@@ -67,6 +71,8 @@ class AdminStaffController extends Controller
             'email' => ['required', 'email', 'max:255', Rule::unique('users', 'email')->ignore($user->id)],
             'role' => ['required', Rule::in(User::STAFF_ROLES)],
             'is_active' => ['required', 'boolean'],
+            'is_design_lead' => ['nullable', 'boolean'],
+            'is_primary_production' => ['nullable', 'boolean'],
         ]);
 
         if ($request->user()->is($user) && ($data['role'] !== User::ROLE_ADMIN || ! $data['is_active'])) {
@@ -85,11 +91,13 @@ class AdminStaffController extends Controller
             }
         }
 
-        $before = $user->only(['name', 'email', 'role', 'is_active']);
+        $data = $this->normaliseWorkflowRoles($request, $data, (bool) $data['is_active']);
+        $before = $user->only(['name', 'email', 'role', 'is_active', 'is_design_lead', 'is_primary_production']);
         $user->update($data);
+        $this->ensureExclusiveWorkflowRoles($user);
         $auditLog->record($request, 'STAFF_ACCOUNT_UPDATED', $request->user(), $user, [
             'before' => $before,
-            'after' => $user->only(['name', 'email', 'role', 'is_active']),
+            'after' => $user->only(['name', 'email', 'role', 'is_active', 'is_design_lead', 'is_primary_production']),
         ]);
 
         return back()->with('admin_success', 'Maklumat staff berjaya dikemas kini.');
@@ -144,5 +152,35 @@ class AdminStaffController extends Controller
     private function ensureStaffUser(User $user): void
     {
         abort_unless(in_array($user->role, User::STAFF_ROLES, true), 404);
+    }
+
+    /** @param array<string, mixed> $data */
+    private function normaliseWorkflowRoles(Request $request, array $data, bool $isActive): array
+    {
+        $data['is_design_lead'] = $isActive
+            && $data['role'] === User::ROLE_DESIGNER
+            && $request->boolean('is_design_lead');
+        $data['is_primary_production'] = $isActive
+            && $data['role'] === User::ROLE_PRODUCTION
+            && $request->boolean('is_primary_production');
+
+        return $data;
+    }
+
+    private function ensureExclusiveWorkflowRoles(User $staff): void
+    {
+        if ($staff->is_design_lead) {
+            User::query()
+                ->where('role', User::ROLE_DESIGNER)
+                ->where('id', '!=', $staff->id)
+                ->update(['is_design_lead' => false]);
+        }
+
+        if ($staff->is_primary_production) {
+            User::query()
+                ->where('role', User::ROLE_PRODUCTION)
+                ->where('id', '!=', $staff->id)
+                ->update(['is_primary_production' => false]);
+        }
     }
 }

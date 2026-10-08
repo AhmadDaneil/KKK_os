@@ -4,12 +4,15 @@ namespace App\Services\Printing;
 
 use App\Models\Order;
 use App\Models\PrintJob;
+use App\Services\Workflow\ResolveAutomaticAssigneeService;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use RuntimeException;
 
 class InitializePrintJobsForOrderService
 {
+    public function __construct(private ResolveAutomaticAssigneeService $assignees) {}
+
     public function initialize(Order $order): Collection
     {
         return DB::transaction(function () use ($order) {
@@ -32,6 +35,22 @@ class InitializePrintJobsForOrderService
                 throw new RuntimeException(
                     "Order {$order->order_id} does not have the expected number of design jobs."
                 );
+            }
+
+            if ($order->printing_assigned_user_id === null) {
+                $productionStaff = $this->assignees->productionStaff();
+                $order->update(['printing_assigned_user_id' => $productionStaff->id]);
+                $order->statusEvents()->create([
+                    'event_type' => 'PRINTING_STAFF_AUTO_ASSIGNED',
+                    'from_status' => $order->status,
+                    'to_status' => $order->status,
+                    'occurred_at' => now(),
+                    'metadata' => [
+                        'assigned_user_id' => $productionStaff->id,
+                        'assignment_mode' => 'AUTOMATIC_PRIMARY_PRODUCTION',
+                    ],
+                ]);
+                $order->refresh();
             }
 
             $jobs = collect();
