@@ -353,6 +353,11 @@ Route::middleware(['auth:staff', 'active.staff'])
             )->name('orders.design-artworks.store');
 
             Route::post(
+                '/orders/{order}/design-jobs/mark-ready',
+                [StaffBatchArtworkController::class, 'markReady']
+            )->name('orders.design-jobs.mark-ready');
+
+            Route::post(
                 '/design-jobs/{designJob}/mark-ready',
                 [StaffDesignWorkflowController::class, 'markReady']
             )->name('design-jobs.mark-ready');

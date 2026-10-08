@@ -90,7 +90,11 @@ class StaffDesignWorkflowController extends Controller
             $missingProducts = $requestedProducts->reject(fn (string $product): bool => $previewTypes->contains($product));
 
             if ($missingProducts->isNotEmpty()) {
-                throw new RuntimeException('Muat naik preview untuk '.implode(' dan ', $missingProducts->all()).' sebelum menghantar hasil design kepada pelanggan.');
+                throw new RuntimeException(
+                    'Muat naik preview '.implode(' dan ', $missingProducts->all())
+                    .' bagi pakej '.ucfirst(strtolower($designJob->side))
+                    .' sebelum menghantar hasil design kepada pelanggan.'
+                );
             }
 
             $service->markReady(
