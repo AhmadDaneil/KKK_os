@@ -17,7 +17,7 @@ class CreateStaffUserCommandTest extends TestCase
             'email' => 'om.staging@example.test',
             'role' => User::ROLE_OM,
         ])
-            ->expectsQuestion('Password (minimum 12 characters)', 'SafePassword123!')
+            ->expectsQuestion('Password (minimum 8 characters)', 'SafePassword123!')
             ->expectsQuestion('Confirm password', 'SafePassword123!')
             ->expectsOutput('Staff account created.')
             ->doesntExpectOutput('SafePassword123!')
@@ -31,6 +31,24 @@ class CreateStaffUserCommandTest extends TestCase
         $this->assertTrue(password_verify('SafePassword123!', $staff->password));
     }
 
+    public function test_command_accepts_an_eight_character_password(): void
+    {
+        $this->artisan('staff:create', [
+            'name' => 'Eight Character Admin',
+            'email' => 'admin.eight@example.test',
+            'role' => User::ROLE_ADMIN,
+        ])
+            ->expectsQuestion('Password (minimum 8 characters)', 'Admin8!x')
+            ->expectsQuestion('Confirm password', 'Admin8!x')
+            ->expectsOutput('Staff account created.')
+            ->assertSuccessful();
+
+        $this->assertDatabaseHas('users', [
+            'email' => 'admin.eight@example.test',
+            'role' => User::ROLE_ADMIN,
+        ]);
+    }
+
     public function test_command_rejects_an_unapproved_role(): void
     {
         $this->artisan('staff:create', [
@@ -38,7 +56,7 @@ class CreateStaffUserCommandTest extends TestCase
             'email' => 'packing.staging@example.test',
             'role' => 'PACKING',
         ])
-            ->expectsQuestion('Password (minimum 12 characters)', 'SafePassword123!')
+            ->expectsQuestion('Password (minimum 8 characters)', 'SafePassword123!')
             ->expectsQuestion('Confirm password', 'SafePassword123!')
             ->assertFailed();
 
@@ -47,15 +65,16 @@ class CreateStaffUserCommandTest extends TestCase
         ]);
     }
 
-    public function test_command_rejects_a_short_or_unconfirmed_password(): void
+    public function test_command_rejects_a_password_shorter_than_eight_characters(): void
     {
         $this->artisan('staff:create', [
             'name' => 'Staging Designer',
             'email' => 'designer.staging@example.test',
             'role' => User::ROLE_DESIGNER,
         ])
-            ->expectsQuestion('Password (minimum 12 characters)', 'short')
-            ->expectsQuestion('Confirm password', 'different')
+            ->expectsQuestion('Password (minimum 8 characters)', 'Admin8!')
+            ->expectsQuestion('Confirm password', 'Admin8!')
+            ->expectsOutput('Password mestilah sekurang-kurangnya 8 aksara.')
             ->assertFailed();
 
         $this->assertDatabaseMissing('users', [
@@ -71,7 +90,7 @@ class CreateStaffUserCommandTest extends TestCase
             'role' => User::ROLE_ADMIN,
             '--inactive' => true,
         ])
-            ->expectsQuestion('Password (minimum 12 characters)', 'SafePassword123!')
+            ->expectsQuestion('Password (minimum 8 characters)', 'SafePassword123!')
             ->expectsQuestion('Confirm password', 'SafePassword123!')
             ->assertSuccessful();
 

@@ -19,7 +19,7 @@ class CreateStaffUser extends Command
 {
     public function handle(): int
     {
-        $password = (string) $this->secret('Password (minimum 12 characters)');
+        $password = (string) $this->secret('Password (minimum 8 characters)');
         $passwordConfirmation = (string) $this->secret('Confirm password');
         $input = [
             'name' => trim((string) $this->argument('name')),
@@ -35,11 +35,11 @@ class CreateStaffUser extends Command
                 'name' => ['required', 'string', 'max:255'],
                 'email' => ['required', 'email', 'max:255', 'unique:users,email'],
                 'role' => ['required', Rule::in(User::STAFF_ROLES)],
-                'password' => ['required', 'string', 'min:12', 'confirmed'],
+                'password' => ['required', 'string', 'min:8', 'confirmed'],
             ],
             [
                 'password.required' => 'Password diperlukan.',
-                'password.min' => 'Password mestilah sekurang-kurangnya 12 aksara.',
+                'password.min' => 'Password mestilah sekurang-kurangnya 8 aksara.',
                 'password.confirmed' => 'Pengesahan password tidak sepadan.',
             ],
         );

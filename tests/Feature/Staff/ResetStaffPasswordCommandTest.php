@@ -20,17 +20,17 @@ class ResetStaffPasswordCommandTest extends TestCase
         ]);
 
         $this->artisan('staff:password', ['email' => 'admin@kkk.local'])
-            ->expectsQuestion('Password baharu (minimum 12 aksara)', 'NewSafePassword123!')
-            ->expectsQuestion('Sahkan password baharu', 'NewSafePassword123!')
+            ->expectsQuestion('Password baharu (minimum 8 aksara)', 'Reset8!x')
+            ->expectsQuestion('Sahkan password baharu', 'Reset8!x')
             ->expectsOutput('Password staff berjaya ditetapkan semula.')
-            ->doesntExpectOutput('NewSafePassword123!')
+            ->doesntExpectOutput('Reset8!x')
             ->assertSuccessful();
 
-        $this->assertTrue(Hash::check('NewSafePassword123!', $staff->fresh()->password));
+        $this->assertTrue(Hash::check('Reset8!x', $staff->fresh()->password));
 
         $this->post(route('admin.login.store'), [
             'email' => 'admin@kkk.local',
-            'password' => 'NewSafePassword123!',
+            'password' => 'Reset8!x',
         ])->assertRedirect(route('admin.dashboard'));
 
         $this->assertAuthenticatedAs($staff, 'admin');
@@ -55,9 +55,9 @@ class ResetStaffPasswordCommandTest extends TestCase
         $originalPassword = $staff->password;
 
         $this->artisan('staff:password', ['email' => 'om@kkk.local'])
-            ->expectsQuestion('Password baharu (minimum 12 aksara)', 'short')
-            ->expectsQuestion('Sahkan password baharu', 'short')
-            ->expectsOutput('Password baharu mestilah sekurang-kurangnya 12 aksara.')
+            ->expectsQuestion('Password baharu (minimum 8 aksara)', 'Admin8!')
+            ->expectsQuestion('Sahkan password baharu', 'Admin8!')
+            ->expectsOutput('Password baharu mestilah sekurang-kurangnya 8 aksara.')
             ->assertFailed();
 
         $this->assertSame($originalPassword, $staff->fresh()->password);
@@ -73,7 +73,7 @@ class ResetStaffPasswordCommandTest extends TestCase
         $originalPassword = $staff->password;
 
         $this->artisan('staff:password', ['email' => 'designer@kkk.local'])
-            ->expectsQuestion('Password baharu (minimum 12 aksara)', 'NewSafePassword123!')
+            ->expectsQuestion('Password baharu (minimum 8 aksara)', 'NewSafePassword123!')
             ->expectsQuestion('Sahkan password baharu', 'DifferentPassword123!')
             ->expectsOutput('Pengesahan password baharu tidak sepadan.')
             ->assertFailed();

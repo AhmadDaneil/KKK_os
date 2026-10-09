@@ -27,14 +27,14 @@ class ResetStaffPassword extends Command
         }
 
         $input = [
-            'password' => (string) $this->secret('Password baharu (minimum 12 aksara)'),
+            'password' => (string) $this->secret('Password baharu (minimum 8 aksara)'),
             'password_confirmation' => (string) $this->secret('Sahkan password baharu'),
         ];
         $validator = Validator::make($input, [
-            'password' => ['required', 'string', 'min:12', 'confirmed'],
+            'password' => ['required', 'string', 'min:8', 'confirmed'],
         ], [
             'password.required' => 'Password baharu diperlukan.',
-            'password.min' => 'Password baharu mestilah sekurang-kurangnya 12 aksara.',
+            'password.min' => 'Password baharu mestilah sekurang-kurangnya 8 aksara.',
             'password.confirmed' => 'Pengesahan password baharu tidak sepadan.',
         ]);
 
