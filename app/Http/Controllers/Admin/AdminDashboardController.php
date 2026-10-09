@@ -58,17 +58,18 @@ class AdminDashboardController extends Controller
         ];
 
         $queues = [
-            'design' => DesignJob::whereIn('status', ['READY_FOR_DESIGN', 'DESIGN_IN_PROGRESS', 'CORRECTION_REQUESTED'])->count(),
-            'printing' => PrintJob::whereIn('status', ['READY_FOR_PRINT', 'PRINTING'])->count(),
-            'packing' => PackingJob::whereIn('status', ['READY_FOR_PACKING', 'PACKING'])->count(),
+            'design' => DesignJob::whereIn('status', ['READY_FOR_DESIGN', 'DESIGN_IN_PROGRESS', 'CORRECTION_REQUESTED'])->whereHas('order', fn ($query) => $query->whereNotIn('status', Order::TERMINAL_OPERATIONAL_STATUSES))->count(),
+            'printing' => PrintJob::whereIn('status', ['READY_FOR_PRINT', 'PRINTING'])->whereHas('order', fn ($query) => $query->whereNotIn('status', Order::TERMINAL_OPERATIONAL_STATUSES))->count(),
+            'packing' => PackingJob::whereIn('status', ['READY_FOR_PACKING', 'PACKING'])->whereHas('order', fn ($query) => $query->whereNotIn('status', Order::TERMINAL_OPERATIONAL_STATUSES))->count(),
         ];
 
         $attention = [
-            'pending_payments' => PaymentTransaction::where('status', 'PENDING')->count(),
-            'design_queue' => DesignJob::whereIn('status', ['READY_FOR_DESIGN', 'CORRECTION_REQUESTED'])->count(),
-            'printing_queue' => PrintJob::where('status', 'READY_FOR_PRINT')->count(),
+            'pending_payments' => PaymentTransaction::where('status', 'PENDING')->whereHas('order', fn ($query) => $query->whereNotIn('status', Order::TERMINAL_OPERATIONAL_STATUSES))->count(),
+            'design_queue' => DesignJob::whereIn('status', ['READY_FOR_DESIGN', 'CORRECTION_REQUESTED'])->whereHas('order', fn ($query) => $query->whereNotIn('status', Order::TERMINAL_OPERATIONAL_STATUSES))->count(),
+            'printing_queue' => PrintJob::where('status', 'READY_FOR_PRINT')->whereHas('order', fn ($query) => $query->whereNotIn('status', Order::TERMINAL_OPERATIONAL_STATUSES))->count(),
             'unassigned_packing' => PackingJob::whereNull('assigned_user_id')
                 ->whereIn('status', ['READY_FOR_PACKING'])
+                ->whereHas('order', fn ($query) => $query->whereNotIn('status', Order::TERMINAL_OPERATIONAL_STATUSES))
                 ->count(),
         ];
 
