@@ -53,12 +53,12 @@ class AdminPasswordResetTest extends TestCase
         $this->post(route('admin.password.update'), [
             'token' => $token,
             'email' => $admin->email,
-            'password' => 'NewAdminPassword123!',
-            'password_confirmation' => 'NewAdminPassword123!',
+            'password' => 'Admin8!x',
+            'password_confirmation' => 'Admin8!x',
         ])->assertRedirect(route('admin.login'))
             ->assertSessionHas('status', 'Kata laluan admin berjaya ditetapkan semula. Sila log masuk.');
 
-        $this->assertTrue(Hash::check('NewAdminPassword123!', $admin->fresh()->password));
+        $this->assertTrue(Hash::check('Admin8!x', $admin->fresh()->password));
         $this->assertDatabaseHas('staff_audit_logs', [
             'event_type' => 'ADMIN_PASSWORD_RESET',
             'target_user_id' => $admin->id,
