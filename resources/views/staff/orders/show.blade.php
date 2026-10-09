@@ -37,7 +37,7 @@
     $statusTone = static fn (string $status): string => match ($status) {
         'DETAILS_INCOMPLETE', 'CORRECTION_REQUESTED' => 'attention',
         'DESIGN_READY', 'BALANCE_PENDING', 'READY_FOR_PICKUP', 'SHIPPED' => 'waiting',
-        'COMPLETED', 'ARCHIVED' => 'complete', 'CANCELLED' => 'attention', default => 'active',
+        'COMPLETED', 'ARCHIVED' => 'complete', 'CANCELLED' => 'cancelled', default => 'active',
     };
     $nextActions = [
         'DETAILS_INCOMPLETE' => 'Dapatkan maklumat customer yang belum lengkap',
