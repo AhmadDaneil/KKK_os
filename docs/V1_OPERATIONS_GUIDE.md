@@ -46,7 +46,7 @@ php artisan staff:create "FULL NAME" "EMAIL" "ROLE"
 
 Allowed roles are `ADMIN`, `OPERATION_MANAGEMENT`, `CUSTOMER_SERVICE`,
 `DESIGNER`, and `PRODUCTION`. The command requests the password through hidden
-interactive prompts, requires at least 12 characters, and does not print or
+interactive prompts, requires at least 8 characters, and does not print or
 store the plaintext password in Git or command history. Use `--inactive` when
 an account must be prepared before access is authorized.
 

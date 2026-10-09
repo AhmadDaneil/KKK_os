@@ -1255,6 +1255,18 @@ a.staff-pagination-link:hover {
     width: 100%;
 }
 
+.staff-batch-review-form {
+    display: flex;
+    justify-content: center;
+    margin-top: 16px;
+}
+
+@media (max-width: 640px) {
+    .staff-batch-review-form .staff-button {
+        width: 100%;
+    }
+}
+
 .staff-file-picker {
     display: flex;
     align-items: center;

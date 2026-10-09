@@ -315,11 +315,22 @@ class StaffOrderController extends Controller
     {
         if ($request->filled('search')) {
             $search = $request->string('search')->trim()->toString();
-            $query->where(fn (Builder $builder) => $builder
-                ->where('order_id', 'like', "%{$search}%")
-                ->orWhere('customer_name', 'like', "%{$search}%")
-                ->orWhere('customer_email', 'like', "%{$search}%")
-                ->orWhere('customer_phone', 'like', "%{$search}%"));
+            $orderIdSearch = str_replace(['-', ' '], '', $search);
+
+            $query->where(function (Builder $builder) use ($search, $orderIdSearch): void {
+                $builder
+                    ->where('order_id', 'like', "%{$search}%")
+                    ->orWhere('customer_name', 'like', "%{$search}%")
+                    ->orWhere('customer_email', 'like', "%{$search}%")
+                    ->orWhere('customer_phone', 'like', "%{$search}%");
+
+                if ($orderIdSearch !== '') {
+                    $builder->orWhereRaw(
+                        "REPLACE(REPLACE(order_id, '-', ''), ' ', '') like ?",
+                        ["%{$orderIdSearch}%"]
+                    );
+                }
+            });
         }
 
         if ($request->filled('status')) {

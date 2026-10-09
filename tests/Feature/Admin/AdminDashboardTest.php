@@ -292,13 +292,20 @@ class AdminDashboardTest extends TestCase
             'name' => 'Designer Test',
             'email' => 'designer@kkk.local',
             'role' => User::ROLE_DESIGNER,
-            'password' => 'password123',
-            'password_confirmation' => 'password123',
+            'password' => 'Admin8!x',
+            'password_confirmation' => 'Admin8!x',
         ])->assertRedirect()->assertSessionHas('admin_success');
 
         $designer = User::where('email', 'designer@kkk.local')->firstOrFail();
         $this->assertTrue($designer->is_active);
         $this->assertSame(User::ROLE_DESIGNER, $designer->role);
+
+        $this->actingAs($admin)->put(route('admin.staff.password.update', $designer), [
+            'password' => 'Staff8!x',
+            'password_confirmation' => 'Staff8!x',
+        ])->assertRedirect()->assertSessionHas('admin_success');
+
+        $this->assertTrue(Hash::check('Staff8!x', $designer->fresh()->password));
 
         $this->actingAs($admin)->put(route('admin.staff.update', $designer), [
             'name' => 'Designer Updated',
