@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\PaymentTransaction;
 use App\Services\Design\InitializeDesignJobsForOrderService;
 use App\Services\Merge\GenerateMergeJobsForOrderService;
+use App\Services\Payments\SynchronizeOrderFinancialsService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -26,7 +27,7 @@ class StaffDepositPaymentController extends Controller
         ]);
     }
 
-    public function approve(Request $request, PaymentTransaction $payment, GenerateMergeJobsForOrderService $merge, InitializeDesignJobsForOrderService $design): RedirectResponse
+    public function approve(Request $request, PaymentTransaction $payment, GenerateMergeJobsForOrderService $merge, InitializeDesignJobsForOrderService $design, SynchronizeOrderFinancialsService $financials): RedirectResponse
     {
         $this->authorizePaymentReview($request);
         $this->ensureDeposit($payment);
@@ -38,7 +39,7 @@ class StaffDepositPaymentController extends Controller
             'amount.decimal' => 'Jumlah bayaran hanya boleh mempunyai sehingga dua tempat perpuluhan.',
         ]);
 
-        DB::transaction(function () use ($request, $payment, $merge, $design, $validated) {
+        DB::transaction(function () use ($request, $payment, $merge, $design, $financials, $validated) {
             $payment->refresh()->load('order');
             abort_unless($payment->status === 'PENDING' && $payment->order->status === 'DETAILS_CONFIRMED', 422);
             $metadata = $payment->metadata ?? [];
@@ -50,6 +51,7 @@ class StaffDepositPaymentController extends Controller
 
             $order = $payment->order;
             $order->update(['booking_payment_status' => 'PAID']);
+            $financials->synchronize($order);
             $merge->generate($order->fresh());
             $design->initialize($order->fresh());
             $order->update(['status' => 'READY_FOR_DESIGN']);

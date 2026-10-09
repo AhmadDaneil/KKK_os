@@ -112,9 +112,16 @@
                     </p>
                 </div>
 
-                <div class="staff-page-count">
-                    {{ $order->package_count }}
-                    pakej
+                <div class="staff-page-header-actions">
+                    <div class="staff-page-count">
+                        {{ $order->package_count }}
+                        pakej
+                    </div>
+                    @if ($order->invoice && (auth()->user()->isAdmin() || auth()->user()->hasStaffRole(\App\Models\User::ROLE_OM)))
+                        <a class="staff-button staff-button-primary" href="{{ route(request()->routeIs('admin.orders.*') ? 'admin.invoices.download' : 'staff.invoices.download', $order->invoice) }}">
+                            Download Invoice
+                        </a>
+                    @endif
                 </div>
             </div>
 

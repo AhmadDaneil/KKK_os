@@ -263,6 +263,12 @@ Payment operations must remain associated with the correct order.
 
 Payment events and important review actions must remain traceable.
 
+### Invoice PDF
+
+The official invoice record is created only after the booking payment is confirmed and an order pricing snapshot is available. The PDF is a two-page A4 output of that database record, not the source of truth.
+
+ADMIN and OPERATION_MANAGEMENT can use **Download Invoice** on the order detail page when an invoice has been issued. If the button is not shown, verify the invoice and pricing snapshot for that order; do not infer the order total from the deposit amount.
+
 ---
 
 ## 11. Printing Workflow

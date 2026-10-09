@@ -395,6 +395,14 @@ textarea {
     margin-bottom: 28px;
 }
 
+.staff-page-header-actions {
+    display: flex;
+    flex: 0 0 auto;
+    align-items: flex-end;
+    flex-direction: column;
+    gap: 10px;
+}
+
 .staff-page-header h1 {
     margin: 0;
     font-size: clamp(26px, 4vw, 34px);
@@ -671,6 +679,12 @@ a.staff-card:hover {
     background: var(--staff-surface);
     font-size: 13px;
     font-weight: 600;
+}
+
+@media (max-width: 700px) {
+    .staff-page-header-actions {
+        align-items: flex-start;
+    }
 }
 
 .staff-order-card {
