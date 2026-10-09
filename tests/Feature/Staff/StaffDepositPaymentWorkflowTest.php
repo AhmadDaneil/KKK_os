@@ -19,6 +19,7 @@ class StaffDepositPaymentWorkflowTest extends TestCase
         Storage::fake('local');
         [$order, $payment] = $this->depositOrder();
         $admin = User::factory()->create(['role' => User::ROLE_OM, 'is_active' => true]);
+        User::factory()->create(['role' => User::ROLE_DESIGNER, 'is_active' => true]);
 
         $this->actingAs($admin)
             ->get(route('staff.payments.receipt', $payment))

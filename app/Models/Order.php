@@ -115,6 +115,21 @@ class Order extends Model
         return $this->hasMany(PaymentTransaction::class);
     }
 
+    public function pricingSnapshot()
+    {
+        return $this->hasOne(OrderPricingSnapshot::class);
+    }
+
+    public function items()
+    {
+        return $this->hasMany(OrderItem::class);
+    }
+
+    public function invoice()
+    {
+        return $this->hasOne(Invoice::class);
+    }
+
     public function printJobs()
     {
         return $this->hasMany(PrintJob::class);

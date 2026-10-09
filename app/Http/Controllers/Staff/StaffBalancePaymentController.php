@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Staff;
 
 use App\Http\Controllers\Controller;
 use App\Models\PaymentTransaction;
+use App\Services\Payments\SynchronizeOrderFinancialsService;
 use App\Services\Printing\InitializePrintJobsForOrderService;
 use App\Services\Printing\SyncOrderPrintStatusService;
 use Illuminate\Http\RedirectResponse;
@@ -12,7 +13,7 @@ use Illuminate\Support\Facades\DB;
 
 class StaffBalancePaymentController extends Controller
 {
-    public function approve(Request $request, PaymentTransaction $payment, InitializePrintJobsForOrderService $initializePrint, SyncOrderPrintStatusService $syncPrint): RedirectResponse
+    public function approve(Request $request, PaymentTransaction $payment, InitializePrintJobsForOrderService $initializePrint, SyncOrderPrintStatusService $syncPrint, SynchronizeOrderFinancialsService $financials): RedirectResponse
     {
         $this->authorizePaymentReview($request);
         $this->ensureBalance($payment);
@@ -24,7 +25,7 @@ class StaffBalancePaymentController extends Controller
             'amount.decimal' => 'Jumlah bayaran hanya boleh mempunyai sehingga dua tempat perpuluhan.',
         ]);
 
-        DB::transaction(function () use ($request, $payment, $initializePrint, $syncPrint, $validated) {
+        DB::transaction(function () use ($request, $payment, $initializePrint, $syncPrint, $financials, $validated) {
             $payment->refresh()->load('order');
             abort_unless($payment->status === 'PENDING' && $payment->order->status === 'BALANCE_PENDING', 422);
             $metadata = $payment->metadata ?? [];
@@ -35,6 +36,7 @@ class StaffBalancePaymentController extends Controller
             $payment->events()->create(['event_type' => 'BALANCE_APPROVED', 'payload' => ['actor_user_id' => $request->user()->id], 'occurred_at' => now()]);
 
             $order = $payment->order;
+            $financials->synchronize($order);
             $order->update(['status' => 'PAID']);
             $initializePrint->initialize($order->fresh());
             $syncPrint->sync($order->fresh());

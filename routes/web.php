@@ -28,6 +28,7 @@ use App\Http\Controllers\Staff\StaffCorrectionPaymentController;
 use App\Http\Controllers\Staff\StaffDashboardController;
 use App\Http\Controllers\Staff\StaffDepositPaymentController;
 use App\Http\Controllers\Staff\StaffDesignWorkflowController;
+use App\Http\Controllers\Staff\StaffInvoiceController;
 use App\Http\Controllers\Staff\StaffJobAssignmentController;
 use App\Http\Controllers\Staff\StaffOrderController;
 use App\Http\Controllers\Staff\StaffOrderDeletionController;
@@ -104,6 +105,12 @@ Route::middleware(['auth:admin', 'active.staff', 'staff.role:ADMIN'])
         Route::get('/orders', [StaffOrderController::class, 'index'])->name('orders.index');
         Route::get('/orders/find', [AdminDashboardController::class, 'findOrder'])->name('orders.find');
         Route::get('/orders/{orderId}', [StaffOrderController::class, 'show'])->name('orders.show');
+        Route::get('/invoices/{invoice}/print', [StaffInvoiceController::class, 'print'])
+            ->middleware(['auth:admin', 'active.staff', 'staff.role:ADMIN'])
+            ->name('invoices.print');
+        Route::get('/invoices/{invoice}/download', [StaffInvoiceController::class, 'download'])
+            ->middleware(['auth:admin', 'active.staff', 'staff.role:ADMIN'])
+            ->name('invoices.download');
         Route::get('/orders/{orderId}/gambar-pengantin/{side}', [StaffOrderController::class, 'downloadCustomerPhoto'])
             ->name('orders.customer-photo');
         Route::delete('/orders/{order}', [StaffOrderDeletionController::class, 'destroy'])
@@ -272,6 +279,12 @@ Route::middleware(['auth:staff', 'active.staff'])
         */
 
         Route::middleware('staff.role:ADMIN,'.User::ROLE_OM)->group(function () {
+            Route::get('/invoices/{invoice}/print', [StaffInvoiceController::class, 'print'])
+                ->middleware('staff.role:ADMIN,'.User::ROLE_OM)
+                ->name('invoices.print');
+            Route::get('/invoices/{invoice}/download', [StaffInvoiceController::class, 'download'])
+                ->middleware('staff.role:ADMIN,'.User::ROLE_OM)
+                ->name('invoices.download');
             Route::delete('/orders/{order}', [StaffOrderDeletionController::class, 'destroy'])
                 ->name('orders.destroy');
             Route::post('/orders/{order}/cancel', [StaffOrderLifecycleController::class, 'cancel'])
