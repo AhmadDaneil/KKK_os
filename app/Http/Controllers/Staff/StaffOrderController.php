@@ -347,6 +347,10 @@ class StaffOrderController extends Controller
             return;
         }
 
+        if ($request->filled('attention')) {
+            $query->whereNotIn('status', Order::TERMINAL_OPERATIONAL_STATUSES);
+        }
+
         match ($request->string('attention')->toString()) {
             'pending_payment' => $query->whereHas(
                 'payments',
