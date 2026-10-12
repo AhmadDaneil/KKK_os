@@ -238,6 +238,8 @@ KKK OS V1 currently uses the approved manual receipt-review workflow for operati
 
 A real production payment gateway has not been selected/integrated and must not be assumed by staff documentation.
 
+The staging application exposes `POST /api/v1/payments/billplz-sandbox/callback` for verified Billplz callback processing. Its X Signature key and Collection ID are read from `BILLPLZ_X_SIGNATURE_KEY` and `BILLPLZ_COLLECTION_ID` in the server `.env`; never commit real values. This callback endpoint alone does not mean Billplz bill creation or a real sandbox end-to-end test is complete.
+
 ### Deposit
 
 Where the order requires deposit verification:

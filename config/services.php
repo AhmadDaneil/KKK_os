@@ -39,4 +39,9 @@ return [
         ],
     ],
 
+    'billplz' => [
+        'x_signature_key' => env('BILLPLZ_X_SIGNATURE_KEY'),
+        'collection_id' => env('BILLPLZ_COLLECTION_ID'),
+    ],
+
 ];

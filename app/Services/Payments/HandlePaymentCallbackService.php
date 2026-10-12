@@ -8,6 +8,8 @@ use RuntimeException;
 
 class HandlePaymentCallbackService
 {
+    public function __construct(private SynchronizeOrderFinancialsService $financials) {}
+
     public function handle(array $verified): PaymentTransaction
     {
         return DB::transaction(function () use ($verified) {
@@ -21,6 +23,11 @@ class HandlePaymentCallbackService
                 ->where('provider_reference', $verified['provider_reference'])
                 ->lockForUpdate()
                 ->firstOrFail();
+
+            if (array_key_exists('amount_sen', $verified)
+                && (int) $verified['amount_sen'] !== $this->toSen((string) $payment->amount)) {
+                throw new RuntimeException('Billplz callback amount does not match the payment ledger.');
+            }
 
             $eventId = $verified['provider_event_id'] ?? null;
 
@@ -45,7 +52,7 @@ class HandlePaymentCallbackService
                 if ($payment->status !== 'PAID') {
                     $payment->update([
                         'status' => 'PAID',
-                        'paid_at' => now(),
+                        'paid_at' => ! empty($verified['paid_at']) ? $verified['paid_at'] : now(),
                     ]);
                 }
 
@@ -59,6 +66,13 @@ class HandlePaymentCallbackService
                             'status' => 'PAID',
                         ]);
                     }
+                    $this->financials->synchronize($order);
+                } elseif ($payment->payment_type === 'BOOKING_DEPOSIT') {
+                    $order = $payment->order()
+                        ->lockForUpdate()
+                        ->firstOrFail();
+                    $order->update(['booking_payment_status' => 'PAID']);
+                    $this->financials->synchronize($order);
                 }
             } elseif ($verified['status'] === 'FAILED') {
                 if ($payment->status !== 'PAID') {
@@ -66,9 +80,20 @@ class HandlePaymentCallbackService
                         'status' => 'FAILED',
                     ]);
                 }
+            } elseif ($verified['status'] === 'CANCELLED' && $payment->status !== 'PAID') {
+                $payment->update(['status' => 'CANCELLED']);
             }
 
             return $payment->fresh();
         });
+    }
+
+    private function toSen(string $amount): int
+    {
+        if (! preg_match('/^(0|[1-9]\\d*)\\.([0-9]{2})$/', $amount, $matches)) {
+            throw new RuntimeException('Payment ledger amount must have exactly two decimal places.');
+        }
+
+        return ((int) $matches[1] * 100) + (int) $matches[2];
     }
 }
