@@ -14,7 +14,7 @@ class BuildCustomerProgressService
             'BOOKING_PENDING' => [5, 'Tempahan Sedang Diproses', 'Tempahan anda sedang diproses.'],
             'BOOKED', 'DEPOSIT_PAID' => [10, 'Tempahan Diterima', 'Tempahan anda telah diterima.'],
             'DETAILS_INCOMPLETE' => [20, 'Maklumat Belum Lengkap', 'Lengkapkan maklumat yang diperlukan sebelum membuat pengesahan.'],
-            'DETAILS_CONFIRMED' => [35, 'Maklumat Telah Disahkan', 'Maklumat tempahan anda telah berjaya disahkan.'],
+            'DETAILS_CONFIRMED' => [35, 'Menunggu Pengesahan Deposit', 'Resit deposit anda sedang menunggu semakan staf.'],
             'READY_FOR_DESIGN' => [40, 'Menunggu Proses Design', 'Maklumat anda telah diterima dan sedia untuk proses design.'],
             'DESIGN_IN_PROGRESS' => [50, ...$this->designProgressCopy($order)],
             'DESIGN_READY' => [60, 'Hasil Design Sedia Untuk Semakan', 'Hasil design anda telah tersedia untuk semakan.'],
@@ -96,23 +96,25 @@ class BuildCustomerProgressService
         $currentStage = match ($status) {
             'BOOKING_PENDING' => 0,
             'BOOKED', 'DEPOSIT_PAID', 'DETAILS_INCOMPLETE' => 1,
-            'DETAILS_CONFIRMED', 'READY_FOR_DESIGN', 'DESIGN_IN_PROGRESS' => 2,
-            'DESIGN_READY', 'CORRECTION_REQUESTED' => 3,
-            'DESIGN_APPROVED', 'BALANCE_PENDING' => 4,
-            'PAID', 'READY_FOR_PRINT', 'PRINTING', 'PRINTED' => 5,
-            'READY_FOR_PACKING', 'PACKING', 'PACKED', 'READY_FOR_FULFILMENT' => 6,
-            'READY_FOR_PICKUP', 'SHIPPED' => 7,
-            'COMPLETED', 'ARCHIVED' => 8,
+            'DETAILS_CONFIRMED' => 2,
+            'READY_FOR_DESIGN', 'DESIGN_IN_PROGRESS' => 3,
+            'DESIGN_READY', 'CORRECTION_REQUESTED' => 4,
+            'DESIGN_APPROVED', 'BALANCE_PENDING' => 5,
+            'PAID', 'READY_FOR_PRINT', 'PRINTING', 'PRINTED' => 6,
+            'READY_FOR_PACKING', 'PACKING', 'PACKED', 'READY_FOR_FULFILMENT' => 7,
+            'READY_FOR_PICKUP', 'SHIPPED' => 8,
+            'COMPLETED', 'ARCHIVED' => 9,
             default => null,
         };
 
         $stageLabels = app()->bound('translator')
             ? __('ui.stages')
-            : ['Tempahan', 'Maklumat', 'Design', 'Kelulusan', 'Bayaran Baki', 'Cetakan', 'Pembungkusan', 'Penghantaran / Pengambilan', 'Selesai'];
+            : ['Tempahan', 'Maklumat', 'Pengesahan Deposit', 'Design', 'Kelulusan', 'Bayaran Baki', 'Cetakan', 'Pembungkusan', 'Penghantaran / Pengambilan', 'Selesai'];
 
         return collect([
             ['label' => 'Tempahan', 'description' => 'Tempahan diterima'],
             ['label' => 'Maklumat', 'description' => 'Maklumat disahkan'],
+            ['label' => 'Pengesahan Deposit', 'description' => 'Deposit disemak dan disahkan'],
             ['label' => 'Design', 'description' => 'Hasil design disediakan'],
             ['label' => 'Kelulusan', 'description' => 'Semakan hasil design'],
             ['label' => 'Bayaran Baki', 'description' => 'Bayaran penuh'],
@@ -125,7 +127,7 @@ class BuildCustomerProgressService
             $stage['number'] = $index + 1;
             $stage['state'] = match (true) {
                 $currentStage === null => 'pending',
-                $currentStage === 8 && $index === 8 => 'complete',
+                $currentStage === 9 && $index === 9 => 'complete',
                 $index < $currentStage => 'complete',
                 $index === $currentStage => 'current',
                 default => 'pending',

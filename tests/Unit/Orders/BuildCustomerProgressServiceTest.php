@@ -34,7 +34,7 @@ class BuildCustomerProgressServiceTest extends TestCase
         ];
     }
 
-    public function test_it_returns_the_established_nine_step_customer_lifecycle(): void
+    public function test_it_returns_the_customer_lifecycle_with_deposit_confirmation_before_design(): void
     {
         $progress = (new BuildCustomerProgressService)->build(
             new Order(['status' => 'BALANCE_PENDING'])
@@ -43,6 +43,7 @@ class BuildCustomerProgressServiceTest extends TestCase
         $this->assertSame([
             'Tempahan',
             'Maklumat',
+            'Pengesahan Deposit',
             'Design',
             'Kelulusan',
             'Bayaran Baki',
@@ -51,8 +52,19 @@ class BuildCustomerProgressServiceTest extends TestCase
             'Penghantaran / Pengambilan',
             'Selesai',
         ], array_column($progress['stages'], 'label'));
-        $this->assertSame('complete', $progress['stages'][3]['state']);
-        $this->assertSame('current', $progress['stages'][4]['state']);
-        $this->assertSame('pending', $progress['stages'][5]['state']);
+        $this->assertSame('complete', $progress['stages'][4]['state']);
+        $this->assertSame('current', $progress['stages'][5]['state']);
+        $this->assertSame('pending', $progress['stages'][6]['state']);
+    }
+
+    public function test_details_confirmed_is_waiting_for_deposit_confirmation_not_design(): void
+    {
+        $progress = (new BuildCustomerProgressService)->build(
+            new Order(['status' => 'DETAILS_CONFIRMED'])
+        );
+
+        $this->assertSame('Menunggu Pengesahan Deposit', $progress['label']);
+        $this->assertSame('current', $progress['stages'][2]['state']);
+        $this->assertSame('pending', $progress['stages'][3]['state']);
     }
 }
