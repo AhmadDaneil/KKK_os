@@ -32,6 +32,8 @@ class CustomerBalanceReceiptController extends Controller
 
         try {
             DB::transaction(function () use ($order, $existing, $receipt, $receiptPath) {
+                $amount = (string) ($order->pricingSnapshot()->value('outstanding_amount')
+                    ?? config('kingkadkahwin.balance.amount'));
                 $metadata = $existing?->metadata ?? [];
                 if ($existing) {
                     $metadata['receipt_history'][] = [
@@ -51,7 +53,7 @@ class CustomerBalanceReceiptController extends Controller
                 $payment = $existing ?: $order->payments()->make(['payment_type' => 'BALANCE']);
                 $payment->fill([
                     'provider' => 'MANUAL_QR',
-                    'amount' => config('kingkadkahwin.balance.amount'),
+                    'amount' => $amount,
                     'currency' => 'MYR',
                     'status' => 'PENDING',
                     'paid_at' => null,

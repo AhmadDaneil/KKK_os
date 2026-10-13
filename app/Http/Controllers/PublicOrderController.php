@@ -84,7 +84,7 @@ class PublicOrderController extends Controller
                 ->withErrors(['order_id' => 'ID Tempahan tidak ditemui. Sila semak dan cuba lagi.']);
         }
 
-        $order->load(['fulfilmentJob', 'payments', 'designJobs.artworkVersions']);
+        $order->load(['fulfilmentJob', 'payments', 'designJobs.artworkVersions', 'pricingSnapshot']);
         $deposit = $order->payments->firstWhere('payment_type', 'BOOKING_DEPOSIT');
         $balance = $order->payments->where('payment_type', 'BALANCE')->sortByDesc('id')->first();
         $artworkReady = in_array($order->status, [
@@ -126,8 +126,10 @@ class PublicOrderController extends Controller
                 'status' => $balance->status,
                 'amount' => $balance->amount,
                 'reason' => $balance->metadata['rejection_reason'] ?? null,
+                'provider' => $balance->provider,
             ] : null,
-            'balanceAmount' => (string) config('kingkadkahwin.balance.amount', '0.00'),
+            'balanceAmount' => (string) ($order->pricingSnapshot?->outstanding_amount ?? config('kingkadkahwin.balance.amount', '0.00')),
+            'balanceBillplzAmount' => $order->pricingSnapshot?->outstanding_amount,
             'balanceQrImage' => (string) config('kingkadkahwin.balance.qr_image'),
             'artworkReady' => $artworkReady,
             'canAccessArtwork' => $sessionAccess->hasAccess($request, $order),
