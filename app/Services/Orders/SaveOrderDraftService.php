@@ -41,14 +41,6 @@ class SaveOrderDraftService
                     'fulfilment',
                 ]);
 
-                if (array_key_exists('card_quantity', $data)) {
-                    $order->forceFill([
-                        'card_quantity' => $data['card_quantity'] === null
-                            ? null
-                            : (int) $data['card_quantity'],
-                    ])->save();
-                }
-
                 if ((int) $order->package_count === 2) {
                     $order->forceFill([
                         'package_format' => $data['package_format'] ?? $order->package_format ?? 'SEPARATE',
@@ -102,6 +94,14 @@ class SaveOrderDraftService
                     if (! $packageSide) {
                         throw ValidationException::withMessages([
                             "sides.$sideName" => 'This package side does not belong to the order.',
+                        ]);
+                    }
+
+                    if (array_key_exists('card_quantity', $sideData)) {
+                        $packageSide->update([
+                            'card_quantity' => $sideData['card_quantity'] === null
+                                ? null
+                                : (int) $sideData['card_quantity'],
                         ]);
                     }
 
@@ -207,6 +207,24 @@ class SaveOrderDraftService
                             ]);
                         }
                     }
+                }
+
+                $sideQuantities = $order->packageSides->pluck('card_quantity');
+                $expectedSideCount = (int) $order->package_count;
+
+                if (
+                    $sideQuantities->count() === $expectedSideCount
+                    && $sideQuantities->every(
+                        fn ($quantity): bool => $quantity !== null && (int) $quantity > 0
+                    )
+                ) {
+                    $order->forceFill([
+                        'card_quantity' => $sideQuantities->sum(
+                            fn ($quantity): int => (int) $quantity
+                        ),
+                    ])->save();
+                } else {
+                    $order->forceFill(['card_quantity' => null])->save();
                 }
 
                 if ((int) $order->package_count === 2 && $order->package_format === 'FOLDED') {
@@ -397,7 +415,7 @@ class SaveOrderDraftService
             return null;
         }
 
-        $value = str_replace(["\r\n", "\r"], "\n", trim((string) $value));
+        $value = str_replace(["\r\n", "\r"], "\n", trim($value));
         $lines = array_map(
             fn ($line) => preg_replace('/[ \t]+/u', ' ', trim($line)),
             explode("\n", $value)

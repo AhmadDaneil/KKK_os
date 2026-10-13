@@ -101,13 +101,26 @@ class SaveAndResumeDraftTest extends TestCase
 
         $saved = app(SaveOrderDraftService::class)->save($order, [
             'sides' => [
-                'LELAKI' => ['design' => ['design_code' => 'l100']],
-                'PEREMPUAN' => ['design' => ['design_code' => 'p200']],
+                'LELAKI' => [
+                    'card_quantity' => 100,
+                    'design' => ['design_code' => 'l100'],
+                ],
+                'PEREMPUAN' => [
+                    'card_quantity' => 300,
+                    'design' => ['design_code' => 'p200'],
+                ],
             ],
-        ]);
+        ],
+        );
 
-        $this->assertSame('L100', $saved->packageSides->firstWhere('side', 'LELAKI')->design->design_code);
-        $this->assertSame('P200', $saved->packageSides->firstWhere('side', 'PEREMPUAN')->design->design_code);
+        $lelaki = $saved->packageSides->firstWhere('side', 'LELAKI');
+        $perempuan = $saved->packageSides->firstWhere('side', 'PEREMPUAN');
+
+        $this->assertSame(100, $lelaki->card_quantity);
+        $this->assertSame(300, $perempuan->card_quantity);
+        $this->assertSame(400, $saved->card_quantity);
+        $this->assertSame('L100', $lelaki->design->design_code);
+        $this->assertSame('P200', $perempuan->design->design_code);
         $this->assertDatabaseCount('orders', 1);
     }
 
@@ -583,7 +596,11 @@ public function test_dashboard_rejects_card_image_larger_than_ten_megabytes(): v
     $response = $this->post(route('orders.draft.update', [
         'orderId' => $order->order_id,
     ]), [
-        'card_quantity' => 500,
+        'sides' => [
+            'PEREMPUAN' => [
+                'card_quantity' => 500,
+            ],
+        ],
     ]);
 
     $response->assertRedirect(route('orders.dashboard', [
@@ -637,7 +654,11 @@ public function test_dashboard_rejects_card_image_larger_than_ten_megabytes(): v
         ->post(route('orders.draft.update', [
             'orderId' => $order->order_id,
         ]), [
-            'card_quantity' => 0,
+            'sides' => [
+                'LELAKI' => [
+                    'card_quantity' => 0,
+                ],
+            ],
         ]);
 
     $response
@@ -645,7 +666,7 @@ public function test_dashboard_rejects_card_image_larger_than_ten_megabytes(): v
             'orderId' => $order->order_id,
         ]))
         ->assertSessionHasErrors([
-            'card_quantity',
+            'sides.LELAKI.card_quantity',
         ]);
 
     $this->assertNull(

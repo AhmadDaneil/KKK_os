@@ -21,14 +21,13 @@ class CardQuantityOptionATest extends TestCase
             'customer_name' => 'Quantity Option A',
         ]);
 
-        $order->forceFill(['card_quantity' => 500])->save();
-
         $sides = [];
 
         foreach ($order->packageSides()->get() as $side) {
             $isLelaki = $side->side === 'LELAKI';
 
             $sides[$side->side] = [
+                'card_quantity' => $isLelaki ? 200 : 300,
                 'design' => [
                     'theme' => $isLelaki ? 'SONGKET' : 'ISLAMIC',
                     'design_code' => $isLelaki ? 'CKS-209' : 'CKI-820',
