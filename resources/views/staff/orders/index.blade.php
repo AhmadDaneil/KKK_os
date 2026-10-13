@@ -53,7 +53,7 @@
         'READY_FOR_PICKUP' => 'Sedia untuk pickup',
         'SHIPPED' => 'Telah dihantar',
         'COMPLETED' => 'Tempahan selesai',
-        'CANCELLED' => 'Cancelled',
+        'CANCELLED' => 'TELAH DIBATALKAN',
         'ARCHIVED' => 'Diarkibkan',
     ];
     $statusTone = static fn (string $status): string => match ($status) {

@@ -31,7 +31,7 @@ class BuildCustomerProgressService
             'READY_FOR_PICKUP' => [95, 'Sedia Untuk Pengambilan', 'Tempahan anda telah sedia untuk diambil.'],
             'SHIPPED' => [95, 'Telah Dihantar', 'Tempahan anda telah diserahkan kepada kurier.'],
             'COMPLETED' => [100, 'Tempahan Selesai', 'Tempahan anda telah selesai.'],
-            'CANCELLED' => [0, 'Tempahan Dibatalkan', 'Tempahan ini telah dibatalkan.'],
+            'CANCELLED' => [0, 'TELAH DIBATALKAN', 'Tempahan ini telah dibatalkan.'],
             'ARCHIVED' => [100, 'Tempahan Diarkibkan', 'Tempahan ini telah diarkibkan.'],
             default => [0, 'Status Tempahan', 'Status tempahan anda sedang dikemas kini.'],
         };

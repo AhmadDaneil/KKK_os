@@ -32,7 +32,7 @@
         'READY_FOR_PACKING' => 'Sedia untuk pembungkusan', 'PACKING' => 'Pembungkusan sedang berjalan',
         'PACKED' => 'Pembungkusan siap', 'READY_FOR_PICKUP' => 'Sedia untuk pengambilan',
         'SHIPPED' => 'Telah dihantar', 'COMPLETED' => 'Tempahan selesai',
-        'CANCELLED' => 'Tempahan dibatalkan', 'ARCHIVED' => 'Tempahan diarkibkan',
+        'CANCELLED' => 'TELAH DIBATALKAN', 'ARCHIVED' => 'Tempahan diarkibkan',
     ];
     $statusTone = static fn (string $status): string => match ($status) {
         'DETAILS_INCOMPLETE', 'CORRECTION_REQUESTED' => 'attention',
