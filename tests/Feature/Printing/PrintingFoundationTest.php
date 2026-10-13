@@ -12,6 +12,7 @@ use App\Services\Merge\GenerateMergeJobsForOrderService;
 use App\Services\Orders\ConfirmOrderDetailsService;
 use App\Services\Orders\CreateOrderService;
 use App\Services\Orders\SaveOrderDraftService;
+use Database\Seeders\KkkPackagePriceCatalogSeeder;
 use App\Services\Payments\CreateBalancePaymentService;
 use App\Services\Payments\HandlePaymentCallbackService;
 use App\Services\Printing\AssignPrintJobService;
@@ -30,6 +31,12 @@ class PrintingFoundationTest extends TestCase
     public function test_approved_order_creates_print_jobs_waiting_for_full_payment(): void
     {
         $order = $this->approvedOrder(1, 'LELAKI');
+
+        User::factory()->create([
+            'role' => User::ROLE_PRODUCTION,
+            'is_active' => true,
+            'is_primary_production' => true,
+        ]);
 
         $jobs = app(InitializePrintJobsForOrderService::class)->initialize($order);
 
@@ -159,8 +166,10 @@ class PrintingFoundationTest extends TestCase
 
     private function approvedOrder(int $packageCount, ?string $singleSide = null)
     {
+        $this->seed(KkkPackagePriceCatalogSeeder::class);
         $data = [
             'package_count' => $packageCount,
+            'package_type' => 'PUTERI_MANIS',
             'customer_name' => 'Printing Test',
         ];
 
@@ -174,6 +183,7 @@ class PrintingFoundationTest extends TestCase
 
         foreach ($order->packageSides()->get() as $side) {
             $sides[$side->side] = [
+                'card_quantity' => $packageCount === 1 ? 200 : 100,
                 'design' => [
                     'design_code' => $side->side === 'LELAKI' ? 'L101' : 'P202',
                 ],
@@ -206,6 +216,18 @@ class PrintingFoundationTest extends TestCase
         ]);
 
         $order = app(ConfirmOrderDetailsService::class)->confirm($order->fresh());
+
+        User::factory()->create([
+            'role' => User::ROLE_DESIGNER,
+            'is_active' => true,
+            'is_design_lead' => true,
+        ]);
+
+        User::factory()->create([
+            'role' => User::ROLE_PRODUCTION,
+            'is_active' => true,
+            'is_primary_production' => true,
+        ]);
 
         app(GenerateMergeJobsForOrderService::class)->generate($order);
         $designJobs = app(InitializeDesignJobsForOrderService::class)->initialize($order->fresh());

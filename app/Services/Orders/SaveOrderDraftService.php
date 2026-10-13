@@ -15,6 +15,10 @@ use Throwable;
 
 class SaveOrderDraftService
 {
+    public function __construct(
+        private ResolvePackagePriceService $packagePriceResolver,
+    ) {}
+
     public function save(Order $order, array $data): Order
     {
         if ($order->status !== 'DETAILS_INCOMPLETE') {
@@ -32,7 +36,7 @@ class SaveOrderDraftService
                 $data,
                 &$newUploadedPaths,
                 &$oldPathsToDelete
-            ) {
+            ): Order {
                 $order->load([
                     'couples',
                     'packageSides.design',
@@ -43,8 +47,12 @@ class SaveOrderDraftService
 
                 if ((int) $order->package_count === 2) {
                     $order->forceFill([
-                        'package_format' => $data['package_format'] ?? $order->package_format ?? 'SEPARATE',
-                        'first_event_side' => $data['first_event_side'] ?? $order->first_event_side ?? 'LELAKI',
+                        'package_format' => $data['package_format']
+                            ?? $order->package_format
+                            ?? 'SEPARATE',
+                        'first_event_side' => $data['first_event_side']
+                            ?? $order->first_event_side
+                            ?? 'LELAKI',
                     ])->save();
                 }
 
@@ -58,10 +66,18 @@ class SaveOrderDraftService
                     }
 
                     $couple->update([
-                        'groom_name' => $this->cleanString(Arr::get($data, 'couple.groom_name')),
-                        'groom_abbreviation' => $this->cleanString(Arr::get($data, 'couple.groom_abbreviation')),
-                        'bride_name' => $this->cleanString(Arr::get($data, 'couple.bride_name')),
-                        'bride_abbreviation' => $this->cleanString(Arr::get($data, 'couple.bride_abbreviation')),
+                        'groom_name' => $this->cleanString(
+                            Arr::get($data, 'couple.groom_name')
+                        ),
+                        'groom_abbreviation' => $this->cleanString(
+                            Arr::get($data, 'couple.groom_abbreviation')
+                        ),
+                        'bride_name' => $this->cleanString(
+                            Arr::get($data, 'couple.bride_name')
+                        ),
+                        'bride_abbreviation' => $this->cleanString(
+                            Arr::get($data, 'couple.bride_abbreviation')
+                        ),
                     ]);
                 }
 
@@ -75,10 +91,18 @@ class SaveOrderDraftService
                     }
 
                     $secondCouple->update([
-                        'groom_name' => $this->cleanString(Arr::get($data, 'second_couple.groom_name')),
-                        'groom_abbreviation' => $this->cleanString(Arr::get($data, 'second_couple.groom_abbreviation')),
-                        'bride_name' => $this->cleanString(Arr::get($data, 'second_couple.bride_name')),
-                        'bride_abbreviation' => $this->cleanString(Arr::get($data, 'second_couple.bride_abbreviation')),
+                        'groom_name' => $this->cleanString(
+                            Arr::get($data, 'second_couple.groom_name')
+                        ),
+                        'groom_abbreviation' => $this->cleanString(
+                            Arr::get($data, 'second_couple.groom_abbreviation')
+                        ),
+                        'bride_name' => $this->cleanString(
+                            Arr::get($data, 'second_couple.bride_name')
+                        ),
+                        'bride_abbreviation' => $this->cleanString(
+                            Arr::get($data, 'second_couple.bride_abbreviation')
+                        ),
                     ]);
                 }
 
@@ -107,16 +131,24 @@ class SaveOrderDraftService
 
                     if (array_key_exists('design', $sideData)) {
                         $designData = [
-                            'theme' => $this->cleanString(Arr::get($sideData, 'design.theme')),
-                            'design_code' => $this->normalizeDesignCode(Arr::get($sideData, 'design.design_code')),
-                            'card_title' => $this->cleanString(Arr::get($sideData, 'design.card_title')),
+                            'theme' => $this->cleanString(
+                                Arr::get($sideData, 'design.theme')
+                            ),
+                            'design_code' => $this->normalizeDesignCode(
+                                Arr::get($sideData, 'design.design_code')
+                            ),
+                            'card_title' => $this->cleanString(
+                                Arr::get($sideData, 'design.card_title')
+                            ),
                         ];
 
                         $cardImage = Arr::get($sideData, 'design.card_image');
                         $oldPath = $packageSide->design->card_image_path;
+
                         $effectiveTheme = Arr::has($sideData, 'design.theme')
                             ? $designData['theme']
                             : $packageSide->design->theme;
+
                         $isPortraitTheme = strtoupper((string) $effectiveTheme) === 'PORTRAIT';
 
                         if ($isPortraitTheme && $cardImage instanceof UploadedFile) {
@@ -132,9 +164,13 @@ class SaveOrderDraftService
                             if (is_string($oldPath) && $oldPath !== '') {
                                 $oldPathsToDelete[] = $oldPath;
                             }
-                        } elseif (! $isPortraitTheme && is_string($oldPath) && $oldPath !== '') {
-                            // Customer photos are reserved for the PORTRAIT theme. Remove an
-                            // old portrait image when the customer switches to another theme.
+                        } elseif (
+                            ! $isPortraitTheme
+                            && is_string($oldPath)
+                            && $oldPath !== ''
+                        ) {
+                            // Customer photos are reserved for the PORTRAIT theme.
+                            // Remove an old portrait image when the customer switches theme.
                             $designData['card_image_path'] = null;
                             $oldPathsToDelete[] = $oldPath;
                         }
@@ -149,61 +185,101 @@ class SaveOrderDraftService
                                 return [
                                     'enabled' => (bool) ($product['enabled'] ?? false),
                                     'size' => $this->cleanString($product['size'] ?? null),
-                                    'quantity' => isset($product['quantity']) ? (int) $product['quantity'] : 1,
-                                    'material' => $this->cleanString($product['material'] ?? null),
-                                    'orientation' => $this->cleanString($product['orientation'] ?? null),
-                                    'instructions' => $this->cleanString($product['instructions'] ?? null),
+                                    'quantity' => isset($product['quantity'])
+                                        ? (int) $product['quantity']
+                                        : 1,
+                                    'material' => $this->cleanString(
+                                        $product['material'] ?? null
+                                    ),
+                                    'orientation' => $this->cleanString(
+                                        $product['orientation'] ?? null
+                                    ),
+                                    'instructions' => $this->cleanString(
+                                        $product['instructions'] ?? null
+                                    ),
                                 ];
                             })
                             ->all();
 
-                        $packageSide->update(['additional_products' => $products ?: null]);
+                        $packageSide->update([
+                            'additional_products' => $products ?: null,
+                        ]);
                     }
 
                     if (array_key_exists('parents', $sideData)) {
                         $packageSide->parents->update([
-                            'father_name' => $this->cleanString(Arr::get($sideData, 'parents.father_name')),
-                            'mother_name' => $this->cleanString(Arr::get($sideData, 'parents.mother_name')),
+                            'father_name' => $this->cleanString(
+                                Arr::get($sideData, 'parents.father_name')
+                            ),
+                            'mother_name' => $this->cleanString(
+                                Arr::get($sideData, 'parents.mother_name')
+                            ),
                         ]);
                     }
 
                     if (array_key_exists('event', $sideData)) {
                         $event = $packageSide->event;
-                        $eventDate = $this->emptyToNull(Arr::get($sideData, 'event.event_date'));
+                        $eventDate = $this->emptyToNull(
+                            Arr::get($sideData, 'event.event_date')
+                        );
 
                         $event->update([
                             'day_name' => $eventDate
                                 ? $this->malayDayName($eventDate)
-                                : $this->cleanString(Arr::get($sideData, 'event.day_name')),
+                                : $this->cleanString(
+                                    Arr::get($sideData, 'event.day_name')
+                                ),
                             'event_date' => $eventDate,
-                            'hijri_date' => $this->cleanString(Arr::get($sideData, 'event.hijri_date')),
-                            'meal_time' => $this->emptyToNull(Arr::get($sideData, 'event.meal_time')),
-                            'bersanding_time' => $this->emptyToNull(Arr::get($sideData, 'event.bersanding_time')),
-                            'venue_name' => $this->cleanString(Arr::get($sideData, 'event.venue_name')),
-                            'full_address' => $this->cleanMultiline(Arr::get($sideData, 'event.full_address')),
-                            'google_maps_url' => $this->cleanString(Arr::get($sideData, 'event.google_maps_url')),
+                            'hijri_date' => $this->cleanString(
+                                Arr::get($sideData, 'event.hijri_date')
+                            ),
+                            'meal_time' => $this->emptyToNull(
+                                Arr::get($sideData, 'event.meal_time')
+                            ),
+                            'bersanding_time' => $this->emptyToNull(
+                                Arr::get($sideData, 'event.bersanding_time')
+                            ),
+                            'venue_name' => $this->cleanString(
+                                Arr::get($sideData, 'event.venue_name')
+                            ),
+                            'full_address' => $this->cleanMultiline(
+                                Arr::get($sideData, 'event.full_address')
+                            ),
+                            'google_maps_url' => $this->cleanString(
+                                Arr::get($sideData, 'event.google_maps_url')
+                            ),
                         ]);
 
-                        foreach ((array) Arr::get($sideData, 'event.contacts', []) as $contactNumber => $contactData) {
+                        foreach (
+                            (array) Arr::get($sideData, 'event.contacts', [])
+                            as $contactNumber => $contactData
+                        ) {
                             $contactNumber = (int) $contactNumber;
 
                             if (! in_array($contactNumber, [1, 2, 3], true)) {
                                 throw ValidationException::withMessages([
-                                    "sides.$sideName.event.contacts.$contactNumber" => 'Only contact persons 1 to 3 are supported.',
+                                    "sides.$sideName.event.contacts.$contactNumber"
+                                        => 'Only contact persons 1 to 3 are supported.',
                                 ]);
                             }
 
-                            $contact = $event->contacts->firstWhere('contact_number', $contactNumber);
+                            $contact = $event->contacts
+                                ->firstWhere('contact_number', $contactNumber);
 
                             if (! $contact) {
                                 throw ValidationException::withMessages([
-                                    "sides.$sideName.event.contacts.$contactNumber" => 'Contact slot is missing.',
+                                    "sides.$sideName.event.contacts.$contactNumber"
+                                        => 'Contact slot is missing.',
                                 ]);
                             }
 
                             $contact->update([
-                                'contact_name' => $this->cleanString($contactData['contact_name'] ?? null),
-                                'contact_phone' => $this->normalizePhone($contactData['contact_phone'] ?? null),
+                                'contact_name' => $this->cleanString(
+                                    $contactData['contact_name'] ?? null
+                                ),
+                                'contact_phone' => $this->normalizePhone(
+                                    $contactData['contact_phone'] ?? null
+                                ),
                             ]);
                         }
                     }
@@ -212,26 +288,41 @@ class SaveOrderDraftService
                 $sideQuantities = $order->packageSides->pluck('card_quantity');
                 $expectedSideCount = (int) $order->package_count;
 
-                if (
+                $hasCompleteSideQuantities =
                     $sideQuantities->count() === $expectedSideCount
                     && $sideQuantities->every(
-                        fn ($quantity): bool => $quantity !== null && (int) $quantity > 0
-                    )
-                ) {
+                        fn ($quantity): bool =>
+                            $quantity !== null && (int) $quantity > 0
+                    );
+
+                if ($hasCompleteSideQuantities) {
                     $order->forceFill([
                         'card_quantity' => $sideQuantities->sum(
                             fn ($quantity): int => (int) $quantity
                         ),
                     ])->save();
+
+                    $this->packagePriceResolver->resolve(
+                        $order->fresh(['packageSides'])
+                    );
                 } else {
-                    $order->forceFill(['card_quantity' => null])->save();
+                    $order->forceFill([
+                        'card_quantity' => null,
+                    ])->save();
                 }
 
-                if ((int) $order->package_count === 2 && $order->package_format === 'FOLDED') {
-                    $firstSide = $order->packageSides->firstWhere('side', $order->first_event_side);
+                if (
+                    (int) $order->package_count === 2
+                    && $order->package_format === 'FOLDED'
+                ) {
+                    $firstSide = $order->packageSides
+                        ->firstWhere('side', $order->first_event_side);
+
                     $secondSide = $order->packageSides->firstWhere(
                         'side',
-                        $order->first_event_side === 'LELAKI' ? 'PEREMPUAN' : 'LELAKI'
+                        $order->first_event_side === 'LELAKI'
+                            ? 'PEREMPUAN'
+                            : 'LELAKI'
                     );
 
                     if ($firstSide?->design && $secondSide?->design) {
@@ -259,13 +350,19 @@ class SaveOrderDraftService
                     $fulfilment->update([
                         'method' => $method,
                         'recipient_name' => $method === 'COURIER'
-                            ? $this->cleanString(Arr::get($data, 'fulfilment.recipient_name'))
+                            ? $this->cleanString(
+                                Arr::get($data, 'fulfilment.recipient_name')
+                            )
                             : null,
                         'recipient_phone' => $method === 'COURIER'
-                            ? $this->normalizePhone(Arr::get($data, 'fulfilment.recipient_phone'))
+                            ? $this->normalizePhone(
+                                Arr::get($data, 'fulfilment.recipient_phone')
+                            )
                             : null,
                         'shipping_address' => $method === 'COURIER'
-                            ? $this->cleanMultiline(Arr::get($data, 'fulfilment.shipping_address'))
+                            ? $this->cleanMultiline(
+                                Arr::get($data, 'fulfilment.shipping_address')
+                            )
                             : null,
                     ]);
                 }
@@ -365,6 +462,7 @@ class SaveOrderDraftService
 
         $target = imagecreatetruecolor($targetWidth, $targetHeight);
         imagefill($target, 0, 0, imagecolorallocate($target, 255, 255, 255));
+
         imagecopyresampled(
             $target,
             $source,
@@ -381,6 +479,7 @@ class SaveOrderDraftService
         ob_start();
         $encoded = imagejpeg($target, null, 90);
         $contents = ob_get_clean();
+
         imagedestroy($target);
         imagedestroy($source);
 
@@ -416,11 +515,15 @@ class SaveOrderDraftService
         }
 
         $value = str_replace(["\r\n", "\r"], "\n", trim($value));
+
         $lines = array_map(
             fn ($line) => preg_replace('/[ \t]+/u', ' ', trim($line)),
             explode("\n", $value)
         );
-        $lines = array_values(array_filter($lines, fn ($line) => $line !== ''));
+
+        $lines = array_values(
+            array_filter($lines, fn ($line) => $line !== '')
+        );
 
         return $lines === [] ? null : implode("\n", $lines);
     }

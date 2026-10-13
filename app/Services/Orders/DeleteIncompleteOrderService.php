@@ -16,6 +16,12 @@ class DeleteIncompleteOrderService
             throw new RuntimeException('Hanya tempahan dengan maklumat belum lengkap boleh dipadam.');
         }
 
+        if ($order->payments()->exists()) {
+            throw new RuntimeException(
+                'Tempahan yang mempunyai rekod transaksi tidak boleh dipadam. Sila gunakan tindakan batal atau arkib.'
+            );
+        }
+
         DB::transaction(function () use ($order): void {
             $sideIds = $order->packageSides()->pluck('id');
             $designJobIds = DB::table('design_jobs')->where('order_id', $order->id)->pluck('id');

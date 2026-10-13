@@ -11,6 +11,7 @@ use App\Services\Merge\GenerateMergeJobsForOrderService;
 use App\Services\Orders\ConfirmOrderDetailsService;
 use App\Services\Orders\CreateOrderService;
 use App\Services\Orders\SaveOrderDraftService;
+use Database\Seeders\KkkPackagePriceCatalogSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use RuntimeException;
 use Tests\TestCase;
@@ -53,7 +54,7 @@ class DesignerWorkflowFoundationTest extends TestCase
         app(InitializeDesignJobsForOrderService::class)->initialize($order->fresh());
 
         $this->assertDatabaseCount('design_jobs', 2);
-        $this->assertDatabaseCount('design_job_events', 2);
+        $this->assertDatabaseCount('design_job_events', 4);
     }
 
     public function test_design_job_can_be_assigned_and_started(): void
@@ -119,7 +120,12 @@ class DesignerWorkflowFoundationTest extends TestCase
 
     private function confirmedOrder(int $packageCount, ?string $side = null)
     {
-        $createData = ['package_count' => $packageCount, 'customer_name' => 'Designer Test'];
+        $this->seed(KkkPackagePriceCatalogSeeder::class);
+        $createData = [
+            'package_count' => $packageCount,
+            'package_type' => 'PUTERI_MANIS',
+            'customer_name' => 'Designer Test',
+        ];
 
         if ($packageCount === 1) {
             $createData['side'] = $side;
@@ -130,6 +136,7 @@ class DesignerWorkflowFoundationTest extends TestCase
 
         foreach ($order->packageSides()->get() as $packageSide) {
             $sides[$packageSide->side] = [
+                'card_quantity' => $packageCount === 1 ? 200 : 100,
                 'design' => [
                     'design_code' => $packageSide->side === 'LELAKI' ? 'L101' : 'P202',
                 ],
@@ -161,6 +168,14 @@ class DesignerWorkflowFoundationTest extends TestCase
             'fulfilment' => ['method' => 'PICKUP'],
         ]);
 
-        return app(ConfirmOrderDetailsService::class)->confirm($order->fresh());
+        $confirmedOrder = app(ConfirmOrderDetailsService::class)->confirm($order->fresh());
+
+        User::factory()->create([
+            'role' => User::ROLE_DESIGNER,
+            'is_active' => true,
+            'is_design_lead' => true,
+        ]);
+
+        return $confirmedOrder;
     }
 }

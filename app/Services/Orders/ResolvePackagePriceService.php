@@ -39,6 +39,19 @@ class ResolvePackagePriceService
             ]);
         }
 
+        $allowedSideQuantities = PriceCatalogItem::query()
+            ->where('item_type', 'PACKAGE_TIER')
+            ->where('is_active', true)
+            ->get()
+            ->filter(
+                fn ($item) => data_get($item->metadata, 'package_type') === $packageType
+            )
+            ->map(fn ($item) => (int) data_get($item->metadata, 'card_quantity'))
+            ->filter(fn ($quantity) => $quantity > 0)
+            ->unique()
+            ->values()
+            ->all();
+
         $sideQuantities = [];
 
         foreach ($order->packageSides as $side) {
@@ -51,6 +64,13 @@ class ResolvePackagePriceService
             if ($side->card_quantity === null || (int) $side->card_quantity < 1) {
                 throw ValidationException::withMessages([
                     'card_quantity' => 'Kuantiti kad bagi setiap pihak mesti diisi.',
+                ]);
+            }
+
+            if (! in_array((int) $side->card_quantity, $allowedSideQuantities, true)) {
+                throw ValidationException::withMessages([
+                    "sides.{$side->side}.card_quantity" =>
+                        'Kuantiti kad bagi pihak ini tiada dalam tier pakej yang tersedia.',
                 ]);
             }
 

@@ -270,33 +270,7 @@
             </fieldset>
         @endif
 
-<fieldset>
-    <legend>Kuantiti Kad</legend>
 
-    <p class="field-help">
-        Masukkan jumlah kad untuk tempahan ini.
-        Bagi tempahan dua pakej, kuantiti yang sama digunakan untuk kedua-dua pakej.
-    </p>
-
-    <div class="grid">
-        <div>
-            <label for="card_quantity">Jumlah Kad</label>
-            <input
-                id="card_quantity"
-                type="number"
-                name="card_quantity"
-                min="1"
-                step="1"
-                inputmode="numeric"
-                value="{{ old('card_quantity', $order->card_quantity) }}"
-            >
-
-            @error('card_quantity')
-                <p class="field-error">{{ $message }}</p>
-            @enderror
-        </div>
-    </div>
-</fieldset>
 
         <fieldset>
             <legend>Maklumat Pasangan</legend>
@@ -313,6 +287,33 @@
             @php($hideFoldedDesign = $order->package_count === 2 && $order->package_format === 'FOLDED' && ! $loop->first)
             <fieldset data-package-side="{{ $side }}">
                 <legend data-package-legend>{{ $order->package_count === 2 ? 'Majlis '.$loop->iteration.' – ' : 'Pakej ' }}Pihak {{ ucfirst(strtolower($side)) }}</legend>
+                @php($selectedQuantity = old("sides.$side.card_quantity", $packageSide->card_quantity))
+
+                <div>
+                    <label for="card_quantity_{{ strtolower($side) }}">
+                        Kuantiti Kad — Pihak {{ ucfirst(strtolower($side)) }}
+                    </label>
+
+                    <select
+                        id="card_quantity_{{ strtolower($side) }}"
+                        name="sides[{{ $side }}][card_quantity]"
+                        data-card-quantity-side="{{ $side }}"
+                    >
+                        <option value="">-- Pilih kuantiti --</option>
+                        @foreach ($quantityOptions as $quantity)
+                            <option
+                                value="{{ $quantity }}"
+                                @selected((string) $selectedQuantity === (string) $quantity)
+                            >
+                                {{ $quantity }} keping
+                            </option>
+                        @endforeach
+                    </select>
+
+                    @error("sides.$side.card_quantity")
+                        <p class="field-error">{{ $message }}</p>
+                    @enderror
+                </div>
                 <div data-folded-second-design="{{ ! $loop->first ? 'true' : 'false' }}" @if ($hideFoldedDesign) hidden @endif>
                 <h3>Design</h3>
 
@@ -598,6 +599,92 @@
 
 </form>
 </main>
+<script type="application/json" id="valid-package-quantity-pairs">@json($validQuantityPairs)</script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const form = document.getElementById('customer-order-form');
+    const pairsElement = document.getElementById('valid-package-quantity-pairs');
+
+    if (!form || !pairsElement) {
+        return;
+    }
+
+    let validPairs;
+
+    try {
+        validPairs = JSON.parse(pairsElement.textContent);
+    } catch (error) {
+        console.error('Senarai pasangan kuantiti tidak sah.', error);
+        return;
+    }
+
+    const selects = Array.from(
+        form.querySelectorAll('[data-card-quantity-side]')
+    );
+
+    if (selects.length === 0) {
+        return;
+    }
+
+    function pairIsValid() {
+        return validPairs.some(function (pair) {
+            return selects.every(function (select) {
+                const side = select.dataset.cardQuantitySide;
+                return String(pair[side] ?? '') === select.value;
+            });
+        });
+    }
+
+    function updateOptions(changedSide = null) {
+        if (
+            changedSide !== null
+            && selects.length === 2
+            && selects.every(select => select.value !== '')
+            && !pairIsValid()
+        ) {
+            const otherSelect = selects.find(
+                select => select.dataset.cardQuantitySide !== changedSide
+            );
+
+            if (otherSelect) {
+                otherSelect.value = '';
+            }
+        }
+
+        selects.forEach(function (select) {
+            const side = select.dataset.cardQuantitySide;
+            const otherSelect = selects.find(
+                candidate => candidate !== select
+            );
+
+            const allowedValues = new Set(
+                validPairs
+                    .filter(function (pair) {
+                        return !otherSelect
+                            || otherSelect.value === ''
+                            || String(pair[otherSelect.dataset.cardQuantitySide] ?? '')
+                                === otherSelect.value;
+                    })
+                    .map(pair => String(pair[side] ?? ''))
+            );
+
+            Array.from(select.options).forEach(function (option) {
+                if (option.value !== '') {
+                    option.disabled = !allowedValues.has(option.value);
+                }
+            });
+        });
+    }
+
+    selects.forEach(function (select) {
+        select.addEventListener('change', function () {
+            updateOptions(select.dataset.cardQuantitySide);
+        });
+    });
+
+    updateOptions();
+});
+</script>
 <script src="{{ asset('js/customer-event-date-pickers.js') }}?v={{ filemtime(public_path('js/customer-event-date-pickers.js')) }}" data-calendar-url="{{ route('public.calendar.convert') }}" defer></script>
 @include('partials.malay-validation')
 <script>

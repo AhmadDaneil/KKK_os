@@ -883,6 +883,28 @@
 
             @if (($canAssignProduction ?? false) && ! $order->isAssignmentLocked() && auth()->user()->isOperationManagement() && ! request()->attributes->get('staff_overview_mode', false))
                 <section class="staff-section">
+                    <h2 class="staff-section-title">Penugasan Pengeluaran</h2>
+
+                    <div class="staff-work-grid">
+                        <form method="POST" action="{{ route($operationRoutePrefix.'orders.assign-printing', $order) }}" class="staff-card staff-assignment-form js-staff-confirmation-form js-async-assignment" data-confirm-assignment="Staf Pengeluaran" data-confirm-mode="{{ $order->printing_assigned_user_id ? 'reassign' : 'assign' }}">
+                            @csrf
+                            <div class="staff-card-heading">
+                                <h3>Staf Pengeluaran</h3>
+                                <span class="staff-status">{{ $order->printingAssignedUser ? 'DITUGASKAN' : 'BELUM DITUGASKAN' }}</span>
+                            </div>
+                            <label for="order-printing-assignee">{{ $order->printing_assigned_user_id ? 'Tugaskan Semula Staf Pengeluaran' : 'Tugaskan Staf Pengeluaran' }}</label>
+                            <div class="staff-assignment-controls">
+                                <select id="order-printing-assignee" name="assigned_user_id" required>
+                                    <option value="">Pilih Staf Pengeluaran</option>
+                                    @foreach ($productionStaff as $staff)
+                                        <option value="{{ $staff->id }}" @selected($order->printing_assigned_user_id === $staff->id)>{{ $staff->name }}</option>
+                                    @endforeach
+                                </select>
+                                <button type="submit" class="staff-button staff-button-small">{{ $order->printing_assigned_user_id ? 'Tugaskan Semula' : 'Tugaskan' }}</button>
+                            </div>
+                        </form>
+                    </div>
+
                     <h2 class="staff-section-title">Tugaskan OM untuk Pembungkusan</h2>
 
                     <div class="staff-work-grid">

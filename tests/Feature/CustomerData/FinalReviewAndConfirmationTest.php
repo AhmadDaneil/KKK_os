@@ -7,6 +7,7 @@ use App\Services\Orders\ConfirmOrderDetailsService;
 use App\Services\Orders\CreateOrderService;
 use App\Services\Orders\SaveOrderDraftService;
 use App\Services\Orders\ValidateOrderCompletionService;
+use Database\Seeders\KkkPackagePriceCatalogSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Validation\ValidationException;
 use Tests\TestCase;
@@ -30,8 +31,10 @@ class FinalReviewAndConfirmationTest extends TestCase
 
     public function test_complete_one_package_order_can_be_confirmed(): void
     {
+        $this->seed(KkkPackagePriceCatalogSeeder::class);
         $order = app(CreateOrderService::class)->create([
             'package_count' => 1,
+            'package_type' => 'PUTERI_MANIS',
             'side' => 'LELAKI',
             'customer_name' => 'Complete',
         ]);
@@ -44,6 +47,7 @@ class FinalReviewAndConfirmationTest extends TestCase
             ],
             'sides' => [
                 'LELAKI' => [
+                    'card_quantity' => 200,
                     'design' => [
                         'design_code' => 'A101',
                     ],
@@ -149,8 +153,10 @@ class FinalReviewAndConfirmationTest extends TestCase
 
     public function test_confirmed_order_cannot_be_confirmed_again(): void
     {
+        $this->seed(KkkPackagePriceCatalogSeeder::class);
         $order = app(CreateOrderService::class)->create([
             'package_count' => 1,
+            'package_type' => 'PUTERI_MANIS',
             'side' => 'LELAKI',
             'customer_name' => 'Confirmation Guard',
         ]);
@@ -163,6 +169,7 @@ class FinalReviewAndConfirmationTest extends TestCase
             ],
             'sides' => [
                 'LELAKI' => [
+                    'card_quantity' => 200,
                     'design' => [
                         'design_code' => 'A101',
                     ],
@@ -240,8 +247,10 @@ class FinalReviewAndConfirmationTest extends TestCase
 
     public function test_final_review_contract_includes_complete_customer_review_data(): void
     {
+        $this->seed(KkkPackagePriceCatalogSeeder::class);
         $order = app(CreateOrderService::class)->create([
             'package_count' => 2,
+            'package_type' => 'PUTERI_MANIS',
             'customer_name' => 'Final Review Contract',
         ]);
 
@@ -264,6 +273,7 @@ class FinalReviewAndConfirmationTest extends TestCase
 
             'sides' => [
                 'LELAKI' => [
+                    'card_quantity' => 200,
                     'design' => [
                         'theme' => 'MINIMALIST',
                         'design_code' => 'L100',
@@ -300,6 +310,7 @@ class FinalReviewAndConfirmationTest extends TestCase
                 ],
 
                 'PEREMPUAN' => [
+                    'card_quantity' => 300,
                     'design' => [
                         'theme' => 'SONGKET',
                         'design_code' => 'P200',
@@ -366,6 +377,9 @@ class FinalReviewAndConfirmationTest extends TestCase
             500,
             $review['card_quantity']
         );
+
+        $this->assertSame('288.00', $review['pricing']['package_amount']);
+        $this->assertSame('100.00', $review['pricing']['deposit_amount']);
 
         $this->assertSame(
             'Muhammad Syafiq',

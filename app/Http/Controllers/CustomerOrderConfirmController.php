@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Services\Orders\ConfirmOrderDetailsService;
 use App\Services\Orders\CustomerOrderSessionAccessService;
+use App\Services\Orders\BuildOrderPricingService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
@@ -11,7 +12,13 @@ use Throwable;
 
 class CustomerOrderConfirmController extends Controller
 {
-    public function store(Request $request, string $orderId, CustomerOrderSessionAccessService $access, ConfirmOrderDetailsService $confirm)
+    public function store(
+        Request $request,
+        string $orderId,
+        CustomerOrderSessionAccessService $access,
+        ConfirmOrderDetailsService $confirm,
+        BuildOrderPricingService $pricing,
+    )
     {
         $validated = $request->validate([
             'responsibility_acknowledged' => ['required', 'accepted'],
@@ -30,13 +37,16 @@ class CustomerOrderConfirmController extends Controller
         $receiptPath = $receipt->store("deposit-receipts/{$order->id}", 'local');
 
         try {
-            $order = DB::transaction(function () use ($order, $confirm, $receipt, $receiptPath) {
-                $payment = $order->payments()->updateOrCreate(
+            $order = DB::transaction(function () use ($order, $confirm, $pricing, $receipt, $receiptPath) {
+                $confirmedOrder = $confirm->confirm($order);
+                $snapshot = $pricing->createSnapshot($confirmedOrder);
+
+                $payment = $confirmedOrder->payments()->updateOrCreate(
                     ['payment_type' => 'BOOKING_DEPOSIT'],
                     [
                         'provider' => 'MANUAL_QR',
-                        'amount' => config('kingkadkahwin.deposit.amount'),
-                        'currency' => 'MYR',
+                        'amount' => $snapshot->booking_amount,
+                        'currency' => $snapshot->currency,
                         'status' => 'PENDING',
                         'metadata' => [
                             'receipt_disk' => 'local',
@@ -48,7 +58,6 @@ class CustomerOrderConfirmController extends Controller
                     ]
                 );
 
-                $confirmedOrder = $confirm->confirm($order);
                 $confirmedOrder->update(['booking_payment_status' => 'RECEIPT_SUBMITTED']);
                 $confirmedOrder->confirmation()->update([
                     'confirmed_snapshot' => [

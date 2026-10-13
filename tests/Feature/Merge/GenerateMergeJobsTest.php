@@ -6,6 +6,7 @@ use App\Services\Merge\GenerateMergeJobsForOrderService;
 use App\Services\Orders\ConfirmOrderDetailsService;
 use App\Services\Orders\CreateOrderService;
 use App\Services\Orders\SaveOrderDraftService;
+use Database\Seeders\KkkPackagePriceCatalogSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use RuntimeException;
 use Tests\TestCase;
@@ -89,8 +90,10 @@ class GenerateMergeJobsTest extends TestCase
 
     private function createConfirmedOrder(int $packageCount, ?string $singleSide = null)
     {
+        $this->seed(KkkPackagePriceCatalogSeeder::class);
         $createData = [
             'package_count' => $packageCount,
+            'package_type' => 'PUTERI_MANIS',
             'customer_name' => 'Merge Test',
         ];
 
@@ -118,6 +121,8 @@ class GenerateMergeJobsTest extends TestCase
                     'Dewan Perempuan'
                 );
             }
+            $sides[$packageSide->side]['card_quantity'] =
+                $packageCount === 1 ? 200 : 100;
         }
 
         app(SaveOrderDraftService::class)->save($order, [

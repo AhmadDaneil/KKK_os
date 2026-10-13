@@ -40,7 +40,7 @@ class CustomerDashboardAccessTest extends TestCase
     ]))
         ->assertOk()
         ->assertSee($order->order_id)
-        ->assertSee('Pratonton Kad Langsung')
+        ->assertSee('Preview Kad Langsung')
         ->assertSee('Kad 4 × 6')
         ->assertSee('data-card-preview="LELAKI"', false)
         ->assertSee('data-preview-face-target="front"', false)

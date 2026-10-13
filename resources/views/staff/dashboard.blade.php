@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 @php
     $dashboardUser = auth()->user();
     $canMonitorOperations = $dashboardUser->canMonitorAllDepartments();

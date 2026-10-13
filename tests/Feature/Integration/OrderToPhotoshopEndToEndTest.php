@@ -7,6 +7,7 @@ use App\Services\Orders\ConfirmOrderDetailsService;
 use App\Services\Orders\CreateOrderService;
 use App\Services\Orders\SaveOrderDraftService;
 use App\Services\Photoshop\GeneratePhotoshopCsvForOrderService;
+use Database\Seeders\KkkPackagePriceCatalogSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -18,6 +19,7 @@ class OrderToPhotoshopEndToEndTest extends TestCase
     {
         $order = app(CreateOrderService::class)->create([
             'package_count' => 1,
+            'package_type' => 'PUTERI_MANIS',
             'side' => 'LELAKI',
             'customer_name' => 'E2E One Package',
         ]);
@@ -70,6 +72,7 @@ class OrderToPhotoshopEndToEndTest extends TestCase
     {
         $order = app(CreateOrderService::class)->create([
             'package_count' => 2,
+            'package_type' => 'PUTERI_MANIS',
             'customer_name' => 'E2E Two Package',
         ]);
 
@@ -162,12 +165,16 @@ class OrderToPhotoshopEndToEndTest extends TestCase
 
     private function saveCompleteOrder($order, array $sideDefinitions, int $cardQuantity): void
     {
+        $this->seed(KkkPackagePriceCatalogSeeder::class);
         $sides = [];
 
         foreach ($order->packageSides()->get() as $side) {
             $definition = $sideDefinitions[$side->side];
 
             $sides[$side->side] = [
+                'card_quantity' => $order->package_count === 1
+                    ? $cardQuantity
+                    : ($side->side === 'LELAKI' ? 200 : $cardQuantity - 200),
                 'design' => [
                     'theme' => $definition['theme'],
                     'design_code' => $definition['design_code'],

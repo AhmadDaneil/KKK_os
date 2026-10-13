@@ -26,7 +26,7 @@ class KkkPackagePriceCatalogSeeder extends Seeder
                 1000 => 368,
             ],
             'JELATA' => [
-                30 => 49,
+                30 => 50,
                 50 => 69,
                 100 => 89,
                 200 => 109,

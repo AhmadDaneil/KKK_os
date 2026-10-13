@@ -7,6 +7,7 @@ use App\Services\Orders\ConfirmOrderDetailsService;
 use App\Services\Orders\CreateOrderService;
 use App\Services\Orders\SaveOrderDraftService;
 use App\Services\Photoshop\GeneratePhotoshopCsvForOrderService;
+use Database\Seeders\KkkPackagePriceCatalogSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -16,8 +17,11 @@ class CardQuantityOptionATest extends TestCase
 
     public function test_two_package_order_uses_one_order_quantity_for_both_merge_jobs_and_csv_rows(): void
     {
+        $this->seed(KkkPackagePriceCatalogSeeder::class);
+
         $order = app(CreateOrderService::class)->create([
             'package_count' => 2,
+            'package_type' => 'PUTERI_MANIS',
             'customer_name' => 'Quantity Option A',
         ]);
 

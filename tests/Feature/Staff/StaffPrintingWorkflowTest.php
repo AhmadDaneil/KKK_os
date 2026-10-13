@@ -12,6 +12,7 @@ use App\Services\Merge\GenerateMergeJobsForOrderService;
 use App\Services\Orders\ConfirmOrderDetailsService;
 use App\Services\Orders\CreateOrderService;
 use App\Services\Orders\SaveOrderDraftService;
+use Database\Seeders\KkkPackagePriceCatalogSeeder;
 use App\Services\Payments\CreateBalancePaymentService;
 use App\Services\Payments\HandlePaymentCallbackService;
 use App\Services\Printing\AssignPrintJobService;
@@ -408,17 +409,17 @@ class StaffPrintingWorkflowTest extends TestCase
 
         $this->actingAs($admin, 'staff')->get(route('staff.orders.show', $order->order_id))
             ->assertOk()
-            ->assertSee('Tugaskan Staf Pengeluaran')
+            ->assertSee($job->assignedUser->name)
             ->assertDontSee('Mulakan Cetakan');
 
         app(AssignPrintJobService::class)->assign($job, $production, $admin);
 
-        $this->actingAs($printing, 'staff')->get(route('staff.orders.show', $order->order_id))
+        $this->actingAs($production, 'staff')->get(route('staff.orders.show', $order->order_id))
             ->assertOk()->assertSee('Mulakan Cetakan');
-        $this->actingAs($printing, 'staff')->post(route('staff.print-jobs.start', $job))
+        $this->actingAs($production, 'staff')->post(route('staff.print-jobs.start', $job))
             ->assertRedirect();
         $this->actingAs($production, 'staff')->get(route('staff.orders.show', $order->order_id))
-            ->assertOk()->assertSee('Mark Printed');
+            ->assertOk()->assertSee('Tandakan Cetakan Siap');
 
         $this->actingAs($admin, 'staff')->get(route('staff.orders.show', $order->order_id))
             ->assertOk()
@@ -517,6 +518,18 @@ class StaffPrintingWorkflowTest extends TestCase
     {
         $order = $this->confirmedOrder($packageCount);
 
+        User::factory()->create([
+            'role' => User::ROLE_DESIGNER,
+            'is_active' => true,
+            'is_design_lead' => true,
+        ]);
+
+        User::factory()->create([
+            'role' => User::ROLE_PRODUCTION,
+            'is_active' => true,
+            'is_primary_production' => true,
+        ]);
+
         app(GenerateMergeJobsForOrderService::class)
             ->generate($order);
 
@@ -553,8 +566,11 @@ class StaffPrintingWorkflowTest extends TestCase
 
     private function confirmedOrder(int $packageCount = 1)
     {
+        $this->seed(KkkPackagePriceCatalogSeeder::class);
+
         $order = app(CreateOrderService::class)->create([
             'package_count' => $packageCount,
+            'package_type' => 'PUTERI_MANIS',
             'side' => $packageCount === 1 ? 'LELAKI' : null,
             'customer_name' => 'Staff Printing Workflow Test',
         ]);
@@ -575,6 +591,10 @@ class StaffPrintingWorkflowTest extends TestCase
                 'Ibu Perempuan',
                 'Dewan Perempuan'
             );
+        }
+
+        foreach ($sides as $side => $payload) {
+            $sides[$side]['card_quantity'] = $packageCount === 1 ? 200 : 100;
         }
 
         app(SaveOrderDraftService::class)->save($order, [

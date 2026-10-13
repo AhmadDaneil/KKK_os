@@ -40,8 +40,8 @@ class AdminDashboardTest extends TestCase
             ->assertOk()
             ->assertSee('Memerlukan Perhatian')
             ->assertSee('Semakan Pembayaran')
-            ->assertSee('Design Belum Ditugaskan')
-            ->assertSee('Pengeluaran Belum Ditugaskan')
+            ->assertSee('Tugasan Design')
+            ->assertSee('Tugasan Pengeluaran')
             ->assertSee('Pembungkusan Belum Ditugaskan')
             ->assertSee(route('admin.orders.index'), false);
     }

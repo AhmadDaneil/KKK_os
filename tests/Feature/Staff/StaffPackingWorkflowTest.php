@@ -12,6 +12,7 @@ use App\Services\Merge\GenerateMergeJobsForOrderService;
 use App\Services\Orders\ConfirmOrderDetailsService;
 use App\Services\Orders\CreateOrderService;
 use App\Services\Orders\SaveOrderDraftService;
+use Database\Seeders\KkkPackagePriceCatalogSeeder;
 use App\Services\Packing\AssignPackingJobService;
 use App\Services\Packing\InitializePackingJobForOrderService;
 use App\Services\Payments\CreateBalancePaymentService;
@@ -677,6 +678,18 @@ class StaffPackingWorkflowTest extends TestCase
             $fulfilmentMethod
         );
 
+        User::factory()->create([
+            'role' => User::ROLE_DESIGNER,
+            'is_active' => true,
+            'is_design_lead' => true,
+        ]);
+
+        User::factory()->create([
+            'role' => User::ROLE_PRODUCTION,
+            'is_active' => true,
+            'is_primary_production' => true,
+        ]);
+
         app(GenerateMergeJobsForOrderService::class)
             ->generate($order);
 
@@ -717,8 +730,11 @@ class StaffPackingWorkflowTest extends TestCase
         string $customerName,
         string $fulfilmentMethod = 'PICKUP'
     ) {
+        $this->seed(KkkPackagePriceCatalogSeeder::class);
+
         $order = app(CreateOrderService::class)->create([
             'package_count' => $packageCount,
+            'package_type' => 'PUTERI_MANIS',
             'side' => $packageCount === 1 ? 'LELAKI' : null,
             'customer_name' => $customerName,
         ]);
@@ -739,6 +755,10 @@ class StaffPackingWorkflowTest extends TestCase
                 'Ibu Perempuan',
                 'Dewan Perempuan'
             );
+        }
+
+        foreach ($sides as $side => $payload) {
+            $sides[$side]['card_quantity'] = $packageCount === 1 ? 200 : 100;
         }
 
         $fulfilment = [

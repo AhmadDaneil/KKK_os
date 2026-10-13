@@ -242,6 +242,8 @@ The staging application exposes `POST /api/v1/payments/billplz-sandbox/callback`
 
 ### Deposit
 
+Package prices are resolved from the active price catalog when the customer opens final review. On confirmation, KKK OS stores the selected package tier, side quantities, package total, and fixed booking deposit in an order pricing snapshot; the pending deposit transaction takes its amount and currency from that snapshot. The snapshot is the basis for subsequent payment reconciliation and invoice generation. The approved Jelata one-package 30-card tier is RM50 so it is consistent with the fixed RM50 one-package deposit.
+
 Where the order requires deposit verification:
 
 1. customer submits the required payment receipt;

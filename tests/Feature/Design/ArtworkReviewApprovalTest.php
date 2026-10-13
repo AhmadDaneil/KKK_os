@@ -17,6 +17,7 @@ use App\Services\Orders\CreateOrderService;
 use App\Services\Orders\GenerateOrderAccessLinkService;
 use App\Services\Orders\OrderLifecycleService;
 use App\Services\Orders\SaveOrderDraftService;
+use Database\Seeders\KkkPackagePriceCatalogSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Storage;
 use RuntimeException;
@@ -90,6 +91,12 @@ class ArtworkReviewApprovalTest extends TestCase
     {
         [$order, $job, $designer] = $this->preparedDesignJob();
 
+        User::factory()->create([
+            'role' => User::ROLE_PRODUCTION,
+            'is_active' => true,
+            'is_primary_production' => true,
+        ]);
+
         app(CreateArtworkVersionService::class)->create($job, [
             'storage_path' => 'artworks/customer-approved-v1.pdf',
             'preview_storage_path' => 'artworks/customer-approved-v1-preview.png',
@@ -101,6 +108,12 @@ class ArtworkReviewApprovalTest extends TestCase
 
         $link = app(GenerateOrderAccessLinkService::class)->generate($order->fresh());
         $this->get($this->requestUri($link))->assertRedirect();
+
+        User::factory()->create([
+            'role' => User::ROLE_PRODUCTION,
+            'is_active' => true,
+            'is_primary_production' => true,
+        ]);
 
         $this->post(route('orders.artwork.approve', [
             'orderId' => $order->order_id,
@@ -119,10 +132,14 @@ class ArtworkReviewApprovalTest extends TestCase
     {
         $order = $this->confirmedOrder(2);
 
+        $designer = User::factory()->create([
+            'role' => User::ROLE_DESIGNER,
+            'is_active' => true,
+            'is_design_lead' => true,
+        ]);
+
         app(GenerateMergeJobsForOrderService::class)->generate($order);
         $jobs = app(InitializeDesignJobsForOrderService::class)->initialize($order->fresh());
-
-        $designer = User::factory()->create();
 
         foreach ($jobs as $job) {
             app(StartDesignJobService::class)->start($job, $designer);
@@ -501,6 +518,12 @@ class ArtworkReviewApprovalTest extends TestCase
 
         app(GenerateMergeJobsForOrderService::class)->generate($order);
 
+        User::factory()->create([
+            'role' => User::ROLE_DESIGNER,
+            'is_active' => true,
+            'is_design_lead' => true,
+        ]);
+
         $job = app(InitializeDesignJobsForOrderService::class)
             ->initialize($order->fresh())
             ->first();
@@ -514,8 +537,11 @@ class ArtworkReviewApprovalTest extends TestCase
 
     private function confirmedOrder(int $packageCount, ?string $singleSide = null)
     {
+        $this->seed(KkkPackagePriceCatalogSeeder::class);
+
         $data = [
             'package_count' => $packageCount,
+            'package_type' => 'PUTERI_MANIS',
             'customer_name' => 'Artwork Review Test',
         ];
 
@@ -529,6 +555,7 @@ class ArtworkReviewApprovalTest extends TestCase
 
         foreach ($order->packageSides()->get() as $side) {
             $sides[$side->side] = [
+                'card_quantity' => $packageCount === 1 ? 200 : 100,
                 'design' => [
                     'design_code' => $side->side === 'LELAKI' ? 'L101' : 'P202',
                 ],

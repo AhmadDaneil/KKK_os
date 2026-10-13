@@ -8,6 +8,7 @@ use App\Services\Merge\GenerateMergeJobsForOrderService;
 use App\Services\Orders\ConfirmOrderDetailsService;
 use App\Services\Orders\CreateOrderService;
 use App\Services\Orders\SaveOrderDraftService;
+use Database\Seeders\KkkPackagePriceCatalogSeeder;
 use App\Services\Photoshop\ExportPhotoshopAutoMergeCsvService;
 use App\Services\Photoshop\GeneratePhotoshopCsvForOrderService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -158,8 +159,10 @@ class PhotoshopProductionExportWiringTest extends TestCase
 
     private function confirmedOrder(int $packageCount, ?string $singleSide = null)
     {
+        $this->seed(KkkPackagePriceCatalogSeeder::class);
         $create = [
             'package_count' => $packageCount,
+            'package_type' => 'PUTERI_MANIS',
             'customer_name' => 'Photoshop Stage 3C',
         ];
 
@@ -175,6 +178,7 @@ class PhotoshopProductionExportWiringTest extends TestCase
             $isLelaki = $side->side === 'LELAKI';
 
             $sides[$side->side] = [
+                'card_quantity' => $packageCount === 1 ? 200 : 100,
                 'design' => [
                     'theme' => $isLelaki ? 'SONGKET' : 'ISLAMIC',
                     'design_code' => $isLelaki ? 'CKS-209' : 'CKI-820',
