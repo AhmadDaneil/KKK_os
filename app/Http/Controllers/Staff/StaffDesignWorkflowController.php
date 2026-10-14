@@ -4,12 +4,14 @@ namespace App\Http\Controllers\Staff;
 
 use App\Http\Controllers\Controller;
 use App\Models\DesignJob;
+use App\Services\Design\ApproveArtworkService;
 use App\Services\Design\CreateArtworkVersionService;
 use App\Services\Design\MarkDesignReadyService;
 use App\Services\Design\ResumeDesignAfterCorrectionService;
 use App\Services\Design\StartDesignJobService;
 use App\Services\Design\SyncOrderDesignStatusService;
 use App\Services\Design\WatermarkArtworkPreviewService;
+use App\Services\Printing\InitializePrintJobsForOrderService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -77,7 +79,9 @@ class StaffDesignWorkflowController extends Controller
         Request $request,
         DesignJob $designJob,
         MarkDesignReadyService $service,
-        SyncOrderDesignStatusService $sync
+        SyncOrderDesignStatusService $sync,
+        ApproveArtworkService $approve,
+        InitializePrintJobsForOrderService $initializePrintJobs
     ): RedirectResponse {
         $this->authorizeAssignedDesigner($request, $designJob);
 
@@ -101,7 +105,12 @@ class StaffDesignWorkflowController extends Controller
                 $designJob,
                 $request->user()
             );
-            $sync->sync($designJob->order);
+            $approve->approve($designJob->fresh(), $request->user());
+            $order = $sync->sync($designJob->order);
+
+            if ($order->status === 'DESIGN_APPROVED') {
+                $initializePrintJobs->initialize($order);
+            }
         } catch (RuntimeException $exception) {
             return back()->withErrors([
                 'design_job' => $exception->getMessage(),
@@ -110,7 +119,7 @@ class StaffDesignWorkflowController extends Controller
 
         return back()->with(
             'status',
-            'Hasil design sedia untuk semakan pelanggan.'
+            'Hasil design telah diluluskan secara dalaman.'
         );
     }
 

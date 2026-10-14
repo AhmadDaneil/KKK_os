@@ -127,77 +127,6 @@
     </section>
 @endif
 
-    @if (in_array($order->status, [
-    'DETAILS_CONFIRMED',
-    'READY_FOR_DESIGN',
-    'DESIGN_IN_PROGRESS',
-    'DESIGN_READY',
-    'CORRECTION_REQUESTED',
-    'DESIGN_APPROVED',
-], true))
-    <section class="dashboard-action-card">
-        <h2>Hasil Design Tempahan</h2>
-
-        @if ($order->status === 'DETAILS_CONFIRMED')
-            <p>
-                Maklumat tempahan anda telah disahkan.
-                Hasil design anda akan disediakan oleh pereka.
-            </p>
-
-            <span class="artwork-progress-label">
-                Menunggu proses design
-            </span>
-
-        @elseif ($order->status === 'READY_FOR_DESIGN')
-            <p>
-                Tempahan anda sedang menunggu proses design.
-            </p>
-
-            <span class="artwork-progress-label">
-                Menunggu designer
-            </span>
-
-        @elseif ($order->status === 'DESIGN_IN_PROGRESS')
-            <p>
-                Pereka sedang menyediakan artwork tempahan anda.
-            </p>
-
-            <span class="artwork-progress-label">
-                Reka bentuk sedang disediakan
-            </span>
-
-        @elseif ($order->status === 'DESIGN_READY')
-            <p>
-                Hasil design anda telah tersedia. Sila semak hasil design sebelum membuat
-                kelulusan atau meminta pembetulan.
-            </p>
-
-            <a href="{{ route('orders.artwork.review', ['orderId' => $order->order_id]) }}">
-                Semak Hasil Design
-            </a>
-
-        @elseif ($order->status === 'CORRECTION_REQUESTED')
-            <p>
-                Permintaan pembetulan anda sedang diproses. Anda masih boleh
-                melihat status semakan artwork.
-            </p>
-
-            <a href="{{ route('orders.artwork.review', ['orderId' => $order->order_id]) }}">
-                Lihat Status Hasil Design
-            </a>
-
-        @else
-            <p>
-                Hasil design tempahan anda telah diluluskan.
-            </p>
-
-            <a href="{{ route('orders.artwork.review', ['orderId' => $order->order_id]) }}">
-                Lihat Hasil Design
-            </a>
-        @endif
-    </section>
-@endif
-
 @if (session('draft_saved'))
         <div class="notice customer-feedback customer-feedback-success" role="status">
             <strong>Maklumat anda telah disimpan.</strong>
@@ -232,18 +161,26 @@
         </div>
     @endif
 
-    <form
-        id="customer-order-form"
-        method="POST"
-        action="{{ route('orders.draft.update', ['orderId' => $order->order_id]) }}"
-        enctype="multipart/form-data"
-    >
-        @csrf
+    <section class="customer-view-switcher" aria-label="Pilih paparan">
+        <button type="button" class="customer-view-switcher-button is-active" data-customer-view-button="form" aria-pressed="true">
+            Order Form
+        </button>
+        <button type="button" class="customer-view-switcher-button" data-customer-view-button="preview" aria-pressed="false">
+            Live Card Preview
+        </button>
+    </section>
 
-        <div class="order-form-layout">
-            @include('orders.partials.card-preview')
+    <section data-customer-view-panel="form">
+        <form
+            id="customer-order-form"
+            method="POST"
+            action="{{ route('orders.draft.update', ['orderId' => $order->order_id]) }}"
+            enctype="multipart/form-data"
+        >
+            @csrf
 
-            <div class="order-form-fields">
+            <div class="order-form-layout">
+                <div class="order-form-fields">
 
         <fieldset class="customer-data-lock" @disabled(! $isEditable)>
 
@@ -597,7 +534,12 @@
     </div>
 @endif
 
-</form>
+        </form>
+    </section>
+
+    <section data-customer-view-panel="preview" hidden>
+        @include('orders.partials.card-preview')
+    </section>
 </main>
 <script type="application/json" id="valid-package-quantity-pairs">@json($validQuantityPairs)</script>
 <script>
@@ -1057,27 +999,29 @@ document.addEventListener('DOMContentLoaded', function () {
             return;
         }
 
-        const previewToggle = preview.querySelector('[data-live-preview-toggle]');
-        const previewBody = preview.querySelector('[data-live-preview-body]');
+        const viewButtons = document.querySelectorAll('[data-customer-view-button]');
+        const viewPanels = document.querySelectorAll('[data-customer-view-panel]');
 
-        function setPreviewOpen(isOpen) {
-            preview.classList.toggle('is-collapsed', !isOpen);
-            previewToggle?.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+        function showCustomerView(view) {
+            viewPanels.forEach(function (panel) {
+                panel.hidden = panel.dataset.customerViewPanel !== view;
+            });
 
-            if (previewBody) {
-                previewBody.hidden = !isOpen;
-            }
+            viewButtons.forEach(function (button) {
+                const active = button.dataset.customerViewButton === view;
+                button.classList.toggle('is-active', active);
+                button.setAttribute('aria-pressed', active ? 'true' : 'false');
+            });
         }
 
-        previewToggle?.addEventListener('click', function () {
-            setPreviewOpen(preview.classList.contains('is-collapsed'));
-        });
+        viewButtons.forEach(function (button) {
+            button.addEventListener('click', function () {
+                showCustomerView(button.dataset.customerViewButton);
 
-        document.addEventListener('keydown', function (event) {
-            if (event.key === 'Escape' && !preview.classList.contains('is-collapsed')) {
-                setPreviewOpen(false);
-                previewToggle?.focus();
-            }
+                if (button.dataset.customerViewButton === 'preview') {
+                    preview.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            });
         });
 
         let activeSide = preview.querySelector('[data-card-preview]:not(.is-hidden)')?.dataset.cardPreview;
@@ -1122,10 +1066,8 @@ document.addEventListener('DOMContentLoaded', function () {
             return translations[title] || translations['Walimatul Urus'];
         }
 
-        function syncCard(side) {
-            const cardWrap = preview.querySelector('[data-card-preview="' + side + '"]');
-
-            if (!cardWrap) {
+        function syncPreviewScope(scope, side) {
+            if (!scope) {
                 return;
             }
 
@@ -1135,31 +1077,39 @@ document.addEventListener('DOMContentLoaded', function () {
             const groomDisplay = value('couple[groom_abbreviation]', groomName);
             const brideDisplay = value('couple[bride_abbreviation]', brideName);
 
-            setText(cardWrap, 'groom_name', groomName);
-            setText(cardWrap, 'bride_name', brideName);
-            setText(cardWrap, 'groom_display', groomDisplay);
-            setText(cardWrap, 'bride_display', brideDisplay);
+            setText(scope, 'groom_name', groomName);
+            setText(scope, 'bride_name', brideName);
+            setText(scope, 'groom_display', groomDisplay);
+            setText(scope, 'bride_display', brideDisplay);
             const cardTitle = value(prefix + '[design][card_title]', 'Walimatul Urus');
-            setText(cardWrap, 'card_title', cardTitle);
-            setText(cardWrap, 'card_title_jawi', jawiCardTitle(cardTitle));
-            setText(cardWrap, 'father_name', value(prefix + '[parents][father_name]', 'NAMA BAPA'));
-            setText(cardWrap, 'mother_name', value(prefix + '[parents][mother_name]', 'NAMA IBU'));
-            setText(cardWrap, 'day_name', value(prefix + '[event][day_name]', 'HARI').toUpperCase());
-            setText(cardWrap, 'event_date', formatDate(value(prefix + '[event][event_date]', '')));
-            setText(cardWrap, 'hijri_date', value(prefix + '[event][hijri_date]', ''));
-            setText(cardWrap, 'meal_time', value(prefix + '[event][meal_time]', '-'));
-            setText(cardWrap, 'bersanding_time', value(prefix + '[event][bersanding_time]', '-'));
-            setText(cardWrap, 'venue_name', value(prefix + '[event][venue_name]', 'NAMA TEMPAT'));
-            setText(cardWrap, 'full_address', value(prefix + '[event][full_address]', 'Alamat penuh majlis'));
+            setText(scope, 'card_title', cardTitle);
+            setText(scope, 'card_title_jawi', jawiCardTitle(cardTitle));
+            setText(scope, 'father_name', value(prefix + '[parents][father_name]', 'NAMA BAPA'));
+            setText(scope, 'mother_name', value(prefix + '[parents][mother_name]', 'NAMA IBU'));
+            setText(scope, 'day_name', value(prefix + '[event][day_name]', 'HARI').toUpperCase());
+            setText(scope, 'event_date', formatDate(value(prefix + '[event][event_date]', '')));
+            setText(scope, 'hijri_date', value(prefix + '[event][hijri_date]', ''));
+            setText(scope, 'meal_time', value(prefix + '[event][meal_time]', '-'));
+            setText(scope, 'bersanding_time', value(prefix + '[event][bersanding_time]', '-'));
+            setText(scope, 'venue_name', value(prefix + '[event][venue_name]', 'NAMA TEMPAT'));
+            setText(scope, 'full_address', value(prefix + '[event][full_address]', 'Alamat penuh majlis'));
 
             for (let number = 1; number <= 3; number += 1) {
                 const contactPrefix = prefix + '[event][contacts][' + number + ']';
-                setText(cardWrap, 'contact_' + number + '_name', value(contactPrefix + '[contact_name]', 'Ahli ' + number));
-                setText(cardWrap, 'contact_' + number + '_phone', value(contactPrefix + '[contact_phone]', '-'));
+                setText(scope, 'contact_' + number + '_name', value(contactPrefix + '[contact_name]', 'Ahli ' + number));
+                setText(scope, 'contact_' + number + '_phone', value(contactPrefix + '[contact_phone]', '-'));
             }
 
             const theme = value(prefix + '[design][theme]', 'songket').toLowerCase();
-            cardWrap.querySelector('.wedding-card-front')?.setAttribute('data-theme', theme);
+            scope.querySelectorAll('[data-live-product-theme], .wedding-card-front').forEach(function (item) {
+                item.setAttribute('data-theme', theme);
+            });
+        }
+
+        function syncCard(side) {
+            preview.querySelectorAll('[data-card-preview="' + side + '"], [data-live-product-preview="' + side + '"]').forEach(function (scope) {
+                syncPreviewScope(scope, side);
+            });
         }
 
         function showSelection() {
@@ -1168,6 +1118,10 @@ document.addEventListener('DOMContentLoaded', function () {
                 card.querySelectorAll('[data-card-face]').forEach(function (face) {
                     face.classList.toggle('is-hidden', face.dataset.cardFace !== activeFace);
                 });
+            });
+
+            preview.querySelectorAll('[data-live-product-preview]').forEach(function (products) {
+                products.classList.toggle('is-hidden', products.dataset.liveProductPreview !== activeSide);
             });
 
             preview.querySelectorAll('[data-preview-folded-side]').forEach(function (tab) {

@@ -181,3 +181,145 @@ html[data-customer-theme="dark"] .customer-policies article > p { color:#c3d2ca!
 
 /* Mobile card layout */
 @media(max-width:700px){.progress-stages,.public-stages{grid-template-columns:repeat(3,1fr);row-gap:14px}.progress-stage{font-size:.7rem}.action-panel,.dashboard-action-card,.package-summary,.review-card,.tracking-card{padding:16px!important}}
+
+/* Keep the artwork previews proportional to the supplied banner and bunting samples. */
+.live-product-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    justify-items: center;
+    gap: 20px;
+}
+
+.live-product {
+    width: 100%;
+    min-height: 0;
+    padding: clamp(16px, 4%, 32px);
+    align-self: start;
+    border-radius: 8px;
+    text-align: center;
+}
+
+.live-product--banner {
+    grid-column: 1 / -1;
+    max-width: 960px;
+    aspect-ratio: 2 / 1;
+}
+
+.live-product--banting {
+    grid-column: auto;
+    max-width: 320px;
+    aspect-ratio: 1 / 2;
+}
+
+.live-product--arrow {
+    grid-column: auto;
+    max-width: 320px;
+    aspect-ratio: 904 / 1280;
+    padding-top: clamp(46px, 18%, 80px);
+}
+
+.live-product--sticker {
+    grid-column: 2;
+    max-width: 320px;
+    aspect-ratio: 1 / 1;
+    border-radius: 8px;
+}
+
+.live-product :is(p, strong, small) {
+    width: 100%;
+    text-align: center;
+}
+
+.live-product strong {
+    overflow-wrap: anywhere;
+}
+
+.arrow-shape {
+    display: block;
+    width: 100%;
+    height: auto;
+    margin: auto auto 10px;
+    overflow: visible;
+    border-radius: 0;
+    background: none;
+}
+
+.live-product--arrow-right .arrow-shape {
+    transform: scaleX(-1);
+}
+
+.card-front-copy {
+    position: absolute;
+    top: 50%;
+    right: 12%;
+    left: 12%;
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+    width: auto;
+    text-align: center;
+    transform: translateY(-50%);
+}
+
+.card-front-copy .card-title,
+.card-front-copy .card-couple-names {
+    width: 100%;
+    margin-inline: auto;
+    text-align: center;
+}
+
+.card-front-copy .card-couple-names {
+    justify-items: center;
+    overflow-wrap: anywhere;
+}
+
+/* The preview ink belongs to the artwork and stays identical in both page themes. */
+html[data-customer-theme="dark"] .live-product :is(p, strong, small, span, i) {
+    color: inherit !important;
+}
+
+html[data-customer-theme="dark"] .live-product .live-product-label {
+    color: #fff !important;
+}
+
+html[data-customer-theme="dark"] .live-product strong i {
+    color: #a76991 !important;
+}
+
+html[data-customer-theme="dark"] .wedding-card-back .card-social-handle {
+    color: #355848 !important;
+}
+
+html[data-customer-theme="dark"] .wedding-card-back .card-social-logo {
+    color: #fff !important;
+}
+
+@media (max-width: 760px) {
+    .live-product-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .live-product--banner {
+        grid-column: 1 / -1;
+    }
+
+    .live-product--sticker {
+        grid-column: 1 / -1;
+    }
+}
+
+@media (max-width: 520px) {
+    .live-product-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .live-product--banner,
+    .live-product--banting,
+    .live-product--arrow,
+    .live-product--sticker {
+        grid-column: 1;
+    }
+
+    .live-product--banner {
+        max-width: none;
+    }
+}

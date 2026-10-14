@@ -26,7 +26,7 @@
         'READY_FOR_FULFILMENT' => 'Sedia Untuk Penghantaran / Pengambilan',
         'SHIPPED' => 'Telah Dihantar',
         'COMPLETED' => 'Selesai',
-        'CANCELLED' => 'Dibatalkan',
+        'CANCELLED' => 'TELAH DIBATALKAN',
         'ARCHIVED' => 'Diarkibkan',
     ];
 

@@ -95,7 +95,6 @@ class StaffDesignWorkflowTest extends TestCase
         );
     }
 
-
     public function test_production_and_operation_management_staff_cannot_start_design_job(): void
     {
         $designer = $this->designer();
@@ -1097,6 +1096,8 @@ class StaffDesignWorkflowTest extends TestCase
         Storage::fake('local');
 
         $designer = $this->designer();
+        $production = $this->staff(User::ROLE_PRODUCTION);
+        $production->update(['is_primary_production' => true]);
         $job = $this->designJob();
 
         $this->assign($job, $designer);
@@ -1148,11 +1149,11 @@ class StaffDesignWorkflowTest extends TestCase
 
         $job->refresh();
 
-        $this->assertSame('DESIGN_READY', $job->status);
+        $this->assertSame('DESIGN_APPROVED', $job->status);
         $this->assertNotNull($job->design_ready_at);
 
         $event = $job->events()
-            ->where('event_type', 'DESIGN_READY')
+            ->where('event_type', 'DESIGN_APPROVED')
             ->latest('id')
             ->firstOrFail();
 
@@ -1162,7 +1163,7 @@ class StaffDesignWorkflowTest extends TestCase
         );
 
         $reviewAction = $job->reviewActions()
-            ->where('action', 'DESIGN_READY')
+            ->where('action', 'DESIGN_APPROVED')
             ->latest('id')
             ->firstOrFail();
 
@@ -1311,6 +1312,8 @@ class StaffDesignWorkflowTest extends TestCase
     {
         $lelakiDesigner = $this->designer();
         $perempuanDesigner = $this->designer();
+        $production = $this->staff(User::ROLE_PRODUCTION);
+        $production->update(['is_primary_production' => true]);
 
         $order = $this->confirmedOrder(2);
 
@@ -1361,7 +1364,7 @@ class StaffDesignWorkflowTest extends TestCase
             ->assertSessionHasNoErrors();
 
         $this->assertSame(
-            'DESIGN_READY',
+            'DESIGN_APPROVED',
             $lelaki->fresh()->status
         );
 
@@ -1395,7 +1398,7 @@ class StaffDesignWorkflowTest extends TestCase
             ->assertSessionHasNoErrors();
 
         $this->assertSame(
-            'DESIGN_READY',
+            'DESIGN_APPROVED',
             $perempuan->fresh()->status
         );
     }

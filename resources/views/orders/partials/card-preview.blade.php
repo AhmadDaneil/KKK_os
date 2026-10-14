@@ -2,31 +2,14 @@
     $isFoldedCard = $order->package_count === 2 && $order->package_format === 'FOLDED';
 @endphp
 
-<aside class="live-preview is-collapsed" aria-labelledby="live-preview-title" data-live-preview data-folded-card-preview="{{ $isFoldedCard ? 'true' : 'false' }}">
-    <button
-        type="button"
-        class="live-preview-toggle"
-        aria-expanded="false"
-        aria-controls="live-preview-panel"
-        data-live-preview-toggle
-    >
-        <span class="live-preview-avatar" aria-hidden="true">K</span>
-
-        <div>
-                <strong id="live-preview-title">Preview Kad Langsung</strong>
-            <small><span aria-hidden="true"></span> Kad 4 × 6 · dikemas kini secara langsung</small>
-        </div>
-
-        <span class="live-preview-chevron" aria-hidden="true"></span>
-    </button>
-
-    <div class="live-preview-body" id="live-preview-panel" data-live-preview-body hidden>
+<section class="live-preview" aria-labelledby="live-preview-title" data-live-preview data-folded-card-preview="{{ $isFoldedCard ? 'true' : 'false' }}">
+    <div class="live-preview-body" id="live-preview-panel" data-live-preview-body>
         <div class="live-preview-heading">
             <div>
                 <p class="eyebrow">Pratonton Langsung</p>
-                <h2>Pratonton Kad Kahwin</h2>
+                <h2 id="live-preview-title">Live Card Preview</h2>
             </div>
-            <span>Anggaran paparan</span>
+            <span>Dikemas kini secara langsung</span>
         </div>
 
     <div class="preview-page-tabs" role="tablist" aria-label="Pilih halaman kad lipatan" data-folded-preview-tabs @if (! $isFoldedCard) hidden @endif>
@@ -119,6 +102,59 @@
         </div>
     @endforeach
 
-    <p class="preview-note">Pratonton ini membantu semakan susun atur. Hasil cetakan sebenar mungkin berbeza sedikit mengikut design yang dipilih.</p>
+    @foreach ($orderedPackageSides as $packageSide)
+        <section class="live-product-previews @if (! $loop->first) is-hidden @endif" data-live-product-preview="{{ $packageSide->side }}">
+            <div class="live-product-heading">
+                <div>
+                    <p class="eyebrow">Termasuk dalam pakej</p>
+                    <h3>Banner, Banting, Poster Anak Panah &amp; Sticker</h3>
+                </div>
+                <span>Pihak {{ ucfirst(strtolower($packageSide->side)) }}</span>
+            </div>
+
+            <div class="live-product-grid">
+                <article class="live-product live-product--banner" data-live-product-theme>
+                    <span class="live-product-label">Banner</span>
+                    <p data-preview-field="card_title">Walimatul Urus</p>
+                    <strong><span data-preview-field="groom_display">Nama Pengantin</span> <i>&amp;</i> <span data-preview-field="bride_display">Pasangan</span></strong>
+                    <small data-preview-field="event_date">Tarikh Majlis</small>
+                </article>
+
+                <article class="live-product live-product--banting" data-live-product-theme>
+                    <span class="live-product-label">Banting</span>
+                    <p data-preview-field="card_title">Walimatul Urus</p>
+                    <strong><span data-preview-field="groom_display">Nama Pengantin</span><i>&amp;</i><span data-preview-field="bride_display">Pasangan</span></strong>
+                    <small><span data-preview-field="day_name">HARI</span> · <span data-preview-field="event_date">Tarikh Majlis</span></small>
+                </article>
+
+                <article class="live-product live-product--arrow live-product--arrow-left" data-live-product-theme>
+                    <span class="live-product-label">Arrow Poster Kiri</span>
+                    <p>Jemputan Majlis</p>
+                    <strong><span data-preview-field="groom_display">Nama Pengantin</span> <i>&amp;</i> <span data-preview-field="bride_display">Pasangan</span></strong>
+                    <svg class="arrow-shape" viewBox="0 0 600 250" aria-hidden="true" focusable="false">
+                        <path d="M22 125 260 20v52h315v106H260v52Z" fill="#363636" stroke="#fff" stroke-width="15" stroke-linejoin="round" />
+                    </svg>
+                </article>
+
+                <article class="live-product live-product--arrow live-product--arrow-right" data-live-product-theme>
+                    <span class="live-product-label">Arrow Poster Kanan</span>
+                    <p>Jemputan Majlis</p>
+                    <strong><span data-preview-field="groom_display">Nama Pengantin</span> <i>&amp;</i> <span data-preview-field="bride_display">Pasangan</span></strong>
+                    <svg class="arrow-shape" viewBox="0 0 600 250" aria-hidden="true" focusable="false">
+                        <path d="M22 125 260 20v52h315v106H260v52Z" fill="#363636" stroke="#fff" stroke-width="15" stroke-linejoin="round" />
+                    </svg>
+                </article>
+
+                <article class="live-product live-product--sticker" data-live-product-theme>
+                    <span class="live-product-label">Sticker</span>
+                    <p>Terima Kasih</p>
+                    <strong><span data-preview-field="groom_display">Nama Pengantin</span> <i>&amp;</i> <span data-preview-field="bride_display">Pasangan</span></strong>
+                    <small data-preview-field="event_date">Tarikh Majlis</small>
+                </article>
+            </div>
+        </section>
+    @endforeach
+
+    <p class="preview-note">Ini ialah pratonton langsung untuk rujukan susun atur. Hasil cetakan sebenar mungkin berbeza sedikit mengikut design yang dipilih.</p>
     </div>
-</aside>
+</section>
