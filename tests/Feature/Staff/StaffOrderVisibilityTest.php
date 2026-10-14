@@ -14,6 +14,7 @@ use App\Services\Merge\GenerateMergeJobsForOrderService;
 use App\Services\Orders\ConfirmOrderDetailsService;
 use App\Services\Orders\CreateOrderService;
 use App\Services\Orders\SaveOrderDraftService;
+use Database\Seeders\KkkPackagePriceCatalogSeeder;
 use App\Services\Packing\AssignPackingJobService;
 use App\Services\Packing\InitializePackingJobForOrderService;
 use App\Services\Payments\CreateBalancePaymentService;
@@ -592,7 +593,7 @@ class StaffOrderVisibilityTest extends TestCase
         $this->actingAs($designer, 'staff')
             ->get(route('staff.orders.show', $order->order_id))
             ->assertOk()
-            ->assertSee('Packages')
+            ->assertSee('Pakej')
             ->assertSee('Kerja Design')
             ->assertDontSee('Ringkasan Tempahan')
             ->assertDontSee('<h2>Pelanggan</h2>', false)
@@ -620,7 +621,7 @@ class StaffOrderVisibilityTest extends TestCase
         $this->actingAs($production)
             ->get(route('staff.orders.show', $order->order_id))
             ->assertOk()
-            ->assertSee('Packages')
+            ->assertSee('Pakej')
             ->assertSee('Printing')
             ->assertDontSee('Order Summary')
             ->assertDontSee('<h2>Customer</h2>', false)
@@ -745,8 +746,8 @@ class StaffOrderVisibilityTest extends TestCase
             ->assertOk()
             ->assertSee('Muat Naik Versi Hasil Design')
             ->assertSee('Fail Sumber Hasil Design')
-            ->assertSee('Pratonton Pelanggan')
-            ->assertSee('Internal Note')
+            ->assertSee('preview pelanggan')
+            ->assertSee('Nota Dalaman')
             ->assertSee(
                 route('staff.design-jobs.artwork.store', $job),
                 false
@@ -926,7 +927,7 @@ class StaffOrderVisibilityTest extends TestCase
             ->assertOk()
             ->assertSee('Photoshop Auto Merge V11')
             ->assertSee('Muat Turun CSV Pelanggan')
-            ->assertSee('Open Photoshop')
+            ->assertSee('Buka Photoshop')
             ->assertSee(route('staff.orders.photoshop.csv', $order), false)
             ->assertSee(route('staff.orders.photoshop.launch', $order), false);
     }
@@ -988,6 +989,12 @@ class StaffOrderVisibilityTest extends TestCase
 
     private function initializeDesignJobs($order)
     {
+        User::factory()->create([
+            'role' => User::ROLE_DESIGNER,
+            'is_active' => true,
+            'is_design_lead' => true,
+        ]);
+
         app(GenerateMergeJobsForOrderService::class)
             ->generate($order);
 
@@ -1000,8 +1007,11 @@ class StaffOrderVisibilityTest extends TestCase
         ?string $singleSide = 'LELAKI',
         string $customerName = 'Staff Visibility Test'
     ) {
+        $this->seed(KkkPackagePriceCatalogSeeder::class);
+
         $data = [
             'package_count' => $packageCount,
+            'package_type' => 'PUTERI_MANIS',
             'customer_name' => $customerName,
         ];
 
@@ -1015,6 +1025,7 @@ class StaffOrderVisibilityTest extends TestCase
 
         foreach ($order->packageSides()->get() as $side) {
             $sides[$side->side] = [
+                'card_quantity' => $packageCount === 1 ? 200 : 100,
                 'design' => [
                     'theme' => $side->side === 'LELAKI'
                         ? 'SONGKET'
@@ -1109,6 +1120,12 @@ class StaffOrderVisibilityTest extends TestCase
         string $customerName = 'Paid Visibility Test'
     ) {
         $order = $this->approvedOrder($customerName);
+
+        User::factory()->create([
+            'role' => User::ROLE_PRODUCTION,
+            'is_active' => true,
+            'is_primary_production' => true,
+        ]);
 
         $payment = app(CreateBalancePaymentService::class)
             ->create($order->fresh(), '250.00');

@@ -6,6 +6,7 @@ use App\Http\Controllers\Admin\AdminPasswordResetController;
 use App\Http\Controllers\Admin\AdminStaffController;
 use App\Http\Controllers\CustomerArtworkReviewController;
 use App\Http\Controllers\CustomerBalanceReceiptController;
+use App\Http\Controllers\CustomerBillplzBalancePaymentController;
 use App\Http\Controllers\CustomerDashboardController;
 use App\Http\Controllers\CustomerDepositReceiptController;
 use App\Http\Controllers\CustomerOrderConfirmController;
@@ -64,6 +65,10 @@ Route::post('/semak-progress', [PublicOrderController::class, 'lookupProgress'])
 Route::post('/order/{orderId}/balance-receipt', [CustomerBalanceReceiptController::class, 'store'])
     ->middleware('throttle:10,1')
     ->name('orders.balance-receipt.store');
+
+Route::post('/order/{orderId}/balance-payment/billplz', [CustomerBillplzBalancePaymentController::class, 'store'])
+    ->middleware('throttle:5,1')
+    ->name('orders.balance-payment.billplz.store');
 
 /*
 |--------------------------------------------------------------------------

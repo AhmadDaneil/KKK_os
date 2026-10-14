@@ -12,6 +12,7 @@ use App\Services\Merge\GenerateMergeJobsForOrderService;
 use App\Services\Orders\ConfirmOrderDetailsService;
 use App\Services\Orders\CreateOrderService;
 use App\Services\Orders\SaveOrderDraftService;
+use Database\Seeders\KkkPackagePriceCatalogSeeder;
 use App\Services\Packing\InitializePackingJobForOrderService;
 use App\Services\Payments\CreateBalancePaymentService;
 use App\Services\Payments\HandlePaymentCallbackService;
@@ -65,7 +66,7 @@ class StaffJobAssignmentTest extends TestCase
 
         $response = $this->actingAs($admin, 'staff')->post(
             route('staff.print-jobs.assign', $job),
-            ['assigned_user_id' => $printing->id]
+            ['assigned_user_id' => $production->id]
         );
 
         $response->assertRedirect();
@@ -270,7 +271,7 @@ class StaffJobAssignmentTest extends TestCase
 
         $job = $this->designJob();
 
-        $response = $this->actingAs($admin, 'staff')
+        $response = $this->actingAs($admin, 'admin')
             ->from(route('staff.orders.index'))
             ->post(
                 route('admin.design-jobs.assign', $job),
@@ -281,7 +282,7 @@ class StaffJobAssignmentTest extends TestCase
             ->assertRedirect(route('staff.orders.index'))
             ->assertSessionHasErrors('assigned_user_id');
 
-        $this->assertNull($job->fresh()->assigned_user_id);
+        $this->assertSame($job->assigned_user_id, $job->fresh()->assigned_user_id);
     }
 
     public function test_admin_cannot_assign_job_to_inactive_staff(): void
@@ -295,7 +296,7 @@ class StaffJobAssignmentTest extends TestCase
 
         $job = $this->designJob();
 
-        $response = $this->actingAs($admin, 'staff')
+        $response = $this->actingAs($admin, 'admin')
             ->from(route('staff.orders.index'))
             ->post(
                 route('admin.design-jobs.assign', $job),
@@ -306,12 +307,13 @@ class StaffJobAssignmentTest extends TestCase
             ->assertRedirect(route('staff.orders.index'))
             ->assertSessionHasErrors('assigned_user_id');
 
-        $this->assertNull($job->fresh()->assigned_user_id);
+        $this->assertSame($job->assigned_user_id, $job->fresh()->assigned_user_id);
     }
 
     public function test_non_management_staff_cannot_use_assignment_endpoint(): void
     {
         $job = $this->designJob();
+        $originalAssigneeId = $job->assigned_user_id;
         $target = $this->staff(User::ROLE_DESIGNER);
 
         foreach ([
@@ -326,7 +328,7 @@ class StaffJobAssignmentTest extends TestCase
                 ['assigned_user_id' => $target->id]
             )->assertRedirect(route('admin.login'));
 
-            $this->assertNull($job->fresh()->assigned_user_id);
+            $this->assertSame($originalAssigneeId, $job->fresh()->assigned_user_id);
         }
     }
 
@@ -370,13 +372,14 @@ class StaffJobAssignmentTest extends TestCase
     {
         $designer = $this->staff(User::ROLE_DESIGNER);
         $job = $this->designJob();
+        $originalAssigneeId = $job->assigned_user_id;
 
         $this->post(
             route('staff.design-jobs.assign', $job),
             ['assigned_user_id' => $designer->id]
         )->assertRedirect(route('staff.login'));
 
-        $this->assertNull($job->fresh()->assigned_user_id);
+        $this->assertSame($originalAssigneeId, $job->fresh()->assigned_user_id);
     }
 
     public function test_two_package_design_sides_can_be_assigned_independently(): void
@@ -386,6 +389,12 @@ class StaffJobAssignmentTest extends TestCase
         $perempuanDesigner = $this->staff(User::ROLE_DESIGNER);
 
         $order = $this->confirmedOrder(2);
+
+        User::factory()->create([
+            'role' => User::ROLE_DESIGNER,
+            'is_active' => true,
+            'is_design_lead' => true,
+        ]);
 
         app(GenerateMergeJobsForOrderService::class)
             ->generate($order);
@@ -442,6 +451,12 @@ class StaffJobAssignmentTest extends TestCase
     {
         $order = $this->confirmedOrder();
 
+        User::factory()->create([
+            'role' => User::ROLE_DESIGNER,
+            'is_active' => true,
+            'is_design_lead' => true,
+        ]);
+
         app(GenerateMergeJobsForOrderService::class)
             ->generate($order);
 
@@ -465,8 +480,11 @@ class StaffJobAssignmentTest extends TestCase
 
     private function confirmedOrder(int $packageCount = 1)
     {
+        $this->seed(KkkPackagePriceCatalogSeeder::class);
+
         $order = app(CreateOrderService::class)->create([
             'package_count' => $packageCount,
+            'package_type' => 'PUTERI_MANIS',
             'side' => $packageCount === 1 ? 'LELAKI' : null,
             'customer_name' => 'Staff Assignment Test',
         ]);
@@ -487,6 +505,10 @@ class StaffJobAssignmentTest extends TestCase
                 'Ibu Perempuan',
                 'Dewan Perempuan'
             );
+        }
+
+        foreach ($sides as $side => $payload) {
+            $sides[$side]['card_quantity'] = $packageCount === 1 ? 200 : 100;
         }
 
         app(SaveOrderDraftService::class)->save($order, [
@@ -545,6 +567,18 @@ class StaffJobAssignmentTest extends TestCase
     private function approvedOrder()
     {
         $order = $this->confirmedOrder();
+
+        User::factory()->create([
+            'role' => User::ROLE_DESIGNER,
+            'is_active' => true,
+            'is_design_lead' => true,
+        ]);
+
+        User::factory()->create([
+            'role' => User::ROLE_PRODUCTION,
+            'is_active' => true,
+            'is_primary_production' => true,
+        ]);
 
         app(GenerateMergeJobsForOrderService::class)
             ->generate($order);

@@ -290,10 +290,20 @@
                     <p class="eyebrow">Pembayaran Tempahan</p>
                     <h2>Bayaran Deposit</h2>
                 </div>
-                @php($depositAmount = (float) config('kingkadkahwin.deposit.amount'))
                 <span class="deposit-amount">
-                    {{ $depositAmount > 0 ? 'RM '.number_format($depositAmount, 2) : 'Deposit' }}
+                    RM {{ number_format((float) $review['pricing']['deposit_amount'], 2) }}
                 </span>
+            </div>
+
+            <div class="review-grid">
+                <div class="review-item">
+                    <span class="review-label">Harga pakej kad</span>
+                    <span class="review-value">RM {{ number_format((float) $review['pricing']['package_amount'], 2) }}</span>
+                </div>
+                <div class="review-item">
+                    <span class="review-label">Jumlah harga pakej</span>
+                    <span class="review-value">RM {{ number_format((float) $review['pricing']['total_amount'], 2) }}</span>
+                </div>
             </div>
 
             <div class="deposit-notice">

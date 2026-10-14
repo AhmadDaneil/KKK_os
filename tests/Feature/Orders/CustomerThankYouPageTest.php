@@ -6,6 +6,7 @@ use App\Models\Order;
 use App\Services\Orders\CreateOrderService;
 use App\Services\Orders\GenerateOrderAccessLinkService;
 use App\Services\Orders\SaveOrderDraftService;
+use Database\Seeders\KkkPackagePriceCatalogSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
@@ -50,6 +51,8 @@ class CustomerThankYouPageTest extends TestCase
         $this->get(route('orders.review.show', ['orderId' => $order->order_id]))
             ->assertOk()
             ->assertSee('Bayaran Deposit')
+            ->assertSee('RM 188.00')
+            ->assertSee('RM 50.00')
             ->assertSee('Ini hanyalah bayaran deposit.')
             ->assertSee('deposit_receipt', false)
             ->assertSee('post_confirmation_liability_acknowledged', false);
@@ -84,6 +87,19 @@ class CustomerThankYouPageTest extends TestCase
         $payment = $order->fresh()->payments()->where('payment_type', 'BOOKING_DEPOSIT')->firstOrFail();
         $this->assertSame('PENDING', $payment->status);
         $this->assertSame('MANUAL_QR', $payment->provider);
+        $this->assertSame('50.00', $payment->amount);
+        $this->assertSame('MYR', $payment->currency);
+        $this->assertDatabaseHas('order_pricing_snapshots', [
+            'order_id' => $order->id,
+            'subtotal' => '188.00',
+            'total_amount' => '188.00',
+            'booking_amount' => '50.00',
+        ]);
+        $this->assertDatabaseHas('order_items', [
+            'order_id' => $order->id,
+            'item_code' => 'PUTERI_MANIS_CARD_200',
+            'line_total' => '188.00',
+        ]);
         $this->assertSame('RECEIPT_SUBMITTED', $order->fresh()->booking_payment_status);
         $this->assertTrue($order->fresh()->confirmation->confirmed_snapshot['post_confirmation_liability_acknowledged']);
         Storage::disk('local')->assertExists($payment->metadata['receipt_path']);
@@ -148,8 +164,10 @@ class CustomerThankYouPageTest extends TestCase
 
     private function completeOrder(): Order
     {
+        $this->seed(KkkPackagePriceCatalogSeeder::class);
         $order = app(CreateOrderService::class)->create([
             'package_count' => 1,
+            'package_type' => 'PUTERI_MANIS',
             'side' => 'LELAKI',
             'customer_name' => 'Customer Thank You',
         ]);
@@ -162,6 +180,7 @@ class CustomerThankYouPageTest extends TestCase
             ],
             'sides' => [
                 'LELAKI' => [
+                    'card_quantity' => 200,
                     'design' => ['design_code' => 'A101'],
                     'parents' => [
                         'father_name' => 'Abdullah bin Ali',

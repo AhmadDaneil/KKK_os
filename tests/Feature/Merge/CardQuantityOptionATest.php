@@ -7,6 +7,7 @@ use App\Services\Orders\ConfirmOrderDetailsService;
 use App\Services\Orders\CreateOrderService;
 use App\Services\Orders\SaveOrderDraftService;
 use App\Services\Photoshop\GeneratePhotoshopCsvForOrderService;
+use Database\Seeders\KkkPackagePriceCatalogSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -16,12 +17,13 @@ class CardQuantityOptionATest extends TestCase
 
     public function test_two_package_order_uses_one_order_quantity_for_both_merge_jobs_and_csv_rows(): void
     {
+        $this->seed(KkkPackagePriceCatalogSeeder::class);
+
         $order = app(CreateOrderService::class)->create([
             'package_count' => 2,
+            'package_type' => 'PUTERI_MANIS',
             'customer_name' => 'Quantity Option A',
         ]);
-
-        $order->forceFill(['card_quantity' => 500])->save();
 
         $sides = [];
 
@@ -29,6 +31,7 @@ class CardQuantityOptionATest extends TestCase
             $isLelaki = $side->side === 'LELAKI';
 
             $sides[$side->side] = [
+                'card_quantity' => $isLelaki ? 200 : 300,
                 'design' => [
                     'theme' => $isLelaki ? 'SONGKET' : 'ISLAMIC',
                     'design_code' => $isLelaki ? 'CKS-209' : 'CKI-820',

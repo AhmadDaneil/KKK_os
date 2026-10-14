@@ -18,6 +18,7 @@ class CreateOrderService
             $order = Order::create([
                 'order_id' => $this->orderIdGenerator->generate(),
                 'package_count' => $data['package_count'],
+                'package_type' => $data['package_type'] ?? null,
                 'package_format' => (int) $data['package_count'] === 2
                     ? ($data['package_format'] ?? 'SEPARATE')
                     : null,

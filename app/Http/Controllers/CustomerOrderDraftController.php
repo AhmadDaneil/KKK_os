@@ -60,6 +60,9 @@ class CustomerOrderDraftController extends Controller
             'sides.LELAKI.event.contacts' => ['sometimes', 'array'],
             'sides.LELAKI.event.contacts.*.contact_name' => ['nullable', 'string', 'max:255'],
             'sides.LELAKI.event.contacts.*.contact_phone' => ['nullable', 'string', 'regex:/^01\d{8,9}$/'],
+            'sides.LELAKI.card_quantity' => ['sometimes', 'nullable', 'integer', 'min:1'],
+            
+
 
             'sides.PEREMPUAN.design.theme' => ['nullable', 'string', 'max:255'],
             'sides.PEREMPUAN.design.design_code' => ['nullable', 'string', 'max:100'],
@@ -85,6 +88,7 @@ class CustomerOrderDraftController extends Controller
             'sides.PEREMPUAN.event.contacts' => ['sometimes', 'array'],
             'sides.PEREMPUAN.event.contacts.*.contact_name' => ['nullable', 'string', 'max:255'],
             'sides.PEREMPUAN.event.contacts.*.contact_phone' => ['nullable', 'string', 'regex:/^01\d{8,9}$/'],
+            'sides.PEREMPUAN.card_quantity' => ['sometimes', 'nullable', 'integer', 'min:1'],
 
             'fulfilment' => ['sometimes', 'array'],
             'fulfilment.method' => ['nullable', 'in:COURIER,PICKUP'],

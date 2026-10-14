@@ -94,6 +94,7 @@ class PublicOrderJourneyTest extends TestCase
     {
         $response = $this->post(route('public.orders.store'), [
             'package_count' => 1,
+            'package_type' => 'PUTERI_MANIS',
             'side' => 'LELAKI',
             'customer_name' => 'Pelanggan Baharu',
             'customer_email' => 'pelanggan@example.com',
@@ -102,6 +103,7 @@ class PublicOrderJourneyTest extends TestCase
 
         $order = Order::query()->firstOrFail();
 
+        $this->assertSame('PUTERI_MANIS', $order->package_type);
         $response->assertRedirect();
         $this->assertStringContainsString('/order/'.$order->order_id, $response->headers->get('Location'));
         $this->assertStringContainsString('token=', $response->headers->get('Location'));
@@ -113,6 +115,7 @@ class PublicOrderJourneyTest extends TestCase
     {
         $response = $this->post(route('public.orders.store'), [
             'package_count' => 2,
+            'package_type' => 'PUTERI_MANIS',
             'package_format' => 'FOLDED',
             'first_event_side' => 'PEREMPUAN',
             'customer_name' => 'Dua Majlis',
@@ -121,8 +124,10 @@ class PublicOrderJourneyTest extends TestCase
         ]);
 
         $order = Order::query()->firstOrFail();
+
         $response->assertRedirect();
         $this->assertSame(2, $order->package_count);
+        $this->assertSame('PUTERI_MANIS', $order->package_type);
         $this->assertSame('FOLDED', $order->package_format);
         $this->assertSame('PEREMPUAN', $order->first_event_side);
         $this->assertEqualsCanonicalizing(['LELAKI', 'PEREMPUAN'], $order->packageSides->pluck('side')->all());

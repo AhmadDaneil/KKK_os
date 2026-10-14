@@ -6,6 +6,10 @@ use App\Models\Order;
 
 class BuildFinalReviewService
 {
+    public function __construct(
+        private BuildOrderPricingService $pricing,
+    ) {}
+
     public function build(Order $order): array
     {
         $order->load([
@@ -18,6 +22,7 @@ class BuildFinalReviewService
 
         $couple = $order->couples->firstWhere('couple_number', 1);
         $secondCouple = $order->couples->firstWhere('couple_number', 2);
+        $pricing = $this->pricing->quote($order);
 
         return [
             'order_id' => $order->order_id,
@@ -27,6 +32,13 @@ class BuildFinalReviewService
             'package_format' => $order->package_format,
             'first_event_side' => $order->first_event_side,
             'status' => $order->status,
+            'pricing' => [
+                'currency' => $pricing['currency'],
+                'package_amount' => $pricing['package_amount'],
+                'total_amount' => $pricing['total_amount'],
+                'deposit_amount' => $pricing['deposit_amount'],
+                'catalog_item_code' => $pricing['package']['catalog_item']->code,
+            ],
 
             'couple' => [
                 'groom_name' => $couple?->groom_name,

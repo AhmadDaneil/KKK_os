@@ -14,6 +14,7 @@ use App\Services\Merge\GenerateMergeJobsForOrderService;
 use App\Services\Orders\ConfirmOrderDetailsService;
 use App\Services\Orders\CreateOrderService;
 use App\Services\Orders\SaveOrderDraftService;
+use Database\Seeders\KkkPackagePriceCatalogSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Exceptions;
@@ -175,13 +176,17 @@ class StaffDesignWorkflowTest extends TestCase
     public function test_other_designer_cannot_resume_correction_job(): void
     {
         $assignedDesigner = $this->designer();
-        $otherDesigner = $this->designer();
-
         $job = $this->correctionRequestedJob(
             $assignedDesigner
         );
+        $otherDesigner = $this->designer();
 
-        $this->actingAs($otherDesigner)
+        $this->assertNotSame(
+            $job->assigned_user_id,
+            $otherDesigner->id
+        );
+
+        $this->actingAs($otherDesigner, 'staff')
             ->post(
                 route(
                     'staff.design-jobs.resume-correction',
@@ -919,6 +924,16 @@ class StaffDesignWorkflowTest extends TestCase
                 'customer_preview' => UploadedFile::fake()->image(
                     $side.'-preview.jpg'
                 ),
+                'banner_preview' => UploadedFile::fake()->image(
+                    $side.'-banner.jpg',
+                    1200,
+                    600
+                ),
+                'banting_preview' => UploadedFile::fake()->image(
+                    $side.'-banting.jpg',
+                    600,
+                    1200
+                ),
                 'internal_note' => 'Artwork '.$job->side,
             ];
         }
@@ -1103,10 +1118,14 @@ class StaffDesignWorkflowTest extends TestCase
                     'ready-preview.jpg'
                 ),
                 'banner_preview' => UploadedFile::fake()->image(
-                    'ready-banner.jpg'
+                    'ready-banner.jpg',
+                    1200,
+                    600
                 ),
                 'banting_preview' => UploadedFile::fake()->image(
-                    'ready-banting.jpg'
+                    'ready-banting.jpg',
+                    600,
+                    1200
                 ),
             ]
         )
@@ -1125,7 +1144,7 @@ class StaffDesignWorkflowTest extends TestCase
             ->assertSessionHasNoErrors()
             ->assertSessionHas(
                 'status',
-                'Hasil design telah diluluskan secara dalaman.'
+                'Hasil design sedia untuk semakan pelanggan.'
             );
 
         $job->refresh();
@@ -1198,6 +1217,10 @@ class StaffDesignWorkflowTest extends TestCase
             [
                 'storage_path' => 'artworks/test/source.pdf',
                 'preview_storage_path' => 'artworks/test/preview.jpg',
+                'preview_files' => [
+                    ['path' => 'artworks/test/banner.jpg', 'artwork_type' => 'BANNER'],
+                    ['path' => 'artworks/test/banting.jpg', 'artwork_type' => 'BANTING'],
+                ],
                 'original_filename' => 'source.pdf',
                 'mime_type' => 'application/pdf',
             ],
@@ -1238,7 +1261,7 @@ class StaffDesignWorkflowTest extends TestCase
             $designer
         );
 
-        $this->actingAs($admin, 'staff')
+        $this->actingAs($admin, 'admin')
             ->post(
                 route('admin.design-jobs.mark-ready', $job)
             )
@@ -1322,10 +1345,10 @@ class StaffDesignWorkflowTest extends TestCase
                 [
                     'storage_path' => "artworks/{$job->side}/source.pdf",
                     'preview_storage_path' => "artworks/{$job->side}/preview.jpg",
-                    'preview_files' => [
-                        ['artwork_type' => 'BANNER'],
-                        ['artwork_type' => 'BANTING'],
-                    ],
+                'preview_files' => [
+                    ['path' => "artworks/{$job->side}/banner.jpg", 'artwork_type' => 'BANNER'],
+                    ['path' => "artworks/{$job->side}/banting.jpg", 'artwork_type' => 'BANTING'],
+                ],
                     'original_filename' => "{$job->side}.pdf",
                     'mime_type' => 'application/pdf',
                 ],
@@ -1478,10 +1501,13 @@ class StaffDesignWorkflowTest extends TestCase
     private function confirmedOrder(
         int $packageCount = 1
     ) {
+        $this->seed(KkkPackagePriceCatalogSeeder::class);
+
         $order = app(
             CreateOrderService::class
         )->create([
             'package_count' => $packageCount,
+            'package_type' => 'PUTERI_MANIS',
             'side' => $packageCount === 1
                     ? 'LELAKI'
                     : null,
@@ -1505,6 +1531,10 @@ class StaffDesignWorkflowTest extends TestCase
                     'Ibu Perempuan',
                     'Dewan Perempuan'
                 );
+        }
+
+        foreach ($sides as $side => $payload) {
+            $sides[$side]['card_quantity'] = $packageCount === 1 ? 200 : 100;
         }
 
         app(SaveOrderDraftService::class)

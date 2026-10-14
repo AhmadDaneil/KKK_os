@@ -12,6 +12,7 @@ use App\Services\Merge\GenerateMergeJobsForOrderService;
 use App\Services\Orders\ConfirmOrderDetailsService;
 use App\Services\Orders\CreateOrderService;
 use App\Services\Orders\SaveOrderDraftService;
+use Database\Seeders\KkkPackagePriceCatalogSeeder;
 use App\Services\Packing\InitializePackingJobForOrderService;
 use App\Services\Printing\InitializePrintJobsForOrderService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -62,7 +63,7 @@ class OrderProductionAssignmentTest extends TestCase
             ->get(route('staff.orders.index', ['workstream' => 'printing']))
             ->assertOk()
             ->assertSee($order->order_id)
-            ->assertSee('WAITING_FOR_PAYMENT');
+            ->assertSee('Design diluluskan');
 
         $this->actingAs($packingOperationManagement)
             ->get(route('staff.orders.index', ['workstream' => 'packing']))
@@ -180,6 +181,19 @@ class OrderProductionAssignmentTest extends TestCase
     private function approvedOrder()
     {
         $order = $this->confirmedOrder();
+
+        User::factory()->create([
+            'role' => User::ROLE_DESIGNER,
+            'is_active' => true,
+            'is_design_lead' => true,
+        ]);
+
+        User::factory()->create([
+            'role' => User::ROLE_PRODUCTION,
+            'is_active' => true,
+            'is_primary_production' => true,
+        ]);
+
         app(GenerateMergeJobsForOrderService::class)->generate($order);
         $designJobs = app(InitializeDesignJobsForOrderService::class)->initialize($order->fresh());
 
@@ -202,8 +216,10 @@ class OrderProductionAssignmentTest extends TestCase
 
     private function confirmedOrder()
     {
+        $this->seed(KkkPackagePriceCatalogSeeder::class);
         $order = app(CreateOrderService::class)->create([
             'package_count' => 1,
+            'package_type' => 'PUTERI_MANIS',
             'side' => 'LELAKI',
             'customer_name' => 'Production Assignment Test',
         ]);
@@ -213,6 +229,7 @@ class OrderProductionAssignmentTest extends TestCase
             'couple' => ['groom_name' => 'Muhammad Syafiq', 'bride_name' => 'Nur Awanis'],
             'sides' => [
                 'LELAKI' => [
+                    'card_quantity' => 200,
                     'design' => ['design_code' => 'L101'],
                     'parents' => ['father_name' => 'Bapa Lelaki', 'mother_name' => 'Ibu Lelaki'],
                     'event' => [

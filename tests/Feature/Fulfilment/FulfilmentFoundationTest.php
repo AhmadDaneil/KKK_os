@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Fulfilment;
 
+use App\Models\User;
 use App\Services\Design\ApproveArtworkService;
 use App\Services\Design\CreateArtworkVersionService;
 use App\Services\Design\InitializeDesignJobsForOrderService;
@@ -13,6 +14,7 @@ use App\Services\Merge\GenerateMergeJobsForOrderService;
 use App\Services\Orders\ConfirmOrderDetailsService;
 use App\Services\Orders\CreateOrderService;
 use App\Services\Orders\SaveOrderDraftService;
+use Database\Seeders\KkkPackagePriceCatalogSeeder;
 use App\Services\Packing\InitializePackingJobForOrderService;
 use App\Services\Packing\MarkPackingJobPackedService;
 use App\Services\Packing\StartPackingService;
@@ -432,8 +434,11 @@ class FulfilmentFoundationTest extends TestCase
         string $fulfilmentMethod,
         ?string $singleSide = null
     ) {
+        $this->seed(KkkPackagePriceCatalogSeeder::class);
+
         $data = [
             'package_count' => $packageCount,
+            'package_type' => 'PUTERI_MANIS',
             'customer_name' => 'Fulfilment Test',
         ];
 
@@ -447,6 +452,7 @@ class FulfilmentFoundationTest extends TestCase
 
         foreach ($order->packageSides()->get() as $side) {
             $sides[$side->side] = [
+                'card_quantity' => $packageCount === 1 ? 200 : 100,
                 'design' => [
                     'design_code' => $side->side === 'LELAKI' ? 'L101' : 'P202',
                 ],
@@ -489,6 +495,18 @@ class FulfilmentFoundationTest extends TestCase
         ]);
 
         $order = app(ConfirmOrderDetailsService::class)->confirm($order->fresh());
+
+        User::factory()->create([
+            'role' => User::ROLE_DESIGNER,
+            'is_active' => true,
+            'is_design_lead' => true,
+        ]);
+
+        User::factory()->create([
+            'role' => User::ROLE_PRODUCTION,
+            'is_active' => true,
+            'is_primary_production' => true,
+        ]);
 
         app(GenerateMergeJobsForOrderService::class)->generate($order);
         $designJobs = app(InitializeDesignJobsForOrderService::class)

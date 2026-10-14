@@ -21,6 +21,7 @@ class Order extends Model
     protected $fillable = [
         'order_id',
         'package_count',
+        'package_type',
         'package_format',
         'first_event_side',
         'customer_name',

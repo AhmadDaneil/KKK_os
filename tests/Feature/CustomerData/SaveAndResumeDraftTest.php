@@ -5,6 +5,7 @@ namespace Tests\Feature\CustomerData;
 use App\Services\Orders\CreateOrderService;
 use App\Services\Orders\GenerateOrderAccessLinkService;
 use App\Services\Orders\SaveOrderDraftService;
+use Database\Seeders\KkkPackagePriceCatalogSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Http\UploadedFile;
@@ -95,19 +96,35 @@ class SaveAndResumeDraftTest extends TestCase
 
     public function test_two_package_draft_keeps_lelaki_and_perempuan_data_separate(): void
     {
+        $this->seed(KkkPackagePriceCatalogSeeder::class);
+
         $order = app(CreateOrderService::class)->create([
             'package_count' => 2,
+            'package_type' => 'PUTERI_MANIS',
         ]);
 
         $saved = app(SaveOrderDraftService::class)->save($order, [
             'sides' => [
-                'LELAKI' => ['design' => ['design_code' => 'l100']],
-                'PEREMPUAN' => ['design' => ['design_code' => 'p200']],
+                'LELAKI' => [
+                    'card_quantity' => 100,
+                    'design' => ['design_code' => 'l100'],
+                ],
+                'PEREMPUAN' => [
+                    'card_quantity' => 300,
+                    'design' => ['design_code' => 'p200'],
+                ],
             ],
-        ]);
+        ],
+        );
 
-        $this->assertSame('L100', $saved->packageSides->firstWhere('side', 'LELAKI')->design->design_code);
-        $this->assertSame('P200', $saved->packageSides->firstWhere('side', 'PEREMPUAN')->design->design_code);
+        $lelaki = $saved->packageSides->firstWhere('side', 'LELAKI');
+        $perempuan = $saved->packageSides->firstWhere('side', 'PEREMPUAN');
+
+        $this->assertSame(100, $lelaki->card_quantity);
+        $this->assertSame(300, $perempuan->card_quantity);
+        $this->assertSame(400, $saved->card_quantity);
+        $this->assertSame('L100', $lelaki->design->design_code);
+        $this->assertSame('P200', $perempuan->design->design_code);
         $this->assertDatabaseCount('orders', 1);
     }
 
@@ -560,54 +577,66 @@ public function test_dashboard_rejects_card_image_larger_than_ten_megabytes(): v
 
     public function test_dashboard_can_save_and_resume_order_level_card_quantity(): void
     {
-    $order = app(CreateOrderService::class)->create([
-        'package_count' => 1,
-        'side' => 'PEREMPUAN',
-        'customer_name' => 'Card Quantity HTTP Test',
-    ]);
+        $this->seed(\Database\Seeders\KkkPackagePriceCatalogSeeder::class);
 
-    $url = app(GenerateOrderAccessLinkService::class)->generate($order);
+        $this->assertDatabaseHas('price_catalog_items', [
+            'code' => 'PUTERI_MANIS_CARD_500',
+        ]);
 
-    $path = (string) parse_url($url, PHP_URL_PATH);
-    $query = (string) parse_url($url, PHP_URL_QUERY);
+        $order = app(CreateOrderService::class)->create([
+            'package_count' => 1,
+            'side' => 'PEREMPUAN',
+            'package_type' => 'PUTERI_MANIS',
+            'customer_name' => 'Card Quantity HTTP Test',
+        ]);
 
-    $magicLinkRequest = $query === ''
-        ? $path
-        : $path.'?'.$query;
+        $this->assertSame('PUTERI_MANIS', $order->package_type);
 
-    $this->get($magicLinkRequest)
-        ->assertRedirect(route('orders.dashboard', [
+        $url = app(GenerateOrderAccessLinkService::class)->generate($order);
+        $path = (string) parse_url($url, PHP_URL_PATH);
+        $query = (string) parse_url($url, PHP_URL_QUERY);
+        $magicLinkRequest = $query === '' ? $path : $path.'?'.$query;
+
+        $this->get($magicLinkRequest)
+            ->assertRedirect(route('orders.dashboard', [
+                'orderId' => $order->order_id,
+            ]));
+
+        $response = $this->post(route('orders.draft.update', [
+            'orderId' => $order->order_id,
+        ]), [
+            'sides' => [
+                'PEREMPUAN' => [
+                    'card_quantity' => 500,
+                ],
+            ],
+        ]);
+
+        $response->assertRedirect(route('orders.dashboard', [
             'orderId' => $order->order_id,
         ]));
 
-    $response = $this->post(route('orders.draft.update', [
-        'orderId' => $order->order_id,
-    ]), [
-        'card_quantity' => 500,
-    ]);
+        $order->refresh();
 
-    $response->assertRedirect(route('orders.dashboard', [
-        'orderId' => $order->order_id,
-    ]));
+        $this->assertSame(500, $order->card_quantity);
 
-    $order->refresh();
+        $this->assertDatabaseHas('orders', [
+            'id' => $order->id,
+            'card_quantity' => 500,
+        ]);
 
-    $this->assertSame(500, $order->card_quantity);
-
-    $this->assertDatabaseHas('orders', [
-        'id' => $order->id,
-        'card_quantity' => 500,
-    ]);
-
-    $this->get(route('orders.dashboard', [
-        'orderId' => $order->order_id,
-    ]))
-        ->assertOk()
-        ->assertSee('Kuantiti Kad')
-        ->assertSee('name="card_quantity"', false)
-        ->assertSee('value="500"', false);
+        $this->get(route('orders.dashboard', [
+            'orderId' => $order->order_id,
+        ]))
+            ->assertOk()
+            ->assertViewHas(
+                'quantityOptions',
+                fn ($options) => $options->contains(500)
+            )
+            ->assertSee('Kuantiti Kad')
+            ->assertSee('name="sides[PEREMPUAN][card_quantity]"', false)
+            ->assertSee('value="500"', false);
     }
-
     public function test_dashboard_rejects_invalid_card_quantity(): void
     {
         $order = app(CreateOrderService::class)->create([
@@ -637,7 +666,11 @@ public function test_dashboard_rejects_card_image_larger_than_ten_megabytes(): v
         ->post(route('orders.draft.update', [
             'orderId' => $order->order_id,
         ]), [
-            'card_quantity' => 0,
+            'sides' => [
+                'LELAKI' => [
+                    'card_quantity' => 0,
+                ],
+            ],
         ]);
 
     $response
@@ -645,7 +678,7 @@ public function test_dashboard_rejects_card_image_larger_than_ten_megabytes(): v
             'orderId' => $order->order_id,
         ]))
         ->assertSessionHasErrors([
-            'card_quantity',
+            'sides.LELAKI.card_quantity',
         ]);
 
     $this->assertNull(
@@ -655,6 +688,7 @@ public function test_dashboard_rejects_card_image_larger_than_ten_megabytes(): v
 
     public function test_confirmed_order_cannot_be_changed_by_save_draft(): void
 {
+    $this->seed(\Database\Seeders\KkkPackagePriceCatalogSeeder::class);
     $order = app(CreateOrderService::class)->create([
         'package_count' => 1,
         'side' => 'LELAKI',

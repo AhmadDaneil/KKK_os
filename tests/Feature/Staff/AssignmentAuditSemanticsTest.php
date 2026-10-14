@@ -13,6 +13,7 @@ use App\Services\Merge\GenerateMergeJobsForOrderService;
 use App\Services\Orders\ConfirmOrderDetailsService;
 use App\Services\Orders\CreateOrderService;
 use App\Services\Orders\SaveOrderDraftService;
+use Database\Seeders\KkkPackagePriceCatalogSeeder;
 use App\Services\Packing\AssignPackingJobService;
 use App\Services\Packing\InitializePackingJobForOrderService;
 use App\Services\Payments\CreateBalancePaymentService;
@@ -199,8 +200,16 @@ class AssignmentAuditSemanticsTest extends TestCase
 
     private function confirmedOrder()
     {
+        $this->seed(KkkPackagePriceCatalogSeeder::class);
+        User::factory()->create([
+            'role' => User::ROLE_DESIGNER,
+            'is_active' => true,
+            'is_design_lead' => true,
+        ]);
+
         $order = app(CreateOrderService::class)->create([
             'package_count' => 1,
+            'package_type' => 'PUTERI_MANIS',
             'side' => 'LELAKI',
             'customer_name' => 'Assignment Audit Test',
         ]);
@@ -213,6 +222,7 @@ class AssignmentAuditSemanticsTest extends TestCase
             ],
             'sides' => [
                 'LELAKI' => [
+                    'card_quantity' => 200,
                     'design' => [
                         'design_code' => 'L101',
                     ],
@@ -254,6 +264,12 @@ class AssignmentAuditSemanticsTest extends TestCase
     private function approvedOrder()
     {
         $order = $this->confirmedOrder();
+
+        User::factory()->create([
+            'role' => User::ROLE_PRODUCTION,
+            'is_active' => true,
+            'is_primary_production' => true,
+        ]);
 
         app(GenerateMergeJobsForOrderService::class)->generate($order);
 

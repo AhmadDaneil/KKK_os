@@ -6,10 +6,11 @@ use Illuminate\Database\Eloquent\Model;
 
 class OrderPackageSide extends Model
 {
-    protected $fillable = ['order_id', 'side', 'additional_products'];
+    protected $fillable = ['order_id', 'side', 'card_quantity', 'additional_products'];
 
     protected $casts = [
         'additional_products' => 'array',
+        'card_quantity' => 'integer',
     ];
 
     public function order()

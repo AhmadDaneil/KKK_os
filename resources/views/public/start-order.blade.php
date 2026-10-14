@@ -35,6 +35,22 @@
                 @error('package_count')<p class="field-error">{{ $message }}</p>@enderror
             </fieldset>
 
+            <fieldset>
+                <label for="package-type">Jenis pakej kad</label>
+                <select id="package-type" name="package_type" required>
+                    <option value="">Pilih jenis pakej</option>
+                    <option value="PUTERI_MANIS" @selected(old('package_type') === 'PUTERI_MANIS')>
+                        Puteri Manis
+                    </option>
+                    <option value="JELATA" @selected(old('package_type') === 'JELATA')>
+                        Jelata
+                    </option>
+                </select>
+                @error('package_type')
+                    <p class="field-error">{{ $message }}</p>
+                @enderror
+            </fieldset>
+
             <div id="side-field">
                 <label for="side">Pakej untuk pihak</label>
                 <select id="side" name="side">

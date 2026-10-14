@@ -41,8 +41,8 @@
                 @if (($orderStatus ?? null) === 'DESIGN_APPROVED' && ($balance['status'] ?? null) !== 'PAID')
                     <div class="balance-payment-notice" role="status">
                         <div>
-                            <strong>Tindakan diperlukan: buat pembayaran penuh</strong>
-                            <span>Hasil design sudah diluluskan. Sila buat bayaran penuh dan hantar resit supaya tempahan boleh diteruskan ke cetakan.</span>
+                            <strong>Tindakan diperlukan: jelaskan baki bayaran</strong>
+                            <span>Hasil design sudah diluluskan. Sila jelaskan baki bayaran supaya tempahan boleh diteruskan ke cetakan.</span>
                         </div>
                         <a href="#balance-payment">Buat pembayaran</a>
                     </div>
@@ -79,19 +79,35 @@
                 @if (($orderStatus ?? null) === 'DESIGN_APPROVED' || ! empty($balance))
                     <section id="balance-payment" class="balance-payment-card" data-status="{{ strtolower($balance['status'] ?? 'new') }}">
                         <div class="balance-payment-heading">
-                            <div><small>PEMBAYARAN PENUH</small><h4>Bayaran baki selepas hasil design diluluskan</h4></div>
+                            <div><small>PEMBAYARAN BAKI</small><h4>Bayaran baki selepas hasil design diluluskan</h4></div>
                             @if ((float) ($balanceAmount ?? 0) > 0)<strong>RM {{ number_format((float) $balanceAmount, 2) }}</strong>@endif
                         </div>
 
                         @if (($balance['status'] ?? null) === 'PENDING')
-                            <div class="balance-status-message"><strong>Resit sedang disemak</strong><span>Pengurusan Operasi akan mengesahkan pembayaran sebelum cetakan dimulakan.</span></div>
+                            @if (($balance['provider'] ?? null) === 'BILLPLZ')
+                                <div class="balance-status-message"><strong>Menunggu bayaran Billplz</strong><span>Lengkapkan pembayaran pada halaman Billplz untuk meneruskan tempahan.</span></div>
+                                <form method="POST" action="{{ route('orders.balance-payment.billplz.store', ['orderId' => $orderId]) }}">
+                                    @csrf
+                                    <button class="button button-primary" type="submit">Teruskan Pembayaran Billplz</button>
+                                </form>
+                                @error('billplz')<p class="field-error" role="alert">{{ $message }}</p>@enderror
+                            @else
+                                <div class="balance-status-message"><strong>Resit sedang disemak</strong><span>Pengurusan Operasi akan mengesahkan pembayaran sebelum cetakan dimulakan.</span></div>
+                            @endif
                         @elseif (($balance['status'] ?? null) === 'PAID')
                             <div class="balance-status-message is-paid"><strong>Bayaran penuh disahkan</strong><span>Tempahan anda akan diteruskan ke proses cetakan.</span></div>
                         @else
                             @if (($balance['status'] ?? null) === 'FAILED')
                                 <div class="balance-status-message is-failed"><strong>Resit ditolak</strong><span>{{ $balance['reason'] ?: 'Sila buat semakan dan hantar resit baharu.' }}</span></div>
                             @endif
-                            <p>Imbas QR di bawah untuk membuat pembayaran penuh, kemudian lampirkan resit sebagai bukti pembayaran.</p>
+                            @if (config('services.billplz.enabled') && $balanceBillplzAmount !== null && (float) $balanceBillplzAmount > 0)
+                                <form method="POST" action="{{ route('orders.balance-payment.billplz.store', ['orderId' => $orderId]) }}">
+                                    @csrf
+                                    <button class="button button-primary" type="submit">Bayar baki RM {{ number_format((float) $balanceBillplzAmount, 2) }} melalui Billplz</button>
+                                </form>
+                                @error('billplz')<p class="field-error" role="alert">{{ $message }}</p>@enderror
+                            @endif
+                            <p>Imbas QR untuk membayar baki, kemudian lampirkan resit sebagai bukti pembayaran.</p>
                             <div class="balance-payment-layout">
                                 <div class="balance-qr-panel">
                                     @if ($balanceQrImage && file_exists(public_path($balanceQrImage)))
