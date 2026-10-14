@@ -3,21 +3,22 @@
 namespace App\Services\Design;
 
 use App\Models\DesignJob;
+use App\Models\User;
 use Illuminate\Support\Facades\DB;
 use RuntimeException;
 
 class ApproveArtworkService
 {
-    public function approve(DesignJob $designJob): DesignJob
+    public function approve(DesignJob $designJob, ?User $actor = null): DesignJob
     {
-        return DB::transaction(function () use ($designJob) {
+        return DB::transaction(function () use ($designJob, $actor) {
             $designJob->refresh();
 
             $designJob->loadMissing('order');
 
             if ($designJob->order->isTerminalOperationalStatus()) {
                 throw new RuntimeException(
-                "Design job {$designJob->id} cannot be approved because the order is terminal."
+                    "Design job {$designJob->id} cannot be approved because the order is terminal."
                 );
             }
 
@@ -38,6 +39,7 @@ class ApproveArtworkService
             $designJob->reviewActions()->create([
                 'artwork_version_id' => $latestArtwork->id,
                 'action' => 'DESIGN_APPROVED',
+                'actor_user_id' => $actor?->id,
                 'acted_at' => now(),
             ]);
 
@@ -45,6 +47,7 @@ class ApproveArtworkService
                 'event_type' => 'DESIGN_APPROVED',
                 'from_status' => 'DESIGN_READY',
                 'to_status' => 'DESIGN_APPROVED',
+                'actor_user_id' => $actor?->id,
                 'occurred_at' => now(),
                 'metadata' => [
                     'artwork_version_id' => $latestArtwork->id,
