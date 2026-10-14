@@ -200,25 +200,37 @@ html[data-customer-theme="dark"] .customer-policies article > p { color:#c3d2ca!
 
 .live-product--banner {
     grid-column: 1 / -1;
+    grid-row: 1;
     max-width: 960px;
     aspect-ratio: 2 / 1;
 }
 
 .live-product--banting {
-    grid-column: auto;
+    grid-column: 1;
+    grid-row: 2 / span 2;
     max-width: 320px;
     aspect-ratio: 1 / 2;
 }
 
 .live-product--arrow {
-    grid-column: auto;
+    grid-row: 2;
     max-width: 320px;
     aspect-ratio: 904 / 1280;
     padding-top: clamp(46px, 18%, 80px);
 }
 
-.live-product--sticker {
+.live-product--arrow-left {
     grid-column: 2;
+}
+
+.live-product--arrow-right {
+    grid-column: 3;
+}
+
+.live-product--sticker {
+    grid-column: 2 / 4;
+    grid-row: 3;
+    justify-self: center;
     max-width: 320px;
     aspect-ratio: 1 / 1;
     border-radius: 8px;
@@ -302,8 +314,26 @@ html[data-customer-theme="dark"] .wedding-card-back .card-social-logo {
         grid-column: 1 / -1;
     }
 
+    .live-product--banting {
+        grid-column: 1 / -1;
+        grid-row: auto;
+    }
+
+    .live-product--arrow {
+        grid-row: auto;
+    }
+
+    .live-product--arrow-left {
+        grid-column: 1;
+    }
+
+    .live-product--arrow-right {
+        grid-column: 2;
+    }
+
     .live-product--sticker {
         grid-column: 1 / -1;
+        grid-row: auto;
     }
 }
 

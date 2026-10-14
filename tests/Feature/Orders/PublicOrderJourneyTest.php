@@ -158,6 +158,25 @@ class PublicOrderJourneyTest extends TestCase
             ->assertDontSee('0199999999');
     }
 
+    public function test_approved_design_progress_hides_redundant_status_copy(): void
+    {
+        $order = app(CreateOrderService::class)->create([
+            'package_count' => 1,
+            'side' => 'LELAKI',
+            'customer_phone' => '0123456789',
+        ]);
+        $order->update(['status' => 'DESIGN_APPROVED']);
+
+        $this->post(route('public.orders.progress.lookup'), [
+            'order_id' => $order->order_id,
+        ])
+            ->assertOk()
+            ->assertSee('70%')
+            ->assertSee('Bayaran baki selepas hasil design diluluskan')
+            ->assertDontSee('Hasil Design Diluluskan')
+            ->assertDontSee('Hasil design telah diluluskan secara dalaman.');
+    }
+
     public function test_printed_order_shows_completed_printing_progress(): void
     {
         $order = app(CreateOrderService::class)->create([

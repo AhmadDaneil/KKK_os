@@ -67,8 +67,10 @@
                         @endforeach
                     </ol>
                 </section>
-                <h3>{{ $progress['label'] }}</h3>
-                <p>{{ $progress['message'] }}</p>
+                @if (($orderStatus ?? null) !== 'DESIGN_APPROVED')
+                    <h3>{{ $progress['label'] }}</h3>
+                    <p>{{ $progress['message'] }}</p>
+                @endif
                 @if ($deposit)
                     <div class="deposit-public-status" data-status="{{ strtolower($deposit['status']) }}">
                         <span>Deposit</span>
