@@ -49,6 +49,7 @@ class BuildCanonicalMergePayloadService
                 // one approved card quantity belongs to the whole business order.
                 // Both 2-package merge jobs inherit this same value.
                 'card_quantity' => $order->card_quantity,
+                'jumlah_hantaran' => (int) $order->package_count === 2 ? $order->jumlah_hantaran : null,
             ],
 
             'generic' => [
@@ -60,6 +61,7 @@ class BuildCanonicalMergePayloadService
                 'masa_raw' => $event->meal_time,
                 'alamat' => $event->full_address,
                 'design_code' => $packageSide->design->design_code,
+                'jumlah_hantaran' => (int) $order->package_count === 2 ? $order->jumlah_hantaran : null,
             ],
 
             'couple' => [

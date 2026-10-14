@@ -415,7 +415,7 @@
                     @if ($canUsePhotoshop)
                         <div class="staff-design-tools">
                             <div>
-                                <p class="staff-kicker">Photoshop Auto Merge V11</p>
+                                <p class="staff-kicker">Photoshop Auto Merge V34</p>
                                 <h3>Sediakan tempahan pelanggan ini dalam Photoshop</h3>
                                 <ol>
                                     <li>Muat turun fail CSV tempahan pelanggan.</li>

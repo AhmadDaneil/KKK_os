@@ -31,6 +31,7 @@ class BuildFinalReviewService
             'card_quantity' => $order->card_quantity,
             'package_format' => $order->package_format,
             'first_event_side' => $order->first_event_side,
+            'jumlah_hantaran' => (int) $order->package_count === 2 ? $order->jumlah_hantaran : null,
             'status' => $order->status,
             'pricing' => [
                 'currency' => $pricing['currency'],

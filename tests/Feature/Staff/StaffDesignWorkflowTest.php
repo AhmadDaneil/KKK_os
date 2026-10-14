@@ -1345,10 +1345,10 @@ class StaffDesignWorkflowTest extends TestCase
                 [
                     'storage_path' => "artworks/{$job->side}/source.pdf",
                     'preview_storage_path' => "artworks/{$job->side}/preview.jpg",
-                'preview_files' => [
-                    ['path' => "artworks/{$job->side}/banner.jpg", 'artwork_type' => 'BANNER'],
-                    ['path' => "artworks/{$job->side}/banting.jpg", 'artwork_type' => 'BANTING'],
-                ],
+                    'preview_files' => [
+                        ['path' => "artworks/{$job->side}/banner.jpg", 'artwork_type' => 'BANNER'],
+                        ['path' => "artworks/{$job->side}/banting.jpg", 'artwork_type' => 'BANTING'],
+                    ],
                     'original_filename' => "{$job->side}.pdf",
                     'mime_type' => 'application/pdf',
                 ],
@@ -1542,6 +1542,7 @@ class StaffDesignWorkflowTest extends TestCase
                 $order,
                 [
                     'card_quantity' => 200,
+                    ...($packageCount === 2 ? ['jumlah_hantaran' => 'RM 8,000.00'] : []),
                     'couple' => [
                         'groom_name' => 'Muhammad Syafiq',
                         'bride_name' => 'Nur Awanis',

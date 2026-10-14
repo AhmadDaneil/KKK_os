@@ -59,6 +59,7 @@ class CardQuantityOptionATest extends TestCase
         }
 
         app(SaveOrderDraftService::class)->save($order, [
+            'jumlah_hantaran' => 'RM 8,000.00',
             'couple' => [
                 'groom_name' => 'Muhammad Syafiq',
                 'groom_abbreviation' => 'Syafiq',
@@ -107,8 +108,9 @@ class CardQuantityOptionATest extends TestCase
 
         fclose($handle);
 
-        $this->assertCount(3, $rows);
+        $this->assertCount(4, $rows);
         $this->assertSame('500', $rows[1][1]);
         $this->assertSame('500', $rows[2][1]);
+        $this->assertSame('CEK_HANTARAN', $rows[3][5]);
     }
 }

@@ -203,6 +203,11 @@
                             <option value="PEREMPUAN" @selected($firstEventSide === 'PEREMPUAN')>Pihak Perempuan</option>
                         </select>
                     </div>
+                    <div>
+                        <label for="jumlah-hantaran">Jumlah Hantaran</label>
+                        <input id="jumlah-hantaran" name="jumlah_hantaran" type="text" maxlength="255" value="{{ old('jumlah_hantaran', $order->jumlah_hantaran) }}" placeholder="Contoh: RM 10,000.00 atau 10 dinar emas">
+                        <p class="field-help">Isi sebelum sahkan tempahan untuk Mockup Cek Hantaran percuma.</p>
+                    </div>
                 </div>
             </fieldset>
         @endif

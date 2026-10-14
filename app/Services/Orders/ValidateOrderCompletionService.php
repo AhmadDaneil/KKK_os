@@ -18,6 +18,10 @@ class ValidateOrderCompletionService
 
         $missing = [];
 
+        if ((int) $order->package_count === 2 && blank($order->jumlah_hantaran)) {
+            $missing[] = 'Jumlah Hantaran';
+        }
+
         if (! $order->card_quantity || (int) $order->card_quantity < 1) {
             $missing[] = 'Kuantiti kad';
         }

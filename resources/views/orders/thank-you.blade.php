@@ -46,6 +46,9 @@
                     <dt>Jumlah Pakej</dt>
                     <dd>{{ $review['package_count'] }}</dd>
                 </div>
+                @if ($review['package_count'] === 2)
+                    <div><dt>Jumlah Hantaran</dt><dd>{{ $review['jumlah_hantaran'] ?: '-' }}</dd></div>
+                @endif
                 <div>
                     <dt>Nama Pengantin Lelaki</dt>
                     <dd>{{ $review['couple']['groom_name'] ?: '-' }}</dd>

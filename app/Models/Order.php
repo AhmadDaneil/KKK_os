@@ -24,6 +24,7 @@ class Order extends Model
         'package_type',
         'package_format',
         'first_event_side',
+        'jumlah_hantaran',
         'customer_name',
         'customer_email',
         'customer_phone',

@@ -35,6 +35,7 @@ class CustomerOrderDraftController extends Controller
             'sides' => ['sometimes', 'array'],
             'package_format' => ['sometimes', 'string', 'in:SEPARATE,FOLDED'],
             'first_event_side' => ['sometimes', 'string', 'in:LELAKI,PEREMPUAN'],
+            'jumlah_hantaran' => [(int) $order->package_count === 2 ? 'sometimes' : 'prohibited', 'nullable', 'string', 'max:255'],
 
             'sides.LELAKI.design.theme' => ['nullable', 'string', 'max:255'],
             'sides.LELAKI.design.design_code' => ['nullable', 'string', 'max:100'],
@@ -61,8 +62,6 @@ class CustomerOrderDraftController extends Controller
             'sides.LELAKI.event.contacts.*.contact_name' => ['nullable', 'string', 'max:255'],
             'sides.LELAKI.event.contacts.*.contact_phone' => ['nullable', 'string', 'regex:/^01\d{8,9}$/'],
             'sides.LELAKI.card_quantity' => ['sometimes', 'nullable', 'integer', 'min:1'],
-            
-
 
             'sides.PEREMPUAN.design.theme' => ['nullable', 'string', 'max:255'],
             'sides.PEREMPUAN.design.design_code' => ['nullable', 'string', 'max:100'],
