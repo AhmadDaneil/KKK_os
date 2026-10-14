@@ -419,11 +419,11 @@
                                 <h3>Sediakan tempahan pelanggan ini dalam Photoshop</h3>
                                 <ol>
                                     <li>Muat turun fail CSV tempahan pelanggan.</li>
-                                    <li>Buka Photoshop; JavaScript yang diluluskan akan bermula secara automatik.</li>
+                                    <li>Buka Photoshop pada workstation Windows dan jalankan JavaScript V11 yang diluluskan.</li>
                                     <li>Pilih folder ROOT, kemudian pilih fail CSV yang telah dimuat turun.</li>
                                 </ol>
                                 <p class="staff-design-tools-note">
-                                    Photoshop akan dibuka pada komputer Windows yang menjalankan KKK OS.
+                                    KKK OS menyediakan CSV pelanggan untuk aliran Photoshop Auto Merge.
                                 </p>
                             </div>
 
@@ -434,17 +434,6 @@
                                 >
                                     Muat Turun CSV Pelanggan
                                 </a>
-
-                                <form
-                                    method="POST"
-                                    action="{{ route('staff.orders.photoshop.launch', $order) }}"
-                                >
-                                    @csrf
-
-                                    <button type="submit" class="staff-button staff-button-primary">
-                                        Buka Photoshop
-                                    </button>
-                                </form>
                             </div>
                         </div>
                     @endif
