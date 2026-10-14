@@ -39,7 +39,7 @@ class GenerateMergeJobsTest extends TestCase
 
         $job = $jobs->first();
 
-        $this->assertSame($order->order_id . '-L', $job->job_id);
+        $this->assertSame($order->order_id.'-L', $job->job_id);
         $this->assertSame('LELAKI', $job->side);
         $this->assertSame('L101', data_get($job->canonical_payload, 'generic.design_code'));
         $this->assertSame('Bapa Lelaki', data_get($job->canonical_payload, 'generic.namabapa'));
@@ -57,12 +57,12 @@ class GenerateMergeJobsTest extends TestCase
         $this->assertDatabaseCount('merge_jobs', 2);
 
         $this->assertDatabaseHas('merge_jobs', [
-            'job_id' => $order->order_id . '-L',
+            'job_id' => $order->order_id.'-L',
             'side' => 'LELAKI',
         ]);
 
         $this->assertDatabaseHas('merge_jobs', [
-            'job_id' => $order->order_id . '-P',
+            'job_id' => $order->order_id.'-P',
             'side' => 'PEREMPUAN',
         ]);
 
@@ -127,6 +127,7 @@ class GenerateMergeJobsTest extends TestCase
 
         app(SaveOrderDraftService::class)->save($order, [
             'card_quantity' => 200,
+            ...($packageCount === 2 ? ['jumlah_hantaran' => 'RM 8,000.00'] : []),
             'couple' => [
                 'groom_name' => 'Muhammad Syafiq',
                 'bride_name' => 'Nur Awanis',
@@ -158,7 +159,7 @@ class GenerateMergeJobsTest extends TestCase
                 'event_date' => '2026-12-20',
                 'meal_time' => '12:00',
                 'venue_name' => $venue,
-                'full_address' => 'Alamat ' . $venue,
+                'full_address' => 'Alamat '.$venue,
                 'contacts' => [
                     1 => [
                         'contact_name' => 'Contact 1',

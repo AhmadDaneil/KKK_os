@@ -58,6 +58,7 @@ class OrderToPhotoshopEndToEndTest extends TestCase
 
         $this->assertCount(2, $rows);
         $this->assertCount(28, $rows[0]);
+        $this->assertNotContains('jumlah_hantaran', $rows[0]);
         $this->assertSame('noinvoice', $rows[0][0]);
         $this->assertSame('qtykad', $rows[0][1]);
 
@@ -73,6 +74,7 @@ class OrderToPhotoshopEndToEndTest extends TestCase
         $order = app(CreateOrderService::class)->create([
             'package_count' => 2,
             'package_type' => 'PUTERI_MANIS',
+            'first_event_side' => 'PEREMPUAN',
             'customer_name' => 'E2E Two Package',
         ]);
 
@@ -92,6 +94,7 @@ class OrderToPhotoshopEndToEndTest extends TestCase
                 'mother_name' => 'Ibu Perempuan',
                 'venue_name' => 'Dewan Perempuan',
                 'address' => 'Alamat Perempuan',
+                'event_date' => '2026-12-27',
             ],
         ], 500);
 
@@ -100,6 +103,11 @@ class OrderToPhotoshopEndToEndTest extends TestCase
         $jobs = app(GenerateMergeJobsForOrderService::class)->generate($order);
 
         $this->assertCount(2, $jobs);
+
+        $this->assertSame(
+            'RM 10,000.00',
+            data_get($jobs->first()->canonical_payload, 'generic.jumlah_hantaran')
+        );
 
         $lelaki = $jobs->firstWhere('side', 'LELAKI');
         $perempuan = $jobs->firstWhere('side', 'PEREMPUAN');
@@ -131,8 +139,8 @@ class OrderToPhotoshopEndToEndTest extends TestCase
 
         $rows = $this->readCsv($path);
 
-        $this->assertCount(3, $rows);
-        $this->assertCount(28, $rows[0]);
+        $this->assertCount(4, $rows);
+        $this->assertCount(30, $rows[0]);
 
         $header = array_flip($rows[0]);
 
@@ -144,6 +152,15 @@ class OrderToPhotoshopEndToEndTest extends TestCase
 
         $this->assertArrayHasKey('LELAKI', $bySide);
         $this->assertArrayHasKey('PEREMPUAN', $bySide);
+        $this->assertArrayHasKey('CEK_HANTARAN', $bySide);
+
+        $this->assertSame($order->order_id.'-L', $bySide['LELAKI'][$header['output_id']]);
+        $this->assertSame($order->order_id.'-P', $bySide['PEREMPUAN'][$header['output_id']]);
+        $this->assertSame($order->order_id.'-CH', $bySide['CEK_HANTARAN'][$header['output_id']]);
+        $this->assertSame('RM 10,000.00', $bySide['CEK_HANTARAN'][$header['jumlah_hantaran']]);
+        $this->assertSame('27 DISEMBER 2026', $bySide['CEK_HANTARAN'][$header['tarikh']]);
+        $this->assertSame('Nur Awanis', $bySide['CEK_HANTARAN'][$header['namapengantinperempuan']]);
+        $this->assertSame('Muhammad Syafiq', $bySide['CEK_HANTARAN'][$header['namapengantinlelaki']]);
 
         $this->assertSame('500', $bySide['LELAKI'][$header['qtykad']]);
         $this->assertSame('500', $bySide['PEREMPUAN'][$header['qtykad']]);
@@ -185,7 +202,7 @@ class OrderToPhotoshopEndToEndTest extends TestCase
                 ],
                 'event' => [
                     'day_name' => 'Sabtu',
-                    'event_date' => '2026-12-26',
+                    'event_date' => $definition['event_date'] ?? '2026-12-26',
                     'hijri_date' => '16 REJAB 1448H',
                     'meal_time' => '12:00',
                     'bersanding_time' => '12:00',
@@ -212,6 +229,7 @@ class OrderToPhotoshopEndToEndTest extends TestCase
 
         app(SaveOrderDraftService::class)->save($order, [
             'card_quantity' => $cardQuantity,
+            ...($order->package_count === 2 ? ['jumlah_hantaran' => 'RM 10,000.00'] : []),
             'couple' => [
                 'groom_name' => 'Muhammad Syafiq',
                 'groom_abbreviation' => 'Syafiq',

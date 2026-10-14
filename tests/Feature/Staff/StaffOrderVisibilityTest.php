@@ -925,7 +925,7 @@ class StaffOrderVisibilityTest extends TestCase
         $this->actingAs($designer, 'staff')
             ->get(route('staff.orders.show', $order->order_id))
             ->assertOk()
-            ->assertSee('Photoshop Auto Merge V11')
+            ->assertSee('Photoshop Auto Merge V34')
             ->assertSee('Muat Turun CSV Pelanggan')
             ->assertSee(route('staff.orders.photoshop.csv', $order), false)
             ->assertDontSee(route('staff.orders.photoshop.launch', $order), false);
@@ -1062,6 +1062,7 @@ class StaffOrderVisibilityTest extends TestCase
 
         app(SaveOrderDraftService::class)->save($order, [
             'card_quantity' => 200,
+            ...($packageCount === 2 ? ['jumlah_hantaran' => 'RM 8,000.00'] : []),
             'couple' => [
                 'groom_name' => 'Muhammad Syafiq',
                 'bride_name' => 'Nur Awanis',

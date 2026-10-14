@@ -53,6 +53,9 @@ class SaveOrderDraftService
                         'first_event_side' => $data['first_event_side']
                             ?? $order->first_event_side
                             ?? 'LELAKI',
+                        'jumlah_hantaran' => array_key_exists('jumlah_hantaran', $data)
+                            ? $this->cleanString($data['jumlah_hantaran'])
+                            : $order->jumlah_hantaran,
                     ])->save();
                 }
 
@@ -251,15 +254,13 @@ class SaveOrderDraftService
                         ]);
 
                         foreach (
-                            (array) Arr::get($sideData, 'event.contacts', [])
-                            as $contactNumber => $contactData
+                            (array) Arr::get($sideData, 'event.contacts', []) as $contactNumber => $contactData
                         ) {
                             $contactNumber = (int) $contactNumber;
 
                             if (! in_array($contactNumber, [1, 2, 3], true)) {
                                 throw ValidationException::withMessages([
-                                    "sides.$sideName.event.contacts.$contactNumber"
-                                        => 'Only contact persons 1 to 3 are supported.',
+                                    "sides.$sideName.event.contacts.$contactNumber" => 'Only contact persons 1 to 3 are supported.',
                                 ]);
                             }
 
@@ -268,8 +269,7 @@ class SaveOrderDraftService
 
                             if (! $contact) {
                                 throw ValidationException::withMessages([
-                                    "sides.$sideName.event.contacts.$contactNumber"
-                                        => 'Contact slot is missing.',
+                                    "sides.$sideName.event.contacts.$contactNumber" => 'Contact slot is missing.',
                                 ]);
                             }
 
@@ -291,8 +291,7 @@ class SaveOrderDraftService
                 $hasCompleteSideQuantities =
                     $sideQuantities->count() === $expectedSideCount
                     && $sideQuantities->every(
-                        fn ($quantity): bool =>
-                            $quantity !== null && (int) $quantity > 0
+                        fn ($quantity): bool => $quantity !== null && (int) $quantity > 0
                     );
 
                 if ($hasCompleteSideQuantities) {

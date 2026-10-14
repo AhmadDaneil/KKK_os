@@ -12,18 +12,18 @@ use App\Services\Merge\GenerateMergeJobsForOrderService;
 use App\Services\Orders\ConfirmOrderDetailsService;
 use App\Services\Orders\CreateOrderService;
 use App\Services\Orders\SaveOrderDraftService;
-use Database\Seeders\KkkPackagePriceCatalogSeeder;
+use App\Services\Packing\AssignPackingJobService;
+use App\Services\Packing\InitializePackingJobForOrderService;
+use App\Services\Packing\MarkPackingJobPackedService;
+use App\Services\Packing\StartPackingService;
+use App\Services\Packing\VerifyPackingItemService;
 use App\Services\Payments\CreateBalancePaymentService;
 use App\Services\Payments\HandlePaymentCallbackService;
 use App\Services\Printing\InitializePrintJobsForOrderService;
 use App\Services\Printing\MarkPrintJobPrintedService;
 use App\Services\Printing\StartPrintingService;
 use App\Services\Printing\SyncOrderPrintStatusService;
-use App\Services\Packing\AssignPackingJobService;
-use App\Services\Packing\InitializePackingJobForOrderService;
-use App\Services\Packing\MarkPackingJobPackedService;
-use App\Services\Packing\StartPackingService;
-use App\Services\Packing\VerifyPackingItemService;
+use Database\Seeders\KkkPackagePriceCatalogSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use RuntimeException;
 use Tests\TestCase;
@@ -154,13 +154,13 @@ class PackingFoundationTest extends TestCase
 
         $payment->update([
             'provider' => 'TEST',
-            'provider_reference' => 'PACK-REF-' . $payment->id,
+            'provider_reference' => 'PACK-REF-'.$payment->id,
         ]);
 
         app(HandlePaymentCallbackService::class)->handle([
             'provider' => 'TEST',
             'provider_reference' => $payment->provider_reference,
-            'provider_event_id' => 'PACK-EVENT-' . $payment->id,
+            'provider_event_id' => 'PACK-EVENT-'.$payment->id,
             'status' => 'PAID',
         ]);
 
@@ -191,14 +191,14 @@ class PackingFoundationTest extends TestCase
                     'design_code' => $side->side === 'LELAKI' ? 'L101' : 'P202',
                 ],
                 'parents' => [
-                    'father_name' => 'Bapa ' . $side->side,
-                    'mother_name' => 'Ibu ' . $side->side,
+                    'father_name' => 'Bapa '.$side->side,
+                    'mother_name' => 'Ibu '.$side->side,
                 ],
                 'event' => [
                     'event_date' => '2026-12-20',
                     'meal_time' => '12:00',
-                    'venue_name' => 'Dewan ' . $side->side,
-                    'full_address' => 'Alamat ' . $side->side,
+                    'venue_name' => 'Dewan '.$side->side,
+                    'full_address' => 'Alamat '.$side->side,
                     'contacts' => [
                         1 => ['contact_name' => 'Contact 1', 'contact_phone' => '0111111111'],
                         2 => ['contact_name' => 'Contact 2', 'contact_phone' => '0122222222'],
@@ -210,6 +210,7 @@ class PackingFoundationTest extends TestCase
 
         app(SaveOrderDraftService::class)->save($order, [
             'card_quantity' => 200,
+            ...($packageCount === 2 ? ['jumlah_hantaran' => 'RM 8,000.00'] : []),
             'couple' => [
                 'groom_name' => 'Muhammad Syafiq',
                 'bride_name' => 'Nur Awanis',
@@ -239,11 +240,11 @@ class PackingFoundationTest extends TestCase
             $designJob = app(StartDesignJobService::class)->start($designJob);
 
             app(CreateArtworkVersionService::class)->create($designJob, [
-            'storage_path' => "artworks/{$designJob->side}/v1.pdf",
-            'preview_storage_path' => "artworks/{$designJob->side}/v1-preview.png",
-            'original_filename' => "{$designJob->side}-v1.pdf",
-            'mime_type' => 'application/pdf',
-        ]);
+                'storage_path' => "artworks/{$designJob->side}/v1.pdf",
+                'preview_storage_path' => "artworks/{$designJob->side}/v1-preview.png",
+                'original_filename' => "{$designJob->side}-v1.pdf",
+                'mime_type' => 'application/pdf',
+            ]);
 
             $designJob = app(MarkDesignReadyService::class)->markReady($designJob->fresh());
             app(ApproveArtworkService::class)->approve($designJob);
