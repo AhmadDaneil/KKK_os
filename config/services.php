@@ -47,4 +47,8 @@ return [
         'collection_id' => env('BILLPLZ_COLLECTION_ID'),
     ],
 
+    'wabot' => [
+        'token' => env('WABOT_API_TOKEN'),
+    ],
+
 ];

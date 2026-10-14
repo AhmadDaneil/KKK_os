@@ -311,29 +311,9 @@
                 <p>Pembayaran penuh atau baki hanya perlu dibuat selepas anda menerima, menyemak dan meluluskan artwork daripada pihak KingKadKahwin.</p>
             </div>
 
-            <div class="payment-layout">
-                <div class="qr-panel">
-                    @php($depositQrPath = config('kingkadkahwin.deposit.qr_image'))
-                    @if ($depositQrPath && file_exists(public_path($depositQrPath)))
-                        <img src="{{ asset($depositQrPath) }}" alt="QR code pembayaran deposit KingKadKahwin">
-                    @else
-                        <div class="qr-placeholder">
-                            <span>QR</span>
-                            <small>QR pembayaran akan dipaparkan di sini</small>
-                        </div>
-                    @endif
-                    <p>Scan QR ini menggunakan aplikasi bank atau e-wallet anda.</p>
-                </div>
-
-                <div class="receipt-panel">
-                    <label for="deposit_receipt">Lampirkan resit pembayaran <span aria-hidden="true">*</span></label>
-                    <p>Format JPG, JPEG, PNG, WEBP atau PDF. Maksimum 10 MB.</p>
-                    <div class="receipt-picker">
-                        <input id="deposit_receipt" type="file" name="deposit_receipt" accept=".jpg,.jpeg,.png,.webp,.pdf,image/jpeg,image/png,image/webp,application/pdf" required form="final-confirmation-form">
-                        <button id="cancel-deposit-receipt" type="button" hidden aria-controls="deposit_receipt">Batal</button>
-                    </div>
-                    @error('deposit_receipt')<p class="field-error" role="alert">{{ $message }}</p>@enderror
-                </div>
+            <div class="deposit-notice">
+                <strong>Booking telah dibayar dan disahkan.</strong>
+                <p>Bayaran baki hanya perlu dibuat selepas anda menerima, menyemak dan meluluskan artwork.</p>
             </div>
         </section>
 
@@ -345,7 +325,7 @@
                 Pastikan semua nama, tarikh, masa, alamat, design dan nombor telefon adalah betul.
             </p>
 
-            <form id="final-confirmation-form" method="POST" enctype="multipart/form-data" action="{{ route('orders.confirm.store', ['orderId' => $review['order_id']]) }}">
+            <form id="final-confirmation-form" method="POST" action="{{ route('orders.confirm.store', ['orderId' => $review['order_id']]) }}">
                 @csrf
 
                 <label class="confirmation-checkbox">
@@ -392,7 +372,7 @@
     <dialog id="final-confirmation-dialog" class="final-confirmation-dialog" aria-labelledby="final-confirmation-dialog-title">
         <div class="final-confirmation-dialog-icon" aria-hidden="true">!</div>
         <h2 id="final-confirmation-dialog-title">Sahkan dan kunci maklumat?</h2>
-        <p>Selepas disahkan, maklumat tempahan tidak boleh disunting semula oleh customer. Pastikan semua maklumat dan resit pembayaran adalah betul.</p>
+        <p>Selepas disahkan, maklumat tempahan tidak boleh disunting semula oleh customer. Pastikan semua maklumat adalah betul.</p>
         <div class="final-confirmation-dialog-actions">
             <button id="cancel-final-confirmation" type="button">Tidak, semak semula</button>
             <button id="confirm-final-confirmation" class="is-primary" type="button">Ya, sahkan tempahan</button>
@@ -401,27 +381,12 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function () {
-            const input = document.getElementById('deposit_receipt');
-            const cancelButton = document.getElementById('cancel-deposit-receipt');
             const confirmationForm = document.getElementById('final-confirmation-form');
             const submitButton = document.getElementById('final-confirmation-submit');
             const confirmationDialog = document.getElementById('final-confirmation-dialog');
             const confirmButton = document.getElementById('confirm-final-confirmation');
             const cancelConfirmationButton = document.getElementById('cancel-final-confirmation');
             let finalConfirmationApproved = false;
-
-            function updateCancelButton() {
-                cancelButton.hidden = input.files.length === 0;
-            }
-
-            input.addEventListener('change', updateCancelButton);
-            cancelButton.addEventListener('click', function () {
-                input.value = '';
-                updateCancelButton();
-                input.focus();
-            });
-
-            updateCancelButton();
 
             confirmationForm.addEventListener('submit', function (event) {
                 if (finalConfirmationApproved) {

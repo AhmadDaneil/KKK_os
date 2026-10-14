@@ -6,7 +6,8 @@ use App\Models\Order;
 use App\Services\Orders\BuildCustomerProgressService;
 use App\Services\Orders\CreateOrderService;
 use App\Services\Orders\CustomerOrderSessionAccessService;
-use App\Services\Orders\GenerateOrderAccessLinkService;
+use App\Services\Orders\NormalizeCustomerPhoneService;
+use App\Services\Payments\CreateBillplzBookingPaymentService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -29,7 +30,8 @@ class PublicOrderController extends Controller
     public function store(
         Request $request,
         CreateOrderService $createOrder,
-        GenerateOrderAccessLinkService $accessLink,
+        NormalizeCustomerPhoneService $phones,
+        CreateBillplzBookingPaymentService $bookingPayment,
     ): RedirectResponse {
         $validated = $request->validate([
             'package_count' => ['required', 'integer', 'in:1,2'],
@@ -39,12 +41,15 @@ class PublicOrderController extends Controller
             'first_event_side' => ['nullable', 'string', 'in:LELAKI,PEREMPUAN', 'required_if:package_count,2'],
             'customer_name' => ['required', 'string', 'max:255'],
             'customer_email' => ['required', 'email', 'max:255'],
-            'customer_phone' => ['required', 'string', 'regex:/^01\d{8,9}$/'],
+            'customer_phone' => ['required', 'string', 'max:32'],
         ]);
 
-        $order = $createOrder->create($validated);
+        $validated['customer_phone'] = $phones->normalize($validated['customer_phone']);
 
-        return redirect()->away($accessLink->generate($order));
+        $order = $createOrder->create($validated);
+        $checkout = $bookingPayment->create($order);
+
+        return redirect()->away($checkout['payment_url']);
     }
 
     public function progress(
@@ -102,10 +107,6 @@ class PublicOrderController extends Controller
             'READY_FOR_FULFILMENT',
             'COMPLETED',
         ], true);
-
-        if ($artworkReady) {
-            $sessionAccess->establishFromProgressLookup($request, $order);
-        }
 
         return view('public.order-progress', [
             'orderId' => $order->order_id,

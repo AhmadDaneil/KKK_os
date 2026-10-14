@@ -5,12 +5,35 @@ namespace Tests\Feature\Orders;
 use App\Models\Order;
 use App\Services\Orders\CreateOrderService;
 use App\Services\Orders\GenerateOrderAccessLinkService;
+use Database\Seeders\KkkPackagePriceCatalogSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Http;
 use Tests\TestCase;
 
 class PublicOrderJourneyTest extends TestCase
 {
     use RefreshDatabase;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+        $this->seed(KkkPackagePriceCatalogSeeder::class);
+        config()->set('app.url', 'https://167.71.196.30');
+        config()->set('services.billplz.enabled', true);
+        config()->set('services.billplz.secret_key', 'sandbox-secret');
+        config()->set('services.billplz.base_url', 'https://www.billplz-sandbox.com/api');
+        config()->set('services.billplz.collection_id', 'sandbox-collection');
+        Http::fake(['www.billplz-sandbox.com/*' => function ($request) {
+            $amount = (int) $request->data()['amount'];
+
+            return Http::response([
+                'id' => 'public-bill-'.uniqid(),
+                'collection_id' => 'sandbox-collection',
+                'amount' => $amount,
+                'url' => 'https://www.billplz-sandbox.com/bills/public-checkout',
+            ]);
+        }]);
+    }
 
     public function test_landing_page_links_to_order_and_progress_flows(): void
     {
@@ -105,8 +128,12 @@ class PublicOrderJourneyTest extends TestCase
 
         $this->assertSame('PUTERI_MANIS', $order->package_type);
         $response->assertRedirect();
-        $this->assertStringContainsString('/order/'.$order->order_id, $response->headers->get('Location'));
-        $this->assertStringContainsString('token=', $response->headers->get('Location'));
+        $response->assertRedirect('https://www.billplz-sandbox.com/bills/public-checkout');
+        $this->assertDatabaseHas('payment_transactions', [
+            'order_id' => $order->id,
+            'payment_type' => 'BOOKING_DEPOSIT',
+            'amount' => '50.00',
+        ]);
         $this->assertSame('Pelanggan Baharu', $order->customer_name);
         $this->assertCount(1, $order->packageSides);
     }
@@ -131,6 +158,7 @@ class PublicOrderJourneyTest extends TestCase
         $this->assertSame('FOLDED', $order->package_format);
         $this->assertSame('PEREMPUAN', $order->first_event_side);
         $this->assertEqualsCanonicalizing(['LELAKI', 'PEREMPUAN'], $order->packageSides->pluck('side')->all());
+        $this->assertSame('100.00', $order->payments()->firstOrFail()->amount);
     }
 
     public function test_progress_lookup_shows_public_status_without_customer_details(): void
@@ -193,7 +221,7 @@ class PublicOrderJourneyTest extends TestCase
             ->assertOk()
             ->assertSee('88%')
             ->assertSee('Cetakan Selesai')
-            ->assertSee('Cetakan tempahan anda telah siap dan akan diteruskan ke proses pembungkusan.');
+            ->assertSee('Tempahan anda telah siap dan akan diteruskan ke proses pembungkusan.');
     }
 
     public function test_unknown_order_id_returns_a_clear_error(): void
@@ -207,7 +235,7 @@ class PublicOrderJourneyTest extends TestCase
             ->assertSessionHasErrors('order_id');
     }
 
-    public function test_progress_page_links_to_artwork_review_for_authorized_customer(): void
+    public function test_public_progress_does_not_expose_private_artwork_link(): void
     {
         $order = app(CreateOrderService::class)->create([
             'package_count' => 1,
@@ -226,11 +254,10 @@ class PublicOrderJourneyTest extends TestCase
             'customer_phone' => $order->customer_phone,
         ])
             ->assertOk()
-            ->assertSee('Buka Semakan Penuh')
-            ->assertSee(route('orders.artwork.review', $order->order_id));
+            ->assertDontSee('Buka Semakan Penuh');
     }
 
-    public function test_order_id_lookup_grants_direct_artwork_review_access(): void
+    public function test_order_id_lookup_does_not_grant_direct_artwork_review_access(): void
     {
         $order = app(CreateOrderService::class)->create([
             'package_count' => 1,
@@ -246,13 +273,12 @@ class PublicOrderJourneyTest extends TestCase
             'customer_phone' => $order->customer_phone,
         ])
             ->assertOk()
-            ->assertSee('Buka Semakan Penuh')
-            ->assertSee(route('orders.artwork.review', $order->order_id));
+            ->assertDontSee('Buka Semakan Penuh');
 
-        $this->get(route('orders.artwork.review', $order->order_id))->assertOk();
+        $this->get(route('orders.artwork.review', $order->order_id))->assertNotFound();
     }
 
-    public function test_progress_lookup_uses_order_id_without_requiring_a_phone_number(): void
+    public function test_progress_lookup_does_not_open_private_order_with_order_id_only(): void
     {
         $order = app(CreateOrderService::class)->create([
             'package_count' => 1,
@@ -267,6 +293,6 @@ class PublicOrderJourneyTest extends TestCase
             'order_id' => $order->order_id,
         ])->assertOk();
 
-        $this->get(route('orders.artwork.review', $order->order_id))->assertOk();
+        $this->get(route('orders.artwork.review', $order->order_id))->assertNotFound();
     }
 }

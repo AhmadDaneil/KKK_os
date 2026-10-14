@@ -32,7 +32,7 @@ class CustomerProgressAccessTest extends TestCase
             ->assertNotFound();
     }
 
-    public function test_progress_lookup_grants_access_with_order_id(): void
+    public function test_progress_lookup_does_not_grant_private_order_access(): void
     {
         $order = app(CreateOrderService::class)->create([
             'package_count' => 1,
@@ -48,6 +48,6 @@ class CustomerProgressAccessTest extends TestCase
         ])->assertOk();
 
         $this->get(route('orders.artwork.review', $order->order_id))
-            ->assertOk();
+            ->assertNotFound();
     }
 }

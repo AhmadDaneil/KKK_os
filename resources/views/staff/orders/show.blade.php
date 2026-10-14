@@ -164,6 +164,9 @@
             @endif
 
             @if ($hasFullQueueView)
+            @php
+                $confirmedPreview = data_get($order->confirmation?->confirmed_snapshot, 'live_preview');
+            @endphp
             <div id="customer-data" class="staff-detail-grid staff-department-group">
                 <section class="staff-card">
                     <h2>Ringkasan Tempahan</h2>
@@ -187,6 +190,11 @@
                         <div>
                             <dt>Bayaran Tempahan</dt>
                             <dd>{{ $order->booking_payment_status ?? '-' }}</dd>
+                        </div>
+
+                        <div>
+                            <dt>Rujukan Pelanggan</dt>
+                            <dd>{{ $order->customer_reference ?: '-' }}</dd>
                         </div>
                     </dl>
                 </section>
@@ -219,6 +227,21 @@
                     @endif
                 </section>
             </div>
+
+            @if (is_array($confirmedPreview))
+                <section class="staff-card">
+                    <h2>Live Preview Yang Disahkan</h2>
+                    <p>Rekod rujukan pelanggan semasa pengesahan akhir. Ini bukan artwork atau fail sumber untuk cetakan.</p>
+                    <dl class="staff-detail-list">
+                        @foreach (($confirmedPreview['package_sides'] ?? []) as $previewSide)
+                            <div>
+                                <dt>{{ $previewSide['side'] ?? '-' }}</dt>
+                                <dd>{{ data_get($previewSide, 'design.design_code', '-') }} · {{ data_get($previewSide, 'design.theme', '-') }}</dd>
+                            </div>
+                        @endforeach
+                    </dl>
+                </section>
+            @endif
 
             <section class="staff-section staff-timeline-section">
                 <div class="staff-lifecycle-heading">

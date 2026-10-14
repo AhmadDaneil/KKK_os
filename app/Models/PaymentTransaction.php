@@ -11,6 +11,7 @@ class PaymentTransaction extends Model
         'payment_type',
         'provider',
         'provider_reference',
+        'public_reference',
         'amount',
         'currency',
         'status',

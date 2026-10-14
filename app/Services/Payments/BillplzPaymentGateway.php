@@ -16,8 +16,15 @@ class BillplzPaymentGateway implements PaymentGatewayContract
      */
     public function createBalancePayment(PaymentTransaction $payment): array
     {
-        if ($payment->payment_type !== 'BALANCE' || $payment->provider !== 'BILLPLZ') {
-            throw new BillplzPaymentException('Billplz hanya boleh digunakan untuk bayaran baki.');
+        return $this->createPayment($payment);
+    }
+
+    /** @return array{provider_reference: string, payment_url: string} */
+    public function createPayment(PaymentTransaction $payment): array
+    {
+        if (! in_array($payment->payment_type, ['BOOKING_DEPOSIT', 'BALANCE'], true)
+            || $payment->provider !== 'BILLPLZ') {
+            throw new BillplzPaymentException('Jenis pembayaran dalam talian tidak disokong.');
         }
 
         $payment->loadMissing('order');
@@ -32,7 +39,7 @@ class BillplzPaymentGateway implements PaymentGatewayContract
             $secretKey === ''
             || $collectionId === ''
             || $baseScheme !== 'https'
-            || $baseHost !== 'www.billplz-sandbox.com'
+            || ! in_array($baseHost, ['www.billplz-sandbox.com', 'www.billplz.com'], true)
         ) {
             throw new BillplzPaymentException('Konfigurasi Billplz Sandbox belum lengkap atau tidak sah.');
         }
@@ -49,11 +56,15 @@ class BillplzPaymentGateway implements PaymentGatewayContract
             'email' => $order->customer_email,
             'name' => Str::limit(trim((string) $order->customer_name), 255, ''),
             'amount' => $amountSen,
-            'description' => Str::limit('Bayaran baki tempahan '.$order->order_id, 200, ''),
+            'description' => Str::limit(
+                ($payment->payment_type === 'BOOKING_DEPOSIT' ? 'Booking tempahan ' : 'Bayaran baki tempahan ').$order->order_id,
+                200,
+                '',
+            ),
             'callback_url' => $appUrl.route('api.billplz-sandbox.callback', [], false),
-            'redirect_url' => $appUrl.route('public.orders.progress', [
-                'order_id' => $order->order_id,
-            ], false),
+            'redirect_url' => $payment->payment_type === 'BOOKING_DEPOSIT'
+                ? $appUrl.route('payments.booking.return', ['reference' => $payment->public_reference], false)
+                : $appUrl.route('public.orders.progress', ['order_id' => $order->order_id], false),
             'reference_1_label' => 'Order ID',
             'reference_1' => $order->order_id,
             'reference_2_label' => 'Payment ID',
