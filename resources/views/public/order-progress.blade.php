@@ -69,15 +69,6 @@
                 </section>
                 <h3>{{ $progress['label'] }}</h3>
                 <p>{{ $progress['message'] }}</p>
-                @if ($artworkReady ?? false)
-                    <div class="public-artwork-action">
-                        <div>
-                            <strong>Hasil design anda sudah tersedia</strong>
-                            <span>Semak setiap preview sebelum meluluskan atau meminta pembetulan.</span>
-                        </div>
-                        <a class="button button-primary" href="{{ route('orders.artwork.review', ['orderId' => $orderId]) }}">Buka Semakan Penuh</a>
-                    </div>
-                @endif
                 @if ($deposit)
                     <div class="deposit-public-status" data-status="{{ strtolower($deposit['status']) }}">
                         <span>Deposit</span>
