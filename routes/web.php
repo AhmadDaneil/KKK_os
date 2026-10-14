@@ -8,6 +8,7 @@ use App\Http\Controllers\BookingPaymentReturnController;
 use App\Http\Controllers\CustomerArtworkReviewController;
 use App\Http\Controllers\CustomerBalanceReceiptController;
 use App\Http\Controllers\CustomerBillplzBalancePaymentController;
+use App\Http\Controllers\CustomerBookingPaymentController;
 use App\Http\Controllers\CustomerDashboardAccessController;
 use App\Http\Controllers\CustomerDashboardController;
 use App\Http\Controllers\CustomerDepositReceiptController;
@@ -223,6 +224,11 @@ Route::get(
     '/order/{orderId}/review',
     [CustomerOrderReviewController::class, 'show']
 )->name('orders.review.show');
+
+Route::post(
+    '/order/{orderId}/booking-payment',
+    [CustomerBookingPaymentController::class, 'store']
+)->middleware('throttle:10,1')->name('orders.booking-payment.store');
 
 Route::post(
     '/order/{orderId}/confirm',
