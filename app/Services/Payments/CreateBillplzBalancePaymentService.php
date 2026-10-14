@@ -120,7 +120,7 @@ class CreateBillplzBalancePaymentService
         $payment = $checkout['payment'];
 
         try {
-            $bill = $this->gateway->createBalancePayment($payment);
+            $bill = $this->gateway->createPayment($payment);
         } catch (BillplzPaymentException $exception) {
             DB::transaction(function () use ($payment): void {
                 $lockedPayment = PaymentTransaction::query()
@@ -141,7 +141,7 @@ class CreateBillplzBalancePaymentService
             });
 
             throw ValidationException::withMessages([
-                'billplz' => 'Bayaran Billplz belum dapat dimulakan. Sila cuba lagi atau gunakan QR manual.',
+                'billplz' => 'Pembayaran belum dapat dimulakan. Sila cuba lagi.',
             ]);
         }
 

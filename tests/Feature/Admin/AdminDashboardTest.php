@@ -2,7 +2,9 @@
 
 namespace Tests\Feature\Admin;
 
+use App\Models\Invoice;
 use App\Models\Order;
+use App\Models\OrderItem;
 use App\Models\PaymentTransaction;
 use App\Models\User;
 use Carbon\CarbonImmutable;
@@ -95,6 +97,61 @@ class AdminDashboardTest extends TestCase
         } finally {
             CarbonImmutable::setTestNow();
         }
+    }
+
+    public function test_dashboard_shows_ledger_business_totals_and_package_breakdown(): void
+    {
+        $admin = $this->staff(User::ROLE_ADMIN);
+        $onePackage = Order::create([
+            'order_id' => 'KKK-BUSINESS-0001',
+            'package_count' => 1,
+            'status' => 'DETAILS_CONFIRMED',
+        ]);
+        Order::create([
+            'order_id' => 'KKK-BUSINESS-0002',
+            'package_count' => 2,
+            'status' => 'DETAILS_CONFIRMED',
+        ]);
+        Invoice::create([
+            'order_id' => $onePackage->id,
+            'invoice_number' => 'KKK261014-001',
+            'currency' => 'MYR',
+            'subtotal' => '200.00',
+            'postage_amount' => '10.00',
+            'discount_amount' => '0.00',
+            'total_amount' => '210.00',
+            'amount_paid' => '50.00',
+            'balance_due' => '160.00',
+            'payment_status' => 'PARTIALLY_PAID',
+            'issued_at' => now(),
+        ]);
+        PaymentTransaction::create([
+            'order_id' => $onePackage->id,
+            'payment_type' => 'BOOKING_DEPOSIT',
+            'amount' => '50.00',
+            'currency' => 'MYR',
+            'status' => 'PAID',
+            'paid_at' => now(),
+        ]);
+        OrderItem::create([
+            'order_id' => $onePackage->id,
+            'item_type' => 'ADDON',
+            'item_code' => 'ADDON-TEST',
+            'description' => 'Add-on test',
+            'quantity' => 1,
+            'unit_price' => '20.00',
+            'line_total' => '20.00',
+        ]);
+
+        $this->actingAs($admin, 'admin')->get(route('admin.dashboard'))
+            ->assertOk()
+            ->assertSee('Gross Sales')
+            ->assertSee('RM 210.00')
+            ->assertSee('Collected')
+            ->assertSee('Outstanding')
+            ->assertSee('RM 160.00')
+            ->assertSee('1 pakej: 1 · 2 pakej: 1')
+            ->assertSee('Booking Collected');
     }
 
     public function test_admin_can_open_a_confirmed_order_from_dashboard_quick_search(): void

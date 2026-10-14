@@ -10,6 +10,7 @@ use Illuminate\Http\Request;
 class CustomerOrderSessionAccessService
 {
     private const SESSION_PREFIX = 'kkk.customer_orders.';
+
     private const ACTIVE_DRAFT_SESSION_KEY = 'kkk.customer_active_draft';
 
     public function establishFromToken(
@@ -75,12 +76,26 @@ class CustomerOrderSessionAccessService
 
     public function establishFromProgressLookup(Request $request, Order $order): void
     {
+        $this->establishFromVerifiedOrder($request, $order);
+    }
+
+    public function establishFromVerifiedOrder(Request $request, Order $order): void
+    {
+        $request->session()->regenerate();
         $request->session()->put($this->sessionKey($order->order_id), [
             'order_fk' => $order->id,
             'expires_at' => now()->addHours(2)->toIso8601String(),
         ]);
 
         $this->rememberActiveDraft($request, $order, now()->addHours(2)->toIso8601String());
+    }
+
+    public function revoke(Request $request, Order $order): void
+    {
+        $request->session()->forget($this->sessionKey($order->order_id));
+        $request->session()->forget(self::ACTIVE_DRAFT_SESSION_KEY);
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
     }
 
     public function unfinishedDraft(Request $request): ?Order

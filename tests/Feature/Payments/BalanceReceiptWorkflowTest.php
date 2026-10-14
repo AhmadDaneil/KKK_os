@@ -8,6 +8,7 @@ use App\Models\MergeJob;
 use App\Models\PaymentTransaction;
 use App\Models\User;
 use App\Services\Orders\CreateOrderService;
+use App\Services\Orders\GenerateOrderAccessLinkService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
@@ -54,10 +55,8 @@ class BalanceReceiptWorkflowTest extends TestCase
         ]);
         $order->update(['status' => 'DESIGN_APPROVED']);
 
-        $this->post(route('public.orders.progress.lookup'), [
-            'order_id' => $order->order_id,
-            'customer_phone' => $order->customer_phone,
-        ])->assertOk();
+        $this->get(app(GenerateOrderAccessLinkService::class)->generate($order))
+            ->assertRedirect(route('orders.dashboard', ['orderId' => $order->order_id]));
         $this->post(route('orders.balance-receipt.store', $order->order_id), [
             'balance_receipt' => UploadedFile::fake()->image('resit.jpg'),
         ])->assertRedirect(route('public.orders.progress', ['order_id' => $order->order_id]));

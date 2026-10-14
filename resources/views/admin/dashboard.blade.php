@@ -43,6 +43,13 @@
         </div>
 
         <div class="admin-sales-summary">
+            <article><span>Gross Sales</span><strong>RM {{ number_format($sales['business_summary']['gross_sales'], 2) }}</strong><small>Nilai invois keseluruhan</small></article>
+            <article><span>Collected</span><strong>RM {{ number_format($sales['business_summary']['collected'], 2) }}</strong><small>Transaksi PAID</small></article>
+            <article><span>Outstanding</span><strong>RM {{ number_format($sales['business_summary']['outstanding'], 2) }}</strong><small>Baki invois</small></article>
+            <article><span>Total Orders</span><strong>{{ number_format($sales['business_summary']['total_orders']) }}</strong><small>1 pakej: {{ $sales['package_breakdown'][1] }} · 2 pakej: {{ $sales['package_breakdown'][2] }}</small></article>
+            <article><span>Add-on / Postage</span><strong>RM {{ number_format($sales['business_summary']['addon_sales'] + $sales['business_summary']['postage_sales'], 2) }}</strong><small>Add-on RM {{ number_format($sales['business_summary']['addon_sales'], 2) }} · Postage RM {{ number_format($sales['business_summary']['postage_sales'], 2) }}</small></article>
+            <article><span>Booking Collected</span><strong>RM {{ number_format($sales['business_summary']['booking_collected'], 2) }}</strong><small>Booking berjaya</small></article>
+            <article><span>Balance Collected</span><strong>RM {{ number_format($sales['business_summary']['balance_collected'], 2) }}</strong><small>Bayaran baki berjaya</small></article>
             <article><span>{{ __('ui.today') }}</span><strong>RM {{ number_format($sales['summary']['today'], 2) }}</strong><small>{{ __('ui.transactions', ['count' => $sales['summary']['today_transactions']]) }}</small></article>
             <article><span>{{ __('ui.this_month') }}</span><strong>RM {{ number_format($sales['summary']['month'], 2) }}</strong><small @class(['is-up' => $sales['summary']['month_change'] >= 0, 'is-down' => $sales['summary']['month_change'] < 0])>{{ $sales['summary']['month_change'] >= 0 ? '+' : '' }}{{ number_format($sales['summary']['month_change'], 1) }}% {{ app()->getLocale() === 'en' ? 'vs last month' : 'berbanding bulan lalu' }}</small></article>
             <article><span>{{ __('ui.this_year') }}</span><strong>RM {{ number_format($sales['summary']['year'], 2) }}</strong><small>{{ $sales['summary']['year_orders'] }} tempahan · {{ __('ui.transactions', ['count' => $sales['summary']['year_transactions']]) }}</small></article>

@@ -8,8 +8,6 @@ use App\Services\Orders\GenerateOrderAccessLinkService;
 use App\Services\Orders\SaveOrderDraftService;
 use Database\Seeders\KkkPackagePriceCatalogSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Http\UploadedFile;
-use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
 class CustomerThankYouPageTest extends TestCase
@@ -44,7 +42,6 @@ class CustomerThankYouPageTest extends TestCase
 
     public function test_successful_confirmation_redirects_to_thank_you_page(): void
     {
-        Storage::fake('local');
         $order = $this->completeOrder();
         $this->establishCustomerSession($order);
 
@@ -53,8 +50,8 @@ class CustomerThankYouPageTest extends TestCase
             ->assertSee('Bayaran Deposit')
             ->assertSee('RM 188.00')
             ->assertSee('RM 50.00')
-            ->assertSee('Ini hanyalah bayaran deposit.')
-            ->assertSee('deposit_receipt', false)
+            ->assertSee('Booking telah dibayar dan disahkan.')
+            ->assertDontSee('deposit_receipt', false)
             ->assertSee('post_confirmation_liability_acknowledged', false);
 
         $response = $this->post(route('orders.confirm.store', [
@@ -62,7 +59,6 @@ class CustomerThankYouPageTest extends TestCase
         ]), [
             'responsibility_acknowledged' => '1',
             'post_confirmation_liability_acknowledged' => '1',
-            'deposit_receipt' => UploadedFile::fake()->image('resit-deposit.jpg'),
         ]);
 
         $response->assertRedirect(route('orders.thank-you.show', [
@@ -85,8 +81,8 @@ class CustomerThankYouPageTest extends TestCase
             ]), false);
 
         $payment = $order->fresh()->payments()->where('payment_type', 'BOOKING_DEPOSIT')->firstOrFail();
-        $this->assertSame('PENDING', $payment->status);
-        $this->assertSame('MANUAL_QR', $payment->provider);
+        $this->assertSame('PAID', $payment->status);
+        $this->assertSame('BILLPLZ', $payment->provider);
         $this->assertSame('50.00', $payment->amount);
         $this->assertSame('MYR', $payment->currency);
         $this->assertDatabaseHas('order_pricing_snapshots', [
@@ -100,12 +96,12 @@ class CustomerThankYouPageTest extends TestCase
             'item_code' => 'PUTERI_MANIS_CARD_200',
             'line_total' => '188.00',
         ]);
-        $this->assertSame('RECEIPT_SUBMITTED', $order->fresh()->booking_payment_status);
+        $this->assertSame('PAID', $order->fresh()->booking_payment_status);
         $this->assertTrue($order->fresh()->confirmation->confirmed_snapshot['post_confirmation_liability_acknowledged']);
-        Storage::disk('local')->assertExists($payment->metadata['receipt_path']);
+        $this->assertSame('LIVE_PREVIEW_REFERENCE', $order->fresh()->confirmation->confirmed_snapshot['snapshot_type']);
     }
 
-    public function test_confirmation_requires_deposit_receipt_and_both_acknowledgements(): void
+    public function test_confirmation_requires_both_acknowledgements(): void
     {
         $order = $this->completeOrder();
         $this->establishCustomerSession($order);
@@ -116,11 +112,10 @@ class CustomerThankYouPageTest extends TestCase
             ->assertSessionHasErrors([
                 'responsibility_acknowledged',
                 'post_confirmation_liability_acknowledged',
-                'deposit_receipt',
             ]);
 
         $this->assertSame('DETAILS_INCOMPLETE', $order->fresh()->status);
-        $this->assertDatabaseCount('payment_transactions', 0);
+        $this->assertDatabaseCount('payment_transactions', 1);
     }
 
     public function test_legacy_order_id_url_redirects_to_final_review(): void
@@ -201,6 +196,17 @@ class CustomerThankYouPageTest extends TestCase
             ],
             'fulfilment' => ['method' => 'PICKUP'],
         ]);
+
+        $order->payments()->create([
+            'payment_type' => 'BOOKING_DEPOSIT',
+            'provider' => 'BILLPLZ',
+            'provider_reference' => 'paid-booking-'.$order->id,
+            'amount' => '50.00',
+            'currency' => 'MYR',
+            'status' => 'PAID',
+            'paid_at' => now(),
+        ]);
+        $order->update(['booking_payment_status' => 'PAID']);
 
         return $order->fresh();
     }

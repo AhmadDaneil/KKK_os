@@ -3,12 +3,16 @@
 namespace App\Services\Payments;
 
 use App\Models\PaymentTransaction;
+use App\Services\Orders\ActivateCustomerDashboardService;
 use Illuminate\Support\Facades\DB;
 use RuntimeException;
 
 class HandlePaymentCallbackService
 {
-    public function __construct(private SynchronizeOrderFinancialsService $financials) {}
+    public function __construct(
+        private SynchronizeOrderFinancialsService $financials,
+        private ActivateCustomerDashboardService $dashboard,
+    ) {}
 
     public function handle(array $verified): PaymentTransaction
     {
@@ -72,6 +76,7 @@ class HandlePaymentCallbackService
                         ->lockForUpdate()
                         ->firstOrFail();
                     $order->update(['booking_payment_status' => 'PAID']);
+                    $this->dashboard->activate($order, $payment);
                     $this->financials->synchronize($order);
                 }
             } elseif ($verified['status'] === 'FAILED') {

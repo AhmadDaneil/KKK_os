@@ -1144,7 +1144,7 @@ class StaffDesignWorkflowTest extends TestCase
             ->assertSessionHasNoErrors()
             ->assertSessionHas(
                 'status',
-                'Hasil design sedia untuk semakan pelanggan.'
+                'Hasil design telah diluluskan secara dalaman.'
             );
 
         $job->refresh();
@@ -1345,10 +1345,10 @@ class StaffDesignWorkflowTest extends TestCase
                 [
                     'storage_path' => "artworks/{$job->side}/source.pdf",
                     'preview_storage_path' => "artworks/{$job->side}/preview.jpg",
-                'preview_files' => [
-                    ['path' => "artworks/{$job->side}/banner.jpg", 'artwork_type' => 'BANNER'],
-                    ['path' => "artworks/{$job->side}/banting.jpg", 'artwork_type' => 'BANTING'],
-                ],
+                    'preview_files' => [
+                        ['path' => "artworks/{$job->side}/banner.jpg", 'artwork_type' => 'BANNER'],
+                        ['path' => "artworks/{$job->side}/banting.jpg", 'artwork_type' => 'BANTING'],
+                    ],
                     'original_filename' => "{$job->side}.pdf",
                     'mime_type' => 'application/pdf',
                 ],

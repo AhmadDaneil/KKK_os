@@ -27,7 +27,8 @@ class StaffInvoicePrintTest extends TestCase
         $invoice = $service->synchronize($order->fresh());
 
         $this->assertInstanceOf(Invoice::class, $invoice);
-        $this->assertSame('INV-'.$order->order_id, $invoice->invoice_number);
+        $this->assertSame($order->fresh()->customer_reference, $invoice->invoice_number);
+        $this->assertMatchesRegularExpression('/^KKK\d{6}-\d{3}$/', $invoice->invoice_number);
         $this->assertSame('300.00', $invoice->total_amount);
         $this->assertSame('100.00', $invoice->amount_paid);
         $this->assertSame('200.00', $invoice->balance_due);
