@@ -311,10 +311,24 @@
                 <p>Pembayaran penuh atau baki hanya perlu dibuat selepas anda menerima, menyemak dan meluluskan artwork daripada pihak KingKadKahwin.</p>
             </div>
 
-            <div class="deposit-notice">
-                <strong>Booking telah dibayar dan disahkan.</strong>
-                <p>Bayaran baki hanya perlu dibuat selepas anda menerima, menyemak dan meluluskan artwork.</p>
-            </div>
+            @if ($order->booking_payment_status === 'PAID')
+                <div class="deposit-notice">
+                    <strong>Booking telah dibayar dan disahkan.</strong>
+                    <p>Bayaran baki hanya perlu dibuat selepas anda menerima, menyemak dan meluluskan artwork.</p>
+                </div>
+            @else
+                <div class="deposit-notice">
+                    <strong>Booking belum dibayar.</strong>
+                    <p>Lengkapkan bayaran booking sebelum membuat pengesahan akhir.</p>
+                    <form method="POST" action="{{ route('orders.booking-payment.store', ['orderId' => $order->order_id]) }}">
+                        @csrf
+                        <button class="confirm-button" type="submit">
+                            Teruskan Pembayaran RM {{ number_format((float) $review['pricing']['deposit_amount'], 2) }}
+                        </button>
+                    </form>
+                    @error('payment')<p class="field-error" role="alert">{{ $message }}</p>@enderror
+                </div>
+            @endif
         </section>
 
         <section class="review-card confirmation-card">

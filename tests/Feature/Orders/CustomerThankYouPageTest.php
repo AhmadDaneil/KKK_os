@@ -8,6 +8,7 @@ use App\Services\Orders\GenerateOrderAccessLinkService;
 use App\Services\Orders\SaveOrderDraftService;
 use Database\Seeders\KkkPackagePriceCatalogSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Http;
 use Tests\TestCase;
 
 class CustomerThankYouPageTest extends TestCase
@@ -116,6 +117,44 @@ class CustomerThankYouPageTest extends TestCase
 
         $this->assertSame('DETAILS_INCOMPLETE', $order->fresh()->status);
         $this->assertDatabaseCount('payment_transactions', 1);
+    }
+
+    public function test_unpaid_booking_can_resume_online_payment_from_final_review(): void
+    {
+        $order = $this->completeOrder();
+        $order->payments()->delete();
+        $order->update(['booking_payment_status' => 'PENDING']);
+        $this->establishCustomerSession($order);
+
+        config()->set('services.billplz.enabled', true);
+        config()->set('app.url', 'https://167.71.196.30');
+        config()->set('services.billplz.secret_key', 'sandbox-secret');
+        config()->set('services.billplz.base_url', 'https://www.billplz-sandbox.com/api');
+        config()->set('services.billplz.collection_id', 'sandbox-collection');
+        Http::preventStrayRequests();
+        Http::fake(['www.billplz-sandbox.com/*' => Http::response([
+            'id' => 'resumed-booking',
+            'collection_id' => 'sandbox-collection',
+            'amount' => 5000,
+            'url' => 'https://www.billplz-sandbox.com/bills/resumed-booking',
+        ])]);
+
+        $this->get(route('orders.review.show', ['orderId' => $order->order_id]))
+            ->assertOk()
+            ->assertSee('Booking belum dibayar.')
+            ->assertSee('Teruskan Pembayaran RM 50.00')
+            ->assertDontSee('Booking telah dibayar dan disahkan.');
+
+        $this->post(route('orders.booking-payment.store', ['orderId' => $order->order_id]))
+            ->assertRedirect('https://www.billplz-sandbox.com/bills/resumed-booking');
+
+        $this->assertDatabaseHas('payment_transactions', [
+            'order_id' => $order->id,
+            'payment_type' => 'BOOKING_DEPOSIT',
+            'provider' => 'BILLPLZ',
+            'amount' => '50.00',
+            'status' => 'PENDING',
+        ]);
     }
 
     public function test_legacy_order_id_url_redirects_to_final_review(): void
