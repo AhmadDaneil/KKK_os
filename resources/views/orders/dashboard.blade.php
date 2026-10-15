@@ -109,6 +109,38 @@
     @endif
 </header>
 
+@if ($order->customer_reference || $order->invoice)
+    <section class="deposit-status-card" aria-label="Ringkasan kewangan">
+        <div><span>Rujukan Pelanggan</span><strong>{{ $order->customer_reference ?: '-' }}</strong></div>
+        @if ($order->invoice)
+            <div><span>Jumlah Invois</span><strong>RM {{ number_format((float) $order->invoice->total_amount, 2) }}</strong></div>
+            <div><span>Jumlah Dibayar</span><strong>RM {{ number_format((float) $order->invoice->amount_paid, 2) }}</strong></div>
+            <div><span>Baki</span><strong>RM {{ number_format((float) $order->invoice->balance_due, 2) }}</strong></div>
+        @endif
+        @if ($order->payments->where('status', 'PAID')->isNotEmpty())
+            <h2>Sejarah Pembayaran</h2>
+            <ul>
+                @foreach ($order->payments->where('status', 'PAID')->sortByDesc('paid_at') as $payment)
+                    <li>{{ $payment->payment_type === 'BOOKING_DEPOSIT' ? 'Booking' : 'Baki' }} — RM {{ number_format((float) $payment->amount, 2) }} — {{ $payment->paid_at?->format('d/m/Y H:i') }}</li>
+                @endforeach
+            </ul>
+        @endif
+    </section>
+@endif
+
+@php($confirmedPreview = data_get($order->confirmation?->confirmed_snapshot, 'live_preview'))
+@if (is_array($confirmedPreview))
+    <section class="deposit-status-card" aria-label="Sejarah Live Preview">
+        <h2>Live Preview Yang Disahkan</h2>
+        <p>Rekod rujukan pelanggan semasa pengesahan akhir. Ini bukan artwork atau fail sumber untuk cetakan.</p>
+        <ul>
+            @foreach (($confirmedPreview['package_sides'] ?? []) as $previewSide)
+                <li>{{ $previewSide['side'] ?? '-' }} — {{ data_get($previewSide, 'design.design_code', '-') }} — {{ data_get($previewSide, 'design.theme', '-') }}</li>
+            @endforeach
+        </ul>
+    </section>
+@endif
+
 @php($depositPayment = $order->payments->firstWhere('payment_type', 'BOOKING_DEPOSIT'))
 @if ($depositPayment)
     <section class="deposit-status-card" data-deposit-status="{{ strtolower($depositPayment->status) }}">

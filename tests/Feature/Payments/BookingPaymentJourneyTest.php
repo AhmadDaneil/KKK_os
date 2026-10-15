@@ -1,0 +1,128 @@
+<?php
+
+namespace Tests\Feature\Payments;
+
+use App\Models\Order;
+use App\Services\Orders\CreateOrderService;
+use App\Services\Payments\CreateBillplzBookingPaymentService;
+use Database\Seeders\KkkPackagePriceCatalogSeeder;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Http;
+use Tests\TestCase;
+
+class BookingPaymentJourneyTest extends TestCase
+{
+    use RefreshDatabase;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+        $this->seed(KkkPackagePriceCatalogSeeder::class);
+        config()->set('app.url', 'https://167.71.196.30');
+        config()->set('services.billplz.enabled', true);
+        config()->set('services.billplz.secret_key', 'sandbox-secret');
+        config()->set('services.billplz.base_url', 'https://www.billplz-sandbox.com/api');
+        config()->set('services.billplz.x_signature_key', 'sandbox-signature');
+        config()->set('services.billplz.collection_id', 'sandbox-collection');
+    }
+
+    public function test_one_package_booking_payment_activates_reference_invoice_dashboard_and_receipt(): void
+    {
+        $order = $this->createOrder(1);
+        $this->fakeBill('booking-one', 5000);
+        $checkout = app(CreateBillplzBookingPaymentService::class)->create($order);
+
+        $this->assertSame('50.00', $checkout['payment']->amount);
+        $this->postJson(route('api.billplz-sandbox.callback'), $this->signedPayload([
+            'id' => 'booking-one', 'collection_id' => 'sandbox-collection', 'paid' => 'true',
+            'state' => 'paid', 'amount' => '5000', 'paid_amount' => '5000',
+            'paid_at' => '2026-10-14 12:00:00 +0800',
+        ]))->assertOk();
+
+        $order = $order->fresh();
+        $payment = $checkout['payment']->fresh();
+        $this->assertSame('PAID', $order->booking_payment_status);
+        $this->assertMatchesRegularExpression('/^KKK\d{6}-001$/', $order->customer_reference);
+        $this->assertNotNull($order->dashboard_activated_at);
+        $this->assertNotEmpty($payment->metadata['customer_access']['dashboard_url_encrypted']);
+        $this->assertDatabaseHas('invoices', [
+            'order_id' => $order->id,
+            'invoice_number' => $order->customer_reference,
+            'amount_paid' => '50.00',
+        ]);
+        $this->assertDatabaseCount('order_access_tokens', 1);
+
+        $this->get(route('payments.booking.return', ['reference' => $payment->public_reference]))
+            ->assertOk()
+            ->assertSee($order->customer_reference)
+            ->assertSee(route('orders.dashboard', ['orderId' => $order->order_id]));
+        $this->get(route('orders.dashboard', ['orderId' => $order->order_id]))->assertOk();
+    }
+
+    public function test_two_package_booking_amount_is_one_hundred_ringgit(): void
+    {
+        $order = $this->createOrder(2);
+        $this->fakeBill('booking-two', 10000);
+        $checkout = app(CreateBillplzBookingPaymentService::class)->create($order);
+
+        $this->assertSame('100.00', $checkout['payment']->amount);
+        $this->assertSame('https://www.billplz-sandbox.com/bills/booking-two', $checkout['payment_url']);
+    }
+
+    public function test_duplicate_callback_is_idempotent(): void
+    {
+        $order = $this->createOrder(1);
+        $this->fakeBill('booking-repeat', 5000);
+        app(CreateBillplzBookingPaymentService::class)->create($order);
+        $payload = $this->signedPayload([
+            'id' => 'booking-repeat', 'collection_id' => 'sandbox-collection', 'paid' => 'true',
+            'state' => 'paid', 'amount' => '5000', 'paid_amount' => '5000',
+            'paid_at' => '2026-10-14 12:00:00 +0800',
+        ]);
+
+        $this->postJson(route('api.billplz-sandbox.callback'), $payload)->assertOk();
+        $this->postJson(route('api.billplz-sandbox.callback'), $payload)->assertOk();
+
+        $this->assertDatabaseCount('order_access_tokens', 1);
+        $this->assertDatabaseCount('customer_reference_sequences', 1);
+        $this->assertSame(3, $order->payments()->firstOrFail()->events()->count());
+    }
+
+    private function createOrder(int $packageCount): Order
+    {
+        return app(CreateOrderService::class)->create([
+            'package_count' => $packageCount,
+            'side' => $packageCount === 1 ? 'LELAKI' : null,
+            'package_format' => $packageCount === 2 ? 'SEPARATE' : null,
+            'first_event_side' => $packageCount === 2 ? 'LELAKI' : null,
+            'package_type' => 'PUTERI_MANIS',
+            'customer_name' => 'Pelanggan Booking',
+            'customer_email' => 'booking@example.test',
+            'customer_phone' => '60123456789',
+        ]);
+    }
+
+    private function fakeBill(string $billId, int $amountSen): void
+    {
+        Http::preventStrayRequests();
+        Http::fake(['www.billplz-sandbox.com/*' => Http::response([
+            'id' => $billId,
+            'collection_id' => 'sandbox-collection',
+            'amount' => $amountSen,
+            'url' => 'https://www.billplz-sandbox.com/bills/'.$billId,
+        ])]);
+    }
+
+    private function signedPayload(array $payload): array
+    {
+        $parameters = $payload;
+        uksort($parameters, static fn (string $left, string $right): int => strcasecmp($left, $right));
+        $source = implode('|', array_map(
+            static fn (string $key, mixed $value): string => $key.(string) $value,
+            array_keys($parameters), array_values($parameters),
+        ));
+        $payload['x_signature'] = hash_hmac('sha256', $source, 'sandbox-signature');
+
+        return $payload;
+    }
+}

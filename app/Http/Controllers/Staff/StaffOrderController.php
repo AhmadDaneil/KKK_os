@@ -60,6 +60,7 @@ class StaffOrderController extends Controller
                 'fulfilment',
                 'payments',
                 'invoice',
+                'confirmation',
                 'fulfilmentJob.events.actor',
                 'printingAssignedUser',
                 'packingAssignedUser',

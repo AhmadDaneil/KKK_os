@@ -2,6 +2,10 @@
 
 namespace App\Services\Admin;
 
+use App\Models\Invoice;
+use App\Models\Order;
+use App\Models\OrderItem;
+use App\Models\OrderPricingSnapshot;
 use App\Models\PaymentTransaction;
 use Carbon\CarbonImmutable;
 
@@ -75,8 +79,32 @@ class BuildSalesAnalysisService
         ])->values()->all();
 
         $bestMonth = collect($monthly)->sortByDesc('amount')->first();
+        $businessSummary = [
+            'gross_sales' => (float) Invoice::query()->sum('total_amount'),
+            'collected' => (float) PaymentTransaction::query()->where('status', 'PAID')->sum('amount'),
+            'outstanding' => (float) Invoice::query()->sum('balance_due'),
+            'total_orders' => Order::query()->where('status', '!=', 'DETAILS_INCOMPLETE')->count(),
+            'addon_sales' => (float) OrderItem::query()->where('item_type', 'ADDON')->sum('line_total'),
+            'postage_sales' => (float) OrderPricingSnapshot::query()->sum('postage_amount'),
+            'booking_collected' => (float) PaymentTransaction::query()
+                ->where('status', 'PAID')->where('payment_type', 'BOOKING_DEPOSIT')->sum('amount'),
+            'balance_collected' => (float) PaymentTransaction::query()
+                ->where('status', 'PAID')->where('payment_type', 'BALANCE')->sum('amount'),
+        ];
+        $packageBreakdown = Order::query()
+            ->where('status', '!=', 'DETAILS_INCOMPLETE')
+            ->selectRaw('package_count, count(*) as total')
+            ->groupBy('package_count')
+            ->pluck('total', 'package_count')
+            ->map(fn ($total): int => (int) $total)
+            ->all();
 
         return [
+            'business_summary' => $businessSummary,
+            'package_breakdown' => [
+                1 => $packageBreakdown[1] ?? 0,
+                2 => $packageBreakdown[2] ?? 0,
+            ],
             'summary' => [
                 'today' => (float) $todayPayments->sum('amount'),
                 'today_transactions' => $todayPayments->count(),

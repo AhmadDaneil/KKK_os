@@ -4,29 +4,25 @@ namespace App\Services\Payments;
 
 use App\Models\Invoice;
 use App\Models\Order;
+use App\Services\Orders\GenerateCustomerReferenceService;
 use Illuminate\Support\Facades\DB;
 use RuntimeException;
 
 class SynchronizeOrderFinancialsService
 {
+    public function __construct(private GenerateCustomerReferenceService $references) {}
+
     public function synchronize(Order $order): ?Invoice
     {
         return DB::transaction(function () use ($order): ?Invoice {
             $lockedOrder = Order::query()->whereKey($order->id)->lockForUpdate()->firstOrFail();
             $snapshot = $lockedOrder->pricingSnapshot()->lockForUpdate()->first();
 
-            if ($snapshot === null) {
-                return null;
-            }
-
-            $totalCents = $this->toCents((string) $snapshot->total_amount);
-            if ($totalCents <= 0) {
-                return null;
-            }
+            $currency = $snapshot?->currency ?? 'MYR';
 
             $paidCents = $lockedOrder->payments()
                 ->where('status', 'PAID')
-                ->where('currency', $snapshot->currency)
+                ->where('currency', $currency)
                 ->get(['amount'])
                 ->sum(fn ($payment): int => $this->toCents((string) $payment->amount));
 
@@ -34,12 +30,16 @@ class SynchronizeOrderFinancialsService
                 return null;
             }
 
-            if ($paidCents > $totalCents) {
+            $totalCents = $snapshot === null
+                ? $paidCents
+                : $this->toCents((string) $snapshot->total_amount);
+
+            if ($totalCents <= 0 || $paidCents > $totalCents) {
                 throw new RuntimeException('Jumlah bayaran order melebihi jumlah keseluruhan snapshot harga.');
             }
 
             $balanceCents = $totalCents - $paidCents;
-            $snapshot->update([
+            $snapshot?->update([
                 'paid_amount' => $this->fromCents($paidCents),
                 'outstanding_amount' => $this->fromCents($balanceCents),
             ]);
@@ -48,17 +48,19 @@ class SynchronizeOrderFinancialsService
                 return null;
             }
 
+            $customerReference = $this->references->generate($lockedOrder);
+
             $paymentStatus = match (true) {
                 $balanceCents === 0 => 'PAID',
                 $paidCents > 0 => 'PARTIALLY_PAID',
                 default => 'UNPAID',
             };
             $values = [
-                'currency' => $snapshot->currency,
-                'subtotal' => $snapshot->subtotal,
-                'postage_amount' => $snapshot->postage_amount,
-                'discount_amount' => $snapshot->discount_amount,
-                'total_amount' => $snapshot->total_amount,
+                'currency' => $currency,
+                'subtotal' => $snapshot?->subtotal ?? $this->fromCents($totalCents),
+                'postage_amount' => $snapshot?->postage_amount ?? '0.00',
+                'discount_amount' => $snapshot?->discount_amount ?? '0.00',
+                'total_amount' => $snapshot?->total_amount ?? $this->fromCents($totalCents),
                 'amount_paid' => $this->fromCents($paidCents),
                 'balance_due' => $this->fromCents($balanceCents),
                 'payment_status' => $paymentStatus,
@@ -69,7 +71,7 @@ class SynchronizeOrderFinancialsService
             if ($invoice === null) {
                 return Invoice::query()->create([
                     'order_id' => $lockedOrder->id,
-                    'invoice_number' => 'INV-'.$lockedOrder->order_id,
+                    'invoice_number' => $customerReference,
                     ...$values,
                     'issued_at' => now(),
                 ]);

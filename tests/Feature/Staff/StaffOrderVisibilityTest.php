@@ -913,7 +913,7 @@ class StaffOrderVisibilityTest extends TestCase
             ->assertDontSee($plainOrder->order_id);
     }
 
-    public function test_assigned_designer_sees_photoshop_and_csv_tools(): void
+    public function test_assigned_designer_sees_photoshop_csv_tool_without_server_launcher(): void
     {
         $designer = $this->staff(User::ROLE_DESIGNER);
         $admin = $this->staff(User::ROLE_ADMIN);
@@ -927,9 +927,8 @@ class StaffOrderVisibilityTest extends TestCase
             ->assertOk()
             ->assertSee('Photoshop Auto Merge V34')
             ->assertSee('Muat Turun CSV Pelanggan')
-            ->assertSee('Buka Photoshop')
             ->assertSee(route('staff.orders.photoshop.csv', $order), false)
-            ->assertSee(route('staff.orders.photoshop.launch', $order), false);
+            ->assertDontSee(route('staff.orders.photoshop.launch', $order), false);
     }
 
     public function test_assigned_designer_can_download_photoshop_ready_csv(): void

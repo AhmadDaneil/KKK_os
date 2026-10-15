@@ -1144,7 +1144,7 @@ class StaffDesignWorkflowTest extends TestCase
             ->assertSessionHasNoErrors()
             ->assertSessionHas(
                 'status',
-                'Hasil design sedia untuk semakan pelanggan.'
+                'Hasil design telah diluluskan secara dalaman.'
             );
 
         $job->refresh();

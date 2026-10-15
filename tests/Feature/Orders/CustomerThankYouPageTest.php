@@ -8,8 +8,7 @@ use App\Services\Orders\GenerateOrderAccessLinkService;
 use App\Services\Orders\SaveOrderDraftService;
 use Database\Seeders\KkkPackagePriceCatalogSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Http\UploadedFile;
-use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Http;
 use Tests\TestCase;
 
 class CustomerThankYouPageTest extends TestCase
@@ -44,7 +43,6 @@ class CustomerThankYouPageTest extends TestCase
 
     public function test_successful_confirmation_redirects_to_thank_you_page(): void
     {
-        Storage::fake('local');
         $order = $this->completeOrder();
         $this->establishCustomerSession($order);
 
@@ -53,8 +51,8 @@ class CustomerThankYouPageTest extends TestCase
             ->assertSee('Bayaran Deposit')
             ->assertSee('RM 188.00')
             ->assertSee('RM 50.00')
-            ->assertSee('Ini hanyalah bayaran deposit.')
-            ->assertSee('deposit_receipt', false)
+            ->assertSee('Booking telah dibayar dan disahkan.')
+            ->assertDontSee('deposit_receipt', false)
             ->assertSee('post_confirmation_liability_acknowledged', false);
 
         $response = $this->post(route('orders.confirm.store', [
@@ -62,7 +60,6 @@ class CustomerThankYouPageTest extends TestCase
         ]), [
             'responsibility_acknowledged' => '1',
             'post_confirmation_liability_acknowledged' => '1',
-            'deposit_receipt' => UploadedFile::fake()->image('resit-deposit.jpg'),
         ]);
 
         $response->assertRedirect(route('orders.thank-you.show', [
@@ -85,8 +82,8 @@ class CustomerThankYouPageTest extends TestCase
             ]), false);
 
         $payment = $order->fresh()->payments()->where('payment_type', 'BOOKING_DEPOSIT')->firstOrFail();
-        $this->assertSame('PENDING', $payment->status);
-        $this->assertSame('MANUAL_QR', $payment->provider);
+        $this->assertSame('PAID', $payment->status);
+        $this->assertSame('BILLPLZ', $payment->provider);
         $this->assertSame('50.00', $payment->amount);
         $this->assertSame('MYR', $payment->currency);
         $this->assertDatabaseHas('order_pricing_snapshots', [
@@ -100,12 +97,12 @@ class CustomerThankYouPageTest extends TestCase
             'item_code' => 'PUTERI_MANIS_CARD_200',
             'line_total' => '188.00',
         ]);
-        $this->assertSame('RECEIPT_SUBMITTED', $order->fresh()->booking_payment_status);
+        $this->assertSame('PAID', $order->fresh()->booking_payment_status);
         $this->assertTrue($order->fresh()->confirmation->confirmed_snapshot['post_confirmation_liability_acknowledged']);
-        Storage::disk('local')->assertExists($payment->metadata['receipt_path']);
+        $this->assertSame('LIVE_PREVIEW_REFERENCE', $order->fresh()->confirmation->confirmed_snapshot['snapshot_type']);
     }
 
-    public function test_confirmation_requires_deposit_receipt_and_both_acknowledgements(): void
+    public function test_confirmation_requires_both_acknowledgements(): void
     {
         $order = $this->completeOrder();
         $this->establishCustomerSession($order);
@@ -116,11 +113,48 @@ class CustomerThankYouPageTest extends TestCase
             ->assertSessionHasErrors([
                 'responsibility_acknowledged',
                 'post_confirmation_liability_acknowledged',
-                'deposit_receipt',
             ]);
 
         $this->assertSame('DETAILS_INCOMPLETE', $order->fresh()->status);
-        $this->assertDatabaseCount('payment_transactions', 0);
+        $this->assertDatabaseCount('payment_transactions', 1);
+    }
+
+    public function test_unpaid_booking_can_resume_online_payment_from_final_review(): void
+    {
+        $order = $this->completeOrder();
+        $order->payments()->delete();
+        $order->update(['booking_payment_status' => 'PENDING']);
+        $this->establishCustomerSession($order);
+
+        config()->set('services.billplz.enabled', true);
+        config()->set('app.url', 'https://167.71.196.30');
+        config()->set('services.billplz.secret_key', 'sandbox-secret');
+        config()->set('services.billplz.base_url', 'https://www.billplz-sandbox.com/api');
+        config()->set('services.billplz.collection_id', 'sandbox-collection');
+        Http::preventStrayRequests();
+        Http::fake(['www.billplz-sandbox.com/*' => Http::response([
+            'id' => 'resumed-booking',
+            'collection_id' => 'sandbox-collection',
+            'amount' => 5000,
+            'url' => 'https://www.billplz-sandbox.com/bills/resumed-booking',
+        ])]);
+
+        $this->get(route('orders.review.show', ['orderId' => $order->order_id]))
+            ->assertOk()
+            ->assertSee('Booking belum dibayar.')
+            ->assertSee('Teruskan Pembayaran RM 50.00')
+            ->assertDontSee('Booking telah dibayar dan disahkan.');
+
+        $this->post(route('orders.booking-payment.store', ['orderId' => $order->order_id]))
+            ->assertRedirect('https://www.billplz-sandbox.com/bills/resumed-booking');
+
+        $this->assertDatabaseHas('payment_transactions', [
+            'order_id' => $order->id,
+            'payment_type' => 'BOOKING_DEPOSIT',
+            'provider' => 'BILLPLZ',
+            'amount' => '50.00',
+            'status' => 'PENDING',
+        ]);
     }
 
     public function test_legacy_order_id_url_redirects_to_final_review(): void
@@ -201,6 +235,17 @@ class CustomerThankYouPageTest extends TestCase
             ],
             'fulfilment' => ['method' => 'PICKUP'],
         ]);
+
+        $order->payments()->create([
+            'payment_type' => 'BOOKING_DEPOSIT',
+            'provider' => 'BILLPLZ',
+            'provider_reference' => 'paid-booking-'.$order->id,
+            'amount' => '50.00',
+            'currency' => 'MYR',
+            'status' => 'PAID',
+            'paid_at' => now(),
+        ]);
+        $order->update(['booking_payment_status' => 'PAID']);
 
         return $order->fresh();
     }

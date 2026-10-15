@@ -17,6 +17,8 @@ class CreateOrderService
         return DB::transaction(function () use ($data) {
             $order = Order::create([
                 'order_id' => $this->orderIdGenerator->generate(),
+                'source' => $data['source'] ?? 'DIRECT',
+                'source_reference' => $data['source_reference'] ?? null,
                 'package_count' => $data['package_count'],
                 'package_type' => $data['package_type'] ?? null,
                 'package_format' => (int) $data['package_count'] === 2
@@ -30,7 +32,7 @@ class CreateOrderService
                     ? strtolower(trim($data['customer_email']))
                     : null,
                 'customer_phone' => $data['customer_phone'] ?? null,
-                'booking_payment_status' => 'TEST',
+                'booking_payment_status' => 'PENDING',
                 'status' => 'DETAILS_INCOMPLETE',
             ]);
 

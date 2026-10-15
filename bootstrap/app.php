@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Middleware\AuthenticateWabot;
 use App\Http\Middleware\EnsureActiveStaff;
 use App\Http\Middleware\EnsureStaffRole;
 use Illuminate\Foundation\Application;
@@ -17,9 +18,10 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware): void {
 
         $middleware->alias([
-        'active.staff' => EnsureActiveStaff::class,
-        'staff.role' => EnsureStaffRole::class,
-    ]);
+            'active.staff' => EnsureActiveStaff::class,
+            'staff.role' => EnsureStaffRole::class,
+            'wabot.auth' => AuthenticateWabot::class,
+        ]);
 
         $middleware->redirectGuestsTo(
             fn (Request $request) => $request->is('admin') || $request->is('admin/*')

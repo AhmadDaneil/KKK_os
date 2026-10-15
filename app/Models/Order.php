@@ -20,6 +20,9 @@ class Order extends Model
 
     protected $fillable = [
         'order_id',
+        'customer_reference',
+        'source',
+        'source_reference',
         'package_count',
         'package_type',
         'package_format',
@@ -33,6 +36,7 @@ class Order extends Model
         'printing_assigned_user_id',
         'packing_assigned_user_id',
         'details_confirmed_at',
+        'dashboard_activated_at',
     ];
 
     protected static function booted(): void
@@ -58,6 +62,7 @@ class Order extends Model
         return [
             'package_count' => 'integer',
             'details_confirmed_at' => 'datetime',
+            'dashboard_activated_at' => 'datetime',
             'card_quantity' => 'integer',
         ];
     }

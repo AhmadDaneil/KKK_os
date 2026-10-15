@@ -4,15 +4,19 @@ use App\Http\Controllers\Admin\AdminAuthController;
 use App\Http\Controllers\Admin\AdminDashboardController;
 use App\Http\Controllers\Admin\AdminPasswordResetController;
 use App\Http\Controllers\Admin\AdminStaffController;
+use App\Http\Controllers\BookingPaymentReturnController;
 use App\Http\Controllers\CustomerArtworkReviewController;
 use App\Http\Controllers\CustomerBalanceReceiptController;
 use App\Http\Controllers\CustomerBillplzBalancePaymentController;
+use App\Http\Controllers\CustomerBookingPaymentController;
+use App\Http\Controllers\CustomerDashboardAccessController;
 use App\Http\Controllers\CustomerDashboardController;
 use App\Http\Controllers\CustomerDepositReceiptController;
 use App\Http\Controllers\CustomerOrderConfirmController;
 use App\Http\Controllers\CustomerOrderDraftController;
 use App\Http\Controllers\CustomerOrderReviewController;
 use App\Http\Controllers\CustomerOrderThankYouController;
+use App\Http\Controllers\CustomerPaymentReceiptController;
 use App\Http\Controllers\DevBalancePaymentController;
 use App\Http\Controllers\DevDesignJobController;
 use App\Http\Controllers\DevFulfilmentJobController;
@@ -54,6 +58,22 @@ Route::get('/tempah', [PublicOrderController::class, 'create'])
 Route::post('/tempah', [PublicOrderController::class, 'store'])
     ->middleware('throttle:10,1')
     ->name('public.orders.store');
+
+Route::get('/pembayaran/booking/{reference}', [BookingPaymentReturnController::class, 'show'])
+    ->middleware('throttle:30,1')
+    ->name('payments.booking.return');
+
+Route::get('/akses-tempahan', [CustomerDashboardAccessController::class, 'create'])
+    ->name('orders.access.create');
+Route::post('/akses-tempahan', [CustomerDashboardAccessController::class, 'store'])
+    ->middleware('throttle:20,1')
+    ->name('orders.access.store');
+Route::post('/order/{orderId}/logout', [CustomerDashboardAccessController::class, 'destroy'])
+    ->name('orders.access.destroy');
+
+Route::get('/order/{orderId}/payments/{payment}/receipt', [CustomerPaymentReceiptController::class, 'show'])
+    ->middleware('throttle:30,1')
+    ->name('payments.receipt.show');
 
 Route::get('/semak-progress', [PublicOrderController::class, 'progress'])
     ->name('public.orders.progress');
@@ -204,6 +224,11 @@ Route::get(
     '/order/{orderId}/review',
     [CustomerOrderReviewController::class, 'show']
 )->name('orders.review.show');
+
+Route::post(
+    '/order/{orderId}/booking-payment',
+    [CustomerBookingPaymentController::class, 'store']
+)->middleware('throttle:10,1')->name('orders.booking-payment.store');
 
 Route::post(
     '/order/{orderId}/confirm',

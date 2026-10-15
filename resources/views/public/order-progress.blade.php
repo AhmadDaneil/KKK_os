@@ -68,12 +68,14 @@
                         @endforeach
                     </ol>
                 </section>
-                <h3>{{ $progress['label'] }}</h3>
-                <p>{{ $progress['message'] }}</p>
+                @if (($orderStatus ?? null) !== 'DESIGN_APPROVED')
+                    <h3>{{ $progress['label'] }}</h3>
+                    <p>{{ $progress['message'] }}</p>
+                @endif
                 @if ($deposit)
                     <div class="deposit-public-status" data-status="{{ strtolower($deposit['status']) }}">
                         <span>Deposit</span>
-                        <strong>{{ match ($deposit['status']) { 'PAID' => 'Disahkan', 'FAILED' => 'Resit Ditolak', default => 'Menunggu Semakan' } }}</strong>
+                        <strong>{{ match ($deposit['status']) { 'PAID' => 'Disahkan', 'FAILED' => 'Resit Ditolak', default => 'Menunggu Pembayaran' } }}</strong>
                         @if ($deposit['status'] === 'FAILED' && $deposit['reason'])<p>Sebab: {{ $deposit['reason'] }}</p>@endif
                     </div>
                 @endif
@@ -86,10 +88,10 @@
 
                         @if (($balance['status'] ?? null) === 'PENDING')
                             @if (($balance['provider'] ?? null) === 'BILLPLZ')
-                                <div class="balance-status-message"><strong>Menunggu bayaran Billplz</strong><span>Lengkapkan pembayaran pada halaman Billplz untuk meneruskan tempahan.</span></div>
+                                <div class="balance-status-message"><strong>Menunggu pembayaran</strong><span>Lengkapkan pembayaran selamat untuk meneruskan tempahan.</span></div>
                                 <form method="POST" action="{{ route('orders.balance-payment.billplz.store', ['orderId' => $orderId]) }}">
                                     @csrf
-                                    <button class="button button-primary" type="submit">Teruskan Pembayaran Billplz</button>
+                                    <button class="button button-primary" type="submit">Teruskan Pembayaran</button>
                                 </form>
                                 @error('billplz')<p class="field-error" role="alert">{{ $message }}</p>@enderror
                             @else
@@ -99,36 +101,15 @@
                             <div class="balance-status-message is-paid"><strong>Bayaran penuh disahkan</strong><span>Tempahan anda akan diteruskan ke proses cetakan.</span></div>
                         @else
                             @if (($balance['status'] ?? null) === 'FAILED')
-                                <div class="balance-status-message is-failed"><strong>Resit ditolak</strong><span>{{ $balance['reason'] ?: 'Sila buat semakan dan hantar resit baharu.' }}</span></div>
+                                <div class="balance-status-message is-failed"><strong>Pembayaran gagal</strong><span>{{ $balance['reason'] ?: 'Sila cuba pembayaran semula.' }}</span></div>
                             @endif
                             @if (config('services.billplz.enabled') && $balanceBillplzAmount !== null && (float) $balanceBillplzAmount > 0)
                                 <form method="POST" action="{{ route('orders.balance-payment.billplz.store', ['orderId' => $orderId]) }}">
                                     @csrf
-                                    <button class="button button-primary" type="submit">Bayar baki RM {{ number_format((float) $balanceBillplzAmount, 2) }} melalui Billplz</button>
+                                    <button class="button button-primary" type="submit">Bayar baki RM {{ number_format((float) $balanceBillplzAmount, 2) }}</button>
                                 </form>
                                 @error('billplz')<p class="field-error" role="alert">{{ $message }}</p>@enderror
                             @endif
-                            <p>Imbas QR untuk membayar baki, kemudian lampirkan resit sebagai bukti pembayaran.</p>
-                            <div class="balance-payment-layout">
-                                <div class="balance-qr-panel">
-                                    @if ($balanceQrImage && file_exists(public_path($balanceQrImage)))
-                                        <img src="{{ asset($balanceQrImage) }}" alt="QR pembayaran penuh">
-                                    @else
-                                        <div class="balance-qr-placeholder"><strong>QR</strong><span>Letakkan imej QR pembayaran dalam konfigurasi sistem.</span></div>
-                                    @endif
-                                </div>
-                                <form id="balance-receipt-form" method="POST" enctype="multipart/form-data" action="{{ route('orders.balance-receipt.store', ['orderId' => $orderId]) }}">
-                                    @csrf
-                                    <label for="balance-receipt">Bukti pembayaran penuh</label>
-                                    <p>JPG, JPEG, PNG, WEBP atau PDF. Maksimum 10 MB.</p>
-                                    <div class="balance-receipt-picker">
-                                        <input id="balance-receipt" type="file" name="balance_receipt" accept=".jpg,.jpeg,.png,.webp,.pdf,image/jpeg,image/png,image/webp,application/pdf" required>
-                                        <button id="cancel-balance-receipt" type="button" hidden aria-controls="balance-receipt">Batal</button>
-                                    </div>
-                                    @error('balance_receipt')<p class="field-error">{{ $message }}</p>@enderror
-                                    <button id="balance-receipt-submit" class="button button-primary" type="submit">Hantar Bukti Pembayaran</button>
-                                </form>
-                            </div>
                         @endif
                     </section>
                 @endif
@@ -143,66 +124,6 @@
             </section>
         @endisset
     </main>
-    <dialog id="balance-receipt-confirmation" class="confirmation-dialog" aria-labelledby="balance-receipt-confirmation-title">
-        <div class="confirmation-dialog-icon" aria-hidden="true">?</div>
-        <h2 id="balance-receipt-confirmation-title">Hantar bukti pembayaran?</h2>
-        <p>Pastikan fail resit bayaran baki yang dipilih adalah betul. Resit ini akan dihantar kepada staff untuk semakan.</p>
-        <div class="confirmation-dialog-actions">
-            <button id="cancel-balance-confirmation" class="button button-secondary" type="button">Tidak, semak semula</button>
-            <button id="confirm-balance-receipt" class="button button-primary" type="button">Ya, hantar resit</button>
-        </div>
-    </dialog>
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            const input = document.getElementById('balance-receipt');
-            const cancelButton = document.getElementById('cancel-balance-receipt');
-            const form = document.getElementById('balance-receipt-form');
-            const submitButton = document.getElementById('balance-receipt-submit');
-            const confirmationDialog = document.getElementById('balance-receipt-confirmation');
-            const confirmButton = document.getElementById('confirm-balance-receipt');
-            const cancelConfirmationButton = document.getElementById('cancel-balance-confirmation');
-            let receiptConfirmed = false;
-
-            if (!input || !cancelButton || !form || !submitButton || !confirmationDialog || !confirmButton || !cancelConfirmationButton) {
-                return;
-            }
-
-            function updateCancelButton() {
-                cancelButton.hidden = input.files.length === 0;
-            }
-
-            input.addEventListener('change', updateCancelButton);
-            cancelButton.addEventListener('click', function () {
-                input.value = '';
-                updateCancelButton();
-                input.focus();
-            });
-
-            updateCancelButton();
-
-            form.addEventListener('submit', function (event) {
-                if (receiptConfirmed) {
-                    submitButton.disabled = true;
-                    submitButton.textContent = 'Menghantar...';
-
-                    return;
-                }
-
-                event.preventDefault();
-                confirmationDialog.showModal();
-            });
-
-            cancelConfirmationButton.addEventListener('click', function () {
-                confirmationDialog.close();
-            });
-
-            confirmButton.addEventListener('click', function () {
-                receiptConfirmed = true;
-                confirmationDialog.close();
-                form.requestSubmit(submitButton);
-            });
-        });
-    </script>
     @include('public.partials.customer-service')
     @include('public.partials.theme-toggle')
     @include('partials.malay-validation')

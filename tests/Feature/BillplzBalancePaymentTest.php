@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Models\Order;
 use App\Models\PaymentTransaction;
 use App\Services\Orders\CreateOrderService;
+use App\Services\Orders\GenerateOrderAccessLinkService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\Client\Request as ClientRequest;
 use Illuminate\Support\Facades\Http;
@@ -208,9 +209,13 @@ class BillplzBalancePaymentTest extends TestCase
 
     private function lookupOrder(Order $order): TestResponse
     {
-        return $this->post(route('public.orders.progress.lookup'), [
-            'order_id' => $order->order_id,
-        ]);
+        $url = app(GenerateOrderAccessLinkService::class)->generate($order);
+        $path = (string) parse_url($url, PHP_URL_PATH);
+        $query = (string) parse_url($url, PHP_URL_QUERY);
+
+        $this->get($query === '' ? $path : $path.'?'.$query)->assertRedirect();
+
+        return $this->get(route('orders.dashboard', ['orderId' => $order->order_id]));
     }
 
     private function fakeBillCreation(string $billId, int $amountSen): void

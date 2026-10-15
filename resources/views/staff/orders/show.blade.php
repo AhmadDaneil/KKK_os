@@ -164,6 +164,9 @@
             @endif
 
             @if ($hasFullQueueView)
+            @php
+                $confirmedPreview = data_get($order->confirmation?->confirmed_snapshot, 'live_preview');
+            @endphp
             <div id="customer-data" class="staff-detail-grid staff-department-group">
                 <section class="staff-card">
                     <h2>Ringkasan Tempahan</h2>
@@ -187,6 +190,11 @@
                         <div>
                             <dt>Bayaran Tempahan</dt>
                             <dd>{{ $order->booking_payment_status ?? '-' }}</dd>
+                        </div>
+
+                        <div>
+                            <dt>Rujukan Pelanggan</dt>
+                            <dd>{{ $order->customer_reference ?: '-' }}</dd>
                         </div>
                     </dl>
                 </section>
@@ -219,6 +227,21 @@
                     @endif
                 </section>
             </div>
+
+            @if (is_array($confirmedPreview))
+                <section class="staff-card">
+                    <h2>Live Preview Yang Disahkan</h2>
+                    <p>Rekod rujukan pelanggan semasa pengesahan akhir. Ini bukan artwork atau fail sumber untuk cetakan.</p>
+                    <dl class="staff-detail-list">
+                        @foreach (($confirmedPreview['package_sides'] ?? []) as $previewSide)
+                            <div>
+                                <dt>{{ $previewSide['side'] ?? '-' }}</dt>
+                                <dd>{{ data_get($previewSide, 'design.design_code', '-') }} · {{ data_get($previewSide, 'design.theme', '-') }}</dd>
+                            </div>
+                        @endforeach
+                    </dl>
+                </section>
+            @endif
 
             <section class="staff-section staff-timeline-section">
                 <div class="staff-lifecycle-heading">
@@ -419,11 +442,11 @@
                                 <h3>Sediakan tempahan pelanggan ini dalam Photoshop</h3>
                                 <ol>
                                     <li>Muat turun fail CSV tempahan pelanggan.</li>
-                                    <li>Buka Photoshop; JavaScript yang diluluskan akan bermula secara automatik.</li>
+                                    <li>Buka Photoshop pada workstation Windows dan jalankan JavaScript V11 yang diluluskan.</li>
                                     <li>Pilih folder ROOT, kemudian pilih fail CSV yang telah dimuat turun.</li>
                                 </ol>
                                 <p class="staff-design-tools-note">
-                                    Photoshop akan dibuka pada komputer Windows yang menjalankan KKK OS.
+                                    KKK OS menyediakan CSV pelanggan untuk aliran Photoshop Auto Merge.
                                 </p>
                             </div>
 
@@ -434,17 +457,6 @@
                                 >
                                     Muat Turun CSV Pelanggan
                                 </a>
-
-                                <form
-                                    method="POST"
-                                    action="{{ route('staff.orders.photoshop.launch', $order) }}"
-                                >
-                                    @csrf
-
-                                    <button type="submit" class="staff-button staff-button-primary">
-                                        Buka Photoshop
-                                    </button>
-                                </form>
                             </div>
                         </div>
                     @endif
