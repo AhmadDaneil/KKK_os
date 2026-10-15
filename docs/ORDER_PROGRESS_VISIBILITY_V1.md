@@ -20,8 +20,8 @@ operational evidence as customer content.
 
 ## Authorization Contract
 
-- ADMIN and OPERATION_MANAGEMENT can read every progress update and its
-  attachment.
+- ADMIN, OPERATION_MANAGEMENT, and CUSTOMER_SERVICE can read every progress
+  update and its attachment. CUSTOMER_SERVICE remains read-only.
 - DESIGNER can create an update only when at least one Design job on the order
   is assigned to that user.
 - PRODUCTION can create an update only when a Print job on the order is
@@ -30,8 +30,8 @@ operational evidence as customer content.
   or Fulfilment job, matching OM's approved operational ownership.
 - A specialist uploader can read their own attachment. Other specialist staff
   receive a not-found response.
-- CUSTOMER_SERVICE does not receive access to this private stream. Existing
-  department-monitoring rules elsewhere are unchanged.
+- CUSTOMER_SERVICE cannot create progress updates and does not receive access
+  to Designer or Courier operational-proof endpoints.
 - Customers must first pass the existing order session/token check. The
   requested update must belong to that exact order and must be explicitly
   customer-visible.
@@ -64,7 +64,8 @@ submissions.
 - assigned and unassigned Designer permissions;
 - assigned and unassigned Production permissions;
 - OM operational-order scope;
-- ADMIN/OM read access and CUSTOMER_SERVICE denial;
+- ADMIN/OM/CUSTOMER_SERVICE read access, with CUSTOMER_SERVICE upload and
+  operational-proof denial;
 - uploader-only private attachment access;
 - customer order isolation and private-update exclusion;
 - customer attachment order/visibility checks;
@@ -83,8 +84,7 @@ Project Owner approval is required before any of these behaviours are changed:
 1. whether particular workflow events should auto-publish to customers;
 2. whether an approval/moderation step is required before a specialist's
    customer-visible update is released;
-3. whether CUSTOMER_SERVICE should be granted access to this private stream;
-4. retention/retraction rules for an already published customer update.
+3. retention/retraction rules for an already published customer update.
 
 Until approved, there is no auto-publishing and no post-publication edit/delete
 workflow. Legacy Production evidence and pre-completion Packing proof remain

@@ -15,7 +15,7 @@ class StaffArtworkProofController extends Controller
     {
         /** @var User $user */
         $user = $request->user();
-        abort_unless($user->canViewAllProgressUpdates(), 404);
+        abort_unless($user->isOperationManagement(), 404);
 
         $artwork = $designJob->artworkVersions()
             ->latest('version_number')

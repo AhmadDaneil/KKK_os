@@ -101,7 +101,7 @@ class User extends Authenticatable
 
     public function canViewAllProgressUpdates(): bool
     {
-        return $this->isAdmin() || $this->hasStaffRole(self::ROLE_OM);
+        return $this->canMonitorAllDepartments();
     }
 
     /**

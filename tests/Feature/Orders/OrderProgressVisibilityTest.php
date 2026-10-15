@@ -148,7 +148,7 @@ class OrderProgressVisibilityTest extends TestCase
         $this->assertNull($update->published_at);
     }
 
-    public function test_admin_and_om_can_view_updates_from_all_uploader_roles_but_customer_service_cannot(): void
+    public function test_admin_om_and_customer_service_can_view_updates_from_all_uploader_roles(): void
     {
         $order = $this->confirmedOrder(1);
         foreach ([User::ROLE_DESIGNER, User::ROLE_PRODUCTION, User::ROLE_OM] as $index => $role) {
@@ -176,7 +176,9 @@ class OrderProgressVisibilityTest extends TestCase
         $this->actingAs($customerService, 'staff')
             ->get(route('staff.orders.show', $order->order_id))
             ->assertOk()
-            ->assertDontSee('Audit update 0');
+            ->assertSee('Audit update 0')
+            ->assertSee('Audit update 1')
+            ->assertSee('Audit update 2');
     }
 
     public function test_customer_dashboard_shows_only_published_updates_for_its_own_order(): void
@@ -226,7 +228,7 @@ class OrderProgressVisibilityTest extends TestCase
             ->assertNotFound();
         $this->actingAs($this->staff(User::ROLE_CUSTOMER_SERVICE), 'staff')
             ->get(route('staff.progress-updates.attachment', $update))
-            ->assertNotFound();
+            ->assertOk();
     }
 
     public function test_customer_attachment_access_enforces_order_and_visibility_scope(): void
@@ -312,7 +314,13 @@ class OrderProgressVisibilityTest extends TestCase
             ->get(route('staff.design-jobs.proof.show', $designJob))
             ->assertOk();
 
-        $this->actingAs($this->staff(User::ROLE_CUSTOMER_SERVICE), 'staff')
+        $customerService = $this->staff(User::ROLE_CUSTOMER_SERVICE);
+        $this->actingAs($customerService, 'staff')
+            ->get(route('staff.orders.show', $order->order_id))
+            ->assertOk()
+            ->assertDontSee('Bukti Designer')
+            ->assertDontSee('Bukti Courier');
+        $this->actingAs($customerService, 'staff')
             ->get(route('staff.design-jobs.proof.show', $designJob))
             ->assertNotFound();
 

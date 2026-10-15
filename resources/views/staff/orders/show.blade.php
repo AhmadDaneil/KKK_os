@@ -582,7 +582,7 @@
                                         ?: ($latestCorrectionPayment?->metadata['affected_assets'] ?? ['CARD']);
                                 @endphp
 
-                                @if (auth()->user()->canViewAllProgressUpdates() && $hasDesignProof)
+                                @if (auth()->user()->isOperationManagement() && $hasDesignProof)
                                     <div class="staff-proof-status">
                                         <strong>Bukti Designer:</strong> Versi {{ $latestProofArtwork->version_number }}
                                         <a href="{{ route($operationRoutePrefix.'design-jobs.proof.show', $job) }}" class="staff-button staff-button-small" target="_blank" rel="noopener">Lihat Bukti</a>
@@ -1294,7 +1294,7 @@
                                 </div>
                             </dl>
                             @if (
-                                auth()->user()->canViewAllProgressUpdates()
+                                auth()->user()->isOperationManagement()
                                 && $order->fulfilmentJob->method === 'COURIER'
                                 && $order->fulfilmentJob->status === 'COMPLETED'
                                 && $order->packingJob?->proof_storage_path
