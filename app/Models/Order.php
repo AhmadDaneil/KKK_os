@@ -161,4 +161,9 @@ class Order extends Model
     {
         return $this->hasOne(FulfilmentJob::class);
     }
+
+    public function progressUpdates()
+    {
+        return $this->hasMany(OrderProgressUpdate::class);
+    }
 }

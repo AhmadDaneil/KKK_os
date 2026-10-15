@@ -109,7 +109,7 @@
                 ]);
             @endphp
 
-            <section class="artwork-card">
+            <section class="artwork-card" id="design-job-{{ $designJob->id }}">
                 <div class="card-heading">
                     <div>
                         <p class="side-label">Pakej</p>

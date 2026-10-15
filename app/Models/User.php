@@ -99,6 +99,11 @@ class User extends Authenticatable
         return $this->isOperationManagement() || $this->isCustomerService();
     }
 
+    public function canViewAllProgressUpdates(): bool
+    {
+        return $this->isAdmin() || $this->hasStaffRole(self::ROLE_OM);
+    }
+
     /**
      * Get the attributes that should be cast.
      *
