@@ -1,0 +1,1208 @@
+/* Customer entry pages share the active admin dashboard's chocolate, cream and gold palette. */
+html.brand-customer-page {
+    background: #f4efe3;
+}
+
+body.brand-landing,
+body.brand-start-order,
+body.brand-order-progress,
+body.brand-order-dashboard,
+body.brand-customer-flow {
+    --brand-ink: #2f291d;
+    --brand-muted: #746b59;
+    --brand-green: #7a5a1e;
+    --brand-green-hover: #5f4416;
+    --brand-gold: #e0b95c;
+    --brand-line: #d8cba9;
+    --brand-surface: #fffdf8;
+    --brand-soft: #f8edcf;
+    --ink: var(--brand-ink);
+    --green: var(--brand-green);
+    --deep: var(--brand-green-hover);
+    --gold: var(--brand-gold);
+    --cream: #f4efe3;
+    --paper: var(--brand-surface);
+    --muted: var(--brand-muted);
+    --line: var(--brand-line);
+    color: var(--brand-ink);
+    background: linear-gradient(180deg, #f4efe3 0, #f3f4f1 380px);
+}
+
+body.brand-landing .brand-mark,
+body.brand-start-order .brand-mark {
+    border-color: var(--brand-gold);
+    border-radius: 11px;
+    color: #302817;
+    background: var(--brand-gold);
+}
+
+body.brand-landing .eyebrow,
+body.brand-start-order .eyebrow {
+    color: #8a6720;
+}
+
+body.brand-landing .hero h1 em {
+    color: var(--brand-green);
+}
+
+body.brand-landing .hero-art::before {
+    border-color: #d8cba9;
+    background: radial-gradient(circle at 75% 22%, rgba(255,255,255,.8), transparent 27%),
+        radial-gradient(circle at 22% 78%, rgba(224,185,92,.24), transparent 33%),
+        linear-gradient(145deg, #fffaf0, #f0e5c9 55%, #e8d5a8);
+}
+
+body.brand-landing .feature-strip {
+    border-color: var(--brand-line);
+}
+
+body.brand-landing .journey li,
+body.brand-landing .faq-grid details,
+body.brand-landing .customer-policies article {
+    border: 1px solid var(--brand-line);
+    border-radius: 13px;
+    background: var(--brand-surface);
+    box-shadow: 0 3px 12px rgba(63,47,17,.06);
+}
+
+body.brand-landing .final-cta {
+    border-radius: 18px;
+    background: linear-gradient(135deg, #302817, #755b26);
+    box-shadow: 0 15px 40px rgba(70,53,20,.18);
+}
+
+body.brand-landing .final-cta .eyebrow {
+    color: #ead7a3;
+}
+
+body.brand-landing .button-primary,
+body.brand-start-order .button-primary {
+    border-radius: 9px;
+    background: var(--brand-green);
+    box-shadow: 0 10px 22px rgba(72,51,14,.16);
+}
+
+body.brand-landing .button-primary:hover,
+body.brand-start-order .button-primary:hover {
+    background: var(--brand-green-hover);
+}
+
+body.brand-landing .social-links a {
+    border-color: var(--brand-line);
+    background: var(--brand-surface);
+}
+
+body.brand-landing .social-links a span {
+    background: #7a5a1e;
+}
+
+body.brand-landing .customer-theme-toggle,
+body.brand-start-order .customer-theme-toggle,
+body.brand-order-dashboard .customer-theme-toggle {
+    border-color: var(--brand-line);
+    color: var(--brand-green);
+    background: var(--brand-surface);
+}
+
+body.brand-landing .button-secondary,
+body.brand-start-order .button-secondary,
+body.brand-start-order .header-link {
+    border-color: #cdbd94;
+    border-radius: 9px;
+    color: var(--brand-green);
+    background: var(--brand-surface);
+}
+
+body.brand-start-order.utility-page {
+    background: linear-gradient(180deg, #f4efe3 0, #f3f4f1 380px);
+}
+
+body.brand-order-progress .progress-search,
+body.brand-customer-flow :is(.review-header, .review-card, .review-item, .order-card, .package-summary, .order-summary, .artwork-card, .action-panel, .history-panel) {
+    border-color: var(--brand-line);
+    background-color: var(--brand-surface);
+}
+
+body.brand-order-progress :is(.header-link, .button-secondary, .balance-receipt-picker button) {
+    border-color: var(--brand-line);
+    border-radius: 9px;
+    color: var(--brand-green);
+    background: var(--brand-surface);
+}
+
+body.brand-order-progress :is(.header-link, .button-secondary, .balance-receipt-picker button):hover {
+    border-color: #b9852c;
+    color: var(--brand-green);
+    background: var(--brand-soft);
+}
+
+body.brand-order-progress :is(.button-primary, .balance-payment-notice a) {
+    border-color: var(--brand-green);
+    color: #fff;
+    background: var(--brand-green);
+}
+
+body.brand-order-progress :is(.button-primary, .balance-payment-notice a):hover {
+    border-color: var(--brand-green-hover);
+    background: var(--brand-green-hover);
+}
+
+body.brand-start-order .public-form {
+    border-color: var(--brand-line);
+    border-radius: 15px;
+    background: var(--brand-surface);
+    box-shadow: 0 12px 35px rgba(63,47,17,.10);
+}
+
+body.brand-start-order .choice-card {
+    border-color: var(--brand-line);
+    border-radius: 9px;
+    background: #fffdf8;
+}
+
+body.brand-start-order .choice-card:has(input:checked) {
+    border-color: var(--brand-green);
+    background: var(--brand-soft);
+    box-shadow: 0 0 0 2px rgba(185,133,44,.13);
+}
+
+body.brand-start-order .choice-card input {
+    accent-color: var(--brand-green);
+}
+
+body.brand-start-order :is(.public-form input:not([type=radio]), .public-form select) {
+    border-color: #d1c4a3;
+    border-radius: 8px;
+    color: var(--brand-ink);
+    background: #fffdf8;
+}
+
+body.brand-start-order :is(.public-form input:not([type=radio]), .public-form select):focus {
+    border-color: var(--brand-green);
+    outline-color: rgba(185,133,44,.16);
+}
+
+body.brand-order-dashboard .order-summary {
+    border-color: var(--brand-line);
+    border-top: 4px solid var(--brand-gold);
+    border-radius: 17px;
+    box-shadow: 0 12px 35px rgba(63,47,17,.10);
+}
+
+body.brand-order-dashboard .order-summary-grid,
+body.brand-order-dashboard .order-status-message,
+body.brand-order-dashboard .customer-view-switcher {
+    border: 1px solid var(--brand-line);
+    background: #faf6ec;
+}
+
+body.brand-order-dashboard :is(.order-summary-heading h1, #customer-order-form h2, #customer-order-form h3, .live-preview-heading h2, .live-product-heading h3) {
+    color: var(--brand-ink);
+}
+
+body.brand-order-dashboard .additional-products,
+body.brand-order-dashboard .additional-product-card {
+    border-color: var(--brand-line);
+    background: #faf6ec;
+}
+
+body.brand-order-dashboard .additional-product-card input[type=checkbox] {
+    accent-color: #9a7126;
+}
+
+body.brand-order-dashboard .status-badge {
+    color: var(--brand-green);
+    background: #f8edcf;
+}
+
+body.brand-order-dashboard .back-home-button {
+    border-color: #cdbd94;
+    color: var(--brand-green);
+}
+
+body.brand-order-dashboard .customer-view-switcher-button {
+    color: var(--brand-green);
+}
+
+body.brand-order-dashboard .customer-view-switcher-button:hover {
+    background: #f8edcf;
+}
+
+body.brand-order-dashboard .customer-view-switcher-button.is-active {
+    border-color: var(--brand-green);
+    color: #fff;
+    background: var(--brand-green);
+}
+
+body.brand-order-dashboard :is(#customer-order-form fieldset, .form-actions, .live-preview, .dashboard-action-card) {
+    border-color: var(--brand-line);
+    background-color: var(--brand-surface);
+    box-shadow: 0 4px 14px rgba(63,47,17,.06);
+}
+
+body.brand-order-dashboard #customer-order-form fieldset {
+    border-top: 3px solid var(--brand-green);
+}
+
+body.brand-order-dashboard #customer-order-form legend {
+    color: var(--brand-green);
+}
+
+body.brand-order-dashboard #customer-order-form :is(input, select, textarea, .date-picker-trigger) {
+    border-color: #d1c4a3;
+    color: var(--brand-ink);
+    background: var(--brand-surface);
+}
+
+body.brand-order-dashboard #customer-order-form :is(input, select, textarea, .date-picker-trigger):focus-visible {
+    border-color: var(--brand-green);
+    outline-color: rgba(185,133,44,.16);
+}
+
+body.brand-order-dashboard :is(.date-picker-panel, .hijri-picker-panel) {
+    border-color: var(--brand-line);
+    background: var(--brand-surface);
+    box-shadow: 0 18px 45px rgba(63,47,17,.18);
+}
+
+body.brand-order-dashboard :is(.date-picker-icon, .date-picker-nav, .date-picker-note, .date-picker-help) {
+    color: var(--brand-green);
+}
+
+body.brand-order-dashboard :is(.date-picker-nav, .date-picker-day, .hijri-picker-clear) {
+    border-color: var(--brand-line);
+    background: #faf6ec;
+}
+
+body.brand-order-dashboard :is(.date-picker-day:hover:not(:disabled), .date-picker-day.is-selected, .hijri-date-option:hover:not(:disabled)) {
+    color: #fff;
+    background: var(--brand-green);
+}
+
+body.brand-order-dashboard .hijri-date-option {
+    border-color: var(--brand-line);
+    color: var(--brand-green);
+    background: var(--brand-soft);
+}
+
+body.brand-order-dashboard .form-actions a,
+body.brand-order-dashboard .dashboard-action-card a {
+    border-color: var(--brand-green);
+    color: #fff;
+    background: var(--brand-green);
+}
+
+body.brand-order-dashboard .form-actions button {
+    border-color: #cdbd94;
+    color: var(--brand-green);
+    background: #fffdf8;
+}
+
+body.brand-order-dashboard .form-actions button:hover {
+    background: var(--brand-soft);
+}
+
+body.brand-order-dashboard :is(.live-preview-heading, .live-product-heading) .eyebrow {
+    color: #8a6720;
+}
+
+body.brand-order-dashboard :is(.preview-side-tab, .preview-face-tab, .preview-page-tab).is-active {
+    border-color: var(--brand-green);
+    color: #fff;
+    background: var(--brand-green);
+}
+
+body.brand-order-dashboard .form-actions a:hover,
+body.brand-order-dashboard .dashboard-action-card a:hover {
+    background: var(--brand-green-hover);
+}
+
+/* Customer actions use the same primary, secondary and selected-tab colours. */
+body.brand-order-dashboard :is(.deposit-status-card button, .form-actions a, .dashboard-action-card a),
+body.brand-customer-flow :is(.confirm-button, .progress-button, .button-primary, .final-confirmation-dialog-actions .is-primary, .artwork-confirmation-actions .is-primary) {
+    border: 1px solid var(--brand-green);
+    color: #fff;
+    background: var(--brand-green);
+}
+
+body.brand-order-dashboard :is(.deposit-status-card button, .form-actions a, .dashboard-action-card a):hover,
+body.brand-customer-flow :is(.confirm-button, .progress-button, .button-primary, .final-confirmation-dialog-actions .is-primary, .artwork-confirmation-actions .is-primary):hover {
+    border-color: var(--brand-green-hover);
+    background: var(--brand-green-hover);
+}
+
+body.brand-order-dashboard :is(.back-home-button, .form-actions button, .cancel-card-image, .customer-view-switcher-button:not(.is-active), .preview-side-tab:not(.is-active), .preview-face-tab:not(.is-active), .preview-page-tab:not(.is-active)),
+body.brand-customer-flow :is(.button-secondary, .receipt-picker button, .final-confirmation-dialog-actions button:not(.is-primary), .artwork-confirmation-actions button:not(.is-primary):not(.is-danger)) {
+    border-color: var(--brand-line);
+    color: var(--brand-green);
+    background: var(--brand-surface);
+}
+
+body.brand-order-dashboard :is(.back-home-button, .form-actions button, .cancel-card-image, .customer-view-switcher-button:not(.is-active), .preview-side-tab:not(.is-active), .preview-face-tab:not(.is-active), .preview-page-tab:not(.is-active)):hover,
+body.brand-customer-flow :is(.button-secondary, .receipt-picker button, .final-confirmation-dialog-actions button:not(.is-primary), .artwork-confirmation-actions button:not(.is-primary):not(.is-danger)):hover {
+    border-color: #b9852c;
+    background: var(--brand-soft);
+}
+
+body.brand-order-dashboard :is(.customer-view-switcher-button.is-active, .preview-side-tab.is-active, .preview-face-tab.is-active, .preview-page-tab.is-active) {
+    border-color: var(--brand-green);
+    color: #fff;
+    background: var(--brand-green);
+}
+
+body.brand-order-dashboard .live-preview-toggle {
+    color: var(--brand-ink);
+    background: var(--brand-surface);
+}
+
+body.brand-order-dashboard .live-preview-toggle:hover {
+    background: var(--brand-soft);
+}
+
+body.brand-order-dashboard .live-preview-avatar {
+    background: var(--brand-green);
+}
+
+body.brand-customer-flow :is(.back-link, .maps-link) {
+    color: var(--brand-green);
+}
+
+body:is(.brand-order-progress, .brand-order-dashboard, .brand-customer-flow) input[type="file"]::file-selector-button {
+    margin-right: 12px;
+    padding: 8px 12px;
+    border: 1px solid var(--brand-line);
+    border-radius: 7px;
+    color: var(--brand-green);
+    background: var(--brand-soft);
+    font: inherit;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+body:is(.brand-order-dashboard, .brand-customer-flow) :is(button, a):focus-visible {
+    outline: 3px solid rgba(185,133,44,.42);
+    outline-offset: 2px;
+}
+
+body.brand-order-progress :is(button, a):focus-visible {
+    outline: 3px solid rgba(185,133,44,.42);
+    outline-offset: 2px;
+}
+
+body:is(.brand-landing, .brand-start-order, .brand-order-progress, .brand-order-dashboard, .brand-customer-flow) .customer-service-button {
+    border-color: #e0b95c;
+    background: #7a5a1e;
+    box-shadow: 0 10px 26px rgba(63,47,17,.22);
+}
+
+body:is(.brand-landing, .brand-start-order, .brand-order-progress, .brand-order-dashboard, .brand-customer-flow) .customer-service-button:hover {
+    background: #5f4416;
+}
+
+body:is(.brand-landing, .brand-start-order, .brand-order-progress, .brand-order-dashboard, .brand-customer-flow) .customer-service-icon svg {
+    fill: #7a5a1e;
+}
+
+/* Artwork previews retain their design-specific colours in both themes. */
+html.brand-customer-page[data-customer-theme="dark"] {
+    background: #211c13 !important;
+}
+
+html[data-customer-theme="dark"] body.brand-landing,
+html[data-customer-theme="dark"] body.brand-start-order,
+html[data-customer-theme="dark"] body.brand-order-progress,
+html[data-customer-theme="dark"] body.brand-order-dashboard,
+html[data-customer-theme="dark"] body.brand-customer-flow {
+    --ink: #f4eddb;
+    --green: #e0b95c;
+    --deep: #f4eddb;
+    --muted: #d1c4a7;
+    --line: #6b5934;
+    --brand-ink: #f4eddb;
+    --brand-muted: #d1c4a7;
+    --brand-green: #e0b95c;
+    --brand-green-hover: #cba247;
+    --brand-line: #6b5934;
+    --brand-surface: #302817;
+    --brand-soft: #49391f;
+    color: var(--brand-ink) !important;
+    background: #211c13 !important;
+}
+
+html[data-customer-theme="dark"] body.brand-order-progress .progress-search,
+html[data-customer-theme="dark"] body.brand-customer-flow :is(.review-header, .review-card, .review-item, .order-card, .package-summary, .order-summary, .artwork-card, .action-panel, .history-panel) {
+    border-color: #6b5934 !important;
+    color: #f4eddb !important;
+    background-color: #302817 !important;
+}
+
+html[data-customer-theme="dark"] body.brand-order-progress :is(.header-link, .button-secondary, .balance-receipt-picker button) {
+    border-color: #8c7546 !important;
+    color: #f4eddb !important;
+    background: #3b301d !important;
+}
+
+html[data-customer-theme="dark"] body.brand-order-progress :is(.header-link, .button-secondary, .balance-receipt-picker button):hover {
+    border-color: #e0b95c !important;
+    background: #49391f !important;
+}
+
+html[data-customer-theme="dark"] body.brand-order-progress :is(.button-primary, .balance-payment-notice a) {
+    border-color: #e0b95c !important;
+    color: #302817 !important;
+    background: #e0b95c !important;
+}
+
+html[data-customer-theme="dark"] body.brand-order-progress :is(.button-primary, .balance-payment-notice a):hover {
+    border-color: #cba247 !important;
+    background: #cba247 !important;
+}
+
+html[data-customer-theme="dark"] body:is(.brand-landing, .brand-start-order, .brand-order-progress, .brand-order-dashboard, .brand-customer-flow) :is(.eyebrow, .footer-social>p) {
+    color: #e0b95c !important;
+}
+
+html[data-customer-theme="dark"] body:is(.brand-landing, .brand-start-order) :is(.hero-text, .feature-strip p, .journey p, .faq-grid details>p, .customer-policies article>p, .form-intro>p:last-child, .privacy-note, .choice-card small, .site-footer) {
+    color: #d1c4a7 !important;
+}
+
+html[data-customer-theme="dark"] body.brand-landing .feature-strip,
+html[data-customer-theme="dark"] body.brand-landing .site-footer,
+html[data-customer-theme="dark"] body.brand-landing .footer-bottom {
+    border-color: #6b5934 !important;
+    background: transparent !important;
+}
+
+html[data-customer-theme="dark"] body.brand-landing .hero-art::before {
+    border-color: #846d40 !important;
+    background: radial-gradient(circle at 78% 20%, rgba(224,185,92,.12), transparent 29%),
+        linear-gradient(145deg, #3d321e, #544224 58%, #302817) !important;
+}
+
+html[data-customer-theme="dark"] body.brand-landing .social-links a {
+    border-color: #6b5934 !important;
+    color: #f4eddb !important;
+    background: #302817 !important;
+}
+
+html[data-customer-theme="dark"] body.brand-landing .social-links a span {
+    background: #9a7126 !important;
+}
+
+html[data-customer-theme="dark"] body:is(.brand-landing, .brand-start-order) .button-primary {
+    border-color: #e0b95c !important;
+    color: #302817 !important;
+    background: #e0b95c !important;
+}
+
+html[data-customer-theme="dark"] body:is(.brand-landing, .brand-start-order) .button-primary span {
+    color: #302817 !important;
+}
+
+html[data-customer-theme="dark"] body.brand-landing .final-cta .button-light,
+html[data-customer-theme="dark"] body.brand-landing .final-cta .button-light span {
+    color: #302817 !important;
+}
+
+html[data-customer-theme="dark"] body:is(.brand-landing, .brand-start-order) :is(.button-secondary, .header-link, .nav-progress) {
+    border-color: #8c7546 !important;
+    color: #f4eddb !important;
+    background: #302817 !important;
+}
+
+html[data-customer-theme="dark"] body.brand-start-order .choice-card {
+    border-color: #6b5934 !important;
+    background: #3b301d !important;
+}
+
+html[data-customer-theme="dark"] body.brand-start-order .choice-card:has(input:checked) :is(b, small) {
+    color: #f4eddb !important;
+}
+
+html[data-customer-theme="dark"] body.brand-start-order .public-form :is(input:not([type=radio]), select) {
+    border-color: #8c7546 !important;
+    color: #f4eddb !important;
+    background: #211c13 !important;
+}
+
+html[data-customer-theme="dark"] body.brand-order-dashboard :is(.order-summary-heading h1, #customer-order-form h2, #customer-order-form h3, .live-preview-heading h2, .live-product-heading h3) {
+    color: #f4eddb !important;
+}
+
+html[data-customer-theme="dark"] body.brand-landing .hero h1 em {
+    color: #e0b95c !important;
+}
+
+html[data-customer-theme="dark"] body.brand-landing nav a:not(.nav-progress):hover {
+    color: #f2d789 !important;
+}
+
+html[data-customer-theme="dark"] body.brand-landing .brand-mark,
+html[data-customer-theme="dark"] body.brand-start-order .brand-mark {
+    color: #302817 !important;
+    background: #e0b95c !important;
+}
+
+html[data-customer-theme="dark"] body.brand-landing :is(.journey li, .faq-grid details, .customer-policies article),
+html[data-customer-theme="dark"] body.brand-start-order .public-form,
+html[data-customer-theme="dark"] body.brand-order-dashboard :is(.order-summary, #customer-order-form fieldset, .form-actions, .live-preview) {
+    border-color: var(--brand-line) !important;
+    background-color: var(--brand-surface) !important;
+    color: var(--brand-ink) !important;
+}
+
+html[data-customer-theme="dark"] body.brand-landing .final-cta {
+    background: linear-gradient(135deg, #302817, #604a23) !important;
+}
+
+html[data-customer-theme="dark"] body.brand-start-order .choice-card:has(input:checked) {
+    border-color: #e0b95c !important;
+    background: #49391f !important;
+}
+
+html[data-customer-theme="dark"] body.brand-start-order .public-form fieldset {
+    border: 0 !important;
+    background: transparent !important;
+}
+
+html[data-customer-theme="dark"] body:is(.brand-landing, .brand-start-order, .brand-order-progress, .brand-order-dashboard, .brand-customer-flow) .customer-theme-toggle {
+    border-color: #8c7546 !important;
+    color: #e0b95c !important;
+    background: #302817 !important;
+}
+
+html[data-customer-theme="dark"] body:is(.brand-landing, .brand-start-order, .brand-order-progress, .brand-order-dashboard, .brand-customer-flow) .customer-service-button {
+    border-color: #e0b95c !important;
+    color: #302817 !important;
+    background: #e0b95c !important;
+}
+
+html[data-customer-theme="dark"] body:is(.brand-landing, .brand-start-order, .brand-order-progress, .brand-order-dashboard, .brand-customer-flow) .customer-service-copy small {
+    color: #49391f !important;
+}
+
+html[data-customer-theme="dark"] body:is(.brand-landing, .brand-start-order, .brand-order-progress, .brand-order-dashboard, .brand-customer-flow) .customer-service-icon svg {
+    fill: #7a5a1e !important;
+}
+
+html[data-customer-theme="dark"] body.brand-order-dashboard :is(.order-summary-grid, .order-status-message, .customer-view-switcher) {
+    border-color: var(--brand-line) !important;
+    background: #3b301d !important;
+}
+
+html[data-customer-theme="dark"] body.brand-order-dashboard :is(.additional-products, .additional-product-card, .live-preview-toggle, .live-preview-body, .date-picker-panel, .hijri-picker-panel) {
+    border-color: #6b5934 !important;
+    color: #f4eddb !important;
+    background: #302817 !important;
+}
+
+html[data-customer-theme="dark"] body.brand-order-dashboard :is(.field-help, .live-preview-toggle small, .live-preview-heading>span, .autosave-status, .live-product-heading>span) {
+    color: #d1c4a7 !important;
+}
+
+html[data-customer-theme="dark"] body.brand-order-dashboard #customer-order-form :is(input, select, textarea, .date-picker-trigger) {
+    border-color: #8c7546 !important;
+    color: #f4eddb !important;
+    background: #211c13 !important;
+}
+
+html[data-customer-theme="dark"] body.brand-order-dashboard :is(.date-picker-nav, .date-picker-day, .hijri-date-option, .hijri-picker-clear) {
+    border-color: #8c7546 !important;
+    color: #f4eddb !important;
+    background: #3b301d !important;
+}
+
+html[data-customer-theme="dark"] body.brand-order-dashboard :is(.date-picker-day:hover:not(:disabled), .date-picker-day.is-selected, .hijri-date-option:hover:not(:disabled)) {
+    border-color: #e0b95c !important;
+    color: #302817 !important;
+    background: #e0b95c !important;
+}
+
+html[data-customer-theme="dark"] body.brand-order-dashboard :is(.preview-side-tab, .preview-face-tab, .preview-page-tab):not(.is-active) {
+    border-color: #8c7546 !important;
+    color: #f4eddb !important;
+    background: #3b301d !important;
+}
+
+html[data-customer-theme="dark"] body.brand-order-dashboard .customer-view-switcher-button {
+    color: #f4eddb !important;
+}
+
+html[data-customer-theme="dark"] body.brand-order-dashboard .customer-view-switcher-button.is-active {
+    border-color: #e0b95c !important;
+    color: #302817 !important;
+    background: #e0b95c !important;
+}
+
+html[data-customer-theme="dark"] body.brand-order-dashboard #customer-order-form legend {
+    color: #e0b95c !important;
+}
+
+html[data-customer-theme="dark"] body.brand-order-dashboard :is(.live-preview-heading, .live-product-heading) .eyebrow {
+    color: #e0b95c !important;
+}
+
+html[data-customer-theme="dark"] body.brand-order-dashboard :is(.preview-side-tab, .preview-face-tab, .preview-page-tab).is-active {
+    border-color: #e0b95c !important;
+    color: #302817 !important;
+    background: #e0b95c !important;
+}
+
+html[data-customer-theme="dark"] body.brand-order-dashboard .form-actions a,
+html[data-customer-theme="dark"] body.brand-order-dashboard .dashboard-action-card a {
+    color: #302817 !important;
+    background: #e0b95c !important;
+}
+
+html[data-customer-theme="dark"] body.brand-order-dashboard :is(.deposit-status-card button, .form-actions a, .dashboard-action-card a),
+html[data-customer-theme="dark"] body.brand-customer-flow :is(.confirm-button, .progress-button, .button-primary, .final-confirmation-dialog-actions .is-primary, .artwork-confirmation-actions .is-primary) {
+    border-color: #e0b95c !important;
+    color: #302817 !important;
+    background: #e0b95c !important;
+}
+
+html[data-customer-theme="dark"] body.brand-order-dashboard :is(.deposit-status-card button, .form-actions a, .dashboard-action-card a):hover,
+html[data-customer-theme="dark"] body.brand-customer-flow :is(.confirm-button, .progress-button, .button-primary, .final-confirmation-dialog-actions .is-primary, .artwork-confirmation-actions .is-primary):hover {
+    border-color: #cba247 !important;
+    background: #cba247 !important;
+}
+
+html[data-customer-theme="dark"] body.brand-order-dashboard :is(.back-home-button, .form-actions button, .cancel-card-image, .customer-view-switcher-button:not(.is-active), .preview-side-tab:not(.is-active), .preview-face-tab:not(.is-active), .preview-page-tab:not(.is-active)),
+html[data-customer-theme="dark"] body.brand-customer-flow :is(.button-secondary, .receipt-picker button, .final-confirmation-dialog-actions button:not(.is-primary), .artwork-confirmation-actions button:not(.is-primary):not(.is-danger)) {
+    border-color: #8c7546 !important;
+    color: #f4eddb !important;
+    background: #3b301d !important;
+}
+
+html[data-customer-theme="dark"] body.brand-order-dashboard :is(.back-home-button, .form-actions button, .cancel-card-image, .customer-view-switcher-button:not(.is-active), .preview-side-tab:not(.is-active), .preview-face-tab:not(.is-active), .preview-page-tab:not(.is-active)):hover,
+html[data-customer-theme="dark"] body.brand-customer-flow :is(.button-secondary, .receipt-picker button, .final-confirmation-dialog-actions button:not(.is-primary), .artwork-confirmation-actions button:not(.is-primary):not(.is-danger)):hover {
+    border-color: #e0b95c !important;
+    background: #49391f !important;
+}
+
+html[data-customer-theme="dark"] body.brand-order-dashboard :is(.customer-view-switcher-button.is-active, .preview-side-tab.is-active, .preview-face-tab.is-active, .preview-page-tab.is-active) {
+    border-color: #e0b95c !important;
+    color: #302817 !important;
+    background: #e0b95c !important;
+}
+
+html[data-customer-theme="dark"] body.brand-order-dashboard .live-preview-toggle {
+    color: #f4eddb !important;
+    background: #302817 !important;
+}
+
+html[data-customer-theme="dark"] body.brand-order-dashboard .live-preview-toggle:hover {
+    background: #49391f !important;
+}
+
+html[data-customer-theme="dark"] body.brand-order-dashboard .live-preview-avatar {
+    color: #302817 !important;
+    background: #e0b95c !important;
+}
+
+html[data-customer-theme="dark"] body.brand-customer-flow :is(.back-link, .maps-link) {
+    color: #e0b95c !important;
+}
+
+html[data-customer-theme="dark"] body:is(.brand-order-progress, .brand-order-dashboard, .brand-customer-flow) input[type="file"]::file-selector-button {
+    border-color: #8c7546 !important;
+    color: #f4eddb !important;
+    background: #3b301d !important;
+}
+
+body.brand-customer-flow :is(.button-danger-outline, .artwork-confirmation-actions .is-danger):focus-visible {
+    outline-color: rgba(185,28,28,.48);
+}
+
+/* Shared customer fields; keep the artwork preview itself untouched. */
+body:is(.brand-start-order, .brand-order-progress, .brand-order-dashboard, .brand-customer-flow) :is(input:not([type="checkbox"]):not([type="radio"]):not([type="hidden"]):not([type="button"]):not([type="submit"]):not([type="reset"]):not([type="range"]):not([type="color"]), select, textarea, .date-picker-trigger) {
+    border: 1px solid #d1c4a3;
+    border-radius: 8px;
+    color: #2f291d;
+    background: #fffdf8;
+}
+
+body:is(.brand-start-order, .brand-order-progress, .brand-order-dashboard, .brand-customer-flow) :is(input, textarea)::placeholder {
+    color: #82745f;
+    opacity: 1;
+}
+
+body:is(.brand-start-order, .brand-order-progress, .brand-order-dashboard, .brand-customer-flow) :is(input:not([type="checkbox"]):not([type="radio"]):not([type="hidden"]):not([type="button"]):not([type="submit"]):not([type="reset"]):not([type="range"]):not([type="color"]), select, textarea, .date-picker-trigger):focus {
+    border-color: #b9852c;
+    outline: 3px solid rgba(185,133,44,.2);
+    outline-offset: 1px;
+}
+
+html[data-customer-theme="dark"] body:is(.brand-start-order, .brand-order-progress, .brand-order-dashboard, .brand-customer-flow) :is(input:not([type="checkbox"]):not([type="radio"]):not([type="hidden"]):not([type="button"]):not([type="submit"]):not([type="reset"]):not([type="range"]):not([type="color"]), select, textarea, .date-picker-trigger) {
+    border-color: #8c7546 !important;
+    color: #f4eddb !important;
+    background: #211c13 !important;
+}
+
+html[data-customer-theme="dark"] body:is(.brand-start-order, .brand-order-progress, .brand-order-dashboard, .brand-customer-flow) :is(input, textarea)::placeholder {
+    color: #b9ab8b !important;
+    opacity: 1;
+}
+
+html[data-customer-theme="dark"] body:is(.brand-start-order, .brand-order-progress, .brand-order-dashboard, .brand-customer-flow) :is(input:not([type="checkbox"]):not([type="radio"]):not([type="hidden"]):not([type="button"]):not([type="submit"]):not([type="reset"]):not([type="range"]):not([type="color"]), select, textarea, .date-picker-trigger):focus {
+    border-color: #e0b95c !important;
+    outline: 3px solid rgba(224,185,92,.28) !important;
+    outline-offset: 1px;
+}
+
+body:is(.brand-start-order, .brand-order-progress, .brand-order-dashboard, .brand-customer-flow) :is(.input-error, [aria-invalid="true"]) {
+    border-color: #b42318 !important;
+}
+
+html[data-customer-theme="dark"] body:is(.brand-start-order, .brand-order-progress, .brand-order-dashboard, .brand-customer-flow) :is(.input-error, [aria-invalid="true"]) {
+    border-color: #ff8d83 !important;
+}
+
+/* Dialogs, status cards and progress indicators belong to the page theme, not the artwork. */
+body:is(.brand-start-order, .brand-order-progress, .brand-customer-flow) :is(.confirmation-dialog, .final-confirmation-dialog, .artwork-confirmation-dialog) {
+    border-color: #d8cba9;
+    color: #2f291d;
+    background: #fffdf8;
+    box-shadow: 0 28px 80px rgba(48, 40, 23, .22);
+}
+
+body:is(.brand-start-order, .brand-order-progress, .brand-customer-flow) :is(.confirmation-dialog, .final-confirmation-dialog, .artwork-confirmation-dialog)::backdrop {
+    background: rgba(28, 23, 14, .65);
+}
+
+body:is(.brand-start-order, .brand-order-progress, .brand-customer-flow) :is(.confirmation-dialog, .final-confirmation-dialog, .artwork-confirmation-dialog) h2 {
+    color: #302817;
+}
+
+body:is(.brand-start-order, .brand-order-progress, .brand-customer-flow) :is(.confirmation-dialog, .final-confirmation-dialog, .artwork-confirmation-dialog) p {
+    color: #746b59;
+}
+
+body:is(.brand-start-order, .brand-order-progress, .brand-customer-flow) :is(.confirmation-dialog-icon, .final-confirmation-dialog-icon, .artwork-confirmation-icon) {
+    color: #302817;
+    background: #e0b95c;
+}
+
+body:is(.brand-start-order, .brand-order-progress, .brand-customer-flow) :is(.confirmation-dialog-actions, .final-confirmation-dialog-actions, .artwork-confirmation-actions) :is(.button-primary, .is-primary) {
+    border-color: #b9852c;
+    color: #302817;
+    background: #e0b95c;
+}
+
+body:is(.brand-start-order, .brand-order-progress, .brand-customer-flow) :is(.confirmation-dialog-actions, .final-confirmation-dialog-actions, .artwork-confirmation-actions) :is(.button-primary, .is-primary):hover {
+    border-color: #b9852c;
+    background: #d4a943;
+}
+
+body:is(.brand-start-order, .brand-order-progress, .brand-customer-flow) :is(.confirmation-dialog-actions, .final-confirmation-dialog-actions, .artwork-confirmation-actions) :is(.button-secondary, button:not(.button-primary):not(.is-primary):not(.is-danger)) {
+    border-color: #cdbd94;
+    color: #3a301e;
+    background: #f8f1e2;
+}
+
+body:is(.brand-start-order, .brand-order-progress, .brand-customer-flow) :is(.confirmation-dialog-actions, .final-confirmation-dialog-actions, .artwork-confirmation-actions) :is(.button-secondary, button:not(.button-primary):not(.is-primary):not(.is-danger)):hover {
+    border-color: #b9852c;
+    background: #f1e5c9;
+}
+
+body.brand-order-progress :is(.tracking-card, .public-artwork-action, .balance-payment-card, .payment-success-message),
+body.brand-order-dashboard :is(.progress-panel, .deposit-status-card, .customer-tracking-card, .customer-empty-state),
+body.brand-customer-flow :is(.review-item, .package-summary, .qr-panel, .receipt-panel, .contact-list li, .state-panel, .history-item, .customer-empty-state) {
+    border-color: #d8cba9;
+    color: #2f291d;
+    background: #faf6ec;
+}
+
+body.brand-order-progress :is(.public-artwork-previews article, .balance-qr-placeholder) {
+    border-color: #d8cba9;
+    color: #2f291d;
+    background: #faf6ec;
+}
+
+body.brand-order-progress .public-artwork-previews article>div {
+    border-color: #d8cba9;
+}
+
+body.brand-customer-flow .success-icon {
+    color: #302817;
+    background: #e0b95c;
+    box-shadow: 0 12px 30px rgba(185, 133, 44, .22);
+}
+
+body.brand-customer-flow .success-message {
+    color: #746b59;
+}
+
+body:is(.brand-order-progress, .brand-order-dashboard, .brand-customer-flow) :is(.status-badge, .order-badge, .side-badge, .artwork-progress-label, .confirmed-badge, .deposit-amount) {
+    border-color: #d8cba9;
+    color: #604614;
+    background: #f8edcf;
+}
+
+body:is(.brand-order-progress, .brand-order-dashboard, .brand-customer-flow) :is(.customer-empty-icon, .balance-payment-heading>strong) {
+    color: #604614;
+    background: #f1dfb4;
+}
+
+body.brand-order-progress :is(.order-lifecycle-heading small, .tracking-card>small, .public-artwork-action strong),
+body.brand-order-dashboard :is(.summary-label, .progress-stage.is-complete, .progress-stage.is-current) {
+    color: #7a5a1e;
+}
+
+body.brand-order-progress :is(.order-lifecycle-marker, .public-stages i),
+body.brand-order-dashboard .stage-dot {
+    border-color: #cdbd94;
+    color: #7a5a1e;
+    background: #fffdf8;
+}
+
+body.brand-order-progress :is(.order-lifecycle-list .is-complete .order-lifecycle-marker, .order-lifecycle-list .is-current .order-lifecycle-marker, .public-stages .complete i),
+body.brand-order-dashboard :is(.progress-stage.is-complete .stage-dot, .progress-stage.is-current .stage-dot) {
+    border-color: #b9852c;
+    color: #302817;
+    background: #e0b95c;
+    box-shadow: 0 0 0 3px rgba(185, 133, 44, .16);
+}
+
+body.brand-order-progress .public-progress-track,
+body.brand-order-progress .order-lifecycle-list li:not(:last-child)::after,
+body.brand-order-dashboard .progress-track {
+    background: #e9dfc9;
+}
+
+body.brand-order-progress .order-lifecycle-list .is-complete:not(:last-child)::after {
+    background: #c9a14a;
+}
+
+body.brand-order-progress :is(.balance-status-message.is-paid, .deposit-public-status[data-status="paid"]),
+body.brand-order-dashboard :is(.notice, .customer-feedback-success, .upload-status:not(.not-uploaded)),
+body.brand-customer-flow :is(.upload-status:not(.not-uploaded), .state-success, .alert-success) {
+    border-color: #c9a14a;
+    color: #5b4317;
+    background: #f8edcf;
+}
+
+body.brand-order-progress .balance-status-message.is-paid,
+body.brand-order-progress .deposit-public-status[data-status="paid"] {
+    border-left-color: #b9852c;
+}
+
+body.brand-order-progress .balance-payment-notice {
+    border-color: #c9a14a;
+    border-left-color: #b9852c;
+    color: #604614;
+    background: #f8edcf;
+}
+
+body:is(.brand-order-progress, .brand-order-dashboard, .brand-customer-flow) :is(.autosave-status[data-state="saved"], .order-lifecycle-list .is-complete, .payment-success-message strong) {
+    color: #7a5a1e;
+}
+
+body.brand-order-dashboard .additional-products {
+    border-color: #d4b66f;
+    background: linear-gradient(135deg, #fff9eb, #f5e8c9);
+}
+
+body.brand-order-dashboard .autosave-status[data-state="saved"] {
+    background: #f8edcf;
+}
+
+body.brand-order-dashboard .progress-panel[data-progress-tone="green"] {
+    --progress-color: #b9852c;
+    --progress-soft: #f8edcf;
+}
+
+body.brand-order-dashboard .progress-stage.is-complete .stage-dot::after {
+    color: #302817;
+}
+
+body.brand-order-dashboard .deposit-status-card[data-deposit-status="paid"] {
+    border-left-color: #b9852c;
+}
+
+body.brand-order-dashboard :is(.customer-tracking-card span, .customer-tracking-card code, .deposit-success) {
+    color: #7a5a1e;
+}
+
+body.brand-order-progress .public-progress-card[data-progress-tone="green"] .public-progress-track span {
+    background: #b9852c;
+}
+
+body.brand-order-progress .public-stages .complete {
+    color: #7a5a1e;
+}
+
+body.brand-order-dashboard .customer-confirmation-dialog {
+    border-color: #d8cba9;
+    color: #2f291d;
+    background: #fffdf8;
+    box-shadow: 0 28px 80px rgba(48, 40, 23, .22);
+}
+
+body.brand-order-dashboard .customer-confirmation-dialog::backdrop {
+    background: rgba(28, 23, 14, .65);
+}
+
+body.brand-order-dashboard .customer-confirmation-dialog h2 {
+    color: #302817;
+}
+
+body.brand-order-dashboard .customer-confirmation-dialog p {
+    color: #746b59;
+}
+
+body.brand-order-dashboard .customer-confirmation-icon {
+    color: #302817;
+    background: #e0b95c;
+}
+
+body.brand-order-dashboard .customer-confirmation-actions button {
+    border-color: #cdbd94;
+    color: #3a301e;
+    background: #f8f1e2;
+}
+
+body.brand-order-dashboard .customer-confirmation-actions button.is-primary {
+    border-color: #b9852c;
+    color: #302817;
+    background: #e0b95c;
+}
+
+html[data-customer-theme="dark"] body:is(.brand-start-order, .brand-order-progress, .brand-customer-flow) :is(.confirmation-dialog, .final-confirmation-dialog, .artwork-confirmation-dialog) {
+    border-color: #8c7546 !important;
+    color: #f4eddb !important;
+    background: #302817 !important;
+}
+
+html[data-customer-theme="dark"] body:is(.brand-start-order, .brand-order-progress, .brand-customer-flow) :is(.confirmation-dialog, .final-confirmation-dialog, .artwork-confirmation-dialog) h2 {
+    color: #f4eddb !important;
+}
+
+html[data-customer-theme="dark"] body:is(.brand-start-order, .brand-order-progress, .brand-customer-flow) :is(.confirmation-dialog, .final-confirmation-dialog, .artwork-confirmation-dialog) p {
+    color: #d1c4a7 !important;
+}
+
+html[data-customer-theme="dark"] body:is(.brand-start-order, .brand-order-progress, .brand-customer-flow) :is(.confirmation-dialog-actions, .final-confirmation-dialog-actions, .artwork-confirmation-actions) :is(.button-primary, .is-primary) {
+    border-color: #e0b95c !important;
+    color: #302817 !important;
+    background: #e0b95c !important;
+}
+
+html[data-customer-theme="dark"] body:is(.brand-start-order, .brand-order-progress, .brand-customer-flow) :is(.confirmation-dialog-actions, .final-confirmation-dialog-actions, .artwork-confirmation-actions) :is(.button-secondary, button:not(.button-primary):not(.is-primary):not(.is-danger)) {
+    border-color: #8c7546 !important;
+    color: #f4eddb !important;
+    background: #3b301d !important;
+}
+
+html[data-customer-theme="dark"] body.brand-start-order .choice-card,
+html[data-customer-theme="dark"] body.brand-order-progress :is(.public-progress-card, .tracking-card, .public-artwork-action, .public-artwork-previews article, .balance-payment-card, .payment-success-message, .balance-qr-placeholder, .deposit-public-status),
+html[data-customer-theme="dark"] body.brand-order-dashboard :is(.progress-panel, .deposit-status-card, .customer-tracking-card, .customer-empty-state),
+html[data-customer-theme="dark"] body.brand-customer-flow :is(.review-item, .package-summary, .qr-panel, .receipt-panel, .contact-list li, .state-panel, .history-item, .customer-empty-state) {
+    border-color: #6b5934 !important;
+    color: #f4eddb !important;
+    background: #302817 !important;
+}
+
+html[data-customer-theme="dark"] body.brand-order-progress .public-artwork-previews article>div {
+    border-color: #6b5934 !important;
+}
+
+html[data-customer-theme="dark"] body.brand-order-progress .balance-payment-notice {
+    border-color: #8c7546 !important;
+    border-left-color: #e0b95c !important;
+    color: #f1d991 !important;
+    background: #49391f !important;
+}
+
+html[data-customer-theme="dark"] body.brand-order-progress .balance-payment-notice :is(strong, span) {
+    color: #f1d991 !important;
+}
+
+html[data-customer-theme="dark"] body.brand-customer-flow .success-message {
+    color: #d1c4a7 !important;
+}
+
+html[data-customer-theme="dark"] body.brand-start-order .choice-card:has(input:checked) {
+    border-color: #e0b95c !important;
+    background: #49391f !important;
+    box-shadow: 0 0 0 2px rgba(224, 185, 92, .16) !important;
+}
+
+html[data-customer-theme="dark"] body:is(.brand-order-progress, .brand-order-dashboard, .brand-customer-flow) :is(.status-badge, .order-badge, .side-badge, .artwork-progress-label, .confirmed-badge, .deposit-amount) {
+    border-color: #8c7546 !important;
+    color: #f1d991 !important;
+    background: #49391f !important;
+}
+
+html[data-customer-theme="dark"] body:is(.brand-order-progress, .brand-order-dashboard, .brand-customer-flow) :is(.customer-empty-icon, .balance-payment-heading>strong) {
+    color: #302817 !important;
+    background: #e0b95c !important;
+}
+
+html[data-customer-theme="dark"] body.brand-order-progress :is(.order-lifecycle-heading small, .tracking-card>small, .public-artwork-action strong, .order-lifecycle-list .is-complete, .order-lifecycle-list .is-current),
+html[data-customer-theme="dark"] body.brand-order-dashboard :is(.progress-stage.is-complete, .progress-stage.is-current, .autosave-status[data-state="saved"]) {
+    color: #e0b95c !important;
+}
+
+html[data-customer-theme="dark"] body.brand-order-progress :is(.order-lifecycle-marker, .public-stages i),
+html[data-customer-theme="dark"] body.brand-order-dashboard .stage-dot {
+    border-color: #8c7546 !important;
+    color: #d1c4a7 !important;
+    background: #211c13 !important;
+}
+
+html[data-customer-theme="dark"] body.brand-order-progress :is(.order-lifecycle-list .is-complete .order-lifecycle-marker, .order-lifecycle-list .is-current .order-lifecycle-marker, .public-stages .complete i),
+html[data-customer-theme="dark"] body.brand-order-dashboard :is(.progress-stage.is-complete .stage-dot, .progress-stage.is-current .stage-dot) {
+    border-color: #e0b95c !important;
+    color: #302817 !important;
+    background: #e0b95c !important;
+    box-shadow: 0 0 0 3px rgba(224, 185, 92, .18) !important;
+}
+
+html[data-customer-theme="dark"] body.brand-order-progress .order-lifecycle-list li:not(:last-child)::after,
+html[data-customer-theme="dark"] body.brand-order-progress .public-progress-track,
+html[data-customer-theme="dark"] body.brand-order-dashboard .progress-track {
+    background: #6b5934 !important;
+}
+
+html[data-customer-theme="dark"] body.brand-order-progress .order-lifecycle-list .is-complete:not(:last-child)::after {
+    background: #e0b95c !important;
+}
+
+html[data-customer-theme="dark"] body.brand-order-progress :is(.balance-status-message.is-paid, .deposit-public-status[data-status="paid"], .payment-success-message),
+html[data-customer-theme="dark"] body.brand-order-dashboard :is(.notice, .customer-feedback-success, .upload-status:not(.not-uploaded), .autosave-status[data-state="saved"]),
+html[data-customer-theme="dark"] body.brand-customer-flow :is(.upload-status:not(.not-uploaded), .state-success, .alert-success) {
+    border-color: #8c7546 !important;
+    color: #f1d991 !important;
+    background: #49391f !important;
+}
+
+html[data-customer-theme="dark"] body.brand-order-progress :is(.balance-status-message.is-paid, .deposit-public-status[data-status="paid"]) {
+    border-left-color: #e0b95c !important;
+}
+
+html[data-customer-theme="dark"] body.brand-order-dashboard .deposit-status-card[data-deposit-status="paid"] {
+    border-left-color: #e0b95c !important;
+}
+
+html[data-customer-theme="dark"] body.brand-order-dashboard .additional-products {
+    border-color: #8c7546 !important;
+    background: linear-gradient(135deg, #49391f, #302817) !important;
+}
+
+html[data-customer-theme="dark"] body.brand-order-dashboard .additional-products :is(h3, .field-help) {
+    color: #f4eddb !important;
+}
+
+html[data-customer-theme="dark"] body.brand-order-progress .public-stages .complete,
+html[data-customer-theme="dark"] body.brand-order-progress .balance-status-message.is-paid :is(strong, span),
+html[data-customer-theme="dark"] body.brand-order-dashboard :is(.customer-tracking-card span, .customer-tracking-card code, .deposit-success) {
+    color: #f1d991 !important;
+}
+
+html[data-customer-theme="dark"] body.brand-order-progress .public-progress-card[data-progress-tone="green"] .public-progress-track span {
+    background: #e0b95c !important;
+}
+
+html[data-customer-theme="dark"] body.brand-order-dashboard .customer-confirmation-dialog {
+    border-color: #8c7546 !important;
+    color: #f4eddb !important;
+    background: #302817 !important;
+}
+
+html[data-customer-theme="dark"] body.brand-order-dashboard .customer-confirmation-dialog h2 {
+    color: #f4eddb !important;
+}
+
+html[data-customer-theme="dark"] body.brand-order-dashboard .customer-confirmation-dialog p {
+    color: #d1c4a7 !important;
+}
+
+html[data-customer-theme="dark"] body.brand-order-dashboard .customer-confirmation-actions button {
+    border-color: #8c7546 !important;
+    color: #f4eddb !important;
+    background: #3b301d !important;
+}
+
+html[data-customer-theme="dark"] body.brand-order-dashboard .customer-confirmation-actions button.is-primary {
+    border-color: #e0b95c !important;
+    color: #302817 !important;
+    background: #e0b95c !important;
+}
+
+html[data-customer-theme="dark"] body:is(.brand-order-progress, .brand-order-dashboard, .brand-customer-flow) :is(.date-picker-icon, .date-picker-heading strong, .date-picker-weekdays span, .date-picker-note, .date-picker-help, .field-help, .autosave-status, .history-item-header time, .contact-list .contact-number) {
+    color: #d1c4a7 !important;
+}
+
+html[data-customer-theme="dark"] body.brand-order-dashboard :is(.date-picker-day:disabled, .hijri-date-option:disabled) {
+    color: #a79570 !important;
+    background: #302817 !important;
+}
+
+/* Contextual errors and cancellation remain red. */
+body.brand-customer-flow .status-badge.status-cancelled {
+    border-color: #e4a6a2;
+    color: #a32626;
+    background: #fff0ef;
+}
+
+html[data-customer-theme="dark"] body.brand-customer-flow .status-badge.status-cancelled {
+    border-color: #b85c5c !important;
+    color: #ffdede !important;
+    background: #432626 !important;
+}
+
+body.brand-customer-flow :is(.artwork-preview-section, .artwork-preview-item, .artwork-preview-item figcaption, .correction-payment-details, .confirmation-note, .confirmation-checkbox, .history-panel) {
+    border-color: #d8cba9;
+    color: #2f291d;
+    background: #faf6ec;
+}
+
+body.brand-customer-flow :is(.alert-neutral, .upload-status.not-uploaded) {
+    border-color: #d8cba9;
+    color: #746b59;
+    background: #faf6ec;
+}
+
+body.brand-customer-flow :is(.confirmation-checkbox:has(input:checked), .artwork-preview-count, .job-status) {
+    border-color: #c9a14a;
+    color: #604614;
+    background: #f8edcf;
+}
+
+body.brand-customer-flow .confirmation-checkbox input {
+    accent-color: #b9852c;
+}
+
+html[data-customer-theme="dark"] body.brand-customer-flow :is(.artwork-preview-section, .artwork-preview-item, .artwork-preview-item figcaption, .correction-payment-details, .confirmation-note, .confirmation-checkbox, .history-panel) {
+    border-color: #6b5934 !important;
+    color: #f4eddb !important;
+    background: #302817 !important;
+}
+
+html[data-customer-theme="dark"] body.brand-customer-flow :is(.alert-neutral, .upload-status.not-uploaded) {
+    border-color: #6b5934 !important;
+    color: #d1c4a7 !important;
+    background: #302817 !important;
+}
+
+html[data-customer-theme="dark"] body.brand-customer-flow .summary-grid,
+html[data-customer-theme="dark"] body.brand-order-progress .order-lifecycle {
+    border-color: #6b5934 !important;
+}
+
+html[data-customer-theme="dark"] body.brand-order-progress .order-lifecycle-list li,
+html[data-customer-theme="dark"] body.brand-order-dashboard .progress-stage:not(.is-complete):not(.is-current) {
+    color: #b9ab8b !important;
+}
+
+html[data-customer-theme="dark"] body.brand-customer-flow :is(.confirmation-checkbox:has(input:checked), .artwork-preview-count, .job-status) {
+    border-color: #8c7546 !important;
+    color: #f1d991 !important;
+    background: #49391f !important;
+}
+
+html[data-customer-theme="dark"] body.brand-customer-flow .artwork-preview-item>a {
+    border-color: #8c7546 !important;
+    background: #211c13 !important;
+}

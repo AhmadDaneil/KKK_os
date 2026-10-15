@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="ms">
+<html lang="ms" class="brand-customer-page">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -8,11 +8,12 @@
     <link rel="stylesheet" href="{{ asset('css/landing.css') }}?v={{ filemtime(public_path('css/landing.css')) }}">
     <link rel="stylesheet" href="{{ asset('css/customer-theme.css') }}?v={{ filemtime(public_path('css/customer-theme.css')) }}">
     <link rel="stylesheet" href="{{ asset('css/customer-service.css') }}?v={{ filemtime(public_path('css/customer-service.css')) }}">
+    <link rel="stylesheet" href="{{ asset('css/customer-brand.css') }}?v={{ filemtime(public_path('css/customer-brand.css')) }}">
 </head>
-<body>
+<body class="brand-landing">
     <header class="site-header">
         <a class="brand" href="{{ route('home') }}" aria-label="KingKadKahwin halaman utama">
-            <span class="brand-mark">K</span>
+            <img class="brand-logo-image" src="{{ asset('images/landing/kingkadkahwin-logo.png') }}" alt="" width="62" height="62" decoding="async">
             <span><b>KingKadKahwin</b><small>Kad indah, kenangan bermakna</small></span>
         </a>
         <nav aria-label="Navigasi utama">
@@ -136,7 +137,7 @@
     <footer class="site-footer">
         <div class="footer-main">
             <div>
-                <a class="brand footer-brand" href="{{ route('home') }}"><span class="brand-mark">K</span><b>KingKadKahwin</b></a>
+                <a class="brand footer-brand" href="{{ route('home') }}"><img class="brand-logo-image" src="{{ asset('images/landing/kingkadkahwin-logo.png') }}" alt="" width="52" height="52" loading="lazy" decoding="async"><b>KingKadKahwin</b></a>
                 <p>Reka bentuk yang indah. Proses yang tenang.</p>
             </div>
 

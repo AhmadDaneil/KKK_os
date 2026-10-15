@@ -55,6 +55,7 @@ button, input { font: inherit; }
 .login-brand, .login-story-content, .login-story-footer { position: relative; z-index: 1; }
 .login-brand { display: flex; align-items: center; gap: 13px; }
 .login-mark { display: grid; place-items: center; width: 47px; height: 47px; border: 1px solid #e1c57c80; border-radius: 13px; color: var(--highlight); font-family: Georgia, serif; font-size: 16px; letter-spacing: -1px; }
+.login-mark--image { display: block; flex: 0 0 47px; object-fit: cover; background: #111; }
 .login-brand strong { display: block; font-size: 15px; font-weight: 650; }
 .login-brand div > span { display: block; margin-top: 5px; color: #ffffff99; font-size: 9px; letter-spacing: 2px; }
 .login-eyebrow { font-size: 10px; font-weight: 750; letter-spacing: 2px; color: var(--accent); }

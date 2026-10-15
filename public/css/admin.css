@@ -112,6 +112,8 @@ body{background:linear-gradient(180deg,#f4efe3 0,#f3f4f1 380px)}
 
 .admin-topbar-avatar{position:relative;overflow:hidden}.admin-topbar-avatar::before{position:absolute;top:6px;left:50%;width:9px;height:9px;border:2px solid #fff;border-radius:50%;content:'';transform:translateX(-50%)}.admin-topbar-avatar::after{position:absolute;bottom:-4px;left:50%;width:21px;height:17px;border:2px solid #fff;border-radius:50% 50% 0 0;content:'';transform:translateX(-50%)}
 
+.admin-brand-logo{display:block;width:44px;height:44px;flex:0 0 44px;border:1px solid #d1ab52;border-radius:12px;background:#111;object-fit:cover}
+
 .admin-logout-profile{margin:0}.admin-logout-profile button{display:flex;padding:0;align-items:center;flex-direction:column;gap:3px;border:0;color:var(--admin-muted);background:transparent;font-size:10px;font-weight:750;cursor:pointer}.admin-logout-profile button:hover{color:var(--admin-green)}
 
 /* Consistent card foundation */
