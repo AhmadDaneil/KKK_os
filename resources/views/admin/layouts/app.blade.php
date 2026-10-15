@@ -11,7 +11,7 @@
 <div class="admin-shell">
     <aside class="admin-sidebar">
         <a class="admin-brand" href="{{ route('admin.dashboard') }}">
-            <span class="admin-brand-mark">KKK</span>
+            <img class="admin-brand-logo" src="{{ asset('images/landing/kingkadkahwin-logo.png') }}" alt="" width="44" height="44" decoding="async">
             <span><strong>KKK OS</strong><small>{{ __('ui.administration') }}</small></span>
         </a>
 

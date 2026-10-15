@@ -22,13 +22,13 @@ class LaunchPhotoshopService
         }
 
         if ($script === '' || ! is_file($script)) {
-            throw new RuntimeException('The approved Photoshop V11 script was not found. Check KKK_PHOTOSHOP_SCRIPT.');
+            throw new RuntimeException('The approved Photoshop script was not found. Check KKK_PHOTOSHOP_SCRIPT.');
         }
 
         $actualHash = strtolower((string) hash_file('sha256', $script));
 
         if ($expectedHash === '' || ! hash_equals($expectedHash, $actualHash)) {
-            throw new RuntimeException('The Photoshop script does not match the approved V11 script.');
+            throw new RuntimeException('The Photoshop script does not match the approved script.');
         }
 
         $automationLauncher = $this->createAutomationLauncher($script);

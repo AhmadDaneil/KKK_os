@@ -27,6 +27,7 @@ class Order extends Model
         'package_type',
         'package_format',
         'first_event_side',
+        'jumlah_hantaran',
         'customer_name',
         'customer_email',
         'customer_phone',
@@ -159,5 +160,10 @@ class Order extends Model
     public function fulfilmentJob()
     {
         return $this->hasOne(FulfilmentJob::class);
+    }
+
+    public function progressUpdates()
+    {
+        return $this->hasMany(OrderProgressUpdate::class);
     }
 }

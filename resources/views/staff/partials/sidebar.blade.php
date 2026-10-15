@@ -17,7 +17,7 @@
 
 <aside class="staff-sidebar" id="staff-sidebar">
     <a href="{{ $staffUser->isAdmin() ? route('admin.dashboard') : route('staff.dashboard') }}" class="staff-sidebar-brand">
-        <span class="staff-brand-mark">KKK</span>
+        <img class="staff-brand-logo" src="{{ asset('images/landing/kingkadkahwin-logo.png') }}" alt="" width="44" height="44" decoding="async">
         <span><strong>KKK OS</strong><small>{{ $staffUser->isAdmin() ? __('ui.operations') : __('ui.staff_operations') }}</small></span>
     </a>
 

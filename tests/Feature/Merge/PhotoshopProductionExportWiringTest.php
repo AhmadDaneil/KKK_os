@@ -8,11 +8,11 @@ use App\Services\Merge\GenerateMergeJobsForOrderService;
 use App\Services\Orders\ConfirmOrderDetailsService;
 use App\Services\Orders\CreateOrderService;
 use App\Services\Orders\SaveOrderDraftService;
-use Database\Seeders\KkkPackagePriceCatalogSeeder;
 use App\Services\Photoshop\ExportPhotoshopAutoMergeCsvService;
 use App\Services\Photoshop\GeneratePhotoshopCsvForOrderService;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use App\Services\Photoshop\UnresolvedCardQuantityProvider;
+use Database\Seeders\KkkPackagePriceCatalogSeeder;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use RuntimeException;
 use Tests\TestCase;
 
@@ -77,14 +77,16 @@ class PhotoshopProductionExportWiringTest extends TestCase
 
         $rows = $this->readCsv($path);
 
-        $this->assertCount(3, $rows); // header + L + P
+        $this->assertCount(4, $rows); // header + L + P + Cek Hantaran
+        $this->assertCount(30, $rows[0]);
 
         $data = collect(array_slice($rows, 1))
             ->mapWithKeys(fn ($row) => [$row[5] => $row]);
 
-        $this->assertSame(['LELAKI', 'PEREMPUAN'], $data->keys()->sort()->values()->all());
+        $this->assertSame(['CEK_HANTARAN', 'LELAKI', 'PEREMPUAN'], $data->keys()->sort()->values()->all());
         $this->assertSame('300', $data['LELAKI'][1]);
         $this->assertSame('500', $data['PEREMPUAN'][1]);
+        $this->assertSame('10 dinar emas', $data['CEK_HANTARAN'][29]);
 
         $this->assertNotSame(
             $data['LELAKI'][3],
@@ -110,6 +112,21 @@ class PhotoshopProductionExportWiringTest extends TestCase
         );
     }
 
+    public function test_two_package_export_rejects_missing_jumlah_hantaran_instead_of_silently_omitting_mockup(): void
+    {
+        $order = $this->confirmedOrder(2);
+        app(GenerateMergeJobsForOrderService::class)->generate($order);
+        $order->update(['jumlah_hantaran' => null]);
+
+        $this->expectException(RuntimeException::class);
+        $this->expectExceptionMessage('requires Jumlah Hantaran');
+
+        $this->serviceWithQuantity(200)->generate(
+            $order->fresh(),
+            storage_path('framework/testing/photoshop-missing-hantaran.csv'),
+        );
+    }
+
     private function serviceWithQuantity(int $quantity): GeneratePhotoshopCsvForOrderService
     {
         return $this->serviceWithQuantityResolver(
@@ -119,10 +136,9 @@ class PhotoshopProductionExportWiringTest extends TestCase
 
     private function serviceWithQuantityResolver(callable $resolver): GeneratePhotoshopCsvForOrderService
     {
-        $provider = new class($resolver) implements CardQuantityProviderContract {
-            public function __construct(private $resolver)
-            {
-            }
+        $provider = new class($resolver) implements CardQuantityProviderContract
+        {
+            public function __construct(private $resolver) {}
 
             public function quantityFor(MergeJob $mergeJob): int
             {
@@ -207,6 +223,7 @@ class PhotoshopProductionExportWiringTest extends TestCase
 
         app(SaveOrderDraftService::class)->save($order, [
             'card_quantity' => 200,
+            ...($packageCount === 2 ? ['jumlah_hantaran' => '10 dinar emas'] : []),
             'couple' => [
                 'groom_name' => 'Muhammad Syafiq',
                 'groom_abbreviation' => 'Syafiq',

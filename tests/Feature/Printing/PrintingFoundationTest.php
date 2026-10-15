@@ -12,7 +12,6 @@ use App\Services\Merge\GenerateMergeJobsForOrderService;
 use App\Services\Orders\ConfirmOrderDetailsService;
 use App\Services\Orders\CreateOrderService;
 use App\Services\Orders\SaveOrderDraftService;
-use Database\Seeders\KkkPackagePriceCatalogSeeder;
 use App\Services\Payments\CreateBalancePaymentService;
 use App\Services\Payments\HandlePaymentCallbackService;
 use App\Services\Printing\AssignPrintJobService;
@@ -20,6 +19,7 @@ use App\Services\Printing\InitializePrintJobsForOrderService;
 use App\Services\Printing\MarkPrintJobPrintedService;
 use App\Services\Printing\StartPrintingService;
 use App\Services\Printing\SyncOrderPrintStatusService;
+use Database\Seeders\KkkPackagePriceCatalogSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use RuntimeException;
 use Tests\TestCase;
@@ -207,6 +207,7 @@ class PrintingFoundationTest extends TestCase
 
         app(SaveOrderDraftService::class)->save($order, [
             'card_quantity' => 200,
+            ...($packageCount === 2 ? ['jumlah_hantaran' => 'RM 8,000.00'] : []),
             'couple' => [
                 'groom_name' => 'Muhammad Syafiq',
                 'bride_name' => 'Nur Awanis',

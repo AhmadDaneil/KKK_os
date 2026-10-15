@@ -39,9 +39,15 @@ class CustomerDashboardController extends Controller
             'packageSides.event.contacts',
             'fulfilment',
             'fulfilmentJob',
+            'packingJob',
             'payments',
             'invoice',
             'confirmation',
+            'designJobs.artworkVersions',
+            'progressUpdates' => fn ($query) => $query
+                ->customerVisible()
+                ->with('uploader:id,name')
+                ->latest(),
         ]);
 
         $catalogItems = PriceCatalogItem::query()

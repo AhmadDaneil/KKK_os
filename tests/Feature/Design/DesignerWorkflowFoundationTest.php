@@ -141,14 +141,14 @@ class DesignerWorkflowFoundationTest extends TestCase
                     'design_code' => $packageSide->side === 'LELAKI' ? 'L101' : 'P202',
                 ],
                 'parents' => [
-                    'father_name' => 'Bapa ' . $packageSide->side,
-                    'mother_name' => 'Ibu ' . $packageSide->side,
+                    'father_name' => 'Bapa '.$packageSide->side,
+                    'mother_name' => 'Ibu '.$packageSide->side,
                 ],
                 'event' => [
                     'event_date' => '2026-12-20',
                     'meal_time' => '12:00',
-                    'venue_name' => 'Dewan ' . $packageSide->side,
-                    'full_address' => 'Alamat ' . $packageSide->side,
+                    'venue_name' => 'Dewan '.$packageSide->side,
+                    'full_address' => 'Alamat '.$packageSide->side,
                     'contacts' => [
                         1 => ['contact_name' => 'Contact 1', 'contact_phone' => '0111111111'],
                         2 => ['contact_name' => 'Contact 2', 'contact_phone' => '0122222222'],
@@ -160,6 +160,7 @@ class DesignerWorkflowFoundationTest extends TestCase
 
         app(SaveOrderDraftService::class)->save($order, [
             'card_quantity' => 200,
+            ...($packageCount === 2 ? ['jumlah_hantaran' => 'RM 8,000.00'] : []),
             'couple' => [
                 'groom_name' => 'Muhammad Syafiq',
                 'bride_name' => 'Nur Awanis',

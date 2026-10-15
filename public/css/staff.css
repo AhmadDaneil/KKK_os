@@ -74,6 +74,17 @@ body {
     letter-spacing: 0.04em;
 }
 
+.staff-brand-logo {
+    display: block;
+    width: 44px;
+    height: 44px;
+    flex: 0 0 44px;
+    border: 1px solid #d1ab52;
+    border-radius: 12px;
+    background: #111;
+    object-fit: cover;
+}
+
 .staff-sidebar-brand strong,
 .staff-sidebar-brand small,
 .staff-sidebar-user strong,
@@ -1560,3 +1571,5 @@ body[data-staff-theme]:not([data-staff-theme="default"]) :is(.staff-kicker,.staf
 
 /* Lifecycle summary for staff: one progress path, with event history kept on demand. */
 .staff-lifecycle-heading{display:flex;align-items:end;justify-content:space-between;gap:18px;margin-bottom:18px}.staff-lifecycle-heading h2{margin:3px 0 0;font-family:Georgia,serif;font-size:1.5rem}.staff-lifecycle-heading>span{color:var(--staff-muted);font-size:12px;text-align:right}.staff-lifecycle-list{display:grid;margin:0;padding:0 0 8px;grid-auto-columns:minmax(132px,1fr);grid-auto-flow:column;gap:0;overflow-x:auto;list-style:none;scroll-snap-type:x proximity}.staff-lifecycle-list li{position:relative;min-width:0;padding:0 12px 10px 0;color:#84908a;scroll-snap-align:start}.staff-lifecycle-list li:not(:last-child)::after{position:absolute;top:17px;left:37px;right:0;height:2px;background:#dbe1dd;content:''}.staff-lifecycle-marker{position:relative;z-index:1;display:grid;width:36px;height:36px;margin-bottom:9px;place-items:center;border:2px solid #cbd4cf;border-radius:50%;color:#728078;background:#fff;font-size:.76rem;font-weight:800}.staff-lifecycle-list strong,.staff-lifecycle-list small{display:block}.staff-lifecycle-list strong{font-size:.78rem;line-height:1.25}.staff-lifecycle-list small{margin-top:4px;font-size:.67rem;line-height:1.35}.staff-lifecycle-list .is-complete{color:#3d6e53}.staff-lifecycle-list .is-complete .staff-lifecycle-marker{border-color:#6dae86;color:#fff;background:#4d976a}.staff-lifecycle-list .is-complete:not(:last-child)::after{background:#77ae8c}.staff-lifecycle-list .is-current{color:var(--staff-text)}.staff-lifecycle-list .is-current .staff-lifecycle-marker{border-color:var(--staff-primary);color:#fff;background:var(--staff-primary);box-shadow:0 0 0 5px color-mix(in srgb,var(--staff-primary) 14%,transparent)}.staff-lifecycle-list .is-current strong{font-weight:850}.staff-activity-history{margin-top:18px;padding-top:16px;border-top:1px solid var(--staff-border)}.staff-activity-history summary{color:var(--staff-muted);font-size:12px;font-weight:750;cursor:pointer}.staff-activity-history[open] summary{margin-bottom:16px;color:var(--staff-text)}@media(max-width:560px){.staff-lifecycle-heading{align-items:flex-start;flex-direction:column}.staff-lifecycle-heading>span{text-align:left}}
+
+.staff-progress-update-list{display:grid;margin:0;padding:0;gap:10px;list-style:none}.staff-progress-update-list li{padding:14px;border:1px solid var(--staff-border);border-radius:10px;background:var(--staff-surface)}.staff-progress-update-heading,.staff-progress-update-meta{display:flex;flex-wrap:wrap;align-items:center;gap:8px}.staff-progress-update-heading span,.staff-progress-update-meta span{padding:3px 7px;border-radius:999px;background:#edf2ef;font-size:10px;font-weight:800}.staff-progress-update-heading time{margin-left:auto;color:var(--staff-muted);font-size:11px}.staff-progress-update-list p{margin:9px 0;white-space:pre-line}.staff-progress-update-meta{color:var(--staff-muted);font-size:11px}.staff-progress-update-meta .is-customer{color:#17613f;background:#e4f3e9}.staff-progress-update-meta .is-internal{color:#7b5412;background:#fff2cf}.staff-progress-update-meta a{color:var(--staff-primary);font-weight:800}.staff-progress-update-form{display:grid;margin-top:18px;padding:16px;border:1px solid var(--staff-border);border-radius:10px;gap:8px;background:#f9fbfa}.staff-progress-update-form>label{font-size:12px;font-weight:800}.staff-progress-update-form textarea,.staff-progress-update-form input[type=file]{width:100%;box-sizing:border-box;padding:10px;border:1px solid var(--staff-border);border-radius:8px;background:#fff;font:inherit}.staff-progress-update-form .staff-progress-visibility{display:flex;align-items:center;gap:8px;margin-top:5px}.staff-progress-update-form .staff-progress-visibility input{width:18px;height:18px;accent-color:var(--staff-primary)}.staff-progress-update-form .staff-button{width:max-content}

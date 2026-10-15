@@ -8,13 +8,13 @@ use App\Services\Design\CreateArtworkVersionService;
 use App\Services\Design\InitializeDesignJobsForOrderService;
 use App\Services\Design\MarkDesignReadyService;
 use App\Services\Design\StartDesignJobService;
+use App\Services\Fulfilment\CompleteCourierFulfilmentService;
 use App\Services\Fulfilment\InitializeFulfilmentJobForOrderService;
 use App\Services\Fulfilment\MarkPickupCollectedService;
 use App\Services\Merge\GenerateMergeJobsForOrderService;
 use App\Services\Orders\ConfirmOrderDetailsService;
 use App\Services\Orders\CreateOrderService;
 use App\Services\Orders\SaveOrderDraftService;
-use Database\Seeders\KkkPackagePriceCatalogSeeder;
 use App\Services\Packing\InitializePackingJobForOrderService;
 use App\Services\Packing\MarkPackingJobPackedService;
 use App\Services\Packing\StartPackingService;
@@ -25,9 +25,9 @@ use App\Services\Printing\InitializePrintJobsForOrderService;
 use App\Services\Printing\MarkPrintJobPrintedService;
 use App\Services\Printing\StartPrintingService;
 use App\Services\Printing\SyncOrderPrintStatusService;
-use App\Services\Fulfilment\CompleteCourierFulfilmentService;
-use Illuminate\Support\Facades\Storage;
+use Database\Seeders\KkkPackagePriceCatalogSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Storage;
 use RuntimeException;
 use Tests\TestCase;
 
@@ -100,7 +100,7 @@ class FulfilmentFoundationTest extends TestCase
         $this->assertSame('COMPLETED', $order->fresh()->status);
     }
 
-        public function test_courier_completion_requires_packing_proof(): void
+    public function test_courier_completion_requires_packing_proof(): void
     {
         Storage::fake('local');
 
@@ -371,7 +371,6 @@ class FulfilmentFoundationTest extends TestCase
         );
     }
 
-
     private function packedOrder(
         int $packageCount,
         string $fulfilmentMethod,
@@ -416,13 +415,13 @@ class FulfilmentFoundationTest extends TestCase
 
         $payment->update([
             'provider' => 'TEST',
-            'provider_reference' => 'FULFIL-REF-' . $payment->id,
+            'provider_reference' => 'FULFIL-REF-'.$payment->id,
         ]);
 
         app(HandlePaymentCallbackService::class)->handle([
             'provider' => 'TEST',
             'provider_reference' => $payment->provider_reference,
-            'provider_event_id' => 'FULFIL-EVENT-' . $payment->id,
+            'provider_event_id' => 'FULFIL-EVENT-'.$payment->id,
             'status' => 'PAID',
         ]);
 
@@ -457,14 +456,14 @@ class FulfilmentFoundationTest extends TestCase
                     'design_code' => $side->side === 'LELAKI' ? 'L101' : 'P202',
                 ],
                 'parents' => [
-                    'father_name' => 'Bapa ' . $side->side,
-                    'mother_name' => 'Ibu ' . $side->side,
+                    'father_name' => 'Bapa '.$side->side,
+                    'mother_name' => 'Ibu '.$side->side,
                 ],
                 'event' => [
                     'event_date' => '2026-12-20',
                     'meal_time' => '12:00',
-                    'venue_name' => 'Dewan ' . $side->side,
-                    'full_address' => 'Alamat ' . $side->side,
+                    'venue_name' => 'Dewan '.$side->side,
+                    'full_address' => 'Alamat '.$side->side,
                     'contacts' => [
                         1 => ['contact_name' => 'Contact 1', 'contact_phone' => '0111111111'],
                         2 => ['contact_name' => 'Contact 2', 'contact_phone' => '0122222222'],
@@ -486,6 +485,7 @@ class FulfilmentFoundationTest extends TestCase
 
         app(SaveOrderDraftService::class)->save($order, [
             'card_quantity' => 200,
+            ...($packageCount === 2 ? ['jumlah_hantaran' => 'RM 8,000.00'] : []),
             'couple' => [
                 'groom_name' => 'Muhammad Syafiq',
                 'bride_name' => 'Nur Awanis',
@@ -516,11 +516,11 @@ class FulfilmentFoundationTest extends TestCase
             $designJob = app(StartDesignJobService::class)->start($designJob);
 
             app(CreateArtworkVersionService::class)->create($designJob, [
-            'storage_path' => "artworks/{$designJob->side}/v1.pdf",
-            'preview_storage_path' => "artworks/{$designJob->side}/v1-preview.png",
-            'original_filename' => "{$designJob->side}-v1.pdf",
-            'mime_type' => 'application/pdf',
-        ]);
+                'storage_path' => "artworks/{$designJob->side}/v1.pdf",
+                'preview_storage_path' => "artworks/{$designJob->side}/v1-preview.png",
+                'original_filename' => "{$designJob->side}-v1.pdf",
+                'mime_type' => 'application/pdf',
+            ]);
 
             $designJob = app(MarkDesignReadyService::class)
                 ->markReady($designJob->fresh());

@@ -7,6 +7,7 @@ use App\Models\PackingJob;
 use App\Services\Orders\CreateOrderService;
 use App\Services\Orders\GenerateOrderAccessLinkService;
 use App\Services\Orders\SaveOrderDraftService;
+use App\Services\Orders\ValidateOrderCompletionService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -51,6 +52,7 @@ class CustomerDashboardAccessTest extends TestCase
             ->assertSee('data-preview-face-target="back"', false)
             ->assertSee('data-preview-field="card_title_jawi"', false)
             ->assertSee('وليمة العروس')
+            ->assertDontSee('name="jumlah_hantaran"', false)
             ->assertDontSee('token=');
     }
 
@@ -109,10 +111,50 @@ class CustomerDashboardAccessTest extends TestCase
             ->assertSee('Pakej Gabungan – Kad Lipatan')
             ->assertSee('Majlis 1 – Pihak Perempuan')
             ->assertSee('Majlis 2 – Pihak Lelaki')
+            ->assertSee('name="jumlah_hantaran"', false)
+            ->assertSee('Mockup Cek Hantaran percuma')
             ->assertSee('Ibu Bapa Pengantin Perempuan')
             ->assertSee('Ibu Bapa Pengantin Lelaki')
             ->assertSee('data-folded-second-design="true"', false)
             ->assertSee('data-preview-field="card_title_jawi"', false);
+    }
+
+    public function test_jumlah_hantaran_is_saved_only_for_two_package_orders(): void
+    {
+        $twoPackage = app(CreateOrderService::class)->create([
+            'package_count' => 2,
+            'customer_name' => 'Hantaran Test',
+        ]);
+
+        $this->assertContains(
+            'Jumlah Hantaran',
+            app(ValidateOrderCompletionService::class)->validate($twoPackage)['missing']
+        );
+
+        $this->get(app(GenerateOrderAccessLinkService::class)->generate($twoPackage));
+
+        $this->post(route('orders.draft.update', ['orderId' => $twoPackage->order_id]), [
+            'jumlah_hantaran' => '  10   dinar emas  ',
+        ])->assertRedirect();
+
+        $this->assertSame('10 dinar emas', $twoPackage->fresh()->jumlah_hantaran);
+        $this->assertNotContains(
+            'Jumlah Hantaran',
+            app(ValidateOrderCompletionService::class)->validate($twoPackage->fresh())['missing']
+        );
+
+        $onePackage = app(CreateOrderService::class)->create([
+            'package_count' => 1,
+            'side' => 'LELAKI',
+        ]);
+
+        $this->get(app(GenerateOrderAccessLinkService::class)->generate($onePackage));
+
+        $this->post(route('orders.draft.update', ['orderId' => $onePackage->order_id]), [
+            'jumlah_hantaran' => 'RM 1,000',
+        ])->assertSessionHasErrors('jumlah_hantaran');
+
+        $this->assertNull($onePackage->fresh()->jumlah_hantaran);
     }
 
     public function test_folded_card_preview_uses_the_first_event_for_front_and_orders_the_back_pages(): void

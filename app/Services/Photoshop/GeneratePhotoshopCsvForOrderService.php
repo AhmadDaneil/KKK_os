@@ -12,14 +12,13 @@ class GeneratePhotoshopCsvForOrderService
     public function __construct(
         private readonly ExportPhotoshopAutoMergeCsvService $csvExporter,
         private readonly CardQuantityProviderContract $quantityProvider,
-    ) {
-    }
+    ) {}
 
     /**
      * Produce the real Photoshop-compatible CSV for one confirmed business order.
      *
      * 1-package => exactly 1 merge row.
-     * 2-package => exactly 2 independent merge rows.
+     * 2-package => 2 independent merge rows and 1 Cek Hantaran mockup row.
      */
     public function generate(Order $order, string $absolutePath): string
     {
@@ -40,17 +39,24 @@ class GeneratePhotoshopCsvForOrderService
 
         if ($mergeJobs->count() !== $expected) {
             throw new RuntimeException(
-                "Order {$order->order_id} expected {$expected} merge job(s), " .
+                "Order {$order->order_id} expected {$expected} merge job(s), ".
                 "but {$mergeJobs->count()} exist."
             );
         }
 
         $this->assertMergeJobsMatchPackageSides($order, $mergeJobs);
 
+        if ($expected === 2 && blank($order->jumlah_hantaran)) {
+            throw new RuntimeException(
+                "Order {$order->order_id} requires Jumlah Hantaran before Photoshop export."
+            );
+        }
+
         return $this->csvExporter->export(
             $mergeJobs,
             $absolutePath,
             fn ($mergeJob) => $this->quantityProvider->quantityFor($mergeJob),
+            $order,
         );
     }
 

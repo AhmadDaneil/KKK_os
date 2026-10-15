@@ -404,7 +404,7 @@ class ArtworkReviewApprovalTest extends TestCase
             'designJobId' => $job->id,
         ]))
             ->assertOk()
-        ->assertSee('King Kad Kahwin . Preview')
+            ->assertSee('King Kad Kahwin . Preview')
             ->assertHeader('Content-Type', 'text/html; charset=UTF-8');
     }
 
@@ -579,6 +579,7 @@ class ArtworkReviewApprovalTest extends TestCase
 
         app(SaveOrderDraftService::class)->save($order, [
             'card_quantity' => 200,
+            ...($packageCount === 2 ? ['jumlah_hantaran' => 'RM 8,000.00'] : []),
             'couple' => [
                 'groom_name' => 'Muhammad Syafiq',
                 'bride_name' => 'Nur Awanis',

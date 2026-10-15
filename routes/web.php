@@ -10,6 +10,7 @@ use App\Http\Controllers\CustomerBalanceReceiptController;
 use App\Http\Controllers\CustomerBillplzBalancePaymentController;
 use App\Http\Controllers\CustomerBookingPaymentController;
 use App\Http\Controllers\CustomerDashboardAccessController;
+use App\Http\Controllers\CustomerCourierProofController;
 use App\Http\Controllers\CustomerDashboardController;
 use App\Http\Controllers\CustomerDepositReceiptController;
 use App\Http\Controllers\CustomerOrderConfirmController;
@@ -17,6 +18,7 @@ use App\Http\Controllers\CustomerOrderDraftController;
 use App\Http\Controllers\CustomerOrderReviewController;
 use App\Http\Controllers\CustomerOrderThankYouController;
 use App\Http\Controllers\CustomerPaymentReceiptController;
+use App\Http\Controllers\CustomerProgressUpdateController;
 use App\Http\Controllers\DevBalancePaymentController;
 use App\Http\Controllers\DevDesignJobController;
 use App\Http\Controllers\DevFulfilmentJobController;
@@ -26,6 +28,7 @@ use App\Http\Controllers\DevPackingJobController;
 use App\Http\Controllers\DevPrintJobController;
 use App\Http\Controllers\PublicCalendarController;
 use App\Http\Controllers\PublicOrderController;
+use App\Http\Controllers\Staff\StaffArtworkProofController;
 use App\Http\Controllers\Staff\StaffAuthController;
 use App\Http\Controllers\Staff\StaffBalancePaymentController;
 use App\Http\Controllers\Staff\StaffBatchArtworkController;
@@ -39,6 +42,7 @@ use App\Http\Controllers\Staff\StaffOrderController;
 use App\Http\Controllers\Staff\StaffOrderDeletionController;
 use App\Http\Controllers\Staff\StaffOrderLifecycleController;
 use App\Http\Controllers\Staff\StaffOrderProductionAssignmentController;
+use App\Http\Controllers\Staff\StaffOrderProgressUpdateController;
 use App\Http\Controllers\Staff\StaffPackingWorkflowController;
 use App\Http\Controllers\Staff\StaffPhotoshopController;
 use App\Http\Controllers\Staff\StaffPrintingWorkflowController;
@@ -138,6 +142,10 @@ Route::middleware(['auth:admin', 'active.staff', 'staff.role:ADMIN'])
             ->name('invoices.download');
         Route::get('/orders/{orderId}/gambar-pengantin/{side}', [StaffOrderController::class, 'downloadCustomerPhoto'])
             ->name('orders.customer-photo');
+        Route::get('/progress-updates/{progressUpdate}/attachment', [StaffOrderProgressUpdateController::class, 'attachment'])
+            ->name('progress-updates.attachment');
+        Route::get('/design-jobs/{designJob}/proof', [StaffArtworkProofController::class, 'show'])
+            ->name('design-jobs.proof.show');
         Route::delete('/orders/{order}', [StaffOrderDeletionController::class, 'destroy'])
             ->name('orders.destroy');
         Route::post('/orders/{order}/cancel', [StaffOrderLifecycleController::class, 'cancel'])
@@ -206,6 +214,11 @@ Route::middleware(['auth:admin', 'active.staff', 'staff.role:ADMIN'])
 
 Route::get('/order/{orderId}', [CustomerDashboardController::class, 'show'])
     ->name('orders.dashboard');
+
+Route::get('/order/{orderId}/progress-updates/{progressUpdate}/attachment', [CustomerProgressUpdateController::class, 'attachment'])
+    ->name('orders.progress-updates.attachment');
+Route::get('/order/{orderId}/courier-proof', [CustomerCourierProofController::class, 'show'])
+    ->name('orders.courier-proof.show');
 
 Route::post(
     '/order/{orderId}/draft',
@@ -298,6 +311,13 @@ Route::middleware(['auth:staff', 'active.staff'])
             ->name('orders.show');
         Route::get('/orders/{orderId}/gambar-pengantin/{side}', [StaffOrderController::class, 'downloadCustomerPhoto'])
             ->name('orders.customer-photo');
+        Route::get('/progress-updates/{progressUpdate}/attachment', [StaffOrderProgressUpdateController::class, 'attachment'])
+            ->name('progress-updates.attachment');
+        Route::get('/design-jobs/{designJob}/proof', [StaffArtworkProofController::class, 'show'])
+            ->name('design-jobs.proof.show');
+        Route::post('/orders/{order}/progress-updates', [StaffOrderProgressUpdateController::class, 'store'])
+            ->middleware('staff.role:DESIGNER,PRODUCTION,'.User::ROLE_OM)
+            ->name('orders.progress-updates.store');
 
         /*
         |--------------------------------------------------------------------------

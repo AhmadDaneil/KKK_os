@@ -4,13 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Log Masuk Admin — KKK OS</title>
-    <link rel="stylesheet" href="{{ asset('css/login.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/login.css') }}?v={{ filemtime(public_path('css/login.css')) }}">
 </head>
 <body class="login-page login-page--admin">
     <main class="login-shell">
         <section class="login-story" aria-label="King Kad Kahwin">
             <div class="login-brand">
-                <span class="login-mark">KKK</span>
+                <img class="login-mark login-mark--image" src="{{ asset('images/landing/kingkadkahwin-logo.png') }}" alt="" width="47" height="47" decoding="async">
                 <div><strong>King Kad Kahwin</strong><span>SISTEM OPERASI</span></div>
             </div>
             <div class="login-story-content">

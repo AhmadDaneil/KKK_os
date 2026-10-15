@@ -1542,6 +1542,7 @@ class StaffDesignWorkflowTest extends TestCase
                 $order,
                 [
                     'card_quantity' => 200,
+                    ...($packageCount === 2 ? ['jumlah_hantaran' => 'RM 8,000.00'] : []),
                     'couple' => [
                         'groom_name' => 'Muhammad Syafiq',
                         'bride_name' => 'Nur Awanis',
