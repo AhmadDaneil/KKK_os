@@ -105,6 +105,21 @@ class StaffOrderController extends Controller
             ]);
         }
 
+        if ($user->canViewAllProgressUpdates()) {
+            $order->load([
+                'progressUpdates' => fn ($query) => $query
+                    ->with('uploader:id,name')
+                    ->latest(),
+            ]);
+        } elseif (in_array($user->role, [User::ROLE_DESIGNER, User::ROLE_PRODUCTION], true)) {
+            $order->load([
+                'progressUpdates' => fn ($query) => $query
+                    ->where('uploader_user_id', $user->id)
+                    ->with('uploader:id,name')
+                    ->latest(),
+            ]);
+        }
+
         $timelineEvents = collect();
 
         if ($user->canMonitorAllDepartments()) {

@@ -23,6 +23,20 @@
     $canUsePhotoshop = auth()->user()->hasStaffRole(\App\Models\User::ROLE_DESIGNER)
         && $hasDesignJobs
         && $order->designJobs->contains('assigned_user_id', auth()->id());
+    $canUploadProgressUpdate = match (auth()->user()->role) {
+        \App\Models\User::ROLE_DESIGNER => $hasDesignJobs
+            && $order->designJobs->contains('assigned_user_id', auth()->id()),
+        \App\Models\User::ROLE_PRODUCTION => $order->relationLoaded('printJobs')
+            && $order->printJobs->contains('assigned_user_id', auth()->id()),
+        \App\Models\User::ROLE_OM => ($order->relationLoaded('packingJob') && $order->packingJob)
+            || ($order->relationLoaded('fulfilmentJob') && $order->fulfilmentJob),
+        default => false,
+    };
+    $progressRoleLabels = [
+        \App\Models\User::ROLE_DESIGNER => 'Designer',
+        \App\Models\User::ROLE_PRODUCTION => 'Production',
+        \App\Models\User::ROLE_OM => 'OM',
+    ];
     $statusLabels = [
         'DETAILS_INCOMPLETE' => 'Maklumat belum lengkap', 'READY_FOR_DESIGN' => 'Sedia untuk design',
         'DESIGN_IN_PROGRESS' => 'Reka bentuk sedang berjalan', 'DESIGN_READY' => 'Menunggu semakan customer',
@@ -280,6 +294,56 @@
                     </details>
                 @endif
             </section>
+
+            @if ($order->relationLoaded('progressUpdates') || $canUploadProgressUpdate)
+                <section class="staff-section staff-progress-updates" id="progress-updates">
+                    <div class="staff-lifecycle-heading">
+                        <div><p class="staff-kicker">Rekod per-order</p><h2>Kemas kini progress</h2></div>
+                        <span>Fail bukti operasi kekal private; hanya kemas kini bertanda customer-visible dipaparkan kepada customer.</span>
+                    </div>
+
+                    @if ($order->relationLoaded('progressUpdates') && $order->progressUpdates->isNotEmpty())
+                        <ol class="staff-progress-update-list">
+                            @foreach ($order->progressUpdates as $update)
+                                <li>
+                                    <div class="staff-progress-update-heading">
+                                        <strong>{{ $update->uploader?->name ?? 'Akaun staf dipadam' }}</strong>
+                                        <span>{{ $progressRoleLabels[$update->uploader_role] ?? $update->uploader_role }}</span>
+                                        <time datetime="{{ $update->created_at->toIso8601String() }}">{{ $update->created_at->timezone(config('app.display_timezone'))->format('d/m/Y, H:i') }}</time>
+                                    </div>
+                                    <p>{{ $update->message ?: 'Lampiran progress dimuat naik.' }}</p>
+                                    <div class="staff-progress-update-meta">
+                                        <span>Status: {{ str_replace('_', ' ', $update->order_status) }}</span>
+                                        <span class="is-{{ strtolower($update->visibility) }}">{{ $update->visibility === \App\Models\OrderProgressUpdate::VISIBILITY_CUSTOMER ? 'Customer-visible' : 'Internal / private' }}</span>
+                                        @if ($update->hasAttachment())
+                                            <a href="{{ route($operationRoutePrefix.'progress-updates.attachment', $update) }}" target="_blank" rel="noopener">Lihat lampiran</a>
+                                        @endif
+                                    </div>
+                                </li>
+                            @endforeach
+                        </ol>
+                    @else
+                        <p class="staff-muted-text">Belum ada kemas kini progress khusus untuk tempahan ini.</p>
+                    @endif
+
+                    @if ($canUploadProgressUpdate && ! $order->isAssignmentLocked())
+                        <form method="POST" enctype="multipart/form-data" action="{{ route('staff.orders.progress-updates.store', $order) }}" class="staff-progress-update-form">
+                            @csrf
+                            <label for="progress-message">Catatan progress</label>
+                            <textarea id="progress-message" name="message" maxlength="2000" rows="4" placeholder="Tulis kemas kini yang selamat untuk rekod atau customer.">{{ old('message') }}</textarea>
+                            <label for="progress-attachment">Lampiran pilihan</label>
+                            <input id="progress-attachment" type="file" name="attachment" accept=".jpg,.jpeg,.png,.webp,.pdf,image/jpeg,image/png,image/webp,application/pdf">
+                            <label class="staff-progress-visibility">
+                                <input type="checkbox" name="customer_visible" value="1" @checked(old('customer_visible'))>
+                                <span>Paparkan kemas kini ini dalam Customer Dashboard</span>
+                            </label>
+                            <p class="staff-muted-text">Lalai ialah internal/private. Jangan terbitkan arahan operasi, data customer lain, label penghantaran, atau fail kerja private.</p>
+                            @error('progress_update')<p class="staff-upload-notice is-error">{{ $message }}</p>@enderror
+                            <button type="submit" class="staff-button staff-button-primary">Simpan Kemas Kini</button>
+                        </form>
+                    @endif
+                </section>
+            @endif
             @endif
 
             <section class="staff-section">
@@ -494,6 +558,13 @@
                                     </div>
                                 </dl>
                                 @php
+                                    $latestProofArtwork = $job->artworkVersions->sortByDesc('version_number')->first();
+                                    $latestProofFiles = $latestProofArtwork?->preview_files ?: array_filter([
+                                        $latestProofArtwork?->preview_storage_path ? ['path' => $latestProofArtwork->preview_storage_path] : null,
+                                    ]);
+                                    $hasDesignProof = collect($latestProofFiles)->contains(
+                                        fn ($file) => filled(data_get($file, 'watermarked_path')) || filled(data_get($file, 'path'))
+                                    );
                                     $latestCorrectionAction = $job->reviewActions
                                         ->where('action', 'CORRECTION_REQUESTED')
                                         ->sortByDesc('acted_at')
@@ -510,6 +581,13 @@
                                     $correctionAssets = $latestCorrectionAction?->affected_assets
                                         ?: ($latestCorrectionPayment?->metadata['affected_assets'] ?? ['CARD']);
                                 @endphp
+
+                                @if (auth()->user()->isOperationManagement() && $hasDesignProof)
+                                    <div class="staff-proof-status">
+                                        <strong>Bukti Designer:</strong> Versi {{ $latestProofArtwork->version_number }}
+                                        <a href="{{ route($operationRoutePrefix.'design-jobs.proof.show', $job) }}" class="staff-button staff-button-small" target="_blank" rel="noopener">Lihat Bukti</a>
+                                    </div>
+                                @endif
 
                                 @if (filled($correctionComment))
                                     <aside class="staff-correction-note" aria-label="Arahan pembetulan pelanggan">
@@ -1215,6 +1293,17 @@
                                     <dd>{{ $order->fulfilmentJob->completion_reference ?? '-' }}</dd>
                                 </div>
                             </dl>
+                            @if (
+                                auth()->user()->isOperationManagement()
+                                && $order->fulfilmentJob->method === 'COURIER'
+                                && $order->fulfilmentJob->status === 'COMPLETED'
+                                && $order->packingJob?->proof_storage_path
+                            )
+                                <div class="staff-proof-status">
+                                    <strong>Bukti Courier:</strong> {{ $order->packingJob->proof_original_name ?? 'Telah dimuat naik' }}
+                                    <a href="{{ route($operationRoutePrefix.'packing-jobs.proof.show', $order->packingJob) }}" class="staff-button staff-button-small" target="_blank" rel="noopener">Lihat Bukti</a>
+                                </div>
+                            @endif
                             @if (
                                 $order->packingJob
                                 && $order->packingJob->assigned_user_id === auth()->id()

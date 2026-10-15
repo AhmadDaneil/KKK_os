@@ -104,6 +104,29 @@
     <div class="order-status-message">
         {{ $progress['message'] }}
     </div>
+
+    @if ($order->relationLoaded('progressUpdates') && $order->progressUpdates->isNotEmpty())
+        <section class="customer-progress-updates" aria-labelledby="customer-progress-updates-title">
+            <div class="customer-progress-updates-heading">
+                <span>Kemas kini terkini</span>
+                <h2 id="customer-progress-updates-title">Progress Tempahan Anda</h2>
+            </div>
+            <ol>
+                @foreach ($order->progressUpdates as $update)
+                    <li>
+                        <div>
+                            <strong>{{ match ($update->uploader_role) { 'DESIGNER' => 'Designer', 'PRODUCTION' => 'Production', 'OPERATION_MANAGEMENT' => 'OM', default => 'Pasukan KKK' } }}</strong>
+                            <time datetime="{{ $update->published_at->toIso8601String() }}">{{ $update->published_at->timezone(config('app.display_timezone'))->format('d/m/Y, H:i') }}</time>
+                        </div>
+                        <p>{{ $update->message ?: 'Lampiran progress baharu telah dimuat naik.' }}</p>
+                        @if ($update->hasAttachment())
+                            <a href="{{ route('orders.progress-updates.attachment', ['orderId' => $order->order_id, 'progressUpdate' => $update]) }}" target="_blank" rel="noopener">Lihat lampiran progress</a>
+                        @endif
+                    </li>
+                @endforeach
+            </ol>
+        </section>
+    @endif
     @if ($order->fulfilmentJob?->method === 'COURIER' && $order->fulfilmentJob?->tracking_number)
         <div class="customer-tracking-card"><span>{{ __('ui.shipping_information') }}</span><strong>{{ $order->fulfilmentJob->courier_provider ?: 'Kurier' }}</strong><code>{{ $order->fulfilmentJob->tracking_number }}</code></div>
     @endif
@@ -128,7 +151,9 @@
     </section>
 @endif
 
-@php($confirmedPreview = data_get($order->confirmation?->confirmed_snapshot, 'live_preview'))
+@php
+    $confirmedPreview = data_get($order->confirmation?->confirmed_snapshot, 'live_preview');
+@endphp
 @if (is_array($confirmedPreview))
     <section class="deposit-status-card" aria-label="Sejarah Live Preview">
         <h2>Live Preview Yang Disahkan</h2>
@@ -138,6 +163,43 @@
                 <li>{{ $previewSide['side'] ?? '-' }} — {{ data_get($previewSide, 'design.design_code', '-') }} — {{ data_get($previewSide, 'design.theme', '-') }}</li>
             @endforeach
         </ul>
+    </section>
+@endif
+
+@php
+    $customerDesignProofJobs = $order->designJobs->filter(function ($job) {
+        $artwork = $job->artworkVersions->sortByDesc('version_number')->first();
+        $previewFiles = $artwork?->preview_files ?: array_filter([
+            $artwork?->preview_storage_path ? ['path' => $artwork->preview_storage_path] : null,
+        ]);
+
+        return in_array($job->status, ['DESIGN_READY', 'CORRECTION_REQUESTED', 'DESIGN_APPROVED'], true)
+            && collect($previewFiles)->contains(
+                fn ($file) => filled(data_get($file, 'watermarked_path')) || filled(data_get($file, 'path'))
+            );
+    });
+    $hasCustomerCourierProof = $order->fulfilmentJob?->method === 'COURIER'
+        && $order->fulfilmentJob?->status === 'COMPLETED'
+        && filled($order->packingJob?->proof_storage_path);
+@endphp
+@if ($customerDesignProofJobs->isNotEmpty() || $hasCustomerCourierProof)
+    <section class="customer-proof-panel" aria-labelledby="customer-proof-title">
+        <div>
+            <span>Bukti progress</span>
+            <h2 id="customer-proof-title">Lihat Bukti Tempahan</h2>
+        </div>
+        <div class="customer-proof-actions">
+            @foreach ($customerDesignProofJobs as $designJob)
+                <a href="{{ route('orders.artwork.review', ['orderId' => $order->order_id]).'#design-job-'.$designJob->id }}">
+                    Lihat Bukti Designer · {{ ucfirst(strtolower($designJob->side)) }}
+                </a>
+            @endforeach
+            @if ($hasCustomerCourierProof)
+                <a href="{{ route('orders.courier-proof.show', ['orderId' => $order->order_id]) }}" target="_blank" rel="noopener">
+                    Lihat Bukti Courier
+                </a>
+            @endif
+        </div>
     </section>
 @endif
 
