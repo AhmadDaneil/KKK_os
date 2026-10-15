@@ -1206,3 +1206,66 @@ html[data-customer-theme="dark"] body.brand-customer-flow .artwork-preview-item>
     border-color: #8c7546 !important;
     background: #211c13 !important;
 }
+
+/* Muted dashboard copy needs its own opaque colours on the warm card surfaces. */
+body.brand-order-dashboard .summary-label {
+    color: #6b531f;
+    font-size: .875rem;
+    font-weight: 700;
+    opacity: 1;
+}
+
+body.brand-order-dashboard :is(.eyebrow, .field-help) {
+    opacity: 1;
+}
+
+html[data-customer-theme="dark"] body.brand-order-dashboard .summary-label {
+    color: #e8d8b4 !important;
+    opacity: 1;
+}
+
+html[data-customer-theme="dark"] body.brand-order-dashboard :is(.field-help, .date-picker-help, .live-preview-toggle small, .live-preview-heading>span, .live-product-heading>span, .deposit-status-card span) {
+    color: #d9c9a7 !important;
+    opacity: 1;
+}
+
+html[data-customer-theme="dark"] body.brand-order-dashboard .order-status-message {
+    color: #f0e5cf !important;
+}
+
+body.brand-order-dashboard :is(.live-preview-toggle small, .live-preview-heading>span, .preview-note) {
+    font-size: .75rem;
+    line-height: 1.5;
+}
+
+html[data-customer-theme="dark"] body.brand-order-dashboard .preview-note {
+    color: #d9c9a7 !important;
+}
+
+html[data-customer-theme="dark"] body.brand-order-dashboard .field-error {
+    color: #ffaaa4 !important;
+}
+
+html[data-customer-theme="dark"] body.brand-order-dashboard .autosave-status[data-state="error"] {
+    color: #ffdede !important;
+}
+
+html[data-customer-theme="dark"] body.brand-order-dashboard .autosave-status[data-state="pending"] {
+    color: #f1d991 !important;
+}
+
+html[data-customer-theme="dark"] body.brand-order-dashboard .customer-data-lock:disabled :is(input, select, textarea) {
+    opacity: 1;
+}
+
+html[data-customer-theme="dark"] body.brand-order-dashboard .progress-panel[data-progress-tone="red"] {
+    --progress-color: #ff9386;
+}
+
+html[data-customer-theme="dark"] body.brand-order-dashboard .progress-panel[data-progress-tone="yellow"] {
+    --progress-color: #f1d991;
+}
+
+html[data-customer-theme="dark"] body.brand-order-dashboard .progress-panel[data-progress-tone="green"] {
+    --progress-color: #e0b95c;
+}
