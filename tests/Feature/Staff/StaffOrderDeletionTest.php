@@ -25,16 +25,17 @@ class StaffOrderDeletionTest extends TestCase
         $this->assertDatabaseMissing('order_package_sides', ['order_id' => $order->id]);
     }
 
-    public function test_operation_management_can_delete_an_incomplete_order(): void
+    public function test_operation_management_can_delete_a_two_package_incomplete_order(): void
     {
         $manager = $this->staff(User::ROLE_OM);
-        $order = $this->incompleteOrder();
+        $order = $this->incompleteOrder(2);
 
         $this->actingAs($manager)
             ->delete(route('staff.orders.destroy', $order))
             ->assertRedirect();
 
         $this->assertDatabaseMissing('orders', ['id' => $order->id]);
+        $this->assertDatabaseMissing('order_package_sides', ['order_id' => $order->id]);
     }
 
     public function test_completed_information_cannot_be_deleted(): void
@@ -75,16 +76,18 @@ class StaffOrderDeletionTest extends TestCase
         $this->assertDatabaseHas('payment_transactions', ['id' => $payment->id]);
     }
 
-    public function test_specialist_staff_cannot_delete_orders(): void
+    public function test_customer_service_designer_and_production_cannot_delete_orders(): void
     {
-        $designer = $this->staff(User::ROLE_DESIGNER);
-        $order = $this->incompleteOrder();
+        foreach ([User::ROLE_CUSTOMER_SERVICE, User::ROLE_DESIGNER, User::ROLE_PRODUCTION] as $role) {
+            $staff = $this->staff($role);
+            $order = $this->incompleteOrder();
 
-        $this->actingAs($designer)
-            ->delete(route('staff.orders.destroy', $order))
-            ->assertForbidden();
+            $this->actingAs($staff)
+                ->delete(route('staff.orders.destroy', $order))
+                ->assertForbidden();
 
-        $this->assertDatabaseHas('orders', ['id' => $order->id]);
+            $this->assertDatabaseHas('orders', ['id' => $order->id]);
+        }
     }
 
     private function staff(string $role): User
@@ -95,11 +98,11 @@ class StaffOrderDeletionTest extends TestCase
         ]);
     }
 
-    private function incompleteOrder()
+    private function incompleteOrder(int $packageCount = 1)
     {
         return app(CreateOrderService::class)->create([
-            'package_count' => 1,
-            'side' => 'LELAKI',
+            'package_count' => $packageCount,
+            'side' => $packageCount === 1 ? 'LELAKI' : null,
             'customer_name' => 'Wrong Incomplete Order',
             'customer_email' => 'wrong@example.test',
             'customer_phone' => '0123456789',

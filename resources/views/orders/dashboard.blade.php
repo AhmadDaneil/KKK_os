@@ -105,12 +105,14 @@
         {{ $progress['message'] }}
     </div>
 
-    @if ($order->relationLoaded('progressUpdates') && $order->progressUpdates->isNotEmpty())
-        <section class="customer-progress-updates" aria-labelledby="customer-progress-updates-title">
-            <div class="customer-progress-updates-heading">
-                <span>Kemas kini terkini</span>
-                <h2 id="customer-progress-updates-title">Progress Tempahan Anda</h2>
-            </div>
+    <section class="customer-progress-updates" aria-labelledby="customer-progress-updates-title">
+        <div class="customer-progress-updates-heading">
+            <span>Semak progress</span>
+            <h2 id="customer-progress-updates-title">Progress &amp; Proofing Tempahan Anda</h2>
+            <p>Semak kemas kini dan proofing yang telah dikongsi oleh pasukan kami untuk tempahan ini.</p>
+        </div>
+
+        @if ($order->relationLoaded('progressUpdates') && $order->progressUpdates->isNotEmpty())
             <ol>
                 @foreach ($order->progressUpdates as $update)
                     <li>
@@ -120,13 +122,15 @@
                         </div>
                         <p>{{ $update->message ?: 'Lampiran progress baharu telah dimuat naik.' }}</p>
                         @if ($update->hasAttachment())
-                            <a href="{{ route('orders.progress-updates.attachment', ['orderId' => $order->order_id, 'progressUpdate' => $update]) }}" target="_blank" rel="noopener">Lihat lampiran progress</a>
+                            <a href="{{ route('orders.progress-updates.attachment', ['orderId' => $order->order_id, 'progressUpdate' => $update]) }}" target="_blank" rel="noopener">Lihat Proofing</a>
                         @endif
                     </li>
                 @endforeach
             </ol>
-        </section>
-    @endif
+        @else
+            <p class="customer-progress-updates-empty">Belum ada progress atau proofing yang dikongsi untuk tempahan ini.</p>
+        @endif
+    </section>
     @if ($order->fulfilmentJob?->method === 'COURIER' && $order->fulfilmentJob?->tracking_number)
         <div class="customer-tracking-card"><span>{{ __('ui.shipping_information') }}</span><strong>{{ $order->fulfilmentJob->courier_provider ?: 'Kurier' }}</strong><code>{{ $order->fulfilmentJob->tracking_number }}</code></div>
     @endif

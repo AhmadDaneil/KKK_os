@@ -73,7 +73,7 @@ class OrderStatusFilterTest extends TestCase
             ->assertDontSee($completedOrder->order_id);
     }
 
-    public function test_incomplete_customer_drafts_are_hidden_from_operational_order_pages(): void
+    public function test_incomplete_customer_drafts_are_available_to_admin_and_operation_management(): void
     {
         $manager = User::factory()->create([
             'role' => User::ROLE_OM,
@@ -91,17 +91,20 @@ class OrderStatusFilterTest extends TestCase
             ->get(route('staff.orders.index'))
             ->assertOk()
             ->assertSee($confirmed->order_id)
-            ->assertDontSee($draft->order_id);
+            ->assertSee($draft->order_id)
+            ->assertSee('Delete order');
 
         $this->actingAs($manager, 'staff')
             ->get(route('staff.orders.show', $draft->order_id))
-            ->assertNotFound();
+            ->assertOk()
+            ->assertSee('Delete order');
 
         $this->actingAs($admin, 'admin')
             ->get(route('admin.orders.index'))
             ->assertOk()
             ->assertSee($confirmed->order_id)
-            ->assertDontSee($draft->order_id);
+            ->assertSee($draft->order_id)
+            ->assertSee('Delete order');
     }
 
     public function test_admin_packing_queue_only_lists_orders_with_active_packing_work(): void

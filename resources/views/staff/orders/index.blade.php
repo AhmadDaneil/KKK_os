@@ -216,7 +216,7 @@
                                 >
                                     @csrf
                                     @method('DELETE')
-                                    <button type="submit" class="staff-order-delete">Padam</button>
+                                    <button type="submit" class="staff-order-delete">Delete order</button>
                                 </form>
                             @endif
                         </div>

@@ -58,8 +58,9 @@ class StaffOrderVisibilityTest extends TestCase
         $response->assertSee($second->order_id);
     }
 
-    public function test_only_customer_service_can_see_orders_with_incomplete_details(): void
+    public function test_admin_operation_management_and_customer_service_can_see_orders_with_incomplete_details(): void
     {
+        $admin = $this->staff(User::ROLE_ADMIN);
         $operationManagement = $this->staff(User::ROLE_OM);
         $customerService = $this->staff(User::ROLE_CUSTOMER_SERVICE);
         $draft = app(CreateOrderService::class)->create([
@@ -69,16 +70,24 @@ class StaffOrderVisibilityTest extends TestCase
             'customer_phone' => '0123456789',
         ]);
 
+        $this->actingAs($admin, 'admin')
+            ->get(route('admin.orders.index'))
+            ->assertOk()
+            ->assertSee($draft->order_id)
+            ->assertSee('Delete order');
+
         $this->actingAs($operationManagement)
             ->get(route('staff.orders.index'))
             ->assertOk()
-            ->assertDontSee($draft->order_id);
+            ->assertSee($draft->order_id)
+            ->assertSee('Delete order');
 
         $this->actingAs($customerService)
             ->get(route('staff.orders.index'))
             ->assertOk()
             ->assertSee($draft->order_id)
-            ->assertSee('Maklumat belum lengkap');
+            ->assertSee('Maklumat belum lengkap')
+            ->assertDontSee('Delete order');
     }
 
     public function test_operation_management_can_see_all_orders(): void

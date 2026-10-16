@@ -189,8 +189,27 @@ class OrderProgressVisibilityTest extends TestCase
         $production = $this->staff(User::ROLE_PRODUCTION);
         $om = $this->staff(User::ROLE_OM);
         $customerService = $this->staff(User::ROLE_CUSTOMER_SERVICE);
-        $this->makeUpdate($order, $designer, 'Design customer-visible', true);
-        $this->makeUpdate($order, $production, 'Production customer-visible', true);
+        $designProof = $this->makeUpdate(
+            $order,
+            $designer,
+            'Design customer-visible',
+            true,
+            'progress/design-customer-visible.jpg',
+        );
+        $productionProof = $this->makeUpdate(
+            $order,
+            $production,
+            'Production customer-visible',
+            true,
+            'progress/production-customer-visible.jpg',
+        );
+        $omProof = $this->makeUpdate(
+            $order,
+            $om,
+            'OM customer-visible',
+            true,
+            'progress/om-customer-visible.jpg',
+        );
         $this->makeUpdate($order, $om, 'OM internal secret', false);
         $this->makeUpdate($order, $customerService, 'Unsupported publisher secret', true);
         $this->makeUpdate($otherOrder, $om, 'Other customer secret', true);
@@ -198,11 +217,38 @@ class OrderProgressVisibilityTest extends TestCase
         $this->withSession($this->customerSession($order))
             ->get(route('orders.dashboard', $order->order_id))
             ->assertOk()
+            ->assertSee('Progress &amp; Proofing Tempahan Anda', false)
             ->assertSee('Design customer-visible')
             ->assertSee('Production customer-visible')
+            ->assertSee('OM customer-visible')
+            ->assertSee('Lihat Proofing')
+            ->assertSee(
+                route('orders.progress-updates.attachment', [$order->order_id, $designProof]),
+                false,
+            )
+            ->assertSee(
+                route('orders.progress-updates.attachment', [$order->order_id, $productionProof]),
+                false,
+            )
+            ->assertSee(
+                route('orders.progress-updates.attachment', [$order->order_id, $omProof]),
+                false,
+            )
             ->assertDontSee('OM internal secret')
             ->assertDontSee('Unsupported publisher secret')
             ->assertDontSee('Other customer secret');
+    }
+
+    public function test_customer_dashboard_shows_an_empty_progress_and_proofing_space(): void
+    {
+        $order = $this->confirmedOrder(1);
+
+        $this->withSession($this->customerSession($order))
+            ->get(route('orders.dashboard', $order->order_id))
+            ->assertOk()
+            ->assertSee('Progress &amp; Proofing Tempahan Anda', false)
+            ->assertSee('Belum ada progress atau proofing yang dikongsi untuk tempahan ini.')
+            ->assertDontSee('Lihat Proofing');
     }
 
     public function test_staff_attachment_is_available_only_to_management_or_the_uploader(): void
@@ -340,6 +386,14 @@ class OrderProgressVisibilityTest extends TestCase
     {
         Storage::fake('local');
         $order = $this->orderWithDesignJobs(2);
+        $designer = $this->staff(User::ROLE_DESIGNER);
+        $progressProof = $this->makeUpdate(
+            $order,
+            $designer,
+            'Proofing progress dua pakej',
+            true,
+            'progress/two-package-proofing.jpg',
+        );
         foreach ($order->designJobs()->get() as $index => $designJob) {
             $designJob->update(['status' => 'DESIGN_APPROVED']);
             $path = 'proofs/design-'.$designJob->side.'.jpg';
@@ -356,7 +410,13 @@ class OrderProgressVisibilityTest extends TestCase
             ->get(route('orders.dashboard', $order->order_id))
             ->assertOk()
             ->assertSee('Lihat Bukti Designer · Lelaki')
-            ->assertSee('Lihat Bukti Designer · Perempuan');
+            ->assertSee('Lihat Bukti Designer · Perempuan')
+            ->assertSee('Proofing progress dua pakej')
+            ->assertSee('Lihat Proofing')
+            ->assertSee(
+                route('orders.progress-updates.attachment', [$order->order_id, $progressProof]),
+                false,
+            );
 
         $this->assertSame(2, substr_count($response->getContent(), 'Lihat Bukti Designer'));
     }
