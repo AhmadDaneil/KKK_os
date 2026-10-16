@@ -238,7 +238,7 @@ class PublicOrderJourneyTest extends TestCase
         ])
             ->assertOk()
             ->assertSee('Lihat progress')
-            ->assertSee('href="'.route('orders.access.create').'"', false);
+            ->assertSee('href="'.route('orders.access.create', ['order_id' => $order->order_id]).'"', false);
 
         $this->get(route('orders.dashboard', ['orderId' => $order->order_id]))
             ->assertNotFound();

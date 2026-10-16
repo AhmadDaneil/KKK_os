@@ -13,9 +13,15 @@ use Illuminate\View\View;
 
 class CustomerDashboardAccessController extends Controller
 {
-    public function create(): View
+    public function create(Request $request): View
     {
-        return view('orders.access');
+        $orderId = strtoupper(trim((string) $request->query('order_id', '')));
+
+        return view('orders.access', [
+            'prefilledOrderId' => preg_match('/^KKK-\d{6}-\d{4}$/', $orderId) === 1
+                ? $orderId
+                : null,
+        ]);
     }
 
     public function store(
@@ -27,14 +33,23 @@ class CustomerDashboardAccessController extends Controller
             'customer_reference' => strtoupper(trim((string) $request->input('customer_reference'))),
         ]);
         $validated = $request->validate([
-            'customer_reference' => ['required', 'string', 'max:32', 'regex:/^[A-Z]{2,3}\d{6}-\d{3}$/'],
+            'customer_reference' => [
+                'required',
+                'string',
+                'max:32',
+                'regex:/^(?:KKK-\d{6}-\d{4}|[A-Z]{2,3}\d{6}-\d{3})$/',
+            ],
             'customer_phone' => ['required', 'string', 'max:32'],
+        ], [
+            'customer_reference.required' => 'Sila masukkan ID Tempahan atau Rujukan Pelanggan.',
+            'customer_reference.regex' => 'Format ID Tempahan atau Rujukan Pelanggan tidak sah.',
+            'customer_phone.required' => 'Sila masukkan nombor telefon yang digunakan semasa tempahan.',
         ]);
-        $reference = $validated['customer_reference'];
-        $key = 'customer-dashboard:'.hash('sha256', $reference.'|'.$request->ip());
+        $identifier = $validated['customer_reference'];
+        $key = 'customer-dashboard:'.hash('sha256', $identifier.'|'.$request->ip());
 
         if (RateLimiter::tooManyAttempts($key, 5)) {
-            $this->audit($request, null, $reference, null, 'LOCKED');
+            $this->audit($request, null, $identifier, null, 'LOCKED');
 
             return back()->withErrors([
                 'customer_reference' => 'Terlalu banyak cubaan. Sila cuba semula selepas 15 minit.',
@@ -42,22 +57,27 @@ class CustomerDashboardAccessController extends Controller
         }
 
         $phone = $phones->normalize($validated['customer_phone']);
-        $order = Order::query()->where('customer_reference', $reference)->first();
+        $order = Order::query()
+            ->where(function ($query) use ($identifier): void {
+                $query->where('customer_reference', $identifier)
+                    ->orWhere('order_id', $identifier);
+            })
+            ->first();
         $matches = $order !== null
             && filled($order->customer_phone)
             && hash_equals($phone, $phones->normalize((string) $order->customer_phone));
 
         if (! $matches) {
             RateLimiter::hit($key, 900);
-            $this->audit($request, $order, $reference, $phone, 'FAILED');
+            $this->audit($request, $order, $identifier, $phone, 'FAILED');
 
-            return back()->withInput(['customer_reference' => $reference])->withErrors([
-                'customer_reference' => 'Rujukan pelanggan atau nombor telefon tidak sepadan.',
+            return back()->withInput(['customer_reference' => $identifier])->withErrors([
+                'customer_reference' => 'ID Tempahan, rujukan pelanggan atau nombor telefon tidak sepadan.',
             ]);
         }
 
         RateLimiter::clear($key);
-        $this->audit($request, $order, $reference, $phone, 'SUCCESS');
+        $this->audit($request, $order, $identifier, $phone, 'SUCCESS');
         $access->establishFromVerifiedOrder($request, $order);
 
         return redirect()->route('orders.dashboard', ['orderId' => $order->order_id]);
@@ -77,13 +97,13 @@ class CustomerDashboardAccessController extends Controller
     private function audit(
         Request $request,
         ?Order $order,
-        string $reference,
+        string $identifier,
         ?string $phone,
         string $result,
     ): void {
         CustomerAccessLog::query()->create([
             'order_id' => $order?->id,
-            'attempted_reference' => $reference,
+            'attempted_reference' => $identifier,
             'phone_fingerprint' => $phone === null ? null : hash('sha256', $phone),
             'result' => $result,
             'ip_address' => $request->ip(),

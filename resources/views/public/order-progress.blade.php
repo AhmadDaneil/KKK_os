@@ -77,7 +77,7 @@
                         <strong>Progress &amp; proofing tempahan</strong>
                         <span>Lihat kemas kini dan proofing yang telah dikongsi untuk tempahan anda.</span>
                     </div>
-                    <a class="button button-primary" href="{{ ($canAccessOrder ?? false) ? route('orders.dashboard', ['orderId' => $orderId]) : route('orders.access.create') }}">Lihat progress</a>
+                    <a class="button button-primary" href="{{ ($canAccessOrder ?? false) ? route('orders.dashboard', ['orderId' => $orderId]) : route('orders.access.create', ['order_id' => $orderId]) }}">Lihat progress</a>
                 </div>
                 @if ($deposit)
                     <div class="deposit-public-status" data-status="{{ strtolower($deposit['status']) }}">
