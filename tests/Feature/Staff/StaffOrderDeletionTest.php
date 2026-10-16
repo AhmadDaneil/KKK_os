@@ -76,6 +76,58 @@ class StaffOrderDeletionTest extends TestCase
         $this->assertDatabaseHas('payment_transactions', ['id' => $payment->id]);
     }
 
+    public function test_incomplete_order_with_failed_billplz_creation_can_be_deleted(): void
+    {
+        $manager = $this->staff(User::ROLE_OM);
+        $order = $this->incompleteOrder();
+        $payment = PaymentTransaction::create([
+            'order_id' => $order->id,
+            'payment_type' => 'BOOKING_DEPOSIT',
+            'provider' => 'BILLPLZ',
+            'amount' => 50.00,
+            'currency' => 'MYR',
+            'status' => 'FAILED',
+            'metadata' => ['billplz' => ['checkout_status' => 'FAILED']],
+        ]);
+        $event = $payment->events()->create([
+            'event_type' => 'BILLPLZ_BILL_CREATION_FAILED',
+            'occurred_at' => now(),
+        ]);
+
+        $this->actingAs($manager)
+            ->delete(route('staff.orders.destroy', $order))
+            ->assertRedirect()
+            ->assertSessionHas('status');
+
+        $this->assertDatabaseMissing('orders', ['id' => $order->id]);
+        $this->assertDatabaseMissing('payment_transactions', ['id' => $payment->id]);
+        $this->assertDatabaseMissing('payment_events', ['id' => $event->id]);
+    }
+
+    public function test_failed_billplz_payment_with_a_provider_reference_cannot_be_deleted(): void
+    {
+        $manager = $this->staff(User::ROLE_OM);
+        $order = $this->incompleteOrder();
+        $payment = PaymentTransaction::create([
+            'order_id' => $order->id,
+            'payment_type' => 'BOOKING_DEPOSIT',
+            'provider' => 'BILLPLZ',
+            'provider_reference' => 'bill-with-possible-callback',
+            'amount' => 50.00,
+            'currency' => 'MYR',
+            'status' => 'FAILED',
+            'metadata' => ['billplz' => ['checkout_status' => 'FAILED']],
+        ]);
+
+        $this->actingAs($manager)
+            ->delete(route('staff.orders.destroy', $order))
+            ->assertRedirect()
+            ->assertSessionHasErrors('order_delete');
+
+        $this->assertDatabaseHas('orders', ['id' => $order->id]);
+        $this->assertDatabaseHas('payment_transactions', ['id' => $payment->id]);
+    }
+
     public function test_customer_service_designer_and_production_cannot_delete_orders(): void
     {
         foreach ([User::ROLE_CUSTOMER_SERVICE, User::ROLE_DESIGNER, User::ROLE_PRODUCTION] as $role) {
