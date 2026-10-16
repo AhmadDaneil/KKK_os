@@ -2,13 +2,14 @@
     'use strict';
 
     const DAY_NAMES = ['Ahad', 'Isnin', 'Selasa', 'Rabu', 'Khamis', 'Jumaat', 'Sabtu'];
+    const DAY_LABELS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
     const MONTH_NAMES = [
-        'Januari', 'Februari', 'Mac', 'April', 'Mei', 'Jun',
-        'Julai', 'Ogos', 'September', 'Oktober', 'November', 'Disember'
+        'January', 'February', 'March', 'April', 'May', 'June',
+        'July', 'August', 'September', 'October', 'November', 'December'
     ];
     const HIJRI_MONTHS = [
-        'Muharam', 'Safar', 'Rabiulawal', 'Rabiulakhir', 'Jamadilawal', 'Jamadilakhir',
-        'Rejab', 'Syaaban', 'Ramadan', 'Syawal', 'Zulkaedah', 'Zulhijjah'
+        'Muharram', 'Safar', 'Rabi al-Awwal', 'Rabi al-Thani', 'Jumada al-Awwal', 'Jumada al-Thani',
+        'Rajab', 'Shaban', 'Ramadan', 'Shawwal', 'Dhu al-Qadah', 'Dhu al-Hijjah'
     ];
     const JAKIM_CALENDAR_URL = document.currentScript?.dataset.calendarUrl || '';
 
@@ -137,24 +138,24 @@
         panel.className = 'date-picker-panel';
         panel.dataset.pickerPanel = '';
         panel.setAttribute('role', 'dialog');
-        panel.setAttribute('aria-label', 'Pilih tarikh majlis');
+        panel.setAttribute('aria-label', 'Select event date');
         panel.hidden = true;
 
         const header = document.createElement('div');
         header.className = 'date-picker-heading';
         const previous = button('‹', 'date-picker-nav');
-        previous.setAttribute('aria-label', 'Bulan sebelumnya');
+        previous.setAttribute('aria-label', 'Previous month');
         const title = document.createElement('strong');
         const next = button('›', 'date-picker-nav');
-        next.setAttribute('aria-label', 'Bulan seterusnya');
+        next.setAttribute('aria-label', 'Next month');
         header.append(previous, title, next);
 
         const weekdayHeader = document.createElement('div');
         weekdayHeader.className = 'date-picker-weekdays';
-        ['A', 'I', 'S', 'R', 'K', 'J', 'S'].forEach(function (day, index) {
+        ['S', 'M', 'T', 'W', 'T', 'F', 'S'].forEach(function (day, index) {
             const label = document.createElement('span');
             label.textContent = day;
-            label.title = DAY_NAMES[index];
+            label.title = DAY_LABELS[index];
             weekdayHeader.append(label);
         });
 
@@ -178,7 +179,7 @@
         }
 
         function updateDisplay() {
-            display.textContent = selected ? displayDate(selected) : 'Pilih tarikh';
+            display.textContent = selected ? displayDate(selected) : 'Select date';
             trigger.classList.toggle('has-value', Boolean(selected));
         }
 
@@ -201,7 +202,7 @@
                 const dateButton = button(String(day), 'date-picker-day');
                 const matchesDay = allowedWeekday === -1 || date.getDay() === allowedWeekday;
                 dateButton.disabled = !matchesDay;
-                dateButton.setAttribute('aria-label', DAY_NAMES[date.getDay()] + ', ' + displayDate(date));
+                dateButton.setAttribute('aria-label', DAY_LABELS[date.getDay()] + ', ' + displayDate(date));
 
                 if (selected && isoDate(selected) === isoDate(date)) {
                     dateButton.classList.add('is-selected');
@@ -226,8 +227,8 @@
             }
 
             note.textContent = allowedWeekday === -1
-                ? 'Pilih mana-mana tarikh. Hari akan diisi secara automatik.'
-                : 'Hanya tarikh hari ' + daySelect.value + ' boleh dipilih.';
+                ? 'Select any date. The day will be filled in automatically.'
+                : 'Only dates falling on ' + DAY_LABELS[allowedWeekday] + ' can be selected.';
             help.textContent = note.textContent;
         }
 
@@ -309,12 +310,12 @@
         panel.className = 'hijri-picker-panel';
         panel.dataset.pickerPanel = '';
         panel.setAttribute('role', 'dialog');
-        panel.setAttribute('aria-label', 'Pilih tarikh Hijri');
+        panel.setAttribute('aria-label', 'Select Hijri date');
         panel.hidden = true;
 
-        const option = button('Pilih Tarikh Miladi dahulu', 'hijri-date-option');
+        const option = button('Select a Gregorian date first', 'hijri-date-option');
         option.disabled = true;
-        const clear = button('Kosongkan', 'hijri-picker-clear');
+        const clear = button('Clear', 'hijri-picker-clear');
         panel.append(option, clear);
         picker.append(trigger, panel);
         input.insertAdjacentElement('afterend', picker);
@@ -324,7 +325,7 @@
         let requestId = 0;
 
         function updateDisplay() {
-            display.textContent = input.value || 'Pilih tarikh Hijri';
+            display.textContent = input.value || 'Select Hijri date';
             trigger.classList.toggle('has-value', Boolean(input.value));
         }
 
@@ -350,15 +351,15 @@
             option.disabled = true;
 
             if (!gregorianDate) {
-                option.textContent = 'Pilih Tarikh Miladi dahulu';
-                help.textContent = 'Pilih Tarikh Miladi dahulu untuk mendapatkan tarikh Hijri rasmi JAKIM.';
+                option.textContent = 'Select a Gregorian date first';
+                help.textContent = 'Select a Gregorian date first to get the official JAKIM Hijri date.';
                 clearSelection(!preserveExisting);
                 return;
             }
 
             const previousValue = input.value;
-            option.textContent = 'Memuatkan tarikh JAKIM...';
-            help.textContent = 'Mendapatkan tarikh Hijri rasmi daripada JAKIM e-Solat...';
+            option.textContent = 'Loading JAKIM date...';
+            help.textContent = 'Getting the official Hijri date from JAKIM e-Solat...';
 
             if (!preserveExisting) {
                 clearSelection(true);
@@ -379,7 +380,7 @@
                 const label = formatHijriDate(hijri);
                 option.textContent = label;
                 option.disabled = false;
-                help.textContent = 'Hanya ' + label + ', yang sepadan dengan ' + displayDate(gregorianDate) + ', boleh dipilih.';
+                help.textContent = 'Only ' + label + ', corresponding to ' + displayDate(gregorianDate) + ', can be selected.';
 
                 if (previousValue !== label) {
                     input.value = label;
@@ -389,9 +390,9 @@
             } catch (error) {
                 if (currentRequestId === requestId) {
                     availableHijriDate = null;
-                    option.textContent = 'Tarikh tidak tersedia';
+                    option.textContent = 'Date unavailable';
                     option.disabled = true;
-                    help.textContent = 'Kalendar rasmi JAKIM tidak dapat dicapai. Sila cuba lagi.';
+                    help.textContent = 'The official JAKIM calendar is unavailable. Please try again.';
                     clearSelection(Boolean(input.value));
                 }
             }

@@ -14,7 +14,7 @@ class DeleteIncompleteOrderService
         $order->refresh();
 
         if ($order->status !== 'DETAILS_INCOMPLETE') {
-            throw new RuntimeException('Hanya tempahan dengan maklumat belum lengkap boleh dipadam.');
+            throw new RuntimeException('Only orders with incomplete details can be deleted.');
         }
 
         $hasProtectedPayment = $order->payments()
@@ -23,7 +23,7 @@ class DeleteIncompleteOrderService
 
         if ($hasProtectedPayment) {
             throw new RuntimeException(
-                'Tempahan yang mempunyai rekod transaksi tidak boleh dipadam. Sila gunakan tindakan batal atau arkib.'
+                'Orders with payment transactions cannot be deleted. Please cancel or archive them instead.'
             );
         }
 

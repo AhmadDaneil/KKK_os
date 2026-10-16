@@ -39,14 +39,14 @@ class StaffBatchArtworkController extends Controller
 
         if ($jobs->count() !== 2) {
             return back()->withErrors([
-                'design_job' => 'Penghantaran bersama hanya tersedia apabila kedua-dua tugasan design pakej ditugaskan kepada anda.',
+                'design_job' => 'Combined submission is available only when both package design jobs are assigned to you.',
             ]);
         }
 
         foreach ($jobs as $job) {
             if ($job->status !== 'DESIGN_IN_PROGRESS') {
                 return back()->withErrors([
-                    'design_job' => 'Kedua-dua tugasan perlu berada dalam status reka bentuk sedang berjalan sebelum dihantar bersama.',
+                    'design_job' => 'Both jobs must be in the design-in-progress state before a combined submission.',
                 ]);
             }
 
@@ -54,7 +54,7 @@ class StaffBatchArtworkController extends Controller
 
             if (! $latestArtwork) {
                 return back()->withErrors([
-                    'design_job' => 'Muat naik hasil design terkini untuk pakej '.ucfirst(strtolower($job->side)).' sebelum menghantar kedua-duanya.',
+                    'design_job' => 'Upload the latest artwork for the '.($job->side === 'LELAKI' ? "groom's" : "bride's").' package before submitting both.',
                 ]);
             }
 
@@ -72,7 +72,7 @@ class StaffBatchArtworkController extends Controller
                 });
 
                 return back()->withErrors([
-                    'design_job' => 'Preview '. $missingLabels->join(' dan ').' untuk pakej '.ucfirst(strtolower($job->side)).' tiada dalam versi terkini. Muat naik versi design baharu bersama semua preview sebelum menghantar kedua-dua pakej.',
+                    'design_job' => 'Previews for '.$missingLabels->join(' and ').' are missing from the latest '.($job->side === 'LELAKI' ? "groom's" : "bride's").' package version. Upload a new design version with all previews before submitting both packages.',
                 ]);
             }
         }
@@ -91,7 +91,7 @@ class StaffBatchArtworkController extends Controller
             ]);
         }
 
-        return back()->with('status', 'Kedua-dua hasil design telah dihantar untuk semakan pelanggan.');
+        return back()->with('status', 'Both designs have been submitted for customer review.');
     }
 
     public function store(
@@ -113,10 +113,10 @@ class StaffBatchArtworkController extends Controller
             'artworks.*.banting_preview' => ['required', 'file', 'mimes:jpg,jpeg,png', 'max:20480'],
             'artworks.*.internal_note' => ['nullable', 'string', 'max:5000'],
         ], [
-            'artworks.*.banner_preview.required' => 'Muat naik preview banner untuk setiap pakej.',
-            'artworks.*.banting_preview.required' => 'Muat naik preview banting untuk setiap pakej.',
-            'artworks.*.banner_preview.uploaded' => 'Preview banner tidak berjaya dimuat naik. Pastikan saiz fail tidak melebihi 20 MB.',
-            'artworks.*.banting_preview.uploaded' => 'Preview banting tidak berjaya dimuat naik. Pastikan saiz fail tidak melebihi 20 MB.',
+            'artworks.*.banner_preview.required' => 'Upload a banner preview for each package.',
+            'artworks.*.banting_preview.required' => 'Upload a bunting preview for each package.',
+            'artworks.*.banner_preview.uploaded' => 'The banner preview could not be uploaded. Ensure the file is no larger than 20 MB.',
+            'artworks.*.banting_preview.uploaded' => 'The bunting preview could not be uploaded. Ensure the file is no larger than 20 MB.',
         ]);
 
         $jobIds = collect(array_keys($validated['artworks']))

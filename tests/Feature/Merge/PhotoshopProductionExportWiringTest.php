@@ -119,7 +119,7 @@ class PhotoshopProductionExportWiringTest extends TestCase
         $order->update(['jumlah_hantaran' => null]);
 
         $this->expectException(RuntimeException::class);
-        $this->expectExceptionMessage('requires Jumlah Hantaran');
+        $this->expectExceptionMessage('requires a gift amount');
 
         $this->serviceWithQuantity(200)->generate(
             $order->fresh(),

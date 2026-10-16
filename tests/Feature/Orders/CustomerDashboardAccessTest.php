@@ -89,7 +89,7 @@ class CustomerDashboardAccessTest extends TestCase
             'orderId' => $order->order_id,
         ]))
             ->assertOk()
-            ->assertDontSee('Semak Hasil Design')
+            ->assertDontSee('Review Design')
             ->assertDontSee(route('orders.artwork.review', [
                 'orderId' => $order->order_id,
             ]), false);
@@ -107,14 +107,14 @@ class CustomerDashboardAccessTest extends TestCase
 
         $this->get(route('orders.dashboard', ['orderId' => $order->order_id]))
             ->assertOk()
-            ->assertSee('Pakej Berasingan')
-            ->assertSee('Pakej Gabungan – Kad Lipatan')
-            ->assertSee('Majlis 1 – Pihak Perempuan')
-            ->assertSee('Majlis 2 – Pihak Lelaki')
+            ->assertSee('Separate Packages')
+            ->assertSee('Combined Package – Folded Card')
+            ->assertSee("Event 1 – Bride's Side")
+            ->assertSee("Event 2 – Groom's Side")
             ->assertSee('name="jumlah_hantaran"', false)
-            ->assertSee('Mockup Cek Hantaran percuma')
-            ->assertSee('Ibu Bapa Pengantin Perempuan')
-            ->assertSee('Ibu Bapa Pengantin Lelaki')
+            ->assertSee('complimentary ceremonial cheque mockup')
+            ->assertSee("Bride's Parents")
+            ->assertSee("Groom's Parents")
             ->assertSee('data-folded-second-design="true"', false)
             ->assertSee('data-preview-field="card_title_jawi"', false);
     }
@@ -127,7 +127,7 @@ class CustomerDashboardAccessTest extends TestCase
         ]);
 
         $this->assertContains(
-            'Jumlah Hantaran',
+            'Gift Amount',
             app(ValidateOrderCompletionService::class)->validate($twoPackage)['missing']
         );
 
@@ -139,7 +139,7 @@ class CustomerDashboardAccessTest extends TestCase
 
         $this->assertSame('10 dinar emas', $twoPackage->fresh()->jumlah_hantaran);
         $this->assertNotContains(
-            'Jumlah Hantaran',
+            'Gift Amount',
             app(ValidateOrderCompletionService::class)->validate($twoPackage->fresh())['missing']
         );
 
@@ -172,8 +172,8 @@ class CustomerDashboardAccessTest extends TestCase
             ->assertOk()
             ->assertSee('data-folded-card-preview="true"', false)
             ->assertSee('Halaman 1 · Kad Depan')
-            ->assertSee('Halaman 2 · Kad Belakang · Perempuan')
-            ->assertSee('Halaman 3 · Kad Belakang · Lelaki')
+            ->assertSee('Halaman 2 · Kad Belakang · Bride')
+            ->assertSee('Halaman 3 · Kad Belakang · Groom')
             ->assertSee('data-preview-folded-side="PEREMPUAN" data-preview-folded-face="front"', false)
             ->assertSee('data-preview-folded-side="PEREMPUAN" data-preview-folded-face="back"', false)
             ->assertSee('data-preview-folded-side="LELAKI" data-preview-folded-face="back"', false)
@@ -234,7 +234,7 @@ class CustomerDashboardAccessTest extends TestCase
             'orderId' => $order->order_id,
         ]))
             ->assertOk()
-            ->assertDontSee('Semak Hasil Design')
+            ->assertDontSee('Review Design')
             ->assertDontSee(route('orders.artwork.review', [
                 'orderId' => $order->order_id,
             ]), false);
@@ -307,10 +307,10 @@ class CustomerDashboardAccessTest extends TestCase
         ]))
             ->assertOk()
             ->assertSee('Live Card Preview')
-            ->assertSee('Menunggu Pengesahan Deposit')
+            ->assertSee('Awaiting Deposit Confirmation')
             ->assertSee('35%')
             ->assertSee('data-progress-tone="red"', false)
-            ->assertDontSee('Semak Hasil Design')
+            ->assertDontSee('Review Design')
             ->assertDontSee(route('orders.artwork.review', [
                 'orderId' => $order->order_id,
             ]), false);
@@ -366,9 +366,9 @@ class CustomerDashboardAccessTest extends TestCase
             })
             ->assertViewHas('progress', function ($progress) {
                 return $progress['percentage'] === 100
-                    && $progress['label'] === 'Tempahan Selesai';
+                    && $progress['label'] === 'Order Complete';
             })
-            ->assertSee('Maklumat Penghantaran')
+            ->assertSee('Shipping Information')
             ->assertSee('Pos Laju')
             ->assertSee('PL123456789MY');
     }
@@ -392,10 +392,10 @@ class CustomerDashboardAccessTest extends TestCase
         ]))
             ->assertOk()
             ->assertSee('Live Card Preview')
-            ->assertSee('Menunggu Proses Design')
+            ->assertSee('Awaiting Design')
             ->assertSee('40%')
             ->assertSee('data-progress-tone="yellow"', false)
-            ->assertDontSee('Semak Hasil Design')
+            ->assertDontSee('Review Design')
             ->assertDontSee(route('orders.artwork.review', [
                 'orderId' => $order->order_id,
             ]), false);

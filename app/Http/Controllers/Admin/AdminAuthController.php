@@ -36,7 +36,7 @@ class AdminAuthController extends Controller
             ]);
 
             throw ValidationException::withMessages([
-                'email' => 'Email atau kata laluan admin tidak sah.',
+                'email' => 'Invalid admin email or password.',
             ]);
         }
 
@@ -48,7 +48,7 @@ class AdminAuthController extends Controller
             $request->session()->regenerateToken();
 
             throw ValidationException::withMessages([
-                'email' => 'Akaun ini ialah akaun staff. Sila log masuk melalui halaman Staff Login.',
+                'email' => 'This is a staff account. Please use the staff login page.',
             ]);
         }
 

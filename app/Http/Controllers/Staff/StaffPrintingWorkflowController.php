@@ -45,7 +45,7 @@ class StaffPrintingWorkflowController extends Controller
 
         return back()->with(
             'status',
-            'Production berjaya dimulakan.'
+            'Production started successfully.'
         );
     }
 
@@ -79,7 +79,7 @@ class StaffPrintingWorkflowController extends Controller
 
         return back()->with(
             'status',
-            'Production berjaya diselesaikan.'
+            'Production completed successfully.'
         );
     }
 
@@ -164,13 +164,13 @@ class StaffPrintingWorkflowController extends Controller
 
         if ($request->expectsJson()) {
             return response()->json([
-                'message' => 'Progress production berjaya dimuat naik.',
+                'message' => 'Production progress uploaded successfully.',
                 'files' => $newFiles,
                 'progress_updated_at' => $printJob->fresh()->progress_updated_at?->toIso8601String(),
             ]);
         }
 
-        return back()->with('status', 'Progress production berjaya dimuat naik.');
+        return back()->with('status', 'Production progress uploaded successfully.');
     }
 
     public function showProgressFile(

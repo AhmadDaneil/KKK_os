@@ -34,9 +34,9 @@ class StaffDepositPaymentController extends Controller
         $validated = $request->validate([
             'amount' => ['required', 'numeric', 'decimal:0,2', 'min:0.01', 'max:9999999999.99'],
         ], [
-            'amount.required' => 'Sila masukkan jumlah bayaran pada resit.',
-            'amount.min' => 'Jumlah bayaran mestilah sekurang-kurangnya RM0.01.',
-            'amount.decimal' => 'Jumlah bayaran hanya boleh mempunyai sehingga dua tempat perpuluhan.',
+            'amount.required' => 'Please enter the payment amount shown on the receipt.',
+            'amount.min' => 'The payment amount must be at least RM0.01.',
+            'amount.decimal' => 'The payment amount may have up to two decimal places.',
         ]);
 
         DB::transaction(function () use ($request, $payment, $merge, $design, $financials, $validated) {
@@ -62,7 +62,7 @@ class StaffDepositPaymentController extends Controller
             ]);
         });
 
-        return back()->with('status', 'Deposit disahkan. Order kini sedia untuk proses design.');
+        return back()->with('status', 'Deposit confirmed. The order is ready for design.');
     }
 
     public function reject(Request $request, PaymentTransaction $payment): RedirectResponse
@@ -83,7 +83,7 @@ class StaffDepositPaymentController extends Controller
             $payment->order()->update(['booking_payment_status' => 'REJECTED']);
         });
 
-        return back()->with('status', 'Deposit ditolak dan customer boleh menghantar resit baharu.');
+        return back()->with('status', 'The deposit was rejected. The customer may submit a new receipt.');
     }
 
     private function ensureDeposit(PaymentTransaction $payment): void

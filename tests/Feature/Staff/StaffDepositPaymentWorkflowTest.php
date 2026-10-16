@@ -41,15 +41,15 @@ class StaffDepositPaymentWorkflowTest extends TestCase
         $this->get($accessUrl)->assertRedirect(route('orders.dashboard', ['orderId' => $order->order_id]));
         $this->get(route('orders.dashboard', ['orderId' => $order->order_id]))
             ->assertOk()
-            ->assertSee('Resit Ditolak')
+            ->assertSee('Receipt Rejected')
             ->assertSee('Jumlah pada resit tidak jelas.')
-            ->assertSee('Hantar Semula Resit');
+            ->assertSee('Resubmit Receipt');
         $this->post(route('public.orders.progress.lookup'), [
             'order_id' => $order->order_id,
             'customer_phone' => $order->customer_phone,
         ])
             ->assertOk()
-            ->assertSee('Resit Ditolak')
+            ->assertSee('Receipt Rejected')
             ->assertSee('Jumlah pada resit tidak jelas.');
         $this->post(route('orders.deposit-receipt.update', ['orderId' => $order->order_id]), [
             'deposit_receipt' => UploadedFile::fake()->image('resit-baharu.jpg'),
@@ -62,7 +62,7 @@ class StaffDepositPaymentWorkflowTest extends TestCase
             'deposit_receipt' => UploadedFile::fake()->image('resit-baharu-dua.jpg'),
         ])
             ->assertRedirect()
-            ->assertSessionHas('deposit_status', 'Resit baharu anda telah pun dihantar dan sedang menunggu semakan.');
+            ->assertSessionHas('deposit_status', 'Your new receipt has been submitted and is awaiting review.');
 
         $this->assertSame('PENDING', $payment->fresh()->status);
         $this->assertDatabaseCount('payment_events', 2);

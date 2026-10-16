@@ -78,24 +78,24 @@ class StaffInvoiceController extends Controller
     private function terms(): array
     {
         return [
-            'Proses Tempahan' => [
-                'Pelanggan mengesahkan pakej, kuantiti dan butiran tempahan bersama PIC.',
-                'Bayaran deposit diperlukan untuk mengesahkan tempahan. Tempahan diproses selepas bayaran diterima.',
-                'Draf reka bentuk akan dihantar kepada pelanggan untuk semakan.',
-                'Pelanggan bertanggungjawab menyemak draf termasuk ejaan nama, tarikh, masa, alamat dan maklumat lain.',
-                'Selepas pengesahan akhir diterima, tempahan dihantar untuk proses cetakan atau penyediaan.',
-                'Baki bayaran perlu dijelaskan sepenuhnya sebelum penghantaran atau pengambilan tempahan.',
-                'Tempahan dihantar mengikut kaedah penghantaran yang telah dipilih.',
+            'Order Process' => [
+                'The customer confirms the package, quantity and order details with the person in charge.',
+                'A deposit is required to confirm the order. Processing begins after payment is received.',
+                'A design proof will be prepared for review.',
+                'The customer is responsible for checking all submitted names, dates, times, addresses and other details.',
+                'After final confirmation, the order proceeds to printing or preparation.',
+                'The remaining balance must be paid in full before delivery or collection.',
+                'The order is delivered using the selected fulfilment method.',
             ],
-            'Terma & Syarat' => [
-                'Deposit yang telah dibayar tidak akan dikembalikan sekiranya tempahan dibatalkan oleh pelanggan.',
-                'Pihak syarikat tidak bertanggungjawab atas kesilapan selepas draf disahkan oleh pelanggan.',
-                'Sebarang pindaan selepas pengesahan akhir mungkin dikenakan caj tambahan.',
-                'Tempoh siap tempahan bergantung kepada tarikh pengesahan draf dan penerimaan bayaran.',
-                'Sedikit perbezaan warna antara paparan skrin dan hasil cetakan adalah perkara biasa.',
-                'Pihak syarikat tidak bertanggungjawab atas kelewatan atau kerosakan oleh pihak kurier, namun akan membantu membuat tuntutan.',
-                'Semua bayaran hendaklah dibuat melalui saluran rasmi KKK OS yang diberikan untuk tempahan.',
-                'Dengan membuat bayaran, pelanggan dianggap bersetuju dengan semua terma dan syarat ini.',
+            'Terms & Conditions' => [
+                'Deposits are non-refundable if the customer cancels the order.',
+                'The company is not responsible for errors after the customer confirms the submitted details.',
+                'Changes after final confirmation may incur additional charges.',
+                'Completion time depends on final confirmation and receipt of payment.',
+                'Slight colour differences between the screen and the printed product are normal.',
+                'The company is not responsible for courier delays or damage, but will assist with claims.',
+                'All payments must be made through the official KKK OS channels provided for the order.',
+                'By making payment, the customer agrees to these terms and conditions.',
             ],
         ];
     }

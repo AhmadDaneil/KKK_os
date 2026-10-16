@@ -1,10 +1,10 @@
 <!doctype html>
-<html lang="ms" class="brand-customer-page">
+<html lang="en" class="brand-customer-page">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="referrer" content="no-referrer">
-    <title>Semakan Hasil Design - {{ $order->order_id }}</title>
+    <title>Design Review - {{ $order->order_id }}</title>
     <link rel="stylesheet" href="{{ asset('css/artwork-review.css') }}?v={{ filemtime(public_path('css/artwork-review.css')) }}">
     <link rel="stylesheet" href="{{ asset('css/customer-theme.css') }}?v={{ filemtime(public_path('css/customer-theme.css')) }}">
     <link rel="stylesheet" href="{{ asset('css/customer-service.css') }}?v={{ filemtime(public_path('css/customer-service.css')) }}">
@@ -13,30 +13,30 @@
 <body class="brand-customer-flow">
 @php
     $orderStatusLabels = [
-        'READY_FOR_DESIGN' => 'Menunggu Proses Design',
-        'DESIGN_IN_PROGRESS' => 'Hasil Design Sedang Disediakan',
-        'DESIGN_READY' => 'Hasil Design Sedia Untuk Semakan',
-        'CORRECTION_REQUESTED' => 'Pembetulan Sedang Diproses',
-        'DESIGN_APPROVED' => 'Hasil Design Telah Diluluskan',
-        'BALANCE_PAYMENT_PENDING' => 'Menunggu Bayaran Baki',
-        'PAID' => 'Bayaran Selesai',
-        'PRINTING' => 'Dalam Proses Cetakan',
-        'PRINTED' => 'Cetakan Selesai',
-        'PACKING' => 'Dalam Proses Pembungkusan',
-        'PACKED' => 'Pembungkusan Selesai',
-        'READY_FOR_FULFILMENT' => 'Sedia Untuk Penghantaran / Pengambilan',
-        'SHIPPED' => 'Telah Dihantar',
-        'COMPLETED' => 'Selesai',
-        'CANCELLED' => 'TELAH DIBATALKAN',
-        'ARCHIVED' => 'Diarkibkan',
+        'READY_FOR_DESIGN' => 'Awaiting Design',
+        'DESIGN_IN_PROGRESS' => 'Design in Progress',
+        'DESIGN_READY' => 'Design Ready for Review',
+        'CORRECTION_REQUESTED' => 'Corrections in Progress',
+        'DESIGN_APPROVED' => 'Design Approved',
+        'BALANCE_PAYMENT_PENDING' => 'Awaiting Balance Payment',
+        'PAID' => 'Payment Complete',
+        'PRINTING' => 'Printing in Progress',
+        'PRINTED' => 'Printing Complete',
+        'PACKING' => 'Packing in Progress',
+        'PACKED' => 'Packing Complete',
+        'READY_FOR_FULFILMENT' => 'Ready for Delivery / Pickup',
+        'SHIPPED' => 'Shipped',
+        'COMPLETED' => 'Completed',
+        'CANCELLED' => 'CANCELLED',
+        'ARCHIVED' => 'Archived',
     ];
 
     $jobStatusLabels = [
-        'READY_FOR_DESIGN' => 'Menunggu Pereka',
-        'DESIGN_IN_PROGRESS' => 'Sedang Disediakan',
-        'DESIGN_READY' => 'Sedia Untuk Semakan',
-        'CORRECTION_REQUESTED' => 'Pembetulan Diminta',
-        'DESIGN_APPROVED' => 'Diluluskan',
+        'READY_FOR_DESIGN' => 'Awaiting Designer',
+        'DESIGN_IN_PROGRESS' => 'In Progress',
+        'DESIGN_READY' => 'Ready for Review',
+        'CORRECTION_REQUESTED' => 'Correction Requested',
+        'DESIGN_APPROVED' => 'Approved',
     ];
 
     $isTerminalOrder = in_array($order->status, ['CANCELLED', 'ARCHIVED'], true);
@@ -45,22 +45,22 @@
 <div class="page-shell">
     <header class="page-header">
         <div>
-            <p class="eyebrow">King Kad Kahwin</p>
-            <h1>Semakan Hasil Design</h1>
+            <p class="eyebrow">King Wedding Card</p>
+            <h1>Design Review</h1>
             <p class="header-copy">
-                Sila semak hasil design bagi setiap pakej dengan teliti sebelum meluluskan atau meminta pembetulan.
+                Please review each package's design carefully before approving it or requesting changes.
             </p>
         </div>
 
         <div class="order-summary">
             <div>
-                <span class="summary-label">ID Tempahan</span>
+                <span class="summary-label">Order ID</span>
                 <strong>{{ $order->order_id }}</strong>
             </div>
             <div>
                 <span class="summary-label">Status</span>
                 <span class="status-badge status-{{ strtolower(str_replace('_', '-', $order->status)) }}">
-                    {{ $orderStatusLabels[$order->status] ?? 'Sedang Diproses' }}
+                    {{ $orderStatusLabels[$order->status] ?? 'In Progress' }}
                 </span>
             </div>
         </div>
@@ -74,7 +74,7 @@
 
     @if ($errors->any())
         <div class="alert alert-error" role="alert">
-            <strong>Tindakan tidak dapat dihantar.</strong>
+            <strong>Could not submit the action.</strong>
             <ul>
                 @foreach ($errors->all() as $error)
                     <li>{{ $error }}</li>
@@ -85,8 +85,8 @@
 
     @if ($isTerminalOrder)
         <div class="alert alert-neutral">
-            Tempahan ini telah {{ $order->status === 'CANCELLED' ? 'dibatalkan' : 'diarkibkan' }}.
-            Tiada tindakan baharu terhadap hasil design boleh dibuat.
+            This order has been {{ $order->status === 'CANCELLED' ? 'cancelled' : 'archived' }}.
+            No further design actions can be taken.
         </div>
     @endif
 
@@ -112,29 +112,29 @@
             <section class="artwork-card" id="design-job-{{ $designJob->id }}">
                 <div class="card-heading">
                     <div>
-                        <p class="side-label">Pakej</p>
-                        <h2>{{ ucfirst(strtolower($designJob->side)) }}</h2>
+                        <p class="side-label">Package</p>
+                        <h2>{{ $designJob->side === 'LELAKI' ? 'Groom' : 'Bride' }}</h2>
                     </div>
 
                     <span class="job-status job-status-{{ strtolower(str_replace('_', '-', $designJob->status)) }}">
-                        {{ $jobStatusLabels[$designJob->status] ?? 'Sedang Diproses' }}
+                        {{ $jobStatusLabels[$designJob->status] ?? 'In Progress' }}
                     </span>
                 </div>
 
                 @if ($latestArtwork)
                     <div class="artwork-meta">
                         <div>
-                            <span class="meta-label">Versi Hasil Design</span>
+                            <span class="meta-label">Design Version</span>
                             <strong>v{{ $latestArtwork->version_number }}</strong>
                         </div>
-                        <span class="artwork-preview-count">{{ count($previewFiles) }} preview untuk disemak</span>
+                        <span class="artwork-preview-count">{{ count($previewFiles) }} previews to review</span>
                     </div>
 
                     @if ($canPreview)
-                        <section class="artwork-preview-section" aria-label="Preview artwork pakej {{ strtolower($designJob->side) }}">
+                        <section class="artwork-preview-section" aria-label="Package artwork preview {{ $designJob->side === 'LELAKI' ? 'groom' : 'bride' }}">
                             <div class="artwork-preview-heading">
-                                <div><span class="meta-label">Semakan visual</span><h3>Preview Artwork</h3></div>
-                                <p>Setiap pakej termasuk banner dan banting yang menggunakan nama singkatan serta tema design kad yang sama. Klik mana-mana gambar untuk melihat saiz lebih besar.</p>
+                                <div><span class="meta-label">Visual review</span><h3>Preview Artwork</h3></div>
+                                <p>Each package includes a banner and bunting using the same short names and card design theme. Select any image to view it larger.</p>
                             </div>
                             <div class="artwork-preview-gallery">
                                 @foreach ($previewFiles as $previewIndex => $previewFile)
@@ -144,8 +144,8 @@
                                             ->filter(fn ($file) => strtoupper($file['artwork_type'] ?? 'CARD') === $previewType)->count();
                                         $previewLabel = match ($previewType) {
                                             'BANNER' => 'banner',
-                                            'BANTING' => 'banting',
-                                            default => 'Kad Kahwin'.($sameTypePosition > 1 ? ' '.$sameTypePosition : ''),
+                                            'BANTING' => 'bunting',
+                                            default => 'Wedding Card'.($sameTypePosition > 1 ? ' '.$sameTypePosition : ''),
                                         };
                                         $previewUrl = route('orders.artwork.preview', [
                                             'orderId' => $order->order_id,
@@ -154,9 +154,9 @@
                                         ]);
                                     @endphp
                                     <figure class="artwork-preview-item artwork-preview-item--{{ strtolower($previewType) }}">
-                                        <figcaption><strong>{{ $previewLabel }}</strong><span>Pihak {{ ucfirst(strtolower($designJob->side)) }}</span></figcaption>
-                                        <a href="{{ $previewUrl }}" target="_blank" rel="noopener noreferrer" aria-label="Buka preview {{ strtolower($previewLabel) }} dalam saiz penuh">
-                                            <img src="{{ $previewUrl }}" alt="Preview {{ strtolower($previewLabel) }} pihak {{ strtolower($designJob->side) }}" loading="lazy">
+                                        <figcaption><strong>{{ $previewLabel }}</strong><span>{{ $designJob->side === 'LELAKI' ? "Groom's Side" : "Bride's Side" }}</span></figcaption>
+                                        <a href="{{ $previewUrl }}" target="_blank" rel="noopener noreferrer" aria-label="Open preview {{ strtolower($previewLabel) }} at full size">
+                                            <img src="{{ $previewUrl }}" alt="Preview {{ strtolower($previewLabel) }} for the {{ $designJob->side === 'LELAKI' ? 'groom' : 'bride' }}" loading="lazy">
                                         </a>
                                     </figure>
                                 @endforeach
@@ -166,23 +166,23 @@
                 @else
                     <div class="empty-state customer-empty-state">
                         <span class="customer-empty-icon" aria-hidden="true">✦</span>
-                        <strong>Hasil design belum sedia untuk dilihat.</strong>
-                        <p>Pasukan design sedang menyiapkan hasil design untuk pakej ini. Kami akan mengemas kini status sebaik sahaja ia sedia untuk semakan.</p>
+                        <strong>The design is not ready to view yet.</strong>
+                        <p>Our design team is preparing this package. We will update its status when it is ready for review.</p>
                     </div>
                 @endif
 
                 @if ($correctionPayment?->status === 'PENDING')
                     <div class="state-panel state-warning">
-                        <h3>Menunggu pengesahan bayaran RM10</h3>
-                        <p>Permintaan diterima. Pembetulan akan dimulakan selepas bayaran disahkan.</p>
+                        <h3>Awaiting RM10 Payment Confirmation</h3>
+                        <p>Request received. Corrections will begin after payment confirmation.</p>
                         <p>{{ $correctionPayment->metadata['correction_comment'] }}</p>
                     </div>
                 @elseif ($designJob->status === 'DESIGN_READY' && ! $isTerminalOrder)
                     <div class="review-actions">
                         <div class="action-panel approve-panel">
-                            <h3>Hasil design sudah betul?</h3>
+                            <h3>Is the design correct?</h3>
                             <p>
-                                Pastikan nama, tarikh, masa, alamat, nombor telefon dan semua maklumat pada hasil design telah diperiksa.
+                                Check all names, dates, times, addresses, phone numbers and other details on the design.
                             </p>
 
                             <form
@@ -192,30 +192,30 @@
                                     'designJobId' => $designJob->id,
                                 ]) }}"
                                 class="js-artwork-confirmation-form"
-                                data-confirm-title="Luluskan hasil design {{ ucfirst(strtolower($designJob->side)) }}?"
-                                data-confirm-message="Hasil design ini akan dianggap betul dan diteruskan ke proses pembayaran baki serta cetakan."
-                                data-confirm-button="Ya, luluskan hasil design"
+                                data-confirm-title="Approve {{ $designJob->side === 'LELAKI' ? "groom's" : "bride's" }} design?"
+                                data-confirm-message="This design will be considered correct and the order will proceed to balance payment and printing."
+                                data-confirm-button="Yes, approve design"
                             >
                                 @csrf
                                 <button type="submit" class="button button-primary">
-                                    Luluskan Hasil Design
+                                    Approve Design
                                 </button>
                             </form>
                         </div>
 
                         <div class="action-panel correction-panel">
-                            <h3>Perlu pembetulan?</h3>
-                            <p>Nyatakan pembetulan dengan jelas supaya designer boleh membuat perubahan dengan tepat.</p>
-                            <p class="correction-fee-warning">Setiap permintaan pembetulan dikenakan caj RM10. Nyatakan semua perubahan dalam satu permintaan.</p>
+                            <h3>Need corrections?</h3>
+                            <p>Describe corrections clearly so the designer can make the right changes.</p>
+                            <p class="correction-fee-warning">Each correction request incurs an RM10 charge. Include all changes in one request.</p>
                             @if ($correctionPayment?->status === 'FAILED')
-                                <div class="alert alert-error">Resit ditolak: {{ $correctionPayment->metadata['rejection_reason'] ?? '' }}. Sila hantar semula resit yang betul.</div>
+                                <div class="alert alert-error">Receipt rejected: {{ $correctionPayment->metadata['rejection_reason'] ?? '' }}. Please resubmit a valid receipt.</div>
                             @endif
 
                             <form
                                 class="correction-payment-form js-artwork-confirmation-form"
-                                data-confirm-title="Hantar permintaan pembetulan?"
-                                data-confirm-message="Permintaan, caj RM10 dan bukti pembayaran akan dihantar untuk semakan. Pastikan semua pembetulan telah dinyatakan dengan jelas."
-                                data-confirm-button="Ya, hantar pembetulan"
+                                data-confirm-title="Submit a correction request?"
+                                data-confirm-message="Your request, RM10 charge and payment proof will be submitted for review. Make sure all corrections are clearly stated."
+                                data-confirm-button="Yes, submit corrections"
                                 data-confirm-tone="danger"
                                 enctype="multipart/form-data"
                                 method="POST"
@@ -227,76 +227,76 @@
                                 @csrf
                                 <input type="hidden" name="correction_job_id" value="{{ $designJob->id }}">
                                 <fieldset class="correction-assets">
-                                    <legend>Hasil design yang perlu dibetulkan</legend>
-                                    <label><input type="checkbox" name="affected_assets[]" value="CARD" checked> Kad Kahwin</label>
+                                    <legend>Design items requiring correction</legend>
+                                    <label><input type="checkbox" name="affected_assets[]" value="CARD" checked> Wedding Card</label>
                                     @if (collect($latestArtwork?->preview_files ?? [])->contains(fn ($file) => data_get($file, 'artwork_type') === 'BANNER'))
                                         <label><input type="checkbox" name="affected_assets[]" value="BANNER"> Banner</label>
                                     @endif
                                     @if (collect($latestArtwork?->preview_files ?? [])->contains(fn ($file) => data_get($file, 'artwork_type') === 'BANTING'))
-                                        <label><input type="checkbox" name="affected_assets[]" value="BANTING"> Banting</label>
+                                        <label><input type="checkbox" name="affected_assets[]" value="BANTING"> Bunting</label>
                                     @endif
                                 </fieldset>
-                                <label for="correction-{{ $designJob->id }}">Maklumat pembetulan</label>
+                                <label for="correction-{{ $designJob->id }}">Correction details</label>
                                 <textarea
                                     id="correction-{{ $designJob->id }}"
                                     name="correction_comment"
                                     rows="5"
                                     maxlength="5000"
                                     required
-                                    placeholder="Contoh: Sila betulkan ejaan nama pengantin perempuan daripada ... kepada ..."
+                                    placeholder="Example: Please correct the bride's name from ... to ..."
                                 >{{ (int) old('correction_job_id') === $designJob->id ? old('correction_comment') : ($correctionPayment?->status === 'FAILED' ? $correctionPayment->metadata['correction_comment'] : '') }}</textarea>
-                                <p class="field-help">Maksimum 5,000 aksara.</p>
+                                <p class="field-help">Maximum 5,000 characters.</p>
 
                                 <label class="correction-fee-consent">
                                     <input type="checkbox" name="correction_fee_agreed" value="1" required aria-controls="correction-payment-{{ $designJob->id }}" @checked((int) old('correction_job_id') === $designJob->id && old('correction_fee_agreed'))>
-                                    <span>Saya bersetuju dengan caj pembetulan RM10.</span>
+                                    <span>I agree to the RM10 correction charge.</span>
                                 </label>
                                 <div class="correction-payment-details" id="correction-payment-{{ $designJob->id }}">
-                                    <strong>Bayaran pembetulan: RM10</strong>
-                                    <img class="correction-qr" src="{{ asset(config('kingkadkahwin.deposit.qr_image')) }}" alt="QR pembayaran pembetulan RM10">
-                                    <label for="correction-receipt-{{ $designJob->id }}">Lampirkan resit pembayaran</label>
-                                    <p class="field-help">JPG, JPEG, PNG, WEBP atau PDF. Maksimum 10 MB.</p>
+                                    <strong>Correction payment: RM10</strong>
+                                    <img class="correction-qr" src="{{ asset(config('kingkadkahwin.deposit.qr_image')) }}" alt="RM10 correction payment QR code">
+                                    <label for="correction-receipt-{{ $designJob->id }}">Attach payment receipt</label>
+                                    <p class="field-help">JPG, JPEG, PNG, WEBP or PDF. Maximum 10 MB.</p>
                                     <input id="correction-receipt-{{ $designJob->id }}" type="file" name="correction_receipt" accept=".jpg,.jpeg,.png,.webp,.pdf" required>
-                                    <button type="button" class="button button-secondary correction-file-cancel" aria-controls="correction-receipt-{{ $designJob->id }}" hidden>Batal</button>
+                                    <button type="button" class="button button-secondary correction-file-cancel" aria-controls="correction-receipt-{{ $designJob->id }}" hidden>Cancel</button>
                                 </div>
 
                                 <button type="submit" class="button button-danger-outline">
-                                    Hantar Permintaan Pembetulan
+                                    Submit Correction Request
                                 </button>
                             </form>
                         </div>
                     </div>
                 @elseif ($designJob->status === 'CORRECTION_REQUESTED')
                     <div class="state-panel state-warning">
-                        <h3>Pembetulan telah diminta</h3>
-                        <p>Pereka sedang membuat pembetulan. Versi baharu hasil design akan tersedia selepas siap.</p>
+                        <h3>Corrections requested</h3>
+                        <p>The designer is making corrections. A new design version will be available when complete.</p>
                     </div>
                 @elseif ($designJob->status === 'DESIGN_APPROVED')
                     <div class="state-panel state-success">
-                        <h3>Hasil design telah diluluskan</h3>
-                        <p>Tiada tindakan lanjut diperlukan untuk pakej ini.</p>
+                        <h3>Design approved</h3>
+                        <p>No further action is required for this package.</p>
                     </div>
                 @elseif ($designJob->status === 'DESIGN_IN_PROGRESS')
                     <div class="state-panel state-neutral">
-                        <h3>Hasil design sedang disediakan</h3>
-                        <p>Sila tunggu sehingga pereka menandakan hasil design sebagai sedia untuk semakan.</p>
+                        <h3>Design in progress</h3>
+                        <p>Please wait until the designer marks the design ready for review.</p>
                     </div>
                 @elseif ($designJob->status === 'READY_FOR_DESIGN')
                     <div class="state-panel state-neutral">
-                        <h3>Menunggu proses design</h3>
-                        <p>Hasil design untuk pakej ini belum mula diproses.</p>
+                        <h3>Awaiting design</h3>
+                        <p>Design work for this package has not started yet.</p>
                     </div>
                 @endif
 
                 @if ($correctionHistory->isNotEmpty())
                     <div class="history-panel">
-                        <h3>Sejarah Pembetulan</h3>
+                        <h3>Correction History</h3>
 
                         <div class="history-list">
                             @foreach ($correctionHistory as $action)
                                 <article class="history-item">
                                     <div class="history-item-header">
-                                        <strong>Permintaan pembetulan</strong>
+                                        <strong>Correction request</strong>
                                         @if ($action->acted_at)
                                             <time datetime="{{ $action->acted_at->toIso8601String() }}">
                                                 {{ $action->acted_at->timezone(config('app.display_timezone'))->format('d/m/Y H:i') }}
@@ -316,8 +316,8 @@
         @empty
             <div class="empty-state customer-empty-state page-empty-state">
                 <span class="customer-empty-icon" aria-hidden="true">✦</span>
-                <strong>Belum ada hasil design untuk disemak.</strong>
-                <p>Tempahan anda masih menunggu proses design. Anda tidak perlu membuat apa-apa buat masa ini.</p>
+                <strong>No designs are available for review yet.</strong>
+                <p>Your order is awaiting design. No action is needed from you right now.</p>
             </div>
         @endforelse
     </main>
@@ -327,17 +327,17 @@
             class="button button-secondary"
             href="{{ route('public.orders.progress', ['order_id' => $order->order_id]) }}"
         >
-            &larr; Kembali ke Semak Progress
+            &larr; Back to Order Tracking
         </a>
     </div>
 </div>
 <dialog id="artwork-confirmation-dialog" class="artwork-confirmation-dialog" aria-labelledby="artwork-confirmation-title">
     <div class="artwork-confirmation-icon" aria-hidden="true">?</div>
-    <h2 id="artwork-confirmation-title">Sahkan tindakan?</h2>
+    <h2 id="artwork-confirmation-title">Confirm action?</h2>
     <p id="artwork-confirmation-message"></p>
     <div class="artwork-confirmation-actions">
-        <button id="cancel-artwork-confirmation" type="button">Tidak, kembali</button>
-        <button id="confirm-artwork-action" type="button">Ya, teruskan</button>
+        <button id="cancel-artwork-confirmation" type="button">No, go back</button>
+        <button id="confirm-artwork-action" type="button">Yes, continue</button>
     </div>
 </dialog>
 <script>
@@ -400,7 +400,7 @@
         if (formSubmit) {
             formSubmit.disabled = true;
             formSubmit.classList.add('is-loading');
-            formSubmit.textContent = 'Sedang dihantar...';
+            formSubmit.textContent = 'Submitting...';
         }
         pendingArtworkForm.submit();
     });

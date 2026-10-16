@@ -15,7 +15,7 @@ class CreateBillplzBalancePaymentService
     {
         if (! config('services.billplz.enabled')) {
             throw ValidationException::withMessages([
-                'billplz' => 'Bayaran Billplz belum diaktifkan.',
+                'billplz' => 'Billplz payments are not enabled.',
             ]);
         }
 
@@ -27,21 +27,21 @@ class CreateBillplzBalancePaymentService
 
             if (! in_array($lockedOrder->status, ['DESIGN_APPROVED', 'BALANCE_PENDING'], true)) {
                 throw ValidationException::withMessages([
-                    'billplz' => 'Bayaran baki hanya boleh dibuat selepas artwork diluluskan.',
+                    'billplz' => 'The balance can only be paid after the artwork is approved.',
                 ]);
             }
 
             $snapshot = $lockedOrder->pricingSnapshot()->lockForUpdate()->first();
             if ($snapshot === null || $snapshot->currency !== 'MYR') {
                 throw ValidationException::withMessages([
-                    'billplz' => 'Snapshot harga tempahan tidak tersedia untuk bayaran baki.',
+                    'billplz' => 'The order price snapshot is unavailable for the balance payment.',
                 ]);
             }
 
             $amount = (string) $snapshot->outstanding_amount;
             if ($this->toSen($amount) <= 0) {
                 throw ValidationException::withMessages([
-                    'billplz' => 'Tiada baki bayaran untuk tempahan ini.',
+                    'billplz' => 'There is no remaining balance for this order.',
                 ]);
             }
 
@@ -56,13 +56,13 @@ class CreateBillplzBalancePaymentService
             if ($existing !== null) {
                 if ($existing->status === 'PAID') {
                     throw ValidationException::withMessages([
-                        'billplz' => 'Bayaran baki tempahan ini telah disahkan.',
+                        'billplz' => 'The balance payment for this order has already been confirmed.',
                     ]);
                 }
 
                 if ($existing->provider !== 'BILLPLZ') {
                     throw ValidationException::withMessages([
-                        'billplz' => 'Bayaran baki sedia ada sedang menunggu semakan. Sila gunakan transaksi tersebut sahaja.',
+                        'billplz' => 'An existing balance payment is awaiting review. Please use that transaction.',
                     ]);
                 }
 
@@ -76,7 +76,7 @@ class CreateBillplzBalancePaymentService
                 }
 
                 throw ValidationException::withMessages([
-                    'billplz' => 'Bil sedang disediakan. Sila cuba sambung semula sebentar lagi.',
+                    'billplz' => 'The bill is being prepared. Please resume shortly.',
                 ]);
             }
 
@@ -141,7 +141,7 @@ class CreateBillplzBalancePaymentService
             });
 
             throw ValidationException::withMessages([
-                'billplz' => 'Pembayaran belum dapat dimulakan. Sila cuba lagi.',
+                'billplz' => 'The payment could not be started. Please try again.',
             ]);
         }
 
@@ -174,7 +174,7 @@ class CreateBillplzBalancePaymentService
     {
         if (! preg_match('/^(0|[1-9]\d*)\.([0-9]{2})$/', $amount, $matches)) {
             throw ValidationException::withMessages([
-                'billplz' => 'Amaun baki dalam snapshot harga tidak sah.',
+                'billplz' => 'The balance amount in the price snapshot is invalid.',
             ]);
         }
 

@@ -1,6 +1,6 @@
 <script>
     (() => {
-        const requiredMessage = 'Sila isi ruangan ini.';
+        const requiredMessage = 'Please fill out this field.';
 
         document.addEventListener('invalid', (event) => {
             const field = event.target;
@@ -9,21 +9,21 @@
                 if (field.validity.valueMissing) {
                     field.setCustomValidity(requiredMessage);
                 } else if (field.validity.typeMismatch && field.type === 'email') {
-                    field.setCustomValidity('Sila masukkan alamat e-mel yang sah.');
+                    field.setCustomValidity('Please enter a valid email address.');
                 } else if (field.validity.typeMismatch) {
-                    field.setCustomValidity('Sila masukkan format yang sah.');
+                    field.setCustomValidity('Please enter a valid format.');
                 } else if (field.validity.tooShort) {
-                    field.setCustomValidity(`Sila masukkan sekurang-kurangnya ${field.minLength} aksara.`);
+                    field.setCustomValidity(`Please enter at least ${field.minLength} characters.`);
                 } else if (field.validity.tooLong) {
-                    field.setCustomValidity(`Sila masukkan tidak lebih daripada ${field.maxLength} aksara.`);
+                    field.setCustomValidity(`Please enter no more than ${field.maxLength} characters.`);
                 } else if (field.validity.rangeUnderflow || field.validity.rangeOverflow) {
-                    field.setCustomValidity('Sila masukkan nilai dalam julat yang sah.');
+                    field.setCustomValidity('Please enter a value within the valid range.');
                 } else if (field.validity.patternMismatch) {
                     field.setCustomValidity(field.type === 'tel'
-                        ? 'Sila masukkan nombor telefon 10 atau 11 digit bermula dengan 01.'
-                        : 'Sila masukkan format yang sah.');
+                        ? 'Please enter a 10- or 11-digit phone number starting with 01.'
+                        : 'Please enter a valid format.');
                 } else if (field.validity.badInput || field.validity.stepMismatch) {
-                    field.setCustomValidity('Sila masukkan nilai yang sah.');
+                    field.setCustomValidity('Please enter a valid value.');
                 }
             }
         }, true);

@@ -1,10 +1,10 @@
 <dialog id="logout-confirmation-dialog" class="logout-confirmation-dialog" aria-labelledby="logout-confirmation-title">
     <div class="logout-confirmation-icon" aria-hidden="true">?</div>
-    <h2 id="logout-confirmation-title">Log keluar sekarang?</h2>
-    <p>Pastikan semua kerja yang sedang dibuat telah disimpan sebelum anda keluar.</p>
+    <h2 id="logout-confirmation-title">Log out now?</h2>
+    <p>Make sure you have saved your work before logging out.</p>
     <div class="logout-confirmation-actions">
-        <button id="cancel-logout" type="button">Tidak, kekal</button>
-        <button id="confirm-logout" class="is-danger" type="button">Ya, log keluar</button>
+        <button id="cancel-logout" type="button">No, stay here</button>
+        <button id="confirm-logout" class="is-danger" type="button">Yes, log out</button>
     </div>
 </dialog>
 
@@ -39,7 +39,7 @@
             }
 
             confirmButton.disabled = true;
-            confirmButton.textContent = 'Sedang log keluar...';
+            confirmButton.textContent = 'Logging out...';
             pendingLogoutForm.submit();
         });
     });

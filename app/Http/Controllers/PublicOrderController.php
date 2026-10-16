@@ -76,8 +76,8 @@ class PublicOrderController extends Controller
         $validated = $request->validate([
             'order_id' => ['required', 'string', 'max:32', 'regex:/^KKK-[A-Za-z0-9-]+$/'],
         ], [
-            'order_id.required' => 'Sila masukkan Order ID anda.',
-            'order_id.regex' => 'Format Order ID tidak sah.',
+            'order_id.required' => 'Please enter your order ID.',
+            'order_id.regex' => 'Invalid order ID format.',
         ]);
 
         $orderId = $validated['order_id'];
@@ -86,7 +86,7 @@ class PublicOrderController extends Controller
         if (! $order) {
             return back()
                 ->withInput()
-                ->withErrors(['order_id' => 'ID Tempahan tidak ditemui. Sila semak dan cuba lagi.']);
+                ->withErrors(['order_id' => 'Order ID not found. Please check it and try again.']);
         }
 
         $order->load(['fulfilmentJob', 'payments', 'designJobs.artworkVersions', 'pricingSnapshot']);

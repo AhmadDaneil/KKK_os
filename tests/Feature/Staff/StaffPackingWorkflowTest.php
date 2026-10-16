@@ -392,13 +392,13 @@ class StaffPackingWorkflowTest extends TestCase
         $this->assertSame('COMPLETED', $order->status);
 
         $this->get(route('staff.orders.show', $order->order_id))
-            ->assertDontSee('Sahkan Serahan kepada Courier');
+            ->assertDontSee('Confirm Courier Handover');
         $this->post(route('public.orders.progress.lookup'), [
             'order_id' => $order->order_id,
             'customer_phone' => $order->customer_phone,
         ])
             ->assertSee('100%')
-            ->assertSee('Tempahan Selesai');
+            ->assertSee('Order Complete');
 
         $this->assertSame(
             'Pos Laju',
@@ -1403,7 +1403,7 @@ class StaffPackingWorkflowTest extends TestCase
             ->assertDontSee(route('staff.packing-jobs.assign', $job))
             ->assertSee('aria-controls="packing-proof"', false);
         $this->assertSame(1, substr_count($response->getContent(), 'id="packing-proof"'));
-        $this->assertSame(1, substr_count($response->getContent(), 'Muat Naik Bukti &amp; Tandakan Selesai Dibungkus') + substr_count($response->getContent(), 'Muat Naik Bukti & Tandakan Selesai Dibungkus'));
+        $this->assertSame(1, substr_count($response->getContent(), 'Upload Proof &amp; Complete Packing') + substr_count($response->getContent(), 'Upload Proof & Complete Packing'));
     }
 
     public function test_packing_saves_courier_details_without_marking_parcel_shipped(): void
@@ -1434,7 +1434,7 @@ class StaffPackingWorkflowTest extends TestCase
         $this->assertSame('READY', $fulfilment->status);
         $this->assertNull($fulfilment->shipped_at);
         $this->get(route('staff.orders.show', $order->order_id))
-            ->assertSee('Sahkan Serahan kepada Kurier')
+            ->assertSee('Confirm Courier Handover')
             ->assertSee('value="Pos Laju"', false)
             ->assertSee('value="PL001234567MY"', false)
             ->assertSee('aria-controls="courier-packing-proof"', false);
@@ -1463,7 +1463,7 @@ class StaffPackingWorkflowTest extends TestCase
         $this->actingAs($operationManagement, 'staff')->get(route('staff.orders.show', $order->order_id))
             ->assertOk()
             ->assertSee(route('staff.payments.receipt', $payment))
-            ->assertSee('Lihat Resit');
+            ->assertSee('View Receipt');
 
         $this->app['auth']->forgetGuards();
         $this->actingAs($admin, 'staff')->get(route('staff.orders.show', $order->order_id))

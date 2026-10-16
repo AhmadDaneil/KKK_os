@@ -32,7 +32,7 @@ class ExportPhotoshopAutoMergeCsvService
         $hasMockup = $order !== null && (int) $order->package_count === 2;
 
         if ($hasMockup && blank($order->jumlah_hantaran)) {
-            throw new RuntimeException('Jumlah Hantaran is required for a two-package Photoshop export.');
+            throw new RuntimeException('Gift amount is required for a two-package Photoshop export.');
         }
 
         $headers = $hasMockup

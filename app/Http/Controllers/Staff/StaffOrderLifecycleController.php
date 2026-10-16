@@ -32,7 +32,7 @@ class StaffOrderLifecycleController extends Controller
             ]);
         }
 
-        return back()->with('status', "Tempahan {$order->order_id} telah dibatalkan dan rekod dikekalkan.");
+        return back()->with('status', "Order {$order->order_id} cancelled. Its record has been retained.");
     }
 
     public function archive(
@@ -56,7 +56,7 @@ class StaffOrderLifecycleController extends Controller
             ]);
         }
 
-        return back()->with('status', "Tempahan {$order->order_id} telah diarkibkan dan rekod dikekalkan.");
+        return back()->with('status', "Order {$order->order_id} archived. Its record has been retained.");
     }
 
     /** @return array{reason: string} */
@@ -65,8 +65,8 @@ class StaffOrderLifecycleController extends Controller
         return $request->validate([
             'reason' => ['required', 'string', 'max:1000'],
         ], [
-            'reason.required' => 'Sila nyatakan sebab tindakan ini.',
-            'reason.max' => 'Sebab tindakan tidak boleh melebihi 1000 aksara.',
+            'reason.required' => 'Please provide a reason for this action.',
+            'reason.max' => 'The reason must not exceed 1,000 characters.',
         ]);
     }
 

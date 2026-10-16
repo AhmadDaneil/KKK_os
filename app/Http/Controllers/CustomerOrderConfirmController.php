@@ -26,14 +26,14 @@ class CustomerOrderConfirmController extends Controller
             'responsibility_acknowledged' => ['required', 'accepted'],
             'post_confirmation_liability_acknowledged' => ['required', 'accepted'],
         ], [
-            'responsibility_acknowledged.accepted' => 'Anda perlu mengesahkan bahawa semua maklumat telah disemak.',
-            'post_confirmation_liability_acknowledged.accepted' => 'Anda perlu bersetuju dengan perakuan kesalahan selepas pengesahan.',
+            'responsibility_acknowledged.accepted' => 'You must confirm that you have reviewed all details.',
+            'post_confirmation_liability_acknowledged.accepted' => 'You must agree to the post-confirmation liability statement.',
         ]);
 
         $order = $access->resolve($request, $orderId);
         if ($order->booking_payment_status !== 'PAID') {
             throw ValidationException::withMessages([
-                'payment' => 'Pembayaran booking mesti berjaya sebelum pengesahan akhir.',
+                'payment' => 'The booking payment must succeed before final confirmation.',
             ]);
         }
 
@@ -54,6 +54,6 @@ class CustomerOrderConfirmController extends Controller
         });
 
         return redirect()->route('orders.thank-you.show', ['orderId' => $order->order_id])
-            ->with('success', 'Maklumat tempahan telah disahkan.');
+            ->with('success', 'The order details have been confirmed.');
     }
 }

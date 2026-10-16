@@ -20,7 +20,7 @@ class AuthenticateWabot
 
         if ($configured === '' || $provided === '' || ! hash_equals($configured, $provided)) {
             return response()->json([
-                'message' => 'Tidak dibenarkan.',
+                'message' => 'Unauthorized.',
                 'code' => 'UNAUTHORIZED',
             ], 401);
         }

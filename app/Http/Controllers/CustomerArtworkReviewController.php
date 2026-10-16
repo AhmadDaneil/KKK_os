@@ -196,10 +196,10 @@ class CustomerArtworkReviewController extends Controller
                 'max:5000',
             ],
         ], [
-            'correction_fee_agreed.accepted' => 'Sila bersetuju dengan caj pembetulan RM10.',
-            'correction_receipt.required' => 'Sila lampirkan resit bayaran pembetulan RM10.',
-            'correction_receipt.mimes' => 'Resit mestilah JPG, JPEG, PNG, WEBP atau PDF.',
-            'correction_receipt.max' => 'Saiz resit tidak boleh melebihi 10 MB.',
+            'correction_fee_agreed.accepted' => 'Please agree to the RM10 correction fee.',
+            'correction_receipt.required' => 'Please attach the RM10 correction payment receipt.',
+            'correction_receipt.mimes' => 'The receipt must be a JPG, JPEG, PNG, WEBP or PDF file.',
+            'correction_receipt.max' => 'The receipt size must not exceed 10 MB.',
         ]);
 
         $receipt = $validated['correction_receipt'];
@@ -212,7 +212,7 @@ class CustomerArtworkReviewController extends Controller
                 abort_unless(! $order->isTerminalOperationalStatus() && $designJob->status === 'DESIGN_READY', 422);
                 if ($order->payments()->where('payment_type', 'ARTWORK_CORRECTION')->where('status', 'PENDING')
                     ->where('metadata->design_job_id', $designJob->id)->exists()) {
-                    throw ValidationException::withMessages(['correction_receipt' => 'Bayaran pembetulan ini masih menunggu pengesahan.']);
+                    throw ValidationException::withMessages(['correction_receipt' => 'This correction payment is still awaiting confirmation.']);
                 }
                 $artwork = $designJob->artworkVersions()->latest('version_number')->firstOrFail();
                 $path = $receipt->store('correction-receipts/'.$order->id, 'local');
@@ -243,7 +243,7 @@ class CustomerArtworkReviewController extends Controller
             ])
             ->with(
                 'success',
-                'Permintaan diterima. Menunggu pengesahan bayaran RM10 sebelum pembetulan dimulakan.'
+                'Request received. The RM10 payment must be confirmed before corrections begin.'
             );
     }
 
@@ -267,7 +267,7 @@ class CustomerArtworkReviewController extends Controller
             $order = Order::whereKey($order->id)->lockForUpdate()->firstOrFail();
             if ($order->payments()->where('payment_type', 'ARTWORK_CORRECTION')->where('status', 'PENDING')
                 ->where('metadata->design_job_id', $designJob->id)->exists()) {
-                throw ValidationException::withMessages(['artwork' => 'Bayaran pembetulan masih menunggu pengesahan.']);
+                throw ValidationException::withMessages(['artwork' => 'The correction payment is still awaiting confirmation.']);
             }
             $approve->approve($designJob);
             $order = $sync->sync($order);
@@ -282,7 +282,7 @@ class CustomerArtworkReviewController extends Controller
             ])
             ->with(
                 'success',
-                'Artwork telah diluluskan.'
+                'Artwork has been approved.'
             );
     }
 }

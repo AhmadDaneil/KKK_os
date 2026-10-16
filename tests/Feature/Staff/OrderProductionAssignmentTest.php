@@ -34,8 +34,8 @@ class OrderProductionAssignmentTest extends TestCase
         $this->actingAs($operationManagement)
             ->get(route('staff.orders.show', $order->order_id))
             ->assertOk()
-            ->assertSee('Tugaskan Staf Pengeluaran')
-            ->assertSee('Tugaskan OM');
+            ->assertSee('Assign Production Staff')
+            ->assertSee('Assign OM');
 
         $this->actingAs($operationManagement)
             ->post(route('staff.design-jobs.assign', $order->designJobs->first()), ['assigned_user_id' => $designer->id])
@@ -55,8 +55,8 @@ class OrderProductionAssignmentTest extends TestCase
         $managementView = $this->actingAs($operationManagement)
             ->get(route('staff.orders.show', $order->order_id));
         $managementView->assertOk()
-            ->assertSee('Tugaskan Semula Staf Pengeluaran')
-            ->assertSee('Tugaskan Semula OM')
+            ->assertSee('Reassign Production Staff')
+            ->assertSee('Reassign OM')
             ->assertDontSee(route('staff.print-jobs.assign', $order->printJobs->first()));
 
         $this->actingAs($production)
@@ -79,7 +79,7 @@ class OrderProductionAssignmentTest extends TestCase
             $this->actingAs($assignee)
                 ->get(route('staff.orders.show', $order->order_id))
                 ->assertOk()
-                ->assertDontSee('Tugaskan Staf Pengeluaran')
+                ->assertDontSee('Assign Production Staff')
                 ->assertSee($order->order_id);
         }
 
@@ -146,8 +146,8 @@ class OrderProductionAssignmentTest extends TestCase
         $this->actingAs($manager)
             ->get(route('staff.orders.show', $order->order_id))
             ->assertOk()
-            ->assertDontSee('Tugaskan Staf Pengeluaran')
-            ->assertDontSee('Tugaskan Semula Pereka');
+            ->assertDontSee('Assign Production Staff')
+            ->assertDontSee('Reassign Designer');
 
         $this->actingAs($manager)
             ->post(route('staff.design-jobs.assign', $designJob), ['assigned_user_id' => $designer->id])

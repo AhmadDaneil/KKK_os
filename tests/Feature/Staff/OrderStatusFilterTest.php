@@ -129,7 +129,7 @@ class OrderStatusFilterTest extends TestCase
         $this->actingAs($admin, 'admin')
             ->get(route('admin.orders.index', ['workstream' => 'packing']))
             ->assertOk()
-            ->assertSee('Senarai Pembungkusan')
+            ->assertSee('Packing Queue')
             ->assertSee($activeOrder->order_id)
             ->assertDontSee($packedOrder->order_id);
     }
@@ -150,7 +150,7 @@ class OrderStatusFilterTest extends TestCase
         $this->actingAs($admin, 'admin')
             ->get(route('admin.orders.index', ['workstream' => 'fulfilment']))
             ->assertOk()
-            ->assertSee('Senarai Pemenuhan Tempahan')
+            ->assertSee('Order Fulfilment')
             ->assertSee($activeOrder->order_id)
             ->assertDontSee($collectedOrder->order_id);
     }

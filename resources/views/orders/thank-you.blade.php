@@ -1,10 +1,10 @@
 <!doctype html>
-<html lang="ms" class="brand-customer-page">
+<html lang="en" class="brand-customer-page">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="referrer" content="no-referrer">
-    <title>Terima Kasih - {{ $review['order_id'] }}</title>
+    <title>Thank You - {{ $review['order_id'] }}</title>
     <link rel="stylesheet" href="{{ asset('css/thank-you.css') }}?v={{ filemtime(public_path('css/thank-you.css')) }}">
     <link rel="stylesheet" href="{{ asset('css/customer-theme.css') }}?v={{ filemtime(public_path('css/customer-theme.css')) }}">
     <link rel="stylesheet" href="{{ asset('css/customer-service.css') }}?v={{ filemtime(public_path('css/customer-service.css')) }}">
@@ -13,8 +13,8 @@
 <body class="brand-customer-flow">
     @php
         $fulfilmentLabel = match ($review['fulfilment']['method'] ?? null) {
-            'COURIER' => 'Pos / Kurier',
-            'PICKUP' => 'Pengambilan Sendiri di KKK',
+            'COURIER' => 'Post / Courier',
+            'PICKUP' => 'Self Pickup at KKK',
             default => '-',
         };
     @endphp
@@ -22,48 +22,48 @@
     <main class="thank-you-page">
         <section class="success-card">
             <div class="success-icon" aria-hidden="true">✓</div>
-            <p class="eyebrow">Pengesahan Berjaya</p>
-            <h1>Terima Kasih</h1>
+            <p class="eyebrow">Confirmation Successful</p>
+            <h1>Thank You</h1>
             <p class="success-message">
-                Maklumat tempahan anda telah berjaya disahkan dan diterima oleh pihak King Kad Kahwin.
+                Your order details have been confirmed and received by KingKadKahwin.
             </p>
         </section>
 
         <section class="order-card">
             <div class="section-heading">
                 <div>
-                    <p class="eyebrow">Maklumat Tempahan</p>
+                    <p class="eyebrow">Order Details</p>
                     <h2>{{ $review['order_id'] }}</h2>
                 </div>
-                <span class="confirmed-badge">Telah Disahkan</span>
+                <span class="confirmed-badge">Confirmed</span>
             </div>
 
             <dl class="summary-grid">
                 <div>
-                    <dt>Nama Pelanggan</dt>
+                    <dt>Customer Name</dt>
                     <dd>{{ $review['customer_name'] ?: '-' }}</dd>
                 </div>
                 <div>
-                    <dt>Jumlah Pakej</dt>
+                    <dt>Number of Packages</dt>
                     <dd>{{ $review['package_count'] }}</dd>
                 </div>
                 @if ($review['package_count'] === 2)
-                    <div><dt>Jumlah Hantaran</dt><dd>{{ $review['jumlah_hantaran'] ?: '-' }}</dd></div>
+                    <div><dt>Gift Amount</dt><dd>{{ $review['jumlah_hantaran'] ?: '-' }}</dd></div>
                 @endif
                 <div>
-                    <dt>Nama Pengantin Lelaki</dt>
+                    <dt>Groom's Name</dt>
                     <dd>{{ $review['couple']['groom_name'] ?: '-' }}</dd>
                 </div>
                 <div>
-                    <dt>Nama Pengantin Perempuan</dt>
+                    <dt>Bride's Name</dt>
                     <dd>{{ $review['couple']['bride_name'] ?: '-' }}</dd>
                 </div>
                 <div>
-                    <dt>Kaedah Penghantaran</dt>
+                    <dt>Delivery Method</dt>
                     <dd>{{ $fulfilmentLabel }}</dd>
                 </div>
                 <div>
-                    <dt>Tarikh Disahkan</dt>
+                    <dt>Confirmation Date</dt>
                     <dd>{{ $order->details_confirmed_at?->timezone(config('app.display_timezone'))->format('d/m/Y, h:i A') }}</dd>
                 </div>
             </dl>
@@ -71,21 +71,21 @@
             <div class="package-list">
                 @foreach ($review['package_sides'] as $side)
                     @php
-                        $sideLabel = $side['side'] === 'LELAKI' ? 'Lelaki' : 'Perempuan';
+                        $sideLabel = $side['side'] === 'LELAKI' ? "Groom's Side" : "Bride's Side";
                     @endphp
                     <article class="package-summary">
-                        <h3>{{ $review['package_count'] === 2 ? 'Majlis '.$loop->iteration.' – ' : 'Pakej ' }}Pihak {{ $sideLabel }}</h3>
+                        <h3>{{ $review['package_count'] === 2 ? 'Event '.$loop->iteration.' – ' : 'Package – ' }}{{ $sideLabel }}</h3>
                         <dl>
                             <div>
-                                <dt>Kod Design</dt>
+                                <dt>Design Code</dt>
                                 <dd>{{ $side['design']['design_code'] ?: '-' }}</dd>
                             </div>
                             <div>
-                                <dt>Tarikh Majlis</dt>
+                                <dt>Event Date</dt>
                                 <dd>{{ $side['event']['event_date'] ?: '-' }}</dd>
                             </div>
                             <div>
-                                <dt>Tempat Majlis</dt>
+                                <dt>Event Venue</dt>
                                 <dd>{{ $side['event']['venue_name'] ?: '-' }}</dd>
                             </div>
                         </dl>
@@ -94,7 +94,7 @@
             </div>
 
             <a class="progress-button" href="{{ route('public.orders.progress', ['order_id' => $review['order_id']]) }}">
-                Semak Progress
+                Track Order
             </a>
         </section>
     </main>

@@ -52,7 +52,7 @@ class CustomerDashboardAccessController extends Controller
             $this->audit($request, null, $identifier, null, 'LOCKED');
 
             return back()->withErrors([
-                'customer_reference' => 'Terlalu banyak cubaan. Sila cuba semula selepas 15 minit.',
+                'customer_reference' => 'Too many attempts. Please try again after 15 minutes.',
             ]);
         }
 
@@ -72,7 +72,7 @@ class CustomerDashboardAccessController extends Controller
             $this->audit($request, $order, $identifier, $phone, 'FAILED');
 
             return back()->withInput(['customer_reference' => $identifier])->withErrors([
-                'customer_reference' => 'ID Tempahan, rujukan pelanggan atau nombor telefon tidak sepadan.',
+                'customer_reference' => 'The customer reference and phone number do not match.',
             ]);
         }
 

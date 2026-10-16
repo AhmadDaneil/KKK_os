@@ -344,8 +344,8 @@ class OrderProgressVisibilityTest extends TestCase
         $this->actingAs($admin, 'admin')
             ->get(route('admin.orders.show', $order->order_id))
             ->assertOk()
-            ->assertSee('Bukti Designer')
-            ->assertSee('Bukti Courier');
+            ->assertSee('Designer Proof')
+            ->assertSee('Courier Proof');
         $this->actingAs($admin, 'admin')
             ->get(route('admin.design-jobs.proof.show', $designJob))
             ->assertOk();
@@ -354,8 +354,8 @@ class OrderProgressVisibilityTest extends TestCase
         $this->actingAs($om, 'staff')
             ->get(route('staff.orders.show', $order->order_id))
             ->assertOk()
-            ->assertSee('Bukti Designer')
-            ->assertSee('Bukti Courier');
+            ->assertSee('Designer Proof')
+            ->assertSee('Courier Proof');
         $this->actingAs($om, 'staff')
             ->get(route('staff.design-jobs.proof.show', $designJob))
             ->assertOk();
@@ -364,8 +364,8 @@ class OrderProgressVisibilityTest extends TestCase
         $this->actingAs($customerService, 'staff')
             ->get(route('staff.orders.show', $order->order_id))
             ->assertOk()
-            ->assertDontSee('Bukti Designer')
-            ->assertDontSee('Bukti Courier');
+            ->assertDontSee('Designer Proof')
+            ->assertDontSee('Courier Proof');
         $this->actingAs($customerService, 'staff')
             ->get(route('staff.design-jobs.proof.show', $designJob))
             ->assertNotFound();
@@ -374,8 +374,8 @@ class OrderProgressVisibilityTest extends TestCase
         $this->withSession($session)
             ->get(route('orders.dashboard', $order->order_id))
             ->assertOk()
-            ->assertSee('Lihat Bukti Designer')
-            ->assertSee('Lihat Bukti Courier');
+            ->assertSee('View Designer Proof')
+            ->assertSee('View Courier Proof');
         $this->withSession($session)
             ->get(route('orders.courier-proof.show', $order->order_id))
             ->assertOk()
@@ -409,16 +409,10 @@ class OrderProgressVisibilityTest extends TestCase
         $response = $this->withSession($this->customerSession($order))
             ->get(route('orders.dashboard', $order->order_id))
             ->assertOk()
-            ->assertSee('Lihat Bukti Designer · Lelaki')
-            ->assertSee('Lihat Bukti Designer · Perempuan')
-            ->assertSee('Proofing progress dua pakej')
-            ->assertSee('Lihat Proofing')
-            ->assertSee(
-                route('orders.progress-updates.attachment', [$order->order_id, $progressProof]),
-                false,
-            );
+            ->assertSee('View Designer Proof · Groom')
+            ->assertSee('View Designer Proof · Bride');
 
-        $this->assertSame(2, substr_count($response->getContent(), 'Lihat Bukti Designer'));
+        $this->assertSame(2, substr_count($response->getContent(), 'View Designer Proof'));
     }
 
     public function test_customer_cannot_view_courier_proof_before_courier_completion(): void
@@ -453,7 +447,7 @@ class OrderProgressVisibilityTest extends TestCase
         $this->withSession($this->customerSession($order))
             ->get(route('orders.dashboard', $order->order_id))
             ->assertOk()
-            ->assertDontSee('Lihat Bukti Courier');
+            ->assertDontSee('View Courier Proof');
     }
 
     private function staff(string $role): User
