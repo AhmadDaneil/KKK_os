@@ -36,7 +36,7 @@ class StaffAuthController extends Controller
             ]);
 
             throw ValidationException::withMessages([
-                'email' => 'Email atau kata laluan tidak sah.',
+                'email' => 'Invalid email or password.',
             ]);
         }
 
@@ -47,7 +47,7 @@ class StaffAuthController extends Controller
             Auth::guard('staff')->logout();
 
             throw ValidationException::withMessages([
-                'email' => 'Akaun ini tidak mempunyai akses staff aktif.',
+                'email' => 'This account does not have active staff access.',
             ]);
         }
 

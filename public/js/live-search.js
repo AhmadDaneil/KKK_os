@@ -68,7 +68,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 window.history.replaceState({}, '', url);
             } catch (error) {
                 if (error.name !== 'AbortError') {
-                    console.error('Carian tidak dapat dikemas kini.', error);
+                    console.error('Search could not be updated.', error);
                 }
             }
         };

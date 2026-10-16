@@ -56,7 +56,7 @@ class AdminPasswordResetTest extends TestCase
             'password' => 'Admin8!x',
             'password_confirmation' => 'Admin8!x',
         ])->assertRedirect(route('admin.login'))
-            ->assertSessionHas('status', 'Kata laluan admin berjaya ditetapkan semula. Sila log masuk.');
+            ->assertSessionHas('status', 'The admin password has been reset. Please log in.');
 
         $this->assertTrue(Hash::check('Admin8!x', $admin->fresh()->password));
         $this->assertDatabaseHas('staff_audit_logs', [

@@ -1,4 +1,4 @@
-<button class="customer-theme-toggle" type="button" aria-label="Tukar kepada mod gelap" aria-pressed="false" title="Tukar tema">
+<button class="customer-theme-toggle" type="button" aria-label="Switch to dark mode" aria-pressed="false" title="Change theme">
     <span class="customer-theme-toggle-sun" aria-hidden="true">☀</span>
     <span class="customer-theme-toggle-moon" aria-hidden="true">☾</span>
 </button>
@@ -14,8 +14,8 @@
             const isDark = theme === 'dark';
             root.dataset.customerTheme = theme;
             button.setAttribute('aria-pressed', String(isDark));
-            button.setAttribute('aria-label', isDark ? 'Tukar kepada mod cerah' : 'Tukar kepada mod gelap');
-            button.title = isDark ? 'Mod cerah' : 'Mod gelap';
+            button.setAttribute('aria-label', isDark ? 'Switch to light mode' : 'Switch to dark mode');
+            button.title = isDark ? 'Light mode' : 'Dark mode';
         }
 
         applyTheme(savedTheme || (systemPrefersDark ? 'dark' : 'light'));

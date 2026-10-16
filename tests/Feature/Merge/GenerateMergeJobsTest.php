@@ -42,8 +42,8 @@ class GenerateMergeJobsTest extends TestCase
         $this->assertSame($order->order_id.'-L', $job->job_id);
         $this->assertSame('LELAKI', $job->side);
         $this->assertSame('L101', data_get($job->canonical_payload, 'generic.design_code'));
-        $this->assertSame('Bapa Lelaki', data_get($job->canonical_payload, 'generic.namabapa'));
-        $this->assertSame('Ibu Lelaki', data_get($job->canonical_payload, 'generic.namaibu'));
+        $this->assertSame('Bapa Groom', data_get($job->canonical_payload, 'generic.namabapa'));
+        $this->assertSame('Ibu Groom', data_get($job->canonical_payload, 'generic.namaibu'));
     }
 
     public function test_two_packages_generate_two_independent_merge_jobs(): void
@@ -72,8 +72,8 @@ class GenerateMergeJobsTest extends TestCase
         $this->assertSame('L101', data_get($lelaki->canonical_payload, 'generic.design_code'));
         $this->assertSame('P202', data_get($perempuan->canonical_payload, 'generic.design_code'));
 
-        $this->assertSame('Bapa Lelaki', data_get($lelaki->canonical_payload, 'generic.namabapa'));
-        $this->assertSame('Bapa Perempuan', data_get($perempuan->canonical_payload, 'generic.namabapa'));
+        $this->assertSame('Bapa Groom', data_get($lelaki->canonical_payload, 'generic.namabapa'));
+        $this->assertSame('Bapa Bride', data_get($perempuan->canonical_payload, 'generic.namabapa'));
     }
 
     public function test_generation_is_idempotent_and_does_not_duplicate_jobs(): void

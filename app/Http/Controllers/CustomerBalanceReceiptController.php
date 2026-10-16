@@ -16,9 +16,9 @@ class CustomerBalanceReceiptController extends Controller
         $validated = $request->validate([
             'balance_receipt' => ['required', 'file', 'mimes:jpg,jpeg,png,webp,pdf', 'max:10240'],
         ], [
-            'balance_receipt.required' => 'Sila lampirkan resit pembayaran penuh.',
-            'balance_receipt.mimes' => 'Resit mestilah dalam format JPG, JPEG, PNG, WEBP atau PDF.',
-            'balance_receipt.max' => 'Saiz resit tidak boleh melebihi 10 MB.',
+            'balance_receipt.required' => 'Please attach the full payment receipt.',
+            'balance_receipt.mimes' => 'The receipt must be in JPG, JPEG, PNG, WEBP or PDF format.',
+            'balance_receipt.max' => 'The receipt size must not exceed 10 MB.',
         ]);
 
         $order = $access->resolve($request, $orderId);
@@ -73,6 +73,6 @@ class CustomerBalanceReceiptController extends Controller
 
         return redirect()
             ->route('public.orders.progress', ['order_id' => $order->order_id])
-            ->with('balance_success', 'Resit pembayaran penuh telah dihantar untuk semakan.');
+            ->with('balance_success', 'The full payment receipt has been submitted for review.');
     }
 }

@@ -95,8 +95,8 @@ class CustomerOrderDraftController extends Controller
             'fulfilment.recipient_phone' => ['nullable', 'string', 'regex:/^01\d{8,9}$/'],
             'fulfilment.shipping_address' => ['nullable', 'string', 'max:2000'],
         ], [
-            'sides.*.event.contacts.*.contact_phone.regex' => 'Nombor telefon mestilah 10 atau 11 digit dan bermula dengan 01.',
-            'fulfilment.recipient_phone.regex' => 'Nombor telefon mestilah 10 atau 11 digit dan bermula dengan 01.',
+            'sides.*.event.contacts.*.contact_phone.regex' => 'The phone number must contain 10 or 11 digits and start with 01.',
+            'fulfilment.recipient_phone.regex' => 'The phone number must contain 10 or 11 digits and start with 01.',
         ]);
 
         $saveDraft->save($order, $validated);

@@ -2,8 +2,8 @@
     $customerServiceBaseUrl = rtrim((string) config('kingkadkahwin.social.whatsapp'), '/');
     $customerServiceOrderId = $order->order_id ?? $orderId ?? null;
     $customerServiceMessage = $customerServiceOrderId
-        ? "Salam King Kad Kahwin, saya perlukan bantuan untuk tempahan {$customerServiceOrderId}."
-        : 'Salam King Kad Kahwin, saya ingin mendapatkan bantuan mengenai tempahan kad kahwin.';
+        ? "Hello KingKadKahwin, I need help with order {$customerServiceOrderId}."
+        : 'Hello KingKadKahwin, I would like help with a wedding card order.';
     $customerServiceSeparator = str_contains($customerServiceBaseUrl, '?') ? '&' : '?';
     $customerServiceUrl = $customerServiceBaseUrl.$customerServiceSeparator.'text='.rawurlencode($customerServiceMessage);
 @endphp
@@ -13,7 +13,7 @@
     href="{{ $customerServiceUrl }}"
     target="_blank"
     rel="noopener noreferrer"
-    aria-label="Hubungi Khidmat Pelanggan melalui WhatsApp"
+    aria-label="Contact customer support via WhatsApp"
 >
     <span class="customer-service-icon" aria-hidden="true">
         <svg viewBox="0 0 24 24" role="img">
@@ -21,7 +21,7 @@
         </svg>
     </span>
     <span class="customer-service-copy">
-        <strong>Khidmat Pelanggan</strong>
-        <small>Kami sedia membantu</small>
+        <strong>Customer Support</strong>
+        <small>We're here to help</small>
     </span>
 </a>

@@ -41,7 +41,7 @@ class AdminPasswordResetController extends Controller
             }
         }
 
-        return back()->with('status', 'Jika e-mel itu milik admin yang aktif, pautan tetapan semula telah dihantar.');
+        return back()->with('status', 'If that email belongs to an active admin, a reset link has been sent.');
     }
 
     public function createReset(Request $request, string $token): View|RedirectResponse
@@ -69,7 +69,7 @@ class AdminPasswordResetController extends Controller
         if (! $admin?->isAdmin()) {
             return back()
                 ->withInput($request->only('email'))
-                ->withErrors(['email' => 'Pautan tetapan semula tidak sah atau telah tamat tempoh.']);
+                ->withErrors(['email' => 'The reset link is invalid or has expired.']);
         }
 
         $status = Password::broker('users')->reset($data, function (User $user, string $password) use ($request, $auditLog): void {
@@ -85,11 +85,11 @@ class AdminPasswordResetController extends Controller
         if ($status !== Password::PASSWORD_RESET) {
             return back()
                 ->withInput($request->only('email'))
-                ->withErrors(['email' => 'Pautan tetapan semula tidak sah atau telah tamat tempoh.']);
+                ->withErrors(['email' => 'The reset link is invalid or has expired.']);
         }
 
         return redirect()
             ->route('admin.login')
-            ->with('status', 'Kata laluan admin berjaya ditetapkan semula. Sila log masuk.');
+            ->with('status', 'The admin password has been reset. Please log in.');
     }
 }

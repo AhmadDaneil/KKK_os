@@ -20,9 +20,9 @@ class StaffBalancePaymentController extends Controller
         $validated = $request->validate([
             'amount' => ['required', 'numeric', 'decimal:0,2', 'min:0.01', 'max:9999999999.99'],
         ], [
-            'amount.required' => 'Sila masukkan jumlah bayaran pada resit.',
-            'amount.min' => 'Jumlah bayaran mestilah sekurang-kurangnya RM0.01.',
-            'amount.decimal' => 'Jumlah bayaran hanya boleh mempunyai sehingga dua tempat perpuluhan.',
+            'amount.required' => 'Please enter the payment amount shown on the receipt.',
+            'amount.min' => 'The payment amount must be at least RM0.01.',
+            'amount.decimal' => 'The payment amount may have up to two decimal places.',
         ]);
 
         DB::transaction(function () use ($request, $payment, $initializePrint, $syncPrint, $financials, $validated) {
@@ -42,7 +42,7 @@ class StaffBalancePaymentController extends Controller
             $syncPrint->sync($order->fresh());
         });
 
-        return back()->with('status', 'Bayaran penuh disahkan. Print Job telah diwujudkan.');
+        return back()->with('status', 'Full payment confirmed. A print job has been created.');
     }
 
     public function reject(Request $request, PaymentTransaction $payment): RedirectResponse
@@ -63,7 +63,7 @@ class StaffBalancePaymentController extends Controller
             $payment->order->update(['status' => 'DESIGN_APPROVED']);
         });
 
-        return back()->with('status', 'Resit pembayaran penuh ditolak. Customer boleh menghantar resit baharu.');
+        return back()->with('status', 'The full payment receipt was rejected. The customer may submit a new receipt.');
     }
 
     private function ensureBalance(PaymentTransaction $payment): void

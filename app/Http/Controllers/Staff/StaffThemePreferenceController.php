@@ -20,6 +20,6 @@ class StaffThemePreferenceController extends Controller
             'staff_theme' => $data['staff_theme'],
         ]);
 
-        return back()->with('status', 'Tema paparan telah dikemas kini.');
+        return back()->with('status', 'Display theme updated.');
     }
 }

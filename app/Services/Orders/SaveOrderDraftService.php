@@ -23,7 +23,7 @@ class SaveOrderDraftService
     {
         if ($order->status !== 'DETAILS_INCOMPLETE') {
             throw ValidationException::withMessages([
-                'order' => 'Maklumat tempahan yang telah disahkan tidak boleh diubah.',
+                'order' => 'Confirmed order details cannot be changed.',
             ]);
         }
 

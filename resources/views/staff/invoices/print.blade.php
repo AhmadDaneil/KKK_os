@@ -5,15 +5,15 @@
     $deliveryItem = $order->items->firstWhere('item_type', 'DELIVERY');
     $discountItem = $order->items->firstWhere('item_type', 'DISCOUNT');
     $deliveryLabel = $deliveryItem?->description ?? match ($order->fulfilment?->method) {
-        'COURIER' => 'Kurier', 'PICKUP' => 'Pengambilan sendiri', default => 'Belum ditetapkan',
+        'COURIER' => 'Courier', 'PICKUP' => 'Self pickup', default => 'Not set',
     };
 @endphp
 <!DOCTYPE html>
-<html lang="ms">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ $invoice->invoice_number }} - Invois</title>
+    <title>{{ $invoice->invoice_number }} - Invoice</title>
     <style>
         :root { color-scheme: light; font-family: Arial, Helvetica, sans-serif; color: #1e2930; }
         * { box-sizing: border-box; }
@@ -58,60 +58,60 @@
     </style>
 </head>
 <body>
-    <nav class="toolbar" aria-label="Tindakan invois">
-        <button type="button" onclick="window.print()">Cetak / Simpan sebagai PDF</button>
-        <a href="{{ route($orderRoute, $order->order_id) }}">Kembali ke tempahan</a>
+    <nav class="toolbar" aria-label="Invoice actions">
+        <button type="button" onclick="window.print()">Print / Save as PDF</button>
+        <a href="{{ route($orderRoute, $order->order_id) }}">Back to order</a>
     </nav>
     <main>
-        <section class="page" aria-label="Muka hadapan invois">
+        <section class="page" aria-label="Invoice front page">
             <header class="invoice-header">
-                <div><div class="brand">{{ $companyName }}</div><div class="brand-sub">Invois tempahan pelanggan</div>
-                    <div class="company-details">@if ($registrationNumber)No. Pendaftaran: {{ $registrationNumber }}@endif
+                <div><div class="brand">{{ $companyName }}</div><div class="brand-sub">Customer order invoice</div>
+                    <div class="company-details">@if ($registrationNumber)Registration No.: {{ $registrationNumber }}@endif
 @if ($businessAddress){{ $businessAddress }}@endif
 @if ($businessPhone){{ $businessPhone }}@endif
 @if ($businessEmail){{ $businessEmail }}@endif</div></div>
-                <div><h1 class="invoice-title">INVOIS</h1><div class="invoice-meta">
-                    <div class="meta-row"><span>No. Invois</span><strong>{{ $invoice->invoice_number }}</strong></div>
-                    <div class="meta-row"><span>Tarikh Invois</span><strong>{{ $invoice->issued_at->timezone(config('app.timezone'))->format('d F Y') }}</strong></div>
+                <div><h1 class="invoice-title">INVOICE</h1><div class="invoice-meta">
+                    <div class="meta-row"><span>Invoice No.</span><strong>{{ $invoice->invoice_number }}</strong></div>
+                    <div class="meta-row"><span>Invoice Date</span><strong>{{ $invoice->issued_at->timezone(config('app.timezone'))->format('d F Y') }}</strong></div>
                 </div></div>
             </header>
-            <div class="order-strip"><strong>No. Tempahan:</strong> {{ $order->order_id }} &nbsp; | &nbsp; <strong>Status:</strong> {{ str_replace('_', ' ', $invoice->payment_status) }}</div>
+            <div class="order-strip"><strong>Order No.:</strong> {{ $order->order_id }} &nbsp; | &nbsp; <strong>Status:</strong> {{ str_replace('_', ' ', $invoice->payment_status) }}</div>
             <div class="two-columns">
                 <section><h2 class="section-label">Bill To</h2><table class="details-table">
-                    <tr><td>Nama</td><td><strong>{{ $order->fulfilment?->recipient_name ?: $order->customer_name ?: '-' }}</strong></td></tr>
-                    <tr><td>Telefon</td><td>{{ $order->fulfilment?->recipient_phone ?: $order->customer_phone ?: '-' }}</td></tr>
-                    <tr><td>Alamat</td><td>{{ $order->fulfilment?->shipping_address ?: '-' }}</td></tr>
+                    <tr><td>Name</td><td><strong>{{ $order->fulfilment?->recipient_name ?: $order->customer_name ?: '-' }}</strong></td></tr>
+                    <tr><td>Phone</td><td>{{ $order->fulfilment?->recipient_phone ?: $order->customer_phone ?: '-' }}</td></tr>
+                    <tr><td>Address</td><td>{{ $order->fulfilment?->shipping_address ?: '-' }}</td></tr>
                 </table></section>
                 <section><h2 class="section-label">Event Details</h2><table class="details-table">
-                    <tr><td>Event</td><td>Majlis Perkahwinan</td></tr><tr><td>Pasangan</td><td>{{ $coupleNames ?: '-' }}</td></tr>
-                    <tr><td>Tarikh</td><td>{{ $eventDates ?: '-' }}</td></tr><tr><td>Pakej</td><td>{{ $packageNames ?: '-' }}</td></tr>
-                    <tr><td>Kuantiti</td><td>{{ $order->card_quantity ? number_format($order->card_quantity).' kad' : '-' }}</td></tr>
-                    <tr><td>Penghantaran</td><td>{{ $deliveryLabel }}</td></tr>
+                    <tr><td>Event</td><td>Wedding Ceremony</td></tr><tr><td>Couple</td><td>{{ $coupleNames ?: '-' }}</td></tr>
+                    <tr><td>Date</td><td>{{ $eventDates ?: '-' }}</td></tr><tr><td>Package</td><td>{{ $packageNames ?: '-' }}</td></tr>
+                    <tr><td>Quantity</td><td>{{ $order->card_quantity ? number_format($order->card_quantity).' cards' : '-' }}</td></tr>
+                    <tr><td>Delivery</td><td>{{ $deliveryLabel }}</td></tr>
                 </table></section>
             </div>
-            <table class="invoice-lines"><thead><tr><th class="number">No.</th><th class="description">Keterangan</th><th class="unit">Unit</th><th class="price">Harga ({{ $currency }})</th><th class="amount">Amaun ({{ $currency }})</th></tr></thead>
+            <table class="invoice-lines"><thead><tr><th class="number">No.</th><th class="description">Description</th><th class="unit">Unit</th><th class="price">Price ({{ $currency }})</th><th class="amount">Amount ({{ $currency }})</th></tr></thead>
                 <tbody>
                     @forelse ($lineItems as $item)
-                        <tr><td>{{ $loop->iteration }}</td><td>{{ $item->description }}@if ($item->side) <span class="muted">({{ ucfirst(strtolower($item->side)) }})</span>@endif</td><td class="unit">{{ number_format($item->quantity) }}</td><td class="price">{{ number_format((float) $item->unit_price, 2) }}</td><td class="amount">{{ number_format((float) $item->line_total, 2) }}</td></tr>
+                        <tr><td>{{ $loop->iteration }}</td><td>{{ $item->description }}@if ($item->side) <span class="muted">({{ $item->side === 'LELAKI' ? 'Groom' : 'Bride' }})</span>@endif</td><td class="unit">{{ number_format($item->quantity) }}</td><td class="price">{{ number_format((float) $item->unit_price, 2) }}</td><td class="amount">{{ number_format((float) $item->line_total, 2) }}</td></tr>
                     @empty
-                        <tr><td>1</td><td>Tempahan kad kahwin ({{ $order->package_count }} pakej)</td><td class="unit">1</td><td class="price">{{ number_format((float) $invoice->subtotal, 2) }}</td><td class="amount">{{ number_format((float) $invoice->subtotal, 2) }}</td></tr>
+                        <tr><td>1</td><td>Wedding card order ({{ $order->package_count }} packages)</td><td class="unit">1</td><td class="price">{{ number_format((float) $invoice->subtotal, 2) }}</td><td class="amount">{{ number_format((float) $invoice->subtotal, 2) }}</td></tr>
                     @endforelse
-                    @if ((float) $invoice->discount_amount > 0)<tr><td>{{ $lineItems->count() + 1 }}</td><td>{{ $discountItem?->description ?: 'Diskaun' }}</td><td class="unit">1</td><td class="price">-{{ number_format((float) $invoice->discount_amount, 2) }}</td><td class="amount">-{{ number_format((float) $invoice->discount_amount, 2) }}</td></tr>@endif
+                    @if ((float) $invoice->discount_amount > 0)<tr><td>{{ $lineItems->count() + 1 }}</td><td>{{ $discountItem?->description ?: 'Discount' }}</td><td class="unit">1</td><td class="price">-{{ number_format((float) $invoice->discount_amount, 2) }}</td><td class="amount">-{{ number_format((float) $invoice->discount_amount, 2) }}</td></tr>@endif
                     @if ((float) $invoice->postage_amount > 0)<tr><td>{{ $lineItems->count() + ((float) $invoice->discount_amount > 0 ? 2 : 1) }}</td><td>{{ $deliveryLabel }}</td><td class="unit">1</td><td class="price">{{ number_format((float) $invoice->postage_amount, 2) }}</td><td class="amount">{{ number_format((float) $invoice->postage_amount, 2) }}</td></tr>@endif
                 </tbody>
             </table>
-            <div class="summary-area"><div class="payment-note"><div class="section-label">Payment Details</div><strong>Bayaran melalui saluran rasmi KKK OS</strong><div class="muted">Simpan invois ini sebagai rujukan tempahan dan pembayaran.</div></div>
+            <div class="summary-area"><div class="payment-note"><div class="section-label">Payment Details</div><strong>Payment through official KKK OS channels</strong><div class="muted">Keep this invoice for your order and payment records.</div></div>
                 <table class="totals"><tr><td>Subtotal</td><td>{{ $money($invoice->subtotal) }}</td></tr><tr><td>Postage / Courier</td><td>{{ $money($invoice->postage_amount) }}</td></tr>
-                    @if ((float) $invoice->discount_amount > 0)<tr><td>Diskaun</td><td>-{{ $money($invoice->discount_amount) }}</td></tr>@endif
-                    <tr class="grand-total"><td>Jumlah</td><td>{{ $money($invoice->total_amount) }}</td></tr><tr><td>Bayaran Diterima</td><td>{{ $money($invoice->amount_paid) }}</td></tr>
-                    <tr class="balance"><td>Baki</td><td>{{ $money($invoice->balance_due) }}</td></tr></table></div>
-            <footer class="page-footer"><span>Invois ini dijana oleh sistem. Tandatangan tidak diperlukan.</span><span>{{ $invoice->invoice_number }} &nbsp;|&nbsp; Muka 1</span></footer>
+                    @if ((float) $invoice->discount_amount > 0)<tr><td>Discount</td><td>-{{ $money($invoice->discount_amount) }}</td></tr>@endif
+                    <tr class="grand-total"><td>Total</td><td>{{ $money($invoice->total_amount) }}</td></tr><tr><td>Payment Received</td><td>{{ $money($invoice->amount_paid) }}</td></tr>
+                    <tr class="balance"><td>Balance</td><td>{{ $money($invoice->balance_due) }}</td></tr></table></div>
+            <footer class="page-footer"><span>This invoice was generated by the system. No signature is required.</span><span>{{ $invoice->invoice_number }} &nbsp;|&nbsp; Page 1</span></footer>
         </section>
-        <section class="page" aria-label="Terma dan syarat invois">
-            <header><h1 class="terms-title">TERMA &amp; SYARAT / PROSES TEMPAHAN</h1><div class="terms-subtitle">Terms &amp; Conditions / Order Process</div></header><hr class="terms-rule">
+        <section class="page" aria-label="Invoice terms and conditions">
+            <header><h1 class="terms-title">TERMS &amp; CONDITIONS / ORDER PROCESS</h1><div class="terms-subtitle">Terms &amp; Conditions / Order Process</div></header><hr class="terms-rule">
             @foreach ($terms as $heading => $items)<section class="terms-section"><h2>{{ mb_strtoupper($heading) }}</h2><ol>@foreach ($items as $term)<li>{{ $term }}</li>@endforeach</ol></section>@endforeach
-            <p class="thanks">Terima kasih kerana memilih King Kad Kahwin.</p>
-            <footer class="page-footer"><span>Invois ini dijana oleh sistem. Tandatangan tidak diperlukan.</span><span>{{ $invoice->invoice_number }} &nbsp;|&nbsp; Muka 2</span></footer>
+            <p class="thanks">Thank you for choosing KingKadKahwin.</p>
+            <footer class="page-footer"><span>This invoice was generated by the system. No signature is required.</span><span>{{ $invoice->invoice_number }} &nbsp;|&nbsp; Page 2</span></footer>
         </section>
     </main>
 </body>

@@ -48,7 +48,7 @@ class GeneratePhotoshopCsvForOrderService
 
         if ($expected === 2 && blank($order->jumlah_hantaran)) {
             throw new RuntimeException(
-                "Order {$order->order_id} requires Jumlah Hantaran before Photoshop export."
+                "Order {$order->order_id} requires a gift amount before Photoshop export."
             );
         }
 

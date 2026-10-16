@@ -69,7 +69,7 @@ class StaffInvoicePrintTest extends TestCase
         $this->actingAs($om)
             ->get(route('staff.invoices.print', $invoice))
             ->assertOk()
-            ->assertSee('Tempahan kad kahwin (2 pakej)');
+            ->assertSee('Wedding card order (2 packages)');
     }
 
     public function test_om_can_download_invoice_as_a_real_pdf(): void

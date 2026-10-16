@@ -19,58 +19,58 @@ class ValidateOrderCompletionService
         $missing = [];
 
         if ((int) $order->package_count === 2 && blank($order->jumlah_hantaran)) {
-            $missing[] = 'Jumlah Hantaran';
+            $missing[] = 'Gift Amount';
         }
 
         if (! $order->card_quantity || (int) $order->card_quantity < 1) {
-            $missing[] = 'Kuantiti kad';
+            $missing[] = 'Card quantity';
         }
 
         $couple = $order->couples->firstWhere('couple_number', 1);
 
         if (! $couple?->groom_name) {
-            $missing[] = 'Nama pengantin lelaki';
+            $missing[] = 'Groom name';
         }
 
         if (! $couple?->bride_name) {
-            $missing[] = 'Nama pengantin perempuan';
+            $missing[] = 'Bride name';
         }
 
         foreach ($order->packageSides as $packageSide) {
             $label = $packageSide->side === 'LELAKI'
-                ? 'Pakej Lelaki'
-                : 'Pakej Perempuan';
+                ? "Groom's package"
+                : "Bride's package";
 
             $design = $packageSide->design;
             $parents = $packageSide->parents;
             $event = $packageSide->event;
 
             if (! $design?->design_code) {
-                $missing[] = "{$label}: Kod design";
+                $missing[] = "{$label}: Design code";
             }
 
             if (! $parents?->father_name) {
-                $missing[] = "{$label}: Nama bapa";
+                $missing[] = "{$label}: Father's name";
             }
 
             if (! $parents?->mother_name) {
-                $missing[] = "{$label}: Nama ibu";
+                $missing[] = "{$label}: Mother's name";
             }
 
             if (! $event?->event_date) {
-                $missing[] = "{$label}: Tarikh majlis";
+                $missing[] = "{$label}: Event date";
             }
 
             if (! $event?->meal_time) {
-                $missing[] = "{$label}: Masa majlis / jamuan";
+                $missing[] = "{$label}: Event / meal time";
             }
 
             if (! $event?->venue_name) {
-                $missing[] = "{$label}: Nama tempat majlis";
+                $missing[] = "{$label}: Venue name";
             }
 
             if (! $event?->full_address) {
-                $missing[] = "{$label}: Alamat penuh";
+                $missing[] = "{$label}: Full address";
             }
 
             $contacts = $event?->contacts ?? collect();
@@ -79,11 +79,11 @@ class ValidateOrderCompletionService
                 $contact = $contacts->firstWhere('contact_number', $contactNumber);
 
                 if (! $contact?->contact_name) {
-                    $missing[] = "{$label}: Contact {$contactNumber} - nama";
+                    $missing[] = "{$label}: Contact {$contactNumber} - name";
                 }
 
                 if (! $contact?->contact_phone) {
-                    $missing[] = "{$label}: Contact {$contactNumber} - telefon";
+                    $missing[] = "{$label}: Contact {$contactNumber} - phone";
                 }
             }
         }
@@ -91,18 +91,18 @@ class ValidateOrderCompletionService
         $fulfilment = $order->fulfilment;
 
         if (! $fulfilment?->method) {
-            $missing[] = 'Kaedah fulfilment';
+            $missing[] = 'Fulfilment method';
         } elseif ($fulfilment->method === 'COURIER') {
             if (! $fulfilment->recipient_name) {
-                $missing[] = 'Kurier: Nama penerima';
+                $missing[] = 'Courier: Recipient name';
             }
 
             if (! $fulfilment->recipient_phone) {
-                $missing[] = 'Kurier: Telefon penerima';
+                $missing[] = 'Courier: Recipient phone';
             }
 
             if (! $fulfilment->shipping_address) {
-                $missing[] = 'Kurier: Alamat penghantaran';
+                $missing[] = 'Courier: Shipping address';
             }
         }
 

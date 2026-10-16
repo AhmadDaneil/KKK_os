@@ -1,10 +1,10 @@
 <!doctype html>
-<html lang="ms" class="brand-customer-page">
+<html lang="en" class="brand-customer-page">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="description" content="Kad kahwin yang mudah ditempah, direka dengan teliti dan boleh disemak secara online.">
-    <title>KingKadKahwin — Kad Kahwin Anda, Direka Dengan Teliti</title>
+    <meta name="description" content="Beautiful wedding cards, easy online ordering and live previews.">
+    <title>KingKadKahwin — Wedding Cards Made for You</title>
     <link rel="stylesheet" href="{{ asset('css/landing.css') }}?v={{ filemtime(public_path('css/landing.css')) }}">
     <link rel="stylesheet" href="{{ asset('css/customer-theme.css') }}?v={{ filemtime(public_path('css/customer-theme.css')) }}">
     <link rel="stylesheet" href="{{ asset('css/customer-service.css') }}?v={{ filemtime(public_path('css/customer-service.css')) }}">
@@ -12,38 +12,38 @@
 </head>
 <body class="brand-landing">
     <header class="site-header">
-        <a class="brand" href="{{ route('home') }}" aria-label="KingKadKahwin halaman utama">
+        <a class="brand" href="{{ route('home') }}" aria-label="KingKadKahwin home">
             <img class="brand-logo-image" src="{{ asset('images/landing/kingkadkahwin-logo.png') }}" alt="" width="62" height="62" decoding="async">
-            <span><b>KingKadKahwin</b><small>Kad indah, kenangan bermakna</small></span>
+            <span><b>KingKadKahwin</b><small>Beautiful cards, meaningful memories</small></span>
         </a>
-        <nav aria-label="Navigasi utama">
-            <a href="#kelebihan">Kelebihan</a>
-            <a href="#cara-tempah">Cara Tempah</a>
-            <a href="#soalan-lazim">Soalan Lazim</a>
+        <nav aria-label="Main navigation">
+            <a href="#kelebihan">Benefits</a>
+            <a href="#cara-tempah">How to Order</a>
+            <a href="#soalan-lazim">FAQs</a>
         </nav>
     </header>
 
     <main>
         <section class="hero">
             <div class="hero-copy">
-                <h1>Raikan hari istimewa dengan kad yang terasa <em>benar-benar milik anda.</em></h1>
-                <p class="hero-text">Pilih tema, lengkapkan maklumat majlis dan lihat pratonton kad secara langsung. Kami uruskan proses daripada design hingga kad siap dihantar.</p>
+                <h1>Celebrate your special day with a card that feels <em>uniquely yours.</em></h1>
+                <p class="hero-text">Choose a theme, enter your event details and preview your card live. We handle everything from design to delivery.</p>
                 <div class="hero-actions">
-                    <a class="button button-primary" href="{{ route('public.orders.create') }}"><span>Tempah Sekarang</span><span class="button-arrow" aria-hidden="true">→</span></a>
-                    <a class="button button-secondary" href="{{ route('public.orders.progress') }}"><span>Semak Progress</span></a>
+                    <a class="button button-primary" href="{{ route('public.orders.create') }}"><span>Order Now</span><span class="button-arrow" aria-hidden="true">→</span></a>
+                    <a class="button button-secondary" href="{{ route('public.orders.progress') }}"><span>Track Order</span></a>
                 </div>
-                <ul class="trust-list" aria-label="Kelebihan utama">
-                    <li><span>✓</span> Pratonton langsung</li>
-                    <li><span>✓</span> Simpan automatik</li>
-                    <li><span>✓</span> Progress dalam talian</li>
+                <ul class="trust-list" aria-label="Key benefits">
+                    <li><span>✓</span> Live preview</li>
+                    <li><span>✓</span> Automatic saving</li>
+                    <li><span>✓</span> Online order tracking</li>
                 </ul>
             </div>
 
-            <div class="hero-art" aria-label="Contoh kad kahwin KingKadKahwin">
+            <div class="hero-art" aria-label="KingKadKahwin wedding card samples">
                 <div class="card-runner card-runner-back">
                     <article class="sample-card sample-card-back sample-card-image">
                         <img src="{{ asset('images/landing/card-nostalgia-ckn-008.jpg') }}"
-                            alt="Kad kahwin tema Nostalgia"
+                            alt="Nostalgia wedding card design"
                             loading="eager"
                             decoding="async"
                             draggable="false">
@@ -56,7 +56,7 @@
                 <div class="card-runner card-runner-front">
                     <article class="sample-card sample-card-front sample-card-image">
                         <img src="{{ asset('images/landing/card-desa-ckd-008.jpg') }}"
-                            alt="Kad kahwin tema Desa"
+                            alt="Countryside wedding card design"
                             loading="eager"
                             decoding="async"
                             draggable="false">
@@ -69,7 +69,7 @@
                 <div class="card-runner card-runner-garden">
                     <article class="sample-card sample-card-garden sample-card-image">
                         <img src="{{ asset('images/landing/card-garden-purple.png') }}"
-                            alt="Kad kahwin tema taman bunga ungu"
+                            alt="Purple garden wedding card design"
                             loading="eager"
                             decoding="async"
                             draggable="false">
@@ -82,7 +82,7 @@
                 <div class="card-runner card-runner-islamic">
                     <article class="sample-card sample-card-islamic sample-card-image">
                         <img src="{{ asset('images/landing/card-islamic-gold.png') }}"
-                            alt="Kad kahwin tema Islamik emas"
+                            alt="Gold Islamic wedding card design"
                             loading="lazy"
                             decoding="async"
                             draggable="false">
@@ -96,41 +96,41 @@
         </section>
 
         <section class="feature-strip" id="kelebihan">
-            <article><span>01</span><div><h2>Pilihan design</h2><p>Tema untuk pelbagai gaya majlis, daripada minimal hingga klasik.</p></div></article>
-            <article><span>02</span><div><h2>Semakan lebih mudah</h2><p>Lihat nama dan maklumat majlis pada kad sambil mengisi borang.</p></div></article>
-            <article><span>03</span><div><h2>Status yang jelas</h2><p>Ikuti progress design, cetakan, pembungkusan dan penghantaran.</p></div></article>
+            <article><span>01</span><div><h2>Design choices</h2><p>Themes for every celebration, from minimal to classic.</p></div></article>
+            <article><span>02</span><div><h2>Easy review</h2><p>See names and event details on your card as you complete the form.</p></div></article>
+            <article><span>03</span><div><h2>Clear updates</h2><p>Follow design, printing, packing and delivery progress.</p></div></article>
         </section>
 
         <section class="journey" id="cara-tempah">
             <div class="section-intro">
-                <p class="eyebrow">Daripada idea kepada kad sebenar</p>
-                <h2>Tempahan yang ringkas dan mudah difahami.</h2>
+                <p class="eyebrow">From idea to finished card</p>
+                <h2>Ordering made simple.</h2>
             </div>
             <ol>
-                <li><b>1</b><div><h3>Isi maklumat</h3><p>Pilih pakej dan lengkapkan butiran pengantin serta majlis.</p></div></li>
-                <li><b>2</b><div><h3>Semak & sahkan</h3><p>Lihat pratonton, betulkan maklumat dan sahkan apabila tepat.</p></div></li>
-                <li><b>3</b><div><h3>Kami siapkan</h3><p>Pasukan kami mengurus design, cetakan dan pembungkusan.</p></div></li>
-                <li><b>4</b><div><h3>Ikuti progress</h3><p>Masukkan ID Tempahan pada bila-bila masa untuk melihat perkembangan.</p></div></li>
+                <li><b>1</b><div><h3>Enter your details</h3><p>Choose a package and complete the couple and event details.</p></div></li>
+                <li><b>2</b><div><h3>Review and confirm</h3><p>Check the preview, correct your details and confirm when everything is right.</p></div></li>
+                <li><b>3</b><div><h3>We prepare your order</h3><p>Our team handles design, printing and packing.</p></div></li>
+                <li><b>4</b><div><h3>Track progress</h3><p>Enter your Order ID anytime to see the latest updates.</p></div></li>
             </ol>
         </section>
 
         <section class="customer-information" id="soalan-lazim">
             <div class="section-intro">
-                <p class="eyebrow">Sebelum anda menempah</p>
-                <h2>Maklumat penting dan soalan lazim.</h2>
+                <p class="eyebrow">Before you order</p>
+                <h2>Important information and FAQs.</h2>
             </div>
             <div class="faq-grid">
-                <details open><summary>Bagaimanakah bayaran dibuat?</summary><p>Bayaran pertama hanyalah deposit untuk memulakan kerja design. Bayaran baki dibuat selepas anda menyemak dan meluluskan hasil design, sebelum proses pengeluaran dimulakan.</p></details>
-                <details><summary>Bagaimanakah pembetulan hasil design dibuat?</summary><p>Anda boleh memilih hasil design yang terlibat, menulis arahan pembetulan dan menghantar bukti bayaran pembetulan melalui halaman Semak Progress.</p></details>
-                <details><summary>Berapa lama proses tempahan?</summary><p>Tempoh bergantung pada jumlah pakej, pembetulan, kuantiti dan kaedah penghantaran. Progress semasa dipaparkan menggunakan ID Tempahan serta nombor telefon anda.</p></details>
-                <details><summary>Adakah banner dan banting disokong?</summary><p>Ya. Anda boleh menyatakan saiz, kuantiti, bahan, orientasi dan arahan tambahan dalam borang tempahan.</p></details>
+                <details open><summary>How do payments work?</summary><p>The first payment is a deposit to begin design work. The balance is due after the design is approved and before production begins.</p></details>
+                <details><summary>How do I request a design correction?</summary><p>Select the affected artwork, describe the changes and submit proof of correction payment on the Track Order page.</p></details>
+                <details><summary>How long will my order take?</summary><p>Timing depends on the number of packages, corrections, quantity and delivery method. Use your Order ID and phone number to see current progress.</p></details>
+                <details><summary>Are banners and bunting available?</summary><p>Yes. You can specify sizes, quantities, materials, orientation and additional instructions in the order form.</p></details>
             </div>
         </section>
 
         <section class="customer-policies" id="polisi">
-            <article id="privasi"><h2>Privasi</h2><p>Maklumat tempahan digunakan untuk menyiapkan, menghubungi dan menghantar tempahan anda. ID Tempahan dan nombor telefon diperlukan untuk melihat maklumat sensitif.</p></article>
-            <article id="terma"><h2>Terma Tempahan</h2><p>Pastikan semua nama, tarikh, masa, alamat dan nombor telefon diperiksa sebelum pengesahan akhir. Perubahan selepas pengesahan mungkin melibatkan caj pembetulan.</p></article>
-            <article id="pemulangan"><h2>Pembatalan dan Pemulangan</h2><p>Hubungi Khidmat Pelanggan dengan segera. Kelayakan pembatalan atau pemulangan bergantung pada tahap design dan pengeluaran semasa.</p></article>
+            <article id="privasi"><h2>Privacy</h2><p>Order details are used to prepare, discuss and deliver your order. Your Order ID and phone number are required to access sensitive details.</p></article>
+            <article id="terma"><h2>Order Terms</h2><p>Check all names, dates, times, addresses and phone numbers before final confirmation. Changes after confirmation may incur correction fees.</p></article>
+            <article id="pemulangan"><h2>Cancellations and Refunds</h2><p>Contact Customer Support promptly. Eligibility depends on the current design and production stage.</p></article>
         </section>
     </main>
 
@@ -138,11 +138,11 @@
         <div class="footer-main">
             <div>
                 <a class="brand footer-brand" href="{{ route('home') }}"><img class="brand-logo-image" src="{{ asset('images/landing/kingkadkahwin-logo.png') }}" alt="" width="52" height="52" loading="lazy" decoding="async"><b>KingKadKahwin</b></a>
-                <p>Reka bentuk yang indah. Proses yang tenang.</p>
+                <p>Beautiful designs. A smooth process.</p>
             </div>
 
             <div class="footer-social">
-                <p>Ikuti kami</p>
+                <p>Follow us</p>
                 <div class="social-links">
                     @foreach ([
                         ['key' => 'instagram', 'label' => 'Instagram'],
@@ -150,7 +150,7 @@
                         ['key' => 'tiktok', 'label' => 'TikTok'],
                     ] as $social)
                         @if (config('kingkadkahwin.social.'.$social['key']))
-                            <a class="social-link social-{{ $social['key'] }}" href="{{ config('kingkadkahwin.social.'.$social['key']) }}" target="_blank" rel="noopener noreferrer" aria-label="KingKadKahwin di {{ $social['label'] }}">
+                            <a class="social-link social-{{ $social['key'] }}" href="{{ config('kingkadkahwin.social.'.$social['key']) }}" target="_blank" rel="noopener noreferrer" aria-label="KingKadKahwin on {{ $social['label'] }}">
                                 <span aria-hidden="true">
                                     @if ($social['key'] === 'instagram')
                                         <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="5"></rect><circle cx="12" cy="12" r="4"></circle><circle cx="17.5" cy="6.5" r="1" class="social-icon-fill"></circle></svg>
@@ -169,7 +169,7 @@
         </div>
         <div class="footer-bottom">
             <span>© {{ date('Y') }} KingKadKahwin</span>
-            <span><a href="#privasi">Privasi</a> · <a href="#terma">Terma Tempahan</a> · <a href="#pemulangan">Pembatalan & Pemulangan</a></span>
+            <span><a href="#privasi">Privacy</a> · <a href="#terma">Order Terms</a> · <a href="#pemulangan">Cancellations & Refunds</a></span>
         </div>
     </footer>
     <script>

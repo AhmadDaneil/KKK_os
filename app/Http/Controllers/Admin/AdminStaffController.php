@@ -59,7 +59,7 @@ class AdminStaffController extends Controller
             'role' => $staff->role,
         ]);
 
-        return back()->with('admin_success', 'Akaun staff berjaya dicipta.');
+        return back()->with('admin_success', 'Staff account created successfully.');
     }
 
     public function update(Request $request, User $user, RecordStaffAuditLogService $auditLog): RedirectResponse
@@ -77,7 +77,7 @@ class AdminStaffController extends Controller
 
         if ($request->user()->is($user) && ($data['role'] !== User::ROLE_ADMIN || ! $data['is_active'])) {
             throw ValidationException::withMessages([
-                'is_active' => 'Anda tidak boleh menukar role atau menyahaktifkan akaun admin yang sedang digunakan.',
+                'is_active' => 'You cannot change the role or deactivate the admin account you are using.',
             ]);
         }
 
@@ -86,7 +86,7 @@ class AdminStaffController extends Controller
 
             if ($activeAdminCount <= 1) {
                 throw ValidationException::withMessages([
-                    'is_active' => 'Sekurang-kurangnya satu akaun admin aktif mesti dikekalkan.',
+                    'is_active' => 'At least one active admin account must be retained.',
                 ]);
             }
         }
@@ -100,7 +100,7 @@ class AdminStaffController extends Controller
             'after' => $user->only(['name', 'email', 'role', 'is_active', 'is_design_lead', 'is_primary_production']),
         ]);
 
-        return back()->with('admin_success', 'Maklumat staff berjaya dikemas kini.');
+        return back()->with('admin_success', 'Staff details updated successfully.');
     }
 
     public function updatePassword(Request $request, User $user, RecordStaffAuditLogService $auditLog): RedirectResponse
@@ -114,7 +114,7 @@ class AdminStaffController extends Controller
         $user->update(['password' => Hash::make($data['password'])]);
         $auditLog->record($request, 'STAFF_PASSWORD_RESET', $request->user(), $user);
 
-        return back()->with('admin_success', "Kata laluan {$user->name} berjaya ditetapkan semula.");
+        return back()->with('admin_success', "{$user->name}'s password has been reset.");
     }
 
     public function destroy(Request $request, User $user, RecordStaffAuditLogService $auditLog): RedirectResponse
@@ -123,7 +123,7 @@ class AdminStaffController extends Controller
 
         if ($request->user()->is($user)) {
             throw ValidationException::withMessages([
-                'delete_staff' => 'Anda tidak boleh memadam akaun admin yang sedang digunakan.',
+                'delete_staff' => 'You cannot delete the admin account you are using.',
             ]);
         }
 
@@ -132,7 +132,7 @@ class AdminStaffController extends Controller
 
             if ($adminCount <= 1) {
                 throw ValidationException::withMessages([
-                    'delete_staff' => 'Sekurang-kurangnya satu akaun admin mesti dikekalkan.',
+                    'delete_staff' => 'At least one admin account must be retained.',
                 ]);
             }
         }
@@ -146,7 +146,7 @@ class AdminStaffController extends Controller
 
         return redirect()
             ->route('admin.staff.index')
-            ->with('admin_success', "Akaun {$staffName} berjaya dipadam. Tugasan aktifnya kini belum di-assign.");
+            ->with('admin_success', "Account {$staffName} deleted. Its active jobs are now unassigned.");
     }
 
     private function ensureStaffUser(User $user): void

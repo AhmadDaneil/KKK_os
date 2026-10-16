@@ -45,7 +45,7 @@ class StaffDesignWorkflowController extends Controller
 
         return back()->with(
             'status',
-            'Kerja design berjaya dimulakan.'
+            'Design work started successfully.'
         );
     }
 
@@ -71,7 +71,7 @@ class StaffDesignWorkflowController extends Controller
 
         return back()->with(
             'status',
-            'Kerja pembetulan berjaya disambung.'
+            'Correction work resumed successfully.'
         );
     }
 
@@ -95,9 +95,9 @@ class StaffDesignWorkflowController extends Controller
 
             if ($missingProducts->isNotEmpty()) {
                 throw new RuntimeException(
-                    'Muat naik preview '.implode(' dan ', $missingProducts->all())
-                    .' bagi pakej '.ucfirst(strtolower($designJob->side))
-                    .' sebelum menghantar hasil design kepada pelanggan.'
+                    'Upload previews for '.implode(' and ', $missingProducts->all())
+                    .' for the '.($designJob->side === 'LELAKI' ? "groom's" : "bride's")
+                    .' package before sending the artwork to the customer.'
                 );
             }
 
@@ -119,7 +119,7 @@ class StaffDesignWorkflowController extends Controller
 
         return back()->with(
             'status',
-            'Hasil design telah diluluskan secara dalaman.'
+            'The artwork has been approved internally.'
         );
     }
 
@@ -146,10 +146,10 @@ class StaffDesignWorkflowController extends Controller
                 'max:5000',
             ],
         ], [
-            'source_artwork.*.uploaded' => 'Fail sumber tidak berjaya dimuat naik. Sila pastikan saiz fail tidak melebihi had server.',
-            'customer_preview.*.uploaded' => 'Pratonton pelanggan tidak berjaya dimuat naik. Sila pastikan saiz fail tidak melebihi had server.',
-            'banner_preview.uploaded' => 'Pratonton banner tidak berjaya dimuat naik. Sila pastikan saiz fail tidak melebihi had server.',
-            'banting_preview.uploaded' => 'Pratonton banting tidak berjaya dimuat naik. Sila pastikan saiz fail tidak melebihi had server.',
+            'source_artwork.*.uploaded' => 'The source file could not be uploaded. Ensure it is within the server file-size limit.',
+            'customer_preview.*.uploaded' => 'The customer preview could not be uploaded. Ensure it is within the server file-size limit.',
+            'banner_preview.uploaded' => 'The banner preview could not be uploaded. Ensure it is within the server file-size limit.',
+            'banting_preview.uploaded' => 'The bunting preview could not be uploaded. Ensure it is within the server file-size limit.',
         ]);
 
         /*

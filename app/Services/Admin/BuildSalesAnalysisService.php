@@ -49,7 +49,7 @@ class BuildSalesAnalysisService
             ];
         })->all();
 
-        $monthLabels = ['Jan', 'Feb', 'Mac', 'Apr', 'Mei', 'Jun', 'Jul', 'Ogo', 'Sep', 'Okt', 'Nov', 'Dis'];
+        $monthLabels = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
         $monthly = collect(range(1, 12))->map(function (int $month) use ($now, $paid, $monthLabels): array {
             return [
                 'label' => $monthLabels[$month - 1],
@@ -67,9 +67,9 @@ class BuildSalesAnalysisService
         })->all();
 
         $breakdownLabels = [
-            'BOOKING_DEPOSIT' => 'Deposit tempahan',
-            'BALANCE' => 'Bayaran baki',
-            'ARTWORK_CORRECTION' => 'Caj pembetulan',
+            'BOOKING_DEPOSIT' => 'Order deposit',
+            'BALANCE' => 'Balance payment',
+            'ARTWORK_CORRECTION' => 'Artwork correction fee',
         ];
         $breakdown = collect($breakdownLabels)->map(fn (string $label, string $type): array => [
             'type' => $type,

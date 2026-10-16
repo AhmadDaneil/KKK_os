@@ -29,13 +29,13 @@ class ResolvePackagePriceService
 
         if (! in_array($packageType, ['PUTERI_MANIS', 'JELATA'], true)) {
             throw ValidationException::withMessages([
-                'package_type' => 'Sila pilih jenis pakej yang sah.',
+                'package_type' => 'Please select a valid package type.',
             ]);
         }
 
         if (! in_array($packageCount, [1, 2], true)) {
             throw ValidationException::withMessages([
-                'package_count' => 'Bilangan pakej tidak sah.',
+                'package_count' => 'Invalid package count.',
             ]);
         }
 
@@ -57,20 +57,20 @@ class ResolvePackagePriceService
         foreach ($order->packageSides as $side) {
             if (! in_array($side->side, ['LELAKI', 'PEREMPUAN'], true)) {
                 throw ValidationException::withMessages([
-                    'card_quantity' => 'Sisi pakej tidak sah.',
+                    'card_quantity' => 'Invalid package side.',
                 ]);
             }
 
             if ($side->card_quantity === null || (int) $side->card_quantity < 1) {
                 throw ValidationException::withMessages([
-                    'card_quantity' => 'Kuantiti kad bagi setiap pihak mesti diisi.',
+                    'card_quantity' => 'The card quantity for each side is required.',
                 ]);
             }
 
             if (! in_array((int) $side->card_quantity, $allowedSideQuantities, true)) {
                 throw ValidationException::withMessages([
                     "sides.{$side->side}.card_quantity" =>
-                        'Kuantiti kad bagi pihak ini tiada dalam tier pakej yang tersedia.',
+                        'The card quantity for this side is not available in any package tier.',
                 ]);
             }
 
@@ -84,7 +84,7 @@ class ResolvePackagePriceService
 
         if (! $expectedSides) {
             throw ValidationException::withMessages([
-                'card_quantity' => 'Kuantiti kad bagi setiap pihak belum lengkap.',
+                'card_quantity' => 'The card quantity for each side is incomplete.',
             ]);
         }
 
@@ -92,7 +92,7 @@ class ResolvePackagePriceService
 
         if ((int) $order->card_quantity !== $totalQuantity) {
             throw ValidationException::withMessages([
-                'card_quantity' => 'Jumlah kad tidak sepadan dengan kuantiti setiap pihak.',
+                'card_quantity' => 'The total card quantity does not match the quantities for each side.',
             ]);
         }
 
@@ -112,7 +112,7 @@ class ResolvePackagePriceService
 
         if (! $item) {
             throw ValidationException::withMessages([
-                'card_quantity' => 'Gabungan kuantiti ini tidak sepadan dengan tier harga yang tersedia.',
+                'card_quantity' => 'This quantity combination does not match an available price tier.',
             ]);
         }
 
@@ -120,7 +120,7 @@ class ResolvePackagePriceService
 
         if (($metadata['package_type'] ?? null) !== $packageType) {
             throw ValidationException::withMessages([
-                'package_type' => 'Item harga katalog tidak sepadan dengan jenis pakej.',
+                'package_type' => 'The catalog price item does not match the package type.',
             ]);
         }
 
@@ -130,7 +130,7 @@ class ResolvePackagePriceService
                 || ($metadata['side_quantities'] ?? null) !== [30, 50]
             ) {
                 throw ValidationException::withMessages([
-                    'card_quantity' => 'Kombinasi khas 30 + 50 tidak dikonfigurasi dengan betul.',
+                    'card_quantity' => 'The special 30 + 50 combination is not configured correctly.',
                 ]);
             }
         } else {
@@ -144,7 +144,7 @@ class ResolvePackagePriceService
                 || ! in_array($packageCount, $allowedPackageCounts, true)
             ) {
                 throw ValidationException::withMessages([
-                    'card_quantity' => 'Tier harga katalog tidak sepadan dengan kuantiti pesanan.',
+                    'card_quantity' => 'The catalog price tier does not match the order quantity.',
                 ]);
             }
         }

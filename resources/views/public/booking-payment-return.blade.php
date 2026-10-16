@@ -1,20 +1,20 @@
 <!DOCTYPE html>
-<html lang="ms">
+<html lang="en">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Status Pembayaran — KingKadKahwin</title>
+    <title>Payment Status — KingKadKahwin</title>
 </head>
 <body>
     <main>
-        <h1>Status pembayaran booking</h1>
+        <h1>Booking payment status</h1>
         @if ($payment->status === 'PAID')
-            <p>Pembayaran telah berjaya.</p>
-            <p>Rujukan pelanggan: <strong>{{ $order->customer_reference }}</strong></p>
-            <p><a href="{{ route('orders.dashboard', ['orderId' => $order->order_id]) }}">Teruskan ke dashboard tempahan</a></p>
-            <p>Simpan rujukan pelanggan ini. Anda juga boleh menggunakannya bersama nombor telefon untuk mengakses tempahan semula.</p>
+            <p>Payment was successful.</p>
+            <p>Customer reference: <strong>{{ $order->customer_reference }}</strong></p>
+            <p><a href="{{ route('orders.dashboard', ['orderId' => $order->order_id]) }}">Continue to your order dashboard</a></p>
+            <p>Save this customer reference. You can also use it with your phone number to access your order again.</p>
         @else
-            <p>Pembayaran sedang disahkan. Sila semak semula sebentar lagi.</p>
+            <p>Your payment is being confirmed. Please check again shortly.</p>
         @endif
     </main>
 </body>

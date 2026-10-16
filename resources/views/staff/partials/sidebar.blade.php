@@ -8,9 +8,9 @@
     $canViewDesignQueue = $canMonitorOperations || $staffUser->hasStaffRole(\App\Models\User::ROLE_DESIGNER);
     $canViewProductionQueue = $canMonitorOperations || $staffUser->hasStaffRole(\App\Models\User::ROLE_PRODUCTION);
     $roleLabel = $staffUser->isAdmin() ? 'Admin' : match ($staffUser->role) {
-        \App\Models\User::ROLE_OM => 'Pengurusan Operasi',
-        \App\Models\User::ROLE_CUSTOMER_SERVICE => 'Khidmat Pelanggan',
-        \App\Models\User::ROLE_PRODUCTION => 'Pengeluaran',
+        \App\Models\User::ROLE_OM => 'Operations Management',
+        \App\Models\User::ROLE_CUSTOMER_SERVICE => 'Customer Service',
+        \App\Models\User::ROLE_PRODUCTION => 'Production',
         default => str_replace('_', ' ', $staffUser->role),
     };
 @endphp
@@ -21,7 +21,7 @@
         <span><strong>KKK OS</strong><small>{{ $staffUser->isAdmin() ? __('ui.operations') : __('ui.staff_operations') }}</small></span>
     </a>
 
-    <nav class="staff-nav" aria-label="Navigasi staf">
+    <nav class="staff-nav" aria-label="Staff navigation">
         @if ($isAdminPortal)
             <section class="staff-nav-section">
                 <h2>{{ __('ui.management') }}</h2>
@@ -57,7 +57,7 @@
 
         @if ($canViewProductionQueue || $canMonitorOperations)
             <section class="staff-nav-section">
-                <h2>Pengeluaran</h2>
+                <h2>Production</h2>
                 @if ($canViewProductionQueue)
                 <a href="{{ route($ordersIndexRoute, ['workstream' => 'printing']) }}" @class(['staff-nav-link', 'is-active' => $activeWorkstream === 'printing'])><span class="staff-nav-icon" aria-hidden="true">CT</span>{{ __('ui.production_queue') }}</a>
                 @endif
@@ -67,7 +67,7 @@
                 @endif
 
                 @if ($canMonitorOperations)
-                <a href="{{ route($ordersIndexRoute, ['workstream' => 'fulfilment']) }}" @class(['staff-nav-link', 'is-active' => $activeWorkstream === 'fulfilment'])><span class="staff-nav-icon" aria-hidden="true">PT</span>Pemenuhan Tempahan</a>
+                <a href="{{ route($ordersIndexRoute, ['workstream' => 'fulfilment']) }}" @class(['staff-nav-link', 'is-active' => $activeWorkstream === 'fulfilment'])><span class="staff-nav-icon" aria-hidden="true">PT</span>Order Fulfilment</a>
                 @endif
             </section>
         @endif
@@ -83,12 +83,12 @@
                 <label for="staff-sidebar-theme">{{ __('ui.display_theme') }}</label>
                 <div>
                     <select id="staff-sidebar-theme" name="staff_theme">
-                        <option value="default" @selected($staffUser->staff_theme === 'default')>Hijau</option>
-                        <option value="modern_blue" @selected($staffUser->staff_theme === 'modern_blue')>Biru</option>
+                        <option value="default" @selected($staffUser->staff_theme === 'default')>Green</option>
+                        <option value="modern_blue" @selected($staffUser->staff_theme === 'modern_blue')>Blue</option>
                         <option value="indigo_violet" @selected($staffUser->staff_theme === 'indigo_violet')>Indigo</option>
-                        <option value="warm_orange" @selected($staffUser->staff_theme === 'warm_orange')>Jingga</option>
-                        <option value="amber_gold" @selected($staffUser->staff_theme === 'amber_gold')>Emas</option>
-                        <option value="dusty_rose" @selected($staffUser->staff_theme === 'dusty_rose')>Limau</option>
+                        <option value="warm_orange" @selected($staffUser->staff_theme === 'warm_orange')>Orange</option>
+                        <option value="amber_gold" @selected($staffUser->staff_theme === 'amber_gold')>Gold</option>
+                        <option value="dusty_rose" @selected($staffUser->staff_theme === 'dusty_rose')>Lime</option>
                         <option value="rose_burgundy" @selected($staffUser->staff_theme === 'rose_burgundy')>Burgundy</option>
                     </select>
                     <button type="submit">{{ __('ui.save') }}</button>

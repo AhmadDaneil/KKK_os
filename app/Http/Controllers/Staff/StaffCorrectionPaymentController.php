@@ -32,7 +32,7 @@ class StaffCorrectionPaymentController extends Controller
             $payment->events()->create(['event_type' => 'CORRECTION_PAYMENT_APPROVED', 'payload' => ['actor_user_id' => $request->user()->id], 'occurred_at' => now()]);
         });
 
-        return back()->with('status', 'Bayaran RM10 disahkan. Designer boleh memulakan pembetulan.');
+        return back()->with('status', 'The RM10 payment is confirmed. The designer can begin the correction.');
     }
 
     public function reject(Request $request, PaymentTransaction $payment): RedirectResponse
@@ -51,6 +51,6 @@ class StaffCorrectionPaymentController extends Controller
             $payment->events()->create(['event_type' => 'CORRECTION_PAYMENT_REJECTED', 'payload' => ['actor_user_id' => $request->user()->id, 'reason' => $validated['rejection_reason']], 'occurred_at' => now()]);
         });
 
-        return back()->with('status', 'Resit pembetulan ditolak. Customer boleh menghantar resit baharu.');
+        return back()->with('status', 'The correction receipt was rejected. The customer may submit a new receipt.');
     }
 }

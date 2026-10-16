@@ -36,7 +36,7 @@ class RequestArtworkCorrectionService
 
             if ($comment === '') {
                 throw ValidationException::withMessages([
-                    'correction_comment' => 'Sila nyatakan pembetulan yang diperlukan.',
+                    'correction_comment' => 'Please describe the required correction.',
                 ]);
             }
 
