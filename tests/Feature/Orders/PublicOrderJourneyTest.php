@@ -224,6 +224,49 @@ class PublicOrderJourneyTest extends TestCase
             ->assertSee('Tempahan anda telah siap dan akan diteruskan ke proses pembungkusan.');
     }
 
+    public function test_printing_order_shows_progress_button_without_granting_private_access(): void
+    {
+        $order = app(CreateOrderService::class)->create([
+            'package_count' => 1,
+            'side' => 'LELAKI',
+            'customer_phone' => '0123456789',
+        ]);
+        $order->update(['status' => 'PRINTING']);
+
+        $this->post(route('public.orders.progress.lookup'), [
+            'order_id' => $order->order_id,
+        ])
+            ->assertOk()
+            ->assertSee('Lihat progress')
+            ->assertSee('href="'.route('orders.access.create').'"', false);
+
+        $this->get(route('orders.dashboard', ['orderId' => $order->order_id]))
+            ->assertNotFound();
+    }
+
+    public function test_customer_with_an_active_two_package_session_can_open_progress_directly(): void
+    {
+        $order = app(CreateOrderService::class)->create([
+            'package_count' => 2,
+            'package_type' => 'PUTERI_MANIS',
+            'package_format' => 'SEPARATE',
+            'first_event_side' => 'LELAKI',
+            'customer_phone' => '0123456789',
+        ]);
+        $order->update(['status' => 'COMPLETED']);
+
+        $secureLink = app(GenerateOrderAccessLinkService::class)->generate($order);
+        $this->get($secureLink)
+            ->assertRedirect(route('orders.dashboard', ['orderId' => $order->order_id]));
+
+        $this->post(route('public.orders.progress.lookup'), [
+            'order_id' => $order->order_id,
+        ])
+            ->assertOk()
+            ->assertSee('Lihat progress')
+            ->assertSee('href="'.route('orders.dashboard', ['orderId' => $order->order_id]).'"', false);
+    }
+
     public function test_unknown_order_id_returns_a_clear_error(): void
     {
         $this->from(route('public.orders.progress'))
