@@ -71,7 +71,7 @@ class CustomerDashboardAccessController extends Controller
             RateLimiter::hit($key, 900);
             $this->audit($request, $order, $identifier, $phone, 'FAILED');
 
-            return back()->withInput(['customer_reference' => $reference])->withErrors([
+            return back()->withInput(['customer_reference' => $identifier])->withErrors([
                 'customer_reference' => 'The customer reference and phone number do not match.',
             ]);
         }
