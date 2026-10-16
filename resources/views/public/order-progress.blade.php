@@ -72,6 +72,13 @@
                     <h3>{{ $progress['label'] }}</h3>
                     <p>{{ $progress['message'] }}</p>
                 @endif
+                <div class="public-artwork-action">
+                    <div>
+                        <strong>Progress &amp; proofing tempahan</strong>
+                        <span>Lihat kemas kini dan proofing yang telah dikongsi untuk tempahan anda.</span>
+                    </div>
+                    <a class="button button-primary" href="{{ ($canAccessOrder ?? false) ? route('orders.dashboard', ['orderId' => $orderId]) : route('orders.access.create', ['order_id' => $orderId]) }}">Lihat progress</a>
+                </div>
                 @if ($deposit)
                     <div class="deposit-public-status" data-status="{{ strtolower($deposit['status']) }}">
                         <span>Deposit</span>

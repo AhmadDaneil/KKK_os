@@ -21,5 +21,9 @@
             <button type="submit">Access order</button>
         </form>
     </main>
+
+    @include('public.partials.customer-service')
+    @include('public.partials.theme-toggle')
+    @include('partials.malay-validation')
 </body>
 </html>

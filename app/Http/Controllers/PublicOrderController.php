@@ -133,7 +133,7 @@ class PublicOrderController extends Controller
             'balanceBillplzAmount' => $order->pricingSnapshot?->outstanding_amount,
             'balanceQrImage' => (string) config('kingkadkahwin.balance.qr_image'),
             'artworkReady' => $artworkReady,
-            'canAccessArtwork' => $sessionAccess->hasAccess($request, $order),
+            'canAccessOrder' => $sessionAccess->hasAccess($request, $order),
         ]);
     }
 }

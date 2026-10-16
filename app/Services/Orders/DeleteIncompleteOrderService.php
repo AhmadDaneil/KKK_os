@@ -3,6 +3,7 @@
 namespace App\Services\Orders;
 
 use App\Models\Order;
+use App\Models\PaymentTransaction;
 use Illuminate\Support\Facades\DB;
 use RuntimeException;
 
@@ -16,7 +17,11 @@ class DeleteIncompleteOrderService
             throw new RuntimeException('Only orders with incomplete details can be deleted.');
         }
 
-        if ($order->payments()->exists()) {
+        $hasProtectedPayment = $order->payments()
+            ->get()
+            ->contains(fn (PaymentTransaction $payment): bool => ! $this->isDiscardableFailedCheckout($payment));
+
+        if ($hasProtectedPayment) {
             throw new RuntimeException(
                 'Orders with payment transactions cannot be deleted. Please cancel or archive them instead.'
             );
@@ -61,5 +66,14 @@ class DeleteIncompleteOrderService
 
             $order->delete();
         });
+    }
+
+    private function isDiscardableFailedCheckout(PaymentTransaction $payment): bool
+    {
+        return $payment->provider === 'BILLPLZ'
+            && $payment->status === 'FAILED'
+            && $payment->provider_reference === null
+            && $payment->paid_at === null
+            && data_get($payment->metadata, 'billplz.checkout_status') === 'FAILED';
     }
 }

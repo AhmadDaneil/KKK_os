@@ -125,8 +125,10 @@
                     </li>
                 @endforeach
             </ol>
-        </section>
-    @endif
+        @else
+            <p class="customer-progress-updates-empty">Belum ada progress atau proofing yang dikongsi untuk tempahan ini.</p>
+        @endif
+    </section>
     @if ($order->fulfilmentJob?->method === 'COURIER' && $order->fulfilmentJob?->tracking_number)
         <div class="customer-tracking-card"><span>{{ __('ui.shipping_information') }}</span><strong>{{ $order->fulfilmentJob->courier_provider ?: 'Courier' }}</strong><code>{{ $order->fulfilmentJob->tracking_number }}</code></div>
     @endif

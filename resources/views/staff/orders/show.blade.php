@@ -136,6 +136,21 @@
                             Download Invoice
                         </a>
                     @endif
+                    @if ($order->status === 'DETAILS_INCOMPLETE' && auth()->user()->isOperationManagement())
+                        <form
+                            method="POST"
+                            action="{{ route($operationRoutePrefix.'orders.destroy', $order) }}"
+                            class="js-staff-confirmation-form"
+                            data-confirm-title="Padam tempahan {{ $order->order_id }}?"
+                            data-confirm-message="Semua maklumat tempahan ini akan dipadam secara kekal. Tindakan ini tidak boleh dibuat asal."
+                            data-confirm-button="Ya, padam tempahan"
+                            data-confirm-tone="danger"
+                        >
+                            @csrf
+                            @method('DELETE')
+                            <button class="staff-button staff-button-danger" type="submit">Delete order</button>
+                        </form>
+                    @endif
                 </div>
             </div>
 
