@@ -1233,6 +1233,91 @@ html[data-customer-theme="dark"] body.brand-order-dashboard .order-status-messag
     color: #f0e5cf !important;
 }
 
+/* Keep dashboard notices and progress empty states readable in both themes. */
+body.brand-order-dashboard .order-status-message {
+    border-color: #dfd0aa;
+    color: #4f452f;
+    background: #fbf7ed;
+}
+
+body.brand-order-dashboard .customer-progress-updates {
+    border-color: #dfd0aa;
+    color: #403723;
+    background: #fbf8f0;
+}
+
+body.brand-order-dashboard .customer-progress-updates-heading span {
+    color: #80601f;
+}
+
+body.brand-order-dashboard .customer-progress-updates-heading h2 {
+    color: #342c1d;
+}
+
+body.brand-order-dashboard .customer-progress-updates-heading p {
+    color: #625b4d;
+}
+
+body.brand-order-dashboard .customer-progress-updates li {
+    border-color: #e3d8ba;
+    border-left-color: #9a7126;
+    background: #fffdf8;
+}
+
+body.brand-order-dashboard .customer-progress-updates time {
+    color: #6d6659;
+}
+
+body.brand-order-dashboard .customer-progress-updates-empty {
+    border-color: #d7c8a3;
+    color: #5d574b;
+    background: #fffdf8;
+}
+
+html[data-customer-theme="dark"] body.brand-order-dashboard .customer-progress-updates {
+    border-color: #6b5934 !important;
+    color: #f4eddb !important;
+    background: #302817 !important;
+}
+
+html[data-customer-theme="dark"] body.brand-order-dashboard .customer-progress-updates-heading span {
+    color: #e0b95c !important;
+}
+
+html[data-customer-theme="dark"] body.brand-order-dashboard .customer-progress-updates-heading h2 {
+    color: #f4eddb !important;
+}
+
+html[data-customer-theme="dark"] body.brand-order-dashboard .customer-progress-updates-heading p {
+    color: #d9c9a7 !important;
+}
+
+html[data-customer-theme="dark"] body.brand-order-dashboard .customer-progress-updates li {
+    border-color: #6b5934 !important;
+    border-left-color: #e0b95c !important;
+    color: #f4eddb !important;
+    background: #3b301d !important;
+}
+
+html[data-customer-theme="dark"] body.brand-order-dashboard .customer-progress-updates time {
+    color: #d1c4a7 !important;
+}
+
+html[data-customer-theme="dark"] body.brand-order-dashboard .customer-progress-updates a {
+    color: #302817 !important;
+    background: #e0b95c !important;
+}
+
+html[data-customer-theme="dark"] body.brand-order-dashboard .customer-progress-updates a:hover {
+    background: #cba247 !important;
+}
+
+html[data-customer-theme="dark"] body.brand-order-dashboard .customer-progress-updates-empty {
+    border-color: #8c7546 !important;
+    color: #e5d8bc !important;
+    background: #3b301d !important;
+}
+
 body.brand-order-dashboard :is(.live-preview-toggle small, .live-preview-heading>span, .preview-note) {
     font-size: .75rem;
     line-height: 1.5;
