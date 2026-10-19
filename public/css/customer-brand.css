@@ -1354,3 +1354,175 @@ html[data-customer-theme="dark"] body.brand-order-dashboard .progress-panel[data
 html[data-customer-theme="dark"] body.brand-order-dashboard .progress-panel[data-progress-tone="green"] {
     --progress-color: #e0b95c;
 }
+
+/* Secure order access follows the customer journey styling without exposing order data. */
+body.brand-order-access .access-page {
+    min-height: calc(100vh - 150px);
+}
+
+body.brand-order-access .access-intro {
+    max-width: 430px;
+}
+
+body.brand-order-access .access-intro h1 {
+    margin: 10px 0 20px;
+    font-size: clamp(2.8rem, 5vw, 4.8rem);
+    line-height: .96;
+}
+
+body.brand-order-access .access-assurance {
+    display: flex;
+    margin-top: 28px;
+    padding: 17px 18px;
+    border: 1px solid var(--brand-line);
+    border-radius: 12px;
+    color: var(--brand-muted);
+    background: rgba(255, 253, 248, .72);
+    align-items: flex-start;
+    gap: 12px;
+}
+
+body.brand-order-access .access-assurance > span {
+    display: grid;
+    width: 27px;
+    height: 27px;
+    border-radius: 50%;
+    color: #fff;
+    background: var(--brand-green);
+    flex: 0 0 auto;
+    font-weight: 800;
+    place-items: center;
+}
+
+body.brand-order-access .access-assurance p {
+    margin: 0;
+    font-size: .86rem;
+    line-height: 1.55;
+}
+
+body.brand-order-access .access-assurance strong {
+    color: var(--brand-ink);
+}
+
+body.brand-order-access .access-card {
+    position: relative;
+    overflow: hidden;
+}
+
+body.brand-order-access .access-card::before {
+    position: absolute;
+    top: 0;
+    right: 0;
+    left: 0;
+    height: 5px;
+    background: linear-gradient(90deg, var(--brand-green), var(--brand-gold));
+    content: "";
+}
+
+body.brand-order-access .access-form-heading {
+    margin-bottom: 25px;
+    padding-bottom: 22px;
+    border-bottom: 1px solid var(--brand-line);
+}
+
+body.brand-order-access .access-form-heading h2 {
+    margin: 5px 0 8px;
+    font-family: Georgia, 'Times New Roman', serif;
+    font-size: clamp(1.7rem, 3vw, 2.25rem);
+    line-height: 1.1;
+}
+
+body.brand-order-access .access-form-heading p:last-child {
+    margin: 0;
+    color: var(--brand-muted);
+    font-size: .9rem;
+    line-height: 1.55;
+}
+
+body.brand-order-access .access-card form > label {
+    margin-top: 18px;
+}
+
+body.brand-order-access .access-card input[readonly] {
+    color: #5d543f;
+    background: #f3ecda;
+    cursor: default;
+}
+
+body.brand-order-access .access-field-note {
+    margin: 7px 0 0;
+    color: var(--brand-muted);
+    font-size: .75rem;
+    line-height: 1.45;
+}
+
+body.brand-order-access .form-alert {
+    display: grid;
+    border: 1px solid #e7b9b4;
+    gap: 4px;
+}
+
+body.brand-order-access .form-alert span {
+    font-size: .86rem;
+}
+
+html[data-customer-theme="dark"] body.brand-order-access .access-assurance {
+    border-color: #6b5934;
+    color: #d9c9a7;
+    background: rgba(59, 48, 29, .78);
+}
+
+html[data-customer-theme="dark"] body.brand-order-access .access-assurance strong,
+html[data-customer-theme="dark"] body.brand-order-access .access-form-heading h2 {
+    color: #f4eddb;
+}
+
+html[data-customer-theme="dark"] body.brand-order-access .access-form-heading {
+    border-color: #6b5934;
+}
+
+html[data-customer-theme="dark"] body.brand-order-access .access-form-heading p:last-child,
+html[data-customer-theme="dark"] body.brand-order-access .access-field-note {
+    color: #d9c9a7;
+}
+
+html[data-customer-theme="dark"] body.brand-order-access .access-card input[readonly] {
+    color: #e6d9bd;
+    background: #2d2517;
+}
+
+html[data-customer-theme="dark"] body.brand-order-access .form-alert {
+    border-color: #9e5e59;
+    color: #ffd6d2;
+    background: #482925;
+}
+
+@media (max-width: 850px) {
+    body.brand-order-access .access-page {
+        padding-top: 25px;
+        align-items: start;
+    }
+
+    body.brand-order-access .access-intro {
+        max-width: 650px;
+    }
+
+    body.brand-order-access .access-intro h1 {
+        font-size: clamp(2.65rem, 10vw, 4rem);
+    }
+}
+
+@media (max-width: 560px) {
+    body.brand-order-access .compact-header nav {
+        justify-content: stretch;
+    }
+
+    body.brand-order-access .compact-header .header-link {
+        flex: 1;
+        text-align: center;
+    }
+
+    body.brand-order-access .access-assurance {
+        margin-top: 20px;
+    }
+}
