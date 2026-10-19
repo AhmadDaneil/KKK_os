@@ -486,7 +486,7 @@
                     </div>
                     <div>
                         <label>Hijri Date</label>
-                        <input name="sides[{{ $side }}][event][hijri_date]" placeholder="Example: 4 Dhu al-Hijjah 1446 AH" value="{{ old("sides.$side.event.hijri_date", $event?->hijri_date) }}" data-hijri-date>
+                        <input name="sides[{{ $side }}][event][hijri_date]" placeholder="Example: 4 Zulhijjah 1446H" value="{{ old("sides.$side.event.hijri_date", $event?->hijri_date) }}" data-hijri-date>
                         <p class="date-picker-help" data-hijri-date-help>Select a day first to filter matching Hijri dates.</p>
                     </div>
                     <div><label>Meal Time</label><input type="time" name="sides[{{ $side }}][event][meal_time]" value="{{ old("sides.$side.event.meal_time", $event?->meal_time ? substr($event->meal_time, 0, 5) : '') }}"></div>

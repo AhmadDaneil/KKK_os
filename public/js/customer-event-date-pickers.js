@@ -8,8 +8,8 @@
         'July', 'August', 'September', 'October', 'November', 'December'
     ];
     const HIJRI_MONTHS = [
-        'Muharram', 'Safar', 'Rabi al-Awwal', 'Rabi al-Thani', 'Jumada al-Awwal', 'Jumada al-Thani',
-        'Rajab', 'Shaban', 'Ramadan', 'Shawwal', 'Dhu al-Qadah', 'Dhu al-Hijjah'
+        'Muharam', 'Safar', 'Rabiulawal', 'Rabiulakhir', 'Jamadilawal', 'Jamadilakhir',
+        'Rejab', 'Syaaban', 'Ramadan', 'Syawal', 'Zulkaedah', 'Zulhijjah'
     ];
     const JAKIM_CALENDAR_URL = document.currentScript?.dataset.calendarUrl || '';
 
