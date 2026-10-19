@@ -6,6 +6,7 @@ use App\Models\Order;
 use App\Models\PaymentTransaction;
 use App\Services\Orders\ResolveBookingAmountService;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 
@@ -89,17 +90,28 @@ class CreateBillplzBookingPaymentService
         $payment = $checkout['payment'];
         try {
             $bill = $this->gateway->createPayment($payment);
-        } catch (BillplzPaymentException) {
-            DB::transaction(function () use ($payment): void {
+        } catch (BillplzPaymentException $exception) {
+            DB::transaction(function () use ($payment, $exception): void {
                 $locked = PaymentTransaction::query()->whereKey($payment->id)->lockForUpdate()->firstOrFail();
                 $metadata = $locked->metadata ?? [];
                 $metadata['billplz']['checkout_status'] = 'FAILED';
                 $locked->update(['status' => 'FAILED', 'metadata' => $metadata]);
                 $locked->events()->create([
                     'event_type' => 'BILLPLZ_BILL_CREATION_FAILED',
+                    'payload' => [
+                        'reason' => $exception->reason,
+                        'provider_status' => $exception->providerStatus,
+                    ],
                     'occurred_at' => now(),
                 ]);
             });
+
+            Log::warning('Billplz booking bill creation failed.', [
+                'order_id' => $payment->order_id,
+                'payment_id' => $payment->id,
+                'reason' => $exception->reason,
+                'provider_status' => $exception->providerStatus,
+            ]);
 
             throw ValidationException::withMessages([
                 'payment' => 'Pembayaran belum dapat dimulakan. Sila cuba lagi.',

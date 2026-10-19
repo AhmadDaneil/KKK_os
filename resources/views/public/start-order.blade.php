@@ -26,6 +26,7 @@
         <form id="start-order-form" class="public-form" method="POST" action="{{ route('public.orders.store') }}">
             @csrf
             @if ($errors->any())<div class="form-alert" role="alert">Sila semak semula maklumat yang ditandakan.</div>@endif
+            @error('payment')<p class="field-error payment-error" role="alert">{{ $message }}</p>@enderror
 
             <fieldset>
                 <legend>Bilangan pakej</legend>

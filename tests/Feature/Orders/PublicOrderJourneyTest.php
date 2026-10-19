@@ -138,6 +138,39 @@ class PublicOrderJourneyTest extends TestCase
         $this->assertCount(1, $order->packageSides);
     }
 
+    public function test_failed_bill_creation_displays_payment_error_and_reuses_the_same_order(): void
+    {
+        Http::fake(['www.billplz-sandbox.com/*' => Http::response([
+            'error' => ['type' => 'InvalidCollection'],
+        ], 422)]);
+
+        $input = [
+            'package_count' => 1,
+            'package_type' => 'PUTERI_MANIS',
+            'side' => 'LELAKI',
+            'customer_name' => 'Cubaan Semula',
+            'customer_email' => 'retry@example.com',
+            'customer_phone' => '01222124456',
+        ];
+
+        $this->followingRedirects()
+            ->post(route('public.orders.store'), $input)
+            ->assertOk()
+            ->assertSee('Pembayaran belum dapat dimulakan. Sila cuba lagi.');
+
+        $this->assertDatabaseCount('orders', 1);
+        $this->assertDatabaseCount('payment_transactions', 1);
+        $this->assertDatabaseHas('payment_events', [
+            'event_type' => 'BILLPLZ_BILL_CREATION_FAILED',
+        ]);
+
+        $this->post(route('public.orders.store'), $input)
+            ->assertSessionHasErrors('payment');
+
+        $this->assertDatabaseCount('orders', 1);
+        $this->assertDatabaseCount('payment_transactions', 2);
+    }
+
     public function test_customer_can_create_folded_two_package_order_with_bride_side_first(): void
     {
         $response = $this->post(route('public.orders.store'), [

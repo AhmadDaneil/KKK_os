@@ -13,6 +13,8 @@ class CustomerOrderSessionAccessService
 
     private const ACTIVE_DRAFT_SESSION_KEY = 'kkk.customer_active_draft';
 
+    private const PENDING_BOOKING_SESSION_KEY = 'kkk.pending_booking_checkout';
+
     public function establishFromToken(
         Request $request,
         string $orderId,
@@ -125,6 +127,41 @@ class CustomerOrderSessionAccessService
         }
 
         return $order;
+    }
+
+    public function pendingBooking(Request $request, string $fingerprint): ?Order
+    {
+        $pending = $request->session()->get(self::PENDING_BOOKING_SESSION_KEY);
+
+        if (! is_array($pending)
+            || ! hash_equals((string) ($pending['fingerprint'] ?? ''), $fingerprint)
+            || CarbonImmutable::parse($pending['expires_at'] ?? now()->subMinute())->isPast()) {
+            $request->session()->forget(self::PENDING_BOOKING_SESSION_KEY);
+
+            return null;
+        }
+
+        $order = Order::query()
+            ->whereKey($pending['order_fk'] ?? 0)
+            ->where('order_id', $pending['order_id'] ?? '')
+            ->where('status', 'DETAILS_INCOMPLETE')
+            ->first();
+
+        if (! $order) {
+            $request->session()->forget(self::PENDING_BOOKING_SESSION_KEY);
+        }
+
+        return $order;
+    }
+
+    public function rememberPendingBooking(Request $request, Order $order, string $fingerprint): void
+    {
+        $request->session()->put(self::PENDING_BOOKING_SESSION_KEY, [
+            'order_fk' => $order->id,
+            'order_id' => $order->order_id,
+            'fingerprint' => $fingerprint,
+            'expires_at' => now()->addHours(2)->toIso8601String(),
+        ]);
     }
 
     private function sessionKey(string $orderId): string

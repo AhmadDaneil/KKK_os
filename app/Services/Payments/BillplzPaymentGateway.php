@@ -24,13 +24,13 @@ class BillplzPaymentGateway implements PaymentGatewayContract
     {
         if (! in_array($payment->payment_type, ['BOOKING_DEPOSIT', 'BALANCE'], true)
             || $payment->provider !== 'BILLPLZ') {
-            throw new BillplzPaymentException('Jenis pembayaran dalam talian tidak disokong.');
+            throw new BillplzPaymentException('Jenis pembayaran dalam talian tidak disokong.', 'unsupported_payment');
         }
 
         $payment->loadMissing('order');
 
-        $secretKey = (string) config('services.billplz.secret_key', '');
-        $collectionId = (string) config('services.billplz.collection_id', '');
+        $secretKey = trim((string) config('services.billplz.secret_key', ''));
+        $collectionId = trim((string) config('services.billplz.collection_id', ''));
         $baseUrl = rtrim((string) config('services.billplz.base_url', ''), '/');
         $baseHost = parse_url($baseUrl, PHP_URL_HOST);
         $baseScheme = parse_url($baseUrl, PHP_URL_SCHEME);
@@ -41,12 +41,12 @@ class BillplzPaymentGateway implements PaymentGatewayContract
             || $baseScheme !== 'https'
             || ! in_array($baseHost, ['www.billplz-sandbox.com', 'www.billplz.com'], true)
         ) {
-            throw new BillplzPaymentException('Konfigurasi Billplz Sandbox belum lengkap atau tidak sah.');
+            throw new BillplzPaymentException('Konfigurasi Billplz Sandbox belum lengkap atau tidak sah.', 'invalid_configuration');
         }
 
         $appUrl = rtrim((string) config('app.url', ''), '/');
         if (parse_url($appUrl, PHP_URL_SCHEME) !== 'https' || parse_url($appUrl, PHP_URL_HOST) === null) {
-            throw new BillplzPaymentException('URL aplikasi mesti menggunakan HTTPS untuk pembayaran Billplz.');
+            throw new BillplzPaymentException('URL aplikasi mesti menggunakan HTTPS untuk pembayaran Billplz.', 'invalid_app_url');
         }
 
         $amountSen = $this->toSen((string) $payment->amount);
@@ -79,11 +79,15 @@ class BillplzPaymentGateway implements PaymentGatewayContract
                 ->timeout(20)
                 ->post($baseUrl.'/v3/bills', $payload);
         } catch (ConnectionException) {
-            throw new BillplzPaymentException('Sambungan ke Billplz Sandbox gagal.');
+            throw new BillplzPaymentException('Sambungan ke Billplz Sandbox gagal.', 'connection_failed');
         }
 
         if (! $response->successful()) {
-            throw new BillplzPaymentException('Billplz Sandbox tidak dapat mencipta bil pembayaran.');
+            throw new BillplzPaymentException(
+                'Billplz Sandbox tidak dapat mencipta bil pembayaran.',
+                'provider_rejected',
+                $response->status(),
+            );
         }
 
         $bill = $response->json();
@@ -96,6 +100,13 @@ class BillplzPaymentGateway implements PaymentGatewayContract
         $paymentUrlHost = parse_url($paymentUrl, PHP_URL_HOST);
         $paymentUrlScheme = parse_url($paymentUrl, PHP_URL_SCHEME);
 
+        // Billplz Sandbox has historically returned an http bill URL even though
+        // the same trusted host supports HTTPS. Upgrade only this allow-listed URL.
+        if ($paymentUrlScheme === 'http' && $paymentUrlHost === $baseHost) {
+            $paymentUrl = 'https://'.substr($paymentUrl, strlen('http://'));
+            $paymentUrlScheme = 'https';
+        }
+
         if (
             $billId === ''
             || $paymentUrl === ''
@@ -104,7 +115,7 @@ class BillplzPaymentGateway implements PaymentGatewayContract
             || (string) ($bill['collection_id'] ?? '') !== $collectionId
             || (int) ($bill['amount'] ?? 0) !== $amountSen
         ) {
-            throw new BillplzPaymentException('Respons bil daripada Billplz Sandbox tidak sah.');
+            throw new BillplzPaymentException('Respons bil daripada Billplz Sandbox tidak sah.', 'invalid_provider_response');
         }
 
         return [
@@ -126,7 +137,7 @@ class BillplzPaymentGateway implements PaymentGatewayContract
     private function toSen(string $amount): int
     {
         if (! preg_match('/^(0|[1-9]\d*)\.([0-9]{2})$/', $amount, $matches)) {
-            throw new BillplzPaymentException('Amaun bayaran baki tidak sah.');
+            throw new BillplzPaymentException('Amaun bayaran baki tidak sah.', 'invalid_amount');
         }
 
         return ((int) $matches[1] * 100) + (int) $matches[2];

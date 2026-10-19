@@ -69,6 +69,25 @@ class BookingPaymentJourneyTest extends TestCase
         $this->assertSame('https://www.billplz-sandbox.com/bills/booking-two', $checkout['payment_url']);
     }
 
+    public function test_trusted_http_sandbox_bill_url_is_upgraded_to_https(): void
+    {
+        $order = $this->createOrder(1);
+        Http::preventStrayRequests();
+        Http::fake(['www.billplz-sandbox.com/*' => Http::response([
+            'id' => 'booking-http-url',
+            'collection_id' => 'sandbox-collection',
+            'amount' => 5000,
+            'url' => 'http://www.billplz-sandbox.com/bills/booking-http-url',
+        ])]);
+
+        $checkout = app(CreateBillplzBookingPaymentService::class)->create($order);
+
+        $this->assertSame(
+            'https://www.billplz-sandbox.com/bills/booking-http-url',
+            $checkout['payment_url'],
+        );
+    }
+
     public function test_duplicate_callback_is_idempotent(): void
     {
         $order = $this->createOrder(1);

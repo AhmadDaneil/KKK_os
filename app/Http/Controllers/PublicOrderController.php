@@ -31,6 +31,7 @@ class PublicOrderController extends Controller
         Request $request,
         CreateOrderService $createOrder,
         NormalizeCustomerPhoneService $phones,
+        CustomerOrderSessionAccessService $sessionAccess,
         CreateBillplzBookingPaymentService $bookingPayment,
     ): RedirectResponse {
         $validated = $request->validate([
@@ -46,7 +47,21 @@ class PublicOrderController extends Controller
 
         $validated['customer_phone'] = $phones->normalize($validated['customer_phone']);
 
-        $order = $createOrder->create($validated);
+        $fingerprint = hash('sha256', json_encode([
+            'package_count' => (int) $validated['package_count'],
+            'side' => $validated['side'] ?? null,
+            'package_type' => $validated['package_type'],
+            'package_format' => $validated['package_format'] ?? null,
+            'first_event_side' => $validated['first_event_side'] ?? null,
+            'customer_name' => trim($validated['customer_name']),
+            'customer_email' => strtolower(trim($validated['customer_email'])),
+            'customer_phone' => $validated['customer_phone'],
+        ], JSON_THROW_ON_ERROR));
+
+        $order = $sessionAccess->pendingBooking($request, $fingerprint)
+            ?? $createOrder->create($validated);
+
+        $sessionAccess->rememberPendingBooking($request, $order, $fingerprint);
         $checkout = $bookingPayment->create($order);
 
         return redirect()->away($checkout['payment_url']);
