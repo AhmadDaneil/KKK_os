@@ -53,7 +53,6 @@ class BillplzPaymentGateway implements PaymentGatewayContract
         $order = $payment->order;
         $payload = [
             'collection_id' => $collectionId,
-            'email' => $order->customer_email,
             'name' => Str::limit(trim((string) $order->customer_name), 255, ''),
             'amount' => $amountSen,
             'description' => Str::limit(
@@ -71,6 +70,14 @@ class BillplzPaymentGateway implements PaymentGatewayContract
             'reference_2' => (string) $payment->id,
             'deliver' => false,
         ];
+
+        if (filled($order->customer_phone)) {
+            $payload['mobile'] = (string) $order->customer_phone;
+        }
+
+        if (filled($order->customer_email)) {
+            $payload['email'] = $order->customer_email;
+        }
 
         try {
             $response = Http::withBasicAuth($secretKey, '')

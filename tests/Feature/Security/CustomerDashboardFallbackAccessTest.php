@@ -19,7 +19,7 @@ class CustomerDashboardFallbackAccessTest extends TestCase
         ]);
 
         $this->get(route('orders.access.create', ['order_id' => $order->order_id]))
-            ->assertSee('Lihat progress')
+            ->assertSee('Access Your Order Dashboard')
             ->assertSee('KingKadKahwin')
             ->assertSee('value="'.$order->order_id.'"', false)
             ->assertSee('readonly', false)
@@ -35,6 +35,7 @@ class CustomerDashboardFallbackAccessTest extends TestCase
             'first_event_side' => 'LELAKI',
             'customer_phone' => '60123456789',
         ]);
+        $order->update(['booking_payment_status' => 'PAID']);
 
         $this->post(route('orders.access.store'), [
             'customer_reference' => strtolower($order->order_id),
@@ -42,7 +43,7 @@ class CustomerDashboardFallbackAccessTest extends TestCase
         ])->assertRedirect(route('orders.dashboard', ['orderId' => $order->order_id]));
 
         $this->get(route('orders.dashboard', ['orderId' => $order->order_id]))
-            ->assertSee('Progress &amp; Proofing Tempahan Anda', false);
+            ->assertSee('Order Progress', false);
         $this->assertDatabaseHas('customer_access_logs', [
             'order_id' => $order->id,
             'attempted_reference' => $order->order_id,
@@ -50,7 +51,7 @@ class CustomerDashboardFallbackAccessTest extends TestCase
         ]);
     }
 
-    public function test_invalid_order_identifier_shows_a_malay_validation_message(): void
+    public function test_invalid_order_identifier_shows_an_english_validation_message(): void
     {
         $this->from(route('orders.access.create'))
             ->post(route('orders.access.store'), [
@@ -59,7 +60,7 @@ class CustomerDashboardFallbackAccessTest extends TestCase
             ])
             ->assertRedirect(route('orders.access.create'))
             ->assertSessionHasErrors([
-                'customer_reference' => 'Format ID Tempahan atau Rujukan Pelanggan tidak sah.',
+                'customer_reference' => 'The order ID or customer reference format is invalid.',
             ]);
     }
 
@@ -72,6 +73,7 @@ class CustomerDashboardFallbackAccessTest extends TestCase
             'customer_phone' => '60123456789',
         ]);
         $order->update(['customer_reference' => 'KKK261014-001']);
+        $order->update(['booking_payment_status' => 'PAID']);
 
         $this->post(route('orders.access.store'), [
             'customer_reference' => 'kkk261014-001',

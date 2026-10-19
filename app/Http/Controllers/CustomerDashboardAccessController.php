@@ -41,9 +41,9 @@ class CustomerDashboardAccessController extends Controller
             ],
             'customer_phone' => ['required', 'string', 'max:32'],
         ], [
-            'customer_reference.required' => 'Sila masukkan ID Tempahan atau Rujukan Pelanggan.',
-            'customer_reference.regex' => 'Format ID Tempahan atau Rujukan Pelanggan tidak sah.',
-            'customer_phone.required' => 'Sila masukkan nombor telefon yang digunakan semasa tempahan.',
+            'customer_reference.required' => 'Please enter your order ID or customer reference.',
+            'customer_reference.regex' => 'The order ID or customer reference format is invalid.',
+            'customer_phone.required' => 'Please enter the phone number used when booking.',
         ]);
         $identifier = $validated['customer_reference'];
         $key = 'customer-dashboard:'.hash('sha256', $identifier.'|'.$request->ip());
@@ -64,6 +64,7 @@ class CustomerDashboardAccessController extends Controller
             })
             ->first();
         $matches = $order !== null
+            && ($order->source !== 'WABOT' || $order->booking_payment_status === 'PAID')
             && filled($order->customer_phone)
             && hash_equals($phone, $phones->normalize((string) $order->customer_phone));
 

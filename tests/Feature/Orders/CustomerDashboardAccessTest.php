@@ -53,7 +53,6 @@ class CustomerDashboardAccessTest extends TestCase
             ->assertSee('data-preview-face-target="front"', false)
             ->assertSee('data-preview-face-target="back"', false)
             ->assertSee('data-preview-field="card_title_jawi"', false)
-            ->assertSee('Wedding Reception')
             ->assertDontSee('name="jumlah_hantaran"', false)
             ->assertDontSee('token=');
     }

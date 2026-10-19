@@ -27,9 +27,9 @@
         <section class="hero">
             <div class="hero-copy">
                 <h1>Celebrate your special day with a card that feels <em>uniquely yours.</em></h1>
-                <p class="hero-text">Choose a theme, enter your event details and preview your card live. We handle everything from design to delivery.</p>
+                <p class="hero-text">Chat with us on WhatsApp to choose your package and pay the booking fee. After payment is confirmed, you can complete your order and preview your card in the Customer Dashboard.</p>
                 <div class="hero-actions">
-                    <a class="button button-primary" href="{{ route('public.orders.create') }}"><span>Order Now</span><span class="button-arrow" aria-hidden="true">→</span></a>
+                    <a class="button button-primary" href="{{ route('public.orders.create') }}"><span>Chat to Book</span><span class="button-arrow" aria-hidden="true">→</span></a>
                     <a class="button button-secondary" href="{{ route('public.orders.progress') }}"><span>Track Order</span></a>
                 </div>
                 <ul class="trust-list" aria-label="Key benefits">
@@ -107,10 +107,10 @@
                 <h2>Ordering made simple.</h2>
             </div>
             <ol>
-                <li><b>1</b><div><h3>Enter your details</h3><p>Choose a package and complete the couple and event details.</p></div></li>
-                <li><b>2</b><div><h3>Review and confirm</h3><p>Check the preview, correct your details and confirm when everything is right.</p></div></li>
-                <li><b>3</b><div><h3>We prepare your order</h3><p>Our team handles design, printing and packing.</p></div></li>
-                <li><b>4</b><div><h3>Track progress</h3><p>Enter your Order ID anytime to see the latest updates.</p></div></li>
+                <li><b>1</b><div><h3>Choose with Wabot</h3><p>Confirm your package, collection and booking amount in WhatsApp.</p></div></li>
+                <li><b>2</b><div><h3>Pay the booking fee</h3><p>Use the secure payment link sent in your chat. One package is RM50; two packages are RM100.</p></div></li>
+                <li><b>3</b><div><h3>Complete your order</h3><p>After payment confirmation, Wabot sends your order reference and secure dashboard link. Enter your wedding details and review the live preview there.</p></div></li>
+                <li><b>4</b><div><h3>Follow production</h3><p>Confirm your details, pay the remaining balance when due and track progress through delivery or pickup.</p></div></li>
             </ol>
         </section>
 
@@ -120,7 +120,7 @@
                 <h2>Important information and FAQs.</h2>
             </div>
             <div class="faq-grid">
-                <details open><summary>How do payments work?</summary><p>The first payment is a deposit to begin design work. The balance is due after the design is approved and before production begins.</p></details>
+                <details open><summary>How do payments work?</summary><p>Pay the RM50 or RM100 booking fee using the link Wabot sends you. Your dashboard becomes available after that payment is confirmed. The remaining balance is due after design approval and before production.</p></details>
                 <details><summary>How do I request a design correction?</summary><p>Select the affected artwork, describe the changes and submit proof of correction payment on the Track Order page.</p></details>
                 <details><summary>How long will my order take?</summary><p>Timing depends on the number of packages, corrections, quantity and delivery method. Use your Order ID and phone number to see current progress.</p></details>
                 <details><summary>Are banners and bunting available?</summary><p>Yes. You can specify sizes, quantities, materials, orientation and additional instructions in the order form.</p></details>

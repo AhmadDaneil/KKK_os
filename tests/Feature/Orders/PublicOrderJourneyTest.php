@@ -2,7 +2,6 @@
 
 namespace Tests\Feature\Orders;
 
-use App\Models\Order;
 use App\Services\Orders\CreateOrderService;
 use App\Services\Orders\GenerateOrderAccessLinkService;
 use Database\Seeders\KkkPackagePriceCatalogSeeder;
@@ -44,7 +43,7 @@ class PublicOrderJourneyTest extends TestCase
         $this->get(route('home'))
             ->assertOk()
             ->assertSee('KingKadKahwin')
-            ->assertSee('Tempah Sekarang')
+            ->assertSee('Chat to Book')
             ->assertSee('Follow us')
             ->assertSee('Instagram')
             ->assertSee('Facebook')
@@ -65,11 +64,10 @@ class PublicOrderJourneyTest extends TestCase
             ->assertSee('card-runner-islamic', false);
     }
 
-    public function test_landing_page_renders_social_icons_and_uses_whatsapp_for_customer_service_only(): void
+    public function test_landing_page_renders_social_icons_and_routes_customer_service_through_wabot(): void
     {
         config()->set('kingkadkahwin.social.instagram', 'https://instagram.example/kkk');
         config()->set('kingkadkahwin.social.facebook', 'https://facebook.example/kkk');
-        config()->set('kingkadkahwin.social.whatsapp', 'https://wa.example/kkk');
 
         $this->get(route('home'))
             ->assertOk()
@@ -77,7 +75,7 @@ class PublicOrderJourneyTest extends TestCase
             ->assertSee('social-facebook', false)
             ->assertDontSee('social-whatsapp', false)
             ->assertSee('customer-service-button', false)
-            ->assertSee('https://wa.example/kkk?text=', false)
+            ->assertSee(route('public.orders.create', ['purpose' => 'support']), false)
             ->assertSee('<svg', false);
     }
 
@@ -90,17 +88,32 @@ class PublicOrderJourneyTest extends TestCase
             ->assertSee('href="'.route('home').'"', false);
     }
 
-    public function test_start_order_header_has_back_and_progress_buttons_with_landing_hover_style(): void
+    public function test_order_cta_goes_to_whatsapp_before_any_order_is_created(): void
     {
         $this->get(route('public.orders.create'))
-            ->assertOk()
-            ->assertSeeInOrder(['Back', 'Track Order'])
-            ->assertSee('href="'.route('home').'"', false)
-            ->assertSee('href="'.route('public.orders.progress').'"', false)
-            ->assertSee('header-link nav-progress', false);
+            ->assertRedirectContains('https://wa.me/601165656968');
+
+        $this->assertDatabaseCount('orders', 0);
     }
 
-    public function test_order_button_resumes_the_customers_unfinished_draft(): void
+    public function test_new_sessions_are_shared_evenly_across_three_numbers_and_repeat_clicks_stay_put(): void
+    {
+        $numbers = ['601165656968', '60177197596', '601135623239'];
+
+        foreach ($numbers as $number) {
+            $this->get(route('public.orders.create'))->assertRedirectContains('https://wa.me/'.$number);
+            $this->get(route('public.orders.create', ['purpose' => 'support']))
+                ->assertRedirectContains('https://wa.me/'.$number);
+            $this->flushSession();
+        }
+
+        $this->get(route('public.orders.create'))
+            ->assertRedirectContains('https://wa.me/'.$numbers[0]);
+        $this->assertDatabaseHas('wabot_route_counters', ['id' => 1, 'next_index' => 1]);
+        $this->assertDatabaseCount('orders', 0);
+    }
+
+    public function test_unpaid_draft_cannot_be_opened_from_the_landing_page(): void
     {
         $order = app(CreateOrderService::class)->create([
             'package_count' => 1,
@@ -110,73 +123,28 @@ class PublicOrderJourneyTest extends TestCase
             'customer_phone' => '0123456789',
         ]);
 
-        $this->get(app(GenerateOrderAccessLinkService::class)->generate($order))
-            ->assertRedirect(route('orders.dashboard', ['orderId' => $order->order_id]));
-
         $this->get(route('public.orders.create'))
-            ->assertRedirect(route('orders.dashboard', ['orderId' => $order->order_id]));
+            ->assertRedirectContains('https://wa.me/');
+        $this->get(route('orders.dashboard', ['orderId' => $order->order_id]))->assertNotFound();
     }
 
-    public function test_customer_can_start_an_order_and_reach_full_form(): void
+    public function test_public_order_form_can_no_longer_create_a_booking(): void
     {
-        $response = $this->post(route('public.orders.store'), [
+        $this->post('/tempah', [
             'package_count' => 1,
             'package_type' => 'PUTERI_MANIS',
             'side' => 'LELAKI',
             'customer_name' => 'Pelanggan Baharu',
             'customer_email' => 'pelanggan@example.com',
             'customer_phone' => '0123456789',
-        ]);
+        ])->assertStatus(405);
 
-        $order = Order::query()->firstOrFail();
-
-        $this->assertSame('PUTERI_MANIS', $order->package_type);
-        $response->assertRedirect();
-        $response->assertRedirect('https://www.billplz-sandbox.com/bills/public-checkout');
-        $this->assertDatabaseHas('payment_transactions', [
-            'order_id' => $order->id,
-            'payment_type' => 'BOOKING_DEPOSIT',
-            'amount' => '50.00',
-        ]);
-        $this->assertSame('Pelanggan Baharu', $order->customer_name);
-        $this->assertCount(1, $order->packageSides);
+        $this->assertDatabaseCount('orders', 0);
     }
 
-    public function test_failed_bill_creation_displays_payment_error_and_reuses_the_same_order(): void
+    public function test_public_order_form_cannot_create_two_package_booking(): void
     {
-        config()->set('services.billplz.test_reject_create', true);
-
-        $input = [
-            'package_count' => 1,
-            'package_type' => 'PUTERI_MANIS',
-            'side' => 'LELAKI',
-            'customer_name' => 'Cubaan Semula',
-            'customer_email' => 'retry@example.com',
-            'customer_phone' => '01222124456',
-        ];
-
-        $this->from(route('public.orders.create'))
-            ->post(route('public.orders.store'), $input)
-            ->assertRedirect(route('public.orders.create'))
-            ->assertSessionHasErrors('payment');
-
-        $this->assertDatabaseCount('orders', 1);
-        $this->assertDatabaseCount('payment_transactions', 1);
-        $this->assertDatabaseHas('payment_events', [
-            'event_type' => 'BILLPLZ_BILL_CREATION_FAILED',
-        ]);
-
-        $this->from(route('public.orders.create'))
-            ->post(route('public.orders.store'), $input)
-            ->assertSessionHasErrors('payment');
-
-        $this->assertDatabaseCount('orders', 1);
-        $this->assertDatabaseCount('payment_transactions', 2);
-    }
-
-    public function test_customer_can_create_folded_two_package_order_with_bride_side_first(): void
-    {
-        $response = $this->post(route('public.orders.store'), [
+        $this->post('/tempah', [
             'package_count' => 2,
             'package_type' => 'PUTERI_MANIS',
             'package_format' => 'FOLDED',
@@ -184,17 +152,9 @@ class PublicOrderJourneyTest extends TestCase
             'customer_name' => 'Dua Majlis',
             'customer_email' => 'dua@example.com',
             'customer_phone' => '0122222222',
-        ]);
+        ])->assertStatus(405);
 
-        $order = Order::query()->firstOrFail();
-
-        $response->assertRedirect();
-        $this->assertSame(2, $order->package_count);
-        $this->assertSame('PUTERI_MANIS', $order->package_type);
-        $this->assertSame('FOLDED', $order->package_format);
-        $this->assertSame('PEREMPUAN', $order->first_event_side);
-        $this->assertEqualsCanonicalizing(['LELAKI', 'PEREMPUAN'], $order->packageSides->pluck('side')->all());
-        $this->assertSame('100.00', $order->payments()->firstOrFail()->amount);
+        $this->assertDatabaseCount('orders', 0);
     }
 
     public function test_progress_lookup_shows_public_status_without_customer_details(): void
@@ -207,7 +167,7 @@ class PublicOrderJourneyTest extends TestCase
             'customer_phone' => '0199999999',
         ]);
 
-        $order->update(['status' => 'DESIGN_IN_PROGRESS']);
+        $order->update(['status' => 'DESIGN_IN_PROGRESS', 'booking_payment_status' => 'PAID']);
 
         $this->post(route('public.orders.progress.lookup'), [
             'order_id' => strtolower($order->order_id),
@@ -216,7 +176,7 @@ class PublicOrderJourneyTest extends TestCase
             ->assertOk()
             ->assertSee($order->order_id)
             ->assertSee('50%')
-            ->assertSee('Design Sedang Disediakan')
+            ->assertSee('Design in Progress')
             ->assertDontSee('Nama Sulit')
             ->assertDontSee('sulit@example.com')
             ->assertDontSee('0199999999');
@@ -229,14 +189,14 @@ class PublicOrderJourneyTest extends TestCase
             'side' => 'LELAKI',
             'customer_phone' => '0123456789',
         ]);
-        $order->update(['status' => 'DESIGN_APPROVED']);
+        $order->update(['status' => 'DESIGN_APPROVED', 'booking_payment_status' => 'PAID']);
 
         $this->post(route('public.orders.progress.lookup'), [
             'order_id' => $order->order_id,
         ])
             ->assertOk()
             ->assertSee('70%')
-            ->assertSee('Balance payment after the design is approved')
+            ->assertSee('Balance payment after design approval')
             ->assertDontSee('Hasil Design Diluluskan')
             ->assertDontSee('The design has been approved internally.');
     }
@@ -248,7 +208,7 @@ class PublicOrderJourneyTest extends TestCase
             'side' => 'LELAKI',
             'customer_phone' => '0123456789',
         ]);
-        $order->update(['status' => 'PRINTED']);
+        $order->update(['status' => 'PRINTED', 'booking_payment_status' => 'PAID']);
 
         $this->post(route('public.orders.progress.lookup'), [
             'order_id' => $order->order_id,
@@ -256,8 +216,8 @@ class PublicOrderJourneyTest extends TestCase
         ])
             ->assertOk()
             ->assertSee('88%')
-            ->assertSee('Printing Complete')
-            ->assertSee('Your order has been printed and will proceed to packing.');
+            ->assertSee('Printing Completed')
+            ->assertSee('Printing is complete and your order will proceed to packing.');
     }
 
     public function test_printing_order_shows_progress_button_without_granting_private_access(): void
@@ -267,13 +227,13 @@ class PublicOrderJourneyTest extends TestCase
             'side' => 'LELAKI',
             'customer_phone' => '0123456789',
         ]);
-        $order->update(['status' => 'PRINTING']);
+        $order->update(['status' => 'PRINTING', 'booking_payment_status' => 'PAID']);
 
         $this->post(route('public.orders.progress.lookup'), [
             'order_id' => $order->order_id,
         ])
             ->assertOk()
-            ->assertSee('Lihat progress')
+            ->assertSee('View progress')
             ->assertSee('href="'.route('orders.access.create', ['order_id' => $order->order_id]).'"', false);
 
         $this->get(route('orders.dashboard', ['orderId' => $order->order_id]))
@@ -289,7 +249,7 @@ class PublicOrderJourneyTest extends TestCase
             'first_event_side' => 'LELAKI',
             'customer_phone' => '0123456789',
         ]);
-        $order->update(['status' => 'COMPLETED']);
+        $order->update(['status' => 'COMPLETED', 'booking_payment_status' => 'PAID']);
 
         $secureLink = app(GenerateOrderAccessLinkService::class)->generate($order);
         $this->get($secureLink)
@@ -299,7 +259,7 @@ class PublicOrderJourneyTest extends TestCase
             'order_id' => $order->order_id,
         ])
             ->assertOk()
-            ->assertSee('Lihat progress')
+            ->assertSee('View progress')
             ->assertSee('href="'.route('orders.dashboard', ['orderId' => $order->order_id]).'"', false);
     }
 
@@ -323,7 +283,7 @@ class PublicOrderJourneyTest extends TestCase
             'customer_email' => 'artwork@example.com',
             'customer_phone' => '0123456789',
         ]);
-        $order->update(['status' => 'DESIGN_READY']);
+        $order->update(['status' => 'DESIGN_READY', 'booking_payment_status' => 'PAID']);
 
         $secureLink = app(GenerateOrderAccessLinkService::class)->generate($order);
         $this->get($secureLink)->assertRedirect(route('orders.dashboard', $order->order_id));
@@ -345,7 +305,7 @@ class PublicOrderJourneyTest extends TestCase
             'customer_email' => 'artwork@example.com',
             'customer_phone' => '0123456789',
         ]);
-        $order->update(['status' => 'DESIGN_READY']);
+        $order->update(['status' => 'DESIGN_READY', 'booking_payment_status' => 'PAID']);
 
         $this->post(route('public.orders.progress.lookup'), [
             'order_id' => $order->order_id,
@@ -366,7 +326,7 @@ class PublicOrderJourneyTest extends TestCase
             'customer_email' => 'selamat@example.com',
             'customer_phone' => '0123456789',
         ]);
-        $order->update(['status' => 'DESIGN_READY']);
+        $order->update(['status' => 'DESIGN_READY', 'booking_payment_status' => 'PAID']);
 
         $this->post(route('public.orders.progress.lookup'), [
             'order_id' => $order->order_id,

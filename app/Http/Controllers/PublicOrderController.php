@@ -3,68 +3,27 @@
 namespace App\Http\Controllers;
 
 use App\Models\Order;
+use App\Services\Orders\AssignWabotNumberService;
 use App\Services\Orders\BuildCustomerProgressService;
-use App\Services\Orders\CreateOrderService;
 use App\Services\Orders\CustomerOrderSessionAccessService;
-use App\Services\Orders\NormalizeCustomerPhoneService;
-use App\Services\Payments\CreateBillplzBookingPaymentService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
 class PublicOrderController extends Controller
 {
-    public function create(
-        Request $request,
-        CustomerOrderSessionAccessService $sessionAccess,
-    ): View|RedirectResponse {
-        $draft = $sessionAccess->unfinishedDraft($request);
+    public function create(Request $request, AssignWabotNumberService $wabotNumbers): RedirectResponse
+    {
+        $number = $wabotNumbers->assign($request);
+        $orderId = strtoupper(trim((string) $request->query('order_id', '')));
+        $isSupport = $request->query('purpose') === 'support';
+        $message = $isSupport
+            ? (preg_match('/^KKK-\d{6}-\d{4}$/', $orderId) === 1
+                ? "Hello KingKadKahwin, I need help with order {$orderId}."
+                : 'Hello KingKadKahwin, I would like help with a wedding card order.')
+            : 'Hello KingKadKahwin, I would like to book a wedding card package.';
 
-        if ($draft) {
-            return redirect()->route('orders.dashboard', ['orderId' => $draft->order_id]);
-        }
-
-        return view('public.start-order');
-    }
-
-    public function store(
-        Request $request,
-        CreateOrderService $createOrder,
-        NormalizeCustomerPhoneService $phones,
-        CustomerOrderSessionAccessService $sessionAccess,
-        CreateBillplzBookingPaymentService $bookingPayment,
-    ): RedirectResponse {
-        $validated = $request->validate([
-            'package_count' => ['required', 'integer', 'in:1,2'],
-            'side' => ['nullable', 'string', 'in:LELAKI,PEREMPUAN', 'required_if:package_count,1'],
-            'package_type' => ['required', 'string', 'in:PUTERI_MANIS,JELATA'],
-            'package_format' => ['nullable', 'string', 'in:SEPARATE,FOLDED', 'required_if:package_count,2'],
-            'first_event_side' => ['nullable', 'string', 'in:LELAKI,PEREMPUAN', 'required_if:package_count,2'],
-            'customer_name' => ['required', 'string', 'max:255'],
-            'customer_email' => ['required', 'email', 'max:255'],
-            'customer_phone' => ['required', 'string', 'max:32'],
-        ]);
-
-        $validated['customer_phone'] = $phones->normalize($validated['customer_phone']);
-
-        $fingerprint = hash('sha256', json_encode([
-            'package_count' => (int) $validated['package_count'],
-            'side' => $validated['side'] ?? null,
-            'package_type' => $validated['package_type'],
-            'package_format' => $validated['package_format'] ?? null,
-            'first_event_side' => $validated['first_event_side'] ?? null,
-            'customer_name' => trim($validated['customer_name']),
-            'customer_email' => strtolower(trim($validated['customer_email'])),
-            'customer_phone' => $validated['customer_phone'],
-        ], JSON_THROW_ON_ERROR));
-
-        $order = $sessionAccess->pendingBooking($request, $fingerprint)
-            ?? $createOrder->create($validated);
-
-        $sessionAccess->rememberPendingBooking($request, $order, $fingerprint);
-        $checkout = $bookingPayment->create($order);
-
-        return redirect()->away($checkout['payment_url']);
+        return redirect()->away('https://wa.me/'.$number.'?text='.rawurlencode($message));
     }
 
     public function progress(
@@ -98,7 +57,7 @@ class PublicOrderController extends Controller
         $orderId = $validated['order_id'];
         $order = Order::query()->where('order_id', $orderId)->first();
 
-        if (! $order) {
+        if (! $order || ($order->source === 'WABOT' && $order->booking_payment_status !== 'PAID')) {
             return back()
                 ->withInput()
                 ->withErrors(['order_id' => 'Order ID not found. Please check it and try again.']);

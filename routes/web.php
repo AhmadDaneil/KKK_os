@@ -9,8 +9,8 @@ use App\Http\Controllers\CustomerArtworkReviewController;
 use App\Http\Controllers\CustomerBalanceReceiptController;
 use App\Http\Controllers\CustomerBillplzBalancePaymentController;
 use App\Http\Controllers\CustomerBookingPaymentController;
-use App\Http\Controllers\CustomerDashboardAccessController;
 use App\Http\Controllers\CustomerCourierProofController;
+use App\Http\Controllers\CustomerDashboardAccessController;
 use App\Http\Controllers\CustomerDashboardController;
 use App\Http\Controllers\CustomerDepositReceiptController;
 use App\Http\Controllers\CustomerOrderConfirmController;
@@ -58,10 +58,6 @@ Route::get('/kalendar/jakim', [PublicCalendarController::class, 'convert'])
 
 Route::get('/tempah', [PublicOrderController::class, 'create'])
     ->name('public.orders.create');
-
-Route::post('/tempah', [PublicOrderController::class, 'store'])
-    ->middleware('throttle:10,1')
-    ->name('public.orders.store');
 
 Route::get('/pembayaran/booking/{reference}', [BookingPaymentReturnController::class, 'show'])
     ->middleware('throttle:30,1')

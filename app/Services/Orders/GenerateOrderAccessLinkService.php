@@ -10,6 +10,8 @@ class GenerateOrderAccessLinkService
 {
     public function generate(Order $order, ?int $expiresInDays = 30): string
     {
+        abort_if($order->source === 'WABOT' && $order->booking_payment_status !== 'PAID', 404);
+
         $plainToken = Str::random(64);
 
         DB::transaction(function () use ($order, $plainToken, $expiresInDays) {
