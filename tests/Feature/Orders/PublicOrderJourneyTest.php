@@ -220,7 +220,7 @@ class PublicOrderJourneyTest extends TestCase
             ->assertSee('Printing is complete and your order will proceed to packing.');
     }
 
-    public function test_printing_order_shows_progress_button_without_granting_private_access(): void
+    public function test_printing_order_opens_proofing_without_granting_private_dashboard_access(): void
     {
         $order = app(CreateOrderService::class)->create([
             'package_count' => 1,
@@ -234,7 +234,13 @@ class PublicOrderJourneyTest extends TestCase
         ])
             ->assertOk()
             ->assertSee('View progress')
-            ->assertSee('href="'.route('orders.access.create', ['order_id' => $order->order_id]).'"', false);
+            ->assertSee('href="'.route('public.orders.proofing', ['orderId' => $order->order_id]).'"', false);
+
+        $this->get(route('public.orders.proofing', ['orderId' => $order->order_id]))
+            ->assertOk()
+            ->assertSee('Customer proofing')
+            ->assertSee($order->order_id)
+            ->assertSee('No proof has been shared yet');
 
         $this->get(route('orders.dashboard', ['orderId' => $order->order_id]))
             ->assertNotFound();
@@ -260,7 +266,24 @@ class PublicOrderJourneyTest extends TestCase
         ])
             ->assertOk()
             ->assertSee('View progress')
-            ->assertSee('href="'.route('orders.dashboard', ['orderId' => $order->order_id]).'"', false);
+            ->assertSee('href="'.route('public.orders.proofing', ['orderId' => $order->order_id]).'"', false);
+
+        $this->get(route('public.orders.proofing', ['orderId' => $order->order_id]))
+            ->assertOk()
+            ->assertSee($order->order_id);
+    }
+
+    public function test_proofing_page_cannot_be_opened_without_a_progress_lookup_session(): void
+    {
+        $order = app(CreateOrderService::class)->create([
+            'package_count' => 1,
+            'side' => 'LELAKI',
+            'customer_phone' => '0123456789',
+        ]);
+        $order->update(['status' => 'PRINTING', 'booking_payment_status' => 'PAID']);
+
+        $this->get(route('public.orders.proofing', ['orderId' => $order->order_id]))
+            ->assertNotFound();
     }
 
     public function test_unknown_order_id_returns_a_clear_error(): void

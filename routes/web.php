@@ -81,6 +81,9 @@ Route::get('/semak-progress', [PublicOrderController::class, 'progress'])
 Route::post('/semak-progress', [PublicOrderController::class, 'lookupProgress'])
     ->middleware('throttle:10,1')
     ->name('public.orders.progress.lookup');
+Route::get('/semak-progress/{orderId}/proofing', [PublicOrderController::class, 'proofing'])
+    ->middleware('throttle:30,1')
+    ->name('public.orders.proofing');
 
 Route::post('/order/{orderId}/balance-receipt', [CustomerBalanceReceiptController::class, 'store'])
     ->middleware('throttle:10,1')

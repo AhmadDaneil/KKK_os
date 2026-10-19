@@ -63,6 +63,8 @@ class PublicOrderController extends Controller
                 ->withErrors(['order_id' => 'Order ID not found. Please check it and try again.']);
         }
 
+        $sessionAccess->establishFromProgressLookup($request, $order);
+
         $order->load(['fulfilmentJob', 'payments', 'designJobs.artworkVersions', 'pricingSnapshot']);
         $deposit = $order->payments->firstWhere('payment_type', 'BOOKING_DEPOSIT');
         $balance = $order->payments->where('payment_type', 'BALANCE')->sortByDesc('id')->first();
@@ -107,7 +109,26 @@ class PublicOrderController extends Controller
             'balanceBillplzAmount' => $order->pricingSnapshot?->outstanding_amount,
             'balanceQrImage' => (string) config('kingkadkahwin.balance.qr_image'),
             'artworkReady' => $artworkReady,
-            'canAccessOrder' => $sessionAccess->hasAccess($request, $order),
+        ]);
+    }
+
+    public function proofing(
+        Request $request,
+        string $orderId,
+        BuildCustomerProgressService $customerProgress,
+        CustomerOrderSessionAccessService $sessionAccess,
+    ): View {
+        $order = $sessionAccess->resolveProofing($request, $orderId);
+        $order->load([
+            'progressUpdates' => fn ($query) => $query
+                ->customerVisible()
+                ->with('uploader:id,name')
+                ->latest(),
+        ]);
+
+        return view('public.order-proofing', [
+            'order' => $order,
+            'progress' => $customerProgress->build($order),
         ]);
     }
 }

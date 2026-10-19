@@ -15,6 +15,8 @@ class CustomerOrderSessionAccessService
 
     private const PENDING_BOOKING_SESSION_KEY = 'kkk.pending_booking_checkout';
 
+    private const PROOFING_SESSION_PREFIX = 'kkk.customer_proofing.';
+
     public function establishFromToken(
         Request $request,
         string $orderId,
@@ -83,7 +85,36 @@ class CustomerOrderSessionAccessService
 
     public function establishFromProgressLookup(Request $request, Order $order): void
     {
-        $this->establishFromVerifiedOrder($request, $order);
+        abort_if($order->source === 'WABOT' && $order->booking_payment_status !== 'PAID', 404);
+
+        $request->session()->put($this->proofingSessionKey($order->order_id), [
+            'order_fk' => $order->id,
+            'expires_at' => now()->addMinutes(30)->toIso8601String(),
+        ]);
+    }
+
+    public function resolveProofing(Request $request, string $orderId): Order
+    {
+        $order = Order::where('order_id', $orderId)->firstOrFail();
+        abort_if($order->source === 'WABOT' && $order->booking_payment_status !== 'PAID', 404);
+
+        if ($this->hasAccess($request, $order)) {
+            return $order;
+        }
+
+        $grant = $request->session()->get($this->proofingSessionKey($orderId));
+
+        abort_if(! is_array($grant), 404);
+        abort_if((int) ($grant['order_fk'] ?? 0) !== (int) $order->id, 404);
+
+        $expiresAt = $grant['expires_at'] ?? null;
+
+        if ($expiresAt === null || CarbonImmutable::parse($expiresAt)->isPast()) {
+            $request->session()->forget($this->proofingSessionKey($orderId));
+            abort(403);
+        }
+
+        return $order;
     }
 
     public function establishFromVerifiedOrder(Request $request, Order $order): void
@@ -178,6 +209,11 @@ class CustomerOrderSessionAccessService
     private function sessionKey(string $orderId): string
     {
         return self::SESSION_PREFIX.$orderId;
+    }
+
+    private function proofingSessionKey(string $orderId): string
+    {
+        return self::PROOFING_SESSION_PREFIX.$orderId;
     }
 
     private function rememberActiveDraft(Request $request, Order $order, ?string $expiresAt): void

@@ -251,6 +251,36 @@ class OrderProgressVisibilityTest extends TestCase
             ->assertDontSee('View progress attachment');
     }
 
+    public function test_track_progress_opens_only_customer_visible_proofs_for_that_order(): void
+    {
+        Storage::fake('local');
+        $order = $this->confirmedOrder(1);
+        $otherOrder = $this->confirmedOrder(1);
+        $designer = $this->staff(User::ROLE_DESIGNER);
+        $om = $this->staff(User::ROLE_OM);
+        $customerService = $this->staff(User::ROLE_CUSTOMER_SERVICE);
+        $visible = $this->makeUpdate($order, $designer, 'Design proof for customer', true, 'progress/design-visible.jpg');
+        $this->makeUpdate($order, $om, 'Internal operations note', false);
+        $this->makeUpdate($order, $customerService, 'Unsupported publisher update', true);
+        $this->makeUpdate($otherOrder, $designer, 'Another customer proof', true);
+        Storage::disk('local')->put($visible->attachment_path, 'visible');
+
+        $this->post(route('public.orders.progress.lookup'), [
+            'order_id' => $order->order_id,
+        ])->assertOk();
+
+        $this->get(route('public.orders.proofing', ['orderId' => $order->order_id]))
+            ->assertOk()
+            ->assertSee('Design proof for customer')
+            ->assertSee('View Proof')
+            ->assertDontSee('Internal operations note')
+            ->assertDontSee('Unsupported publisher update')
+            ->assertDontSee('Another customer proof');
+
+        $this->get(route('orders.progress-updates.attachment', [$order->order_id, $visible]))
+            ->assertOk();
+    }
+
     public function test_staff_attachment_is_available_only_to_management_or_the_uploader(): void
     {
         Storage::fake('local');

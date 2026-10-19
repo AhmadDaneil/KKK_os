@@ -16,7 +16,7 @@ class CustomerProgressUpdateController extends Controller
         OrderProgressUpdate $progressUpdate,
         CustomerOrderSessionAccessService $sessionAccess,
     ): StreamedResponse {
-        $order = $sessionAccess->resolve($request, $orderId);
+        $order = $sessionAccess->resolveProofing($request, $orderId);
 
         abort_unless(
             $progressUpdate->order_id === $order->id
