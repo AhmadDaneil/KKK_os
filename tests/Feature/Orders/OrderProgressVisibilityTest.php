@@ -217,11 +217,11 @@ class OrderProgressVisibilityTest extends TestCase
         $this->withSession($this->customerSession($order))
             ->get(route('orders.dashboard', $order->order_id))
             ->assertOk()
-            ->assertSee('Progress &amp; Proofing Tempahan Anda', false)
+            ->assertSee('Your Order Progress')
             ->assertSee('Design customer-visible')
             ->assertSee('Production customer-visible')
             ->assertSee('OM customer-visible')
-            ->assertSee('Lihat Proofing')
+            ->assertSee('View progress attachment')
             ->assertSee(
                 route('orders.progress-updates.attachment', [$order->order_id, $designProof]),
                 false,
@@ -246,9 +246,9 @@ class OrderProgressVisibilityTest extends TestCase
         $this->withSession($this->customerSession($order))
             ->get(route('orders.dashboard', $order->order_id))
             ->assertOk()
-            ->assertSee('Progress &amp; Proofing Tempahan Anda', false)
+            ->assertDontSee('Your Order Progress')
             ->assertSee('Belum ada progress atau proofing yang dikongsi untuk tempahan ini.')
-            ->assertDontSee('Lihat Proofing');
+            ->assertDontSee('View progress attachment');
     }
 
     public function test_staff_attachment_is_available_only_to_management_or_the_uploader(): void

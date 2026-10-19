@@ -72,9 +72,8 @@ class BookingPaymentJourneyTest extends TestCase
     public function test_return_page_reconciles_paid_one_package_bill_when_callback_is_delayed(): void
     {
         $order = $this->createOrder(1);
-        $this->fakeBill('booking-reconcile-one', 5000);
+        $this->fakeBillThenPaidStatus('booking-reconcile-one', 5000);
         $payment = app(CreateBillplzBookingPaymentService::class)->create($order)['payment'];
-        $this->fakePaidBillStatus('booking-reconcile-one', 5000);
 
         $this->get(route('payments.booking.return', ['reference' => $payment->public_reference]))
             ->assertOk()
@@ -89,9 +88,8 @@ class BookingPaymentJourneyTest extends TestCase
     public function test_return_page_reconciles_paid_two_package_bill_when_callback_is_delayed(): void
     {
         $order = $this->createOrder(2);
-        $this->fakeBill('booking-reconcile-two', 10000);
+        $this->fakeBillThenPaidStatus('booking-reconcile-two', 10000);
         $payment = app(CreateBillplzBookingPaymentService::class)->create($order)['payment'];
-        $this->fakePaidBillStatus('booking-reconcile-two', 10000);
 
         $this->get(route('payments.booking.return', ['reference' => $payment->public_reference]))
             ->assertOk()
@@ -165,19 +163,26 @@ class BookingPaymentJourneyTest extends TestCase
         ])]);
     }
 
-    private function fakePaidBillStatus(string $billId, int $amountSen): void
+    private function fakeBillThenPaidStatus(string $billId, int $amountSen): void
     {
         Http::preventStrayRequests();
         Http::fake([
-            'www.billplz-sandbox.com/api/v3/bills/'.$billId => Http::response([
-                'id' => $billId,
-                'collection_id' => 'sandbox-collection',
-                'paid' => true,
-                'state' => 'paid',
-                'amount' => $amountSen,
-                'paid_amount' => $amountSen,
-                'paid_at' => '2026-10-19 09:50:00 +0800',
-            ]),
+            'www.billplz-sandbox.com/*' => Http::sequence()
+                ->push([
+                    'id' => $billId,
+                    'collection_id' => 'sandbox-collection',
+                    'amount' => $amountSen,
+                    'url' => 'https://www.billplz-sandbox.com/bills/'.$billId,
+                ])
+                ->push([
+                    'id' => $billId,
+                    'collection_id' => 'sandbox-collection',
+                    'paid' => true,
+                    'state' => 'paid',
+                    'amount' => $amountSen,
+                    'paid_amount' => $amountSen,
+                    'paid_at' => '2026-10-19 09:50:00 +0800',
+                ]),
         ]);
     }
 
