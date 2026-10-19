@@ -22,14 +22,23 @@ class ResolveBookingAmountService
             ->where('is_active', true)
             ->first();
 
-        if ($profile === null || $profile->deposit_method !== 'FIXED') {
+        $expectedAmount = match ((int) $order->package_count) {
+            1 => '50.00',
+            2 => '100.00',
+            default => null,
+        };
+
+        if ($profile === null
+            || $profile->deposit_method !== 'FIXED'
+            || (float) $profile->deposit_value !== (float) $expectedAmount
+            || $profile->currency !== 'MYR') {
             throw ValidationException::withMessages([
-                'payment' => 'An active booking amount is not configured for this order.',
+                'payment' => 'The required RM50 or RM100 booking amount is not configured for this order.',
             ]);
         }
 
         return [
-            'amount' => (string) $profile->deposit_value,
+            'amount' => $expectedAmount,
             'currency' => $profile->currency,
             'profile' => $profile,
         ];

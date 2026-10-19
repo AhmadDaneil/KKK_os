@@ -15,7 +15,7 @@
         <a class="brand" href="{{ route('home') }}"><img class="brand-logo-image" src="{{ asset('images/landing/kingkadkahwin-logo.png') }}" alt="" width="62" height="62" decoding="async"><span><b>KingKadKahwin</b><small>Beautiful cards, meaningful memories</small></span></a>
         <nav aria-label="Order tracking navigation">
             <a class="header-link nav-progress" href="{{ route('home') }}">← Back</a>
-            <a class="header-link nav-progress" href="{{ route('public.orders.create') }}">Order Now</a>
+            <a class="header-link nav-progress" href="{{ route('public.orders.create') }}">Chat to Book</a>
         </nav>
     </header>
     <main class="progress-page">
@@ -74,10 +74,10 @@
                 @endif
                 <div class="public-artwork-action">
                     <div>
-                        <strong>Progress &amp; proofing tempahan</strong>
-                        <span>Lihat kemas kini dan proofing yang telah dikongsi untuk tempahan anda.</span>
+                        <strong>Order progress and proofing</strong>
+                        <span>See the latest updates and proofs shared for your order.</span>
                     </div>
-                    <a class="button button-primary" href="{{ ($canAccessOrder ?? false) ? route('orders.dashboard', ['orderId' => $orderId]) : route('orders.access.create', ['order_id' => $orderId]) }}">Lihat progress</a>
+                    <a class="button button-primary" href="{{ ($canAccessOrder ?? false) ? route('orders.dashboard', ['orderId' => $orderId]) : route('orders.access.create', ['order_id' => $orderId]) }}">View progress</a>
                 </div>
                 @if ($deposit)
                     <div class="deposit-public-status" data-status="{{ strtolower($deposit['status']) }}">

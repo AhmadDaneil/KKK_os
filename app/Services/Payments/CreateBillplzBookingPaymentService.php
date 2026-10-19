@@ -28,6 +28,12 @@ class CreateBillplzBookingPaymentService
         $checkout = DB::transaction(function () use ($order): array {
             $lockedOrder = Order::query()->whereKey($order->id)->lockForUpdate()->firstOrFail();
 
+            if ($lockedOrder->booking_payment_status === 'PAID') {
+                throw ValidationException::withMessages([
+                    'payment' => 'The booking fee for this order has already been paid.',
+                ]);
+            }
+
             if ($lockedOrder->status !== 'DETAILS_INCOMPLETE') {
                 throw ValidationException::withMessages([
                     'payment' => 'The booking fee can only be paid before order details are confirmed.',
