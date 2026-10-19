@@ -24,6 +24,10 @@ class PublicOrderJourneyTest extends TestCase
         config()->set('services.billplz.base_url', 'https://www.billplz-sandbox.com/api');
         config()->set('services.billplz.collection_id', 'sandbox-collection');
         Http::fake(['www.billplz-sandbox.com/*' => function ($request) {
+            if (config('services.billplz.test_reject_create')) {
+                return Http::response(['error' => ['type' => 'InvalidCollection']], 422);
+            }
+
             $amount = (int) $request->data()['amount'];
 
             return Http::response([
@@ -140,9 +144,7 @@ class PublicOrderJourneyTest extends TestCase
 
     public function test_failed_bill_creation_displays_payment_error_and_reuses_the_same_order(): void
     {
-        Http::fake(['www.billplz-sandbox.com/*' => Http::response([
-            'error' => ['type' => 'InvalidCollection'],
-        ], 422)]);
+        config()->set('services.billplz.test_reject_create', true);
 
         $input = [
             'package_count' => 1,
@@ -153,10 +155,10 @@ class PublicOrderJourneyTest extends TestCase
             'customer_phone' => '01222124456',
         ];
 
-        $this->followingRedirects()
+        $this->from(route('public.orders.create'))
             ->post(route('public.orders.store'), $input)
-            ->assertOk()
-            ->assertSee('The payment could not be started. Please try again.');
+            ->assertRedirect(route('public.orders.create'))
+            ->assertSessionHasErrors('payment');
 
         $this->assertDatabaseCount('orders', 1);
         $this->assertDatabaseCount('payment_transactions', 1);
@@ -164,7 +166,8 @@ class PublicOrderJourneyTest extends TestCase
             'event_type' => 'BILLPLZ_BILL_CREATION_FAILED',
         ]);
 
-        $this->post(route('public.orders.store'), $input)
+        $this->from(route('public.orders.create'))
+            ->post(route('public.orders.store'), $input)
             ->assertSessionHasErrors('payment');
 
         $this->assertDatabaseCount('orders', 1);
