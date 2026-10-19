@@ -47,8 +47,8 @@ class CustomerDepositReceiptController extends Controller
         return back()->with(
             'deposit_status',
             $wasResubmitted
-                ? 'Resit baharu telah dihantar untuk semakan.'
-                : 'Resit baharu anda telah pun dihantar dan sedang menunggu semakan.'
+                ? 'A new receipt has been submitted for review.'
+                : 'Your new receipt has been submitted and is awaiting review.'
         );
     }
 }

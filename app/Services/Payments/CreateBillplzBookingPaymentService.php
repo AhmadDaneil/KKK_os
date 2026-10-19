@@ -22,7 +22,7 @@ class CreateBillplzBookingPaymentService
     {
         if (! config('services.billplz.enabled')) {
             throw ValidationException::withMessages([
-                'payment' => 'Pembayaran dalam talian belum diaktifkan.',
+                'payment' => 'Online payments are not enabled.',
             ]);
         }
 
@@ -31,7 +31,7 @@ class CreateBillplzBookingPaymentService
 
             if ($lockedOrder->status !== 'DETAILS_INCOMPLETE') {
                 throw ValidationException::withMessages([
-                    'payment' => 'Booking hanya boleh dibayar sebelum maklumat tempahan disahkan.',
+                    'payment' => 'The booking fee can only be paid before order details are confirmed.',
                 ]);
             }
 
@@ -44,7 +44,7 @@ class CreateBillplzBookingPaymentService
 
             if ($existing?->status === 'PAID') {
                 throw ValidationException::withMessages([
-                    'payment' => 'Booking tempahan ini telah dibayar.',
+                    'payment' => 'The booking fee for this order has already been paid.',
                 ]);
             }
 
@@ -55,7 +55,7 @@ class CreateBillplzBookingPaymentService
                 }
 
                 throw ValidationException::withMessages([
-                    'payment' => 'Pembayaran sedang disediakan. Sila cuba lagi sebentar.',
+                    'payment' => 'The payment is being prepared. Please try again shortly.',
                 ]);
             }
 
@@ -114,7 +114,7 @@ class CreateBillplzBookingPaymentService
             ]);
 
             throw ValidationException::withMessages([
-                'payment' => 'Pembayaran belum dapat dimulakan. Sila cuba lagi.',
+                'payment' => 'The payment could not be started. Please try again.',
             ]);
         }
 

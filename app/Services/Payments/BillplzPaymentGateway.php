@@ -24,7 +24,7 @@ class BillplzPaymentGateway implements PaymentGatewayContract
     {
         if (! in_array($payment->payment_type, ['BOOKING_DEPOSIT', 'BALANCE'], true)
             || $payment->provider !== 'BILLPLZ') {
-            throw new BillplzPaymentException('Jenis pembayaran dalam talian tidak disokong.', 'unsupported_payment');
+            throw new BillplzPaymentException('This online payment type is not supported.', 'unsupported_payment');
         }
 
         $payment->loadMissing('order');
@@ -41,12 +41,12 @@ class BillplzPaymentGateway implements PaymentGatewayContract
             || $baseScheme !== 'https'
             || ! in_array($baseHost, ['www.billplz-sandbox.com', 'www.billplz.com'], true)
         ) {
-            throw new BillplzPaymentException('Konfigurasi Billplz Sandbox belum lengkap atau tidak sah.', 'invalid_configuration');
+            throw new BillplzPaymentException('The Billplz Sandbox configuration is incomplete or invalid.', 'invalid_configuration');
         }
 
         $appUrl = rtrim((string) config('app.url', ''), '/');
         if (parse_url($appUrl, PHP_URL_SCHEME) !== 'https' || parse_url($appUrl, PHP_URL_HOST) === null) {
-            throw new BillplzPaymentException('URL aplikasi mesti menggunakan HTTPS untuk pembayaran Billplz.', 'invalid_app_url');
+            throw new BillplzPaymentException('The application URL must use HTTPS for Billplz payments.', 'invalid_app_url');
         }
 
         $amountSen = $this->toSen((string) $payment->amount);
@@ -57,7 +57,7 @@ class BillplzPaymentGateway implements PaymentGatewayContract
             'name' => Str::limit(trim((string) $order->customer_name), 255, ''),
             'amount' => $amountSen,
             'description' => Str::limit(
-                ($payment->payment_type === 'BOOKING_DEPOSIT' ? 'Booking tempahan ' : 'Bayaran baki tempahan ').$order->order_id,
+                ($payment->payment_type === 'BOOKING_DEPOSIT' ? 'Order booking fee ' : 'Order balance payment ').$order->order_id,
                 200,
                 '',
             ),
@@ -79,12 +79,12 @@ class BillplzPaymentGateway implements PaymentGatewayContract
                 ->timeout(20)
                 ->post($baseUrl.'/v3/bills', $payload);
         } catch (ConnectionException) {
-            throw new BillplzPaymentException('Sambungan ke Billplz Sandbox gagal.', 'connection_failed');
+            throw new BillplzPaymentException('The connection to Billplz Sandbox failed.', 'connection_failed');
         }
 
         if (! $response->successful()) {
             throw new BillplzPaymentException(
-                'Billplz Sandbox tidak dapat mencipta bil pembayaran.',
+                'Billplz Sandbox could not create the payment bill.',
                 'provider_rejected',
                 $response->status(),
             );
@@ -115,7 +115,7 @@ class BillplzPaymentGateway implements PaymentGatewayContract
             || (string) ($bill['collection_id'] ?? '') !== $collectionId
             || (int) ($bill['amount'] ?? 0) !== $amountSen
         ) {
-            throw new BillplzPaymentException('Respons bil daripada Billplz Sandbox tidak sah.', 'invalid_provider_response');
+            throw new BillplzPaymentException('The bill response from Billplz Sandbox is invalid.', 'invalid_provider_response');
         }
 
         return [
@@ -137,7 +137,7 @@ class BillplzPaymentGateway implements PaymentGatewayContract
     private function toSen(string $amount): int
     {
         if (! preg_match('/^(0|[1-9]\d*)\.([0-9]{2})$/', $amount, $matches)) {
-            throw new BillplzPaymentException('Amaun bayaran baki tidak sah.', 'invalid_amount');
+            throw new BillplzPaymentException('The balance payment amount is invalid.', 'invalid_amount');
         }
 
         return ((int) $matches[1] * 100) + (int) $matches[2];

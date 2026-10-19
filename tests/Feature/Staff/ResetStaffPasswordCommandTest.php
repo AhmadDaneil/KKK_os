@@ -20,8 +20,8 @@ class ResetStaffPasswordCommandTest extends TestCase
         ]);
 
         $this->artisan('staff:password', ['email' => 'admin@kkk.local'])
-            ->expectsQuestion('Password baharu (minimum 8 aksara)', 'Reset8!x')
-            ->expectsQuestion('Sahkan password baharu', 'Reset8!x')
+            ->expectsQuestion('New password (at least 8 characters)', 'Reset8!x')
+            ->expectsQuestion('Confirm new password', 'Reset8!x')
             ->expectsOutput('Password staff berjaya ditetapkan semula.')
             ->doesntExpectOutput('Reset8!x')
             ->assertSuccessful();
@@ -39,7 +39,7 @@ class ResetStaffPasswordCommandTest extends TestCase
     public function test_command_rejects_an_unknown_staff_email_without_prompting_for_a_password(): void
     {
         $this->artisan('staff:password', ['email' => 'missing@kkk.local'])
-            ->expectsOutput('Akaun staff dengan e-mel tersebut tidak ditemui.')
+            ->expectsOutput('No staff account was found for that email address.')
             ->assertFailed();
 
         $this->assertDatabaseCount('users', 0);
@@ -55,9 +55,9 @@ class ResetStaffPasswordCommandTest extends TestCase
         $originalPassword = $staff->password;
 
         $this->artisan('staff:password', ['email' => 'om@kkk.local'])
-            ->expectsQuestion('Password baharu (minimum 8 aksara)', 'Admin8!')
-            ->expectsQuestion('Sahkan password baharu', 'Admin8!')
-            ->expectsOutput('Password baharu mestilah sekurang-kurangnya 8 aksara.')
+            ->expectsQuestion('New password (at least 8 characters)', 'Admin8!')
+            ->expectsQuestion('Confirm new password', 'Admin8!')
+            ->expectsOutput('The new password must be at least 8 characters.')
             ->assertFailed();
 
         $this->assertSame($originalPassword, $staff->fresh()->password);
@@ -73,9 +73,9 @@ class ResetStaffPasswordCommandTest extends TestCase
         $originalPassword = $staff->password;
 
         $this->artisan('staff:password', ['email' => 'designer@kkk.local'])
-            ->expectsQuestion('Password baharu (minimum 8 aksara)', 'NewSafePassword123!')
-            ->expectsQuestion('Sahkan password baharu', 'DifferentPassword123!')
-            ->expectsOutput('Pengesahan password baharu tidak sepadan.')
+            ->expectsQuestion('New password (at least 8 characters)', 'NewSafePassword123!')
+            ->expectsQuestion('Confirm new password', 'DifferentPassword123!')
+            ->expectsOutput('The new password confirmation does not match.')
             ->assertFailed();
 
         $this->assertSame($originalPassword, $staff->fresh()->password);

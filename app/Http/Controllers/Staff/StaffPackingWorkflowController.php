@@ -66,7 +66,7 @@ class StaffPackingWorkflowController extends Controller
 
         return back()->with(
             'status',
-            'Packing berjaya dimulakan.'
+            'Packing started successfully.'
         );
     }
 
@@ -96,7 +96,7 @@ class StaffPackingWorkflowController extends Controller
 
         return back()->with(
             'status',
-            'Item packing berjaya disahkan.'
+            'Packing item confirmed.'
         );
     }
 
@@ -121,9 +121,9 @@ class StaffPackingWorkflowController extends Controller
                 'max:10240',
             ],
         ], [
-            'packing_proof.required' => 'Bukti gambar barang yang telah dipack wajib dimuat naik.',
-            'packing_proof.image' => 'Bukti packing mestilah fail gambar.',
-            'packing_proof.max' => 'Saiz bukti packing tidak boleh melebihi 10 MB.',
+            'packing_proof.required' => 'A photo of the packed items is required.',
+            'packing_proof.image' => 'Packing proof must be an image file.',
+            'packing_proof.max' => 'Packing proof must not exceed 10 MB.',
         ]);
 
         $proof = $validated['packing_proof'] ?? null;
@@ -191,7 +191,7 @@ class StaffPackingWorkflowController extends Controller
 
         return back()->with(
             'status',
-            'Packing berjaya diselesaikan.'
+            'Packing completed successfully.'
         );
     }
 
@@ -226,26 +226,26 @@ class StaffPackingWorkflowController extends Controller
                 'accepted',
             ],
         ], [
-            'packing_proof.required' => 'Bukti gambar parcel bersama label tracking wajib dimuat naik.',
-            'packing_proof.image' => 'Bukti courier mestilah fail gambar.',
-            'packing_proof.max' => 'Saiz bukti courier tidak boleh melebihi 10 MB.',
-            'courier_provider.required' => 'Sila masukkan nama courier.',
-            'tracking_number.required' => 'Sila masukkan tracking number.',
-            'complete.required' => 'Sila tandakan COMPLETE sebelum menamatkan order.',
-            'complete.accepted' => 'Sila tandakan COMPLETE sebelum menamatkan order.',
+            'packing_proof.required' => 'A photo of the parcel with its tracking label is required.',
+            'packing_proof.image' => 'Courier proof must be an image file.',
+            'packing_proof.max' => 'Courier proof must not exceed 10 MB.',
+            'courier_provider.required' => 'Please enter the courier name.',
+            'tracking_number.required' => 'Please enter the tracking number.',
+            'complete.required' => 'Please mark COMPLETE before closing the order.',
+            'complete.accepted' => 'Please mark COMPLETE before closing the order.',
         ]);
 
         $fulfilmentJob = $packingJob->order->fulfilmentJob;
 
         if (! $fulfilmentJob) {
             return back()->withErrors([
-                'packing_job' => 'Fulfilment job belum tersedia untuk order ini.',
+                'packing_job' => 'A fulfilment job is not yet available for this order.',
             ]);
         }
 
         if ($fulfilmentJob->method !== 'COURIER') {
             return back()->withErrors([
-                'packing_job' => 'Courier completion hanya dibenarkan untuk order COURIER.',
+                'packing_job' => 'Courier completion is only allowed for COURIER orders.',
             ]);
         }
 
@@ -301,7 +301,7 @@ class StaffPackingWorkflowController extends Controller
 
         return back()->with(
             'status',
-            'Serahan kepada courier berjaya diselesaikan.'
+            'Handover to the courier completed successfully.'
         );
     }
 
@@ -325,21 +325,21 @@ class StaffPackingWorkflowController extends Controller
                 'accepted',
             ],
         ], [
-            'complete.required' => 'Sila tandakan COMPLETE sebelum menamatkan order.',
-            'complete.accepted' => 'Sila tandakan COMPLETE sebelum menamatkan order.',
+            'complete.required' => 'Please mark COMPLETE before closing the order.',
+            'complete.accepted' => 'Please mark COMPLETE before closing the order.',
         ]);
 
         $fulfilmentJob = $packingJob->order->fulfilmentJob;
 
         if (! $fulfilmentJob) {
             return back()->withErrors([
-                'packing_job' => 'Fulfilment job belum tersedia untuk order ini.',
+                'packing_job' => 'A fulfilment job is not yet available for this order.',
             ]);
         }
 
         if ($fulfilmentJob->method !== 'PICKUP') {
             return back()->withErrors([
-                'packing_job' => 'Pickup completion hanya dibenarkan untuk order PICKUP.',
+                'packing_job' => 'Pickup completion is only allowed for PICKUP orders.',
             ]);
         }
 
@@ -357,7 +357,7 @@ class StaffPackingWorkflowController extends Controller
 
         return back()->with(
             'status',
-            'Kutipan pelanggan berjaya diselesaikan.'
+            'Customer pickup completed successfully.'
         );
     }
 

@@ -38,9 +38,9 @@ class CreateStaffUser extends Command
                 'password' => ['required', 'string', 'min:8', 'confirmed'],
             ],
             [
-                'password.required' => 'Password diperlukan.',
-                'password.min' => 'Password mestilah sekurang-kurangnya 8 aksara.',
-                'password.confirmed' => 'Pengesahan password tidak sepadan.',
+                'password.required' => 'A password is required.',
+                'password.min' => 'The password must be at least 8 characters.',
+                'password.confirmed' => 'The password confirmation does not match.',
             ],
         );
 

@@ -16,7 +16,7 @@ class GenerateCustomerReferenceService
 
         $prefix = strtoupper((string) config('invoice.business_unit_prefix', 'KKK'));
         if (! preg_match('/^[A-Z]{2,3}$/', $prefix)) {
-            throw new RuntimeException('Awalan Customer Reference tidak sah.');
+            throw new RuntimeException('The customer reference prefix is invalid.');
         }
 
         return DB::transaction(function () use ($order, $prefix): string {
@@ -42,7 +42,7 @@ class GenerateCustomerReferenceService
             $number = ((int) $sequence->last_number) + 1;
 
             if ($number > 999) {
-                throw new RuntimeException('Had Customer Reference harian telah dicapai.');
+                throw new RuntimeException('The daily customer reference limit has been reached.');
             }
 
             DB::table('customer_reference_sequences')

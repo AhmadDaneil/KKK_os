@@ -41,16 +41,16 @@ class BuildCustomerProgressServiceTest extends TestCase
         );
 
         $this->assertSame([
-            'Tempahan',
-            'Maklumat',
-            'Pengesahan Deposit',
+            'Order',
+            'Details',
+            'Deposit Confirmation',
             'Design',
-            'Kelulusan',
-            'Bayaran Baki',
-            'Cetakan',
-            'Pembungkusan',
-            'Penghantaran / Pengambilan',
-            'Selesai',
+            'Approval',
+            'Balance Payment',
+            'Printing',
+            'Packing',
+            'Delivery / Pickup',
+            'Complete',
         ], array_column($progress['stages'], 'label'));
         $this->assertSame('complete', $progress['stages'][4]['state']);
         $this->assertSame('current', $progress['stages'][5]['state']);
@@ -63,7 +63,7 @@ class BuildCustomerProgressServiceTest extends TestCase
             new Order(['status' => 'DETAILS_CONFIRMED'])
         );
 
-        $this->assertSame('Menunggu Pengesahan Deposit', $progress['label']);
+        $this->assertSame('Awaiting Deposit Confirmation', $progress['label']);
         $this->assertSame('current', $progress['stages'][2]['state']);
         $this->assertSame('pending', $progress['stages'][3]['state']);
     }

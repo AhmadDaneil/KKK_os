@@ -13,7 +13,7 @@ class ResolveAutomaticAssigneeService
             ->orderByDesc('is_design_lead')
             ->orderBy('id')
             ->first()
-            ?? throw new RuntimeException('Sila aktifkan sekurang-kurangnya seorang pereka untuk menerima tugasan design automatik.');
+            ?? throw new RuntimeException('Please activate at least one designer to receive automatically assigned design jobs.');
     }
 
     public function correctionDesigner(?int $previousDesignerId): User
@@ -33,7 +33,7 @@ class ResolveAutomaticAssigneeService
             ->orderByDesc('is_primary_production')
             ->orderBy('id')
             ->first()
-            ?? throw new RuntimeException('Sila aktifkan seorang staf pengeluaran untuk menerima tugasan cetakan automatik.');
+            ?? throw new RuntimeException('Please activate a production staff member to receive automatically assigned print jobs.');
     }
 
     private function activeStaff(string $role)

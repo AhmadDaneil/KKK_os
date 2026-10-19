@@ -45,8 +45,8 @@ class KkkPackagePriceCatalogSeeder extends Seeder
                     ['code' => "{$packageType}_CARD_{$quantity}"],
                     [
                         'item_type' => 'PACKAGE_TIER',
-                        'name' => "{$packageType} — {$quantity} keping",
-                        'description' => "Harga tier {$quantity} keping untuk {$packageType}.",
+                        'name' => "{$packageType} — {$quantity} cards",
+                        'description' => "Price tier for {$quantity} cards in {$packageType}.",
                         'calculation_method' => 'FIXED_TIER',
                         'unit_price' => $price,
                         'unit_label' => 'tier',
@@ -79,8 +79,8 @@ class KkkPackagePriceCatalogSeeder extends Seeder
                 ['code' => $combo['code']],
                 [
                     'item_type' => 'PACKAGE_COMBO',
-                    'name' => "{$combo['package_type']} — dua pakej 30 + 50 keping",
-                    'description' => 'Pengecualian dua pakej: harga 30 keping + harga 50 keping.',
+                    'name' => "{$combo['package_type']} — two packages of 30 + 50 cards",
+                    'description' => 'Two-package exception: price of 30 cards plus price of 50 cards.',
                     'calculation_method' => 'FIXED_COMBO',
                     'unit_price' => $combo['price'],
                     'unit_label' => 'combo',
@@ -95,8 +95,8 @@ class KkkPackagePriceCatalogSeeder extends Seeder
         }
 
         foreach ([
-            ['code' => 'V1_ONE_PACKAGE', 'name' => 'KKK OS V1 — satu pakej', 'deposit' => 50],
-            ['code' => 'V1_TWO_PACKAGES', 'name' => 'KKK OS V1 — dua pakej', 'deposit' => 100],
+            ['code' => 'V1_ONE_PACKAGE', 'name' => 'KKK OS V1 — one package', 'deposit' => 50],
+            ['code' => 'V1_TWO_PACKAGES', 'name' => 'KKK OS V1 — two packages', 'deposit' => 100],
         ] as $profile) {
             OrderPricingProfile::updateOrCreate(
                 ['code' => $profile['code']],

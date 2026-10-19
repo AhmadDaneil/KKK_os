@@ -48,10 +48,10 @@ class CustomerThankYouPageTest extends TestCase
 
         $this->get(route('orders.review.show', ['orderId' => $order->order_id]))
             ->assertOk()
-            ->assertSee('Bayaran Deposit')
+            ->assertSee('Deposit Payment')
             ->assertSee('RM 188.00')
             ->assertSee('RM 50.00')
-            ->assertSee('Booking telah dibayar dan disahkan.')
+            ->assertSee('Booking payment has been confirmed.')
             ->assertDontSee('deposit_receipt', false)
             ->assertSee('post_confirmation_liability_acknowledged', false);
 
@@ -70,13 +70,13 @@ class CustomerThankYouPageTest extends TestCase
             'orderId' => $order->order_id,
         ]))
             ->assertOk()
-            ->assertSee('Terima Kasih')
-            ->assertSee('Maklumat Tempahan')
+            ->assertSee('Thank You')
+            ->assertSee('Order Details')
             ->assertSee($order->order_id)
             ->assertSee('Customer Thank You')
             ->assertSee('Muhammad Syafiq')
             ->assertSee('Nur Awanis')
-            ->assertSee('Semak Progress')
+            ->assertSee('Track Order')
             ->assertSee(route('public.orders.progress', [
                 'order_id' => $order->order_id,
             ]), false);
@@ -141,9 +141,9 @@ class CustomerThankYouPageTest extends TestCase
 
         $this->get(route('orders.review.show', ['orderId' => $order->order_id]))
             ->assertOk()
-            ->assertSee('Booking belum dibayar.')
-            ->assertSee('Teruskan Pembayaran RM 50.00')
-            ->assertDontSee('Booking telah dibayar dan disahkan.');
+            ->assertSee('Booking payment is still outstanding.')
+            ->assertSee('Continue to Payment RM 50.00')
+            ->assertDontSee('Booking payment has been confirmed.');
 
         $this->post(route('orders.booking-payment.store', ['orderId' => $order->order_id]))
             ->assertRedirect('https://www.billplz-sandbox.com/bills/resumed-booking');

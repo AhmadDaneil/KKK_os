@@ -35,7 +35,7 @@ class SynchronizeOrderFinancialsService
                 : $this->toCents((string) $snapshot->total_amount);
 
             if ($totalCents <= 0 || $paidCents > $totalCents) {
-                throw new RuntimeException('Jumlah bayaran order melebihi jumlah keseluruhan snapshot harga.');
+                throw new RuntimeException('The total payments exceed the order price snapshot.');
             }
 
             $balanceCents = $totalCents - $paidCents;
@@ -86,7 +86,7 @@ class SynchronizeOrderFinancialsService
     private function toCents(string $amount): int
     {
         if (! preg_match('/^(0|[1-9]\d*)\.([0-9]{2})$/', $amount, $matches)) {
-            throw new RuntimeException('Amaun kewangan bukan nilai perpuluhan dua tempat yang sah.');
+            throw new RuntimeException('The financial amount is not a valid value with two decimal places.');
         }
 
         return ((int) $matches[1] * 100) + (int) $matches[2];

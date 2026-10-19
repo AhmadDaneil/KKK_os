@@ -21,8 +21,8 @@ class AdminDashboardController extends Controller
         $validated = $request->validate([
             'order_id' => ['required', 'string', 'max:32'],
         ], [
-            'order_id.required' => 'Sila masukkan Order ID.',
-            'order_id.max' => 'Order ID tidak boleh melebihi 32 aksara.',
+            'order_id.required' => 'Please enter an order ID.',
+            'order_id.max' => 'The order ID must not exceed 32 characters.',
         ]);
 
         $orderId = strtoupper(trim($validated['order_id']));
@@ -33,7 +33,7 @@ class AdminDashboardController extends Controller
 
         if (! $order) {
             return back()
-                ->withErrors(['order_id' => 'Order ID tidak dijumpai.'])
+                ->withErrors(['order_id' => 'Order ID not found.'])
                 ->withInput();
         }
 

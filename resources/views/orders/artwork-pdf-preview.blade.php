@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="ms">
+<html lang="en">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -12,7 +12,7 @@
     </style>
 </head>
 <body>
-    <object data="data:application/pdf;base64,{{ $pdf }}" type="application/pdf" aria-label="Pratonton hasil design"></object>
+    <object data="data:application/pdf;base64,{{ $pdf }}" type="application/pdf" aria-label="Design preview"></object>
     <div class="watermark" aria-hidden="true">
         <span>King Kad Kahwin . Preview</span>
     </div>

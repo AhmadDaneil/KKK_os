@@ -41,7 +41,7 @@ class PublicOrderJourneyTest extends TestCase
             ->assertOk()
             ->assertSee('KingKadKahwin')
             ->assertSee('Tempah Sekarang')
-            ->assertSee('Ikuti kami')
+            ->assertSee('Follow us')
             ->assertSee('Instagram')
             ->assertSee('Facebook')
             ->assertSee('WhatsApp')
@@ -81,7 +81,7 @@ class PublicOrderJourneyTest extends TestCase
     {
         $this->get(route('public.orders.progress'))
             ->assertOk()
-            ->assertSee('Kembali')
+            ->assertSee('Back')
             ->assertSee('header-link nav-progress', false)
             ->assertSee('href="'.route('home').'"', false);
     }
@@ -90,7 +90,7 @@ class PublicOrderJourneyTest extends TestCase
     {
         $this->get(route('public.orders.create'))
             ->assertOk()
-            ->assertSeeInOrder(['Kembali', 'Semak Progress'])
+            ->assertSeeInOrder(['Back', 'Track Order'])
             ->assertSee('href="'.route('home').'"', false)
             ->assertSee('href="'.route('public.orders.progress').'"', false)
             ->assertSee('header-link nav-progress', false);
@@ -156,7 +156,7 @@ class PublicOrderJourneyTest extends TestCase
         $this->followingRedirects()
             ->post(route('public.orders.store'), $input)
             ->assertOk()
-            ->assertSee('Pembayaran belum dapat dimulakan. Sila cuba lagi.');
+            ->assertSee('The payment could not be started. Please try again.');
 
         $this->assertDatabaseCount('orders', 1);
         $this->assertDatabaseCount('payment_transactions', 1);
@@ -233,9 +233,9 @@ class PublicOrderJourneyTest extends TestCase
         ])
             ->assertOk()
             ->assertSee('70%')
-            ->assertSee('Bayaran baki selepas hasil design diluluskan')
+            ->assertSee('Balance payment after the design is approved')
             ->assertDontSee('Hasil Design Diluluskan')
-            ->assertDontSee('Hasil design telah diluluskan secara dalaman.');
+            ->assertDontSee('The design has been approved internally.');
     }
 
     public function test_printed_order_shows_completed_printing_progress(): void
@@ -253,8 +253,8 @@ class PublicOrderJourneyTest extends TestCase
         ])
             ->assertOk()
             ->assertSee('88%')
-            ->assertSee('Cetakan Selesai')
-            ->assertSee('Tempahan anda telah siap dan akan diteruskan ke proses pembungkusan.');
+            ->assertSee('Printing Complete')
+            ->assertSee('Your order has been printed and will proceed to packing.');
     }
 
     public function test_printing_order_shows_progress_button_without_granting_private_access(): void
@@ -330,7 +330,7 @@ class PublicOrderJourneyTest extends TestCase
             'customer_phone' => $order->customer_phone,
         ])
             ->assertOk()
-            ->assertDontSee('Buka Semakan Penuh');
+            ->assertDontSee('Open Full Review');
     }
 
     public function test_order_id_lookup_does_not_grant_direct_artwork_review_access(): void
@@ -349,7 +349,7 @@ class PublicOrderJourneyTest extends TestCase
             'customer_phone' => $order->customer_phone,
         ])
             ->assertOk()
-            ->assertDontSee('Buka Semakan Penuh');
+            ->assertDontSee('Open Full Review');
 
         $this->get(route('orders.artwork.review', $order->order_id))->assertNotFound();
     }

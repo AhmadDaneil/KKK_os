@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="ms">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Log Masuk Admin — KKK OS</title>
+    <title>Admin Login — KKK OS</title>
     <link rel="stylesheet" href="{{ asset('css/login.css') }}?v={{ filemtime(public_path('css/login.css')) }}">
 </head>
 <body class="login-page login-page--admin">
@@ -11,23 +11,23 @@
         <section class="login-story" aria-label="King Kad Kahwin">
             <div class="login-brand">
                 <img class="login-mark login-mark--image" src="{{ asset('images/landing/kingkadkahwin-logo.png') }}" alt="" width="47" height="47" decoding="async">
-                <div><strong>King Kad Kahwin</strong><span>SISTEM OPERASI</span></div>
+                <div><strong>King Kad Kahwin</strong><span>OPERATIONS SYSTEM</span></div>
             </div>
             <div class="login-story-content">
-                <span class="login-eyebrow">PANDANGAN MENYELURUH</span>
-                <h2>Urus pasukan. <br>Gerakkan operasi.</h2>
-                <p>Satukan pengurusan staf dan pantau perjalanan operasi dalam satu ruang yang teratur.</p>
-                <div class="login-tags"><span>Pengurusan staf</span><span>Pemantauan operasi</span></div>
+                <span class="login-eyebrow">OPERATIONS OVERVIEW</span>
+                <h2>Manage your team. <br>Keep operations moving.</h2>
+                <p>Manage staff and monitor operations in one organised workspace.</p>
+                <div class="login-tags"><span>Staff management</span><span>Operations monitoring</span></div>
             </div>
-            <div class="login-story-footer"><span class="login-dot"></span> Satu pasukan. Satu tujuan.</div>
+            <div class="login-story-footer"><span class="login-dot"></span> One team. One purpose.</div>
             <div class="login-orbit login-orbit--one" aria-hidden="true"></div>
             <div class="login-orbit login-orbit--two" aria-hidden="true"></div>
         </section>
         <section class="login-panel" aria-labelledby="login-title">
             <div class="login-heading">
-                <span class="login-eyebrow">SELAMAT KEMBALI</span>
-                <h1 id="login-title">Log Masuk Admin<span>.</span></h1>
-                <p>Log masuk untuk mengurus akaun staf dan memantau keseluruhan operasi.</p>
+                <span class="login-eyebrow">WELCOME BACK</span>
+                <h1 id="login-title">Admin Login<span>.</span></h1>
+                <p>Log in to manage staff accounts and monitor all operations.</p>
             </div>
             @if ($errors->any())
                 <div class="login-alert" role="alert">{{ $errors->first() }}</div>
@@ -38,24 +38,24 @@
             <form method="POST" action="{{ route('admin.login.store') }}" class="login-form">
                 @csrf
                 <div class="login-field">
-                    <label for="email">E-mel Admin</label>
-                    <input id="email" type="email" name="email" value="{{ old('email') }}" placeholder="nama@kingkadkahwin.com" required autofocus autocomplete="email">
+                    <label for="email">Admin Email</label>
+                    <input id="email" type="email" name="email" value="{{ old('email') }}" placeholder="name@kingkadkahwin.com" required autofocus autocomplete="email">
                 </div>
                 <div class="login-field">
-                    <label for="password">Kata Laluan</label>
+                    <label for="password">Password</label>
                     <div class="password-field">
-                        <input id="password" type="password" name="password" placeholder="Masukkan kata laluan anda" required autocomplete="current-password">
-                        <button type="button" class="password-visibility-toggle" data-password-toggle aria-controls="password" aria-label="Tunjukkan kata laluan" aria-pressed="false">
+                        <input id="password" type="password" name="password" placeholder="Enter your password" required autocomplete="current-password">
+                        <button type="button" class="password-visibility-toggle" data-password-toggle aria-controls="password" aria-label="Show password" aria-pressed="false">
                             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2.5 12s3.5-6 9.5-6 9.5 6 9.5 6-3.5 6-9.5 6-9.5-6-9.5-6Z"></path><circle cx="12" cy="12" r="2.75"></circle></svg>
                         </button>
                     </div>
                 </div>
-                <button type="submit" class="login-submit">Log Masuk <span aria-hidden="true">→</span></button>
+                <button type="submit" class="login-submit">Log In <span aria-hidden="true">→</span></button>
             </form>
-            <p class="login-help"><a href="{{ route('admin.password.request') }}">Lupa kata laluan?</a></p>
+            <p class="login-help"><a href="{{ route('admin.password.request') }}">Forgot your password?</a></p>
         </section>
     </main>
-    <footer class="login-footer">KING KAD KAHWIN <span>·</span> Ruang kerja pasukan anda</footer>
+    <footer class="login-footer">KING KAD KAHWIN <span>·</span> Your team workspace</footer>
     @include('partials.malay-validation')
     <script>
         document.querySelectorAll('[data-password-toggle]').forEach((button) => {
@@ -65,7 +65,7 @@
 
                 passwordInput.type = willShowPassword ? 'text' : 'password';
                 button.setAttribute('aria-pressed', String(willShowPassword));
-                button.setAttribute('aria-label', willShowPassword ? 'Sembunyikan kata laluan' : 'Tunjukkan kata laluan');
+                button.setAttribute('aria-label', willShowPassword ? 'Hide password' : 'Show password');
             });
         });
     </script>

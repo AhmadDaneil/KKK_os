@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="ms" class="brand-customer-page">
+<html lang="en" class="brand-customer-page">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -33,7 +33,7 @@
 
     <div class="order-summary-grid">
         <div>
-            <span class="summary-label">ID Tempahan</span>
+            <span class="summary-label">Order ID</span>
             <strong>{{ $order->order_id }}</strong>
         </div>
 
@@ -41,7 +41,7 @@
             <span class="summary-label">{{ __('ui.package') }}</span>
             <strong>
                 {{ $order->package_count }}
-                Pakej
+                {{ $order->package_count === 1 ? 'Package' : 'Packages' }}
             </strong>
         </div>
 
@@ -105,24 +105,22 @@
         {{ $progress['message'] }}
     </div>
 
-    <section class="customer-progress-updates" aria-labelledby="customer-progress-updates-title">
-        <div class="customer-progress-updates-heading">
-            <span>Semak progress</span>
-            <h2 id="customer-progress-updates-title">Progress &amp; Proofing Tempahan Anda</h2>
-            <p>Semak kemas kini dan proofing yang telah dikongsi oleh pasukan kami untuk tempahan ini.</p>
-        </div>
-
-        @if ($order->relationLoaded('progressUpdates') && $order->progressUpdates->isNotEmpty())
+    @if ($order->relationLoaded('progressUpdates') && $order->progressUpdates->isNotEmpty())
+        <section class="customer-progress-updates" aria-labelledby="customer-progress-updates-title">
+            <div class="customer-progress-updates-heading">
+                <span>Latest updates</span>
+                <h2 id="customer-progress-updates-title">Your Order Progress</h2>
+            </div>
             <ol>
                 @foreach ($order->progressUpdates as $update)
                     <li>
                         <div>
-                            <strong>{{ match ($update->uploader_role) { 'DESIGNER' => 'Designer', 'PRODUCTION' => 'Production', 'OPERATION_MANAGEMENT' => 'OM', default => 'Pasukan KKK' } }}</strong>
+                            <strong>{{ match ($update->uploader_role) { 'DESIGNER' => 'Designer', 'PRODUCTION' => 'Production', 'OPERATION_MANAGEMENT' => 'OM', default => 'KKK Team' } }}</strong>
                             <time datetime="{{ $update->published_at->toIso8601String() }}">{{ $update->published_at->timezone(config('app.display_timezone'))->format('d/m/Y, H:i') }}</time>
                         </div>
-                        <p>{{ $update->message ?: 'Lampiran progress baharu telah dimuat naik.' }}</p>
+                        <p>{{ $update->message ?: 'A new progress attachment has been uploaded.' }}</p>
                         @if ($update->hasAttachment())
-                            <a href="{{ route('orders.progress-updates.attachment', ['orderId' => $order->order_id, 'progressUpdate' => $update]) }}" target="_blank" rel="noopener">Lihat Proofing</a>
+                            <a href="{{ route('orders.progress-updates.attachment', ['orderId' => $order->order_id, 'progressUpdate' => $update]) }}" target="_blank" rel="noopener">View progress attachment</a>
                         @endif
                     </li>
                 @endforeach
@@ -132,23 +130,23 @@
         @endif
     </section>
     @if ($order->fulfilmentJob?->method === 'COURIER' && $order->fulfilmentJob?->tracking_number)
-        <div class="customer-tracking-card"><span>{{ __('ui.shipping_information') }}</span><strong>{{ $order->fulfilmentJob->courier_provider ?: 'Kurier' }}</strong><code>{{ $order->fulfilmentJob->tracking_number }}</code></div>
+        <div class="customer-tracking-card"><span>{{ __('ui.shipping_information') }}</span><strong>{{ $order->fulfilmentJob->courier_provider ?: 'Courier' }}</strong><code>{{ $order->fulfilmentJob->tracking_number }}</code></div>
     @endif
 </header>
 
 @if ($order->customer_reference || $order->invoice)
-    <section class="deposit-status-card" aria-label="Ringkasan kewangan">
-        <div><span>Rujukan Pelanggan</span><strong>{{ $order->customer_reference ?: '-' }}</strong></div>
+    <section class="deposit-status-card" aria-label="Financial summary">
+        <div><span>Customer Reference</span><strong>{{ $order->customer_reference ?: '-' }}</strong></div>
         @if ($order->invoice)
-            <div><span>Jumlah Invois</span><strong>RM {{ number_format((float) $order->invoice->total_amount, 2) }}</strong></div>
-            <div><span>Jumlah Dibayar</span><strong>RM {{ number_format((float) $order->invoice->amount_paid, 2) }}</strong></div>
-            <div><span>Baki</span><strong>RM {{ number_format((float) $order->invoice->balance_due, 2) }}</strong></div>
+            <div><span>Invoice Total</span><strong>RM {{ number_format((float) $order->invoice->total_amount, 2) }}</strong></div>
+            <div><span>Amount Paid</span><strong>RM {{ number_format((float) $order->invoice->amount_paid, 2) }}</strong></div>
+            <div><span>Balance Due</span><strong>RM {{ number_format((float) $order->invoice->balance_due, 2) }}</strong></div>
         @endif
         @if ($order->payments->where('status', 'PAID')->isNotEmpty())
-            <h2>Sejarah Pembayaran</h2>
+            <h2>Payment History</h2>
             <ul>
                 @foreach ($order->payments->where('status', 'PAID')->sortByDesc('paid_at') as $payment)
-                    <li>{{ $payment->payment_type === 'BOOKING_DEPOSIT' ? 'Booking' : 'Baki' }} — RM {{ number_format((float) $payment->amount, 2) }} — {{ $payment->paid_at?->format('d/m/Y H:i') }}</li>
+                    <li>{{ $payment->payment_type === 'BOOKING_DEPOSIT' ? 'Booking deposit' : 'Remaining balance' }} — RM {{ number_format((float) $payment->amount, 2) }} — {{ $payment->paid_at?->format('d/m/Y H:i') }}</li>
                 @endforeach
             </ul>
         @endif
@@ -159,9 +157,9 @@
     $confirmedPreview = data_get($order->confirmation?->confirmed_snapshot, 'live_preview');
 @endphp
 @if (is_array($confirmedPreview))
-    <section class="deposit-status-card" aria-label="Sejarah Live Preview">
-        <h2>Live Preview Yang Disahkan</h2>
-        <p>Rekod rujukan pelanggan semasa pengesahan akhir. Ini bukan artwork atau fail sumber untuk cetakan.</p>
+    <section class="deposit-status-card" aria-label="Live preview history">
+        <h2>Confirmed Live Preview</h2>
+        <p>A customer reference record from final confirmation. This is not print-ready artwork or a source file.</p>
         <ul>
             @foreach (($confirmedPreview['package_sides'] ?? []) as $previewSide)
                 <li>{{ $previewSide['side'] ?? '-' }} — {{ data_get($previewSide, 'design.design_code', '-') }} — {{ data_get($previewSide, 'design.theme', '-') }}</li>
@@ -189,18 +187,18 @@
 @if ($customerDesignProofJobs->isNotEmpty() || $hasCustomerCourierProof)
     <section class="customer-proof-panel" aria-labelledby="customer-proof-title">
         <div>
-            <span>Bukti progress</span>
-            <h2 id="customer-proof-title">Lihat Bukti Tempahan</h2>
+            <span>Progress proof</span>
+            <h2 id="customer-proof-title">View Order Proof</h2>
         </div>
         <div class="customer-proof-actions">
             @foreach ($customerDesignProofJobs as $designJob)
                 <a href="{{ route('orders.artwork.review', ['orderId' => $order->order_id]).'#design-job-'.$designJob->id }}">
-                    Lihat Bukti Designer · {{ ucfirst(strtolower($designJob->side)) }}
+                    View Designer Proof · {{ $designJob->side === 'LELAKI' ? 'Groom' : 'Bride' }}
                 </a>
             @endforeach
             @if ($hasCustomerCourierProof)
                 <a href="{{ route('orders.courier-proof.show', ['orderId' => $order->order_id]) }}" target="_blank" rel="noopener">
-                    Lihat Bukti Courier
+                    View Courier Proof
                 </a>
             @endif
         </div>
@@ -212,10 +210,10 @@
     <section class="deposit-status-card" data-deposit-status="{{ strtolower($depositPayment->status) }}">
         <div><span>{{ __('ui.deposit_status') }}</span><strong>{{ match ($depositPayment->status) { 'PAID' => __('ui.deposit_confirmed'), 'FAILED' => __('ui.receipt_rejected'), default => __('ui.pending_review') } }}</strong></div>
         @if (session('deposit_status'))<p class="deposit-success">{{ session('deposit_status') }}</p>@endif
-        @if ($depositPayment->status === 'PENDING')<p>Resit deposit anda telah diterima dan sedang disemak oleh Pengurusan Operasi.</p>@endif
-        @if ($depositPayment->status === 'PAID')<p>Bayaran deposit telah disahkan. Tempahan boleh diteruskan ke proses design.</p>@endif
+        @if ($depositPayment->status === 'PENDING')<p>Your deposit receipt has been received and is being reviewed by Operations Management.</p>@endif
+        @if ($depositPayment->status === 'PAID')<p>Your deposit payment has been confirmed. Your order can proceed to design.</p>@endif
         @if ($depositPayment->status === 'FAILED')
-            <p><strong>Sebab penolakan:</strong> {{ $depositPayment->metadata['rejection_reason'] ?? 'Resit tidak dapat disahkan.' }}</p>
+            <p><strong>Rejection reason:</strong> {{ $depositPayment->metadata['rejection_reason'] ?? 'The receipt could not be verified.' }}</p>
             <form method="POST" enctype="multipart/form-data" action="{{ route('orders.deposit-receipt.update', ['orderId' => $order->order_id]) }}" data-deposit-resubmission-form>
                 @csrf
                 <label for="replacement-deposit-receipt">{{ __('ui.upload_new_receipt') }}</label>
@@ -228,15 +226,15 @@
 
 @if (session('draft_saved'))
         <div class="notice customer-feedback customer-feedback-success" role="status">
-            <strong>Maklumat anda telah disimpan.</strong>
-            <span>Anda boleh keluar sekarang dan sambung semula melalui pautan dashboard yang sama.</span>
+            <strong>Your information has been saved.</strong>
+            <span>You can leave now and return using the same dashboard link.</span>
         </div>
     @endif
 
     @if ($errors->any())
         <div class="errors customer-feedback customer-feedback-error" role="alert">
-            <strong>Kami perlukan beberapa maklumat lagi.</strong>
-            <span>Sila semak ruangan di bawah, kemudian cuba semula.</span>
+            <strong>We need a few more details.</strong>
+            <span>Please review the fields below and try again.</span>
             <ul>
                 @foreach ($errors->all() as $error)
                     <li>{{ $error }}</li>
@@ -253,14 +251,14 @@
 
     @if (! $isEditable)
         <div class="notice readonly-notice">
-            <strong>Maklumat tempahan telah dikunci.</strong>
+            <strong>Order details have been locked.</strong>
             <div>
-                Maklumat yang telah disahkan hanya boleh dilihat dan tidak boleh diubah.
+                Confirmed information is read-only and cannot be changed.
             </div>
         </div>
     @endif
 
-    <section class="customer-view-switcher" aria-label="Pilih paparan">
+    <section class="customer-view-switcher" aria-label="Choose view">
         <button type="button" class="customer-view-switcher-button is-active" data-customer-view-button="form" aria-pressed="true">
             Order Form
         </button>
@@ -285,27 +283,27 @@
 
         @if ((int) $order->package_count === 2)
             <fieldset class="two-package-settings">
-                <legend>Tetapan Dua Pakej</legend>
-                <p class="field-help">Kedua-dua majlis mempunyai maklumat dan pilihan design masing-masing.</p>
+                <legend>Two-Package Settings</legend>
+                <p class="field-help">Each event has its own details and design choices.</p>
                 <div class="grid">
                     <div>
-                        <label for="package-format">Jenis Pakej</label>
+                        <label for="package-format">Package Type</label>
                         <select id="package-format" name="package_format">
-                            <option value="SEPARATE" @selected(old('package_format', $order->package_format) === 'SEPARATE')>Pakej Berasingan</option>
-                            <option value="FOLDED" @selected(old('package_format', $order->package_format) === 'FOLDED')>Pakej Gabungan – Kad Lipatan</option>
+                            <option value="SEPARATE" @selected(old('package_format', $order->package_format) === 'SEPARATE')>Separate Packages</option>
+                            <option value="FOLDED" @selected(old('package_format', $order->package_format) === 'FOLDED')>Combined Package – Folded Card</option>
                         </select>
                     </div>
                     <div>
-                        <label for="first-event-side">Majlis Pertama</label>
+                        <label for="first-event-side">First Event</label>
                         <select id="first-event-side" name="first_event_side">
-                            <option value="LELAKI" @selected($firstEventSide === 'LELAKI')>Pihak Lelaki</option>
-                            <option value="PEREMPUAN" @selected($firstEventSide === 'PEREMPUAN')>Pihak Perempuan</option>
+                            <option value="LELAKI" @selected($firstEventSide === 'LELAKI')>Groom's Side</option>
+                            <option value="PEREMPUAN" @selected($firstEventSide === 'PEREMPUAN')>Bride's Side</option>
                         </select>
                     </div>
                     <div>
-                        <label for="jumlah-hantaran">Jumlah Hantaran</label>
-                        <input id="jumlah-hantaran" name="jumlah_hantaran" type="text" maxlength="255" value="{{ old('jumlah_hantaran', $order->jumlah_hantaran) }}" placeholder="Contoh: RM 10,000.00 atau 10 dinar emas">
-                        <p class="field-help">Isi sebelum sahkan tempahan untuk Mockup Cek Hantaran percuma.</p>
+                        <label for="jumlah-hantaran">Gift Amount</label>
+                        <input id="jumlah-hantaran" name="jumlah_hantaran" type="text" maxlength="255" value="{{ old('jumlah_hantaran', $order->jumlah_hantaran) }}" placeholder="Example: RM 10,000.00 or 10 gold dinars">
+                        <p class="field-help">Enter this before confirming your order for a complimentary ceremonial cheque mockup.</p>
                     </div>
                 </div>
             </fieldset>
@@ -314,12 +312,12 @@
 
 
         <fieldset>
-            <legend>Maklumat Pasangan</legend>
+            <legend>Couple Details</legend>
             <div class="grid">
-                <div><label>Nama Pengantin Lelaki</label><input name="couple[groom_name]" placeholder="Contoh: Muhammad Syafiq Bin Rahim" value="{{ old('couple.groom_name', $couple?->groom_name) }}"></div>
-                <div><label>Singkatan Pengantin Lelaki</label><input name="couple[groom_abbreviation]" placeholder="Contoh: Syafiq" value="{{ old('couple.groom_abbreviation', $couple?->groom_abbreviation) }}"></div>
-                <div><label>Nama Pengantin Perempuan</label><input name="couple[bride_name]" placeholder="Contoh: Nur Awanis Binti Azman" value="{{ old('couple.bride_name', $couple?->bride_name) }}"></div>
-                <div><label>Singkatan Pengantin Perempuan</label><input name="couple[bride_abbreviation]" placeholder="Contoh: Awanis" value="{{ old('couple.bride_abbreviation', $couple?->bride_abbreviation) }}"></div>
+                <div><label>Groom's Full Name</label><input name="couple[groom_name]" placeholder="Example: Muhammad Syafiq Bin Rahim" value="{{ old('couple.groom_name', $couple?->groom_name) }}"></div>
+                <div><label>Groom's Short Name</label><input name="couple[groom_abbreviation]" placeholder="Example: Syafiq" value="{{ old('couple.groom_abbreviation', $couple?->groom_abbreviation) }}"></div>
+                <div><label>Bride's Full Name</label><input name="couple[bride_name]" placeholder="Example: Nur Awanis Binti Azman" value="{{ old('couple.bride_name', $couple?->bride_name) }}"></div>
+                <div><label>Bride's Short Name</label><input name="couple[bride_abbreviation]" placeholder="Example: Awanis" value="{{ old('couple.bride_abbreviation', $couple?->bride_abbreviation) }}"></div>
             </div>
         </fieldset>
         @foreach ($orderedPackageSides as $packageSide)
@@ -327,12 +325,12 @@
             @php($event = $packageSide->event)
             @php($hideFoldedDesign = $order->package_count === 2 && $order->package_format === 'FOLDED' && ! $loop->first)
             <fieldset data-package-side="{{ $side }}">
-                <legend data-package-legend>{{ $order->package_count === 2 ? 'Majlis '.$loop->iteration.' – ' : 'Pakej ' }}Pihak {{ ucfirst(strtolower($side)) }}</legend>
+                <legend data-package-legend>{{ $order->package_count === 2 ? 'Event '.$loop->iteration.' – ' : 'Package – ' }}{{ $side === 'LELAKI' ? "Groom's Side" : "Bride's Side" }}</legend>
                 @php($selectedQuantity = old("sides.$side.card_quantity", $packageSide->card_quantity))
 
                 <div>
                     <label for="card_quantity_{{ strtolower($side) }}">
-                        Kuantiti Kad — Pihak {{ ucfirst(strtolower($side)) }}
+                        Card Quantity — {{ $side === 'LELAKI' ? "Groom's Side" : "Bride's Side" }}
                     </label>
 
                     <select
@@ -340,13 +338,13 @@
                         name="sides[{{ $side }}][card_quantity]"
                         data-card-quantity-side="{{ $side }}"
                     >
-                        <option value="">-- Pilih kuantiti --</option>
+                        <option value="">-- Select quantity --</option>
                         @foreach ($quantityOptions as $quantity)
                             <option
                                 value="{{ $quantity }}"
                                 @selected((string) $selectedQuantity === (string) $quantity)
                             >
-                                {{ $quantity }} keping
+                                {{ $quantity }} cards
                             </option>
                         @endforeach
                     </select>
@@ -360,11 +358,11 @@
 
 <div class="grid">
     <div>
-        <label>Tema</label>
+        <label>Theme</label>
         @php($selectedTheme = old("sides.$side.design.theme", $packageSide->design?->theme))
 
 <select name="sides[{{ $side }}][design][theme]">
-    <option value="">-- Pilih Tema --</option>
+    <option value="">-- Select theme --</option>
 
     @foreach ([
         'PORTRAIT',
@@ -386,10 +384,10 @@
     </div>
 
     <div>
-        <label>Kod Design</label>
+        <label>Design Code</label>
         <input
             name="sides[{{ $side }}][design][design_code]"
-            placeholder="Contoh: KKK-001"
+            placeholder="Example: KKK-001"
             value="{{ old("sides.$side.design.design_code", $packageSide->design?->design_code) }}"
         >
     </div>
@@ -397,38 +395,32 @@
     @php($selectedCardTitle = old("sides.$side.design.card_title", $packageSide->design?->card_title))
 
 <div>
-    <label>Tajuk Majlis</label>
+    <label>Event Title</label>
 
     <select name="sides[{{ $side }}][design][card_title]">
-        <option value="">-- Pilih Tajuk Majlis --</option>
-        <option value="Walimatul Urus" @selected($selectedCardTitle === 'Walimatul Urus')>
-            Walimatul Urus
-        </option>
-        <option value="Majlis Perkahwinan" @selected($selectedCardTitle === 'Majlis Perkahwinan')>
-            Majlis Perkahwinan
-        </option>
-        <option value="Kenduri Kesyukuran" @selected($selectedCardTitle === 'Kenduri Kesyukuran')>
-            Kenduri Kesyukuran
-        </option>
+        <option value="">-- Select event title --</option>
+        <option value="Walimatul Urus" @selected($selectedCardTitle === 'Walimatul Urus')>Wedding Reception</option>
+        <option value="Majlis Perkahwinan" @selected($selectedCardTitle === 'Majlis Perkahwinan')>Wedding Ceremony</option>
+        <option value="Kenduri Kesyukuran" @selected($selectedCardTitle === 'Kenduri Kesyukuran')>Thanksgiving Celebration</option>
     </select>
 </div>
 </div>
 
 <div class="image-upload-field" data-card-image-upload @if (strtoupper((string) $selectedTheme) !== 'PORTRAIT') hidden @endif>
     <label for="card-image-{{ strtolower($side) }}">
-        Gambar Pengantin
+        Couple Photo
     </label>
 
     <p class="field-help">
-        Untuk tema PORTRAIT sahaja. Gunakan gambar menegak/portrait yang jelas, sebaiknya nisbah 3:4.
-        Gambar mendatar atau petak akan dipotong dan diseragamkan kepada 900 × 1200 px (3:4).
-        Format JPG, JPEG, PNG atau WEBP. Maksimum 10 MB.
+        For the PORTRAIT theme only. Use a clear portrait-oriented photo, preferably with a 3:4 ratio.
+        Landscape or square images will be cropped to 900 × 1200 px (3:4).
+        JPG, JPEG, PNG or WEBP format. Maximum 10 MB.
     </p>
 
     @if ($packageSide->design?->card_image_path)
         <p class="upload-status">
-            Gambar telah dimuat naik.
-            Pilih fail baharu di bawah hanya jika anda mahu menggantikannya.
+            Photo uploaded.
+            Choose a new file below only if you want to replace it.
         </p>
     @endif
 
@@ -439,7 +431,7 @@
         name="sides[{{ $side }}][design][card_image]"
         accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp"
     >
-    <button type="button" class="cancel-card-image" hidden aria-controls="card-image-{{ strtolower($side) }}">Batal</button>
+    <button type="button" class="cancel-card-image" hidden aria-controls="card-image-{{ strtolower($side) }}">Cancel</button>
     </div>
 
     @error("sides.$side.design.card_image")
@@ -448,24 +440,24 @@
 </div>
                 </div>
                 <section class="additional-products" aria-labelledby="included-design-items-{{ strtolower($side) }}">
-                    <h3 id="included-design-items-{{ strtolower($side) }}">Termasuk Dalam Pakej Kad</h3>
-                    <p class="field-help">Setiap pakej kad kahwin termasuk preview banner dan banting. Designer akan menggunakan nama singkatan serta tema design kad yang dipilih. Gambar pengantin hanya digunakan untuk tema PORTRAIT.</p>
+                    <h3 id="included-design-items-{{ strtolower($side) }}">Included in the Card Package</h3>
+                    <p class="field-help">Each wedding card package includes banner and bunting previews. The designer will use the short names and selected card design theme. Couple photos are used only for the PORTRAIT theme.</p>
                 </section>
-                <h3>Ibu Bapa Pengantin {{ ucfirst(strtolower($side)) }}</h3>
-                <p class="field-help">Masukkan nama ibu bapa bagi pihak yang menjadi tuan rumah majlis ini.</p>
+                <h3>{{ $side === 'LELAKI' ? "Groom's" : "Bride's" }} Parents</h3>
+                <p class="field-help">Enter the names of the parents hosting this event.</p>
                 <div class="grid">
-                    <div><label>Nama Bapa</label><input name="sides[{{ $side }}][parents][father_name]" placeholder="Contoh: Encik Rahim Bin Abdullah" value="{{ old("sides.$side.parents.father_name", $packageSide->parents?->father_name) }}"></div>
-                    <div><label>Nama Ibu</label><input name="sides[{{ $side }}][parents][mother_name]" placeholder="Contoh: Puan Aminah Binti Ismail" value="{{ old("sides.$side.parents.mother_name", $packageSide->parents?->mother_name) }}"></div>
+                    <div><label>Father's Name</label><input name="sides[{{ $side }}][parents][father_name]" placeholder="Example: Mr Rahim Bin Abdullah" value="{{ old("sides.$side.parents.father_name", $packageSide->parents?->father_name) }}"></div>
+                    <div><label>Mother's Name</label><input name="sides[{{ $side }}][parents][mother_name]" placeholder="Example: Mrs Aminah Binti Ismail" value="{{ old("sides.$side.parents.mother_name", $packageSide->parents?->mother_name) }}"></div>
                 </div>
-                <h3>Majlis</h3>
+                <h3>Event</h3>
                 <div class="grid">
                     @php($selectedDay = old("sides.$side.event.day_name", $event?->day_name))
 
 <div>
-    <label>Hari</label>
+    <label>Day</label>
 
     <select name="sides[{{ $side }}][event][day_name]" data-event-day>
-        <option value="">-- Pilih Hari --</option>
+        <option value="">-- Select day --</option>
 
         @foreach ([
             'Ahad',
@@ -477,46 +469,46 @@
             'Sabtu',
         ] as $day)
             <option value="{{ $day }}" @selected($selectedDay === $day)>
-                {{ $day }}
+                {{ match ($day) { 'Ahad' => 'Sunday', 'Isnin' => 'Monday', 'Selasa' => 'Tuesday', 'Rabu' => 'Wednesday', 'Khamis' => 'Thursday', 'Jumaat' => 'Friday', 'Sabtu' => 'Saturday' } }}
             </option>
         @endforeach
     </select>
 </div>
                     <div>
-                        <label>Tarikh</label>
+                        <label>Date</label>
                         <input type="date" name="sides[{{ $side }}][event][event_date]" value="{{ old("sides.$side.event.event_date", $event?->event_date?->format('Y-m-d')) }}" data-event-date>
-                        <p class="date-picker-help" data-event-date-help>Pilih hari dahulu untuk memaparkan tarikh yang sepadan sahaja.</p>
+                        <p class="date-picker-help" data-event-date-help>Select a day first to show only matching dates.</p>
                     </div>
                     <div>
-                        <label>Tarikh Hijri</label>
-                        <input name="sides[{{ $side }}][event][hijri_date]" placeholder="Contoh: 4 Zulhijjah 1446H" value="{{ old("sides.$side.event.hijri_date", $event?->hijri_date) }}" data-hijri-date>
-                        <p class="date-picker-help" data-hijri-date-help>Pilih hari dahulu untuk menapis tarikh Hijri yang sepadan.</p>
+                        <label>Hijri Date</label>
+                        <input name="sides[{{ $side }}][event][hijri_date]" placeholder="Example: 4 Dhu al-Hijjah 1446 AH" value="{{ old("sides.$side.event.hijri_date", $event?->hijri_date) }}" data-hijri-date>
+                        <p class="date-picker-help" data-hijri-date-help>Select a day first to filter matching Hijri dates.</p>
                     </div>
-                    <div><label>Masa Makan</label><input type="time" name="sides[{{ $side }}][event][meal_time]" value="{{ old("sides.$side.event.meal_time", $event?->meal_time ? substr($event->meal_time, 0, 5) : '') }}"></div>
-                    <div><label>Masa Bersanding</label><input type="time" name="sides[{{ $side }}][event][bersanding_time]" value="{{ old("sides.$side.event.bersanding_time", $event?->bersanding_time ? substr($event->bersanding_time, 0, 5) : '') }}"></div>
-                    <div><label>Nama Tempat</label><input name="sides[{{ $side }}][event][venue_name]" placeholder="Contoh: Dewan Seri Impian" value="{{ old("sides.$side.event.venue_name", $event?->venue_name) }}"></div>
+                    <div><label>Meal Time</label><input type="time" name="sides[{{ $side }}][event][meal_time]" value="{{ old("sides.$side.event.meal_time", $event?->meal_time ? substr($event->meal_time, 0, 5) : '') }}"></div>
+                    <div><label>Wedding Reception Time</label><input type="time" name="sides[{{ $side }}][event][bersanding_time]" value="{{ old("sides.$side.event.bersanding_time", $event?->bersanding_time ? substr($event->bersanding_time, 0, 5) : '') }}"></div>
+                    <div><label>Venue Name</label><input name="sides[{{ $side }}][event][venue_name]" placeholder="Example: Seri Impian Hall" value="{{ old("sides.$side.event.venue_name", $event?->venue_name) }}"></div>
                 </div>
-                <label>Alamat Penuh</label>
-                <textarea rows="4" name="sides[{{ $side }}][event][full_address]" placeholder="Contoh: No. 87, Laluan Taman Meru 8, Taman Meru 2B, 30020 Ipoh, Perak">{{ old("sides.$side.event.full_address", $event?->full_address) }}</textarea>
-                <label>Pautan Google Maps</label>
-                <input type="url" name="sides[{{ $side }}][event][google_maps_url]" placeholder="Contoh: https://maps.app.goo.gl/..." value="{{ old("sides.$side.event.google_maps_url", $event?->google_maps_url) }}">
-                <h3>Wakil Untuk Dihubungi</h3>
+                <label>Full Address</label>
+                <textarea rows="4" name="sides[{{ $side }}][event][full_address]" placeholder="Example: No. 87, Laluan Taman Meru 8, Taman Meru 2B, 30020 Ipoh, Perak">{{ old("sides.$side.event.full_address", $event?->full_address) }}</textarea>
+                <label>Google Maps Link</label>
+                <input type="url" name="sides[{{ $side }}][event][google_maps_url]" placeholder="Example: https://maps.app.goo.gl/..." value="{{ old("sides.$side.event.google_maps_url", $event?->google_maps_url) }}">
+                <h3>Contact Persons</h3>
 
 @for ($contactNumber = 1; $contactNumber <= 3; $contactNumber++)
     @php($contact = $event?->contacts?->firstWhere('contact_number', $contactNumber))
 
     <div class="grid">
         <div>
-            <label>Wakil {{ $contactNumber }} - Nama</label>
+            <label>Contact {{ $contactNumber }} - Name</label>
             <input
                 name="sides[{{ $side }}][event][contacts][{{ $contactNumber }}][contact_name]"
-                placeholder="Contoh: Ahmad"
+                placeholder="Example: Ahmad"
                 value="{{ old("sides.$side.event.contacts.$contactNumber.contact_name", $contact?->contact_name) }}"
             >
         </div>
 
         <div>
-            <label>Wakil {{ $contactNumber }} - Telefon</label>
+            <label>Contact {{ $contactNumber }} - Phone</label>
             <input
                 name="sides[{{ $side }}][event][contacts][{{ $contactNumber }}][contact_phone]"
                 type="tel"
@@ -524,8 +516,8 @@
                 inputmode="numeric"
                 minlength="10"
                 maxlength="11"
-                title="Masukkan 10 atau 11 digit bermula dengan 01."
-                placeholder="Contoh: 0123456789"
+                title="Enter a 10- or 11-digit number starting with 01."
+                placeholder="Example: 0123456789"
                 value="{{ old("sides.$side.event.contacts.$contactNumber.contact_phone", $contact?->contact_phone) }}"
             >
         </div>
@@ -535,12 +527,12 @@
         @endforeach
 
         <fieldset>
-    <legend>Penghantaran / Pengambilan</legend>
+    <legend>Delivery / Pickup</legend>
 
     @php($fulfilmentMethod = old('fulfilment.method', $order->fulfilment?->method))
 
     <p class="field-help">
-        Pilih bagaimana tempahan anda akan diterima selepas siap.
+        Choose how you would like to receive your completed order.
     </p>
 
     <div class="fulfilment-options">
@@ -552,8 +544,8 @@
                 @checked($fulfilmentMethod === 'COURIER')
             >
             <span>
-                <strong>Pos / Kurier</strong><br>
-                Tempahan akan dihantar ke alamat yang diberikan.
+                <strong>Post / Courier</strong><br>
+                Your order will be delivered to the address provided.
             </span>
         </label>
 
@@ -565,8 +557,8 @@
                 @checked($fulfilmentMethod === 'PICKUP')
             >
             <span>
-                <strong>Pengambilan Sendiri</strong><br>
-                Ambil sendiri tempahan di KKK.
+                <strong>Self Pickup</strong><br>
+                Collect your order at KKK.
             </span>
         </label>
     </div>
@@ -576,21 +568,21 @@
     class="courier-details"
     @if ($fulfilmentMethod !== 'COURIER') hidden @endif
 >
-    <h3>Maklumat Penghantaran Kurier</h3>
+    <h3>Courier Delivery Details</h3>
 
     <div class="grid">
         <div>
-            <label>Nama Penerima</label>
+            <label>Recipient Name</label>
             <input
                 id="courier-recipient-name"
                 name="fulfilment[recipient_name]"
-                placeholder="Contoh: Muhammad Syafiq Bin Rahim"
+                placeholder="Example: Muhammad Syafiq Bin Rahim"
                 value="{{ old('fulfilment.recipient_name', $order->fulfilment?->recipient_name) }}"
             >
         </div>
 
         <div>
-            <label>Telefon Penerima</label>
+            <label>Recipient Phone</label>
             <input
                 id="courier-recipient-phone"
                 name="fulfilment[recipient_phone]"
@@ -599,19 +591,19 @@
                 inputmode="numeric"
                 minlength="10"
                 maxlength="11"
-                title="Masukkan 10 atau 11 digit bermula dengan 01."
-                placeholder="Contoh: 0123456789"
+                title="Enter a 10- or 11-digit number starting with 01."
+                placeholder="Example: 0123456789"
                 value="{{ old('fulfilment.recipient_phone', $order->fulfilment?->recipient_phone) }}"
             >
         </div>
     </div>
 
-    <label>Alamat Penghantaran</label>
+    <label>Delivery Address</label>
     <textarea
         id="courier-shipping-address"
         rows="4"
         name="fulfilment[shipping_address]"
-        placeholder="Contoh: No. 12, Jalan Melur 3, Taman Melur, 43000 Kajang, Selangor"
+        placeholder="Example: No. 12, Jalan Melur 3, Taman Melur, 43000 Kajang, Selangor"
     >{{ old('fulfilment.shipping_address', $order->fulfilment?->shipping_address) }}</textarea>
 </div>
 </fieldset>
@@ -622,18 +614,18 @@
 
 @if ($isEditable)
     <div class="form-actions">
-        <button type="submit">Simpan Draf</button>
+        <button type="submit">Save Draft</button>
 
         <span id="autosave-status" class="autosave-status" data-state="saved" role="status" aria-live="polite">
             <span class="autosave-indicator" aria-hidden="true"></span>
-            <span id="autosave-message">Semua perubahan selamat disimpan</span>
+            <span id="autosave-message">All changes saved</span>
         </span>
 
         <a
             id="review-order-link"
             href="{{ route('orders.review.show', ['orderId' => $order->order_id]) }}"
         >
-            Semak Maklumat & Teruskan
+            Review Details & Continue
         </a>
     </div>
 @endif
@@ -660,7 +652,7 @@ document.addEventListener('DOMContentLoaded', function () {
     try {
         validPairs = JSON.parse(pairsElement.textContent);
     } catch (error) {
-        console.error('Senarai pasangan kuantiti tidak sah.', error);
+        console.error('Invalid quantity option list.', error);
         return;
     }
 
@@ -764,7 +756,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
         const error = document.createElement('p');
         error.className = 'field-error required-field-error';
-        error.textContent = 'Sila isi ' + message + '.';
+        error.textContent = 'Please enter ' + message + '.';
 
         field.insertAdjacentElement('afterend', error);
     }
@@ -793,15 +785,15 @@ document.addEventListener('DOMContentLoaded', function () {
         const requiredFields = [
             {
                 selector: '[name="couple[groom_name]"]',
-                label: 'Nama Pengantin Lelaki'
+                label: "the groom's name"
             },
             {
                 selector: '[name="couple[bride_name]"]',
-                label: 'Nama Pengantin Perempuan'
+                label: "the bride's name"
             },
             {
                 selector: '[name="fulfilment[method]"]:checked',
-                label: 'Kaedah Pemenuhan Tempahan',
+                label: 'delivery method',
                 type: 'radio'
             }
         ];
@@ -820,7 +812,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
                         const error = document.createElement('p');
                         error.className = 'field-error required-field-error';
-                        error.textContent = 'Sila pilih Kaedah Pemenuhan Tempahan.';
+                        error.textContent = 'Please select a delivery method.';
 
                         container.insertAdjacentElement('afterend', error);
                     }
@@ -841,26 +833,26 @@ document.addEventListener('DOMContentLoaded', function () {
             .forEach(function (fieldset) {
                 const side = fieldset.dataset.packageSide;
                 const sideLabel = side === 'LELAKI'
-                    ? 'Pakej Lelaki'
-                    : 'Pakej Perempuan';
+                    ? "Groom's Package"
+                    : "Bride's Package";
 
                 const sideRequiredFields = [
-                    ['design][design_code]', 'Kod Design'],
-                    ['parents][father_name]', 'Nama Bapa'],
-                    ['parents][mother_name]', 'Nama Ibu'],
-                    ['event][event_date]', 'Tarikh Majlis'],
-                    ['event][meal_time]', 'Masa Majlis / Jamuan'],
-                    ['event][venue_name]', 'Nama Tempat Majlis'],
-                    ['event][full_address]', 'Alamat Penuh'],
+                    ['design][design_code]', 'design code'],
+                    ['parents][father_name]', "father's name"],
+                    ['parents][mother_name]', "mother's name"],
+                    ['event][event_date]', 'event date'],
+                    ['event][meal_time]', 'event / meal time'],
+                    ['event][venue_name]', 'venue name'],
+                    ['event][full_address]', 'full address'],
 
-                    ['event][contacts][1][contact_name]', 'Wakil 1 - Nama'],
-                    ['event][contacts][1][contact_phone]', 'Wakil 1 - Telefon'],
+                    ['event][contacts][1][contact_name]', 'contact 1 name'],
+                    ['event][contacts][1][contact_phone]', 'contact 1 phone'],
 
-                    ['event][contacts][2][contact_name]', 'Wakil 2 - Nama'],
-                    ['event][contacts][2][contact_phone]', 'Wakil 2 - Telefon'],
+                    ['event][contacts][2][contact_name]', 'contact 2 name'],
+                    ['event][contacts][2][contact_phone]', 'contact 2 phone'],
 
-                    ['event][contacts][3][contact_name]', 'Wakil 3 - Nama'],
-                    ['event][contacts][3][contact_phone]', 'Wakil 3 - Telefon']
+                    ['event][contacts][3][contact_name]', 'contact 3 name'],
+                    ['event][contacts][3][contact_phone]', 'contact 3 phone']
                 ];
 
                 sideRequiredFields.forEach(function (item) {
@@ -884,7 +876,7 @@ document.addEventListener('DOMContentLoaded', function () {
             });
 
         /*
-         * Courier fields hanya wajib apabila customer pilih Courier.
+         * Courier fields are required only when the customer selects courier delivery.
          */
         const fulfilmentMethod = document.querySelector(
             '[name="fulfilment[method]"]:checked'
@@ -892,9 +884,9 @@ document.addEventListener('DOMContentLoaded', function () {
 
         if (fulfilmentMethod && fulfilmentMethod.value === 'COURIER') {
             [
-                ['[name="fulfilment[recipient_name]"]', 'Nama Penerima'],
-                ['[name="fulfilment[recipient_phone]"]', 'No Telefon Penerima'],
-                ['[name="fulfilment[shipping_address]"]', 'Alamat Penghantaran']
+                ['[name="fulfilment[recipient_name]"]', 'recipient name'],
+                ['[name="fulfilment[recipient_phone]"]', 'recipient phone'],
+                ['[name="fulfilment[shipping_address]"]', 'delivery address']
             ].forEach(function (item) {
                 if (!validateRequiredField(item[0], item[1])) {
                     valid = false;
@@ -985,14 +977,14 @@ document.addEventListener('DOMContentLoaded', function () {
                 if (!response.ok) {
                     return response.json().catch(function () { return {}; }).then(function (payload) {
                         const errors = payload.errors ? Object.values(payload.errors).flat().join(' ') : '';
-                        throw new Error(errors || payload.message || 'Kami tidak dapat menyimpan perubahan ini.');
+                        throw new Error(errors || payload.message || 'We could not save these changes.');
                     });
                 }
 
                 savedRevision = Math.max(savedRevision, revision);
 
                 if (savedRevision === draftRevision) {
-                    setStatus('Semua perubahan telah disimpan', 'saved');
+                    setStatus('All changes have been saved', 'saved');
                 }
             }).catch(function (error) {
                 if (retryAttempt === 0) {
@@ -1005,7 +997,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
                 if (revision === draftRevision) {
                     setStatus(
-                        'Simpanan belum berjaya. ' + (error.message || 'Semak sambungan internet, kemudian tekan Simpan Draf.'),
+                        'Unable to save. ' + (error.message || 'Check your internet connection, then select Save Draft.'),
                         'error'
                     );
                 }
@@ -1032,7 +1024,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
             window.clearTimeout(autosaveTimer);
             draftRevision += 1;
-            setStatus('Perubahan belum disimpan', 'pending');
+            setStatus('Unsaved changes', 'pending');
             autosaveTimer = window.setTimeout(function () {
                 queueSave(includeFiles).catch(function () {});
             }, 800);
@@ -1079,7 +1071,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 window.clearTimeout(autosaveTimer);
                 reviewLink.setAttribute('aria-disabled', 'true');
                 reviewLink.classList.add('is-loading');
-                reviewLink.textContent = 'Menyimpan maklumat...';
+                reviewLink.textContent = 'Saving details...';
 
                 queueSave(true)
                     .then(function () {
@@ -1088,7 +1080,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     .catch(function () {
                         reviewLink.removeAttribute('aria-disabled');
                         reviewLink.classList.remove('is-loading');
-                        reviewLink.textContent = 'Semak Maklumat & Teruskan';
+                        reviewLink.textContent = 'Review Details & Continue';
                     });
             });
         }
@@ -1149,11 +1141,11 @@ document.addEventListener('DOMContentLoaded', function () {
 
         function formatDate(raw) {
             if (!raw) {
-                return 'TARIKH MAJLIS';
+                return 'EVENT DATE';
             }
 
             const date = new Date(raw + 'T00:00:00');
-            return new Intl.DateTimeFormat('ms-MY', {
+            return new Intl.DateTimeFormat('en-MY', {
                 day: 'numeric',
                 month: 'long',
                 year: 'numeric'
@@ -1162,9 +1154,9 @@ document.addEventListener('DOMContentLoaded', function () {
 
         function jawiCardTitle(title) {
             const translations = {
-                'Walimatul Urus': 'وليمة العروس',
-                'Majlis Perkahwinan': 'مجليس ڤركهوينن',
-                'Kenduri Kesyukuran': 'کندوري کشوکورن'
+                'Walimatul Urus': 'Wedding Reception',
+                'Majlis Perkahwinan': 'Wedding Ceremony',
+                'Kenduri Kesyukuran': 'Thanksgiving Celebration'
             };
 
             return translations[title] || translations['Walimatul Urus'];
@@ -1176,8 +1168,8 @@ document.addEventListener('DOMContentLoaded', function () {
             }
 
             const prefix = 'sides[' + side + ']';
-            const groomName = value('couple[groom_name]', 'NAMA PENGANTIN');
-            const brideName = value('couple[bride_name]', 'NAMA PASANGAN');
+            const groomName = value('couple[groom_name]', 'GROOM NAME');
+            const brideName = value('couple[bride_name]', 'BRIDE NAME');
             const groomDisplay = value('couple[groom_abbreviation]', groomName);
             const brideDisplay = value('couple[bride_abbreviation]', brideName);
 
@@ -1186,21 +1178,21 @@ document.addEventListener('DOMContentLoaded', function () {
             setText(scope, 'groom_display', groomDisplay);
             setText(scope, 'bride_display', brideDisplay);
             const cardTitle = value(prefix + '[design][card_title]', 'Walimatul Urus');
-            setText(scope, 'card_title', cardTitle);
+            setText(scope, 'card_title', ({ 'Walimatul Urus': 'Wedding Reception', 'Majlis Perkahwinan': 'Wedding Ceremony', 'Kenduri Kesyukuran': 'Thanksgiving Celebration' })[cardTitle] || cardTitle);
             setText(scope, 'card_title_jawi', jawiCardTitle(cardTitle));
-            setText(scope, 'father_name', value(prefix + '[parents][father_name]', 'NAMA BAPA'));
-            setText(scope, 'mother_name', value(prefix + '[parents][mother_name]', 'NAMA IBU'));
-            setText(scope, 'day_name', value(prefix + '[event][day_name]', 'HARI').toUpperCase());
+            setText(scope, 'father_name', value(prefix + '[parents][father_name]', "FATHER'S NAME"));
+            setText(scope, 'mother_name', value(prefix + '[parents][mother_name]', "MOTHER'S NAME"));
+            setText(scope, 'day_name', ({ Ahad: 'Sunday', Isnin: 'Monday', Selasa: 'Tuesday', Rabu: 'Wednesday', Khamis: 'Thursday', Jumaat: 'Friday', Sabtu: 'Saturday' })[value(prefix + '[event][day_name]', '')] || 'DAY');
             setText(scope, 'event_date', formatDate(value(prefix + '[event][event_date]', '')));
             setText(scope, 'hijri_date', value(prefix + '[event][hijri_date]', ''));
             setText(scope, 'meal_time', value(prefix + '[event][meal_time]', '-'));
             setText(scope, 'bersanding_time', value(prefix + '[event][bersanding_time]', '-'));
-            setText(scope, 'venue_name', value(prefix + '[event][venue_name]', 'NAMA TEMPAT'));
-            setText(scope, 'full_address', value(prefix + '[event][full_address]', 'Alamat penuh majlis'));
+            setText(scope, 'venue_name', value(prefix + '[event][venue_name]', 'VENUE NAME'));
+            setText(scope, 'full_address', value(prefix + '[event][full_address]', 'Full event address'));
 
             for (let number = 1; number <= 3; number += 1) {
                 const contactPrefix = prefix + '[event][contacts][' + number + ']';
-                setText(scope, 'contact_' + number + '_name', value(contactPrefix + '[contact_name]', 'Ahli ' + number));
+                setText(scope, 'contact_' + number + '_name', value(contactPrefix + '[contact_name]', 'Contact ' + number));
                 setText(scope, 'contact_' + number + '_phone', value(contactPrefix + '[contact_phone]', '-'));
             }
 
@@ -1254,16 +1246,16 @@ document.addEventListener('DOMContentLoaded', function () {
                 if (section && parent) {
                     parent.insertBefore(section, reference);
                     const legend = section.querySelector('[data-package-legend]');
-                    if (legend) legend.textContent = 'Majlis ' + (index + 1) + ' – Pihak ' + (side === 'LELAKI' ? 'Lelaki' : 'Perempuan');
+                    if (legend) legend.textContent = 'Event ' + (index + 1) + ' – ' + (side === 'LELAKI' ? "Groom's Side" : "Bride's Side");
                 }
             });
 
             if (isFoldedCardPreview) {
                 const tabs = preview.querySelector('[data-folded-preview-tabs]');
                 const pages = [
-                    { side: order[0], face: 'front', label: 'Halaman 1 · Kad Depan' },
-                    { side: order[0], face: 'back', label: 'Halaman 2 · Kad Belakang · ' + (order[0] === 'LELAKI' ? 'Lelaki' : 'Perempuan') },
-                    { side: order[1], face: 'back', label: 'Halaman 3 · Kad Belakang · ' + (order[1] === 'LELAKI' ? 'Lelaki' : 'Perempuan') },
+                    { side: order[0], face: 'front', label: 'Page 1 · Card Front' },
+                    { side: order[0], face: 'back', label: 'Page 2 · Card Back · ' + (order[0] === 'LELAKI' ? 'Groom' : 'Bride') },
+                    { side: order[1], face: 'back', label: 'Page 3 · Card Back · ' + (order[1] === 'LELAKI' ? 'Groom' : 'Bride') },
                 ];
 
                 pages.forEach(function (page) {
@@ -1280,7 +1272,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     if (tab && tabs) {
                         tabs.appendChild(tab);
                         const label = tab.querySelector('[data-preview-tab-label]');
-                        if (label) label.textContent = 'Majlis ' + (index + 1) + ' – ' + (side === 'LELAKI' ? 'Lelaki' : 'Perempuan');
+                        if (label) label.textContent = 'Event ' + (index + 1) + ' – ' + (side === 'LELAKI' ? 'Groom' : 'Bride');
                     }
                 });
             }

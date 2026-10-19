@@ -1,10 +1,10 @@
 <!doctype html>
-<html lang="ms" class="brand-customer-page">
+<html lang="en" class="brand-customer-page">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="referrer" content="no-referrer">
-    <title>Semakan Akhir - {{ $review['order_id'] }}</title>
+    <title>Final Review - {{ $review['order_id'] }}</title>
     <link rel="stylesheet" href="{{ asset('css/final-review.css') }}?v={{ filemtime(public_path('css/final-review.css')) }}">
     <link rel="stylesheet" href="{{ asset('css/customer-theme.css') }}?v={{ filemtime(public_path('css/customer-theme.css')) }}">
     <link rel="stylesheet" href="{{ asset('css/customer-service.css') }}?v={{ filemtime(public_path('css/customer-service.css')) }}">
@@ -16,8 +16,8 @@
         $hasSecondCouple = collect($secondCouple)->filter(fn ($value) => filled($value))->isNotEmpty();
 
         $fulfilmentLabel = match ($review['fulfilment']['method'] ?? null) {
-            'COURIER' => 'Pos / Kurier',
-            'PICKUP' => 'Pengambilan Sendiri di KKK',
+            'COURIER' => 'Post / Courier',
+            'PICKUP' => 'Self Pickup at KKK',
             default => $review['fulfilment']['method'] ?? '-',
         };
     @endphp
@@ -26,22 +26,22 @@
         <header class="review-header">
             <div class="review-header-top">
                 <div>
-                    <p class="eyebrow">Semakan Maklumat Tempahan</p>
-                    <h1>Semakan Akhir</h1>
+                    <p class="eyebrow">Review Your Order Details</p>
+                    <h1>Final Review</h1>
                 </div>
 
                 <span class="order-badge">{{ $review['order_id'] }}</span>
             </div>
 
             <p class="review-intro">
-                Sila semak semua maklumat di bawah dengan teliti sebelum membuat pengesahan akhir.
-                Maklumat yang telah disahkan akan dikunci daripada suntingan customer.
+                Please review all details carefully before final confirmation.
+                Confirmed details will be locked from further customer edits.
             </p>
         </header>
 
         @if ($errors->any())
             <section class="review-card">
-                <h2>Terdapat perkara yang perlu disemak</h2>
+                <h2>Some details need your attention</h2>
                 <ul>
                     @foreach ($errors->all() as $error)
                         <li>{{ $error }}</li>
@@ -51,53 +51,53 @@
         @endif
 
         <section class="review-card">
-            <h2>Ringkasan Tempahan</h2>
+            <h2>Order Summary</h2>
 
             <div class="review-grid">
                 <div class="review-item">
-                    <span class="review-label">ID Tempahan</span>
+                    <span class="review-label">Order ID</span>
                     <span class="review-value">{{ $review['order_id'] }}</span>
                 </div>
 
                 <div class="review-item">
-                    <span class="review-label">Jumlah Pakej</span>
+                    <span class="review-label">Number of Packages</span>
                     <span class="review-value">{{ $review['package_count'] }}</span>
                 </div>
 
                 <div class="review-item">
-                    <span class="review-label">Kuantiti Kad</span>
+                    <span class="review-label">Card Quantity</span>
                     <span class="review-value">{{ $review['card_quantity'] ?? '-' }}</span>
                 </div>
 
                 @if ($review['package_count'] === 2)
-                    <div class="review-item"><span class="review-label">Jenis Pakej</span><span class="review-value">{{ $review['package_format'] === 'FOLDED' ? 'Pakej Gabungan – Kad Lipatan' : 'Pakej Berasingan' }}</span></div>
-                    <div class="review-item"><span class="review-label">Majlis Pertama</span><span class="review-value">Pihak {{ ucfirst(strtolower($review['first_event_side'])) }}</span></div>
-                    <div class="review-item"><span class="review-label">Jumlah Hantaran</span><span class="review-value">{{ $review['jumlah_hantaran'] ?: '-' }}</span></div>
+                    <div class="review-item"><span class="review-label">Package Type</span><span class="review-value">{{ $review['package_format'] === 'FOLDED' ? 'Combined Package – Folded Card' : 'Separate Packages' }}</span></div>
+                    <div class="review-item"><span class="review-label">First Event</span><span class="review-value">{{ $review['first_event_side'] === 'LELAKI' ? "Groom's Side" : "Bride's Side" }}</span></div>
+                    <div class="review-item"><span class="review-label">Gift Amount</span><span class="review-value">{{ $review['jumlah_hantaran'] ?: '-' }}</span></div>
                 @endif
             </div>
         </section>
 
         <section class="review-card">
-            <h2>Pasangan Utama</h2>
+            <h2>Couple</h2>
 
             <div class="review-grid">
                 <div class="review-item">
-                    <span class="review-label">Nama Pengantin Lelaki</span>
+                    <span class="review-label">Groom's Full Name</span>
                     <span class="review-value">{{ $review['couple']['groom_name'] ?: '-' }}</span>
                 </div>
 
                 <div class="review-item">
-                    <span class="review-label">Singkatan Pengantin Lelaki</span>
+                    <span class="review-label">Groom's Short Name</span>
                     <span class="review-value">{{ $review['couple']['groom_abbreviation'] ?: '-' }}</span>
                 </div>
 
                 <div class="review-item">
-                    <span class="review-label">Nama Pengantin Perempuan</span>
+                    <span class="review-label">Bride's Full Name</span>
                     <span class="review-value">{{ $review['couple']['bride_name'] ?: '-' }}</span>
                 </div>
 
                 <div class="review-item">
-                    <span class="review-label">Singkatan Pengantin Perempuan</span>
+                    <span class="review-label">Bride's Short Name</span>
                     <span class="review-value">{{ $review['couple']['bride_abbreviation'] ?: '-' }}</span>
                 </div>
             </div>
@@ -105,29 +105,29 @@
 
         @if ($hasSecondCouple)
             <section class="review-card">
-                <h2>Pasangan Kedua</h2>
+                <h2>Second Couple</h2>
                 <p class="review-intro">
-                    Maklumat ini adalah untuk rujukan designer dan tidak digunakan dalam standard Photoshop Auto Merge V1.
+                    These details are for the designer's reference and are not used in Photoshop Auto Merge V1.
                 </p>
 
                 <div class="review-grid">
                     <div class="review-item">
-                        <span class="review-label">Nama Pengantin Lelaki</span>
+                        <span class="review-label">Groom's Full Name</span>
                         <span class="review-value">{{ $secondCouple['groom_name'] ?: '-' }}</span>
                     </div>
 
                     <div class="review-item">
-                        <span class="review-label">Singkatan Pengantin Lelaki</span>
+                        <span class="review-label">Groom's Short Name</span>
                         <span class="review-value">{{ $secondCouple['groom_abbreviation'] ?: '-' }}</span>
                     </div>
 
                     <div class="review-item">
-                        <span class="review-label">Nama Pengantin Perempuan</span>
+                        <span class="review-label">Bride's Full Name</span>
                         <span class="review-value">{{ $secondCouple['bride_name'] ?: '-' }}</span>
                     </div>
 
                     <div class="review-item">
-                        <span class="review-label">Singkatan Pengantin Perempuan</span>
+                        <span class="review-label">Bride's Short Name</span>
                         <span class="review-value">{{ $secondCouple['bride_abbreviation'] ?: '-' }}</span>
                     </div>
                 </div>
@@ -136,7 +136,7 @@
 
             @foreach ($review['package_sides'] as $side)
             @php
-                $sideLabel = $side['side'] === 'LELAKI' ? 'Lelaki' : 'Perempuan';
+                $sideLabel = $side['side'] === 'LELAKI' ? "Groom's Side" : "Bride's Side";
                 $event = $side['event'];
                 $design = $side['design'];
                 $parents = $side['parents'];
@@ -144,92 +144,92 @@
 
             <section class="review-card package-card">
                 <div class="package-heading">
-                    <h2>{{ $review['package_count'] === 2 ? 'Majlis '.$loop->iteration.' – ' : 'Pakej ' }}Pihak {{ $sideLabel }}</h2>
-                    <span class="side-badge">{{ $side['side'] }}</span>
+                    <h2>{{ $review['package_count'] === 2 ? 'Event '.$loop->iteration.' – ' : 'Package – ' }}{{ $sideLabel }}</h2>
+                    <span class="side-badge">{{ $side['side'] === 'LELAKI' ? 'Groom' : 'Bride' }}</span>
                 </div>
 
-                <h3>Design Kad</h3>
+                <h3>Card Design</h3>
                 <div class="review-grid">
                     <div class="review-item">
-                        <span class="review-label">Tema</span>
+                        <span class="review-label">Theme</span>
                         <span class="review-value">{{ $design['theme'] ?: '-' }}</span>
                     </div>
 
                     <div class="review-item">
-                        <span class="review-label">Kod Design</span>
+                        <span class="review-label">Design Code</span>
                         <span class="review-value">{{ $design['design_code'] ?: '-' }}</span>
                     </div>
 
                     <div class="review-item">
-                        <span class="review-label">Tajuk Majlis</span>
-                        <span class="review-value">{{ $design['card_title'] ?: '-' }}</span>
+                        <span class="review-label">Event Title</span>
+                        <span class="review-value">{{ match ($design['card_title']) { 'Walimatul Urus' => 'Wedding Reception', 'Majlis Perkahwinan' => 'Wedding Ceremony', 'Kenduri Kesyukuran' => 'Thanksgiving Celebration', default => $design['card_title'] ?: '-' } }}</span>
                     </div>
 
                     <div class="review-item">
-                        <span class="review-label">Gambar Pengantin</span>
+                        <span class="review-label">Couple Photo</span>
                         @if ($design['has_card_image'])
-                            <span class="upload-status">Gambar telah dimuat naik</span>
+                            <span class="upload-status">Photo uploaded</span>
                         @else
-                            <span class="upload-status not-uploaded">Tiada gambar dimuat naik</span>
+                            <span class="upload-status not-uploaded">No photo uploaded</span>
                         @endif
                     </div>
                 </div>
 
-                <h3>Termasuk Dalam Pakej Kad</h3>
+                <h3>Included in the Card Package</h3>
                 <div class="review-grid">
                     <div class="review-item">
-                        <span class="review-label">banner & banting</span>
-                        <span class="review-value">Termasuk secara automatik. Preview menggunakan nama singkatan dan tema design kad yang dipilih. Gambar pengantin hanya digunakan untuk tema PORTRAIT.</span>
+                        <span class="review-label">Banner & bunting</span>
+                        <span class="review-value">Included automatically. The preview uses the short names and selected card design theme. Couple photos are used only for the PORTRAIT theme.</span>
                     </div>
                 </div>
 
-                <h3>Maklumat Ibu Bapa</h3>
+                <h3>Parents' Details</h3>
                 <div class="review-grid">
                     <div class="review-item">
-                        <span class="review-label">Nama Bapa</span>
+                        <span class="review-label">Father's Name</span>
                         <span class="review-value">{{ $parents['father_name'] ?: '-' }}</span>
                     </div>
 
                     <div class="review-item">
-                        <span class="review-label">Nama Ibu</span>
+                        <span class="review-label">Mother's Name</span>
                         <span class="review-value">{{ $parents['mother_name'] ?: '-' }}</span>
                     </div>
                 </div>
 
-                <h3>Maklumat Majlis</h3>
+                <h3>Event Details</h3>
                 <div class="review-grid">
                     <div class="review-item">
-                        <span class="review-label">Hari</span>
-                        <span class="review-value">{{ $event['day_name'] ?: '-' }}</span>
+                        <span class="review-label">Day</span>
+                        <span class="review-value">{{ ['Ahad' => 'Sunday', 'Isnin' => 'Monday', 'Selasa' => 'Tuesday', 'Rabu' => 'Wednesday', 'Khamis' => 'Thursday', 'Jumaat' => 'Friday', 'Sabtu' => 'Saturday'][$event['day_name'] ?? ''] ?? '-' }}</span>
                     </div>
 
                     <div class="review-item">
-                        <span class="review-label">Tarikh Majlis</span>
+                        <span class="review-label">Event Date</span>
                         <span class="review-value">{{ $event['event_date'] ?: '-' }}</span>
                     </div>
 
                     <div class="review-item">
-                        <span class="review-label">Tarikh Hijri</span>
+                        <span class="review-label">Hijri Date</span>
                         <span class="review-value">{{ $event['hijri_date'] ?: '-' }}</span>
                     </div>
 
                     <div class="review-item">
-                        <span class="review-label">Masa Jamuan Makan</span>
+                        <span class="review-label">Meal Time</span>
                         <span class="review-value">{{ $event['meal_time'] ? substr($event['meal_time'], 0, 5) : '-' }}</span>
                     </div>
 
                     <div class="review-item">
-                        <span class="review-label">Masa Bersanding</span>
+                        <span class="review-label">Wedding Reception Time</span>
                         <span class="review-value">{{ $event['bersanding_time'] ? substr($event['bersanding_time'], 0, 5) : '-' }}</span>
                     </div>
 
                     <div class="review-item">
-                        <span class="review-label">Tempat Majlis</span>
+                        <span class="review-label">Event Venue</span>
                         <span class="review-value">{{ $event['venue_name'] ?: '-' }}</span>
                     </div>
 
                     <div class="review-item full-width">
-                        <span class="review-label">Alamat Majlis</span>
+                        <span class="review-label">Event Address</span>
                         <span class="review-value">{{ $event['full_address'] ?: '-' }}</span>
                     </div>
 
@@ -237,7 +237,7 @@
                         <span class="review-label">Google Maps</span>
                         @if ($event['google_maps_url'])
                             <a class="maps-link" href="{{ $event['google_maps_url'] }}" target="_blank" rel="noopener noreferrer">
-                                Buka lokasi Google Maps
+                                Open location in Google Maps
                             </a>
                         @else
                             <span class="review-value empty-value">-</span>
@@ -245,11 +245,11 @@
                     </div>
                 </div>
 
-                <h3>Wakil Untuk Dihubungi</h3>
+                <h3>Contact Persons</h3>
                 <ol class="contact-list">
                     @foreach ($event['contacts'] as $contact)
                         <li>
-                            <span class="contact-number">Wakil {{ $contact['contact_number'] }}</span>
+                            <span class="contact-number">Contact {{ $contact['contact_number'] }}</span>
                             <strong>{{ $contact['name'] ?: '-' }}</strong>
                             <span> — {{ $contact['phone'] ?: '-' }}</span>
                         </li>
@@ -259,27 +259,27 @@
         @endforeach
 
         <section class="review-card">
-            <h2>Penghantaran / Pengambilan</h2>
+            <h2>Delivery / Pickup</h2>
 
             <div class="review-grid">
                 <div class="review-item">
-                    <span class="review-label">Kaedah</span>
+                    <span class="review-label">Method</span>
                     <span class="review-value">{{ $fulfilmentLabel }}</span>
                 </div>
 
                 @if (($review['fulfilment']['method'] ?? null) === 'COURIER')
                     <div class="review-item">
-                        <span class="review-label">Nama Penerima</span>
+                        <span class="review-label">Recipient Name</span>
                         <span class="review-value">{{ $review['fulfilment']['recipient_name'] ?: '-' }}</span>
                     </div>
 
                     <div class="review-item">
-                        <span class="review-label">Telefon Penerima</span>
+                        <span class="review-label">Recipient Phone</span>
                         <span class="review-value">{{ $review['fulfilment']['recipient_phone'] ?: '-' }}</span>
                     </div>
 
                     <div class="review-item full-width">
-                        <span class="review-label">Alamat Penghantaran</span>
+                        <span class="review-label">Delivery Address</span>
                         <span class="review-value">{{ $review['fulfilment']['shipping_address'] ?: '-' }}</span>
                     </div>
                 @endif
@@ -289,8 +289,8 @@
         <section class="review-card payment-card">
             <div class="payment-heading">
                 <div>
-                    <p class="eyebrow">Pembayaran Tempahan</p>
-                    <h2>Bayaran Deposit</h2>
+                    <p class="eyebrow">Order Payment</p>
+                    <h2>Deposit Payment</h2>
                 </div>
                 <span class="deposit-amount">
                     RM {{ number_format((float) $review['pricing']['deposit_amount'], 2) }}
@@ -299,33 +299,33 @@
 
             <div class="review-grid">
                 <div class="review-item">
-                    <span class="review-label">Harga pakej kad</span>
+                    <span class="review-label">Card package price</span>
                     <span class="review-value">RM {{ number_format((float) $review['pricing']['package_amount'], 2) }}</span>
                 </div>
                 <div class="review-item">
-                    <span class="review-label">Jumlah harga pakej</span>
+                    <span class="review-label">Total package price</span>
                     <span class="review-value">RM {{ number_format((float) $review['pricing']['total_amount'], 2) }}</span>
                 </div>
             </div>
 
             <div class="deposit-notice">
-                <strong>Ini hanyalah bayaran deposit.</strong>
-                <p>Pembayaran penuh atau baki hanya perlu dibuat selepas anda menerima, menyemak dan meluluskan artwork daripada pihak KingKadKahwin.</p>
+                <strong>This is the deposit payment only.</strong>
+                <p>The remaining balance is due after the design has been approved and you have been notified.</p>
             </div>
 
             @if ($order->booking_payment_status === 'PAID')
                 <div class="deposit-notice">
-                    <strong>Booking telah dibayar dan disahkan.</strong>
-                    <p>Bayaran baki hanya perlu dibuat selepas anda menerima, menyemak dan meluluskan artwork.</p>
+                    <strong>Booking payment has been confirmed.</strong>
+                    <p>The remaining balance is due after design approval.</p>
                 </div>
             @else
                 <div class="deposit-notice">
-                    <strong>Booking belum dibayar.</strong>
-                    <p>Lengkapkan bayaran booking sebelum membuat pengesahan akhir.</p>
+                    <strong>Booking payment is still outstanding.</strong>
+                    <p>Complete your booking payment before final confirmation.</p>
                     <form method="POST" action="{{ route('orders.booking-payment.store', ['orderId' => $order->order_id]) }}">
                         @csrf
                         <button class="confirm-button" type="submit">
-                            Teruskan Pembayaran RM {{ number_format((float) $review['pricing']['deposit_amount'], 2) }}
+                            Continue to Payment RM {{ number_format((float) $review['pricing']['deposit_amount'], 2) }}
                         </button>
                     </form>
                     @error('payment')<p class="field-error" role="alert">{{ $message }}</p>@enderror
@@ -334,11 +334,11 @@
         </section>
 
         <section class="review-card confirmation-card">
-            <h2>Pengesahan Akhir</h2>
+            <h2>Final Confirmation</h2>
 
             <p class="confirmation-note">
-                Selepas anda mengesahkan maklumat ini, maklumat tempahan akan dikunci daripada suntingan customer.
-                Pastikan semua nama, tarikh, masa, alamat, design dan nombor telefon adalah betul.
+                After confirmation, these order details can no longer be edited by the customer.
+                Make sure all names, dates, times, addresses, design choices and phone numbers are correct.
             </p>
 
             <form id="final-confirmation-form" method="POST" action="{{ route('orders.confirm.store', ['orderId' => $review['order_id']]) }}">
@@ -353,7 +353,7 @@
                         @checked(old('responsibility_acknowledged'))
                     >
                     <span>
-                        Saya telah menyemak semua maklumat di atas dan mengesahkan bahawa maklumat tersebut adalah betul.
+                        I have reviewed all the details above and confirm that they are correct.
                     </span>
                 </label>
                 @error('responsibility_acknowledged')<p class="field-error" role="alert">{{ $message }}</p>@enderror
@@ -367,18 +367,18 @@
                         @checked(old('post_confirmation_liability_acknowledged'))
                     >
                     <span>
-                        Saya memahami dan bersetuju bahawa sebarang kesalahan pada maklumat yang berlaku atau ditemukan selepas pengesahan akhir ini tidak akan ditanggung oleh pihak KingKadKahwin.
+                        I understand and agree that KingKadKahwin is not responsible for errors in the information found after this final confirmation.
                     </span>
                 </label>
                 @error('post_confirmation_liability_acknowledged')<p class="field-error" role="alert">{{ $message }}</p>@enderror
 
                 <div class="review-actions">
                     <a class="back-link" href="{{ route('orders.dashboard', ['orderId' => $review['order_id']]) }}">
-                        Kembali & Betulkan Maklumat
+                        Back & Edit Details
                     </a>
 
                     <button id="final-confirmation-submit" class="confirm-button" type="submit">
-                        Sahkan Maklumat Tempahan
+                        Confirm Order Details
                     </button>
                 </div>
             </form>
@@ -387,11 +387,11 @@
 
     <dialog id="final-confirmation-dialog" class="final-confirmation-dialog" aria-labelledby="final-confirmation-dialog-title">
         <div class="final-confirmation-dialog-icon" aria-hidden="true">!</div>
-        <h2 id="final-confirmation-dialog-title">Sahkan dan kunci maklumat?</h2>
-        <p>Selepas disahkan, maklumat tempahan tidak boleh disunting semula oleh customer. Pastikan semua maklumat adalah betul.</p>
+        <h2 id="final-confirmation-dialog-title">Confirm and lock these details?</h2>
+        <p>After confirmation, the customer cannot edit the order details. Please make sure everything is correct.</p>
         <div class="final-confirmation-dialog-actions">
-            <button id="cancel-final-confirmation" type="button">Tidak, semak semula</button>
-            <button id="confirm-final-confirmation" class="is-primary" type="button">Ya, sahkan tempahan</button>
+            <button id="cancel-final-confirmation" type="button">No, review again</button>
+            <button id="confirm-final-confirmation" class="is-primary" type="button">Yes, confirm order</button>
         </div>
     </dialog>
 
@@ -407,7 +407,7 @@
             confirmationForm.addEventListener('submit', function (event) {
                 if (finalConfirmationApproved) {
                     submitButton.disabled = true;
-                    submitButton.textContent = 'Mengesahkan...';
+                    submitButton.textContent = 'Confirming...';
 
                     return;
                 }

@@ -43,7 +43,7 @@ class BuildOrderPricingService
 
         if ($profile === null || $profile->deposit_method !== 'FIXED') {
             throw ValidationException::withMessages([
-                'pricing' => 'Profil harga dan deposit aktif tidak dikonfigurasi untuk tempahan ini.',
+                'pricing' => 'An active pricing and deposit profile is not configured for this order.',
             ]);
         }
 
@@ -52,7 +52,7 @@ class BuildOrderPricingService
 
         if ($depositCents > $packageCents) {
             throw ValidationException::withMessages([
-                'pricing' => 'Deposit tidak boleh melebihi jumlah harga tempahan.',
+                'pricing' => 'The deposit cannot exceed the total order price.',
             ]);
         }
 
@@ -132,7 +132,7 @@ class BuildOrderPricingService
     {
         if (! preg_match('/^(0|[1-9]\d*)\.([0-9]{2})$/', $amount, $matches)) {
             throw ValidationException::withMessages([
-                'pricing' => 'Amaun harga atau deposit bukan nilai wang yang sah.',
+                'pricing' => 'The price or deposit amount is not a valid monetary value.',
             ]);
         }
 

@@ -16,7 +16,7 @@ class NormalizeCustomerPhoneService
 
         if (! preg_match('/^601\d{8,9}$/', $digits)) {
             throw ValidationException::withMessages([
-                'customer_phone' => 'Nombor telefon Malaysia tidak sah.',
+                'customer_phone' => 'Invalid Malaysian phone number.',
             ]);
         }
 

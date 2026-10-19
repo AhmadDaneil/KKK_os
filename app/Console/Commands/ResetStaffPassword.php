@@ -21,21 +21,21 @@ class ResetStaffPassword extends Command
             ->first();
 
         if ($staff === null) {
-            $this->error('Akaun staff dengan e-mel tersebut tidak ditemui.');
+            $this->error('No staff account was found for that email address.');
 
             return self::FAILURE;
         }
 
         $input = [
-            'password' => (string) $this->secret('Password baharu (minimum 8 aksara)'),
-            'password_confirmation' => (string) $this->secret('Sahkan password baharu'),
+            'password' => (string) $this->secret('New password (at least 8 characters)'),
+            'password_confirmation' => (string) $this->secret('Confirm new password'),
         ];
         $validator = Validator::make($input, [
             'password' => ['required', 'string', 'min:8', 'confirmed'],
         ], [
-            'password.required' => 'Password baharu diperlukan.',
-            'password.min' => 'Password baharu mestilah sekurang-kurangnya 8 aksara.',
-            'password.confirmed' => 'Pengesahan password baharu tidak sepadan.',
+            'password.required' => 'A new password is required.',
+            'password.min' => 'The new password must be at least 8 characters.',
+            'password.confirmed' => 'The new password confirmation does not match.',
         ]);
 
         if ($validator->fails()) {
@@ -50,7 +50,7 @@ class ResetStaffPassword extends Command
             'password' => $validator->validated()['password'],
         ]);
 
-        $this->info('Password staff berjaya ditetapkan semula.');
+        $this->info('The staff password has been reset.');
         $this->line("Email: {$staff->email}");
         $this->line("Role: {$staff->role}");
 

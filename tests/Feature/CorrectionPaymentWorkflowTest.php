@@ -34,14 +34,14 @@ class CorrectionPaymentWorkflowTest extends TestCase
             ->assertSessionHasErrors('design_job');
         $this->assertSame('DESIGN_READY', $job->fresh()->status);
         Storage::disk('local')->assertExists($payment->metadata['receipt_path']);
-        $this->get(route('orders.artwork.review', $order->order_id))->assertSee('Menunggu pengesahan bayaran RM10')->assertDontSee('Luluskan Artwork');
+        $this->get(route('orders.artwork.review', $order->order_id))->assertSee('Awaiting RM10 Payment Confirmation')->assertDontSee('Approve Artwork');
         $this->submit($order, $job)->assertSessionHasErrors('correction_receipt');
         $this->assertSame(1, $order->payments()->count());
         $this->assertCount(1, Storage::disk('local')->allFiles());
         $this->post(route('orders.artwork.approve', [$order->order_id, $job->id]))->assertSessionHasErrors('artwork');
 
         $manager = User::factory()->create(['role' => User::ROLE_OM, 'is_active' => true]);
-        $this->actingAs($manager, 'staff')->get(route('staff.orders.show', $order->order_id))->assertOk()->assertSee('Sahkan Bayaran Pembetulan RM10');
+        $this->actingAs($manager, 'staff')->get(route('staff.orders.show', $order->order_id))->assertOk()->assertSee('Confirm RM10 Correction Payment');
         $this->get(route('staff.payments.receipt', $payment))->assertOk();
         $this->post(route('staff.payments.correction.approve', $payment))->assertRedirect();
         $this->assertSame('PAID', $payment->fresh()->status);

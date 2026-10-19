@@ -16,7 +16,7 @@ class ConfirmOrderDetailsService
     {
         if ($order->status !== 'DETAILS_INCOMPLETE') {
             throw ValidationException::withMessages([
-                'order' => 'Maklumat tempahan ini tidak boleh disahkan semula.',
+                'order' => "This order's details cannot be confirmed again.",
             ]);
         }
 

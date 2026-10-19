@@ -28,7 +28,7 @@ class PublicCalendarController extends Controller
             report($exception);
 
             return response()->json([
-                'message' => 'Kalendar rasmi JAKIM tidak dapat dicapai. Sila cuba lagi.',
+                'message' => 'The official JAKIM calendar is unavailable. Please try again.',
             ], 503);
         }
     }

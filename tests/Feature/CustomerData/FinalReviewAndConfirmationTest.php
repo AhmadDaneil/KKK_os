@@ -114,8 +114,8 @@ class FinalReviewAndConfirmationTest extends TestCase
 
         $missingText = implode(' | ', $validation['missing']);
 
-        $this->assertStringContainsString('Pakej Lelaki', $missingText);
-        $this->assertStringContainsString('Pakej Perempuan', $missingText);
+        $this->assertStringContainsString("Groom's package", $missingText);
+        $this->assertStringContainsString("Bride's package", $missingText);
     }
 
     public function test_courier_requires_shipping_information(): void

@@ -633,7 +633,7 @@ public function test_dashboard_rejects_card_image_larger_than_ten_megabytes(): v
                 'quantityOptions',
                 fn ($options) => $options->contains(500)
             )
-            ->assertSee('Kuantiti Kad')
+            ->assertSee('Card Quantity')
             ->assertSee('name="sides[PEREMPUAN][card_quantity]"', false)
             ->assertSee('value="500"', false);
     }

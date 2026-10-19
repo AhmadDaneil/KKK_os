@@ -21,14 +21,14 @@ class BillplzWebhookController extends Controller
             $payment = $handler->handle($verified);
         } catch (RuntimeException $exception) {
             return response()->json([
-                'message' => 'Callback Billplz tidak sah atau tidak sepadan dengan rekod pembayaran.',
+                'message' => 'The Billplz callback is invalid or does not match a payment record.',
                 'code' => 'INVALID_BILLPLZ_CALLBACK',
             ], 400);
         } catch (Throwable $exception) {
             report($exception);
 
             return response()->json([
-                'message' => 'Callback tidak dapat diproses sekarang.',
+                'message' => 'The callback cannot be processed right now.',
                 'code' => 'CALLBACK_PROCESSING_FAILED',
             ], 500);
         }

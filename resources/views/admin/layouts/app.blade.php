@@ -1,9 +1,9 @@
 <!doctype html>
-<html lang="ms">
+<html lang="en">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>@yield('title', 'Papan Pemuka Admin') — KKK OS</title>
+    <title>@yield('title', 'Admin Dashboard') — KKK OS</title>
     <link rel="stylesheet" href="{{ asset('css/admin.css') }}?v={{ filemtime(public_path('css/admin.css')) }}">
     <link rel="stylesheet" href="{{ asset('css/dashboard-compact.css') }}?v={{ filemtime(public_path('css/dashboard-compact.css')) }}">
 </head>
@@ -15,7 +15,7 @@
             <span><strong>KKK OS</strong><small>{{ __('ui.administration') }}</small></span>
         </a>
 
-        <nav class="admin-nav" aria-label="Navigasi admin">
+        <nav class="admin-nav" aria-label="Admin navigation">
             <p>{{ __('ui.management') }}</p>
             <a href="{{ route('admin.dashboard') }}" @class(['is-active' => request()->routeIs('admin.dashboard')])><span>OV</span>{{ __('ui.overview') }}</a>
             <a href="{{ route('admin.dashboard') }}#sales-analysis"><span>SA</span>{{ __('ui.sales_analysis') }}</a>
@@ -36,7 +36,7 @@
 
     <div class="admin-workspace">
         <header class="admin-topbar">
-            <div><p>KingKadKahwin</p><h1>@yield('heading', 'Papan Pemuka Admin')</h1></div>
+            <div><p>KingKadKahwin</p><h1>@yield('heading', 'Admin Dashboard')</h1></div>
             <div class="admin-topbar-actions">
                 <form class="js-logout-form admin-logout-profile" method="POST" action="{{ route('admin.logout') }}">@csrf<button type="submit"><span class="admin-topbar-avatar" aria-hidden="true"></span><span>{{ __('ui.logout') }}</span></button></form>
             </div>
@@ -47,7 +47,7 @@
                 <div class="admin-alert admin-alert-success">{{ session('admin_success') }}</div>
             @endif
             @if ($errors->any())
-                <div class="admin-alert admin-alert-error"><strong>Tindakan tidak dapat disimpan.</strong><ul>@foreach ($errors->all() as $error)<li>{{ $error }}</li>@endforeach</ul></div>
+                <div class="admin-alert admin-alert-error"><strong>The action could not be saved.</strong><ul>@foreach ($errors->all() as $error)<li>{{ $error }}</li>@endforeach</ul></div>
             @endif
             @yield('content')
         </main>

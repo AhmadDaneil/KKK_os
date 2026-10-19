@@ -41,10 +41,10 @@ class AdminDashboardTest extends TestCase
             ->get(route('admin.dashboard'))
             ->assertOk()
             ->assertSee('Memerlukan Perhatian')
-            ->assertSee('Semakan Pembayaran')
-            ->assertSee('Tugasan Design')
-            ->assertSee('Tugasan Pengeluaran')
-            ->assertSee('Pembungkusan Belum Ditugaskan')
+            ->assertSee('Payment Review')
+            ->assertSee('Design Tasks')
+            ->assertSee('Production Tasks')
+            ->assertSee('Unassigned Packing')
             ->assertSee(route('admin.orders.index'), false);
     }
 
@@ -93,7 +93,7 @@ class AdminDashboardTest extends TestCase
                 ->assertSee('Trend Harian')
                 ->assertSee('Trend Bulanan')
                 ->assertSee('Jualan Tahunan')
-                ->assertSee('Pecahan Kutipan');
+                ->assertSee('Collection Breakdown');
         } finally {
             CarbonImmutable::setTestNow();
         }
@@ -150,7 +150,7 @@ class AdminDashboardTest extends TestCase
             ->assertSee('Collected')
             ->assertSee('Outstanding')
             ->assertSee('RM 160.00')
-            ->assertSee('1 pakej: 1 · 2 pakej: 1')
+            ->assertSee('1 package: 1 · 2 packages: 1')
             ->assertSee('Booking Collected');
     }
 
@@ -166,7 +166,7 @@ class AdminDashboardTest extends TestCase
         $this->actingAs($admin)
             ->get(route('admin.dashboard'))
             ->assertOk()
-            ->assertSee('Carian pantas ID tempahan')
+            ->assertSee('Quick Order ID Search')
             ->assertSee(route('admin.orders.find'), false);
 
         $this->get(route('admin.orders.find', ['order_id' => strtolower($order->order_id)]))
@@ -196,7 +196,7 @@ class AdminDashboardTest extends TestCase
         $this->from(route('admin.dashboard'))
             ->get(route('admin.orders.find', ['order_id' => $draft->order_id]))
             ->assertRedirect(route('admin.dashboard'))
-            ->assertSessionHasErrors(['order_id' => 'Order ID tidak dijumpai.']);
+            ->assertSessionHasErrors(['order_id' => 'Order ID not found.']);
     }
 
     public function test_dashboard_quick_search_reports_missing_or_unknown_order_id(): void
@@ -207,12 +207,12 @@ class AdminDashboardTest extends TestCase
             ->from(route('admin.dashboard'))
             ->get(route('admin.orders.find'))
             ->assertRedirect(route('admin.dashboard'))
-            ->assertSessionHasErrors(['order_id' => 'Sila masukkan Order ID.']);
+            ->assertSessionHasErrors(['order_id' => 'Please enter an order ID.']);
 
         $this->from(route('admin.dashboard'))
             ->get(route('admin.orders.find', ['order_id' => 'KKK-TIDAK-WUJUD']))
             ->assertRedirect(route('admin.dashboard'))
-            ->assertSessionHasErrors(['order_id' => 'Order ID tidak dijumpai.'])
+            ->assertSessionHasErrors(['order_id' => 'Order ID not found.'])
             ->assertSessionHasInput('order_id', 'KKK-TIDAK-WUJUD');
     }
 
@@ -249,7 +249,7 @@ class AdminDashboardTest extends TestCase
         $this->actingAs($admin, 'admin')
             ->get(route('admin.orders.index', ['attention' => 'pending_payment']))
             ->assertOk()
-            ->assertSee('<title>Semakan Bayaran - KKK OS</title>', false)
+            ->assertSee('<title>Payment Review - KKK OS</title>', false)
             ->assertSeeInOrder([
                 'Operasi Admin',
                 'Semakan Bayaran',
@@ -306,7 +306,7 @@ class AdminDashboardTest extends TestCase
             'email' => $designer->email,
             'password' => 'secure-password',
         ])->assertRedirect(route('admin.login'))
-            ->assertSessionHasErrors(['email' => 'Akaun ini ialah akaun staff. Sila log masuk melalui halaman Staff Login.']);
+            ->assertSessionHasErrors(['email' => 'This is a staff account. Please use the staff login page.']);
 
         $this->assertGuest('admin');
     }

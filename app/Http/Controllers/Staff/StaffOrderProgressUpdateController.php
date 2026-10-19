@@ -25,7 +25,7 @@ class StaffOrderProgressUpdateController extends Controller
         $user = $request->user();
         $this->authorizeUpload($user, $order);
 
-        abort_if($order->isAssignmentLocked(), 422, 'Progress tidak boleh ditambah selepas tempahan ditutup.');
+        abort_if($order->isAssignmentLocked(), 422, 'Progress cannot be added after the order is closed.');
 
         $validated = $request->validate([
             'message' => ['nullable', 'string', 'max:2000', 'required_without:attachment'],
@@ -51,7 +51,7 @@ class StaffOrderProgressUpdateController extends Controller
             throw ValidationException::withMessages(['progress_update' => $exception->getMessage()]);
         }
 
-        return back()->with('status', 'Kemas kini progress berjaya direkodkan.');
+        return back()->with('status', 'Progress update recorded successfully.');
     }
 
     public function attachment(Request $request, OrderProgressUpdate $progressUpdate): StreamedResponse

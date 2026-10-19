@@ -24,7 +24,7 @@ class ResolveBookingAmountService
 
         if ($profile === null || $profile->deposit_method !== 'FIXED') {
             throw ValidationException::withMessages([
-                'payment' => 'Amaun booking aktif tidak dikonfigurasi untuk tempahan ini.',
+                'payment' => 'An active booking amount is not configured for this order.',
             ]);
         }
 

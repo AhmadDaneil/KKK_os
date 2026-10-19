@@ -36,7 +36,7 @@ class CreateOrderProgressUpdateService
             );
 
             if ($path === false) {
-                throw new RuntimeException('Fail progress tidak dapat disimpan.');
+                throw new RuntimeException('The progress file could not be saved.');
             }
         }
 
@@ -76,7 +76,7 @@ class CreateOrderProgressUpdateService
             }
 
             if (str_contains(strtolower($exception->getMessage()), 'deduplication')) {
-                throw new RuntimeException('Kemas kini progress yang sama telah direkodkan.', previous: $exception);
+                throw new RuntimeException('The same progress update has already been recorded.', previous: $exception);
             }
 
             throw $exception;

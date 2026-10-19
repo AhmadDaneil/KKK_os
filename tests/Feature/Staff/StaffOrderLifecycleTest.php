@@ -20,7 +20,7 @@ class StaffOrderLifecycleTest extends TestCase
         $this->actingAs($manager, 'staff')
             ->post(route('staff.orders.cancel', $order), ['reason' => 'Customer requested cancellation'])
             ->assertRedirect()
-            ->assertSessionHas('status', "Tempahan {$order->order_id} telah dibatalkan dan rekod dikekalkan.");
+            ->assertSessionHas('status', "Order {$order->order_id} cancelled. Its record has been retained.");
 
         $this->assertDatabaseHas('orders', [
             'id' => $order->id,
@@ -46,7 +46,7 @@ class StaffOrderLifecycleTest extends TestCase
         $this->actingAs($admin, 'admin')
             ->post(route('admin.orders.archive', $order), ['reason' => 'Completed order retention'])
             ->assertRedirect()
-            ->assertSessionHas('status', "Tempahan {$order->order_id} telah diarkibkan dan rekod dikekalkan.");
+            ->assertSessionHas('status', "Order {$order->order_id} archived. Its record has been retained.");
 
         $this->assertDatabaseHas('orders', [
             'id' => $order->id,
