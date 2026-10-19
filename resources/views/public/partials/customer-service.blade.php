@@ -1,11 +1,9 @@
 @php
-    $customerServiceBaseUrl = rtrim((string) config('kingkadkahwin.social.whatsapp'), '/');
     $customerServiceOrderId = $order->order_id ?? $orderId ?? null;
-    $customerServiceMessage = $customerServiceOrderId
-        ? "Hello KingKadKahwin, I need help with order {$customerServiceOrderId}."
-        : 'Hello KingKadKahwin, I would like help with a wedding card order.';
-    $customerServiceSeparator = str_contains($customerServiceBaseUrl, '?') ? '&' : '?';
-    $customerServiceUrl = $customerServiceBaseUrl.$customerServiceSeparator.'text='.rawurlencode($customerServiceMessage);
+    $customerServiceUrl = route('public.orders.create', array_filter([
+        'purpose' => 'support',
+        'order_id' => $customerServiceOrderId,
+    ]));
 @endphp
 
 <a

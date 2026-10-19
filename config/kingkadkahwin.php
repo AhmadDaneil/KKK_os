@@ -15,7 +15,11 @@ return [
         'instagram' => env('KKK_SOCIAL_INSTAGRAM', 'https://www.instagram.com/kingkadkahwin/'),
         'facebook' => env('KKK_SOCIAL_FACEBOOK', 'https://www.facebook.com/stickingbyking/'),
         'tiktok' => env('KKK_SOCIAL_TIKTOK', 'https://www.tiktok.com/@kingkadkahwinhq?_r=1&_t=ZS-9A7t5VH9y9x'),
-        'whatsapp' => env('KKK_SOCIAL_WHATSAPP', 'https://wa.me/60187716968'),
+        'whatsapp' => env('KKK_SOCIAL_WHATSAPP', 'https://wa.me/601165656968'),
+    ],
+
+    'booking' => [
+        'whatsapp_numbers' => ['601165656968', '60177197596', '601135623239'],
     ],
 
     'photoshop' => [

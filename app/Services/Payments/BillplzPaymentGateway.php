@@ -53,7 +53,6 @@ class BillplzPaymentGateway implements PaymentGatewayContract
         $order = $payment->order;
         $payload = [
             'collection_id' => $collectionId,
-            'email' => $order->customer_email,
             'name' => Str::limit(trim((string) $order->customer_name), 255, ''),
             'amount' => $amountSen,
             'description' => Str::limit(
@@ -72,6 +71,14 @@ class BillplzPaymentGateway implements PaymentGatewayContract
             'deliver' => false,
         ];
 
+        if (filled($order->customer_phone)) {
+            $payload['mobile'] = (string) $order->customer_phone;
+        }
+
+        if (filled($order->customer_email)) {
+            $payload['email'] = $order->customer_email;
+        }
+
         try {
             $response = Http::withBasicAuth($secretKey, '')
                 ->asForm()
@@ -79,7 +86,7 @@ class BillplzPaymentGateway implements PaymentGatewayContract
                 ->timeout(20)
                 ->post($baseUrl.'/v3/bills', $payload);
         } catch (ConnectionException) {
-            throw new BillplzPaymentException('Sambungan ke Billplz Sandbox gagal.');
+            throw new BillplzPaymentException('Connection to Billplz failed.');
         }
 
         if (! $response->successful()) {

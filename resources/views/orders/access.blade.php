@@ -15,7 +15,7 @@
         <form method="POST" action="{{ route('orders.access.store') }}">
             @csrf
             <label for="customer_reference">Customer reference</label>
-            <input id="customer_reference" name="customer_reference" value="{{ old('customer_reference') }}" required>
+            <input id="customer_reference" name="customer_reference" value="{{ old('customer_reference', $prefilledOrderId) }}" @if ($prefilledOrderId) readonly @endif required>
             <label for="customer_phone">Phone number</label>
             <input id="customer_phone" name="customer_phone" type="tel" required>
             <button type="submit">Access order</button>

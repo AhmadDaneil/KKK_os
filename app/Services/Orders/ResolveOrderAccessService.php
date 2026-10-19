@@ -12,6 +12,7 @@ class ResolveOrderAccessService
         abort_if($plainToken === '', 404);
 
         $order = Order::where('order_id', $orderId)->firstOrFail();
+        abort_if($order->source === 'WABOT' && $order->booking_payment_status !== 'PAID', 404);
 
         $accessToken = OrderAccessToken::query()
             ->where('order_fk', $order->id)

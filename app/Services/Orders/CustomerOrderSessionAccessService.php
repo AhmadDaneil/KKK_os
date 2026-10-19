@@ -40,6 +40,7 @@ class CustomerOrderSessionAccessService
     public function resolve(Request $request, string $orderId): Order
     {
         $order = Order::where('order_id', $orderId)->firstOrFail();
+        abort_if($order->source === 'WABOT' && $order->booking_payment_status !== 'PAID', 404);
         $grant = $request->session()->get($this->sessionKey($orderId));
 
         abort_if(! is_array($grant), 404);
@@ -57,6 +58,10 @@ class CustomerOrderSessionAccessService
 
     public function hasAccess(Request $request, Order $order): bool
     {
+        if ($order->source === 'WABOT' && $order->booking_payment_status !== 'PAID') {
+            return false;
+        }
+
         $grant = $request->session()->get($this->sessionKey($order->order_id));
 
         if (! is_array($grant) || (int) ($grant['order_fk'] ?? 0) !== (int) $order->id) {
@@ -81,6 +86,8 @@ class CustomerOrderSessionAccessService
 
     public function establishFromVerifiedOrder(Request $request, Order $order): void
     {
+        abort_if($order->source === 'WABOT' && $order->booking_payment_status !== 'PAID', 404);
+
         $request->session()->regenerate();
         $request->session()->put($this->sessionKey($order->order_id), [
             'order_fk' => $order->id,
@@ -118,6 +125,10 @@ class CustomerOrderSessionAccessService
             ->whereKey($draft['order_fk'] ?? 0)
             ->where('order_id', $draft['order_id'] ?? '')
             ->where('status', 'DETAILS_INCOMPLETE')
+            ->where(function ($query): void {
+                $query->where('source', '!=', 'WABOT')
+                    ->orWhere('booking_payment_status', 'PAID');
+            })
             ->first();
 
         if (! $order) {
