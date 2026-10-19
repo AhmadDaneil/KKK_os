@@ -3,6 +3,7 @@
 namespace Tests\Feature\Payments;
 
 use App\Models\Order;
+use App\Models\User;
 use App\Services\Orders\CreateOrderService;
 use App\Services\Payments\CreateBillplzBookingPaymentService;
 use Database\Seeders\KkkPackagePriceCatalogSeeder;
@@ -136,6 +137,54 @@ class BookingPaymentJourneyTest extends TestCase
         $this->assertDatabaseCount('order_access_tokens', 1);
         $this->assertDatabaseCount('customer_reference_sequences', 1);
         $this->assertSame(3, $order->payments()->firstOrFail()->events()->count());
+    }
+
+    public function test_paid_callback_advances_confirmed_one_and_two_package_orders_to_design(): void
+    {
+        User::factory()->create(['role' => User::ROLE_DESIGNER, 'is_active' => true]);
+
+        foreach ([1, 2] as $packageCount) {
+            $order = $this->createOrder($packageCount);
+            $order->confirmation()->create([
+                'confirmed_at' => now(),
+                'confirmation_version' => 'v1',
+            ]);
+            $order->update([
+                'status' => 'DETAILS_CONFIRMED',
+                'details_confirmed_at' => now(),
+            ]);
+            $billId = "confirmed-{$packageCount}-package";
+            $amountSen = $packageCount * 5000;
+            $order->payments()->create([
+                'payment_type' => 'BOOKING_DEPOSIT',
+                'provider' => 'BILLPLZ',
+                'provider_reference' => $billId,
+                'amount' => number_format($amountSen / 100, 2, '.', ''),
+                'currency' => 'MYR',
+                'status' => 'PENDING',
+            ]);
+
+            $this->postJson(route('api.billplz-sandbox.callback'), $this->signedPayload([
+                'id' => $billId,
+                'collection_id' => 'sandbox-collection',
+                'paid' => 'true',
+                'state' => 'paid',
+                'amount' => (string) $amountSen,
+                'paid_amount' => (string) $amountSen,
+                'paid_at' => '2026-10-19 09:50:00 +0800',
+            ]))->assertOk();
+
+            $this->assertSame('PAID', $order->fresh()->booking_payment_status);
+            $this->assertSame('READY_FOR_DESIGN', $order->fresh()->status);
+            $this->assertSame($packageCount, $order->mergeJobs()->count());
+            $this->assertSame($packageCount, $order->designJobs()->count());
+            $this->assertDatabaseHas('order_status_events', [
+                'order_id' => $order->id,
+                'event_type' => 'BOOKING_PAYMENT_CONFIRMED',
+                'from_status' => 'DETAILS_CONFIRMED',
+                'to_status' => 'READY_FOR_DESIGN',
+            ]);
+        }
     }
 
     private function createOrder(int $packageCount): Order

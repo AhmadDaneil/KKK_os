@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Services\Orders\AdvancePaidConfirmedOrderToDesignService;
 use App\Services\Orders\BuildFinalReviewService;
 use App\Services\Orders\BuildOrderPricingService;
 use App\Services\Orders\ConfirmOrderDetailsService;
@@ -9,7 +10,9 @@ use App\Services\Orders\CustomerOrderSessionAccessService;
 use App\Services\Payments\SynchronizeOrderFinancialsService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\ValidationException;
+use Throwable;
 
 class CustomerOrderConfirmController extends Controller
 {
@@ -21,6 +24,7 @@ class CustomerOrderConfirmController extends Controller
         BuildOrderPricingService $pricing,
         BuildFinalReviewService $review,
         SynchronizeOrderFinancialsService $financials,
+        AdvancePaidConfirmedOrderToDesignService $designReadiness,
     ) {
         $validated = $request->validate([
             'responsibility_acknowledged' => ['required', 'accepted'],
@@ -52,6 +56,18 @@ class CustomerOrderConfirmController extends Controller
 
             return $confirmedOrder->fresh();
         });
+
+        try {
+            $order = $designReadiness->advance(
+                $order,
+                eventType: 'DETAILS_CONFIRMED_AFTER_PAYMENT',
+            );
+        } catch (Throwable $exception) {
+            report($exception);
+            Log::warning('Confirmed paid order could not be advanced to the design queue.', [
+                'order_id' => $order->id,
+            ]);
+        }
 
         return redirect()->route('orders.thank-you.show', ['orderId' => $order->order_id])
             ->with('success', 'The order details have been confirmed.');

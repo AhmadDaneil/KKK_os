@@ -3,6 +3,7 @@
 namespace Tests\Feature\Orders;
 
 use App\Models\Order;
+use App\Models\User;
 use App\Services\Orders\CreateOrderService;
 use App\Services\Orders\GenerateOrderAccessLinkService;
 use App\Services\Orders\SaveOrderDraftService;
@@ -44,6 +45,7 @@ class CustomerThankYouPageTest extends TestCase
     public function test_successful_confirmation_redirects_to_thank_you_page(): void
     {
         $order = $this->completeOrder();
+        User::factory()->create(['role' => User::ROLE_DESIGNER, 'is_active' => true]);
         $this->establishCustomerSession($order);
 
         $this->get(route('orders.review.show', ['orderId' => $order->order_id]))
@@ -98,6 +100,15 @@ class CustomerThankYouPageTest extends TestCase
             'line_total' => '188.00',
         ]);
         $this->assertSame('PAID', $order->fresh()->booking_payment_status);
+        $this->assertSame('READY_FOR_DESIGN', $order->fresh()->status);
+        $this->assertDatabaseCount('merge_jobs', 1);
+        $this->assertDatabaseCount('design_jobs', 1);
+        $this->assertDatabaseHas('order_status_events', [
+            'order_id' => $order->id,
+            'event_type' => 'DETAILS_CONFIRMED_AFTER_PAYMENT',
+            'from_status' => 'DETAILS_CONFIRMED',
+            'to_status' => 'READY_FOR_DESIGN',
+        ]);
         $this->assertTrue($order->fresh()->confirmation->confirmed_snapshot['post_confirmation_liability_acknowledged']);
         $this->assertSame('LIVE_PREVIEW_REFERENCE', $order->fresh()->confirmation->confirmed_snapshot['snapshot_type']);
     }

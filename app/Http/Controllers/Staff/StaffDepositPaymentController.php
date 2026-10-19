@@ -4,8 +4,7 @@ namespace App\Http\Controllers\Staff;
 
 use App\Http\Controllers\Controller;
 use App\Models\PaymentTransaction;
-use App\Services\Design\InitializeDesignJobsForOrderService;
-use App\Services\Merge\GenerateMergeJobsForOrderService;
+use App\Services\Orders\AdvancePaidConfirmedOrderToDesignService;
 use App\Services\Payments\SynchronizeOrderFinancialsService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -27,7 +26,7 @@ class StaffDepositPaymentController extends Controller
         ]);
     }
 
-    public function approve(Request $request, PaymentTransaction $payment, GenerateMergeJobsForOrderService $merge, InitializeDesignJobsForOrderService $design, SynchronizeOrderFinancialsService $financials): RedirectResponse
+    public function approve(Request $request, PaymentTransaction $payment, AdvancePaidConfirmedOrderToDesignService $designReadiness, SynchronizeOrderFinancialsService $financials): RedirectResponse
     {
         $this->authorizePaymentReview($request);
         $this->ensureDeposit($payment);
@@ -39,7 +38,7 @@ class StaffDepositPaymentController extends Controller
             'amount.decimal' => 'The payment amount may have up to two decimal places.',
         ]);
 
-        DB::transaction(function () use ($request, $payment, $merge, $design, $financials, $validated) {
+        DB::transaction(function () use ($request, $payment, $designReadiness, $financials, $validated) {
             $payment->refresh()->load('order');
             abort_unless($payment->status === 'PENDING' && $payment->order->status === 'DETAILS_CONFIRMED', 422);
             $metadata = $payment->metadata ?? [];
@@ -52,14 +51,13 @@ class StaffDepositPaymentController extends Controller
             $order = $payment->order;
             $order->update(['booking_payment_status' => 'PAID']);
             $financials->synchronize($order);
-            $merge->generate($order->fresh());
-            $design->initialize($order->fresh());
-            $order->update(['status' => 'READY_FOR_DESIGN']);
-            $order->statusEvents()->create([
-                'event_type' => 'DEPOSIT_APPROVED', 'from_status' => 'DETAILS_CONFIRMED', 'to_status' => 'READY_FOR_DESIGN',
-                'actor_user_id' => $request->user()->id, 'source' => 'STAFF', 'occurred_at' => now(),
-                'metadata' => ['payment_transaction_id' => $payment->id],
-            ]);
+            $designReadiness->advance(
+                $order,
+                eventType: 'DEPOSIT_APPROVED',
+                actorUserId: $request->user()->id,
+                source: $request->routeIs('admin.*') ? 'ADMIN' : 'STAFF',
+                metadata: ['payment_transaction_id' => $payment->id],
+            );
         });
 
         return back()->with('status', 'Deposit confirmed. The order is ready for design.');

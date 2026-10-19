@@ -4,19 +4,23 @@ namespace App\Services\Payments;
 
 use App\Models\PaymentTransaction;
 use App\Services\Orders\ActivateCustomerDashboardService;
+use App\Services\Orders\AdvancePaidConfirmedOrderToDesignService;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use RuntimeException;
+use Throwable;
 
 class HandlePaymentCallbackService
 {
     public function __construct(
         private SynchronizeOrderFinancialsService $financials,
         private ActivateCustomerDashboardService $dashboard,
+        private AdvancePaidConfirmedOrderToDesignService $designReadiness,
     ) {}
 
     public function handle(array $verified): PaymentTransaction
     {
-        return DB::transaction(function () use ($verified) {
+        $payment = DB::transaction(function () use ($verified) {
             foreach (['provider', 'provider_reference', 'status'] as $required) {
                 if (! array_key_exists($required, $verified)) {
                     throw new RuntimeException("Missing verified callback field: {$required}");
@@ -91,6 +95,24 @@ class HandlePaymentCallbackService
 
             return $payment->fresh();
         });
+
+        if ($payment->payment_type === 'BOOKING_DEPOSIT' && $payment->status === 'PAID') {
+            try {
+                $this->designReadiness->advance(
+                    $payment->order()->firstOrFail(),
+                    eventType: 'BOOKING_PAYMENT_CONFIRMED',
+                    metadata: ['payment_transaction_id' => $payment->id],
+                );
+            } catch (Throwable $exception) {
+                report($exception);
+                Log::warning('Paid order could not be advanced to the design queue.', [
+                    'payment_id' => $payment->id,
+                    'order_id' => $payment->order_id,
+                ]);
+            }
+        }
+
+        return $payment->fresh();
     }
 
     private function toSen(string $amount): int
