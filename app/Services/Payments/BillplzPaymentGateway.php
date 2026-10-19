@@ -129,6 +129,97 @@ class BillplzPaymentGateway implements PaymentGatewayContract
         return $this->signatureVerifier->verifyCallback($payload);
     }
 
+    /**
+     * Reconcile a payment through Billplz's authenticated API.
+     *
+     * This is used on the customer return page as a safe fallback when the
+     * provider callback is delayed or cannot be delivered. Redirect query
+     * parameters are deliberately not trusted as proof of payment.
+     */
+    public function retrievePaymentStatus(PaymentTransaction $payment): array
+    {
+        if ($payment->provider !== 'BILLPLZ' || trim((string) $payment->provider_reference) === '') {
+            throw new BillplzPaymentException('This payment cannot be reconciled with Billplz.', 'unsupported_payment');
+        }
+
+        $secretKey = trim((string) config('services.billplz.secret_key', ''));
+        $collectionId = trim((string) config('services.billplz.collection_id', ''));
+        $baseUrl = rtrim((string) config('services.billplz.base_url', ''), '/');
+
+        if ($secretKey === '' || $collectionId === '' || $baseUrl === '') {
+            throw new BillplzPaymentException('The Billplz Sandbox configuration is incomplete.', 'invalid_configuration');
+        }
+
+        try {
+            $response = Http::withBasicAuth($secretKey, '')
+                ->acceptJson()
+                ->connectTimeout(5)
+                ->timeout(20)
+                ->get($baseUrl.'/v3/bills/'.rawurlencode((string) $payment->provider_reference));
+        } catch (ConnectionException) {
+            throw new BillplzPaymentException('The connection to Billplz Sandbox failed.', 'connection_failed');
+        }
+
+        if (! $response->successful()) {
+            throw new BillplzPaymentException(
+                'Billplz Sandbox could not confirm the payment status.',
+                'provider_rejected',
+                $response->status(),
+            );
+        }
+
+        $bill = $response->json();
+        if (! is_array($bill)) {
+            throw new BillplzPaymentException('The Billplz status response is invalid.', 'invalid_provider_response');
+        }
+
+        $billId = is_scalar($bill['id'] ?? null) ? trim((string) $bill['id']) : '';
+        $billCollectionId = is_scalar($bill['collection_id'] ?? null) ? trim((string) $bill['collection_id']) : '';
+        $state = is_scalar($bill['state'] ?? null) ? strtolower(trim((string) $bill['state'])) : '';
+        $paid = filter_var($bill['paid'] ?? null, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE);
+        $amountSen = $this->integerSen($bill['amount'] ?? null, 'amount');
+        $paidAmountSen = $this->integerSen($bill['paid_amount'] ?? ($paid ? $amountSen : 0), 'paid_amount');
+        $ledgerAmountSen = $this->toSen((string) $payment->amount);
+
+        if (
+            $billId === ''
+            || ! hash_equals((string) $payment->provider_reference, $billId)
+            || ! hash_equals($collectionId, $billCollectionId)
+            || $paid === null
+            || ! in_array($state, ['paid', 'due', 'deleted'], true)
+            || $amountSen !== $ledgerAmountSen
+            || ($paid && ($state !== 'paid' || $paidAmountSen !== $amountSen))
+            || (! $paid && $state === 'paid')
+            || $paidAmountSen > $amountSen
+        ) {
+            throw new BillplzPaymentException('The Billplz status response does not match the payment ledger.', 'invalid_provider_response');
+        }
+
+        $paidAt = is_scalar($bill['paid_at'] ?? null) ? (string) $bill['paid_at'] : null;
+        $safePayload = [
+            'id' => $billId,
+            'collection_id' => $billCollectionId,
+            'paid' => $paid,
+            'state' => $state,
+            'amount' => $amountSen,
+            'paid_amount' => $paidAmountSen,
+            'paid_at' => $paidAt,
+            'source' => 'authenticated_bill_status',
+        ];
+
+        return [
+            'provider' => 'BILLPLZ',
+            'provider_reference' => $billId,
+            'provider_event_id' => hash('sha256', implode('|', [
+                $billId, $state, $paid ? 'true' : 'false', (string) $paidAt, (string) $paidAmountSen,
+            ])),
+            'status' => $paid ? 'PAID' : ($state === 'deleted' ? 'CANCELLED' : 'PENDING'),
+            'amount_sen' => $amountSen,
+            'paid_at' => $paidAt,
+            'raw_payload' => $safePayload,
+        ];
+    }
+
     public function providerName(): string
     {
         return 'BILLPLZ';
@@ -141,5 +232,14 @@ class BillplzPaymentGateway implements PaymentGatewayContract
         }
 
         return ((int) $matches[1] * 100) + (int) $matches[2];
+    }
+
+    private function integerSen(mixed $value, string $field): int
+    {
+        if (! is_scalar($value) || ! preg_match('/^\d+$/', (string) $value)) {
+            throw new BillplzPaymentException("Billplz {$field} must be integer sen.", 'invalid_provider_response');
+        }
+
+        return (int) $value;
     }
 }

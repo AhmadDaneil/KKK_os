@@ -69,6 +69,39 @@ class BookingPaymentJourneyTest extends TestCase
         $this->assertSame('https://www.billplz-sandbox.com/bills/booking-two', $checkout['payment_url']);
     }
 
+    public function test_return_page_reconciles_paid_one_package_bill_when_callback_is_delayed(): void
+    {
+        $order = $this->createOrder(1);
+        $this->fakeBill('booking-reconcile-one', 5000);
+        $payment = app(CreateBillplzBookingPaymentService::class)->create($order)['payment'];
+        $this->fakePaidBillStatus('booking-reconcile-one', 5000);
+
+        $this->get(route('payments.booking.return', ['reference' => $payment->public_reference]))
+            ->assertOk()
+            ->assertSee('Payment successful')
+            ->assertSee(route('orders.dashboard', ['orderId' => $order->order_id]));
+
+        $this->assertSame('PAID', $payment->fresh()->status);
+        $this->assertSame('PAID', $order->fresh()->booking_payment_status);
+        $this->assertDatabaseCount('order_access_tokens', 1);
+    }
+
+    public function test_return_page_reconciles_paid_two_package_bill_when_callback_is_delayed(): void
+    {
+        $order = $this->createOrder(2);
+        $this->fakeBill('booking-reconcile-two', 10000);
+        $payment = app(CreateBillplzBookingPaymentService::class)->create($order)['payment'];
+        $this->fakePaidBillStatus('booking-reconcile-two', 10000);
+
+        $this->get(route('payments.booking.return', ['reference' => $payment->public_reference]))
+            ->assertOk()
+            ->assertSee('Payment successful');
+
+        $this->assertSame('PAID', $payment->fresh()->status);
+        $this->assertSame('PAID', $order->fresh()->booking_payment_status);
+        $this->assertDatabaseCount('order_access_tokens', 1);
+    }
+
     public function test_trusted_http_sandbox_bill_url_is_upgraded_to_https(): void
     {
         $order = $this->createOrder(1);
@@ -130,6 +163,22 @@ class BookingPaymentJourneyTest extends TestCase
             'amount' => $amountSen,
             'url' => 'https://www.billplz-sandbox.com/bills/'.$billId,
         ])]);
+    }
+
+    private function fakePaidBillStatus(string $billId, int $amountSen): void
+    {
+        Http::preventStrayRequests();
+        Http::fake([
+            'www.billplz-sandbox.com/api/v3/bills/'.$billId => Http::response([
+                'id' => $billId,
+                'collection_id' => 'sandbox-collection',
+                'paid' => true,
+                'state' => 'paid',
+                'amount' => $amountSen,
+                'paid_amount' => $amountSen,
+                'paid_at' => '2026-10-19 09:50:00 +0800',
+            ]),
+        ]);
     }
 
     private function signedPayload(array $payload): array
