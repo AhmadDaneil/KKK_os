@@ -434,6 +434,7 @@ button {
     display: flex;
     align-items: center;
     justify-content: flex-end;
+    flex-wrap: wrap;
     gap: 0.65rem;
 }
 
@@ -602,8 +603,10 @@ button {
 
     .order-summary-actions {
         width: 100%;
-        justify-content: space-between;
+        justify-content: flex-start;
     }
+
+    .order-summary-actions .status-badge { margin-left: auto; }
 
     .progress-stages { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 }

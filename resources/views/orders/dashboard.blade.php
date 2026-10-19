@@ -20,9 +20,14 @@
         </div>
 
         <div class="order-summary-actions">
-            <a href="{{ route('home') }}" class="back-home-button">
+            <a href="{{ route('public.orders.progress', ['order_id' => $order->order_id]) }}" class="back-home-button">
                 <span aria-hidden="true">&larr;</span>
                 {{ __('ui.back') }}
+            </a>
+
+            <a href="{{ route('home') }}" class="back-home-button">
+                <span aria-hidden="true">&larr;</span>
+                {{ __('ui.back_to_home') }}
             </a>
 
             <span class="status-badge">

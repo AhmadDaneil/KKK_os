@@ -18,7 +18,7 @@ return [
     'personalisation' => 'Personalisation', 'display_theme' => 'Display Theme', 'save' => 'Save',
     'staff_intro_title' => 'Clear operations, from order to completion.',
     'staff_intro' => 'Monitor tasks according to your role while following the established workflow.',
-    'customer_order' => 'Your Order', 'back' => 'Back', 'package' => 'Package', 'customer_name' => 'Customer Name',
+    'customer_order' => 'Your Order', 'back' => 'Back', 'back_to_home' => 'Back to Home', 'package' => 'Package', 'customer_name' => 'Customer Name',
     'phone' => 'Phone No.', 'email' => 'Email', 'order_progress' => 'Order Progress', 'order_stages' => 'Order Stages',
     'shipping_information' => 'Shipping Information', 'deposit_status' => 'Deposit Status', 'deposit_confirmed' => 'Deposit Confirmed',
     'receipt_rejected' => 'Receipt Rejected', 'pending_review' => 'Pending Review', 'upload_new_receipt' => 'Upload a new receipt',

@@ -41,6 +41,8 @@ class CustomerDashboardAccessTest extends TestCase
         ]))
             ->assertOk()
             ->assertSee($order->order_id)
+            ->assertSee('Back to Home')
+            ->assertSee('href="'.route('public.orders.progress', ['order_id' => $order->order_id]).'"', false)
             ->assertSee('Live Card Preview')
             ->assertSee('Order Form')
             ->assertSee('Banner, Banting, Poster Anak Panah &amp; Sticker', false)
@@ -107,6 +109,8 @@ class CustomerDashboardAccessTest extends TestCase
 
         $this->get(route('orders.dashboard', ['orderId' => $order->order_id]))
             ->assertOk()
+            ->assertSee('Back to Home')
+            ->assertSee('href="'.route('public.orders.progress', ['order_id' => $order->order_id]).'"', false)
             ->assertSee('Separate Packages')
             ->assertSee('Combined Package – Folded Card')
             ->assertSee("Event 1 – Bride's Side")
