@@ -120,6 +120,7 @@ class PublicOrderController extends Controller
     ): View {
         $order = $sessionAccess->resolveProofing($request, $orderId);
         $order->load([
+            'designJobs.artworkVersions',
             'progressUpdates' => fn ($query) => $query
                 ->customerVisible()
                 ->with('uploader:id,name')

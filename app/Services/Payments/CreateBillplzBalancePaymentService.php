@@ -5,6 +5,7 @@ namespace App\Services\Payments;
 use App\Models\Order;
 use App\Models\PaymentTransaction;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 
 class CreateBillplzBalancePaymentService
@@ -83,6 +84,7 @@ class CreateBillplzBalancePaymentService
             $payment = $lockedOrder->payments()->create([
                 'payment_type' => 'BALANCE',
                 'provider' => 'BILLPLZ',
+                'public_reference' => Str::random(48),
                 'amount' => $amount,
                 'currency' => $snapshot->currency,
                 'status' => 'PENDING',
