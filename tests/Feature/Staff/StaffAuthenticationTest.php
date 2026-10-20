@@ -35,6 +35,15 @@ class StaffAuthenticationTest extends TestCase
             ->assertRedirect(route('staff.login'));
     }
 
+    public function test_staff_login_uses_the_shared_gold_theme_without_a_mode_toggle(): void
+    {
+        $this->get(route('staff.login'))
+            ->assertOk()
+            ->assertSee('operations-theme.css')
+            ->assertSee('kkk-operations-mode')
+            ->assertDontSee('operations-theme-toggle');
+    }
+
     public function test_active_staff_can_log_in(): void
     {
         $staff = User::factory()->create([
