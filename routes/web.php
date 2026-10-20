@@ -4,6 +4,7 @@ use App\Http\Controllers\Admin\AdminAuthController;
 use App\Http\Controllers\Admin\AdminDashboardController;
 use App\Http\Controllers\Admin\AdminPasswordResetController;
 use App\Http\Controllers\Admin\AdminStaffController;
+use App\Http\Controllers\BalancePaymentReturnController;
 use App\Http\Controllers\BookingPaymentReturnController;
 use App\Http\Controllers\CustomerArtworkReviewController;
 use App\Http\Controllers\CustomerBalanceReceiptController;
@@ -65,6 +66,9 @@ Route::get('/tempah/{brand}', [PublicOrderController::class, 'create'])
 Route::get('/pembayaran/booking/{reference}', [BookingPaymentReturnController::class, 'show'])
     ->middleware('throttle:30,1')
     ->name('payments.booking.return');
+Route::get('/pembayaran/baki/{reference}', [BalancePaymentReturnController::class, 'show'])
+    ->middleware('throttle:30,1')
+    ->name('payments.balance.return');
 
 Route::get('/akses-tempahan', [CustomerDashboardAccessController::class, 'create'])
     ->name('orders.access.create');

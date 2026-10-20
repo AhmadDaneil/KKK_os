@@ -50,6 +50,64 @@
                 <p>Only files approved for customer viewing appear here.</p>
             </div>
 
+            @php
+                $designProofs = $order->designJobs
+                    ->filter(fn ($job) => in_array($job->status, ['DESIGN_READY', 'CORRECTION_REQUESTED', 'DESIGN_APPROVED'], true))
+                    ->map(function ($job) {
+                        $artwork = $job->artworkVersions->sortByDesc('version_number')->first();
+                        $files = collect($artwork?->preview_files ?: array_filter([
+                            $artwork?->preview_storage_path ? ['path' => $artwork->preview_storage_path] : null,
+                        ]))->filter(
+                            fn ($file) => filled(data_get($file, 'watermarked_path')) || filled(data_get($file, 'path'))
+                        )->values();
+
+                        return $artwork && $files->isNotEmpty()
+                            ? ['job' => $job, 'artwork' => $artwork, 'files' => $files]
+                            : null;
+                    })
+                    ->filter()
+                    ->values();
+            @endphp
+
+            @if ($designProofs->isNotEmpty())
+                <div class="design-proof-grid" aria-label="Designer artwork proofs">
+                    @foreach ($designProofs as $proof)
+                        @php
+                            $designJob = $proof['job'];
+                            $artwork = $proof['artwork'];
+                            $sideLabel = $designJob->side === 'LELAKI' ? 'Groom' : 'Bride';
+                        @endphp
+                        <article class="design-proof-card">
+                            <div class="design-proof-card-heading">
+                                <span>Designer Proof</span>
+                                <b>Version {{ $artwork->version_number }}</b>
+                            </div>
+                            <h3>{{ $sideLabel }} Package</h3>
+                            <p>Review the latest artwork preview uploaded by the Designer.</p>
+                            <div class="design-proof-actions">
+                                @foreach ($proof['files'] as $previewIndex => $previewFile)
+                                    @php
+                                        $previewType = strtoupper(data_get($previewFile, 'artwork_type', 'CARD'));
+                                        $previewLabel = match ($previewType) {
+                                            'BANNER' => 'Banner',
+                                            'BANTING' => 'Bunting',
+                                            default => count($proof['files']) > 1 ? 'Wedding Card '.($previewIndex + 1) : 'Wedding Card',
+                                        };
+                                    @endphp
+                                    <a class="button button-primary" href="{{ route('orders.artwork.preview', [
+                                        'orderId' => $order->order_id,
+                                        'designJobId' => $designJob->id,
+                                        'file' => $previewIndex,
+                                    ]) }}" target="_blank" rel="noopener noreferrer">
+                                        View Designer Proof · {{ $sideLabel }} · {{ $previewLabel }}
+                                    </a>
+                                @endforeach
+                            </div>
+                        </article>
+                    @endforeach
+                </div>
+            @endif
+
             @if ($order->progressUpdates->isNotEmpty())
                 <ol class="proofing-list">
                     @foreach ($order->progressUpdates as $update)
@@ -66,7 +124,7 @@
                         </li>
                     @endforeach
                 </ol>
-            @else
+            @elseif ($designProofs->isEmpty())
                 <div class="proofing-empty">
                     <span aria-hidden="true">⌛</span>
                     <h3>No proof has been shared yet</h3>

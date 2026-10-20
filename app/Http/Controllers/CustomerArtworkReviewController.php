@@ -43,7 +43,7 @@ class CustomerArtworkReviewController extends Controller
         CustomerOrderSessionAccessService $access,
         WatermarkArtworkPreviewService $watermark
     ): Response {
-        $order = $access->resolve($request, $orderId);
+        $order = $access->resolveProofing($request, $orderId);
 
         $designJob = DesignJob::query()
             ->where('order_id', $order->id)

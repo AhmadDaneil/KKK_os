@@ -344,7 +344,10 @@ class OrderProgressVisibilityTest extends TestCase
             'storage_path' => 'private/source.pdf',
             'preview_storage_path' => 'proofs/design-preview.jpg',
         ]);
-        Storage::disk('local')->put($artwork->preview_storage_path, 'design-proof');
+        Storage::disk('local')->put(
+            $artwork->preview_storage_path,
+            UploadedFile::fake()->image('design-preview.jpg')->getContent(),
+        );
 
         $order->fulfilment()->update([
             'method' => 'COURIER',
@@ -410,6 +413,18 @@ class OrderProgressVisibilityTest extends TestCase
             ->get(route('orders.courier-proof.show', $order->order_id))
             ->assertOk()
             ->assertHeader('Cache-Control', 'max-age=0, no-store, private');
+
+        $this->post(route('public.orders.progress.lookup'), ['order_id' => $order->order_id])
+            ->assertOk();
+        $this->get(route('public.orders.proofing', ['orderId' => $order->order_id]))
+            ->assertOk()
+            ->assertSee('Designer Proof')
+            ->assertSee('View Designer Proof · Groom · Wedding Card');
+        $this->get(route('orders.artwork.preview', [
+            'orderId' => $order->order_id,
+            'designJobId' => $designJob->id,
+            'file' => 0,
+        ]))->assertOk();
     }
 
     public function test_two_package_customer_sees_a_design_proof_button_for_each_side(): void
@@ -443,6 +458,15 @@ class OrderProgressVisibilityTest extends TestCase
             ->assertSee('View Designer Proof · Bride');
 
         $this->assertSame(2, substr_count($response->getContent(), 'View Designer Proof'));
+
+        $this->post(route('public.orders.progress.lookup'), ['order_id' => $order->order_id])
+            ->assertOk();
+        $proofing = $this->get(route('public.orders.proofing', ['orderId' => $order->order_id]))
+            ->assertOk()
+            ->assertSee('View Designer Proof · Groom · Wedding Card')
+            ->assertSee('View Designer Proof · Bride · Wedding Card');
+
+        $this->assertSame(2, substr_count($proofing->getContent(), 'View Designer Proof'));
     }
 
     public function test_customer_cannot_view_courier_proof_before_courier_completion(): void

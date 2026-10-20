@@ -42,8 +42,11 @@ class BillplzBalancePaymentTest extends TestCase
 
         Http::assertSent(fn (ClientRequest $request): bool => (int) $request->data()['amount'] === 25000
             && $request->data()['collection_id'] === 'sandbox-collection-001'
-            && $request->data()['callback_url'] === 'https://167.71.196.30/api/v1/payments/billplz/callback'
-            && $request->data()['redirect_url'] === 'https://167.71.196.30/semak-progress?order_id='.$order->order_id
+            && $request->data()['callback_url'] === 'https://167.71.196.30/api/v1/payments/billplz-sandbox/callback'
+            && $request->data()['redirect_url'] === 'https://167.71.196.30'.route('payments.balance.return', ['reference' => PaymentTransaction::query()
+                ->where('order_id', $order->id)
+                ->where('payment_type', 'BALANCE')
+                ->value('public_reference')], false)
             && $request->data()['reference_1'] === $order->order_id
             && $request->hasHeader('Authorization', 'Basic '.base64_encode('billplz-sandbox-secret:'))
         );
@@ -70,7 +73,23 @@ class BillplzBalancePaymentTest extends TestCase
         $this->post(route('orders.balance-payment.billplz.store', ['orderId' => $order->order_id]))
             ->assertRedirect('https://www.billplz-sandbox.com/bills/bill-two-packages');
 
-        Http::assertSent(fn (ClientRequest $request): bool => (int) $request->data()['amount'] === 40000);
+        $payment = PaymentTransaction::query()
+            ->where('order_id', $order->id)
+            ->where('payment_type', 'BALANCE')
+            ->firstOrFail();
+
+        Http::assertSent(fn (ClientRequest $request): bool => (int) $request->data()['amount'] === 40000
+            && $request->data()['redirect_url'] === 'https://167.71.196.30'.route('payments.balance.return', [
+                'reference' => $payment->public_reference,
+            ], false));
+
+        $payment->update(['status' => 'PAID', 'paid_at' => now()]);
+
+        $this->get(route('payments.balance.return', ['reference' => $payment->public_reference]))
+            ->assertOk()
+            ->assertSee('Payment Successful')
+            ->assertSee('View Billplz E-Receipt')
+            ->assertSee('Return to Merchant');
     }
 
     public function test_repeat_checkout_reuses_the_existing_bill_without_creating_another(): void
@@ -186,6 +205,15 @@ class BillplzBalancePaymentTest extends TestCase
         $this->assertSame('PAID', $payment->status);
         $this->assertSame('PAID', $order->fresh()->status);
         $this->assertSame('0.00', $order->pricingSnapshot()->value('outstanding_amount'));
+
+        $this->get(route('payments.balance.return', ['reference' => $payment->public_reference]))
+            ->assertOk()
+            ->assertSee('Payment Successful')
+            ->assertSee('View Billplz E-Receipt')
+            ->assertSee('https://www.billplz-sandbox.com/bills/bill-paid', false)
+            ->assertSee('Continue to Track Progress')
+            ->assertSee('Return to Merchant')
+            ->assertSee(route('public.orders.progress', ['order_id' => $order->order_id]), false);
     }
 
     private function createApprovedOrder(int $packageCount, string $total, string $deposit, string $balance): Order

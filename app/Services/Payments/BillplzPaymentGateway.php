@@ -63,7 +63,7 @@ class BillplzPaymentGateway implements PaymentGatewayContract
             'callback_url' => $appUrl.route('api.billplz.callback', [], false),
             'redirect_url' => $payment->payment_type === 'BOOKING_DEPOSIT'
                 ? $appUrl.route('payments.booking.return', ['reference' => $payment->public_reference], false)
-                : $appUrl.route('public.orders.progress', ['order_id' => $order->order_id], false),
+                : $appUrl.route('payments.balance.return', ['reference' => $payment->public_reference], false),
             'reference_1_label' => 'Order ID',
             'reference_1' => $order->order_id,
             'reference_2_label' => 'Payment ID',
