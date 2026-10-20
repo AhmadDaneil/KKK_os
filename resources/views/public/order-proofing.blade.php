@@ -51,6 +51,21 @@
             </div>
 
             @php
+                $productionProofs = $order->printJobs
+                    ->flatMap(function ($job) {
+                        return collect($job->progress_files ?? [])
+                            ->values()
+                            ->map(fn ($file, $index) => [
+                                'job' => $job,
+                                'file' => $file,
+                                'index' => $index,
+                            ])
+                            ->filter(fn ($proof) => data_get($proof['file'], 'customer_visible') === true
+                                && data_get($proof['file'], 'uploaded_by_role') === 'PRODUCTION'
+                                && filled(data_get($proof['file'], 'path'))
+                                && filled(data_get($proof['file'], 'uploaded_by_user_id')));
+                    })
+                    ->values();
                 $designProofs = $order->designJobs
                     ->filter(fn ($job) => in_array($job->status, ['DESIGN_READY', 'CORRECTION_REQUESTED', 'DESIGN_APPROVED'], true))
                     ->map(function ($job) {
@@ -108,6 +123,37 @@
                 </div>
             @endif
 
+            <section class="design-proof-card production-proof-section" aria-labelledby="production-proof-title">
+                <div class="design-proof-card-heading">
+                    <span>Production Proof</span>
+                    @if ($productionProofs->isNotEmpty())
+                        <b>{{ $productionProofs->count() }} {{ \Illuminate\Support\Str::plural('file', $productionProofs->count()) }}</b>
+                    @endif
+                </div>
+                <h3 id="production-proof-title">Production progress</h3>
+                <p>View production progress files shared for your order.</p>
+
+                @if ($productionProofs->isNotEmpty())
+                    <div class="design-proof-actions">
+                        @foreach ($productionProofs as $proof)
+                            @php
+                                $sideLabel = $proof['job']->side === 'LELAKI' ? 'Groom' : 'Bride';
+                                $fileNumber = $loop->iteration;
+                            @endphp
+                            <a class="button button-primary" href="{{ route('public.orders.production-proof', [
+                                'orderId' => $order->order_id,
+                                'printJobId' => $proof['job']->id,
+                                'file' => $proof['index'],
+                            ]) }}" target="_blank" rel="noopener noreferrer">
+                                View Production Proof · {{ $sideLabel }} · File {{ $fileNumber }}
+                            </a>
+                        @endforeach
+                    </div>
+                @else
+                    <p class="production-proof-empty">No production proof has been shared yet.</p>
+                @endif
+            </section>
+
             @if ($order->progressUpdates->isNotEmpty())
                 <ol class="proofing-list">
                     @foreach ($order->progressUpdates as $update)
@@ -124,7 +170,7 @@
                         </li>
                     @endforeach
                 </ol>
-            @elseif ($designProofs->isEmpty())
+            @elseif ($designProofs->isEmpty() && $productionProofs->isEmpty())
                 <div class="proofing-empty">
                     <span aria-hidden="true">⌛</span>
                     <h3>No proof has been shared yet</h3>

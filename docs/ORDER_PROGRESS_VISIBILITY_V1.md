@@ -6,7 +6,9 @@ This change adds one canonical, per-order progress-update stream without
 replacing the existing workflow artefacts:
 
 - Designer artwork remains in the artwork/review workflow.
-- Production progress evidence remains in `print_jobs.progress_files`.
+- Production progress evidence remains in `print_jobs.progress_files`; each
+  uploaded file is private by default and can be explicitly shared with the
+  customer from the Production upload form.
 - OM packing and courier proof remains in the Packing/Fulfilment workflow.
 - A new `order_progress_updates` stream carries progress messages and optional
   attachments intended for management monitoring and, only when explicitly
@@ -45,7 +47,11 @@ DESIGNER, PRODUCTION, and OPERATION_MANAGEMENT.
 
 Attachments use the private `local` disk and are streamed only through
 authorized controllers. Storage paths are never exposed as public URLs.
-Operational proofs are not copied into this stream. Following the Project
+Operational proofs are not copied into this stream. Production progress files
+explicitly marked customer-visible are shown in a separate Production Proof
+section and streamed only through a customer-session endpoint scoped to the
+matching order and print job. Existing progress files without this explicit
+flag remain private. Following the Project
 Owner instruction on 2026-10-15, the final Courier proof may be streamed to the
 customer only after the matching order's Courier job is `COMPLETED`. The same
 session/order check is enforced again by the file endpoint. Design proof links
@@ -69,6 +75,8 @@ submissions.
 - uploader-only private attachment access;
 - customer order isolation and private-update exclusion;
 - customer attachment order/visibility checks;
+- one- and two-package Production Proof display, private-file exclusion,
+  customer session enforcement, and per-order file isolation;
 - default-private behaviour and duplicate rejection;
 - both one-package and two-package orders.
 
