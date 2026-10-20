@@ -224,6 +224,11 @@ class StaffPrintingWorkflowTest extends TestCase
             'event_type' => 'PRINT_PROGRESS_VISIBILITY_CHANGED',
             'actor_user_id' => $production->id,
         ]);
+
+        $this->get(route('staff.orders.show', $job->order->order_id))
+            ->assertOk()
+            ->assertSee('Shared with customer')
+            ->assertDontSee('Hide from customer');
     }
 
     public function test_other_production_staff_cannot_start_assigned_print_job(): void
