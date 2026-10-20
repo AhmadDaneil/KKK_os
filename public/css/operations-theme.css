@@ -70,6 +70,7 @@ html, body, body.admin-operations-mode {
 .staff-hero .staff-button:not(.staff-button-danger):hover { border-color: #edcf83; color: #302817; background: #edcf83; }
 .staff-order-next-action { border-left-color: #b9852c; background: #f8edcf; }
 .staff-assignment-form, body.admin-operations-mode .staff-assignment-form, .staff-progress-update-form { border-color: var(--operations-line); border-left-color: #b9852c; background: var(--operations-soft); }
+.staff-packing-complete-form { color: var(--operations-text); border-color: var(--operations-line); background: var(--operations-soft); }
 .staff-work-message, .staff-empty-state, .staff-selected-files li { border-color: var(--operations-line); color: var(--operations-text); background: var(--operations-soft); }
 .staff-attention-panel { border-color: #c64a3b; background: #fff8f6; }
 .staff-attention-card { color: var(--operations-text); }
@@ -129,6 +130,9 @@ html[data-operations-theme="dark"] :is(.staff-feature-card p,.staff-order-card s
 html[data-operations-theme="dark"] :is(.staff-dashboard-group-heading,.staff-card-heading,.admin-panel-heading,.staff-detail-list>div,.admin-team-counts div,.admin-sales-breakdown>div,.admin-table td) { border-color: var(--operations-line); }
 html[data-operations-theme="dark"] :is(.staff-section-title,body.admin-operations-mode .staff-section-title,.staff-order-next-action,.staff-assignment-form,body.admin-operations-mode .staff-assignment-form,.staff-progress-update-form,
     .admin-create-form,.admin-filter,.admin-edit-form,.admin-staff-card[data-inactive]) { color: var(--operations-text); border-color: var(--operations-line); background: var(--operations-soft); }
+html[data-operations-theme="dark"] .staff-packing-complete-form { color: var(--operations-text); border-color: #826d48; background: #393122; }
+html[data-operations-theme="dark"] .staff-packing-complete-form .staff-progress-visibility { color: var(--operations-text); }
+html[data-operations-theme="dark"] .staff-packing-complete-form .staff-progress-visibility input[type="checkbox"] { accent-color: var(--operations-gold); }
 html[data-operations-theme="dark"] .staff-detail-list>div:nth-child(n) { background: var(--operations-surface); }
 html[data-operations-theme="dark"] :is(.staff-detail-list dt,.staff-order-filter label span,.staff-field-help,.staff-optional,.admin-form label,.admin-bar-column small,.admin-sales-summary span) { color: var(--operations-muted); }
 html[data-operations-theme="dark"] :is(.staff-button:not(.staff-button-danger),.staff-order-open,.admin-button-primary) { color: #261d10; border-color: #e0b95c; background: #e0b95c; }
