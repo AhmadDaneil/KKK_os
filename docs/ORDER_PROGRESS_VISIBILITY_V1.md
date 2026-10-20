@@ -51,7 +51,9 @@ Operational proofs are not copied into this stream. Production progress files
 explicitly marked customer-visible are shown in a separate Production Proof
 section and streamed only through a customer-session endpoint scoped to the
 matching order and print job. Existing progress files without this explicit
-flag remain private. Following the Project
+flag remain private until an authorized Production assignee or OM explicitly
+shares them from the order details page; this action records an audit event.
+Following the Project
 Owner instruction on 2026-10-15, the final Courier proof may be streamed to the
 customer only after the matching order's Courier job is `COMPLETED`. The same
 session/order check is enforced again by the file endpoint. Design proof links

@@ -206,6 +206,61 @@ class StaffPrintingWorkflowController extends Controller
         );
     }
 
+    public function setProgressFileVisibility(
+        Request $request,
+        PrintJob $printJob,
+        int $file
+    ): RedirectResponse {
+        $user = $request->user();
+        abort_unless(
+            $user->isOperationManagement()
+                || ($user->hasStaffRole(User::ROLE_PRODUCTION)
+                    && $printJob->assigned_user_id === $user->id),
+            404,
+        );
+
+        $validated = $request->validate([
+            'customer_visible' => ['required', 'boolean'],
+        ]);
+
+        $progressFiles = $printJob->progress_files ?? [];
+        abort_unless(array_key_exists($file, $progressFiles), 404);
+
+        $progressFile = $progressFiles[$file];
+        $path = data_get($progressFile, 'path');
+        abort_unless(
+            filled($path)
+                && str_starts_with($path, 'printing-progress/'.$printJob->id.'/')
+                && filled(data_get($progressFile, 'uploaded_by_user_id'))
+                && in_array(data_get($progressFile, 'uploaded_by_role'), [null, User::ROLE_PRODUCTION], true)
+                && Storage::disk('local')->exists($path),
+            404,
+        );
+
+        $customerVisible = (bool) $validated['customer_visible'];
+        $progressFiles[$file]['uploaded_by_role'] = User::ROLE_PRODUCTION;
+        $progressFiles[$file]['customer_visible'] = $customerVisible;
+        $printJob->update(['progress_files' => $progressFiles]);
+        $printJob->events()->create([
+            'event_type' => 'PRINT_PROGRESS_VISIBILITY_CHANGED',
+            'from_status' => $printJob->status,
+            'to_status' => $printJob->status,
+            'actor_user_id' => $user->id,
+            'metadata' => [
+                'file_index' => $file,
+                'customer_visible' => $customerVisible,
+            ],
+            'occurred_at' => now(),
+        ]);
+
+        return back()->with(
+            'status',
+            $customerVisible
+                ? 'Production proof shared with the customer.'
+                : 'Production proof hidden from the customer.'
+        );
+    }
+
     private function authorizeAssignedPrintingStaff(
         Request $request,
         PrintJob $printJob

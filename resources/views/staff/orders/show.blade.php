@@ -1103,9 +1103,20 @@
                                             @foreach ($job->progress_files as $file)
                                                 <div class="staff-contact-row">
                                                     <span>{{ $file['original_name'] ?? 'Progress file' }}</span>
-                                                    <a href="{{ route($operationRoutePrefix.'print-jobs.progress-files.show', ['printJob' => $job, 'file' => $loop->index]) }}" class="staff-button staff-button-small" target="_blank" rel="noopener">
-                                                        View · {{ isset($file['uploaded_at']) ? \Illuminate\Support\Carbon::parse($file['uploaded_at'])->timezone(config('app.display_timezone'))->format('Y-m-d H:i') : '-' }}
-                                                    </a>
+                                                    <div class="staff-contact-actions">
+                                                        <a href="{{ route($operationRoutePrefix.'print-jobs.progress-files.show', ['printJob' => $job, 'file' => $loop->index]) }}" class="staff-button staff-button-small" target="_blank" rel="noopener">
+                                                            View · {{ isset($file['uploaded_at']) ? \Illuminate\Support\Carbon::parse($file['uploaded_at'])->timezone(config('app.display_timezone'))->format('Y-m-d H:i') : '-' }}
+                                                        </a>
+                                                        @if (auth()->user()->isOperationManagement() || (auth()->user()->hasStaffRole(\App\Models\User::ROLE_PRODUCTION) && $job->assigned_user_id === auth()->id()))
+                                                            <form method="POST" action="{{ route($operationRoutePrefix.'print-jobs.progress-files.visibility', ['printJob' => $job, 'file' => $loop->index]) }}">
+                                                                @csrf
+                                                                <input type="hidden" name="customer_visible" value="{{ ($file['customer_visible'] ?? false) ? '0' : '1' }}">
+                                                                <button type="submit" class="staff-button staff-button-small {{ ($file['customer_visible'] ?? false) ? 'staff-button-secondary' : 'staff-button-primary' }}">
+                                                                    {{ ($file['customer_visible'] ?? false) ? 'Hide from customer' : 'Share with customer' }}
+                                                                </button>
+                                                            </form>
+                                                        @endif
+                                                    </div>
                                                 </div>
                                             @endforeach
                                         </div>
