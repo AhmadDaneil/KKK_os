@@ -91,14 +91,17 @@
 
     <link rel="stylesheet" href="{{ asset('css/staff.css') }}?v={{ filemtime(public_path('css/staff.css')) }}">
     <link rel="stylesheet" href="{{ asset('css/dashboard-compact.css') }}?v={{ filemtime(public_path('css/dashboard-compact.css')) }}">
+    <link rel="stylesheet" href="{{ asset('css/operations-theme.css') }}?v={{ filemtime(public_path('css/operations-theme.css')) }}">
+    @include('staff.partials.theme-init')
 </head>
-<body @class(['admin-operations-mode' => auth()->user()->isAdmin()]) data-staff-theme="{{ auth()->user()->staff_theme }}">
+<body @class(['admin-operations-mode' => auth()->user()->isAdmin()])>
     <div class="staff-app-shell">
         @include('staff.partials.sidebar')
         <div class="staff-workspace">
             <header class="staff-topbar">
                 <div><p class="staff-kicker">{{ auth()->user()->isAdmin() ? 'Admin Operations' : ($workstreamLabel ?? 'Operations Management') }}</p><h1>Orders</h1></div>
                 <div class="staff-topbar-actions">
+                    @include('staff.partials.theme-toggle')
                     <form class="js-logout-form staff-logout-profile" method="POST" action="{{ route($logoutRoute) }}">@csrf<button type="submit"><span class="staff-topbar-avatar" aria-hidden="true"></span><span>{{ __('ui.logout') }}</span></button></form>
                 </div>
             </header>
