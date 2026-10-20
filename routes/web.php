@@ -18,6 +18,7 @@ use App\Http\Controllers\CustomerOrderConfirmController;
 use App\Http\Controllers\CustomerOrderDraftController;
 use App\Http\Controllers\CustomerOrderReviewController;
 use App\Http\Controllers\CustomerOrderThankYouController;
+use App\Http\Controllers\CustomerProductionProofController;
 use App\Http\Controllers\CustomerPaymentReceiptController;
 use App\Http\Controllers\CustomerProgressUpdateController;
 use App\Http\Controllers\DevBalancePaymentController;
@@ -91,6 +92,10 @@ Route::post('/semak-progress', [PublicOrderController::class, 'lookupProgress'])
 Route::get('/semak-progress/{orderId}/proofing', [PublicOrderController::class, 'proofing'])
     ->middleware('throttle:30,1')
     ->name('public.orders.proofing');
+Route::get('/semak-progress/{orderId}/production-proof/{printJobId}/{file}', [CustomerProductionProofController::class, 'show'])
+    ->middleware('throttle:60,1')
+    ->whereNumber(['printJobId', 'file'])
+    ->name('public.orders.production-proof');
 
 Route::post('/order/{orderId}/balance-receipt', [CustomerBalanceReceiptController::class, 'store'])
     ->middleware('throttle:10,1')

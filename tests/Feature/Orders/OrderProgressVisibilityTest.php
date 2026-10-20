@@ -504,6 +504,173 @@ class OrderProgressVisibilityTest extends TestCase
             ->assertDontSee('View Courier Proof');
     }
 
+    public function test_customer_can_view_production_progress_proof_for_their_one_package_order(): void
+    {
+        Storage::fake('local');
+        $order = $this->orderWithDesignJobs(1);
+        $designJob = $order->designJobs()->firstOrFail();
+        $artwork = ArtworkVersion::create([
+            'design_job_id' => $designJob->id,
+            'version_number' => 1,
+            'storage_path' => 'private/production-artwork-one.pdf',
+        ]);
+        $production = $this->staff(User::ROLE_PRODUCTION);
+        $path = 'printing-progress/one-package/progress-1.jpg';
+        Storage::disk('local')->put($path, 'production-proof');
+
+        $printJob = PrintJob::create([
+            'order_id' => $order->id,
+            'design_job_id' => $designJob->id,
+            'order_package_side_id' => $designJob->order_package_side_id,
+            'artwork_version_id' => $artwork->id,
+            'side' => $designJob->side,
+            'status' => 'PRINTING',
+            'assigned_user_id' => $production->id,
+            'progress_files' => [[
+                'path' => $path,
+                'original_name' => 'production-progress.jpg',
+                'mime_type' => 'image/jpeg',
+                'uploaded_at' => now()->toIso8601String(),
+                'uploaded_by_user_id' => $production->id,
+                'uploaded_by_role' => User::ROLE_PRODUCTION,
+                'customer_visible' => true,
+            ]],
+        ]);
+
+        $session = $this->customerSession($order);
+        $this->withSession($session)
+            ->get(route('public.orders.proofing', ['orderId' => $order->order_id]))
+            ->assertOk()
+            ->assertSee('Production Proof')
+            ->assertSee('View Production Proof · Groom · File 1');
+
+        $this->withSession($session)
+            ->get(route('public.orders.production-proof', [
+                'orderId' => $order->order_id,
+                'printJobId' => $printJob->id,
+                'file' => 0,
+            ]))
+            ->assertOk()
+            ->assertHeader('Cache-Control', 'private, no-store, max-age=0');
+
+        $printJob->update([
+            'progress_files' => array_merge($printJob->progress_files, [[
+                'path' => $path,
+                'original_name' => 'internal-production-note.jpg',
+                'mime_type' => 'image/jpeg',
+                'uploaded_by_user_id' => $production->id,
+                'uploaded_by_role' => User::ROLE_PRODUCTION,
+                'customer_visible' => false,
+            ]]),
+        ]);
+        $this->withSession($session)
+            ->get(route('public.orders.proofing', ['orderId' => $order->order_id]))
+            ->assertOk()
+            ->assertSee('View Production Proof · Groom · File 1')
+            ->assertDontSee('View Production Proof · Groom · File 2');
+        $this->withSession($session)
+            ->get(route('public.orders.production-proof', [
+                'orderId' => $order->order_id,
+                'printJobId' => $printJob->id,
+                'file' => 1,
+            ]))
+            ->assertNotFound();
+
+        $this->get(route('public.orders.production-proof', [
+            'orderId' => $order->order_id,
+            'printJobId' => $printJob->id,
+            'file' => 0,
+        ]))->assertNotFound();
+    }
+
+    public function test_two_package_customer_sees_both_production_proofs_and_cannot_cross_order_scope(): void
+    {
+        Storage::fake('local');
+        $order = $this->orderWithDesignJobs(2);
+        $otherOrder = $this->orderWithDesignJobs(1);
+        $production = $this->staff(User::ROLE_PRODUCTION);
+        $otherDesignJob = $otherOrder->designJobs()->firstOrFail();
+        $otherArtwork = ArtworkVersion::create([
+            'design_job_id' => $otherDesignJob->id,
+            'version_number' => 1,
+            'storage_path' => 'private/production-artwork-other.pdf',
+        ]);
+        $otherPrintJob = PrintJob::create([
+            'order_id' => $otherOrder->id,
+            'design_job_id' => $otherDesignJob->id,
+            'order_package_side_id' => $otherDesignJob->order_package_side_id,
+            'artwork_version_id' => $otherArtwork->id,
+            'side' => $otherDesignJob->side,
+            'status' => 'PRINTING',
+            'assigned_user_id' => $production->id,
+            'progress_files' => [[
+                'path' => 'printing-progress/other-order/progress-1.jpg',
+                'original_name' => 'other-order.jpg',
+                'mime_type' => 'image/jpeg',
+                'uploaded_by_user_id' => $production->id,
+                'uploaded_by_role' => User::ROLE_PRODUCTION,
+                'customer_visible' => true,
+            ]],
+        ]);
+        Storage::disk('local')->put('printing-progress/other-order/progress-1.jpg', 'private-other-order-proof');
+
+        $visiblePrintJobs = collect();
+        foreach ($order->designJobs()->get() as $index => $designJob) {
+            $path = "printing-progress/two-package/progress-{$index}.jpg";
+            Storage::disk('local')->put($path, "production-proof-{$index}");
+            $artwork = ArtworkVersion::create([
+                'design_job_id' => $designJob->id,
+                'version_number' => 1,
+                'storage_path' => "private/production-artwork-{$index}.pdf",
+            ]);
+            $visiblePrintJobs->push(PrintJob::create([
+                'order_id' => $order->id,
+                'design_job_id' => $designJob->id,
+                'order_package_side_id' => $designJob->order_package_side_id,
+                'artwork_version_id' => $artwork->id,
+                'side' => $designJob->side,
+                'status' => 'PRINTED',
+                'assigned_user_id' => $production->id,
+                'progress_files' => [[
+                    'path' => $path,
+                    'original_name' => "production-progress-{$index}.jpg",
+                    'mime_type' => 'image/jpeg',
+                    'uploaded_by_user_id' => $production->id,
+                    'uploaded_by_role' => User::ROLE_PRODUCTION,
+                    'customer_visible' => true,
+                ]],
+            ]));
+        }
+
+        $response = $this->withSession($this->customerSession($order))
+            ->get(route('public.orders.proofing', ['orderId' => $order->order_id]))
+            ->assertOk()
+            ->assertSee('Production Proof')
+            ->assertSee('View Production Proof · Groom · File 1')
+            ->assertSee('View Production Proof · Bride · File 2')
+            ->assertDontSee('other-order.jpg');
+
+        $this->assertSame(2, substr_count($response->getContent(), 'View Production Proof'));
+
+        foreach ($visiblePrintJobs as $printJob) {
+            $this->withSession($this->customerSession($order))
+                ->get(route('public.orders.production-proof', [
+                    'orderId' => $order->order_id,
+                    'printJobId' => $printJob->id,
+                    'file' => 0,
+                ]))
+                ->assertOk();
+        }
+
+        $this->withSession($this->customerSession($order))
+            ->get(route('public.orders.production-proof', [
+                'orderId' => $order->order_id,
+                'printJobId' => $otherPrintJob->id,
+                'file' => 0,
+            ]))
+            ->assertNotFound();
+    }
+
     private function staff(string $role): User
     {
         return User::factory()->create(['role' => $role, 'is_active' => true]);

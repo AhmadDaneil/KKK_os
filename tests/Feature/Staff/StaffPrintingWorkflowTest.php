@@ -119,6 +119,7 @@ class StaffPrintingWorkflowTest extends TestCase
                     UploadedFile::fake()->image('printing-stage-1.jpg'),
                     UploadedFile::fake()->create('machine-log.pdf', 100, 'application/pdf'),
                 ],
+                'customer_visible' => '1',
             ])
             ->assertRedirect()
             ->assertSessionHasNoErrors()
@@ -131,6 +132,8 @@ class StaffPrintingWorkflowTest extends TestCase
 
         foreach ($job->progress_files as $file) {
             Storage::disk('local')->assertExists($file['path']);
+            $this->assertSame('PRODUCTION', $file['uploaded_by_role']);
+            $this->assertTrue($file['customer_visible']);
         }
 
         $this->assertDatabaseHas('print_job_events', [
@@ -182,6 +185,8 @@ class StaffPrintingWorkflowTest extends TestCase
 
         $this->assertCount(1, $job->progress_files);
         $this->assertNotNull($job->progress_updated_at);
+        $this->assertFalse($job->progress_files[0]['customer_visible']);
+        $this->assertSame('PRODUCTION', $job->progress_files[0]['uploaded_by_role']);
     }
 
     public function test_other_production_staff_cannot_start_assigned_print_job(): void
