@@ -1,12 +1,6 @@
 @php
     $currency = $invoice->currency === 'MYR' ? 'RM' : $invoice->currency;
     $money = static fn ($amount): string => $currency.' '.number_format((float) $amount, 2);
-    $lineItems = $order->items->whereNotIn('item_type', ['DELIVERY', 'DISCOUNT']);
-    $deliveryItem = $order->items->firstWhere('item_type', 'DELIVERY');
-    $discountItem = $order->items->firstWhere('item_type', 'DISCOUNT');
-    $deliveryLabel = $deliveryItem?->description ?? match ($order->fulfilment?->method) {
-        'COURIER' => 'Courier', 'PICKUP' => 'Self pickup', default => 'Not set',
-    };
 @endphp
 <!DOCTYPE html>
 <html lang="en">
@@ -91,13 +85,9 @@
             </div>
             <table class="invoice-lines"><thead><tr><th class="number">No.</th><th class="description">Description</th><th class="unit">Unit</th><th class="price">Price ({{ $currency }})</th><th class="amount">Amount ({{ $currency }})</th></tr></thead>
                 <tbody>
-                    @forelse ($lineItems as $item)
-                        <tr><td>{{ $loop->iteration }}</td><td>{{ $item->description }}@if ($item->side) <span class="muted">({{ $item->side === 'LELAKI' ? 'Groom' : 'Bride' }})</span>@endif</td><td class="unit">{{ number_format($item->quantity) }}</td><td class="price">{{ number_format((float) $item->unit_price, 2) }}</td><td class="amount">{{ number_format((float) $item->line_total, 2) }}</td></tr>
-                    @empty
-                        <tr><td>1</td><td>Wedding card order ({{ $order->package_count }} packages)</td><td class="unit">1</td><td class="price">{{ number_format((float) $invoice->subtotal, 2) }}</td><td class="amount">{{ number_format((float) $invoice->subtotal, 2) }}</td></tr>
-                    @endforelse
-                    @if ((float) $invoice->discount_amount > 0)<tr><td>{{ $lineItems->count() + 1 }}</td><td>{{ $discountItem?->description ?: 'Discount' }}</td><td class="unit">1</td><td class="price">-{{ number_format((float) $invoice->discount_amount, 2) }}</td><td class="amount">-{{ number_format((float) $invoice->discount_amount, 2) }}</td></tr>@endif
-                    @if ((float) $invoice->postage_amount > 0)<tr><td>{{ $lineItems->count() + ((float) $invoice->discount_amount > 0 ? 2 : 1) }}</td><td>{{ $deliveryLabel }}</td><td class="unit">1</td><td class="price">{{ number_format((float) $invoice->postage_amount, 2) }}</td><td class="amount">{{ number_format((float) $invoice->postage_amount, 2) }}</td></tr>@endif
+                    @foreach ($invoiceLines as $item)
+                        <tr><td>{{ $loop->iteration }}</td><td>{{ $item['description'] }}@if ($item['side']) <span class="muted">({{ $item['side'] === 'LELAKI' ? 'Groom' : 'Bride' }})</span>@endif</td><td class="unit">{{ number_format($item['quantity']) }}</td><td class="price">{{ number_format($item['unit_price'], 2) }}</td><td class="amount">{{ number_format($item['line_total'], 2) }}</td></tr>
+                    @endforeach
                 </tbody>
             </table>
             <div class="summary-area"><div class="payment-note"><div class="section-label">Payment Details</div><strong>Payment through official KKK OS channels</strong><div class="muted">Keep this invoice for your order and payment records.</div></div>

@@ -5,8 +5,10 @@ namespace Tests\Feature\Staff;
 use App\Models\Invoice;
 use App\Models\Order;
 use App\Models\User;
+use App\Services\Orders\BuildOrderPricingService;
 use App\Services\Orders\CreateOrderService;
 use App\Services\Payments\SynchronizeOrderFinancialsService;
+use Database\Seeders\KkkPackagePriceCatalogSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use RuntimeException;
 use Tests\TestCase;
@@ -48,12 +50,12 @@ class StaffInvoicePrintTest extends TestCase
         $this->actingAs($om)
             ->get(route('staff.invoices.print', $invoice))
             ->assertOk()
-            ->assertSee('Muka hadapan invois')
-            ->assertSee('INVOIS')
+            ->assertSee('Invoice front page')
+            ->assertSee('INVOICE')
             ->assertSee('Invoice Customer')
             ->assertSee($order->order_id)
             ->assertSee('RM 300.00')
-            ->assertSee('TERMA &amp; SYARAT', false);
+            ->assertSee('TERMS &amp; CONDITIONS / ORDER PROCESS', false);
 
         $this->actingAs($designer)
             ->get(route('staff.invoices.print', $invoice))
@@ -70,6 +72,121 @@ class StaffInvoicePrintTest extends TestCase
             ->get(route('staff.invoices.print', $invoice))
             ->assertOk()
             ->assertSee('Wedding card order (2 packages)');
+    }
+
+    public function test_puteri_manis_invoice_lists_package_contents_and_free_items(): void
+    {
+        $order = $this->pricedOrder(1, 'PAID');
+        $order->update(['package_type' => 'PUTERI_MANIS']);
+        $invoice = app(SynchronizeOrderFinancialsService::class)->synchronize($order->fresh());
+
+        $this->actingAs($this->staff(User::ROLE_OM))
+            ->get(route('staff.invoices.print', $invoice))
+            ->assertOk()
+            ->assertSee('Kad Kahwin 4x6 200 pcs')
+            ->assertSee('White Envelope 4x6 200 pcs')
+            ->assertSee('Sticker 3cm 150 pcs')
+            ->assertSee('Alive Card Premium')
+            ->assertSee('FREE Motion Video')
+            ->assertSee('FREE Wooden Hanger 1 pc');
+    }
+
+    public function test_jelata_two_package_invoice_lists_contents_without_puteri_manis_freebies(): void
+    {
+        $order = $this->pricedOrder(2, 'PAID');
+        $order->update(['package_type' => 'JELATA']);
+        $invoice = app(SynchronizeOrderFinancialsService::class)->synchronize($order->fresh());
+
+        $this->actingAs($this->staff(User::ROLE_OM))
+            ->get(route('staff.invoices.print', $invoice))
+            ->assertOk()
+            ->assertSee('Kad Kahwin 4x6 200 pcs')
+            ->assertSee('Live Card')
+            ->assertSee('Sampul 200 pcs')
+            ->assertDontSee('FREE Motion Video')
+            ->assertDontSee('FREE Wooden Hanger');
+    }
+
+    public function test_postage_quote_uses_package_quantity_and_destination_region(): void
+    {
+        $this->seed(KkkPackagePriceCatalogSeeder::class);
+
+        $onePackage = $this->pricedOrder(1, 'PAID');
+        $onePackage->update(['package_type' => 'PUTERI_MANIS']);
+        $onePackage->packageSides()->firstOrFail()->update(['card_quantity' => 200]);
+        $onePackage->fulfilment()->update([
+            'method' => 'COURIER',
+            'shipping_address' => 'Sekinchan, Selangor',
+        ]);
+        $onePackage->forceFill(['card_quantity' => 200])->save();
+
+        $peninsularQuote = app(BuildOrderPricingService::class)->quote($onePackage->fresh());
+        $this->assertSame('25.00', $peninsularQuote['postage_amount']);
+        $this->assertSame('213.00', $peninsularQuote['total_amount']);
+        $this->assertSame('Postage Semenanjung - Puteri Manis 200 pcs', $peninsularQuote['delivery']['description']);
+
+        $twoPackages = app(CreateOrderService::class)->create([
+            'package_count' => 2,
+            'package_type' => 'PUTERI_MANIS',
+            'customer_name' => 'Two Package Customer',
+        ]);
+        $twoPackages->packageSides()->where('side', 'LELAKI')->firstOrFail()->update(['card_quantity' => 30]);
+        $twoPackages->packageSides()->where('side', 'PEREMPUAN')->firstOrFail()->update(['card_quantity' => 50]);
+        $twoPackages->forceFill(['card_quantity' => 80])->save();
+        $twoPackages->fulfilment()->update([
+            'method' => 'COURIER',
+            'shipping_address' => 'Kota Kinabalu, Sabah',
+        ]);
+
+        $eastMalaysiaQuote = app(BuildOrderPricingService::class)->quote($twoPackages->fresh());
+        $this->assertSame('70.00', $eastMalaysiaQuote['postage_amount']);
+        $this->assertSame('296.00', $eastMalaysiaQuote['total_amount']);
+        $this->assertSame('Postage Sabah/Sarawak - Puteri Manis 80 pcs', $eastMalaysiaQuote['delivery']['description']);
+    }
+
+    public function test_postage_is_saved_in_pricing_snapshot_and_invoice_balance(): void
+    {
+        $this->seed(KkkPackagePriceCatalogSeeder::class);
+        $order = app(CreateOrderService::class)->create([
+            'package_count' => 1,
+            'package_type' => 'PUTERI_MANIS',
+            'side' => 'LELAKI',
+            'customer_name' => 'Postage Customer',
+        ]);
+        $order->packageSides()->firstOrFail()->update(['card_quantity' => 200]);
+        $order->forceFill([
+            'card_quantity' => 200,
+            'booking_payment_status' => 'PAID',
+        ])->save();
+        $order->fulfilment()->update([
+            'method' => 'COURIER',
+            'recipient_name' => 'Postage Customer',
+            'recipient_phone' => '0123456789',
+            'shipping_address' => 'Sekinchan, Selangor',
+        ]);
+        $order->payments()->create([
+            'payment_type' => 'BOOKING_DEPOSIT',
+            'provider' => 'MANUAL_QR',
+            'amount' => '50.00',
+            'currency' => 'MYR',
+            'status' => 'PAID',
+            'paid_at' => now(),
+        ]);
+
+        $snapshot = app(BuildOrderPricingService::class)->createSnapshot($order->fresh());
+        $invoice = app(SynchronizeOrderFinancialsService::class)->synchronize($order->fresh());
+
+        $this->assertSame('188.00', $snapshot->subtotal);
+        $this->assertSame('25.00', $snapshot->postage_amount);
+        $this->assertSame('213.00', $snapshot->total_amount);
+        $this->assertSame('213.00', $invoice->total_amount);
+        $this->assertSame('163.00', $invoice->balance_due);
+        $this->assertDatabaseHas('order_items', [
+            'order_id' => $order->id,
+            'item_type' => 'DELIVERY',
+            'description' => 'Postage Semenanjung - Puteri Manis 200 pcs',
+            'line_total' => '25.00',
+        ]);
     }
 
     public function test_om_can_download_invoice_as_a_real_pdf(): void

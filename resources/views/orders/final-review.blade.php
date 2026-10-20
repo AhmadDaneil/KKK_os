@@ -302,8 +302,14 @@
                     <span class="review-label">Card package price</span>
                     <span class="review-value">RM {{ number_format((float) $review['pricing']['package_amount'], 2) }}</span>
                 </div>
+                @if ((float) $review['pricing']['postage_amount'] > 0)
+                    <div class="review-item">
+                        <span class="review-label">{{ $review['pricing']['delivery_label'] }}</span>
+                        <span class="review-value">RM {{ number_format((float) $review['pricing']['postage_amount'], 2) }}</span>
+                    </div>
+                @endif
                 <div class="review-item">
-                    <span class="review-label">Total package price</span>
+                    <span class="review-label">Order total</span>
                     <span class="review-value">RM {{ number_format((float) $review['pricing']['total_amount'], 2) }}</span>
                 </div>
             </div>
