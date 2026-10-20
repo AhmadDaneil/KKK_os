@@ -36,6 +36,8 @@ class BuildFinalReviewService
             'pricing' => [
                 'currency' => $pricing['currency'],
                 'package_amount' => $pricing['package_amount'],
+                'postage_amount' => $pricing['postage_amount'],
+                'delivery_label' => $pricing['delivery']['region_label'],
                 'total_amount' => $pricing['total_amount'],
                 'deposit_amount' => $pricing['deposit_amount'],
                 'catalog_item_code' => $pricing['package']['catalog_item']->code,

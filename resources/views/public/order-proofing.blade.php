@@ -24,6 +24,16 @@
     </header>
 
     <main class="proofing-page">
+        @php
+            $customerProofUrl = static fn (string $routeName, array $parameters): string =>
+                \Illuminate\Support\Facades\URL::temporarySignedRoute(
+                    $routeName,
+                    $proofingExpiresAt,
+                    $parameters,
+                    false,
+                );
+        @endphp
+
         <section class="proofing-hero">
             <div>
                 <p class="eyebrow">Customer proofing</p>
@@ -110,7 +120,7 @@
                                             default => count($proof['files']) > 1 ? 'Wedding Card '.($previewIndex + 1) : 'Wedding Card',
                                         };
                                     @endphp
-                                    <a class="button button-primary" href="{{ route('orders.artwork.preview', [
+                                    <a class="button button-primary" href="{{ $customerProofUrl('orders.artwork.preview', [
                                         'orderId' => $order->order_id,
                                         'designJobId' => $designJob->id,
                                         'file' => $previewIndex,
@@ -141,7 +151,7 @@
                                 $sideLabel = $proof['job']->side === 'LELAKI' ? 'Groom' : 'Bride';
                                 $fileNumber = $loop->iteration;
                             @endphp
-                            <a class="button button-primary" href="{{ route('public.orders.production-proof', [
+                            <a class="button button-primary" href="{{ $customerProofUrl('public.orders.production-proof', [
                                 'orderId' => $order->order_id,
                                 'printJobId' => $proof['job']->id,
                                 'file' => $proof['index'],
@@ -167,7 +177,7 @@
 
                 @if ($packingProofAvailable)
                     <div class="design-proof-actions">
-                        <a class="button button-primary" href="{{ route('orders.packing-proof.show', ['orderId' => $order->order_id]) }}" target="_blank" rel="noopener noreferrer">
+                        <a class="button button-primary" href="{{ $customerProofUrl('orders.packing-proof.show', ['orderId' => $order->order_id]) }}" target="_blank" rel="noopener noreferrer">
                             View Packing Proof
                         </a>
                     </div>
@@ -199,7 +209,7 @@
                     @if ($fulfilmentJob->status === 'COMPLETED' && filled($order->packingJob?->proof_storage_path))
                         <p>View the parcel handover photo and courier details.</p>
                         <div class="design-proof-actions">
-                            <a class="button button-primary" href="{{ route('orders.courier-proof.show', ['orderId' => $order->order_id]) }}" target="_blank" rel="noopener noreferrer">
+                            <a class="button button-primary" href="{{ $customerProofUrl('orders.courier-proof.show', ['orderId' => $order->order_id]) }}" target="_blank" rel="noopener noreferrer">
                                 View Courier Proof
                             </a>
                         </div>
@@ -226,7 +236,7 @@
                             <h3>{{ str($update->order_status)->replace('_', ' ')->title() }}</h3>
                             <p>{{ $update->message ?: 'A new progress proof has been shared for your order.' }}</p>
                             @if ($update->hasAttachment())
-                                <a class="button button-primary" href="{{ route('orders.progress-updates.attachment', ['orderId' => $order->order_id, 'progressUpdate' => $update]) }}" target="_blank" rel="noopener">View Proof</a>
+                                <a class="button button-primary" href="{{ $customerProofUrl('orders.progress-updates.attachment', ['orderId' => $order->order_id, 'progressUpdate' => $update]) }}" target="_blank" rel="noopener">View Proof</a>
                             @endif
                         </li>
                     @endforeach

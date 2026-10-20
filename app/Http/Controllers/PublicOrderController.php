@@ -7,6 +7,8 @@ use App\Services\Orders\BuildCustomerProgressService;
 use App\Services\Orders\CustomerOrderSessionAccessService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\URL;
 use Illuminate\View\View;
 
 class PublicOrderController extends Controller
@@ -67,7 +69,7 @@ class PublicOrderController extends Controller
                 ->withErrors(['order_id' => 'Order ID not found. Please check it and try again.']);
         }
 
-        $sessionAccess->establishFromProgressLookup($request, $order);
+        $proofingExpiresAt = $sessionAccess->establishFromProgressLookup($request, $order);
 
         $order->load(['fulfilmentJob', 'payments', 'designJobs.artworkVersions', 'pricingSnapshot']);
         $deposit = $order->payments->firstWhere('payment_type', 'BOOKING_DEPOSIT');
@@ -118,6 +120,12 @@ class PublicOrderController extends Controller
             'balanceBillplzAmount' => $order->pricingSnapshot?->outstanding_amount,
             'balanceQrImage' => (string) config('kingkadkahwin.balance.qr_image'),
             'artworkReady' => $artworkReady,
+            'proofingUrl' => URL::temporarySignedRoute(
+                'public.orders.proofing',
+                $proofingExpiresAt,
+                ['orderId' => $order->order_id],
+                false,
+            ),
         ]);
     }
 
@@ -142,12 +150,13 @@ class PublicOrderController extends Controller
         $packingJob = $order->packingJob;
         $packingProofAvailable = $packingJob?->status === 'PACKED'
             && filled($packingJob->proof_storage_path)
-            && \Illuminate\Support\Facades\Storage::disk('local')->exists($packingJob->proof_storage_path);
+            && Storage::disk('local')->exists($packingJob->proof_storage_path);
 
         return view('public.order-proofing', [
             'order' => $order,
             'progress' => $customerProgress->build($order),
             'packingProofAvailable' => $packingProofAvailable,
+            'proofingExpiresAt' => now()->addMinutes(30),
         ]);
     }
 }

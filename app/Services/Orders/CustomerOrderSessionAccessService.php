@@ -6,6 +6,7 @@ use App\Models\Order;
 use App\Models\OrderAccessToken;
 use Carbon\CarbonImmutable;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\URL;
 
 class CustomerOrderSessionAccessService
 {
@@ -83,20 +84,27 @@ class CustomerOrderSessionAccessService
         return true;
     }
 
-    public function establishFromProgressLookup(Request $request, Order $order): void
+    public function establishFromProgressLookup(Request $request, Order $order): CarbonImmutable
     {
         abort_if($order->source === 'WABOT' && $order->booking_payment_status !== 'PAID', 404);
 
+        $expiresAt = CarbonImmutable::now()->addMinutes(30);
         $request->session()->put($this->proofingSessionKey($order->order_id), [
             'order_fk' => $order->id,
-            'expires_at' => now()->addMinutes(30)->toIso8601String(),
+            'expires_at' => $expiresAt->toIso8601String(),
         ]);
+
+        return $expiresAt;
     }
 
     public function resolveProofing(Request $request, string $orderId): Order
     {
         $order = Order::where('order_id', $orderId)->firstOrFail();
         abort_if($order->source === 'WABOT' && $order->booking_payment_status !== 'PAID', 404);
+
+        if (URL::hasValidSignature($request, false)) {
+            return $order;
+        }
 
         if ($this->hasAccess($request, $order)) {
             return $order;
