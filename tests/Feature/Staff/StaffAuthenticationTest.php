@@ -35,12 +35,13 @@ class StaffAuthenticationTest extends TestCase
             ->assertRedirect(route('staff.login'));
     }
 
-    public function test_staff_login_uses_the_shared_gold_theme_without_a_mode_toggle(): void
+    public function test_staff_login_does_not_load_dark_mode(): void
     {
         $this->get(route('staff.login'))
             ->assertOk()
-            ->assertSee('operations-theme.css')
-            ->assertSee('kkk-operations-mode')
+            ->assertSee('login.css')
+            ->assertDontSee('operations-theme.css')
+            ->assertDontSee('kkk-operations-mode')
             ->assertDontSee('operations-theme-toggle');
     }
 
