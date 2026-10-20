@@ -12,10 +12,13 @@ class InitializeOrderStructureService
     {
         return DB::transaction(function () use ($order, $singlePackageSide) {
             if ($order->package_count === 1) {
-                if (! in_array($singlePackageSide, ['LELAKI', 'PEREMPUAN'], true)) {
+                if ($singlePackageSide === null && $order->source === 'WABOT') {
+                    $sides = [];
+                } elseif (! in_array($singlePackageSide, ['LELAKI', 'PEREMPUAN'], true)) {
                     throw new InvalidArgumentException('singlePackageSide must be LELAKI or PEREMPUAN for a 1-package order.');
+                } else {
+                    $sides = [$singlePackageSide];
                 }
-                $sides = [$singlePackageSide];
             } elseif ($order->package_count === 2) {
                 $sides = ['LELAKI', 'PEREMPUAN'];
             } else {

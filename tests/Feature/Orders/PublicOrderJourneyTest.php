@@ -96,20 +96,35 @@ class PublicOrderJourneyTest extends TestCase
         $this->assertDatabaseCount('orders', 0);
     }
 
-    public function test_new_sessions_are_shared_evenly_across_three_numbers_and_repeat_clicks_stay_put(): void
+    public function test_each_brand_link_opens_its_own_whatsapp_account(): void
     {
-        $numbers = ['601165656968', '60177197596', '601135623239'];
+        $channels = [
+            'kingkadkahwin' => ['601165656968', 'KingKadKahwin'],
+            'destinasi-raja-sehari' => ['60177197596', 'Destinasi Raja Sehari'],
+            'cetaking' => ['60175863239', 'Cetaking'],
+            'royalicious' => ['601135623239', 'Royalicious'],
+        ];
 
-        foreach ($numbers as $number) {
-            $this->get(route('public.orders.create'))->assertRedirectContains('https://wa.me/'.$number);
-            $this->get(route('public.orders.create', ['purpose' => 'support']))
-                ->assertRedirectContains('https://wa.me/'.$number);
-            $this->flushSession();
+        foreach ($channels as $slug => [$number, $brand]) {
+            $url = route('public.orders.create.brand', ['brand' => $slug]);
+
+            $this->get($url)
+                ->assertRedirectContains('https://wa.me/'.$number)
+                ->assertRedirectContains(rawurlencode('Hello '.$brand));
+            $this->get($url.'?purpose=support')
+                ->assertRedirectContains('https://wa.me/'.$number)
+                ->assertRedirectContains(rawurlencode('Hello '.$brand));
         }
 
         $this->get(route('public.orders.create'))
-            ->assertRedirectContains('https://wa.me/'.$numbers[0]);
-        $this->assertDatabaseHas('wabot_route_counters', ['id' => 1, 'next_index' => 1]);
+            ->assertRedirectContains('https://wa.me/601165656968');
+        $this->assertDatabaseCount('orders', 0);
+    }
+
+    public function test_unknown_brand_link_returns_not_found_without_creating_an_order(): void
+    {
+        $this->get('/tempah/unknown-brand')->assertNotFound();
+
         $this->assertDatabaseCount('orders', 0);
     }
 

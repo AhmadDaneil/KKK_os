@@ -108,6 +108,24 @@ class BillplzBalancePaymentTest extends TestCase
         $this->assertDatabaseCount('payment_transactions', 2);
     }
 
+    public function test_progress_shows_existing_billplz_link_only_to_customer_with_dashboard_access(): void
+    {
+        $order = $this->createApprovedOrder(1, '300.00', '50.00', '250.00');
+        $this->fakeBillCreation('bill-progress', 25000);
+        $checkoutUrl = 'https://www.billplz-sandbox.com/bills/bill-progress';
+
+        $this->lookupOrder($order)->assertOk();
+        $this->post(route('orders.balance-payment.billplz.store', ['orderId' => $order->order_id]))
+            ->assertRedirect($checkoutUrl);
+        $this->get(route('public.orders.progress', ['order_id' => $order->order_id]))
+            ->assertSee($checkoutUrl, false)
+            ->assertSee('Continue to Billplz Payment');
+
+        $this->flushSession();
+        $this->get(route('public.orders.progress', ['order_id' => $order->order_id]))
+            ->assertDontSee($checkoutUrl, false);
+    }
+
     public function test_checkout_does_not_create_a_second_payment_when_manual_balance_is_pending(): void
     {
         $order = $this->createApprovedOrder(1, '300.00', '50.00', '250.00');

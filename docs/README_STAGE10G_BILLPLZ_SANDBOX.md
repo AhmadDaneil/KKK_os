@@ -30,6 +30,12 @@ Keep production disabled and use only credentials and a collection created in Bi
 6. The webhook verifies X Signature, collection, state, and amount before updating the payment ledger and synchronizing order financials.
 7. A pending manual QR balance transaction prevents creation of a competing Billplz charge.
 
+## Scheduled reconciliation
+
+When `BILLPLZ_ENABLED=true`, Laravel schedules `payments:reconcile-pending-billplz` every minute. It checks up to 25 pending Billplz booking-deposit and balance transactions with a saved Billplz bill ID, retrieves each bill through the authenticated Billplz API, and sends the verified result through the same payment callback handler used by signed webhooks. It never treats customer redirect parameters as payment confirmation.
+
+The latest check time is stored with the Billplz payment metadata to avoid generating an event for every unchanged, unpaid bill. Provider status changes are passed through the normal payment handler and retained in the payment event history; API failures are logged and retried on a later cycle. Scheduler overlap and multi-server execution are guarded with Laravel's cache locks. The VPS must already run Laravel's scheduler every minute (`php artisan schedule:run`) for this fallback to operate. When Billplz is disabled, the scheduled command does not run.
+
 ## Verification and limits
 
 Automated coverage: `tests/Feature/Payments/BookingPaymentJourneyTest.php`, `tests/Feature/Orders/PublicOrderJourneyTest.php`, and `tests/Feature/BillplzBalancePaymentTest.php` cover one-package and two-package amounts, trusted checkout URLs, retry deduplication, provider failure, manual QR conflict, and signed callback idempotency. The adjacent manual payment suites must also remain green.
