@@ -77,7 +77,7 @@
                         <strong>Order progress and proofing</strong>
                         <span>See the latest updates and proofs shared for your order.</span>
                     </div>
-                    <a class="button button-primary" href="{{ route('public.orders.proofing', ['orderId' => $orderId]) }}">View progress</a>
+                    <a class="button button-primary" href="{{ $proofingUrl }}">View progress</a>
                 </div>
                 @if ($deposit)
                     <div class="deposit-public-status" data-status="{{ strtolower($deposit['status']) }}">

@@ -13,6 +13,7 @@ class BuildOrderPricingService
 {
     public function __construct(
         private ResolvePackagePriceService $packagePriceResolver,
+        private CalculateOrderPostageService $postageCalculator,
     ) {}
 
     /**
@@ -21,6 +22,8 @@ class BuildOrderPricingService
      *     profile: OrderPricingProfile,
      *     currency: string,
      *     package_amount: string,
+     *     postage_amount: string,
+     *     delivery: array{amount: string, region: string|null, region_label: string, description: string},
      *     deposit_amount: string,
      *     total_amount: string
      * }
@@ -48,9 +51,11 @@ class BuildOrderPricingService
         }
 
         $packageCents = $this->toCents((string) $package['amount']);
+        $delivery = $this->postageCalculator->quote($order);
+        $postageCents = $this->toCents($delivery['amount']);
         $depositCents = $this->toCents((string) $profile->deposit_value);
 
-        if ($depositCents > $packageCents) {
+        if ($depositCents > ($packageCents + $postageCents)) {
             throw ValidationException::withMessages([
                 'pricing' => 'The deposit cannot exceed the total order price.',
             ]);
@@ -61,8 +66,10 @@ class BuildOrderPricingService
             'profile' => $profile,
             'currency' => $profile->currency,
             'package_amount' => $this->fromCents($packageCents),
+            'postage_amount' => $this->fromCents($postageCents),
+            'delivery' => $delivery,
             'deposit_amount' => $this->fromCents($depositCents),
-            'total_amount' => $this->fromCents($packageCents),
+            'total_amount' => $this->fromCents($packageCents + $postageCents),
         ];
     }
 
@@ -82,18 +89,20 @@ class BuildOrderPricingService
 
             $quote = $this->quote($lockedOrder->fresh('packageSides'));
             $package = $quote['package'];
-            $amount = $quote['total_amount'];
+            $packageAmount = $quote['package_amount'];
+            $postageAmount = $quote['postage_amount'];
+            $totalAmount = $quote['total_amount'];
 
             $snapshot = $lockedOrder->pricingSnapshot()->create([
                 'pricing_profile_id' => $quote['profile']->id,
                 'currency' => $quote['currency'],
-                'subtotal' => $amount,
-                'postage_amount' => '0.00',
+                'subtotal' => $packageAmount,
+                'postage_amount' => $postageAmount,
                 'discount_amount' => '0.00',
-                'total_amount' => $amount,
+                'total_amount' => $totalAmount,
                 'booking_amount' => $quote['deposit_amount'],
                 'paid_amount' => '0.00',
-                'outstanding_amount' => $amount,
+                'outstanding_amount' => $totalAmount,
                 'calculation_snapshot' => [
                     'package_type' => $package['package_type'],
                     'package_count' => $package['package_count'],
@@ -102,6 +111,8 @@ class BuildOrderPricingService
                     'catalog_item_code' => $package['catalog_item']->code,
                     'catalog_item_name' => $package['catalog_item']->name,
                     'package_amount' => $quote['package_amount'],
+                    'postage_amount' => $postageAmount,
+                    'postage_region' => $quote['delivery']['region'],
                     'deposit_profile_code' => $quote['profile']->code,
                     'deposit_amount' => $quote['deposit_amount'],
                 ],
@@ -114,8 +125,8 @@ class BuildOrderPricingService
                 'item_code' => $package['catalog_item']->code,
                 'description' => $package['catalog_item']->name,
                 'quantity' => 1,
-                'unit_price' => $amount,
-                'line_total' => $amount,
+                'unit_price' => $packageAmount,
+                'line_total' => $packageAmount,
                 'metadata' => [
                     'package_type' => $package['package_type'],
                     'package_count' => $package['package_count'],
@@ -123,6 +134,23 @@ class BuildOrderPricingService
                     'side_quantities' => $package['side_quantities'],
                 ],
             ]);
+
+            if ($this->toCents($postageAmount) > 0) {
+                OrderItem::query()->create([
+                    'order_id' => $lockedOrder->id,
+                    'item_type' => 'DELIVERY',
+                    'item_code' => 'POSTAGE_'.str_replace('/', '_', (string) $quote['delivery']['region']),
+                    'description' => $quote['delivery']['description'],
+                    'quantity' => 1,
+                    'unit_price' => $postageAmount,
+                    'line_total' => $postageAmount,
+                    'metadata' => [
+                        'region' => $quote['delivery']['region'],
+                        'package_type' => $package['package_type'],
+                        'card_quantity' => $package['card_quantity'],
+                    ],
+                ]);
+            }
 
             return $snapshot;
         }, 3);

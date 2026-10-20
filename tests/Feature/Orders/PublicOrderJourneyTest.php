@@ -7,6 +7,7 @@ use App\Services\Orders\GenerateOrderAccessLinkService;
 use Database\Seeders\KkkPackagePriceCatalogSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\URL;
 use Tests\TestCase;
 
 class PublicOrderJourneyTest extends TestCase
@@ -244,20 +245,50 @@ class PublicOrderJourneyTest extends TestCase
         ]);
         $order->update(['status' => 'PRINTING', 'booking_payment_status' => 'PAID']);
 
-        $this->post(route('public.orders.progress.lookup'), [
+        $progress = $this->post(route('public.orders.progress.lookup'), [
             'order_id' => $order->order_id,
         ])
             ->assertOk()
             ->assertSee('View progress')
-            ->assertSee('href="'.route('public.orders.proofing', ['orderId' => $order->order_id]).'"', false);
+            ->assertSee('signature=', false);
 
-        $this->get(route('public.orders.proofing', ['orderId' => $order->order_id]))
+        $this->assertSame(
+            1,
+            preg_match('/href="([^"]+)"[^>]*>\s*View progress/', $progress->getContent(), $proofingLink),
+        );
+        $proofingUrl = html_entity_decode($proofingLink[1], ENT_QUOTES);
+
+        $this->flushSession()
+            ->get($proofingUrl)
             ->assertOk()
             ->assertSee('Customer proofing')
             ->assertSee($order->order_id)
             ->assertSee('No proof has been shared yet');
 
+        $this->get(route('public.orders.proofing', ['orderId' => $order->order_id]))
+            ->assertNotFound();
+
         $this->get(route('orders.dashboard', ['orderId' => $order->order_id]))
+            ->assertNotFound();
+    }
+
+    public function test_expired_signed_proofing_link_is_rejected(): void
+    {
+        $order = app(CreateOrderService::class)->create([
+            'package_count' => 1,
+            'side' => 'LELAKI',
+            'customer_phone' => '0123456789',
+        ]);
+        $order->update(['status' => 'PRINTING', 'booking_payment_status' => 'PAID']);
+        $expiredUrl = URL::temporarySignedRoute(
+            'public.orders.proofing',
+            now()->subMinute(),
+            ['orderId' => $order->order_id],
+            false,
+        );
+
+        $this->flushSession()
+            ->get($expiredUrl)
             ->assertNotFound();
     }
 
@@ -281,7 +312,7 @@ class PublicOrderJourneyTest extends TestCase
         ])
             ->assertOk()
             ->assertSee('View progress')
-            ->assertSee('href="'.route('public.orders.proofing', ['orderId' => $order->order_id]).'"', false);
+            ->assertSee('signature=', false);
 
         $this->get(route('public.orders.proofing', ['orderId' => $order->order_id]))
             ->assertOk()
