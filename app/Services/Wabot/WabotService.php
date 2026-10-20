@@ -11,7 +11,7 @@ class WabotService
     public function sendText(string $channel, string $phone, string $message): array
     {
         $channelCredentials = config('services.wabot.channels.'.$channel, []);
-        $baseUrl = rtrim(trim((string) (($channelCredentials['base_url'] ?? null) ?: config('services.wabot.base_url'))), '/');
+        $baseUrl = rtrim(trim((string) config('services.wabot.base_url')), '/');
         $instanceId = trim((string) ($channelCredentials['instance_id'] ?? ''));
         $accessToken = trim((string) ($channelCredentials['access_token'] ?? ''));
 
@@ -22,14 +22,13 @@ class WabotService
             return $this->result(false, false, null, null, 'INVALID_CONFIGURATION_OR_PHONE');
         }
 
-        $url = $baseUrl.'/api/send.php?'.http_build_query([
-            'type' => 'text', 'instance_id' => $instanceId, 'access_token' => $accessToken,
-        ], '', '&', PHP_QUERY_RFC3986);
-
         try {
-            $response = Http::asForm()->connectTimeout(5)->timeout(15)->post($url, [
+            $response = Http::asJson()->connectTimeout(5)->timeout(15)->post($baseUrl.'/api/send', [
                 'number' => $phone,
+                'type' => 'text',
                 'message' => $message,
+                'instance_id' => $instanceId,
+                'access_token' => $accessToken,
             ]);
         } catch (ConnectionException) {
             return $this->result(false, true, null, null, 'CONNECTION_FAILED');
