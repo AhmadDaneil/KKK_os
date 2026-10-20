@@ -14,7 +14,7 @@ class CustomerCourierProofController extends Controller
         string $orderId,
         CustomerOrderSessionAccessService $sessionAccess,
     ): StreamedResponse {
-        $order = $sessionAccess->resolve($request, $orderId);
+        $order = $sessionAccess->resolveProofing($request, $orderId);
         $order->loadMissing(['packingJob', 'fulfilmentJob']);
         $packingJob = $order->packingJob;
         $fulfilmentJob = $order->fulfilmentJob;

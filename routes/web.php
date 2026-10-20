@@ -11,6 +11,7 @@ use App\Http\Controllers\CustomerBalanceReceiptController;
 use App\Http\Controllers\CustomerBillplzBalancePaymentController;
 use App\Http\Controllers\CustomerBookingPaymentController;
 use App\Http\Controllers\CustomerCourierProofController;
+use App\Http\Controllers\CustomerPackingProofController;
 use App\Http\Controllers\CustomerDashboardAccessController;
 use App\Http\Controllers\CustomerDashboardController;
 use App\Http\Controllers\CustomerDepositReceiptController;
@@ -232,6 +233,9 @@ Route::get('/order/{orderId}/progress-updates/{progressUpdate}/attachment', [Cus
     ->name('orders.progress-updates.attachment');
 Route::get('/order/{orderId}/courier-proof', [CustomerCourierProofController::class, 'show'])
     ->name('orders.courier-proof.show');
+Route::get('/order/{orderId}/packing-proof', [CustomerPackingProofController::class, 'show'])
+    ->middleware('throttle:60,1')
+    ->name('orders.packing-proof.show');
 
 Route::post(
     '/order/{orderId}/draft',
