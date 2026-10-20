@@ -19,7 +19,18 @@ return [
     ],
 
     'booking' => [
-        'whatsapp_numbers' => ['601165656968', '60177197596', '601135623239'],
+        'whatsapp_channels' => [
+            'kingkadkahwin' => ['name' => 'KingKadKahwin', 'number' => '601165656968'],
+            'destinasi-raja-sehari' => ['name' => 'Destinasi Raja Sehari', 'number' => '60177197596'],
+            'cetaking' => ['name' => 'Cetaking', 'number' => '60175863239'],
+            'royalicious' => ['name' => 'Royalicious', 'number' => '601135623239'],
+        ],
+        'reference_prefixes' => [
+            'kingkadkahwin' => 'KKK',
+            'destinasi-raja-sehari' => 'DRS',
+            'cetaking' => 'CK',
+            'royalicious' => 'RYC',
+        ],
     ],
 
     'photoshop' => [

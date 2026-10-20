@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Models\Order;
-use App\Services\Orders\AssignWabotNumberService;
 use App\Services\Orders\BuildCustomerProgressService;
 use App\Services\Orders\CustomerOrderSessionAccessService;
 use Illuminate\Http\RedirectResponse;
@@ -12,16 +11,21 @@ use Illuminate\View\View;
 
 class PublicOrderController extends Controller
 {
-    public function create(Request $request, AssignWabotNumberService $wabotNumbers): RedirectResponse
+    public function create(Request $request): RedirectResponse
     {
-        $number = $wabotNumbers->assign($request);
+        $channels = config('kingkadkahwin.booking.whatsapp_channels');
+        $channel = $channels[$request->route('brand', 'kingkadkahwin')] ?? null;
+        abort_if($channel === null, 404);
+
+        $number = $channel['number'];
+        $brand = $channel['name'];
         $orderId = strtoupper(trim((string) $request->query('order_id', '')));
         $isSupport = $request->query('purpose') === 'support';
         $message = $isSupport
             ? (preg_match('/^KKK-\d{6}-\d{4}$/', $orderId) === 1
-                ? "Hello KingKadKahwin, I need help with order {$orderId}."
-                : 'Hello KingKadKahwin, I would like help with a wedding card order.')
-            : 'Hello KingKadKahwin, I would like to book a wedding card package.';
+                ? "Hello {$brand}, I need help with order {$orderId}."
+                : "Hello {$brand}, I would like help with a wedding card order.")
+            : "Hello {$brand}, I would like to book a wedding card package.";
 
         return redirect()->away('https://wa.me/'.$number.'?text='.rawurlencode($message));
     }
@@ -104,6 +108,11 @@ class PublicOrderController extends Controller
                 'amount' => $balance->amount,
                 'reason' => $balance->metadata['rejection_reason'] ?? null,
                 'provider' => $balance->provider,
+                'checkout_url' => $sessionAccess->hasAccess($request, $order)
+                    && $balance->status === 'PENDING'
+                    && $balance->provider === 'BILLPLZ'
+                    ? ($balance->metadata['billplz']['checkout_url'] ?? null)
+                    : null,
             ] : null,
             'balanceAmount' => (string) ($order->pricingSnapshot?->outstanding_amount ?? config('kingkadkahwin.balance.amount', '0.00')),
             'balanceBillplzAmount' => $order->pricingSnapshot?->outstanding_amount,

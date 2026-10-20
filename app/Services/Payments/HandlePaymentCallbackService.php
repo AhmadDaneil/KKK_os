@@ -57,11 +57,20 @@ class HandlePaymentCallbackService
             ]);
 
             if ($verified['status'] === 'PAID') {
+                $transactionId = $verified['raw_payload']['transaction_id'] ?? null;
+                $metadata = $payment->metadata ?? [];
+                if (is_scalar($transactionId) && trim((string) $transactionId) !== '') {
+                    $metadata['billplz']['transaction_id'] = trim((string) $transactionId);
+                }
+
                 if ($payment->status !== 'PAID') {
                     $payment->update([
                         'status' => 'PAID',
                         'paid_at' => ! empty($verified['paid_at']) ? $verified['paid_at'] : now(),
+                        'metadata' => $metadata,
                     ]);
+                } elseif ($metadata !== ($payment->metadata ?? [])) {
+                    $payment->update(['metadata' => $metadata]);
                 }
 
                 if ($payment->payment_type === 'BALANCE') {

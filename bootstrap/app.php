@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Middleware\AuthenticateBookingIntent;
 use App\Http\Middleware\AuthenticateWabot;
 use App\Http\Middleware\EnsureActiveStaff;
 use App\Http\Middleware\EnsureStaffRole;
@@ -21,6 +22,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'active.staff' => EnsureActiveStaff::class,
             'staff.role' => EnsureStaffRole::class,
             'wabot.auth' => AuthenticateWabot::class,
+            'booking-intent.auth' => AuthenticateBookingIntent::class,
         ]);
 
         $middleware->redirectGuestsTo(

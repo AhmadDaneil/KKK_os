@@ -6,6 +6,7 @@ use App\Services\Payments\BillplzSignatureVerifier;
 use App\Services\Payments\HandlePaymentCallbackService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use RuntimeException;
 use Throwable;
 
@@ -20,6 +21,10 @@ class BillplzWebhookController extends Controller
             $verified = $verifier->verifyCallback($request->all());
             $payment = $handler->handle($verified);
         } catch (RuntimeException $exception) {
+            Log::warning('Rejected invalid Billplz callback.', [
+                'reason' => class_basename($exception),
+            ]);
+
             return response()->json([
                 'message' => 'The Billplz callback is invalid or does not match a payment record.',
                 'code' => 'INVALID_BILLPLZ_CALLBACK',

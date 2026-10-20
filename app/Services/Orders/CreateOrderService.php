@@ -19,6 +19,9 @@ class CreateOrderService
                 'order_id' => $this->orderIdGenerator->generate(),
                 'source' => $data['source'] ?? 'DIRECT',
                 'source_reference' => $data['source_reference'] ?? null,
+                'wabot_channel' => $data['wabot_channel'] ?? null,
+                'wabot_idempotency_key' => $data['wabot_idempotency_key'] ?? null,
+                'wabot_package_code' => $data['wabot_package_code'] ?? null,
                 'package_count' => $data['package_count'],
                 'package_type' => $data['package_type'] ?? null,
                 'package_format' => (int) $data['package_count'] === 2

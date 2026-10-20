@@ -18,9 +18,13 @@ class CreateBillplzBookingPaymentService
     ) {}
 
     /** @return array{payment: PaymentTransaction, payment_url: string} */
-    public function create(Order $order): array
+    public function create(Order $order, bool $throwGatewayFailure = false): array
     {
         if (! config('services.billplz.enabled')) {
+            if ($throwGatewayFailure) {
+                throw new BillplzPaymentException('Billplz is not enabled.', 'disabled');
+            }
+
             throw ValidationException::withMessages([
                 'payment' => 'Online payments are not enabled.',
             ]);
@@ -100,10 +104,11 @@ class CreateBillplzBookingPaymentService
             DB::transaction(function () use ($payment, $exception): void {
                 $locked = PaymentTransaction::query()->whereKey($payment->id)->lockForUpdate()->firstOrFail();
                 $metadata = $locked->metadata ?? [];
-                $metadata['billplz']['checkout_status'] = 'FAILED';
-                $locked->update(['status' => 'FAILED', 'metadata' => $metadata]);
+                $uncertain = $exception->reason === 'connection_failed';
+                $metadata['billplz']['checkout_status'] = $uncertain ? 'UNKNOWN' : 'FAILED';
+                $locked->update(['status' => $uncertain ? 'PENDING' : 'FAILED', 'metadata' => $metadata]);
                 $locked->events()->create([
-                    'event_type' => 'BILLPLZ_BILL_CREATION_FAILED',
+                    'event_type' => $uncertain ? 'BILLPLZ_BILL_CREATION_UNCERTAIN' : 'BILLPLZ_BILL_CREATION_FAILED',
                     'payload' => [
                         'reason' => $exception->reason,
                         'provider_status' => $exception->providerStatus,
@@ -118,6 +123,10 @@ class CreateBillplzBookingPaymentService
                 'reason' => $exception->reason,
                 'provider_status' => $exception->providerStatus,
             ]);
+
+            if ($throwGatewayFailure) {
+                throw $exception;
+            }
 
             throw ValidationException::withMessages([
                 'payment' => 'The payment could not be started. Please try again.',
