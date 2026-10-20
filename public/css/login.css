@@ -30,6 +30,40 @@ button, input { font: inherit; }
     --story: #362c1c;
     --story-end: #66512c;
 }
+.login-page--staff {
+    --accent: #765315;
+    --accent-hover: #5e410e;
+    --tint: #f8edcf;
+    --story: #362c1c;
+    --story-end: #66512c;
+    --highlight: #e0b95c;
+    color: #2f291d;
+    background: radial-gradient(ellipse at 8% 12%, #e7dac0 0, transparent 48%), radial-gradient(ellipse at 95% 90%, #ebe3d1 0, transparent 45%), #f4efe3;
+}
+.login-page--staff .login-shell { border-color: #d8cba9; background: #fffdf8; }
+.login-page--staff .login-field input { border-color: #d1c4a3; color: #2f291d; background: #fffdf8; }
+.login-page--staff .login-heading p, .login-page--staff .login-help { color: #645942; }
+.login-page--staff .login-field input::placeholder { color: #766b57; }
+.login-page--staff .password-visibility-toggle { color: #645942; }
+.login-page--staff .login-footer { color: #645942; }
+html[data-operations-theme="dark"] .login-page--staff {
+    --accent: #e0b95c;
+    --accent-hover: #f0ce7d;
+    --tint: #48391e;
+    --story: #302718;
+    --story-end: #58411d;
+    color: #f5efdf;
+    background: radial-gradient(ellipse at 8% 12%, #342b1d 0, transparent 48%), #1e1a14;
+}
+html[data-operations-theme="dark"] .login-page--staff .login-shell { border-color: #625439; background: #2d271e; }
+html[data-operations-theme="dark"] .login-page--staff :is(.login-heading p,.login-help,.login-footer) { color: #d3c4a6; }
+html[data-operations-theme="dark"] .login-page--staff .login-field input { border-color: #887650; color: #f5efdf; background: #211c15; }
+html[data-operations-theme="dark"] .login-page--staff .login-field input::placeholder { color: #b9a986; }
+html[data-operations-theme="dark"] .login-page--staff .login-field input:focus { border-color: #e0b95c; background: #211c15; }
+html[data-operations-theme="dark"] .login-page--staff .password-visibility-toggle { color: #d3c4a6; }
+html[data-operations-theme="dark"] .login-page--staff .login-submit { color: #261d10; }
+html[data-operations-theme="dark"] .login-page--staff .login-alert { border-color: #a45c55; color: #ffd7d2; background: #552c29; }
+html[data-operations-theme="dark"] .login-page--staff .login-alert--success { border-color: #478865; color: #c9efda; background: #234231; }
 .login-shell {
     display: grid;
     grid-template-columns: 1fr 1fr;

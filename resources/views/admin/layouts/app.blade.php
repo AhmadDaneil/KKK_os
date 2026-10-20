@@ -6,6 +6,8 @@
     <title>@yield('title', 'Admin Dashboard') — KKK OS</title>
     <link rel="stylesheet" href="{{ asset('css/admin.css') }}?v={{ filemtime(public_path('css/admin.css')) }}">
     <link rel="stylesheet" href="{{ asset('css/dashboard-compact.css') }}?v={{ filemtime(public_path('css/dashboard-compact.css')) }}">
+    <link rel="stylesheet" href="{{ asset('css/operations-theme.css') }}?v={{ filemtime(public_path('css/operations-theme.css')) }}">
+    @include('staff.partials.theme-init')
 </head>
 <body>
 <div class="admin-shell">
@@ -38,6 +40,7 @@
         <header class="admin-topbar">
             <div><p>KingKadKahwin</p><h1>@yield('heading', 'Admin Dashboard')</h1></div>
             <div class="admin-topbar-actions">
+                @include('staff.partials.theme-toggle')
                 <form class="js-logout-form admin-logout-profile" method="POST" action="{{ route('admin.logout') }}">@csrf<button type="submit"><span class="admin-topbar-avatar" aria-hidden="true"></span><span>{{ __('ui.logout') }}</span></button></form>
             </div>
         </header>
