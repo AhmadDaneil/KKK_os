@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Staff;
 
 use App\Http\Controllers\Controller;
 use App\Models\Invoice;
+use App\Services\Invoices\BuildInvoiceLineItemsService;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Response;
 use Illuminate\View\View;
@@ -32,6 +33,7 @@ class StaffInvoiceController extends Controller
     /** @return array<string, mixed> */
     private function invoiceViewData(Invoice $invoice): array
     {
+        $lineItems = app(BuildInvoiceLineItemsService::class);
         $invoice->loadMissing([
             'order.items',
             'order.packageSides.design',
@@ -71,6 +73,8 @@ class StaffInvoiceController extends Controller
                 ->implode(', '),
             'terms' => $this->terms(),
             'orderRoute' => $portalPrefix.'orders.show',
+            'invoiceLines' => $lineItems->build($invoice->order, $invoice),
+            'deliveryLabel' => $lineItems->deliveryLabel($invoice->order),
         ];
     }
 

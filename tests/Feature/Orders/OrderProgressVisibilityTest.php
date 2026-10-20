@@ -603,20 +603,23 @@ class OrderProgressVisibilityTest extends TestCase
         ]);
 
         $session = $this->customerSession($order);
-        $this->withSession($session)
+        $proofing = $this->withSession($session)
             ->get(route('public.orders.proofing', ['orderId' => $order->order_id]))
             ->assertOk()
             ->assertSee('Production Proof')
-            ->assertSee('View Production Proof · Groom · File 1');
+            ->assertSee('View Production Proof · Groom · File 1')
+            ->assertSee('signature=', false);
 
-        $this->withSession($session)
-            ->get(route('public.orders.production-proof', [
-                'orderId' => $order->order_id,
-                'printJobId' => $printJob->id,
-                'file' => 0,
-            ]))
+        $this->assertSame(
+            1,
+            preg_match('/href="([^"]+)"[^>]*>\s*View Production Proof/', $proofing->getContent(), $productionProofLink),
+        );
+        $productionProofUrl = html_entity_decode($productionProofLink[1], ENT_QUOTES);
+
+        $this->flushSession()
+            ->get($productionProofUrl)
             ->assertOk()
-            ->assertHeader('Cache-Control', 'private, no-store, max-age=0');
+            ->assertHeader('Cache-Control', 'max-age=0, no-store, private');
 
         $printJob->update([
             'progress_files' => array_merge($printJob->progress_files, [[
@@ -641,11 +644,13 @@ class OrderProgressVisibilityTest extends TestCase
             ]))
             ->assertNotFound();
 
-        $this->get(route('public.orders.production-proof', [
-            'orderId' => $order->order_id,
-            'printJobId' => $printJob->id,
-            'file' => 0,
-        ]))->assertNotFound();
+        $this->flushSession()
+            ->get(route('public.orders.production-proof', [
+                'orderId' => $order->order_id,
+                'printJobId' => $printJob->id,
+                'file' => 0,
+            ]))
+            ->assertNotFound();
     }
 
     public function test_two_package_customer_sees_both_production_proofs_and_cannot_cross_order_scope(): void
