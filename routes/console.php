@@ -23,3 +23,9 @@ Schedule::command('backup:files --isolated')
     ->withoutOverlapping(360)
     ->onOneServer()
     ->when(static fn (): bool => (bool) config('backup.enabled'));
+
+Schedule::command('payments:reconcile-pending-billplz')
+    ->everyMinute()
+    ->withoutOverlapping(2)
+    ->onOneServer()
+    ->when(static fn (): bool => (bool) config('services.billplz.enabled'));
