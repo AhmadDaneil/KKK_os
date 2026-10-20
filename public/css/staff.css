@@ -1059,6 +1059,18 @@ a.staff-pagination-link:hover {
     color: var(--staff-muted);
 }
 
+.staff-contact-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 8px;
+}
+
+.staff-contact-actions form {
+    margin: 0;
+}
+
 .staff-contact-row strong {
     text-align: right;
 }

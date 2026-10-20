@@ -199,6 +199,8 @@ Route::middleware(['auth:admin', 'active.staff', 'staff.role:ADMIN'])
             ->name('print-jobs.mark-printed');
         Route::get('/print-jobs/{printJob}/progress-files/{file}', [StaffPrintingWorkflowController::class, 'showProgressFile'])
             ->name('print-jobs.progress-files.show');
+        Route::post('/print-jobs/{printJob}/progress-files/{file}/visibility', [StaffPrintingWorkflowController::class, 'setProgressFileVisibility'])
+            ->name('print-jobs.progress-files.visibility');
 
         Route::post('/packing-jobs/{packingJob}/assign', [StaffJobAssignmentController::class, 'assignPacking'])
             ->name('packing-jobs.assign');
@@ -464,6 +466,11 @@ Route::middleware(['auth:staff', 'active.staff'])
                 [StaffPrintingWorkflowController::class, 'markPrinted']
             )->name('print-jobs.mark-printed');
         });
+
+        Route::post(
+            '/print-jobs/{printJob}/progress-files/{file}/visibility',
+            [StaffPrintingWorkflowController::class, 'setProgressFileVisibility']
+        )->name('print-jobs.progress-files.visibility');
 
         /*
             |--------------------------------------------------------------------------
