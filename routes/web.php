@@ -58,6 +58,9 @@ Route::get('/kalendar/jakim', [PublicCalendarController::class, 'convert'])
 
 Route::get('/tempah', [PublicOrderController::class, 'create'])
     ->name('public.orders.create');
+Route::get('/tempah/{brand}', [PublicOrderController::class, 'create'])
+    ->whereIn('brand', ['kingkadkahwin', 'destinasi-raja-sehari', 'cetaking', 'royalicious'])
+    ->name('public.orders.create.brand');
 
 Route::get('/pembayaran/booking/{reference}', [BookingPaymentReturnController::class, 'show'])
     ->middleware('throttle:30,1')

@@ -3,6 +3,7 @@
 namespace Tests\Feature\Api;
 
 use App\Models\Order;
+use App\Services\Orders\CreateOrderService;
 use App\Services\Orders\GenerateOrderAccessLinkService;
 use Database\Seeders\KkkPackagePriceCatalogSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -30,6 +31,71 @@ class WabotOrderApiTest extends TestCase
     public function test_wabot_requires_valid_bearer_token(): void
     {
         $this->postJson(route('api.wabot.orders.store'), [])->assertUnauthorized();
+        $this->postJson(route('api.wabot.orders.balance-payment.store', 'KKK-261019-0001'))
+            ->assertUnauthorized();
+    }
+
+    public function test_wabot_cannot_start_balance_payment_before_artwork_approval(): void
+    {
+        $order = $this->paidWabotOrder('DESIGN_READY');
+        Http::preventStrayRequests();
+
+        $this->postJson(route('api.wabot.orders.balance-payment.store', $order->order_id), [], [
+            'Authorization' => 'Bearer wabot-test-token',
+        ])->assertUnprocessable()->assertJsonValidationErrors('billplz');
+
+        Http::assertNothingSent();
+        $this->assertDatabaseMissing('payment_transactions', [
+            'order_id' => $order->id,
+            'payment_type' => 'BALANCE',
+        ]);
+    }
+
+    public function test_wabot_receives_one_reusable_billplz_balance_link_after_artwork_approval(): void
+    {
+        $order = $this->paidWabotOrder('DESIGN_APPROVED');
+        Http::preventStrayRequests();
+        Http::fake(['www.billplz-sandbox.com/*' => Http::response([
+            'id' => 'wabot-balance', 'collection_id' => 'sandbox-collection', 'amount' => 25000,
+            'url' => 'https://www.billplz-sandbox.com/bills/wabot-balance',
+        ])]);
+        $headers = ['Authorization' => 'Bearer wabot-test-token'];
+        $url = route('api.wabot.orders.balance-payment.store', $order->order_id);
+
+        $this->getJson(route('api.wabot.orders.show', $order->order_id), $headers)
+            ->assertOk()
+            ->assertJsonPath('balance.status', 'DUE')
+            ->assertJsonPath('balance.amount', '250.00')
+            ->assertJsonPath('balance.checkout_url', null);
+        $this->postJson($url, [], $headers)
+            ->assertOk()
+            ->assertJsonPath('balance.status', 'PENDING')
+            ->assertJsonPath('balance.checkout_url', 'https://www.billplz-sandbox.com/bills/wabot-balance');
+        $this->postJson($url, [], $headers)
+            ->assertOk()
+            ->assertJsonPath('balance.checkout_url', 'https://www.billplz-sandbox.com/bills/wabot-balance');
+        $this->getJson(route('api.wabot.orders.show', $order->order_id), $headers)
+            ->assertOk()
+            ->assertJsonPath('balance.checkout_url', 'https://www.billplz-sandbox.com/bills/wabot-balance');
+
+        $this->postJson(route('api.billplz-sandbox.callback'), $this->signedPayload([
+            'id' => 'wabot-balance', 'collection_id' => 'sandbox-collection', 'paid' => 'true',
+            'state' => 'paid', 'amount' => '25000', 'paid_amount' => '25000',
+            'paid_at' => '2026-10-19 12:00:00 +0800',
+        ]))->assertOk();
+        $this->getJson(route('api.wabot.orders.show', $order->order_id), $headers)
+            ->assertOk()
+            ->assertJsonPath('balance.status', 'PAID')
+            ->assertJsonPath('balance.checkout_url', null);
+
+        Http::assertSentCount(1);
+        $this->assertSame('PAID', $order->fresh()->status);
+        $this->assertDatabaseHas('payment_transactions', [
+            'order_id' => $order->id,
+            'payment_type' => 'BALANCE',
+            'provider' => 'BILLPLZ',
+            'amount' => '250.00',
+        ]);
     }
 
     public function test_wabot_creates_one_order_and_reuses_checkout_for_same_reference(): void
@@ -166,7 +232,7 @@ class WabotOrderApiTest extends TestCase
         $this->postJson(route('api.wabot.orders.store'), $payload, $headers)->assertCreated();
         $this->postJson(route('api.wabot.orders.store'), [
             ...$payload, 'customer_phone' => '0198765432',
-        ], $headers)->assertUnprocessable()->assertJsonValidationErrors('external_reference');
+        ], $headers)->assertStatus(409)->assertJsonPath('code', 'BOOKING_CONFLICT');
         $this->assertDatabaseCount('orders', 1);
         $this->assertDatabaseCount('payment_transactions', 1);
     }
@@ -249,5 +315,40 @@ class WabotOrderApiTest extends TestCase
         $payload['x_signature'] = hash_hmac('sha256', $source, 'sandbox-signature');
 
         return $payload;
+    }
+
+    private function paidWabotOrder(string $status): Order
+    {
+        $order = app(CreateOrderService::class)->create([
+            'source' => 'WABOT',
+            'source_reference' => 'balance-'.$status,
+            'package_count' => 1,
+            'side' => 'LELAKI',
+            'package_type' => 'PUTERI_MANIS',
+            'customer_name' => 'Balance Customer',
+            'customer_phone' => '0123456789',
+        ]);
+        $order->update(['status' => $status, 'booking_payment_status' => 'PAID']);
+        $order->pricingSnapshot()->create([
+            'currency' => 'MYR',
+            'subtotal' => '300.00',
+            'postage_amount' => '0.00',
+            'discount_amount' => '0.00',
+            'total_amount' => '300.00',
+            'booking_amount' => '50.00',
+            'paid_amount' => '50.00',
+            'outstanding_amount' => '250.00',
+            'calculation_snapshot' => [],
+        ]);
+        $order->payments()->create([
+            'payment_type' => 'BOOKING_DEPOSIT',
+            'provider' => 'BILLPLZ',
+            'amount' => '50.00',
+            'currency' => 'MYR',
+            'status' => 'PAID',
+            'paid_at' => now(),
+        ]);
+
+        return $order->fresh();
     }
 }

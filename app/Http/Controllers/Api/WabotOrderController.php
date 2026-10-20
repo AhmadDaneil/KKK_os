@@ -6,17 +6,25 @@ use App\Http\Controllers\Controller;
 use App\Models\Order;
 use App\Models\PaymentTransaction;
 use App\Services\Orders\CreateWabotDraftOrderService;
+use App\Services\Orders\WabotBookingConflictException;
+use App\Services\Payments\BillplzPaymentException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Crypt;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\URL;
+use Illuminate\Validation\ValidationException;
 
 class WabotOrderController extends Controller
 {
     public function store(Request $request, CreateWabotDraftOrderService $orders): JsonResponse
     {
-        $validated = $request->validate([
+        $canonical = $request->routeIs('api.booking-intents.store');
+        $request->merge(['idempotency_key' => $request->header('Idempotency-Key')]);
+        $rules = [
             'external_reference' => ['required', 'string', 'max:128'],
+            'idempotency_key' => ['nullable', 'string', 'max:160', 'regex:/^booking-[A-Za-z0-9._:-]{1,128}$/'],
+            'brand' => ['nullable', 'string', 'in:kingkadkahwin,destinasi-raja-sehari,cetaking,royalicious'],
             'package_count' => ['required', 'integer', 'in:1,2'],
             'side' => ['nullable', 'string', 'in:LELAKI,PEREMPUAN', 'required_if:package_count,1'],
             'package_type' => ['required', 'string', 'in:PUTERI_MANIS,JELATA'],
@@ -25,11 +33,86 @@ class WabotOrderController extends Controller
             'customer_name' => ['required', 'string', 'max:255'],
             'customer_email' => ['nullable', 'email', 'max:255'],
             'customer_phone' => ['required', 'string', 'max:32'],
-        ]);
+        ];
 
-        $result = $orders->create($validated);
+        if ($canonical) {
+            $rules['external_reference'] = ['nullable', 'string', 'max:128'];
+            $rules['conversation_id'] = ['required', 'string', 'max:128', 'regex:/^[A-Za-z0-9._:-]+$/'];
+            $rules['idempotency_key'][0] = 'required';
+            $rules['business_unit'] = ['required', 'string', 'in:KKK,DRS,CK,RYC'];
+            $rules['phone'] = ['required', 'string', 'max:32'];
+            $rules['email'] = ['nullable', 'email', 'max:255'];
+            $rules['package_code'] = ['nullable', 'string', 'max:64'];
+            $rules['package_type'][0] = 'nullable';
+            $rules['side'] = ['nullable', 'string', 'in:LELAKI,PEREMPUAN'];
+            $rules['customer_phone'][0] = 'nullable';
+        }
+
+        try {
+            $validated = $request->validate($rules);
+        } catch (ValidationException $exception) {
+            Log::warning('Rejected invalid Wabot booking request.', [
+                'fields' => array_keys($exception->errors()),
+            ]);
+
+            throw $exception;
+        }
+
+        if ($canonical) {
+            $channels = ['KKK' => 'kingkadkahwin', 'DRS' => 'destinasi-raja-sehari', 'CK' => 'cetaking', 'RYC' => 'royalicious'];
+            $validated['external_reference'] = $validated['conversation_id'];
+            $validated['brand'] = $channels[$validated['business_unit']];
+            $validated['customer_phone'] = $validated['phone'];
+            $validated['customer_email'] = $validated['email'] ?? null;
+            $validated['wabot_package_code'] = $validated['package_code'] ?? null;
+            unset($validated['conversation_id'], $validated['business_unit'], $validated['phone'], $validated['email'], $validated['package_code']);
+        }
+
+        if ($canonical && $validated['idempotency_key'] !== 'booking-'.$validated['external_reference']) {
+            Log::warning('Rejected mismatched booking idempotency key.');
+
+            throw ValidationException::withMessages([
+                'idempotency_key' => 'The Idempotency-Key must match the conversation reference.',
+            ]);
+        }
+
+        $validated['wabot_idempotency_key'] = $validated['idempotency_key'] ?? null;
+        $validated['wabot_channel'] = $validated['brand'] ?? 'kingkadkahwin';
+        unset($validated['idempotency_key'], $validated['brand']);
+
+        try {
+            $result = $orders->create($validated);
+        } catch (WabotBookingConflictException $exception) {
+            Log::warning('Wabot booking request conflicted with an existing order.', [
+                'external_reference' => $validated['external_reference'],
+            ]);
+
+            return response()->json(['message' => $exception->getMessage(), 'code' => 'BOOKING_CONFLICT'], 409);
+        } catch (BillplzPaymentException $exception) {
+            return response()->json([
+                'message' => 'Billplz is unavailable. Please retry later or contact support.',
+                'code' => 'BILLPLZ_UNAVAILABLE',
+            ], 502);
+        }
         $payment = $this->bookingPayment($result['order']);
         abort_if($payment === null, 404);
+
+        if ($canonical) {
+            $response = [
+                'success' => true,
+                'draft_order_id' => $result['order']->order_id,
+                'booking_amount' => (int) round(((float) $payment->amount) * 100),
+                'currency' => $payment->currency,
+                'payment_status' => $payment->status,
+                'payment_url' => $payment->status === 'PAID' ? null : $result['payment_url'],
+            ];
+
+            if ($payment->status === 'PAID') {
+                $response = array_merge($response, $this->paidOrderDetails($result['order']->fresh(), $payment));
+            }
+
+            return response()->json($response, $result['reused'] ? 200 : 201);
+        }
 
         $response = [
             'order_id' => $result['order']->order_id,
@@ -70,17 +153,20 @@ class WabotOrderController extends Controller
 
         if ($payment?->status === 'PAID') {
             $response = array_merge($response, $this->paidOrderDetails($order, $payment));
+            $response['balance'] = $this->balancePaymentDetails($order);
         }
 
         return response()->json($response);
     }
 
-    /** @return array{customer_reference: string|null, invoice_number: string|null, dashboard_url: string|null, receipt_url: string} */
+    /** @return array{order_reference: string|null, payment_status: string, customer_reference: string|null, invoice_number: string|null, dashboard_url: string|null, receipt_url: string} */
     private function paidOrderDetails(Order $order, PaymentTransaction $payment): array
     {
         $encryptedUrl = $payment->metadata['customer_access']['dashboard_url_encrypted'] ?? null;
 
         return [
+            'order_reference' => $order->customer_reference,
+            'payment_status' => 'PAID',
             'customer_reference' => $order->customer_reference,
             'invoice_number' => $order->invoice()->value('invoice_number'),
             'dashboard_url' => is_string($encryptedUrl) ? Crypt::decryptString($encryptedUrl) : null,
@@ -103,5 +189,37 @@ class WabotOrderController extends Controller
                 ->where('payment_type', 'BOOKING_DEPOSIT')
                 ->latest('id')
                 ->first();
+    }
+
+    /** @return array{amount: string, currency: string, status: string, checkout_url: string|null, payment_options: array<int, string>}|null */
+    private function balancePaymentDetails(Order $order): ?array
+    {
+        $payment = $order->payments()
+            ->where('payment_type', 'BALANCE')
+            ->where('status', 'PAID')
+            ->latest('id')
+            ->first()
+            ?? $order->payments()
+                ->where('payment_type', 'BALANCE')
+                ->latest('id')
+                ->first();
+
+        if ($payment === null && $order->status !== 'DESIGN_APPROVED') {
+            return null;
+        }
+
+        $snapshot = $order->pricingSnapshot()->first();
+
+        return [
+            'amount' => $payment?->status === 'PAID'
+                ? $payment->amount
+                : (string) ($snapshot?->outstanding_amount ?? $payment?->amount ?? '0.00'),
+            'currency' => $payment?->currency ?? 'MYR',
+            'status' => $payment?->status ?? 'DUE',
+            'checkout_url' => $payment?->status === 'PENDING' && $payment->provider === 'BILLPLZ'
+                ? ($payment->metadata['billplz']['checkout_url'] ?? null)
+                : null,
+            'payment_options' => ['ONLINE_BANKING', 'DUITNOW_QR'],
+        ];
     }
 }

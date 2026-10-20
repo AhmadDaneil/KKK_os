@@ -14,7 +14,9 @@ class GenerateCustomerReferenceService
             return (string) $order->customer_reference;
         }
 
-        $prefix = strtoupper((string) config('invoice.business_unit_prefix', 'KKK'));
+        $prefix = $order->source === 'WABOT'
+            ? (string) config('kingkadkahwin.booking.reference_prefixes.'.($order->wabot_channel ?? 'kingkadkahwin'), '')
+            : strtoupper((string) config('invoice.business_unit_prefix', 'KKK'));
         if (! preg_match('/^[A-Z]{2,3}$/', $prefix)) {
             throw new RuntimeException('The customer reference prefix is invalid.');
         }
@@ -25,7 +27,7 @@ class GenerateCustomerReferenceService
                 return (string) $lockedOrder->customer_reference;
             }
 
-            $date = now()->toDateString();
+            $date = now(config('app.display_timezone'))->toDateString();
             DB::table('customer_reference_sequences')->insertOrIgnore([
                 'business_unit' => $prefix,
                 'sequence_date' => $date,
@@ -49,7 +51,7 @@ class GenerateCustomerReferenceService
                 ->where('id', $sequence->id)
                 ->update(['last_number' => $number, 'updated_at' => now()]);
 
-            $reference = $prefix.now()->format('ymd').'-'.str_pad((string) $number, 3, '0', STR_PAD_LEFT);
+            $reference = $prefix.now(config('app.display_timezone'))->format('ymd').'-'.str_pad((string) $number, 3, '0', STR_PAD_LEFT);
             $lockedOrder->update(['customer_reference' => $reference]);
 
             return $reference;

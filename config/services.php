@@ -49,6 +49,7 @@ return [
 
     'wabot' => [
         'token' => env('WABOT_API_TOKEN'),
+        'inbound_api_key' => env('WABOT_INBOUND_API_KEY'),
     ],
 
 ];

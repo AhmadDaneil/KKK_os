@@ -96,10 +96,14 @@
                         @if (($balance['status'] ?? null) === 'PENDING')
                             @if (($balance['provider'] ?? null) === 'BILLPLZ')
                                 <div class="balance-status-message"><strong>Awaiting payment</strong><span>Complete your secure payment to continue your order.</span></div>
-                                <form method="POST" action="{{ route('orders.balance-payment.billplz.store', ['orderId' => $orderId]) }}">
-                                    @csrf
-                                    <button class="button button-primary" type="submit">Continue to Payment</button>
-                                </form>
+                                @if (! empty($balance['checkout_url']))
+                                    <a class="button button-primary" href="{{ $balance['checkout_url'] }}">Continue to Billplz Payment</a>
+                                @else
+                                    <form method="POST" action="{{ route('orders.balance-payment.billplz.store', ['orderId' => $orderId]) }}">
+                                        @csrf
+                                        <button class="button button-primary" type="submit">Continue to Payment</button>
+                                    </form>
+                                @endif
                                 @error('billplz')<p class="field-error" role="alert">{{ $message }}</p>@enderror
                             @else
                                 <div class="balance-status-message"><strong>Receipt under review</strong><span>Our operations team will confirm payment before printing begins.</span></div>
