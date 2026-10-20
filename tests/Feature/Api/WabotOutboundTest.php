@@ -21,7 +21,7 @@ class WabotOutboundTest extends TestCase
     {
         parent::setUp();
         Http::preventStrayRequests();
-        config()->set('services.wabot.base_url', 'https://dash.wabot.my');
+        config()->set('services.wabot.base_url', 'https://app.wabot.my');
         config()->set('services.wabot.channels.kingkadkahwin', [
             'instance_id' => 'kkk-instance', 'access_token' => 'kkk-secret',
         ]);
@@ -29,7 +29,7 @@ class WabotOutboundTest extends TestCase
 
     public function test_booking_confirmation_sends_once_and_records_provider_response(): void
     {
-        Http::fake(['dash.wabot.my/*' => Http::response('queued', 200)]);
+        Http::fake(['app.wabot.my/*' => Http::response('queued', 200)]);
         $log = $this->paidMessageLog();
 
         app(SendWabotBookingConfirmation::class, ['messageLogId' => $log->id])->handle(app(WabotService::class));
@@ -37,9 +37,12 @@ class WabotOutboundTest extends TestCase
 
         Http::assertSentCount(1);
         Http::assertSent(function ($request) {
-            return str_contains($request->url(), 'instance_id=kkk-instance')
-                && str_contains($request->url(), 'access_token=kkk-secret')
+            return $request->url() === 'https://app.wabot.my/api/send'
+                && str_contains($request->header('Content-Type')[0] ?? '', 'application/json')
                 && $request['number'] === '60123456789'
+                && $request['type'] === 'text'
+                && $request['instance_id'] === 'kkk-instance'
+                && $request['access_token'] === 'kkk-secret'
                 && str_contains($request['message'], 'KKK261020-001')
                 && str_contains($request['message'], 'RM50.00')
                 && str_contains($request['message'], '/access/test-token');
@@ -52,7 +55,7 @@ class WabotOutboundTest extends TestCase
 
     public function test_authentication_failure_is_logged_without_retry(): void
     {
-        Http::fake(['dash.wabot.my/*' => Http::response('invalid token: kkk-secret', 401)]);
+        Http::fake(['app.wabot.my/*' => Http::response('invalid token: kkk-secret', 401)]);
         $log = $this->paidMessageLog();
 
         app(SendWabotBookingConfirmation::class, ['messageLogId' => $log->id])->handle(app(WabotService::class));
@@ -65,7 +68,7 @@ class WabotOutboundTest extends TestCase
 
     public function test_server_error_is_retryable(): void
     {
-        Http::fake(['dash.wabot.my/*' => Http::response('temporary error', 503)]);
+        Http::fake(['app.wabot.my/*' => Http::response('temporary error', 503)]);
         $log = $this->paidMessageLog();
 
         $this->expectException(RuntimeException::class);
@@ -78,22 +81,21 @@ class WabotOutboundTest extends TestCase
         }
     }
 
-    public function test_each_brand_uses_its_own_instance_and_subdomain(): void
+    public function test_each_brand_uses_its_own_instance_on_the_shared_api_endpoint(): void
     {
         config()->set('services.wabot.channels.destinasi-raja-sehari', [
-            'base_url' => 'https://drs.wabot.my',
             'instance_id' => 'drs-instance',
             'access_token' => 'drs-secret',
         ]);
-        Http::fake(['drs.wabot.my/*' => Http::response('accepted', 200)]);
+        Http::fake(['app.wabot.my/*' => Http::response('accepted', 200)]);
 
         $result = app(WabotService::class)->sendText('destinasi-raja-sehari', '60123456789', 'Test message');
 
         $this->assertTrue($result['success']);
         Http::assertSent(function ($request) {
-            return str_starts_with($request->url(), 'https://drs.wabot.my/api/send.php?')
-                && str_contains($request->url(), 'instance_id=drs-instance')
-                && ! str_contains($request->url(), 'kkk-instance');
+            return $request->url() === 'https://app.wabot.my/api/send'
+                && $request['instance_id'] === 'drs-instance'
+                && $request['access_token'] === 'drs-secret';
         });
     }
 

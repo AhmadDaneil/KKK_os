@@ -50,12 +50,12 @@ return [
     'wabot' => [
         'token' => env('WABOT_API_TOKEN'),
         'inbound_api_key' => env('WABOT_INBOUND_API_KEY'),
-        'base_url' => env('WABOT_BASE_URL', 'https://dash.wabot.my'),
+        'base_url' => env('WABOT_BASE_URL', 'https://app.wabot.my'),
         'channels' => [
-            'kingkadkahwin' => ['base_url' => env('WABOT_KKK_BASE_URL'), 'instance_id' => env('WABOT_KKK_INSTANCE_ID'), 'access_token' => env('WABOT_KKK_ACCESS_TOKEN')],
-            'destinasi-raja-sehari' => ['base_url' => env('WABOT_DRS_BASE_URL'), 'instance_id' => env('WABOT_DRS_INSTANCE_ID'), 'access_token' => env('WABOT_DRS_ACCESS_TOKEN')],
-            'cetaking' => ['base_url' => env('WABOT_CK_BASE_URL'), 'instance_id' => env('WABOT_CK_INSTANCE_ID'), 'access_token' => env('WABOT_CK_ACCESS_TOKEN')],
-            'royalicious' => ['base_url' => env('WABOT_RYC_BASE_URL'), 'instance_id' => env('WABOT_RYC_INSTANCE_ID'), 'access_token' => env('WABOT_RYC_ACCESS_TOKEN')],
+            'kingkadkahwin' => ['instance_id' => env('WABOT_KKK_INSTANCE_ID'), 'access_token' => env('WABOT_KKK_ACCESS_TOKEN')],
+            'destinasi-raja-sehari' => ['instance_id' => env('WABOT_DRS_INSTANCE_ID'), 'access_token' => env('WABOT_DRS_ACCESS_TOKEN')],
+            'cetaking' => ['instance_id' => env('WABOT_CK_INSTANCE_ID'), 'access_token' => env('WABOT_CK_ACCESS_TOKEN')],
+            'royalicious' => ['instance_id' => env('WABOT_RYC_INSTANCE_ID'), 'access_token' => env('WABOT_RYC_ACCESS_TOKEN')],
         ],
     ],
 
