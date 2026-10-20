@@ -82,6 +82,7 @@
                     })
                     ->filter()
                     ->values();
+                $hasHandoverConfirmation = in_array($order->fulfilmentJob?->status, ['COMPLETED', 'COLLECTED'], true);
             @endphp
 
             @if ($designProofs->isNotEmpty())
@@ -154,6 +155,66 @@
                 @endif
             </section>
 
+            <section class="design-proof-card production-proof-section" aria-labelledby="packing-proof-title">
+                <div class="design-proof-card-heading">
+                    <span>Packing Proof</span>
+                    @if ($packingProofAvailable)
+                        <b>1 file</b>
+                    @endif
+                </div>
+                <h3 id="packing-proof-title">Packing progress</h3>
+                <p>View the packing photo shared for your order.</p>
+
+                @if ($packingProofAvailable)
+                    <div class="design-proof-actions">
+                        <a class="button button-primary" href="{{ route('orders.packing-proof.show', ['orderId' => $order->order_id]) }}" target="_blank" rel="noopener noreferrer">
+                            View Packing Proof
+                        </a>
+                    </div>
+                @else
+                    <p class="production-proof-empty">No packing proof has been shared yet.</p>
+                @endif
+            </section>
+
+            @php($fulfilmentJob = $order->fulfilmentJob)
+            <section class="design-proof-card production-proof-section" aria-labelledby="handover-proof-title">
+                <div class="design-proof-card-heading">
+                    <span>{{ $fulfilmentJob?->method === 'PICKUP' ? 'Pickup Confirmation' : 'Courier Proof' }}</span>
+                    @if ($fulfilmentJob?->status === 'COMPLETED' || $fulfilmentJob?->status === 'COLLECTED')
+                        <b>Complete</b>
+                    @endif
+                </div>
+                @if ($fulfilmentJob?->method === 'PICKUP')
+                    <h3 id="handover-proof-title">Pickup confirmation</h3>
+                    @if ($fulfilmentJob->status === 'COLLECTED')
+                        <p>Your order was collected{{ $fulfilmentJob->collected_at ? ' on '.$fulfilmentJob->collected_at->timezone(config('app.display_timezone'))->format('d/m/Y, H:i') : '' }}.</p>
+                        @if (filled($fulfilmentJob->completion_reference))
+                            <p>Collection reference: <strong>{{ $fulfilmentJob->completion_reference }}</strong></p>
+                        @endif
+                    @else
+                        <p>Pickup confirmation will appear here once your order has been collected.</p>
+                    @endif
+                @elseif ($fulfilmentJob?->method === 'COURIER')
+                    <h3 id="handover-proof-title">Courier proof</h3>
+                    @if ($fulfilmentJob->status === 'COMPLETED' && filled($order->packingJob?->proof_storage_path))
+                        <p>View the parcel handover photo and courier details.</p>
+                        <div class="design-proof-actions">
+                            <a class="button button-primary" href="{{ route('orders.courier-proof.show', ['orderId' => $order->order_id]) }}" target="_blank" rel="noopener noreferrer">
+                                View Courier Proof
+                            </a>
+                        </div>
+                        @if (filled($fulfilmentJob->courier_provider) || filled($fulfilmentJob->tracking_number))
+                            <p>{{ $fulfilmentJob->courier_provider }}{{ $fulfilmentJob->tracking_number ? ' · '.$fulfilmentJob->tracking_number : '' }}</p>
+                        @endif
+                    @else
+                        <p>Courier proof will appear here once the parcel has been handed to the courier.</p>
+                    @endif
+                @else
+                    <h3 id="handover-proof-title">Handover confirmation</h3>
+                    <p>Pickup or courier proof will appear here when available.</p>
+                @endif
+            </section>
+
             @if ($order->progressUpdates->isNotEmpty())
                 <ol class="proofing-list">
                     @foreach ($order->progressUpdates as $update)
@@ -170,7 +231,7 @@
                         </li>
                     @endforeach
                 </ol>
-            @elseif ($designProofs->isEmpty() && $productionProofs->isEmpty())
+            @elseif ($designProofs->isEmpty() && $productionProofs->isEmpty() && ! $packingProofAvailable && ! $hasHandoverConfirmation)
                 <div class="proofing-empty">
                     <span aria-hidden="true">⌛</span>
                     <h3>No proof has been shared yet</h3>

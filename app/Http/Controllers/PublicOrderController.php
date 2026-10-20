@@ -131,15 +131,23 @@ class PublicOrderController extends Controller
         $order->load([
             'designJobs.artworkVersions',
             'printJobs',
+            'packingJob',
+            'fulfilmentJob',
             'progressUpdates' => fn ($query) => $query
                 ->customerVisible()
                 ->with('uploader:id,name')
                 ->latest(),
         ]);
 
+        $packingJob = $order->packingJob;
+        $packingProofAvailable = $packingJob?->status === 'PACKED'
+            && filled($packingJob->proof_storage_path)
+            && \Illuminate\Support\Facades\Storage::disk('local')->exists($packingJob->proof_storage_path);
+
         return view('public.order-proofing', [
             'order' => $order,
             'progress' => $customerProgress->build($order),
+            'packingProofAvailable' => $packingProofAvailable,
         ]);
     }
 }

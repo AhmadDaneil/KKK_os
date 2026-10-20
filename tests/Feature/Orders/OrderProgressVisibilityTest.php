@@ -419,7 +419,17 @@ class OrderProgressVisibilityTest extends TestCase
         $this->get(route('public.orders.proofing', ['orderId' => $order->order_id]))
             ->assertOk()
             ->assertSee('Designer Proof')
-            ->assertSee('View Designer Proof · Groom · Wedding Card');
+            ->assertSee('View Designer Proof · Groom · Wedding Card')
+            ->assertSee('Packing Proof')
+            ->assertSee('View Packing Proof')
+            ->assertSee('Courier Proof')
+            ->assertSee('View Courier Proof');
+        $this->get(route('orders.packing-proof.show', $order->order_id))
+            ->assertOk()
+            ->assertHeader('Cache-Control', 'max-age=0, no-store, private');
+        $this->get(route('orders.courier-proof.show', $order->order_id))
+            ->assertOk()
+            ->assertHeader('Cache-Control', 'max-age=0, no-store, private');
         $this->get(route('orders.artwork.preview', [
             'orderId' => $order->order_id,
             'designJobId' => $designJob->id,
@@ -431,6 +441,23 @@ class OrderProgressVisibilityTest extends TestCase
     {
         Storage::fake('local');
         $order = $this->orderWithDesignJobs(2);
+        $packingJob = PackingJob::create([
+            'order_id' => $order->id,
+            'status' => 'PACKED',
+            'proof_storage_path' => 'proofs/two-package-packing.jpg',
+            'proof_original_name' => 'two-package-packing.jpg',
+            'proof_mime_type' => 'image/jpeg',
+        ]);
+        Storage::disk('local')->put($packingJob->proof_storage_path, 'packing-proof');
+        FulfilmentJob::create([
+            'order_id' => $order->id,
+            'order_fulfilment_id' => $order->fulfilment->id,
+            'packing_job_id' => $packingJob->id,
+            'method' => 'PICKUP',
+            'status' => 'COLLECTED',
+            'completion_reference' => 'TWO-PACKAGE-PICKUP',
+            'collected_at' => now(),
+        ]);
         $designer = $this->staff(User::ROLE_DESIGNER);
         $progressProof = $this->makeUpdate(
             $order,
@@ -464,7 +491,9 @@ class OrderProgressVisibilityTest extends TestCase
         $proofing = $this->get(route('public.orders.proofing', ['orderId' => $order->order_id]))
             ->assertOk()
             ->assertSee('View Designer Proof · Groom · Wedding Card')
-            ->assertSee('View Designer Proof · Bride · Wedding Card');
+            ->assertSee('View Designer Proof · Bride · Wedding Card')
+            ->assertSee('View Packing Proof')
+            ->assertSee('TWO-PACKAGE-PICKUP');
 
         $this->assertSame(2, substr_count($proofing->getContent(), 'View Designer Proof'));
     }
@@ -502,6 +531,42 @@ class OrderProgressVisibilityTest extends TestCase
             ->get(route('orders.dashboard', $order->order_id))
             ->assertOk()
             ->assertDontSee('View Courier Proof');
+    }
+
+    public function test_customer_proofing_shows_pickup_completion_reference_and_packing_proof(): void
+    {
+        Storage::fake('local');
+        $order = $this->confirmedOrder(1);
+        $packingJob = PackingJob::create([
+            'order_id' => $order->id,
+            'status' => 'PACKED',
+            'proof_storage_path' => 'proofs/packing-proof.jpg',
+            'proof_original_name' => 'packing-proof.jpg',
+            'proof_mime_type' => 'image/jpeg',
+        ]);
+        Storage::disk('local')->put($packingJob->proof_storage_path, 'packing-proof');
+        FulfilmentJob::create([
+            'order_id' => $order->id,
+            'order_fulfilment_id' => $order->fulfilment->id,
+            'packing_job_id' => $packingJob->id,
+            'method' => 'PICKUP',
+            'status' => 'COLLECTED',
+            'completion_reference' => 'PICKUP-REF-123',
+            'collected_at' => now(),
+        ]);
+
+        $this->withSession($this->customerSession($order))
+            ->get(route('public.orders.proofing', ['orderId' => $order->order_id]))
+            ->assertOk()
+            ->assertSee('Packing Proof')
+            ->assertSee('View Packing Proof')
+            ->assertSee('Pickup Confirmation')
+            ->assertSee('Pickup confirmation')
+            ->assertSee('PICKUP-REF-123');
+
+        $this->withSession($this->customerSession($order))
+            ->get(route('orders.packing-proof.show', $order->order_id))
+            ->assertOk();
     }
 
     public function test_customer_can_view_production_progress_proof_for_their_one_package_order(): void
