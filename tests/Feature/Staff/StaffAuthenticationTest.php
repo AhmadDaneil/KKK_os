@@ -35,6 +35,16 @@ class StaffAuthenticationTest extends TestCase
             ->assertRedirect(route('staff.login'));
     }
 
+    public function test_staff_login_does_not_load_dark_mode(): void
+    {
+        $this->get(route('staff.login'))
+            ->assertOk()
+            ->assertSee('login.css')
+            ->assertDontSee('operations-theme.css')
+            ->assertDontSee('kkk-operations-mode')
+            ->assertDontSee('operations-theme-toggle');
+    }
+
     public function test_active_staff_can_log_in(): void
     {
         $staff = User::factory()->create([

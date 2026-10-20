@@ -21,6 +21,17 @@ class AdminDashboardTest extends TestCase
         $this->get(route('admin.dashboard'))->assertRedirect(route('admin.login'));
     }
 
+    public function test_admin_dashboard_includes_shared_light_and_dark_mode_control(): void
+    {
+        $admin = $this->staff(User::ROLE_ADMIN);
+
+        $this->actingAs($admin)
+            ->get(route('admin.dashboard'))
+            ->assertOk()
+            ->assertSee('operations-theme.css')
+            ->assertSee('Switch to dark mode');
+    }
+
     public function test_only_active_admin_can_open_admin_dashboard(): void
     {
         $admin = $this->staff(User::ROLE_ADMIN);

@@ -2,7 +2,9 @@
 
 namespace App\Services\Payments;
 
+use App\Jobs\SendWabotBookingConfirmation;
 use App\Models\PaymentTransaction;
+use App\Models\WabotMessageLog;
 use App\Services\Orders\ActivateCustomerDashboardService;
 use App\Services\Orders\AdvancePaidConfirmedOrderToDesignService;
 use Illuminate\Support\Facades\DB;
@@ -57,6 +59,7 @@ class HandlePaymentCallbackService
             ]);
 
             if ($verified['status'] === 'PAID') {
+                $becamePaid = $payment->status !== 'PAID';
                 $transactionId = $verified['raw_payload']['transaction_id'] ?? null;
                 $metadata = $payment->metadata ?? [];
                 if (is_scalar($transactionId) && trim((string) $transactionId) !== '') {
@@ -91,6 +94,16 @@ class HandlePaymentCallbackService
                     $order->update(['booking_payment_status' => 'PAID']);
                     $this->dashboard->activate($order, $payment);
                     $this->financials->synchronize($order);
+
+                    if ($becamePaid && $order->source === 'WABOT') {
+                        $messageLog = WabotMessageLog::query()->firstOrCreate(
+                            ['payment_transaction_id' => $payment->id, 'message_type' => 'BOOKING_CONFIRMED'],
+                            ['order_id' => $order->id, 'phone' => (string) $order->customer_phone, 'status' => 'PENDING'],
+                        );
+                        SendWabotBookingConfirmation::dispatch($messageLog->id)
+                            ->onConnection('database')
+                            ->afterCommit();
+                    }
                 }
             } elseif ($verified['status'] === 'FAILED') {
                 if ($payment->status !== 'PAID') {

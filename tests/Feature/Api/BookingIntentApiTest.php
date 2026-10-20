@@ -2,10 +2,12 @@
 
 namespace Tests\Feature\Api;
 
+use App\Jobs\SendWabotBookingConfirmation;
 use App\Models\Order;
 use Database\Seeders\KkkPackagePriceCatalogSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Queue;
 use Tests\TestCase;
 
 class BookingIntentApiTest extends TestCase
@@ -39,6 +41,7 @@ class BookingIntentApiTest extends TestCase
 
     public function test_one_package_booking_is_idempotent_and_activates_only_after_verified_callback(): void
     {
+        Queue::fake([SendWabotBookingConfirmation::class]);
         Http::fake(['www.billplz-sandbox.com/*' => Http::response([
             'id' => 'booking-bill-1', 'collection_id' => 'sandbox-collection', 'amount' => 5000,
             'url' => 'https://www.billplz-sandbox.com/bills/booking-bill-1',
@@ -86,6 +89,8 @@ class BookingIntentApiTest extends TestCase
         $this->assertNotEmpty($paid->json('dashboard_url'));
         $this->assertDatabaseCount('invoices', 1);
         $this->assertDatabaseCount('order_access_tokens', 1);
+        $this->assertDatabaseCount('wabot_message_logs', 1);
+        Queue::assertPushed(SendWabotBookingConfirmation::class, 1);
         Http::assertSentCount(1);
     }
 

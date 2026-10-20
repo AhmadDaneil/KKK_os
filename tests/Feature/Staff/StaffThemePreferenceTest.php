@@ -10,7 +10,7 @@ class StaffThemePreferenceTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_staff_can_save_a_personal_dashboard_theme(): void
+    public function test_staff_dashboard_has_shared_mode_toggle_without_personalisation_picker(): void
     {
         $staff = User::factory()->create([
             'role' => User::ROLE_DESIGNER,
@@ -20,22 +20,13 @@ class StaffThemePreferenceTest extends TestCase
         $this->actingAs($staff)
             ->get(route('staff.dashboard'))
             ->assertOk()
-            ->assertSee('Tema paparan')
-            ->assertSee('Biru')
-            ->assertSee('Emas')
-            ->assertSee('Limau');
-
-        $this->actingAs($staff)
-            ->put(route('staff.theme.update'), ['staff_theme' => 'modern_blue'])
-            ->assertRedirect();
-
-        $this->assertDatabaseHas('users', [
-            'id' => $staff->id,
-            'staff_theme' => 'modern_blue',
-        ]);
+            ->assertSee('operations-theme.css')
+            ->assertSee('Switch to dark mode')
+            ->assertDontSee('Personalisation')
+            ->assertDontSee('staff-sidebar-theme');
     }
 
-    public function test_staff_cannot_save_an_unknown_theme(): void
+    public function test_old_personalisation_endpoint_is_unavailable(): void
     {
         $staff = User::factory()->create([
             'role' => User::ROLE_DESIGNER,
@@ -43,7 +34,9 @@ class StaffThemePreferenceTest extends TestCase
         ]);
 
         $this->actingAs($staff)
-            ->put(route('staff.theme.update'), ['staff_theme' => 'not-a-theme'])
-            ->assertSessionHasErrors('staff_theme');
+            ->put('/staff/theme', ['staff_theme' => 'modern_blue'])
+            ->assertNotFound();
+
+        $this->assertSame('default', $staff->fresh()->staff_theme);
     }
 }

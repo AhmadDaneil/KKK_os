@@ -74,28 +74,6 @@
         @endif
     </nav>
 
-    @if (! $isAdminPortal)
-        <section class="staff-sidebar-theme" aria-labelledby="staff-sidebar-theme-title">
-            <p id="staff-sidebar-theme-title">{{ __('ui.personalisation') }}</p>
-            <form method="POST" action="{{ route('staff.theme.update') }}">
-                @csrf
-                @method('PUT')
-                <label for="staff-sidebar-theme">{{ __('ui.display_theme') }}</label>
-                <div>
-                    <select id="staff-sidebar-theme" name="staff_theme">
-                        <option value="default" @selected($staffUser->staff_theme === 'default')>Green</option>
-                        <option value="modern_blue" @selected($staffUser->staff_theme === 'modern_blue')>Blue</option>
-                        <option value="indigo_violet" @selected($staffUser->staff_theme === 'indigo_violet')>Indigo</option>
-                        <option value="warm_orange" @selected($staffUser->staff_theme === 'warm_orange')>Orange</option>
-                        <option value="amber_gold" @selected($staffUser->staff_theme === 'amber_gold')>Gold</option>
-                        <option value="dusty_rose" @selected($staffUser->staff_theme === 'dusty_rose')>Lime</option>
-                        <option value="rose_burgundy" @selected($staffUser->staff_theme === 'rose_burgundy')>Burgundy</option>
-                    </select>
-                    <button type="submit">{{ __('ui.save') }}</button>
-                </div>
-            </form>
-        </section>
-    @endif
     @unless ($isOverview)
         <div class="staff-sidebar-user">
             <span class="staff-user-avatar">{{ strtoupper(substr($staffUser->name, 0, 1)) }}</span>
