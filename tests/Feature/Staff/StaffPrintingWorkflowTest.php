@@ -189,6 +189,43 @@ class StaffPrintingWorkflowTest extends TestCase
         $this->assertSame('PRODUCTION', $job->progress_files[0]['uploaded_by_role']);
     }
 
+    public function test_assigned_production_staff_can_share_an_existing_legacy_progress_file(): void
+    {
+        Storage::fake('local');
+
+        $admin = $this->admin();
+        $production = $this->staff(User::ROLE_PRODUCTION);
+        [, $jobs] = $this->printJobs();
+        $job = $jobs->first();
+
+        app(AssignPrintJobService::class)->assign($job, $production, $admin);
+        $path = 'printing-progress/'.$job->id.'/legacy/progress-1.jpg';
+        Storage::disk('local')->put($path, 'legacy-proof');
+        $job->update(['progress_files' => [[
+            'path' => $path,
+            'original_name' => 'legacy-proof.jpg',
+            'mime_type' => 'image/jpeg',
+            'uploaded_by_user_id' => $production->id,
+        ]]]);
+
+        $this->actingAs($production, 'staff')
+            ->post(route('staff.print-jobs.progress-files.visibility', [
+                'printJob' => $job,
+                'file' => 0,
+            ]), ['customer_visible' => '1'])
+            ->assertRedirect()
+            ->assertSessionHasNoErrors();
+
+        $job->refresh();
+        $this->assertTrue($job->progress_files[0]['customer_visible']);
+        $this->assertSame('PRODUCTION', $job->progress_files[0]['uploaded_by_role']);
+        $this->assertDatabaseHas('print_job_events', [
+            'print_job_id' => $job->id,
+            'event_type' => 'PRINT_PROGRESS_VISIBILITY_CHANGED',
+            'actor_user_id' => $production->id,
+        ]);
+    }
+
     public function test_other_production_staff_cannot_start_assigned_print_job(): void
     {
         $admin = $this->admin();
