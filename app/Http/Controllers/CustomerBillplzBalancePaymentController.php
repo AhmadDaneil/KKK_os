@@ -17,7 +17,7 @@ class CustomerBillplzBalancePaymentController extends Controller
     ): RedirectResponse {
         abort_unless(config('services.billplz.enabled'), 404);
 
-        $order = $access->resolve($request, $orderId);
+        $order = $access->resolveForBalancePayment($request, $orderId);
 
         return redirect()->away($checkout->create($order));
     }

@@ -216,6 +216,33 @@ class BillplzBalancePaymentTest extends TestCase
             ->assertSee(route('public.orders.progress', ['order_id' => $order->order_id]), false);
     }
 
+    public function test_progress_lookup_session_can_start_balance_checkout_without_dashboard_access(): void
+    {
+        $order = $this->createApprovedOrder(1, '300.00', '50.00', '250.00');
+        $this->fakeBillCreation('bill-progress-session', 25000);
+
+        $this->post(route('public.orders.progress.lookup'), [
+            'order_id' => $order->order_id,
+        ])->assertOk();
+
+        $this->post(route('orders.balance-payment.billplz.store', ['orderId' => $order->order_id]))
+            ->assertRedirect('https://www.billplz-sandbox.com/bills/bill-progress-session');
+
+        $this->get(route('orders.dashboard', ['orderId' => $order->order_id]))
+            ->assertNotFound();
+    }
+
+    public function test_balance_checkout_remains_blocked_without_an_order_access_session(): void
+    {
+        $order = $this->createApprovedOrder(1, '300.00', '50.00', '250.00');
+        Http::preventStrayRequests();
+
+        $this->post(route('orders.balance-payment.billplz.store', ['orderId' => $order->order_id]))
+            ->assertNotFound();
+
+        Http::assertNothingSent();
+    }
+
     private function createApprovedOrder(int $packageCount, string $total, string $deposit, string $balance): Order
     {
         $order = app(CreateOrderService::class)->create([

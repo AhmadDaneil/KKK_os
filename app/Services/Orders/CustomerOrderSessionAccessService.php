@@ -61,6 +61,30 @@ class CustomerOrderSessionAccessService
         return $order;
     }
 
+    public function resolveForBalancePayment(Request $request, string $orderId): Order
+    {
+        $order = Order::where('order_id', $orderId)->firstOrFail();
+        abort_if($order->source === 'WABOT' && $order->booking_payment_status !== 'PAID', 404);
+
+        if ($this->hasAccess($request, $order)) {
+            return $order;
+        }
+
+        $grant = $request->session()->get($this->proofingSessionKey($orderId));
+
+        abort_if(! is_array($grant), 404);
+        abort_if((int) ($grant['order_fk'] ?? 0) !== (int) $order->id, 404);
+
+        $expiresAt = $grant['expires_at'] ?? null;
+
+        if ($expiresAt === null || CarbonImmutable::parse($expiresAt)->isPast()) {
+            $request->session()->forget($this->proofingSessionKey($orderId));
+            abort(403);
+        }
+
+        return $order;
+    }
+
     public function hasAccess(Request $request, Order $order): bool
     {
         if ($order->source === 'WABOT' && $order->booking_payment_status !== 'PAID') {
