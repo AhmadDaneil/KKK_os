@@ -1135,6 +1135,10 @@
                                                 <button type="button" class="staff-file-cancel" hidden aria-controls="print-progress-{{ $job->id }}">Cancel</button>
                                             </div>
                                             <p class="staff-muted-text">Upload images or PDFs showing production progress. Maximum 10 files, 20 MB each.</p>
+                                            <label class="staff-progress-visibility">
+                                                <input type="checkbox" name="customer_visible" value="1">
+                                                Share these production proofs with the customer
+                                            </label>
                                             <button type="submit" class="staff-button staff-button-secondary">Upload Progress</button>
                                             <p class="staff-upload-notice" role="status" aria-live="polite" hidden></p>
                                         </form>

@@ -1073,6 +1073,21 @@ a.staff-pagination-link:hover {
     line-height: 1.6;
 }
 
+.staff-progress-visibility {
+    display: flex;
+    margin-top: 8px;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.staff-progress-visibility input {
+    width: 18px;
+    height: 18px;
+    accent-color: var(--staff-primary);
+}
+
 @media (max-width: 820px) {
     .staff-detail-grid,
     .staff-package-grid,
