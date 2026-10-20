@@ -14,8 +14,9 @@ replacing the existing workflow artefacts:
   attachments intended for management monitoring and, only when explicitly
   published, the Customer Dashboard.
 - The Customer Dashboard also provides proof buttons for customer-safe Design
-  previews and for the final Courier proof after courier completion. Source
-  artwork and pre-completion packing proof remain private.
+  previews, Packing proof after packing is complete, the final Courier proof
+  after courier handover, and the Pickup completion record after collection.
+  Source artwork and other pre-completion operational material remain private.
 
 This avoids asking the customer to re-enter data and avoids treating private
 operational evidence as customer content.
@@ -60,6 +61,13 @@ session/order check is enforced again by the file endpoint. Design proof links
 open only the established customer-preview workflow; source artwork is never
 served by these proof buttons.
 
+Following the Project Owner request on 2026-10-20, the Packing proof is also
+available through an order-scoped customer endpoint once the Packing job is
+`PACKED`. Pickup jobs expose their completion date and completion reference as
+the customer-facing collection record; V1 does not upload a separate pickup
+photo. All file links continue to require the customer's existing order or
+proofing session.
+
 Each record stores order, uploader ID, uploader-role snapshot, order-status
 snapshot, created timestamp, visibility, publication timestamp, message, and
 attachment metadata/hash. A deterministic unique key rejects exact duplicate
@@ -79,6 +87,9 @@ submissions.
 - customer attachment order/visibility checks;
 - one- and two-package Production Proof display, private-file exclusion,
   customer session enforcement, and per-order file isolation;
+- one- and two-package Packing proof sections, order-session protected proof
+  download, completed Pickup confirmation display, and completed Courier proof
+  access from the proofing session;
 - default-private behaviour and duplicate rejection;
 - both one-package and two-package orders.
 
