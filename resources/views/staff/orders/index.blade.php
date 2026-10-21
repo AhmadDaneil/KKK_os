@@ -214,7 +214,7 @@
                             )
                                 <form
                                     method="POST"
-                                    action="{{ route($isAdminPortal ? 'admin.orders.destroy' : 'staff.orders.destroy', $order) }}"
+                                    action="{{ route($isAdminPortal ? 'admin.orders.destroy' : 'staff.orders.destroy', $order->order_id) }}"
                                     onsubmit="return confirm('Delete order {{ $order->order_id }}? All order details, payments and workflow records will be permanently deleted.');"
                                 >
                                     @csrf
