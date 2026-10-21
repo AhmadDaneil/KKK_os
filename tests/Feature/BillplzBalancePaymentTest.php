@@ -26,6 +26,7 @@ class BillplzBalancePaymentTest extends TestCase
         config()->set('services.billplz.base_url', 'https://www.billplz-sandbox.com/api');
         config()->set('services.billplz.x_signature_key', 'billplz-sandbox-signature');
         config()->set('services.billplz.collection_id', 'sandbox-collection-001');
+        config()->set('services.billplz.duitnow_qr_enabled', false);
     }
 
     public function test_one_package_checkout_uses_snapshot_balance_as_sen(): void
@@ -42,14 +43,13 @@ class BillplzBalancePaymentTest extends TestCase
 
         Http::assertSent(fn (ClientRequest $request): bool => (int) $request->data()['amount'] === 25000
             && $request->data()['collection_id'] === 'sandbox-collection-001'
-            && $request->data()['callback_url'] === 'https://167.71.196.30/api/v1/payments/billplz-sandbox/callback'
-            && $request->data()['redirect_url'] === 'https://167.71.196.30'.route('payments.balance.return', ['reference' => PaymentTransaction::query()
-                ->where('order_id', $order->id)
-                ->where('payment_type', 'BALANCE')
-                ->value('public_reference')], false)
-            && $request->data()['reference_1'] === $order->order_id
-            && $request->hasHeader('Authorization', 'Basic '.base64_encode('billplz-sandbox-secret:'))
-        );
+            && $request->data()['reference_1'] === $order->order_id);
+        Http::assertSent(fn (ClientRequest $request): bool => $request->data()['callback_url'] === 'https://167.71.196.30'.route('api.billplz.callback', [], false));
+        Http::assertSent(fn (ClientRequest $request): bool => $request->data()['redirect_url'] === 'https://167.71.196.30'.route('payments.balance.return', ['reference' => PaymentTransaction::query()
+            ->where('order_id', $order->id)
+            ->where('payment_type', 'BALANCE')
+            ->value('public_reference')], false));
+        Http::assertSent(fn (ClientRequest $request): bool => $request->hasHeader('Authorization', 'Basic '.base64_encode('billplz-sandbox-secret:')));
 
         $payment = PaymentTransaction::query()
             ->where('order_id', $order->id)
@@ -90,6 +90,49 @@ class BillplzBalancePaymentTest extends TestCase
             ->assertSee('Payment Successful')
             ->assertSee('View Billplz E-Receipt')
             ->assertSee('Return to Merchant');
+    }
+
+    public function test_balance_checkout_can_start_direct_duitnow_qr_when_enabled(): void
+    {
+        $order = $this->createApprovedOrder(1, '300.00', '50.00', '250.00');
+        config()->set('services.billplz.duitnow_qr_enabled', true);
+        $this->fakeBillCreation('bill-balance-qr', 25000);
+
+        $this->lookupOrder($order)->assertOk();
+        $this->get(route('public.orders.progress', ['order_id' => $order->order_id]))
+            ->assertSee('Pay RM 250.00 with Billplz')
+            ->assertSee('Pay RM 250.00 with DuitNow QR');
+
+        $this->post(route('orders.balance-payment.billplz.store', ['orderId' => $order->order_id]), [
+            'payment_method' => 'DUITNOW_QR',
+        ])->assertRedirect('https://www.billplz-sandbox.com/bills/bill-balance-qr?auto_submit=true');
+
+        Http::assertSent(fn (ClientRequest $request): bool => $request->data()['reference_1_label'] === 'Bank Code'
+            && $request->data()['reference_1'] === 'BP-RHBQR');
+
+        $payment = PaymentTransaction::query()
+            ->where('order_id', $order->id)
+            ->where('payment_type', 'BALANCE')
+            ->firstOrFail();
+        $this->assertSame('DUITNOW_QR', $payment->metadata['billplz']['payment_method']);
+    }
+
+    public function test_balance_checkout_refuses_to_switch_payment_method_while_bill_is_pending(): void
+    {
+        $order = $this->createApprovedOrder(1, '300.00', '50.00', '250.00');
+        config()->set('services.billplz.duitnow_qr_enabled', true);
+        $this->fakeBillCreation('bill-existing-standard', 25000);
+
+        $this->lookupOrder($order)->assertOk();
+        $this->post(route('orders.balance-payment.billplz.store', ['orderId' => $order->order_id]))
+            ->assertRedirect('https://www.billplz-sandbox.com/bills/bill-existing-standard');
+
+        $this->post(route('orders.balance-payment.billplz.store', ['orderId' => $order->order_id]), [
+            'payment_method' => 'DUITNOW_QR',
+        ])->assertSessionHasErrors('billplz');
+
+        Http::assertSentCount(1);
+        $this->assertDatabaseCount('payment_transactions', 2);
     }
 
     public function test_repeat_checkout_reuses_the_existing_bill_without_creating_another(): void

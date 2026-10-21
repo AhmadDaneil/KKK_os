@@ -18,7 +18,7 @@ class CreateBillplzBookingPaymentService
     ) {}
 
     /** @return array{payment: PaymentTransaction, payment_url: string} */
-    public function create(Order $order, bool $throwGatewayFailure = false): array
+    public function create(Order $order, bool $throwGatewayFailure = false, string $paymentMethod = BillplzPaymentMethod::BILLPLZ): array
     {
         if (! config('services.billplz.enabled')) {
             if ($throwGatewayFailure) {
@@ -30,7 +30,9 @@ class CreateBillplzBookingPaymentService
             ]);
         }
 
-        $checkout = DB::transaction(function () use ($order): array {
+        BillplzPaymentMethod::assertEnabled($paymentMethod);
+
+        $checkout = DB::transaction(function () use ($order, $paymentMethod): array {
             $lockedOrder = Order::query()->whereKey($order->id)->lockForUpdate()->firstOrFail();
 
             if ($lockedOrder->booking_payment_status === 'PAID') {
@@ -59,6 +61,12 @@ class CreateBillplzBookingPaymentService
             }
 
             if ($existing !== null) {
+                if (BillplzPaymentMethod::fromPayment($existing) !== $paymentMethod) {
+                    throw ValidationException::withMessages([
+                        'payment' => 'A payment is already in progress with a different method. Continue that payment or wait for it to expire.',
+                    ]);
+                }
+
                 $url = $existing->metadata['billplz']['checkout_url'] ?? null;
                 if ($existing->provider === 'BILLPLZ' && is_string($url) && $url !== '') {
                     return ['payment' => $existing, 'payment_url' => $url, 'create_bill' => false];
@@ -77,14 +85,17 @@ class CreateBillplzBookingPaymentService
                 'amount' => $amount['amount'],
                 'currency' => $amount['currency'],
                 'status' => 'PENDING',
-                'metadata' => ['billplz' => ['checkout_status' => 'CREATING']],
+                'metadata' => ['billplz' => [
+                    'checkout_status' => 'CREATING',
+                    'payment_method' => $paymentMethod,
+                ]],
             ]);
             $payment->events()->create([
                 'event_type' => 'BOOKING_PAYMENT_CREATED',
                 'payload' => [
                     'amount' => $amount['amount'],
                     'currency' => $amount['currency'],
-                    'payment_options' => ['DUITNOW_QR', 'ONLINE_BANKING'],
+                    'payment_method' => $paymentMethod,
                 ],
                 'occurred_at' => now(),
             ]);
@@ -136,10 +147,10 @@ class CreateBillplzBookingPaymentService
         $payment = DB::transaction(function () use ($payment, $bill): PaymentTransaction {
             $locked = PaymentTransaction::query()->whereKey($payment->id)->lockForUpdate()->firstOrFail();
             $metadata = $locked->metadata ?? [];
-            $metadata['billplz'] = [
+            $metadata['billplz'] = array_merge($metadata['billplz'] ?? [], [
                 'checkout_status' => 'READY',
                 'checkout_url' => $bill['payment_url'],
-            ];
+            ]);
             $locked->update([
                 'provider_reference' => $bill['provider_reference'],
                 'metadata' => $metadata,

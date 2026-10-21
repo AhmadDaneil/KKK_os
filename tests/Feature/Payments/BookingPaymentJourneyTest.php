@@ -5,6 +5,7 @@ namespace Tests\Feature\Payments;
 use App\Models\Order;
 use App\Models\User;
 use App\Services\Orders\CreateOrderService;
+use App\Services\Orders\GenerateOrderAccessLinkService;
 use App\Services\Payments\CreateBillplzBookingPaymentService;
 use Database\Seeders\KkkPackagePriceCatalogSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -25,6 +26,7 @@ class BookingPaymentJourneyTest extends TestCase
         config()->set('services.billplz.base_url', 'https://www.billplz-sandbox.com/api');
         config()->set('services.billplz.x_signature_key', 'sandbox-signature');
         config()->set('services.billplz.collection_id', 'sandbox-collection');
+        config()->set('services.billplz.duitnow_qr_enabled', false);
     }
 
     public function test_one_package_booking_payment_activates_reference_invoice_dashboard_and_receipt(): void
@@ -68,6 +70,30 @@ class BookingPaymentJourneyTest extends TestCase
 
         $this->assertSame('100.00', $checkout['payment']->amount);
         $this->assertSame('https://www.billplz-sandbox.com/bills/booking-two', $checkout['payment_url']);
+    }
+
+    public function test_booking_checkout_can_start_direct_duitnow_qr_when_enabled(): void
+    {
+        $order = $this->createOrder(1);
+        config()->set('services.billplz.duitnow_qr_enabled', true);
+        Http::preventStrayRequests();
+        Http::fake(['www.billplz-sandbox.com/*' => Http::response([
+            'id' => 'booking-qr',
+            'collection_id' => 'sandbox-collection',
+            'amount' => 5000,
+            'url' => 'https://www.billplz-sandbox.com/bills/booking-qr',
+        ])]);
+
+        $this->establishCustomerOrderAccess($order);
+        $response = $this->post(route('orders.booking-payment.store', ['orderId' => $order->order_id]), [
+            'payment_method' => 'DUITNOW_QR',
+        ]);
+
+        $response->assertRedirect('https://www.billplz-sandbox.com/bills/booking-qr?auto_submit=true');
+        Http::assertSent(fn ($request): bool => $request->data()['reference_1_label'] === 'Bank Code'
+            && $request->data()['reference_1'] === 'BP-RHBQR');
+        $payment = $order->payments()->where('payment_type', 'BOOKING_DEPOSIT')->firstOrFail();
+        $this->assertSame('DUITNOW_QR', $payment->metadata['billplz']['payment_method']);
     }
 
     public function test_return_page_reconciles_paid_one_package_bill_when_callback_is_delayed(): void
@@ -199,6 +225,14 @@ class BookingPaymentJourneyTest extends TestCase
             'customer_email' => 'booking@example.test',
             'customer_phone' => '60123456789',
         ]);
+    }
+
+    private function establishCustomerOrderAccess(Order $order): void
+    {
+        $url = app(GenerateOrderAccessLinkService::class)->generate($order);
+        $path = (string) parse_url($url, PHP_URL_PATH);
+        $query = (string) parse_url($url, PHP_URL_QUERY);
+        $this->get($query === '' ? $path : $path.'?'.$query)->assertRedirect();
     }
 
     private function fakeBill(string $billId, int $amountSen): void

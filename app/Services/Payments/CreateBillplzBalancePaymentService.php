@@ -12,7 +12,7 @@ class CreateBillplzBalancePaymentService
 {
     public function __construct(private BillplzPaymentGateway $gateway) {}
 
-    public function create(Order $order): string
+    public function create(Order $order, string $paymentMethod = BillplzPaymentMethod::BILLPLZ): string
     {
         if (! config('services.billplz.enabled')) {
             throw ValidationException::withMessages([
@@ -20,7 +20,9 @@ class CreateBillplzBalancePaymentService
             ]);
         }
 
-        $checkout = DB::transaction(function () use ($order): array {
+        BillplzPaymentMethod::assertEnabled($paymentMethod);
+
+        $checkout = DB::transaction(function () use ($order, $paymentMethod): array {
             $lockedOrder = Order::query()
                 ->whereKey($order->id)
                 ->lockForUpdate()
@@ -67,6 +69,12 @@ class CreateBillplzBalancePaymentService
                     ]);
                 }
 
+                if (BillplzPaymentMethod::fromPayment($existing) !== $paymentMethod) {
+                    throw ValidationException::withMessages([
+                        'billplz' => 'A balance payment is already in progress with a different method. Continue that payment or wait for it to expire.',
+                    ]);
+                }
+
                 $paymentUrl = $existing->metadata['billplz']['checkout_url'] ?? null;
                 if (is_string($paymentUrl) && $paymentUrl !== '') {
                     return [
@@ -91,6 +99,7 @@ class CreateBillplzBalancePaymentService
                 'metadata' => [
                     'billplz' => [
                         'checkout_status' => 'CREATING',
+                        'payment_method' => $paymentMethod,
                     ],
                 ],
             ]);
@@ -101,6 +110,7 @@ class CreateBillplzBalancePaymentService
                     'provider' => 'BILLPLZ',
                     'amount' => $amount,
                     'currency' => $snapshot->currency,
+                    'payment_method' => $paymentMethod,
                 ],
                 'occurred_at' => now(),
             ]);
