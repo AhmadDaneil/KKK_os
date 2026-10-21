@@ -211,7 +211,7 @@
                             )
                                 <form
                                     method="POST"
-                                    action="{{ route($isAdminPortal ? 'admin.orders.destroy' : 'staff.orders.destroy', $order) }}"
+                                    action="{{ route($isAdminPortal ? 'admin.orders.destroy' : 'staff.orders.destroy', $order->order_id) }}"
                                     onsubmit="return confirm('Padam tempahan {{ $order->order_id }}? Semua maklumat tempahan, pembayaran dan rekod aliran kerja akan dipadam secara kekal.');"
                                 >
                                     @csrf

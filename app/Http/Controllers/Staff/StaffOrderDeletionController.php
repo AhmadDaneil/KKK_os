@@ -13,10 +13,12 @@ class StaffOrderDeletionController extends Controller
 {
     public function destroy(
         Request $request,
-        Order $order,
+        string $publicOrderId,
         DeleteIncompleteOrderService $service
     ): RedirectResponse {
         abort_unless($request->user()?->isOperationManagement(), 403);
+
+        $order = Order::query()->where('order_id', $publicOrderId)->firstOrFail();
 
         $orderId = $order->order_id;
 

@@ -113,7 +113,7 @@ Route::middleware(['auth:admin', 'active.staff', 'staff.role:ADMIN'])
             ->name('invoices.download');
         Route::get('/orders/{orderId}/gambar-pengantin/{side}', [StaffOrderController::class, 'downloadCustomerPhoto'])
             ->name('orders.customer-photo');
-        Route::delete('/orders/{order}', [StaffOrderDeletionController::class, 'destroy'])
+        Route::delete('/orders/{orderId}', [StaffOrderDeletionController::class, 'destroy'])
             ->name('orders.destroy');
         Route::post('/orders/{order}/cancel', [StaffOrderLifecycleController::class, 'cancel'])
             ->name('orders.cancel');
@@ -285,7 +285,7 @@ Route::middleware(['auth:staff', 'active.staff'])
             Route::get('/invoices/{invoice}/download', [StaffInvoiceController::class, 'download'])
                 ->middleware('staff.role:ADMIN,'.User::ROLE_OM)
                 ->name('invoices.download');
-            Route::delete('/orders/{order}', [StaffOrderDeletionController::class, 'destroy'])
+            Route::delete('/orders/{orderId}', [StaffOrderDeletionController::class, 'destroy'])
                 ->name('orders.destroy');
             Route::post('/orders/{order}/cancel', [StaffOrderLifecycleController::class, 'cancel'])
                 ->name('orders.cancel');
