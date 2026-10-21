@@ -157,7 +157,7 @@ Route::middleware(['auth:admin', 'active.staff', 'staff.role:ADMIN'])
             ->name('progress-updates.attachment');
         Route::get('/design-jobs/{designJob}/proof', [StaffArtworkProofController::class, 'show'])
             ->name('design-jobs.proof.show');
-        Route::delete('/orders/{order}', [StaffOrderDeletionController::class, 'destroy'])
+        Route::delete('/orders/{orderId}', [StaffOrderDeletionController::class, 'destroy'])
             ->name('orders.destroy');
         Route::post('/orders/{order}/cancel', [StaffOrderLifecycleController::class, 'cancel'])
             ->name('orders.cancel');
@@ -349,7 +349,7 @@ Route::middleware(['auth:staff', 'active.staff'])
             Route::get('/invoices/{invoice}/download', [StaffInvoiceController::class, 'download'])
                 ->middleware('staff.role:ADMIN,'.User::ROLE_OM)
                 ->name('invoices.download');
-            Route::delete('/orders/{order}', [StaffOrderDeletionController::class, 'destroy'])
+            Route::delete('/orders/{orderId}', [StaffOrderDeletionController::class, 'destroy'])
                 ->name('orders.destroy');
             Route::post('/orders/{order}/cancel', [StaffOrderLifecycleController::class, 'cancel'])
                 ->name('orders.cancel');

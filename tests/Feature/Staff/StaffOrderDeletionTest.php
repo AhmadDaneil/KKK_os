@@ -18,7 +18,7 @@ class StaffOrderDeletionTest extends TestCase
         $order = $this->incompleteOrder();
 
         $this->actingAs($admin, 'admin')
-            ->delete(route('admin.orders.destroy', $order))
+            ->delete(route('admin.orders.destroy', $order->order_id))
             ->assertRedirect();
 
         $this->assertDatabaseMissing('orders', ['id' => $order->id]);
@@ -31,7 +31,7 @@ class StaffOrderDeletionTest extends TestCase
         $order = $this->incompleteOrder(2);
 
         $this->actingAs($manager)
-            ->delete(route('staff.orders.destroy', $order))
+            ->delete(route('staff.orders.destroy', $order->order_id))
             ->assertRedirect();
 
         $this->assertDatabaseMissing('orders', ['id' => $order->id]);
@@ -45,7 +45,7 @@ class StaffOrderDeletionTest extends TestCase
         $order->update(['status' => 'DETAILS_CONFIRMED']);
 
         $this->actingAs($manager)
-            ->delete(route('staff.orders.destroy', $order))
+            ->delete(route('staff.orders.destroy', $order->order_id))
             ->assertRedirect()
             ->assertSessionHasErrors('order_delete');
 
@@ -68,7 +68,7 @@ class StaffOrderDeletionTest extends TestCase
         ]);
 
         $this->actingAs($manager)
-            ->delete(route('staff.orders.destroy', $order))
+            ->delete(route('staff.orders.destroy', $order->order_id))
             ->assertRedirect()
             ->assertSessionHasErrors('order_delete');
 
@@ -95,7 +95,7 @@ class StaffOrderDeletionTest extends TestCase
         ]);
 
         $this->actingAs($manager)
-            ->delete(route('staff.orders.destroy', $order))
+            ->delete(route('staff.orders.destroy', $order->order_id))
             ->assertRedirect()
             ->assertSessionHas('status');
 
@@ -135,7 +135,7 @@ class StaffOrderDeletionTest extends TestCase
             $order = $this->incompleteOrder();
 
             $this->actingAs($staff)
-                ->delete(route('staff.orders.destroy', $order))
+                ->delete(route('staff.orders.destroy', $order->order_id))
                 ->assertForbidden();
 
             $this->assertDatabaseHas('orders', ['id' => $order->id]);
