@@ -120,7 +120,7 @@ class StaffOrderDeletionTest extends TestCase
         ]);
 
         $this->actingAs($manager)
-            ->delete(route('staff.orders.destroy', $order))
+            ->delete(route('staff.orders.destroy', $order->order_id))
             ->assertRedirect()
             ->assertSessionHasErrors('order_delete');
 
