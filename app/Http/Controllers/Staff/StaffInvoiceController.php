@@ -37,6 +37,7 @@ class StaffInvoiceController extends Controller
         $lineItems = app(BuildInvoiceLineItemsService::class);
         $invoice->loadMissing([
             'order.items',
+            'order.payments',
             'order.packageSides.design',
             'order.packageSides.event',
             'order.couples',
@@ -59,6 +60,11 @@ class StaffInvoiceController extends Controller
             'paymentAccountName' => config('invoice.payment_account_name'),
             'paymentAccountNumber' => config('invoice.payment_account_number'),
             'paymentInstruction' => config('invoice.payment_instruction'),
+            'depositAmount' => $invoice->order->payments
+                ->where('payment_type', 'BOOKING_DEPOSIT')
+                ->where('status', 'PAID')
+                ->where('currency', $invoice->currency)
+                ->sum(fn ($payment): float => (float) $payment->amount),
             'coupleNames' => $invoice->order->couples
                 ->map(fn ($couple): string => trim(implode(' & ', array_filter([
                     $couple->groom_name,
