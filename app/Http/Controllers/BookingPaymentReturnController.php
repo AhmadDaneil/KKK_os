@@ -47,6 +47,21 @@ class BookingPaymentReturnController extends Controller
         return view('public.booking-payment-return', [
             'payment' => $payment,
             'order' => $payment->order,
+            'receiptUrl' => $this->trustedReceiptUrl($payment),
         ]);
+    }
+
+    private function trustedReceiptUrl(PaymentTransaction $payment): ?string
+    {
+        $url = data_get($payment->metadata, 'billplz.checkout_url');
+
+        if (! is_string($url) || $url === '') {
+            return null;
+        }
+
+        return parse_url($url, PHP_URL_SCHEME) === 'https'
+            && in_array(parse_url($url, PHP_URL_HOST), ['www.billplz-sandbox.com', 'www.billplz.com'], true)
+                ? $url
+                : null;
     }
 }
