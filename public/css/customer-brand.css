@@ -1949,6 +1949,10 @@ body.brand-payment-return .payment-return-actions .button {
     min-height: 50px;
 }
 
+body.brand-payment-return .payment-return-actions .button:only-child {
+    grid-column: 1 / -1;
+}
+
 body.brand-payment-return .payment-return-merchant {
     display: inline-block;
     margin-top: 22px;
