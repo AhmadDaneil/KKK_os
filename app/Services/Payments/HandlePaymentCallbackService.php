@@ -7,6 +7,8 @@ use App\Models\PaymentTransaction;
 use App\Models\WabotMessageLog;
 use App\Services\Orders\ActivateCustomerDashboardService;
 use App\Services\Orders\AdvancePaidConfirmedOrderToDesignService;
+use App\Services\Printing\InitializePrintJobsForOrderService;
+use App\Services\Printing\SyncOrderPrintStatusService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use RuntimeException;
@@ -18,6 +20,8 @@ class HandlePaymentCallbackService
         private SynchronizeOrderFinancialsService $financials,
         private ActivateCustomerDashboardService $dashboard,
         private AdvancePaidConfirmedOrderToDesignService $designReadiness,
+        private InitializePrintJobsForOrderService $initializePrintJobs,
+        private SyncOrderPrintStatusService $syncPrintStatus,
     ) {}
 
     public function handle(array $verified): PaymentTransaction
@@ -137,6 +141,25 @@ class HandlePaymentCallbackService
                     'payment_id' => $payment->id,
                     'order_id' => $payment->order_id,
                 ]);
+            }
+        }
+
+        if ($payment->payment_type === 'BALANCE' && $payment->status === 'PAID') {
+            $order = $payment->order()->firstOrFail();
+
+            if ($order->status === 'PAID'
+                && $order->designJobs()->count() === (int) $order->package_count
+                && $order->designJobs()->where('status', '<>', 'DESIGN_APPROVED')->doesntExist()) {
+                try {
+                    $this->initializePrintJobs->initialize($order);
+                    $this->syncPrintStatus->sync($order->fresh());
+                } catch (Throwable $exception) {
+                    report($exception);
+                    Log::warning('Paid order could not be advanced to the printing queue.', [
+                        'payment_id' => $payment->id,
+                        'order_id' => $payment->order_id,
+                    ]);
+                }
             }
         }
 

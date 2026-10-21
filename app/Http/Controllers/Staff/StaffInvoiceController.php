@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Staff;
 
 use App\Http\Controllers\Controller;
 use App\Models\Invoice;
+use App\Models\Order;
 use App\Services\Invoices\BuildInvoiceLineItemsService;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Response;
@@ -36,6 +37,7 @@ class StaffInvoiceController extends Controller
         $lineItems = app(BuildInvoiceLineItemsService::class);
         $invoice->loadMissing([
             'order.items',
+            'order.payments',
             'order.packageSides.design',
             'order.packageSides.event',
             'order.couples',
@@ -54,6 +56,15 @@ class StaffInvoiceController extends Controller
             'businessAddress' => config('invoice.business_address'),
             'businessEmail' => config('invoice.business_email'),
             'businessPhone' => config('invoice.business_phone'),
+            'paymentBank' => config('invoice.payment_bank'),
+            'paymentAccountName' => config('invoice.payment_account_name'),
+            'paymentAccountNumber' => config('invoice.payment_account_number'),
+            'paymentInstruction' => config('invoice.payment_instruction'),
+            'depositAmount' => $invoice->order->payments
+                ->where('payment_type', 'BOOKING_DEPOSIT')
+                ->where('status', 'PAID')
+                ->where('currency', $invoice->currency)
+                ->sum(fn ($payment): float => (float) $payment->amount),
             'coupleNames' => $invoice->order->couples
                 ->map(fn ($couple): string => trim(implode(' & ', array_filter([
                     $couple->groom_name,
@@ -61,16 +72,27 @@ class StaffInvoiceController extends Controller
                 ]))))
                 ->filter()
                 ->implode(' / '),
+            'bookingDate' => $invoice->order->created_at
+                ->timezone(config('app.display_timezone'))
+                ->format('d/m/Y'),
             'eventDates' => $invoice->order->packageSides
-                ->map(fn ($side): ?string => $side->event?->event_date?->format('d/m/Y'))
+                ->map(fn ($side): ?string => $side->event?->event_date
+                    ? $this->sideLabel($side->side).': '.$side->event->event_date->format('d/m/Y')
+                    : null)
                 ->filter()
-                ->unique()
-                ->implode(', '),
-            'packageNames' => $invoice->order->packageSides
-                ->map(fn ($side): ?string => $side->design?->design_code ?: $side->design?->theme)
+                ->implode(' | '),
+            'packageName' => match ($invoice->order->package_type) {
+                'PUTERI_MANIS' => 'Puteri Manis',
+                'JELATA' => 'Jelata',
+                default => $invoice->order->items->firstWhere('item_type', 'PACKAGE')?->description ?: '-',
+            },
+            'packageQuantities' => $this->packageQuantities($invoice->order),
+            'designCodes' => $invoice->order->packageSides
+                ->map(fn ($side): ?string => $side->design?->design_code
+                    ? $this->sideLabel($side->side).': '.$side->design->design_code
+                    : null)
                 ->filter()
-                ->unique()
-                ->implode(', '),
+                ->implode(' | '),
             'terms' => $this->terms(),
             'orderRoute' => $portalPrefix.'orders.show',
             'invoiceLines' => $lineItems->build($invoice->order, $invoice),
@@ -102,5 +124,38 @@ class StaffInvoiceController extends Controller
                 'By making payment, the customer agrees to these terms and conditions.',
             ],
         ];
+    }
+
+    private function packageQuantities(Order $order): string
+    {
+        $sides = $order->packageSides;
+        $hasRecordedSideQuantity = $sides->contains(fn ($side): bool => $side->card_quantity !== null);
+
+        if (! $hasRecordedSideQuantity && $sides->count() === 1 && (int) $order->card_quantity > 0) {
+            $side = $sides->first();
+            $male = $side->side === 'LELAKI' ? (int) $order->card_quantity : 0;
+            $female = $side->side === 'PEREMPUAN' ? (int) $order->card_quantity : 0;
+        } elseif (! $hasRecordedSideQuantity) {
+            $male = null;
+            $female = null;
+        } else {
+            $male = (int) $sides->where('side', 'LELAKI')->sum('card_quantity');
+            $female = (int) $sides->where('side', 'PEREMPUAN')->sum('card_quantity');
+        }
+
+        $total = (int) $order->card_quantity ?: ($male + $female);
+
+        return 'Male: '.($male === null ? '-' : number_format($male))
+            .' | Female: '.($female === null ? '-' : number_format($female))
+            .' | Total: '.number_format($total);
+    }
+
+    private function sideLabel(?string $side): string
+    {
+        return match ($side) {
+            'LELAKI' => 'Male',
+            'PEREMPUAN' => 'Female',
+            default => 'Package',
+        };
     }
 }

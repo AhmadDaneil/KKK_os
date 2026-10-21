@@ -19,22 +19,24 @@
         .invoice-header { display: flex; justify-content: space-between; gap: 24px; align-items: flex-start; border-bottom: 2px solid #a9823f; padding-bottom: 14px; }
         .brand { font-size: 17pt; font-weight: 800; letter-spacing: .04em; color: #213c35; }
         .brand-sub, .company-details, .muted { color: #65716e; } .brand-sub { font-size: 9pt; margin-top: 3px; }
-        .company-details { font-size: 8.5pt; margin-top: 8px; white-space: pre-line; }
+        .company-details { font-size: 8.5pt; margin-top: 8px; white-space: pre-line; max-width: 360px; }
         .invoice-title { margin: 0; color: #213c35; font-size: 25pt; letter-spacing: .03em; text-align: right; }
         .invoice-meta { margin-top: 8px; text-align: right; font-size: 9pt; }
         .meta-row { display: flex; justify-content: flex-end; gap: 12px; margin-top: 3px; } .meta-row span:first-child { color: #687775; }
         .order-strip { margin: 14px 0 18px; color: #42544f; }
         .two-columns { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 18px; }
         .section-label { margin: 0 0 8px; font-size: 9pt; font-weight: 800; letter-spacing: .07em; color: #9a7b44; text-transform: uppercase; }
-        .details-table { width: 100%; border-collapse: collapse; font-size: 9pt; } .details-table td { padding: 3px 0; vertical-align: top; overflow-wrap: anywhere; }
+        .details-table { width: 100%; border-collapse: collapse; font-size: 8.5pt; } .details-table td { padding: 2px 0; vertical-align: top; overflow-wrap: anywhere; }
         .details-table td:first-child { width: 32%; color: #6b7473; padding-right: 8px; }
         .invoice-lines { width: 100%; border-collapse: collapse; table-layout: fixed; margin-top: 5px; }
-        .invoice-lines th { background: #29434b; color: white; text-align: left; font-size: 8.5pt; padding: 8px 7px; }
-        .invoice-lines td { border-bottom: 1px solid #dce2df; padding: 8px 7px; vertical-align: top; font-size: 9pt; overflow-wrap: anywhere; }
+        .invoice-lines th { background: #29434b; color: white; text-align: left; font-size: 8pt; padding: 5px 6px; }
+        .invoice-lines td { border-bottom: 1px solid #dce2df; padding: 4px 6px; vertical-align: top; font-size: 8pt; overflow-wrap: anywhere; }
         .invoice-lines .number { width: 7%; } .invoice-lines .description { width: 43%; } .invoice-lines .unit { width: 12%; text-align: center; }
         .invoice-lines .price { width: 18%; text-align: right; } .invoice-lines .amount { width: 20%; text-align: right; }
         .summary-area { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 18px; align-items: start; }
-        .payment-note { padding: 13px; background: #f3f5f3; border-radius: 5px; } .payment-note strong { color: #29434b; }
+        .payment-note { padding: 10px; background: #f3f5f3; border-radius: 5px; font-size: 8.5pt; } .payment-note strong { color: #29434b; }
+        .payment-details { width: 100%; border-collapse: collapse; margin: 5px 0; } .payment-details td { padding: 2px 0; vertical-align: top; }
+        .payment-details td:first-child { width: 36%; color: #687775; }
         .totals { width: 100%; border-collapse: collapse; } .totals td { padding: 5px 7px; } .totals td:last-child { text-align: right; white-space: nowrap; }
         .totals .grand-total { background: #29434b; color: white; font-weight: 800; font-size: 11pt; }
         .totals .balance td { border-top: 1px solid #a9823f; font-weight: 800; font-size: 11pt; color: #806536; }
@@ -78,8 +80,9 @@
                 </table></section>
                 <section><h2 class="section-label">Event Details</h2><table class="details-table">
                     <tr><td>Event</td><td>Wedding Ceremony</td></tr><tr><td>Couple</td><td>{{ $coupleNames ?: '-' }}</td></tr>
-                    <tr><td>Date</td><td>{{ $eventDates ?: '-' }}</td></tr><tr><td>Package</td><td>{{ $packageNames ?: '-' }}</td></tr>
-                    <tr><td>Quantity</td><td>{{ $order->card_quantity ? number_format($order->card_quantity).' cards' : '-' }}</td></tr>
+                    <tr><td>Booking Date</td><td>{{ $bookingDate }}</td></tr><tr><td>Event Date</td><td>{{ $eventDates ?: '-' }}</td></tr>
+                    <tr><td>Package</td><td>{{ $packageName }}</td></tr><tr><td>Quantity</td><td>{{ $packageQuantities }}</td></tr>
+                    <tr><td>Design Code</td><td>{{ $designCodes ?: '-' }}</td></tr>
                     <tr><td>Delivery</td><td>{{ $deliveryLabel }}</td></tr>
                 </table></section>
             </div>
@@ -90,11 +93,15 @@
                     @endforeach
                 </tbody>
             </table>
-            <div class="summary-area"><div class="payment-note"><div class="section-label">Payment Details</div><strong>Payment through official KKK OS channels</strong><div class="muted">Keep this invoice for your order and payment records.</div></div>
+            <div class="summary-area"><div class="payment-note"><div class="section-label">Payment Details</div><table class="payment-details">
+                    <tr><td>Bank</td><td><strong>{{ $paymentBank }}</strong></td></tr>
+                    <tr><td>Account Name</td><td><strong>{{ $paymentAccountName }}</strong></td></tr>
+                    <tr><td>Account No.</td><td><strong>{{ $paymentAccountNumber }}</strong></td></tr>
+                </table><div class="muted">{{ $paymentInstruction }}</div></div>
                 <table class="totals"><tr><td>Subtotal</td><td>{{ $money($invoice->subtotal) }}</td></tr><tr><td>Postage / Courier</td><td>{{ $money($invoice->postage_amount) }}</td></tr>
                     @if ((float) $invoice->discount_amount > 0)<tr><td>Discount</td><td>-{{ $money($invoice->discount_amount) }}</td></tr>@endif
-                    <tr class="grand-total"><td>Total</td><td>{{ $money($invoice->total_amount) }}</td></tr><tr><td>Payment Received</td><td>{{ $money($invoice->amount_paid) }}</td></tr>
-                    <tr class="balance"><td>Balance</td><td>{{ $money($invoice->balance_due) }}</td></tr></table></div>
+                    <tr class="grand-total"><td>Total</td><td>{{ $money($invoice->total_amount) }}</td></tr><tr><td>Deposit</td><td>{{ $money($depositAmount) }}</td></tr>
+                    <tr class="balance"><td>Balance Due</td><td>{{ $money($invoice->balance_due) }}</td></tr></table></div>
             <footer class="page-footer"><span>This invoice was generated by the system. No signature is required.</span><span>{{ $invoice->invoice_number }} &nbsp;|&nbsp; Page 1</span></footer>
         </section>
         <section class="page" aria-label="Invoice terms and conditions">

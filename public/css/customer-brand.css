@@ -331,6 +331,20 @@ body.brand-customer-flow :is(.confirm-button, .progress-button, .button-primary,
     background: var(--brand-green-hover);
 }
 
+body:is(.brand-order-progress, .brand-customer-flow) .payment-method-actions {
+    display: grid;
+    margin-top: 12px;
+    gap: 10px;
+}
+
+body:is(.brand-order-progress, .brand-customer-flow) .payment-method-actions form {
+    margin: 0;
+}
+
+body:is(.brand-order-progress, .brand-customer-flow) .payment-method-actions button {
+    width: 100%;
+}
+
 body.brand-order-dashboard :is(.back-home-button, .form-actions button, .cancel-card-image, .customer-view-switcher-button:not(.is-active), .preview-side-tab:not(.is-active), .preview-face-tab:not(.is-active), .preview-page-tab:not(.is-active)),
 body.brand-customer-flow :is(.button-secondary, .receipt-picker button, .final-confirmation-dialog-actions button:not(.is-primary), .artwork-confirmation-actions button:not(.is-primary):not(.is-danger)) {
     border-color: var(--brand-line);

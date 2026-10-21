@@ -45,6 +45,7 @@ return [
         'base_url' => env('BILLPLZ_BASE_URL', 'https://www.billplz-sandbox.com/api'),
         'x_signature_key' => env('BILLPLZ_X_SIGNATURE_KEY'),
         'collection_id' => env('BILLPLZ_COLLECTION_ID'),
+        'duitnow_qr_enabled' => env('BILLPLZ_DUITNOW_QR_ENABLED', false),
     ],
 
     'wabot' => [

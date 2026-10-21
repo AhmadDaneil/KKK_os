@@ -63,6 +63,44 @@ class PrintingFoundationTest extends TestCase
         ]);
     }
 
+    public function test_balance_payment_callback_releases_existing_print_jobs_from_payment_hold(): void
+    {
+        $order = $this->approvedOrder(1, 'LELAKI');
+        User::factory()->create([
+            'role' => User::ROLE_PRODUCTION,
+            'is_active' => true,
+            'is_primary_production' => true,
+        ]);
+
+        $job = app(InitializePrintJobsForOrderService::class)
+            ->initialize($order)
+            ->firstOrFail();
+        $this->assertSame('WAITING_FOR_PAYMENT', $job->status);
+
+        $payment = app(CreateBalancePaymentService::class)->create($order->fresh(), '250.00');
+        $payment->update([
+            'provider' => 'TEST',
+            'provider_reference' => 'PRINT-RELEASE-'.$payment->id,
+        ]);
+
+        app(HandlePaymentCallbackService::class)->handle([
+            'provider' => 'TEST',
+            'provider_reference' => $payment->provider_reference,
+            'provider_event_id' => 'PRINT-RELEASE-EVENT-'.$payment->id,
+            'status' => 'PAID',
+        ]);
+
+        $this->assertSame('PAID', $payment->fresh()->status);
+        $this->assertSame('READY_FOR_PRINT', $job->fresh()->status);
+        $this->assertSame('READY_FOR_PRINT', $order->fresh()->status);
+        $this->assertDatabaseHas('print_job_events', [
+            'print_job_id' => $job->id,
+            'event_type' => 'PAYMENT_CLEARED_FOR_PRINTING',
+            'from_status' => 'WAITING_FOR_PAYMENT',
+            'to_status' => 'READY_FOR_PRINT',
+        ]);
+    }
+
     public function test_two_package_paid_order_creates_two_independent_print_jobs(): void
     {
         $order = $this->paidOrder(2);
