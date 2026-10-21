@@ -34,11 +34,50 @@ class BookingIntentApiTest extends TestCase
     {
         $this->postJson(route('api.booking-intents.store'), [])->assertUnauthorized();
         $this->postJson(route('api.booking-intents.store'), [], [
+            'Authorization' => 'Bearer wrong-key',
+        ])->assertUnauthorized();
+        $this->postJson(route('api.booking-intents.store'), [], [
             'X-KKK-API-Key' => 'inbound-test-key',
         ])->assertUnprocessable()->assertJsonValidationErrors([
             'conversation_id', 'business_unit', 'customer_name', 'phone', 'package_count',
         ]);
+        $this->postJson(route('api.booking-intents.store'), [], [
+            'Authorization' => 'Bearer inbound-test-key',
+        ])->assertUnprocessable()->assertJsonValidationErrors([
+            'conversation_id', 'business_unit', 'customer_name', 'phone', 'package_count',
+        ]);
         Http::assertNothingSent();
+    }
+
+    public function test_wabot_raw_json_and_authorization_header_work_without_content_type_header(): void
+    {
+        Http::fake(['www.billplz-sandbox.com/*' => Http::response([
+            'id' => 'raw-json-bill', 'collection_id' => 'sandbox-collection', 'amount' => 5000,
+            'url' => 'https://www.billplz-sandbox.com/bills/raw-json-bill',
+        ])]);
+        $payload = json_encode([
+            'conversation_id' => 'raw-json-conversation',
+            'customer_name' => 'Nur Aisyah',
+            'phone' => '0123456789',
+            'business_unit' => 'RYC',
+            'package_count' => 1,
+            'package_code' => 'PUTERI_MANIS',
+        ], JSON_THROW_ON_ERROR);
+        $server = [
+            'HTTP_AUTHORIZATION' => 'Bearer inbound-test-key',
+            'CONTENT_TYPE' => 'text/plain',
+        ];
+
+        $first = $this->call('POST', route('api.booking-intents.store'), [], [], [], $server, $payload)
+            ->assertCreated()
+            ->assertJsonPath('provider_bill_id', 'raw-json-bill')
+            ->assertJsonPath('reused_existing_booking', false);
+        $this->call('POST', route('api.booking-intents.store'), [], [], [], $server, $payload)
+            ->assertOk()
+            ->assertJsonPath('draft_order_id', $first->json('draft_order_id'))
+            ->assertJsonPath('payment_url', $first->json('payment_url'))
+            ->assertJsonPath('reused_existing_booking', true);
+        Http::assertSentCount(1);
     }
 
     public function test_one_package_booking_is_idempotent_and_activates_only_after_verified_callback(): void
