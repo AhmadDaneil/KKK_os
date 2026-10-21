@@ -97,14 +97,16 @@
                             @if (($balance['provider'] ?? null) === 'BILLPLZ')
                                 <div class="balance-status-message"><strong>Awaiting payment</strong><span>Complete your secure payment to continue your order.</span></div>
                                 @if (! empty($balance['checkout_url']))
-                                    <a class="button button-primary" href="{{ $balance['checkout_url'] }}">Continue to Billplz Payment</a>
+                                    <a class="button button-primary" href="{{ $balance['checkout_url'] }}">Continue to {{ ($balance['payment_method'] ?? null) === 'DUITNOW_QR' ? 'DuitNow QR' : 'Billplz Payment' }}</a>
                                 @else
                                     <form method="POST" action="{{ route('orders.balance-payment.billplz.store', ['orderId' => $orderId]) }}">
                                         @csrf
-                                        <button class="button button-primary" type="submit">Continue to Payment</button>
+                                        <input type="hidden" name="payment_method" value="{{ $balance['payment_method'] ?? 'BILLPLZ' }}">
+                                        <button class="button button-primary" type="submit">Continue to {{ ($balance['payment_method'] ?? null) === 'DUITNOW_QR' ? 'DuitNow QR' : 'Billplz Payment' }}</button>
                                     </form>
                                 @endif
                                 @error('billplz')<p class="field-error" role="alert">{{ $message }}</p>@enderror
+                                @error('payment_method')<p class="field-error" role="alert">{{ $message }}</p>@enderror
                             @else
                                 <div class="balance-status-message"><strong>Receipt under review</strong><span>Our operations team will confirm payment before printing begins.</span></div>
                             @endif
@@ -115,11 +117,22 @@
                                 <div class="balance-status-message is-failed"><strong>Payment failed</strong><span>{{ $balance['reason'] ?: 'Please try your payment again.' }}</span></div>
                             @endif
                             @if (config('services.billplz.enabled') && $balanceBillplzAmount !== null && (float) $balanceBillplzAmount > 0)
-                                <form method="POST" action="{{ route('orders.balance-payment.billplz.store', ['orderId' => $orderId]) }}">
-                                    @csrf
-                                    <button class="button button-primary" type="submit">Pay Balance RM {{ number_format((float) $balanceBillplzAmount, 2) }}</button>
-                                </form>
+                                <div class="payment-method-actions">
+                                    <form method="POST" action="{{ route('orders.balance-payment.billplz.store', ['orderId' => $orderId]) }}">
+                                        @csrf
+                                        <input type="hidden" name="payment_method" value="BILLPLZ">
+                                        <button class="button button-primary" type="submit">Pay RM {{ number_format((float) $balanceBillplzAmount, 2) }} with Billplz</button>
+                                    </form>
+                                    @if (config('services.billplz.duitnow_qr_enabled'))
+                                        <form method="POST" action="{{ route('orders.balance-payment.billplz.store', ['orderId' => $orderId]) }}">
+                                            @csrf
+                                            <input type="hidden" name="payment_method" value="DUITNOW_QR">
+                                            <button class="button button-primary" type="submit">Pay RM {{ number_format((float) $balanceBillplzAmount, 2) }} with DuitNow QR</button>
+                                        </form>
+                                    @endif
+                                </div>
                                 @error('billplz')<p class="field-error" role="alert">{{ $message }}</p>@enderror
+                                @error('payment_method')<p class="field-error" role="alert">{{ $message }}</p>@enderror
                             @endif
                         @endif
                     </section>

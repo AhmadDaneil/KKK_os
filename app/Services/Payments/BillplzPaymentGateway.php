@@ -51,6 +51,8 @@ class BillplzPaymentGateway implements PaymentGatewayContract
 
         $amountSen = $this->toSen((string) $payment->amount);
         $order = $payment->order;
+        $paymentMethod = BillplzPaymentMethod::fromPayment($payment);
+        BillplzPaymentMethod::assertEnabled($paymentMethod);
         $payload = [
             'collection_id' => $collectionId,
             'name' => Str::limit(trim((string) $order->customer_name), 255, ''),
@@ -64,8 +66,8 @@ class BillplzPaymentGateway implements PaymentGatewayContract
             'redirect_url' => $payment->payment_type === 'BOOKING_DEPOSIT'
                 ? $appUrl.route('payments.booking.return', ['reference' => $payment->public_reference], false)
                 : $appUrl.route('payments.balance.return', ['reference' => $payment->public_reference], false),
-            'reference_1_label' => 'Order ID',
-            'reference_1' => $order->order_id,
+            'reference_1_label' => $paymentMethod === BillplzPaymentMethod::DUITNOW_QR ? 'Bank Code' : 'Order ID',
+            'reference_1' => $paymentMethod === BillplzPaymentMethod::DUITNOW_QR ? 'BP-RHBQR' : $order->order_id,
             'reference_2_label' => 'Payment ID',
             'reference_2' => (string) $payment->id,
             'deliver' => false,
@@ -123,6 +125,10 @@ class BillplzPaymentGateway implements PaymentGatewayContract
             || (int) ($bill['amount'] ?? 0) !== $amountSen
         ) {
             throw new BillplzPaymentException('The bill response from Billplz Sandbox is invalid.', 'invalid_provider_response');
+        }
+
+        if ($paymentMethod === BillplzPaymentMethod::DUITNOW_QR) {
+            $paymentUrl .= (str_contains($paymentUrl, '?') ? '&' : '?').'auto_submit=true';
         }
 
         return [

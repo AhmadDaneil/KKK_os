@@ -328,13 +328,26 @@
                 <div class="deposit-notice">
                     <strong>Booking payment is still outstanding.</strong>
                     <p>Complete your booking payment before final confirmation.</p>
-                    <form method="POST" action="{{ route('orders.booking-payment.store', ['orderId' => $order->order_id]) }}">
-                        @csrf
-                        <button class="confirm-button" type="submit">
-                            Continue to Payment RM {{ number_format((float) $review['pricing']['deposit_amount'], 2) }}
-                        </button>
-                    </form>
+                    <div class="payment-method-actions">
+                        <form method="POST" action="{{ route('orders.booking-payment.store', ['orderId' => $order->order_id]) }}">
+                            @csrf
+                            <input type="hidden" name="payment_method" value="BILLPLZ">
+                            <button class="confirm-button" type="submit">
+                                Pay RM {{ number_format((float) $review['pricing']['deposit_amount'], 2) }} with Billplz
+                            </button>
+                        </form>
+                        @if (config('services.billplz.duitnow_qr_enabled'))
+                            <form method="POST" action="{{ route('orders.booking-payment.store', ['orderId' => $order->order_id]) }}">
+                                @csrf
+                                <input type="hidden" name="payment_method" value="DUITNOW_QR">
+                                <button class="confirm-button" type="submit">
+                                    Pay RM {{ number_format((float) $review['pricing']['deposit_amount'], 2) }} with DuitNow QR
+                                </button>
+                            </form>
+                        @endif
+                    </div>
                     @error('payment')<p class="field-error" role="alert">{{ $message }}</p>@enderror
+                    @error('payment_method')<p class="field-error" role="alert">{{ $message }}</p>@enderror
                 </div>
             @endif
         </section>
