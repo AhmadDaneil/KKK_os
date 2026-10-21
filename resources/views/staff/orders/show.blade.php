@@ -907,7 +907,7 @@
 
                                 <div>
                                     <dt>Method</dt>
-                                    <dd>{{ $payment->provider ?: '-' }}</dd>
+                                    <dd>{{ $payment->provider === 'BILLPLZ' && data_get($payment->metadata, 'billplz.payment_method') === 'DUITNOW_QR' ? 'BILLPLZ DUITNOW QR' : ($payment->provider ?: '-') }}</dd>
                                 </div>
 
                                 <div>

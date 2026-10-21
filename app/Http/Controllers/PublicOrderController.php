@@ -110,6 +110,7 @@ class PublicOrderController extends Controller
                 'amount' => $balance->amount,
                 'reason' => $balance->metadata['rejection_reason'] ?? null,
                 'provider' => $balance->provider,
+                'payment_method' => data_get($balance->metadata, 'billplz.payment_method', 'BILLPLZ'),
                 'checkout_url' => $sessionAccess->hasAccess($request, $order)
                     && $balance->status === 'PENDING'
                     && $balance->provider === 'BILLPLZ'
