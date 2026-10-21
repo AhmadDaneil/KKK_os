@@ -124,10 +124,33 @@ class StaffInvoicePrintTest extends TestCase
             $this->actingAs($this->staff(User::ROLE_OM))
                 ->get(route('staff.invoices.print', $invoice))
                 ->assertOk()
-                ->assertSee('Payment Received')
+                ->assertSee('Deposit')
                 ->assertSee('RM '.$example['deposit'])
                 ->assertSee('RM '.$example['balance']);
         }
+    }
+
+    public function test_invoice_keeps_booking_deposit_separate_from_paid_balance(): void
+    {
+        $order = $this->pricedOrder(1, 'PAID', '50.00');
+        $order->payments()->create([
+            'payment_type' => 'BALANCE',
+            'provider' => 'MANUAL_QR',
+            'amount' => '250.00',
+            'currency' => 'MYR',
+            'status' => 'PAID',
+            'paid_at' => now(),
+        ]);
+        $invoice = app(SynchronizeOrderFinancialsService::class)->synchronize($order->fresh());
+
+        $this->actingAs($this->staff(User::ROLE_OM))
+            ->get(route('staff.invoices.print', $invoice))
+            ->assertOk()
+            ->assertSee('Deposit')
+            ->assertSee('RM 50.00')
+            ->assertSee('Balance Due')
+            ->assertSee('RM 0.00')
+            ->assertDontSee('Payment Received');
     }
 
     public function test_jelata_two_package_invoice_lists_contents_without_puteri_manis_freebies(): void
