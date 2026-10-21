@@ -95,7 +95,10 @@ class HandlePaymentCallbackService
                     $order = $payment->order()
                         ->lockForUpdate()
                         ->firstOrFail();
-                    $order->update(['booking_payment_status' => 'PAID']);
+                    $order->update([
+                        'booking_payment_status' => 'PAID',
+                        'wabot_active_booking_key' => null,
+                    ]);
                     $this->dashboard->activate($order, $payment);
                     $this->financials->synchronize($order);
 
@@ -117,6 +120,9 @@ class HandlePaymentCallbackService
                 }
             } elseif ($verified['status'] === 'CANCELLED' && $payment->status !== 'PAID') {
                 $payment->update(['status' => 'CANCELLED']);
+                if ($payment->payment_type === 'BOOKING_DEPOSIT') {
+                    $payment->order()->update(['wabot_active_booking_key' => null]);
+                }
             }
 
             return $payment->fresh();
