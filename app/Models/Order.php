@@ -23,6 +23,8 @@ class Order extends Model
         'customer_reference',
         'source',
         'source_reference',
+        'wabot_conversation_id',
+        'wabot_active_booking_key',
         'wabot_channel',
         'wabot_idempotency_key',
         'wabot_package_code',

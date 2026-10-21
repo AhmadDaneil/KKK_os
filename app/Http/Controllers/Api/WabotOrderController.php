@@ -38,7 +38,7 @@ class WabotOrderController extends Controller
         if ($canonical) {
             $rules['external_reference'] = ['nullable', 'string', 'max:128'];
             $rules['conversation_id'] = ['required', 'string', 'max:128', 'regex:/^[A-Za-z0-9._:-]+$/'];
-            $rules['idempotency_key'][0] = 'required';
+            $rules['idempotency_key'] = ['nullable', 'string', 'max:160'];
             $rules['business_unit'] = ['required', 'string', 'in:KKK,DRS,CK,RYC'];
             $rules['phone'] = ['required', 'string', 'max:32'];
             $rules['email'] = ['nullable', 'email', 'max:255'];
@@ -60,31 +60,24 @@ class WabotOrderController extends Controller
 
         if ($canonical) {
             $channels = ['KKK' => 'kingkadkahwin', 'DRS' => 'destinasi-raja-sehari', 'CK' => 'cetaking', 'RYC' => 'royalicious'];
-            $validated['external_reference'] = $validated['conversation_id'];
+            $validated['wabot_conversation_id'] = $validated['conversation_id'];
             $validated['brand'] = $channels[$validated['business_unit']];
             $validated['customer_phone'] = $validated['phone'];
             $validated['customer_email'] = $validated['email'] ?? null;
             $validated['wabot_package_code'] = $validated['package_code'] ?? null;
-            unset($validated['conversation_id'], $validated['business_unit'], $validated['phone'], $validated['email'], $validated['package_code']);
+            unset($validated['external_reference'], $validated['conversation_id'], $validated['business_unit'], $validated['phone'], $validated['email'], $validated['package_code']);
         }
 
-        if ($canonical && $validated['idempotency_key'] !== 'booking-'.$validated['external_reference']) {
-            Log::warning('Rejected mismatched booking idempotency key.');
-
-            throw ValidationException::withMessages([
-                'idempotency_key' => 'The Idempotency-Key must match the conversation reference.',
-            ]);
-        }
-
-        $validated['wabot_idempotency_key'] = $validated['idempotency_key'] ?? null;
+        $validated['wabot_idempotency_key'] = $canonical ? null : ($validated['idempotency_key'] ?? null);
         $validated['wabot_channel'] = $validated['brand'] ?? 'kingkadkahwin';
         unset($validated['idempotency_key'], $validated['brand']);
 
         try {
-            $result = $orders->create($validated);
+            $result = $canonical ? $orders->createForConversation($validated) : $orders->create($validated);
         } catch (WabotBookingConflictException $exception) {
             Log::warning('Wabot booking request conflicted with an existing order.', [
-                'external_reference' => $validated['external_reference'],
+                'external_reference' => $validated['external_reference'] ?? null,
+                'conversation_id' => $validated['wabot_conversation_id'] ?? null,
             ]);
 
             return response()->json(['message' => $exception->getMessage(), 'code' => 'BOOKING_CONFLICT'], 409);
@@ -105,6 +98,8 @@ class WabotOrderController extends Controller
                 'currency' => $payment->currency,
                 'payment_status' => $payment->status,
                 'payment_url' => $payment->status === 'PAID' ? null : $result['payment_url'],
+                'provider_bill_id' => $payment->provider_reference,
+                'reused_existing_booking' => $result['reused'],
             ];
 
             if ($payment->status === 'PAID') {

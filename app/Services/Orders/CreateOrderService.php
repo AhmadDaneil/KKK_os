@@ -19,6 +19,8 @@ class CreateOrderService
                 'order_id' => $this->orderIdGenerator->generate(),
                 'source' => $data['source'] ?? 'DIRECT',
                 'source_reference' => $data['source_reference'] ?? null,
+                'wabot_conversation_id' => $data['wabot_conversation_id'] ?? null,
+                'wabot_active_booking_key' => $data['wabot_active_booking_key'] ?? null,
                 'wabot_channel' => $data['wabot_channel'] ?? null,
                 'wabot_idempotency_key' => $data['wabot_idempotency_key'] ?? null,
                 'wabot_package_code' => $data['wabot_package_code'] ?? null,

@@ -6,6 +6,7 @@ use App\Models\Order;
 use App\Services\Payments\CreateBillplzBookingPaymentService;
 use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 
 class CreateWabotDraftOrderService
 {
@@ -14,6 +15,104 @@ class CreateWabotDraftOrderService
         private CreateBillplzBookingPaymentService $bookingPayments,
         private NormalizeCustomerPhoneService $phones,
     ) {}
+
+    /** @return array{order: Order, payment_url: string, reused: bool} */
+    public function createForConversation(array $data): array
+    {
+        $phone = $this->phones->normalize((string) $data['customer_phone']);
+        $channel = (string) $data['wabot_channel'];
+        $conversationId = (string) $data['wabot_conversation_id'];
+        $activeKey = hash('sha256', implode('|', [$channel, $conversationId, $phone]));
+
+        try {
+            $selection = DB::transaction(function () use ($data, $phone, $channel, $conversationId, $activeKey): array {
+                $existing = Order::query()
+                    ->where('source', 'WABOT')
+                    ->where('wabot_active_booking_key', $activeKey)
+                    ->lockForUpdate()
+                    ->first();
+
+                if ($existing === null) {
+                    $legacy = Order::query()
+                        ->where('source', 'WABOT')
+                        ->where('source_reference', $conversationId)
+                        ->whereNull('wabot_conversation_id')
+                        ->where('wabot_channel', $channel)
+                        ->where('customer_phone', $phone)
+                        ->lockForUpdate()
+                        ->first();
+
+                    if ($legacy !== null && $this->isActiveBooking($legacy)) {
+                        $legacy->update([
+                            'wabot_conversation_id' => $conversationId,
+                            'wabot_active_booking_key' => $activeKey,
+                        ]);
+                        $existing = $legacy;
+                    }
+                }
+
+                if ($existing !== null && $this->isActiveBooking($existing)) {
+                    return ['order' => $existing, 'reused' => true];
+                }
+
+                if ($existing !== null) {
+                    $existing->update(['wabot_active_booking_key' => null]);
+                }
+
+                $order = $this->orders->create([
+                    ...$data,
+                    'source' => 'WABOT',
+                    'source_reference' => (string) Str::uuid(),
+                    'wabot_active_booking_key' => $activeKey,
+                    'wabot_idempotency_key' => null,
+                    'customer_phone' => $phone,
+                    'wabot_channel' => $channel,
+                ]);
+
+                return ['order' => $order, 'reused' => false];
+            }, 3);
+        } catch (UniqueConstraintViolationException $exception) {
+            $existing = Order::query()
+                ->where('source', 'WABOT')
+                ->where('wabot_active_booking_key', $activeKey)
+                ->first();
+
+            if ($existing === null || ! $this->isActiveBooking($existing)) {
+                throw $exception;
+            }
+
+            $selection = ['order' => $existing, 'reused' => true];
+        }
+
+        /** @var Order $order */
+        $order = $selection['order'];
+        if ($selection['reused']) {
+            $pendingPayment = $order->payments()
+                ->where('payment_type', 'BOOKING_DEPOSIT')
+                ->where('status', 'PENDING')
+                ->latest('id')
+                ->first();
+
+            if ($pendingPayment !== null && blank($pendingPayment->metadata['billplz']['checkout_url'] ?? null)) {
+                throw new WabotBookingConflictException('The booking bill is still being prepared. Retry shortly.');
+            }
+        }
+
+        $checkout = $this->bookingPayments->create($order, throwGatewayFailure: true);
+
+        return ['order' => $order, 'payment_url' => $checkout['payment_url'], 'reused' => $selection['reused']];
+    }
+
+    private function isActiveBooking(Order $order): bool
+    {
+        if ($order->status !== 'DETAILS_INCOMPLETE' || $order->booking_payment_status !== 'PENDING') {
+            return false;
+        }
+
+        $payment = $order->payments()->where('payment_type', 'BOOKING_DEPOSIT')->latest('id')->first();
+
+        return $payment === null || $payment->status === 'PENDING';
+    }
 
     /** @return array{order: Order, payment_url: string, reused: bool} */
     public function create(array $data): array
@@ -109,6 +208,7 @@ class CreateWabotDraftOrderService
 
         if ($order->source_reference !== $sourceReference
             || $order->wabot_idempotency_key !== $idempotencyKey
+            || $order->wabot_conversation_id !== ($data['wabot_conversation_id'] ?? null)
             || ($order->wabot_channel ?? 'kingkadkahwin') !== $channel
             || (int) $order->package_count !== (int) $data['package_count']
             || $order->package_type !== ($data['package_type'] ?? null)
@@ -119,7 +219,7 @@ class CreateWabotDraftOrderService
             || $side !== ($data['side'] ?? null)
             || (isset($data['package_format']) && $order->package_format !== $data['package_format'])
             || (isset($data['first_event_side']) && $order->first_event_side !== $data['first_event_side'])) {
-            throw new WabotBookingConflictException('The Idempotency-Key or conversation reference belongs to a different booking.');
+            throw new WabotBookingConflictException('The booking attempt or Idempotency-Key belongs to a different booking.');
         }
     }
 }
