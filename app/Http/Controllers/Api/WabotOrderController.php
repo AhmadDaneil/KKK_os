@@ -20,6 +20,13 @@ class WabotOrderController extends Controller
     public function store(Request $request, CreateWabotDraftOrderService $orders): JsonResponse
     {
         $canonical = $request->routeIs('api.booking-intents.store');
+        if ($canonical && ! $request->isJson()) {
+            $rawPayload = json_decode($request->getContent(), true);
+            if (is_array($rawPayload)) {
+                $request->merge($rawPayload);
+            }
+        }
+
         $request->merge(['idempotency_key' => $request->header('Idempotency-Key')]);
         $rules = [
             'external_reference' => ['required', 'string', 'max:128'],

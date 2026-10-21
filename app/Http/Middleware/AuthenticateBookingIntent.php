@@ -17,9 +17,14 @@ class AuthenticateBookingIntent
     public function handle(Request $request, Closure $next): Response
     {
         $configured = (string) config('services.wabot.inbound_api_key', '');
-        $provided = (string) $request->header('X-KKK-API-Key', '');
+        $providedHeader = (string) $request->header('X-KKK-API-Key', '');
+        $providedBearer = (string) $request->bearerToken();
+        $authorized = $configured !== '' && (
+            ($providedHeader !== '' && hash_equals($configured, $providedHeader))
+            || ($providedBearer !== '' && hash_equals($configured, $providedBearer))
+        );
 
-        if ($configured === '' || $provided === '' || ! hash_equals($configured, $provided)) {
+        if (! $authorized) {
             Log::warning('Rejected unauthorized booking intent request.');
 
             return response()->json(['message' => 'Unauthorized.', 'code' => 'UNAUTHORIZED'], 401);
