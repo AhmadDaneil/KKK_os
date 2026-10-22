@@ -1145,7 +1145,9 @@ a.staff-pagination-link:hover {
 }
 
 .staff-workflow-form { display:inline-block; margin:1rem .5rem 0 0; }
-.staff-proof-status { margin-top:1rem; padding:.8rem 1rem; border-radius:8px; background:#edf8f1; color:#17623a; }
+.staff-proof-status { display:flex; margin-top:1rem; padding:.8rem 1rem; flex-wrap:wrap; align-items:center; gap:.65rem; border-radius:8px; background:#edf8f1; color:#17623a; }
+.staff-proof-status-label { font-size:.82rem; font-weight:700; }
+.staff-proof-preview-select { min-width:150px; min-height:38px; padding:.45rem 2rem .45rem .65rem; border:1px solid #b8d3c1; border-radius:7px; background:#fff; color:#174d32; font:inherit; }
 .staff-packing-complete-form { display:grid; max-width:560px; margin-top:1.25rem; padding:1rem; border:1px solid #dce5df; border-radius:10px; background:#f8fbf9; gap:.65rem; }
 .staff-packing-complete-form label { font-size:.82rem; font-weight:800; }
 .staff-packing-complete-form input { width:100%; min-height:42px; padding:.6rem .75rem; border:1px solid #cbd5e1; border-radius:7px; background:#fff; }
