@@ -21,8 +21,8 @@ class CreateWabotDraftOrderService
     {
         $phone = $this->phones->normalize((string) $data['customer_phone']);
         $channel = (string) $data['wabot_channel'];
-        $conversationId = (string) $data['wabot_conversation_id'];
-        $activeKey = hash('sha256', implode('|', [$channel, $conversationId, $phone]));
+        $conversationId = $data['wabot_conversation_id'] ?? null;
+        $activeKey = hash('sha256', implode('|', [$channel, $phone]));
 
         try {
             $selection = DB::transaction(function () use ($data, $phone, $channel, $conversationId, $activeKey): array {
@@ -33,25 +33,36 @@ class CreateWabotDraftOrderService
                     ->first();
 
                 if ($existing === null) {
-                    $legacy = Order::query()
+                    $previousBookings = Order::query()
                         ->where('source', 'WABOT')
-                        ->where('source_reference', $conversationId)
-                        ->whereNull('wabot_conversation_id')
                         ->where('wabot_channel', $channel)
                         ->where('customer_phone', $phone)
+                        ->where('status', 'DETAILS_INCOMPLETE')
+                        ->where('booking_payment_status', 'PENDING')
+                        ->latest('id')
                         ->lockForUpdate()
-                        ->first();
+                        ->get();
 
-                    if ($legacy !== null && $this->isActiveBooking($legacy)) {
-                        $legacy->update([
-                            'wabot_conversation_id' => $conversationId,
+                    foreach ($previousBookings as $previousBooking) {
+                        if (! $this->isActiveBooking($previousBooking)) {
+                            continue;
+                        }
+
+                        $previousBooking->update([
+                            'wabot_conversation_id' => $previousBooking->wabot_conversation_id ?? $conversationId,
                             'wabot_active_booking_key' => $activeKey,
                         ]);
-                        $existing = $legacy;
+                        $existing = $previousBooking;
+
+                        break;
                     }
                 }
 
                 if ($existing !== null && $this->isActiveBooking($existing)) {
+                    if ($existing->wabot_conversation_id === null && $conversationId !== null) {
+                        $existing->update(['wabot_conversation_id' => $conversationId]);
+                    }
+
                     return ['order' => $existing, 'reused' => true];
                 }
 
