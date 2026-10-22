@@ -45,6 +45,32 @@ body.brand-landing .hero h1 em {
     color: var(--brand-green);
 }
 
+body.brand-landing .landing-resume-order {
+    max-width: 610px;
+    margin: 0 0 24px;
+    padding: 20px;
+    border: 1px solid var(--brand-line);
+    border-left: 4px solid var(--brand-gold);
+    border-radius: 12px;
+    background: var(--brand-surface);
+    box-shadow: 0 12px 30px rgba(63, 47, 17, .08);
+}
+
+body.brand-landing .landing-resume-order strong {
+    display: block;
+    font-size: 1.05rem;
+}
+
+body.brand-landing .landing-resume-order p {
+    margin: 8px 0 16px;
+    color: var(--brand-muted);
+    line-height: 1.5;
+}
+
+body.brand-landing .landing-resume-order .button {
+    display: inline-flex;
+}
+
 body.brand-landing .hero-art::before {
     border-color: #d8cba9;
     background: radial-gradient(circle at 75% 22%, rgba(255,255,255,.8), transparent 27%),
