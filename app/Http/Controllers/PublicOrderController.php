@@ -7,12 +7,25 @@ use App\Services\Orders\BuildCustomerProgressService;
 use App\Services\Orders\CustomerOrderSessionAccessService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\URL;
 use Illuminate\View\View;
 
 class PublicOrderController extends Controller
 {
+    public function landing(Request $request, CustomerOrderSessionAccessService $sessionAccess): Response
+    {
+        $activeDraft = $sessionAccess->unfinishedDraft($request);
+
+        if ($activeDraft && ! $sessionAccess->hasAccess($request, $activeDraft)) {
+            $activeDraft = null;
+        }
+
+        return response()->view('public.landing', ['activeDraft' => $activeDraft])
+            ->header('Cache-Control', 'private, no-store');
+    }
+
     public function create(Request $request): RedirectResponse
     {
         $channels = config('kingkadkahwin.booking.whatsapp_channels');

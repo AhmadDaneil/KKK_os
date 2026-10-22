@@ -50,7 +50,8 @@ class PublicOrderJourneyTest extends TestCase
             ->assertSee('Facebook')
             ->assertSee('WhatsApp')
             ->assertSee(route('public.orders.create'))
-            ->assertSee(route('public.orders.progress'));
+            ->assertSee(route('public.orders.progress'))
+            ->assertDontSee('Complete Order Details');
     }
 
     public function test_landing_page_displays_all_four_animated_card_examples(): void
