@@ -44,7 +44,7 @@ class WabotOrderController extends Controller
 
         if ($canonical) {
             $rules['external_reference'] = ['nullable', 'string', 'max:128'];
-            $rules['conversation_id'] = ['required', 'string', 'max:128', 'regex:/^[A-Za-z0-9._:-]+$/'];
+            $rules['conversation_id'] = ['nullable', 'string', 'max:128', 'regex:/^[A-Za-z0-9._:-]+$/'];
             $rules['idempotency_key'] = ['nullable', 'string', 'max:160'];
             $rules['business_unit'] = ['required', 'string', 'in:KKK,DRS,CK,RYC'];
             $rules['phone'] = ['required', 'string', 'max:32'];
@@ -60,6 +60,10 @@ class WabotOrderController extends Controller
         } catch (ValidationException $exception) {
             Log::warning('Rejected invalid Wabot booking request.', [
                 'fields' => array_keys($exception->errors()),
+                'present_fields' => array_values(array_filter(
+                    ['business_unit', 'conversation_id', 'customer_name', 'phone', 'package_count', 'package_code'],
+                    static fn (string $field): bool => $request->filled($field),
+                )),
             ]);
 
             throw $exception;
@@ -67,7 +71,7 @@ class WabotOrderController extends Controller
 
         if ($canonical) {
             $channels = ['KKK' => 'kingkadkahwin', 'DRS' => 'destinasi-raja-sehari', 'CK' => 'cetaking', 'RYC' => 'royalicious'];
-            $validated['wabot_conversation_id'] = $validated['conversation_id'];
+            $validated['wabot_conversation_id'] = $validated['conversation_id'] ?? null;
             $validated['brand'] = $channels[$validated['business_unit']];
             $validated['customer_phone'] = $validated['phone'];
             $validated['customer_email'] = $validated['email'] ?? null;

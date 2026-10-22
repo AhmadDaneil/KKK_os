@@ -39,12 +39,12 @@ class BookingIntentApiTest extends TestCase
         $this->postJson(route('api.booking-intents.store'), [], [
             'X-KKK-API-Key' => 'inbound-test-key',
         ])->assertUnprocessable()->assertJsonValidationErrors([
-            'conversation_id', 'business_unit', 'customer_name', 'phone', 'package_count',
+            'business_unit', 'customer_name', 'phone', 'package_count',
         ]);
         $this->postJson(route('api.booking-intents.store'), [], [
             'Authorization' => 'Bearer inbound-test-key',
         ])->assertUnprocessable()->assertJsonValidationErrors([
-            'conversation_id', 'business_unit', 'customer_name', 'phone', 'package_count',
+            'business_unit', 'customer_name', 'phone', 'package_count',
         ]);
         Http::assertNothingSent();
     }
@@ -162,6 +162,81 @@ class BookingIntentApiTest extends TestCase
             ->assertJsonPath('payment_url', $first->json('payment_url'))
             ->assertJsonPath('reused_existing_booking', true);
         $this->assertDatabaseCount('orders', 1);
+        Http::assertSentCount(1);
+    }
+
+    public function test_booking_without_conversation_id_reuses_one_pending_bill_for_the_same_phone(): void
+    {
+        Http::fake(['www.billplz-sandbox.com/*' => Http::response([
+            'id' => 'phone-bill-1', 'collection_id' => 'sandbox-collection', 'amount' => 5000,
+            'url' => 'https://www.billplz-sandbox.com/bills/phone-bill-1',
+        ])]);
+        $payload = [
+            'customer_name' => 'Nur Aisyah', 'phone' => '0123456789',
+            'business_unit' => 'RYC', 'package_count' => 1,
+            'package_code' => 'PUTERI_MANIS',
+        ];
+        $headers = ['X-KKK-API-Key' => 'inbound-test-key'];
+
+        $first = $this->postJson(route('api.booking-intents.store'), $payload, $headers)
+            ->assertCreated()
+            ->assertJsonPath('payment_url', 'https://www.billplz-sandbox.com/bills/phone-bill-1');
+        $this->postJson(route('api.booking-intents.store'), [
+            ...$payload,
+            'conversation_id' => 'later-conversation',
+        ], $headers)
+            ->assertOk()
+            ->assertJsonPath('draft_order_id', $first->json('draft_order_id'))
+            ->assertJsonPath('payment_url', $first->json('payment_url'))
+            ->assertJsonPath('reused_existing_booking', true);
+
+        $this->assertDatabaseCount('orders', 1);
+        $this->assertDatabaseCount('payment_transactions', 1);
+        $order = Order::query()->where('order_id', $first->json('draft_order_id'))->firstOrFail();
+        $this->assertSame('later-conversation', $order->wabot_conversation_id);
+        Http::assertSentCount(1);
+    }
+
+    public function test_booking_without_phone_returns_422_without_creating_a_bill(): void
+    {
+        $payload = [
+            'customer_name' => 'Nur Aisyah', 'business_unit' => 'RYC',
+            'package_count' => 1, 'package_code' => 'PUTERI_MANIS',
+        ];
+
+        $this->postJson(route('api.booking-intents.store'), $payload, [
+            'X-KKK-API-Key' => 'inbound-test-key',
+        ])->assertUnprocessable()->assertJsonValidationErrors(['phone']);
+
+        $this->assertDatabaseCount('orders', 0);
+        $this->assertDatabaseCount('payment_transactions', 0);
+        Http::assertNothingSent();
+    }
+
+    public function test_same_phone_on_a_new_conversation_reuses_the_active_bill(): void
+    {
+        Http::fake(['www.billplz-sandbox.com/*' => Http::response([
+            'id' => 'shared-phone-bill', 'collection_id' => 'sandbox-collection', 'amount' => 5000,
+            'url' => 'https://www.billplz-sandbox.com/bills/shared-phone-bill',
+        ])]);
+        $payload = [
+            'conversation_id' => 'first-conversation', 'customer_name' => 'Nur Aisyah',
+            'phone' => '0123456789', 'business_unit' => 'RYC', 'package_count' => 1,
+        ];
+        $headers = ['X-KKK-API-Key' => 'inbound-test-key'];
+
+        $first = $this->postJson(route('api.booking-intents.store'), $payload, $headers)->assertCreated();
+        $this->postJson(route('api.booking-intents.store'), [
+            ...$payload,
+            'conversation_id' => 'second-conversation',
+        ], $headers)
+            ->assertOk()
+            ->assertJsonPath('draft_order_id', $first->json('draft_order_id'))
+            ->assertJsonPath('payment_url', $first->json('payment_url'))
+            ->assertJsonPath('reused_existing_booking', true);
+
+        $this->assertDatabaseCount('orders', 1);
+        $this->assertDatabaseCount('payment_transactions', 1);
         Http::assertSentCount(1);
     }
 
@@ -331,6 +406,7 @@ class BookingIntentApiTest extends TestCase
             'source_reference' => 'old-conversation-id',
             'wabot_channel' => 'royalicious',
             'wabot_idempotency_key' => 'booking-old-conversation-id',
+            'wabot_active_booking_key' => hash('sha256', 'royalicious|old-conversation-id|60123456789'),
             'customer_name' => 'Nur Aisyah',
             'customer_phone' => '60123456789',
             'package_count' => 1,
@@ -350,6 +426,7 @@ class BookingIntentApiTest extends TestCase
             ->assertJsonPath('reused_existing_booking', true);
 
         $this->assertSame('old-conversation-id', $order->fresh()->wabot_conversation_id);
+        $this->assertSame(hash('sha256', 'royalicious|60123456789'), $order->fresh()->wabot_active_booking_key);
         $this->assertDatabaseCount('orders', 1);
         Http::assertSentCount(1);
     }
