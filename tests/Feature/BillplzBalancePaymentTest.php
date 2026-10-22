@@ -100,8 +100,8 @@ class BillplzBalancePaymentTest extends TestCase
 
         $this->lookupOrder($order)->assertOk();
         $this->get(route('public.orders.progress', ['order_id' => $order->order_id]))
-            ->assertSee('Pay RM 250.00 with Billplz')
-            ->assertSee('Pay RM 250.00 with DuitNow QR');
+            ->assertSee('Pay remaining balance · RM 250.00 · Billplz')
+            ->assertSee('Pay remaining balance · RM 250.00 · DuitNow QR');
 
         $this->post(route('orders.balance-payment.billplz.store', ['orderId' => $order->order_id]), [
             'payment_method' => 'DUITNOW_QR',

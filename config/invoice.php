@@ -2,6 +2,12 @@
 
 return [
     'business_unit_prefix' => env('INVOICE_BUSINESS_UNIT_PREFIX', 'KKK'),
+    'service_phone_prefixes' => [
+        '601165656968' => 'KKK',
+        '60177197596' => 'DRS',
+        '601135623239' => 'RYL',
+        '60175863239' => 'CK',
+    ],
     'business_name' => env('INVOICE_BUSINESS_NAME', 'MASSA EMPIRE'),
     'registration_number' => env('INVOICE_REGISTRATION_NUMBER') ?: 'TR0271374-H',
     'business_address' => env('INVOICE_BUSINESS_ADDRESS') ?: '3 & 3A, Jalan Malinja 3, Taman Malinja Bukit Baru, 75150 Melaka',

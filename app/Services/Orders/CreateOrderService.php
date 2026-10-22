@@ -15,6 +15,10 @@ class CreateOrderService
     public function create(array $data): Order
     {
         return DB::transaction(function () use ($data) {
+            $channel = $data['wabot_channel'] ?? 'kingkadkahwin';
+            $servingPhone = $data['serving_phone_number']
+                ?? config("kingkadkahwin.booking.whatsapp_channels.{$channel}.number");
+
             $order = Order::create([
                 'order_id' => $this->orderIdGenerator->generate(),
                 'source' => $data['source'] ?? 'DIRECT',
@@ -22,6 +26,9 @@ class CreateOrderService
                 'wabot_conversation_id' => $data['wabot_conversation_id'] ?? null,
                 'wabot_active_booking_key' => $data['wabot_active_booking_key'] ?? null,
                 'wabot_channel' => $data['wabot_channel'] ?? null,
+                'serving_phone_number' => is_string($servingPhone)
+                    ? preg_replace('/\\D+/', '', $servingPhone)
+                    : null,
                 'wabot_idempotency_key' => $data['wabot_idempotency_key'] ?? null,
                 'wabot_package_code' => $data['wabot_package_code'] ?? null,
                 'package_count' => $data['package_count'],
