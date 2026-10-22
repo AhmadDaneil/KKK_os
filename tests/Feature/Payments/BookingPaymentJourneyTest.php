@@ -58,8 +58,16 @@ class BookingPaymentJourneyTest extends TestCase
         $this->get(route('payments.booking.return', ['reference' => $payment->public_reference]))
             ->assertOk()
             ->assertSee($order->customer_reference)
-            ->assertSee(route('orders.dashboard', ['orderId' => $order->order_id]));
-        $this->get(route('orders.dashboard', ['orderId' => $order->order_id]))->assertOk();
+            ->assertSee('Continue to Landing Page');
+        $this->get(route('home'))
+            ->assertOk()
+            ->assertSee('Booking payment confirmed')
+            ->assertSee('Complete Order Details')
+            ->assertSee(route('orders.dashboard', ['orderId' => $order->order_id]).'#customer-order-form')
+            ->assertDontSee('Chat to Book');
+        $this->get(route('orders.dashboard', ['orderId' => $order->order_id]))
+            ->assertOk()
+            ->assertSee('customer-order-form');
     }
 
     public function test_two_package_booking_amount_is_one_hundred_ringgit(): void
@@ -104,8 +112,8 @@ class BookingPaymentJourneyTest extends TestCase
 
         $this->get(route('payments.booking.return', ['reference' => $payment->public_reference]))
             ->assertOk()
-            ->assertSee('Payment successful')
-            ->assertSee(route('orders.dashboard', ['orderId' => $order->order_id]));
+            ->assertSee('Payment Successful')
+            ->assertSee('Continue to Landing Page');
 
         $this->assertSame('PAID', $payment->fresh()->status);
         $this->assertSame('PAID', $order->fresh()->booking_payment_status);
@@ -120,7 +128,7 @@ class BookingPaymentJourneyTest extends TestCase
 
         $this->get(route('payments.booking.return', ['reference' => $payment->public_reference]))
             ->assertOk()
-            ->assertSee('Payment successful');
+            ->assertSee('Payment Successful');
 
         $this->assertSame('PAID', $payment->fresh()->status);
         $this->assertSame('PAID', $order->fresh()->booking_payment_status);

@@ -11,7 +11,6 @@ use App\Http\Controllers\CustomerBalanceReceiptController;
 use App\Http\Controllers\CustomerBillplzBalancePaymentController;
 use App\Http\Controllers\CustomerBookingPaymentController;
 use App\Http\Controllers\CustomerCourierProofController;
-use App\Http\Controllers\CustomerPackingProofController;
 use App\Http\Controllers\CustomerDashboardAccessController;
 use App\Http\Controllers\CustomerDashboardController;
 use App\Http\Controllers\CustomerDepositReceiptController;
@@ -19,8 +18,9 @@ use App\Http\Controllers\CustomerOrderConfirmController;
 use App\Http\Controllers\CustomerOrderDraftController;
 use App\Http\Controllers\CustomerOrderReviewController;
 use App\Http\Controllers\CustomerOrderThankYouController;
-use App\Http\Controllers\CustomerProductionProofController;
+use App\Http\Controllers\CustomerPackingProofController;
 use App\Http\Controllers\CustomerPaymentReceiptController;
+use App\Http\Controllers\CustomerProductionProofController;
 use App\Http\Controllers\CustomerProgressUpdateController;
 use App\Http\Controllers\DevBalancePaymentController;
 use App\Http\Controllers\DevDesignJobController;
@@ -52,7 +52,7 @@ use App\Http\Controllers\Staff\StaffPrintingWorkflowController;
 use App\Models\User;
 use Illuminate\Support\Facades\Route;
 
-Route::view('/', 'public.landing')->name('home');
+Route::get('/', [PublicOrderController::class, 'landing'])->name('home');
 
 Route::get('/kalendar/jakim', [PublicCalendarController::class, 'convert'])
     ->middleware('throttle:60,1')

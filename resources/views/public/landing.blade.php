@@ -28,10 +28,19 @@
             <div class="hero-copy">
                 <h1>Celebrate your special day with a card that feels <em>uniquely yours.</em></h1>
                 <p class="hero-text">Chat with us on WhatsApp to choose your package and pay the booking fee. After payment is confirmed, you can complete your order and preview your card in the Customer Dashboard.</p>
-                <div class="hero-actions">
-                    <a class="button button-primary" href="{{ route('public.orders.create') }}"><span>Chat to Book</span><span class="button-arrow" aria-hidden="true">→</span></a>
-                    <a class="button button-secondary" href="{{ route('public.orders.progress') }}"><span>Track Order</span></a>
-                </div>
+                @if ($activeDraft)
+                    <div class="landing-resume-order" role="status">
+                        <strong>Booking payment confirmed</strong>
+                        <p>Your booking is ready. Please complete your order details before tracking its progress.</p>
+                        <a class="button button-primary" href="{{ route('orders.dashboard', ['orderId' => $activeDraft->order_id]) }}#customer-order-form">Complete Order Details →</a>
+                    </div>
+                @endif
+                @unless ($activeDraft)
+                    <div class="hero-actions">
+                        <a class="button button-primary" href="{{ route('public.orders.create') }}"><span>Chat to Book</span><span class="button-arrow" aria-hidden="true">→</span></a>
+                        <a class="button button-secondary" href="{{ route('public.orders.progress') }}"><span>Track Order</span></a>
+                    </div>
+                @endunless
                 <ul class="trust-list" aria-label="Key benefits">
                     <li><span>✓</span> Live preview</li>
                     <li><span>✓</span> Automatic saving</li>
