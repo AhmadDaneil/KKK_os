@@ -107,7 +107,7 @@ class WabotOrderApiTest extends TestCase
         ])]);
         $payload = [
             'external_reference' => 'conversation-123', 'package_count' => 1, 'side' => 'LELAKI',
-            'package_type' => 'PUTERI_MANIS', 'customer_name' => 'Pelanggan Wabot',
+            'package_type' => 'PUTERI_MANIS', 'brand' => 'royalicious', 'customer_name' => 'Pelanggan Wabot',
             'customer_email' => 'wabot@example.test', 'customer_phone' => '012-345 6789',
         ];
         $headers = ['Authorization' => 'Bearer wabot-test-token'];
@@ -122,7 +122,11 @@ class WabotOrderApiTest extends TestCase
         $this->assertDatabaseCount('orders', 1);
         $this->assertDatabaseCount('payment_transactions', 1);
         $this->assertDatabaseHas('orders', [
-            'source' => 'WABOT', 'source_reference' => 'conversation-123', 'customer_phone' => '60123456789',
+            'source' => 'WABOT',
+            'source_reference' => 'conversation-123',
+            'wabot_channel' => 'royalicious',
+            'serving_phone_number' => '601135623239',
+            'customer_phone' => '60123456789',
         ]);
         Http::assertSentCount(1);
     }

@@ -26,6 +26,7 @@ class Order extends Model
         'wabot_conversation_id',
         'wabot_active_booking_key',
         'wabot_channel',
+        'serving_phone_number',
         'wabot_idempotency_key',
         'wabot_package_code',
         'package_count',

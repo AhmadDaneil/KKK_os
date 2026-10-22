@@ -4,13 +4,17 @@ namespace App\Services\Payments;
 
 use App\Models\Invoice;
 use App\Models\Order;
+use App\Services\Invoices\GenerateInvoiceNumberService;
 use App\Services\Orders\GenerateCustomerReferenceService;
 use Illuminate\Support\Facades\DB;
 use RuntimeException;
 
 class SynchronizeOrderFinancialsService
 {
-    public function __construct(private GenerateCustomerReferenceService $references) {}
+    public function __construct(
+        private GenerateCustomerReferenceService $references,
+        private GenerateInvoiceNumberService $invoiceNumbers,
+    ) {}
 
     public function synchronize(Order $order): ?Invoice
     {
@@ -71,7 +75,7 @@ class SynchronizeOrderFinancialsService
             if ($invoice === null) {
                 return Invoice::query()->create([
                     'order_id' => $lockedOrder->id,
-                    'invoice_number' => $customerReference,
+                    'invoice_number' => $this->invoiceNumbers->generate($lockedOrder, $customerReference),
                     ...$values,
                     'issued_at' => now(),
                 ]);

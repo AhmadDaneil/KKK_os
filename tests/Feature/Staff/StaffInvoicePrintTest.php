@@ -40,6 +40,23 @@ class StaffInvoicePrintTest extends TestCase
         $this->assertDatabaseCount('invoices', 1);
     }
 
+    public function test_refreshing_an_existing_legacy_invoice_keeps_its_invoice_number(): void
+    {
+        $order = $this->pricedOrder(1, 'PAID');
+        $service = app(SynchronizeOrderFinancialsService::class);
+        $invoice = $service->synchronize($order);
+        $legacyInvoiceNumber = 'INV-'.$invoice->invoice_number;
+
+        $invoice->update(['invoice_number' => $legacyInvoiceNumber]);
+        $order->payments()->where('payment_type', 'BOOKING_DEPOSIT')->update(['amount' => '150.00']);
+
+        $refreshedInvoice = $service->synchronize($order->fresh());
+
+        $this->assertSame($legacyInvoiceNumber, $refreshedInvoice->invoice_number);
+        $this->assertSame('150.00', $refreshedInvoice->amount_paid);
+        $this->assertSame('150.00', $refreshedInvoice->balance_due);
+    }
+
     public function test_om_can_print_one_package_invoice_and_other_roles_are_forbidden(): void
     {
         $order = $this->pricedOrder(1, 'PAID');
@@ -85,8 +102,8 @@ class StaffInvoicePrintTest extends TestCase
         $order->update(['package_type' => 'PUTERI_MANIS']);
         $side = $order->packageSides()->firstOrFail();
         $side->update(['card_quantity' => 200]);
-        $side->design()->create(['design_code' => 'CKP-006']);
-        $side->event()->create(['event_date' => '2026-12-20']);
+        $side->design()->updateOrCreate([], ['design_code' => 'CKP-006']);
+        $side->event()->updateOrCreate([], ['event_date' => '2026-12-20']);
         $order->forceFill(['card_quantity' => 200])->save();
         $invoice = app(SynchronizeOrderFinancialsService::class)->synchronize($order->fresh());
 
