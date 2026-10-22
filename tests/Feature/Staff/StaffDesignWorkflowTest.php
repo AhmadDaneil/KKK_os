@@ -1308,6 +1308,45 @@ class StaffDesignWorkflowTest extends TestCase
         );
     }
 
+    public function test_operation_management_can_choose_each_uploaded_jpg_or_png_designer_preview(): void
+    {
+        $operationManagement = $this->staff(User::ROLE_OM);
+        $designer = $this->designer();
+        $job = $this->designJob();
+
+        $this->assign($job, $designer);
+        app(StartDesignJobService::class)->start($job, $designer);
+
+        app(CreateArtworkVersionService::class)->create($job->fresh(), [
+            'storage_path' => 'artworks/test/source.psd',
+            'preview_storage_path' => 'artworks/test/card-front.jpg',
+            'original_filename' => 'source.psd',
+            'mime_type' => 'image/vnd.adobe.photoshop',
+            'preview_files' => [
+                ['path' => 'artworks/test/card-front.jpg', 'original_name' => 'card-front.jpg', 'mime_type' => 'image/jpeg', 'artwork_type' => 'CARD'],
+                ['path' => 'artworks/test/card-back.png', 'original_name' => 'card-back.png', 'mime_type' => 'image/png', 'artwork_type' => 'CARD'],
+                ['path' => 'artworks/test/banner.jpg', 'original_name' => 'banner.jpg', 'mime_type' => 'image/jpeg', 'artwork_type' => 'BANNER'],
+                ['path' => 'artworks/test/bunting.png', 'original_name' => 'bunting.png', 'mime_type' => 'image/png', 'artwork_type' => 'BANTING'],
+                ['path' => 'artworks/test/source.pdf', 'original_name' => 'source.pdf', 'mime_type' => 'application/pdf', 'artwork_type' => 'CARD'],
+            ],
+        ], $designer);
+
+        $response = $this->actingAs($operationManagement)
+            ->get(route('staff.orders.show', $job->order->order_id));
+
+        $response->assertOk()
+            ->assertSee('Kad Depan')
+            ->assertSee('Kad Belakang')
+            ->assertSee('Banner')
+            ->assertSee('Bunting')
+            ->assertDontSee('source.pdf')
+            ->assertSee('data-proof-preview-select', false)
+            ->assertSee('file=0', false)
+            ->assertSee('file=1', false)
+            ->assertSee('file=2', false)
+            ->assertSee('file=3', false);
+    }
+
     public function test_two_package_design_sides_can_be_marked_ready_independently(): void
     {
         $lelakiDesigner = $this->designer();

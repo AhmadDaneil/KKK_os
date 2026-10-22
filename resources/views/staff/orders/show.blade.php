@@ -577,12 +577,40 @@
                                 </dl>
                                 @php
                                     $latestProofArtwork = $job->artworkVersions->sortByDesc('version_number')->first();
-                                    $latestProofFiles = $latestProofArtwork?->preview_files ?: array_filter([
+                                    $latestProofFiles = collect($latestProofArtwork?->preview_files ?: array_filter([
                                         $latestProofArtwork?->preview_storage_path ? ['path' => $latestProofArtwork->preview_storage_path] : null,
-                                    ]);
-                                    $hasDesignProof = collect($latestProofFiles)->contains(
-                                        fn ($file) => filled(data_get($file, 'watermarked_path')) || filled(data_get($file, 'path'))
-                                    );
+                                    ]))->values();
+                                    $cardPreviewNumber = 0;
+                                    $proofPreviewOptions = $latestProofFiles
+                                        ->map(function ($file, $fileIndex) use (&$cardPreviewNumber) {
+                                            $path = data_get($file, 'watermarked_path') ?: data_get($file, 'path');
+                                            $filename = data_get($file, 'original_name') ?: $path;
+                                            $extension = strtolower(pathinfo((string) $filename, PATHINFO_EXTENSION));
+
+                                            if (! filled($path) || ! in_array($extension, ['jpg', 'jpeg', 'png'], true)) {
+                                                return null;
+                                            }
+
+                                            $artworkType = strtoupper((string) data_get($file, 'artwork_type', 'CARD'));
+                                            $label = match ($artworkType) {
+                                                'BANNER' => 'Banner',
+                                                'BANTING' => 'Bunting',
+                                                default => match (++$cardPreviewNumber) {
+                                                    1 => 'Kad Depan',
+                                                    2 => 'Kad Belakang',
+                                                    default => 'Kad '.$cardPreviewNumber,
+                                                },
+                                            };
+
+                                            return [
+                                                'index' => $fileIndex,
+                                                'label' => $label,
+                                            ];
+                                        })
+                                        ->filter()
+                                        ->values();
+                                    $hasDesignProof = $proofPreviewOptions->isNotEmpty();
+                                    $proofPreviewSelectId = 'designer-proof-preview-'.$job->id;
                                     $latestCorrectionAction = $job->reviewActions
                                         ->where('action', 'CORRECTION_REQUESTED')
                                         ->sortByDesc('acted_at')
@@ -602,8 +630,22 @@
 
                                 @if (auth()->user()->isOperationManagement() && $hasDesignProof)
                                     <div class="staff-proof-status">
-                                        <strong>Designer Proof:</strong> Version {{ $latestProofArtwork->version_number }}
-                                        <a href="{{ route($operationRoutePrefix.'design-jobs.proof.show', $job) }}" class="staff-button staff-button-small" target="_blank" rel="noopener">View Proof</a>
+                                        <strong>Designer Proof · Version {{ $latestProofArtwork->version_number }}</strong>
+                                        <label class="staff-proof-status-label" for="{{ $proofPreviewSelectId }}">Preview</label>
+                                        <select id="{{ $proofPreviewSelectId }}" class="staff-proof-preview-select" data-proof-preview-select>
+                                            @foreach ($proofPreviewOptions as $previewOption)
+                                                <option
+                                                    value="{{ $previewOption['index'] }}"
+                                                    data-proof-url="{{ route($operationRoutePrefix.'design-jobs.proof.show', ['designJob' => $job, 'file' => $previewOption['index']]) }}"
+                                                >{{ $previewOption['label'] }}</option>
+                                            @endforeach
+                                        </select>
+                                        <a
+                                            href="{{ route($operationRoutePrefix.'design-jobs.proof.show', ['designJob' => $job, 'file' => $proofPreviewOptions->first()['index']]) }}"
+                                            class="staff-button staff-button-small js-proof-preview-link"
+                                            target="_blank"
+                                            rel="noopener"
+                                        >View Proof</a>
                                     </div>
                                 @endif
 
@@ -1467,6 +1509,22 @@
     </div>
 <script>
     document.addEventListener('DOMContentLoaded', function () {
+        document.querySelectorAll('[data-proof-preview-select]').forEach(function (select) {
+            const link = select.closest('.staff-proof-status')?.querySelector('.js-proof-preview-link');
+
+            if (!link) {
+                return;
+            }
+
+            select.addEventListener('change', function () {
+                const selectedOption = select.selectedOptions[0];
+
+                if (selectedOption?.dataset.proofUrl) {
+                    link.href = selectedOption.dataset.proofUrl;
+                }
+            });
+        });
+
         document.querySelectorAll('.staff-multi-file-picker').forEach(function (picker) {
             const input = picker.querySelector('input[type="file"]');
             const addButton = picker.querySelector('.staff-file-add');
