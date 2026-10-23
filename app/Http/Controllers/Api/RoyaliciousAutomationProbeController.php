@@ -45,7 +45,7 @@ class RoyaliciousAutomationProbeController extends Controller
     }
 
     /** @param array<array-key, mixed> $payload
-     *  @return array<int, string>
+     * @return array<int, string>
      */
     private function fieldPaths(array $payload, string $prefix = '', int $depth = 0): array
     {

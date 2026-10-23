@@ -1,9 +1,9 @@
 <?php
 
+use App\Http\Controllers\Api\RoyaliciousAutomationProbeController;
 use App\Http\Controllers\Api\WabotBalancePaymentController;
 use App\Http\Controllers\Api\WabotBookingIntentController;
 use App\Http\Controllers\Api\WabotOrderController;
-use App\Http\Controllers\Api\RoyaliciousAutomationProbeController;
 use App\Http\Controllers\BillplzWebhookController;
 use Illuminate\Support\Facades\Route;
 
