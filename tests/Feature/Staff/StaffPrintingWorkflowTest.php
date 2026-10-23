@@ -193,7 +193,8 @@ class StaffPrintingWorkflowTest extends TestCase
     {
         Storage::fake('local');
 
-        [, $jobs] = $this->printJobs();
+        $order = $this->approvedOrder();
+        $jobs = app(InitializePrintJobsForOrderService::class)->initialize($order);
         $job = $jobs->first();
         $path = "printing-progress/{$job->id}/proof.jpg";
 
