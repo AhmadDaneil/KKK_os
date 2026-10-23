@@ -60,6 +60,13 @@ class RoyaliciousAutomationProbeControllerTest extends TestCase
                     'contact', 'contact.number', 'params', 'params.customer_name',
                     'params.package_count', 'params.package_code', 'params.payment_method',
                 ]
+                && $context['field_present'] === [
+                    'contact.number' => true,
+                    'params.customer_name' => true,
+                    'params.package_count' => true,
+                    'params.package_code' => true,
+                    'params.payment_method' => true,
+                ]
                 && ! str_contains(json_encode($context, JSON_THROW_ON_ERROR), 'Nur Aisyah')
                 && ! str_contains(json_encode($context, JSON_THROW_ON_ERROR), '60123456789');
         });
@@ -72,6 +79,32 @@ class RoyaliciousAutomationProbeControllerTest extends TestCase
                 'package_code' => 'PUTERI_MANIS',
                 'payment_method' => 'ONLINE_BANKING',
             ],
+        ])
+            ->assertOk()
+            ->assertJsonPath('mode', 'observe_only');
+
+        $this->assertDatabaseCount('orders', 0);
+        Http::assertNothingSent();
+    }
+
+    public function test_records_missing_and_blank_booking_fields_without_logging_their_values(): void
+    {
+        Http::preventStrayRequests();
+        Log::shouldReceive('info')->once()->withArgs(static function (string $message, array $context): bool {
+            return $message === 'Royalicious automation probe received.'
+                && $context['field_present'] === [
+                    'contact.number' => false,
+                    'params.customer_name' => false,
+                    'params.package_count' => true,
+                    'params.package_code' => false,
+                    'params.payment_method' => false,
+                ]
+                && ! str_contains(json_encode($context, JSON_THROW_ON_ERROR), '  ');
+        });
+
+        $this->postJson($this->probeUrl(self::TOKEN), [
+            'contact' => ['number' => '  '],
+            'params' => ['customer_name' => '', 'package_count' => '1'],
         ])
             ->assertOk()
             ->assertJsonPath('mode', 'observe_only');
