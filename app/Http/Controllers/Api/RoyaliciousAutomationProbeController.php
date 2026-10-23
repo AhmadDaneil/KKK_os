@@ -38,10 +38,32 @@ class RoyaliciousAutomationProbeController extends Controller
 
         Log::info('Royalicious automation probe received.', [
             'field_paths' => $fieldPaths,
+            'field_present' => $this->fieldPresence($payload),
             'payload_bytes' => strlen($body),
         ]);
 
         return response()->json(['success' => true, 'mode' => 'observe_only']);
+    }
+
+    /** @param array<array-key, mixed> $payload
+     * @return array<string, bool>
+     */
+    private function fieldPresence(array $payload): array
+    {
+        $presence = [];
+
+        foreach ([
+            'contact.number',
+            'params.customer_name',
+            'params.package_count',
+            'params.package_code',
+            'params.payment_method',
+        ] as $path) {
+            $value = data_get($payload, $path);
+            $presence[$path] = is_scalar($value) && trim((string) $value) !== '';
+        }
+
+        return $presence;
     }
 
     /** @param array<array-key, mixed> $payload
