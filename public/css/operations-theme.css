@@ -183,3 +183,13 @@ html[data-operations-theme="dark"] :is(.logout-confirmation-dialog h2,.logout-co
 html[data-operations-theme="dark"] :is(.logout-confirmation-actions button:not(.is-danger)) { color: var(--operations-text); border-color: var(--operations-line); background: var(--operations-soft); }
 
 @media (max-width: 520px) { .operations-theme-toggle-label { display: none; } }
+
+html[data-operations-theme="dark"] .staff-design-tools {
+    color: var(--operations-text);
+    border-color: var(--operations-line);
+    background: var(--operations-surface);
+    box-shadow: 0 10px 24px rgba(0, 0, 0, .18);
+}
+html[data-operations-theme="dark"] .staff-design-tools h3 { color: var(--operations-text); }
+html[data-operations-theme="dark"] .staff-design-tools ol,
+html[data-operations-theme="dark"] .staff-design-tools-note { color: var(--operations-muted); }
