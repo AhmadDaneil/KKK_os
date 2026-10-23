@@ -192,4 +192,7 @@ html[data-operations-theme="dark"] .staff-supplementary-heading h4 { color: var(
 html[data-operations-theme="dark"] .staff-supplementary-heading p,
 html[data-operations-theme="dark"] :is(.staff-supplementary-artworks .staff-field label,.staff-supplementary-artworks .staff-field-help,.staff-supplementary-artworks .staff-optional) { color: var(--operations-muted); }
 html[data-operations-theme="dark"] .staff-artwork-ratio { color: #d7f2e2; border-color: #638c72; background: #263c30; }
+html[data-operations-theme="dark"] .staff-artwork-ready-panel { color: var(--operations-text); border-color: #478865; background: #234231; }
+html[data-operations-theme="dark"] .staff-artwork-ready-panel strong { color: #b7eed0; }
+html[data-operations-theme="dark"] .staff-artwork-ready-panel p { color: #d3e7d9; }
 html[data-operations-theme="dark"] .staff-workspace input[type="file"]::file-selector-button { color: #261d10; border: 1px solid #e0b95c; border-radius: 5px; background: #e0b95c; }
