@@ -51,6 +51,7 @@ return [
     'wabot' => [
         'token' => env('WABOT_API_TOKEN'),
         'inbound_api_key' => env('WABOT_INBOUND_API_KEY'),
+        'royalicious_automation_probe_token' => env('WABOT_RYC_AUTOMATION_PROBE_TOKEN'),
         'base_url' => env('WABOT_BASE_URL', 'https://app.wabot.my'),
         'channels' => [
             'kingkadkahwin' => ['instance_id' => env('WABOT_KKK_INSTANCE_ID'), 'access_token' => env('WABOT_KKK_ACCESS_TOKEN')],
