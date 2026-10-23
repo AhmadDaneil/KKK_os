@@ -195,4 +195,8 @@ html[data-operations-theme="dark"] .staff-artwork-ratio { color: #d7f2e2; border
 html[data-operations-theme="dark"] .staff-artwork-ready-panel { color: var(--operations-text); border-color: #478865; background: #234231; }
 html[data-operations-theme="dark"] .staff-artwork-ready-panel strong { color: #b7eed0; }
 html[data-operations-theme="dark"] .staff-artwork-ready-panel p { color: #d3e7d9; }
+html[data-operations-theme="dark"] .staff-proof-status { color: #d3e7d9; border: 1px solid #478865; background: #234231; }
+html[data-operations-theme="dark"] .staff-proof-status strong { color: #b7eed0; }
+html[data-operations-theme="dark"] .staff-proof-status-label { color: #d3e7d9; }
+html[data-operations-theme="dark"] .staff-proof-preview-select { color: var(--operations-text); border-color: #887650; background: #211c15; }
 html[data-operations-theme="dark"] .staff-workspace input[type="file"]::file-selector-button { color: #261d10; border: 1px solid #e0b95c; border-radius: 5px; background: #e0b95c; }
