@@ -189,6 +189,35 @@ class StaffPrintingWorkflowTest extends TestCase
         $this->assertSame('PRODUCTION', $job->progress_files[0]['uploaded_by_role']);
     }
 
+    public function test_operation_management_can_view_production_progress_files(): void
+    {
+        Storage::fake('local');
+
+        [, $jobs] = $this->printJobs();
+        $job = $jobs->first();
+        $path = "printing-progress/{$job->id}/proof.jpg";
+
+        Storage::disk('local')->put($path, 'production proof');
+        $job->update([
+            'progress_files' => [[
+                'path' => $path,
+                'original_name' => 'proof.jpg',
+                'mime_type' => 'image/jpeg',
+                'uploaded_by_role' => User::ROLE_PRODUCTION,
+            ]],
+        ]);
+
+        $operationManagement = $this->staff(User::ROLE_OM);
+
+        $this->actingAs($operationManagement, 'staff')
+            ->get(route('staff.print-jobs.progress-files.show', [
+                'printJob' => $job,
+                'file' => 0,
+            ]))
+            ->assertOk()
+            ->assertHeader('Content-Type', 'image/jpeg');
+    }
+
     public function test_assigned_production_staff_can_share_an_existing_legacy_progress_file(): void
     {
         Storage::fake('local');
