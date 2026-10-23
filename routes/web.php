@@ -449,12 +449,14 @@ Route::middleware(['auth:staff', 'active.staff'])
         |
         */
 
-        Route::middleware('staff.role:PRODUCTION')->group(function () {
-            Route::get(
-                '/print-jobs/{printJob}/progress-files/{file}',
-                [StaffPrintingWorkflowController::class, 'showProgressFile']
-            )->name('print-jobs.progress-files.show');
+        Route::get(
+            '/print-jobs/{printJob}/progress-files/{file}',
+            [StaffPrintingWorkflowController::class, 'showProgressFile']
+        )
+            ->middleware('staff.role:PRODUCTION,'.User::ROLE_OM)
+            ->name('print-jobs.progress-files.show');
 
+        Route::middleware('staff.role:PRODUCTION')->group(function () {
             Route::post(
                 '/print-jobs/{printJob}/progress-files',
                 [StaffPrintingWorkflowController::class, 'uploadProgress']
