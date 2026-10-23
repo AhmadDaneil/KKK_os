@@ -18,6 +18,7 @@
             <div class="login-heading"><span class="login-eyebrow">FORGOT PASSWORD</span><h1 id="forgot-password-title">Reset access<span>.</span></h1><p>Enter your admin email to receive a reset link.</p></div>
             @if (session('status'))<div class="login-alert login-alert--success" role="status">{{ session('status') }}</div>@endif
             @error('email')<div class="login-alert" role="alert">{{ $message }}</div>@enderror
+            @if (config('mail.default') === 'log')<div class="login-alert login-alert--info" role="status">Local email is logged instead of delivered. After requesting a link, open <code>storage/logs/laravel.log</code> and use the latest admin password reset link.</div>@endif
             <form method="POST" action="{{ route('admin.password.email') }}" class="login-form">
                 @csrf
                 <div class="login-field"><label for="email">Admin Email</label><input id="email" type="email" name="email" value="{{ old('email') }}" placeholder="name@kingkadkahwin.com" required autofocus autocomplete="email"></div>
