@@ -310,17 +310,25 @@ class StaffOrderController extends Controller
                             ->where('status', '!=', 'PRINTED')
                     )
             ),
-            'packing' => $query->where(
-                fn (Builder $packingQuery) => $packingQuery
-                    ->where(fn (Builder $assignedQuery) => $assignedQuery
-                        ->whereNotNull('packing_assigned_user_id')
-                        ->whereDoesntHave('packingJob'))
-                    ->orWhereHas(
-                        'packingJob',
-                        fn (Builder $jobQuery) => $jobQuery
-                            ->where('status', '!=', 'PACKED')
-                    )
-            ),
+            'packing' => $query
+                ->where('status', 'PRINTED')
+                ->whereHas('printJobs')
+                ->whereDoesntHave(
+                    'printJobs',
+                    fn (Builder $jobQuery) => $jobQuery
+                        ->where('status', '!=', 'PRINTED')
+                )
+                ->where(
+                    fn (Builder $packingQuery) => $packingQuery
+                        ->where(fn (Builder $assignedQuery) => $assignedQuery
+                            ->whereNotNull('packing_assigned_user_id')
+                            ->whereDoesntHave('packingJob'))
+                        ->orWhereHas(
+                            'packingJob',
+                            fn (Builder $jobQuery) => $jobQuery
+                                ->where('status', '!=', 'PACKED')
+                        )
+                ),
             'fulfilment' => $query->whereHas(
                 'fulfilmentJob',
                 fn (Builder $jobQuery) => $jobQuery
