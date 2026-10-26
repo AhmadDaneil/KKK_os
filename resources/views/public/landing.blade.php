@@ -138,7 +138,7 @@
 
         <section class="customer-policies" id="polisi">
             <article><h2>Privacy</h2><p>Order information is used to prepare, discuss and deliver your order.</p><a href="{{ route('public.privacy') }}">Read our privacy notice</a></article>
-            <article id="terma"><h2>Order Terms</h2><p>Check all names, dates, times, addresses and phone numbers before final confirmation. Changes after confirmation may incur correction fees.</p></article>
+            <article id="terma"><h2>Order Terms</h2><p>Check all names, dates, times, addresses and phone numbers before final confirmation. Changes after confirmation may incur correction fees.</p><a href="{{ route('public.terms') }}">Read our order terms</a></article>
             <article id="pemulangan"><h2>Cancellations and Refunds</h2><p>Contact Customer Support promptly. Eligibility depends on the current design and production stage.</p></article>
         </section>
     </main>
