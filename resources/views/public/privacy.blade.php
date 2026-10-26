@@ -23,19 +23,19 @@
         </nav>
     </header>
 
-    <main class="privacy-page">
-        <header class="privacy-page-heading">
+    <main class="customer-legal-page">
+        <header class="customer-legal-page-heading">
             <p class="eyebrow">Customer information</p>
             <h1>Notis Privasi <span aria-hidden="true">/</span> Privacy Notice</h1>
             <p>Ketahui cara maklumat anda digunakan untuk mengurus pesanan KingKadKahwin. / Learn how your information is used to manage your KingKadKahwin order.</p>
-            <p class="privacy-updated">Dikemas kini / Last updated: 26 October 2026</p>
-            <nav class="privacy-language-nav" aria-label="Choose language / Pilih bahasa">
+            <p class="customer-legal-updated">Dikemas kini / Last updated: 26 October 2026</p>
+            <nav class="customer-legal-language-nav" aria-label="Choose language / Pilih bahasa">
                 <a href="#notis-bm">Bahasa Melayu</a>
                 <a href="#privacy-notice">English</a>
             </nav>
         </header>
 
-        <article class="privacy-document" id="notis-bm" lang="ms" aria-labelledby="privacy-title-ms">
+        <article class="customer-legal-document" id="notis-bm" lang="ms" aria-labelledby="privacy-title-ms">
             <header>
                 <p class="eyebrow">Bahasa Melayu</p>
                 <h2 id="privacy-title-ms">Notis Perlindungan Data Peribadi</h2>
@@ -108,7 +108,7 @@
             </section>
         </article>
 
-        <article class="privacy-document" id="privacy-notice" lang="en" aria-labelledby="privacy-title-en">
+        <article class="customer-legal-document" id="privacy-notice" lang="en" aria-labelledby="privacy-title-en">
             <header>
                 <p class="eyebrow">English</p>
                 <h2 id="privacy-title-en">Personal Data Protection Notice</h2>
