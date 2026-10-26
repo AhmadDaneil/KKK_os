@@ -45,7 +45,7 @@
                 <strong>{{ $order->order_id }}</strong>
                 <b>{{ $progress['percentage'] }}%</b>
             </div>
-            <div class="public-progress-track" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="{{ $progress['percentage'] }}">
+            <div class="public-progress-track" data-progress-tone="{{ $progress['tone'] }}" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="{{ $progress['percentage'] }}">
                 <span style="width: {{ $progress['percentage'] }}%"></span>
             </div>
             <p class="proofing-current-status"><strong>{{ $progress['label'] }}</strong><span>{{ $progress['message'] }}</span></p>
