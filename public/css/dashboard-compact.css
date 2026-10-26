@@ -56,6 +56,7 @@
 .staff-timeline-section .staff-lifecycle-list li{padding-bottom:14px}
 .staff-timeline-section .staff-lifecycle-marker{margin-bottom:14px}
 .staff-timeline-section .staff-lifecycle-list small{margin-top:6px}
+.staff-timeline-section .staff-lifecycle-list li:not(:last-child)::after{left:46px}
 .staff-confirmed-preview{margin-top:16px}
 
 /* Customer artwork correction notes, shared by staff and admin operation views. */
