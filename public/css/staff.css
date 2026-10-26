@@ -990,8 +990,20 @@ a.staff-pagination-link:hover {
     margin-top: 14px;
 }
 
-.staff-detail-list > div:nth-last-child(-n + 2) {
+.staff-detail-list > div:last-child {
     border-bottom: 0;
+}
+
+@media (min-width: 561px) {
+    .staff-detail-list:has(> div:last-child:nth-child(even):not(.staff-detail-wide)) > div:nth-last-child(2) {
+        border-bottom: 0;
+    }
+
+    .staff-detail-list:has(> div:last-child:nth-child(odd):not(.staff-detail-wide))::after {
+        content: "";
+        grid-column: 2;
+        border-left: 1px solid var(--staff-border);
+    }
 }
 
 .staff-detail-list > div:nth-child(odd) {
