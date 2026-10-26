@@ -52,11 +52,11 @@
 .staff-order-card{padding:14px}.staff-artwork-ready-panel{margin-top:11px;padding:11px 13px}
 .staff-timeline-item{padding:7px 0 12px}.staff-timeline-content{padding:9px 11px}
 .staff-order-brief{margin-bottom:12px}.staff-order-brief>div{padding:11px 13px}.staff-order-sections{margin-top:16px;margin-bottom:16px}
-.staff-timeline-section .staff-lifecycle-list{padding-bottom:12px}
+.staff-timeline-section .staff-lifecycle-list{padding-top:8px;padding-bottom:12px}
 .staff-timeline-section .staff-lifecycle-list li{padding-bottom:14px}
 .staff-timeline-section .staff-lifecycle-marker{margin-bottom:14px}
 .staff-timeline-section .staff-lifecycle-list small{margin-top:6px}
-.staff-timeline-section .staff-lifecycle-list li:not(:last-child)::after{left:46px}
+
 .staff-confirmed-preview{margin-top:16px}
 
 /* Customer artwork correction notes, shared by staff and admin operation views. */
