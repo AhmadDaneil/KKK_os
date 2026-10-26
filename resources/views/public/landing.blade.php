@@ -129,7 +129,7 @@
                 <h2>Important information and FAQs.</h2>
             </div>
             <div class="faq-grid">
-                <details open><summary>How do payments work?</summary><p>Pay the RM50 or RM100 booking fee using the link Wabot sends you. Your dashboard becomes available after that payment is confirmed. The remaining balance is due after design approval and before production.</p></details>
+                <details><summary>How do payments work?</summary><p>Pay the RM50 or RM100 booking fee using the link Wabot sends you. Your dashboard becomes available after that payment is confirmed. The remaining balance is due after design approval and before production.</p></details>
                 <details><summary>How do I request a design correction?</summary><p>Select the affected artwork, describe the changes and submit proof of correction payment on the Track Order page.</p></details>
                 <details><summary>How long will my order take?</summary><p>Timing depends on the number of packages, corrections, quantity and delivery method. Use your Order ID and phone number to see current progress.</p></details>
                 <details><summary>Are banners and bunting available?</summary><p>Yes. You can specify sizes, quantities, materials, orientation and additional instructions in the order form.</p></details>

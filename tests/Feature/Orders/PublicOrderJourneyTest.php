@@ -66,6 +66,13 @@ class PublicOrderJourneyTest extends TestCase
             ->assertSee('card-runner-islamic', false);
     }
 
+    public function test_landing_page_faq_questions_are_collapsed_by_default(): void
+    {
+        $this->get(route('home'))
+            ->assertSee('<details><summary>How do payments work?</summary>', false)
+            ->assertDontSee('<details open', false);
+    }
+
     public function test_landing_page_renders_social_icons_and_routes_customer_service_through_wabot(): void
     {
         config()->set('kingkadkahwin.social.instagram', 'https://instagram.example/kkk');
