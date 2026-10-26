@@ -54,6 +54,7 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/', [PublicOrderController::class, 'landing'])->name('home');
 Route::view('/privasi', 'public.privacy')->name('public.privacy');
+Route::view('/terma', 'public.terms')->name('public.terms');
 
 Route::get('/kalendar/jakim', [PublicCalendarController::class, 'convert'])
     ->middleware('throttle:60,1')
