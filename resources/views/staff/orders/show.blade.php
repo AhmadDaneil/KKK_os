@@ -261,7 +261,7 @@
             </div>
 
             @if (is_array($confirmedPreview))
-                <section class="staff-card">
+                <section class="staff-card staff-confirmed-preview">
                     <h2>Confirmed Live Preview</h2>
                     <p>Customer reference record from final confirmation. This is not print-ready artwork or a source file.</p>
                     <dl class="staff-detail-list">
