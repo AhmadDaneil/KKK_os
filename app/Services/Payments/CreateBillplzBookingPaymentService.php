@@ -68,8 +68,24 @@ class CreateBillplzBookingPaymentService
                 }
 
                 $url = $existing->metadata['billplz']['checkout_url'] ?? null;
-                if ($existing->provider === 'BILLPLZ' && is_string($url) && $url !== '') {
+                $configuredHost = parse_url((string) config('services.billplz.base_url', ''), PHP_URL_HOST);
+                $checkoutHost = is_string($url) ? parse_url($url, PHP_URL_HOST) : null;
+                $checkoutScheme = is_string($url) ? parse_url($url, PHP_URL_SCHEME) : null;
+
+                if ($existing->provider === 'BILLPLZ'
+                    && in_array($configuredHost, ['www.billplz.com', 'www.billplz-sandbox.com'], true)
+                    && is_string($url)
+                    && $url !== ''
+                    && $checkoutScheme === 'https'
+                    && $checkoutHost === $configuredHost) {
                     return ['payment' => $existing, 'payment_url' => $url, 'create_bill' => false];
+                }
+
+                if (is_string($url) && $url !== '') {
+                    throw new BillplzPaymentException(
+                        'The existing checkout belongs to a different Billplz environment.',
+                        'checkout_environment_mismatch',
+                    );
                 }
 
                 throw ValidationException::withMessages([
