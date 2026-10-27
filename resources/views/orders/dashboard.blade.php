@@ -253,6 +253,9 @@
     @php($isEditable = $order->status === 'DETAILS_INCOMPLETE')
     @php($firstEventSide = old('first_event_side', $order->first_event_side ?: 'LELAKI'))
     @php($orderedPackageSides = $order->packageSides->sortBy(fn ($item) => $item->side === $firstEventSide ? 0 : 1)->values())
+    @php($hasSelectableSinglePackageSide = (int) $order->package_count === 1 && $orderedPackageSides->isEmpty())
+    @php($singlePackageSide = old('single_package_side') === 'PEREMPUAN' ? 'PEREMPUAN' : 'LELAKI')
+    @php($formPackageSides = $hasSelectableSinglePackageSide ? [$singlePackageSide] : $orderedPackageSides->pluck('side')->all())
 
     @if (! $isEditable)
         <div class="notice readonly-notice">
@@ -285,6 +288,18 @@
                 <div class="order-form-fields">
 
         <fieldset class="customer-data-lock" @disabled(! $isEditable)>
+
+        @if ($hasSelectableSinglePackageSide)
+            <fieldset class="single-package-side-selection">
+                <legend>Wedding Card Package</legend>
+                <label for="single-package-side">Which side is this package for?</label>
+                <select id="single-package-side" name="single_package_side" data-single-package-side-selector data-selected-side="{{ $singlePackageSide }}">
+                    <option value="LELAKI" @selected($singlePackageSide === 'LELAKI')>Groom's Side</option>
+                    <option value="PEREMPUAN" @selected($singlePackageSide === 'PEREMPUAN')>Bride's Side</option>
+                </select>
+                <p class="field-help">Choose the side so we can show the complete card, event and delivery details form.</p>
+            </fieldset>
+        @endif
 
         @if ((int) $order->package_count === 2)
             <fieldset class="two-package-settings">
@@ -325,17 +340,17 @@
                 <div><label>Bride's Short Name</label><input name="couple[bride_abbreviation]" placeholder="Example: Awanis" value="{{ old('couple.bride_abbreviation', $couple?->bride_abbreviation) }}"></div>
             </div>
         </fieldset>
-        @foreach ($orderedPackageSides as $packageSide)
-            @php($side = $packageSide->side)
-            @php($event = $packageSide->event)
+        @foreach ($formPackageSides as $side)
+            @php($packageSide = $order->packageSides->firstWhere('side', $side))
+            @php($event = $packageSide?->event)
             @php($hideFoldedDesign = $order->package_count === 2 && $order->package_format === 'FOLDED' && ! $loop->first)
             <fieldset data-package-side="{{ $side }}">
-                <legend data-package-legend>{{ $order->package_count === 2 ? 'Event '.$loop->iteration.' – ' : 'Package – ' }}{{ $side === 'LELAKI' ? "Groom's Side" : "Bride's Side" }}</legend>
-                @php($selectedQuantity = old("sides.$side.card_quantity", $packageSide->card_quantity))
+                <legend data-package-legend>{{ $hasSelectableSinglePackageSide ? 'Wedding Card Details' : ($order->package_count === 2 ? 'Event '.$loop->iteration.' – ' : 'Package – ').($side === 'LELAKI' ? "Groom's Side" : "Bride's Side") }}</legend>
+                @php($selectedQuantity = old("sides.$side.card_quantity", $packageSide?->card_quantity))
 
                 <div>
-                    <label for="card_quantity_{{ strtolower($side) }}">
-                        Card Quantity — {{ $side === 'LELAKI' ? "Groom's Side" : "Bride's Side" }}
+                    <label for="card_quantity_{{ strtolower($side) }}" data-package-quantity-label>
+                        {{ $hasSelectableSinglePackageSide ? 'Card Quantity' : 'Card Quantity — '.($side === 'LELAKI' ? "Groom's Side" : "Bride's Side") }}
                     </label>
 
                     <select
@@ -364,7 +379,7 @@
 <div class="grid">
     <div>
         <label>Theme</label>
-        @php($selectedTheme = old("sides.$side.design.theme", $packageSide->design?->theme))
+        @php($selectedTheme = old("sides.$side.design.theme", $packageSide?->design?->theme))
 
 <select name="sides[{{ $side }}][design][theme]">
     <option value="">-- Select theme --</option>
@@ -393,11 +408,11 @@
         <input
             name="sides[{{ $side }}][design][design_code]"
             placeholder="Example: KKK-001"
-            value="{{ old("sides.$side.design.design_code", $packageSide->design?->design_code) }}"
+            value="{{ old("sides.$side.design.design_code", $packageSide?->design?->design_code) }}"
         >
     </div>
 
-    @php($selectedCardTitle = old("sides.$side.design.card_title", $packageSide->design?->card_title))
+@php($selectedCardTitle = old("sides.$side.design.card_title", $packageSide?->design?->card_title))
 
 <div>
     <label>Event Title</label>
@@ -422,7 +437,7 @@
         JPG, JPEG, PNG or WEBP format. Maximum 10 MB.
     </p>
 
-    @if ($packageSide->design?->card_image_path)
+    @if ($packageSide?->design?->card_image_path)
         <p class="upload-status">
             Photo uploaded.
             Choose a new file below only if you want to replace it.
@@ -448,11 +463,11 @@
                     <h3 id="included-design-items-{{ strtolower($side) }}">Included in the Card Package</h3>
                     <p class="field-help">Each wedding card package includes banner and bunting previews. The designer will use the short names and selected card design theme. Couple photos are used only for the PORTRAIT theme.</p>
                 </section>
-                <h3>{{ $side === 'LELAKI' ? "Groom's" : "Bride's" }} Parents</h3>
+                <h3>{{ $hasSelectableSinglePackageSide ? 'Parents' : ($side === 'LELAKI' ? "Groom's" : "Bride's').' Parents' }}</h3>
                 <p class="field-help">Enter the names of the parents hosting this event.</p>
                 <div class="grid">
-                    <div><label>Father's Name</label><input name="sides[{{ $side }}][parents][father_name]" placeholder="Example: Mr Rahim Bin Abdullah" value="{{ old("sides.$side.parents.father_name", $packageSide->parents?->father_name) }}"></div>
-                    <div><label>Mother's Name</label><input name="sides[{{ $side }}][parents][mother_name]" placeholder="Example: Mrs Aminah Binti Ismail" value="{{ old("sides.$side.parents.mother_name", $packageSide->parents?->mother_name) }}"></div>
+                    <div><label>Father's Name</label><input name="sides[{{ $side }}][parents][father_name]" placeholder="Example: Mr Rahim Bin Abdullah" value="{{ old("sides.$side.parents.father_name", $packageSide?->parents?->father_name) }}"></div>
+                    <div><label>Mother's Name</label><input name="sides[{{ $side }}][parents][mother_name]" placeholder="Example: Mrs Aminah Binti Ismail" value="{{ old("sides.$side.parents.mother_name", $packageSide?->parents?->mother_name) }}"></div>
                 </div>
                 <h3>Event</h3>
                 <div class="grid">
@@ -650,6 +665,32 @@ document.addEventListener('DOMContentLoaded', function () {
 
     if (!form || !pairsElement) {
         return;
+    }
+
+    const singlePackageSideSelector = form.querySelector('[data-single-package-side-selector]');
+
+    if (singlePackageSideSelector) {
+        singlePackageSideSelector.addEventListener('change', function () {
+            const previousSide = singlePackageSideSelector.dataset.selectedSide;
+            const selectedSide = singlePackageSideSelector.value;
+
+            if (previousSide === selectedSide) {
+                return;
+            }
+
+            form.querySelectorAll('[name^="sides[' + previousSide + ']"]').forEach(function (field) {
+                field.name = field.name.replace('sides[' + previousSide + ']', 'sides[' + selectedSide + ']');
+            });
+
+            form.querySelectorAll('[data-package-side="' + previousSide + '"]').forEach(function (section) {
+                section.dataset.packageSide = selectedSide;
+                section.querySelectorAll('[data-card-quantity-side]').forEach(function (quantityField) {
+                    quantityField.dataset.cardQuantitySide = selectedSide;
+                });
+            });
+
+            singlePackageSideSelector.dataset.selectedSide = selectedSide;
+        });
     }
 
     let validPairs;
