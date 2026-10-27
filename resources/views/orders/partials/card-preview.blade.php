@@ -8,20 +8,23 @@
             <div>
                 <p class="eyebrow">LIVE PREVIEW</p>
                 <h2 id="live-preview-title">Live Card Preview</h2>
+                @if ($hasSelectableSinglePackageSide)
+                    <p class="preview-note" data-single-package-preview-note>Sample layout — choose the package side in the order form.</p>
+                @endif
             </div>
             <span>Updates as you type</span>
         </div>
 
     <div class="preview-page-tabs" role="tablist" aria-label="Choose folded card page" data-folded-preview-tabs @if (! $isFoldedCard) hidden @endif>
             @php
-                $firstPackageSide = $orderedPackageSides->first();
+                $firstPackageSide = $previewPackageSides->first();
             @endphp
             @if ($firstPackageSide)
                 <button type="button" class="preview-page-tab is-active" data-preview-folded-side="{{ $firstPackageSide->side }}" data-preview-folded-face="front">
                     Page 1 · Card Front
                 </button>
             @endif
-            @foreach ($orderedPackageSides as $packageSide)
+            @foreach ($previewPackageSides as $packageSide)
                 <button type="button" class="preview-page-tab" data-preview-folded-side="{{ $packageSide->side }}" data-preview-folded-face="back">
                     Page {{ $loop->iteration + 1 }} · Card Back · {{ $packageSide->side === 'LELAKI' ? 'Groom' : 'Bride' }}
                 </button>
@@ -30,7 +33,7 @@
 
     @if ($order->packageSides->count() > 1)
         <div class="preview-side-tabs" role="tablist" aria-label="Choose package to preview" data-preview-separate-tabs @if ($isFoldedCard) hidden @endif>
-            @foreach ($orderedPackageSides as $packageSide)
+            @foreach ($previewPackageSides as $packageSide)
                 <button type="button" class="preview-side-tab @if ($loop->first) is-active @endif" data-preview-side-target="{{ $packageSide->side }}">
                     <span data-preview-tab-label>Event {{ $loop->iteration }} – {{ $packageSide->side === 'LELAKI' ? 'Groom' : 'Bride' }}</span>
                 </button>
@@ -43,7 +46,7 @@
         <button type="button" class="preview-face-tab" data-preview-face-target="back">Back</button>
     </div>
 
-    @foreach ($orderedPackageSides as $packageSide)
+    @foreach ($previewPackageSides as $packageSide)
         @php
             $jawiCardTitle = match ($packageSide->design?->card_title) {
                 'Majlis Perkahwinan' => 'Wedding Ceremony',
@@ -102,7 +105,7 @@
         </div>
     @endforeach
 
-    @foreach ($orderedPackageSides as $packageSide)
+    @foreach ($previewPackageSides as $packageSide)
         <section class="live-product-previews @if (! $loop->first) is-hidden @endif" data-live-product-preview="{{ $packageSide->side }}">
             <div class="live-product-heading">
                 <div>
