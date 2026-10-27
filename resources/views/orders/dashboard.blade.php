@@ -210,7 +210,9 @@
     </section>
 @endif
 
-@php($depositPayment = $order->payments->firstWhere('payment_type', 'BOOKING_DEPOSIT'))
+@php
+    $depositPayment = $order->payments->firstWhere('payment_type', 'BOOKING_DEPOSIT');
+@endphp
 @if ($depositPayment)
     <section class="deposit-status-card" data-deposit-status="{{ strtolower($depositPayment->status) }}">
         <div><span>{{ __('ui.deposit_status') }}</span><strong>{{ match ($depositPayment->status) { 'PAID' => __('ui.deposit_confirmed'), 'FAILED' => __('ui.receipt_rejected'), default => __('ui.pending_review') } }}</strong></div>
@@ -248,15 +250,17 @@
         </div>
     @endif
 
-    @php($couple = $order->couples->firstWhere('couple_number', 1))
-    @php($secondCouple = $order->couples->firstWhere('couple_number', 2))
-    @php($isEditable = $order->status === 'DETAILS_INCOMPLETE')
-    @php($firstEventSide = old('first_event_side', $order->first_event_side ?: 'LELAKI'))
-    @php($orderedPackageSides = $order->packageSides->sortBy(fn ($item) => $item->side === $firstEventSide ? 0 : 1)->values())
-    @php($hasSelectableSinglePackageSide = (int) $order->package_count === 1 && $orderedPackageSides->isEmpty())
-    @php($singlePackageSide = old('single_package_side') === 'PEREMPUAN' ? 'PEREMPUAN' : 'LELAKI')
-    @php($selectedSinglePackageSide = in_array(old('single_package_side'), ['LELAKI', 'PEREMPUAN'], true) ? old('single_package_side') : '')
-    @php($formPackageSides = $hasSelectableSinglePackageSide ? [$singlePackageSide] : $orderedPackageSides->pluck('side')->all())
+    @php
+        $couple = $order->couples->firstWhere('couple_number', 1);
+        $secondCouple = $order->couples->firstWhere('couple_number', 2);
+        $isEditable = $order->status === 'DETAILS_INCOMPLETE';
+        $firstEventSide = old('first_event_side', $order->first_event_side ?: 'LELAKI');
+        $orderedPackageSides = $order->packageSides->sortBy(fn ($item) => $item->side === $firstEventSide ? 0 : 1)->values();
+        $hasSelectableSinglePackageSide = (int) $order->package_count === 1 && $orderedPackageSides->isEmpty();
+        $singlePackageSide = old('single_package_side') === 'PEREMPUAN' ? 'PEREMPUAN' : 'LELAKI';
+        $selectedSinglePackageSide = in_array(old('single_package_side'), ['LELAKI', 'PEREMPUAN'], true) ? old('single_package_side') : '';
+        $formPackageSides = $hasSelectableSinglePackageSide ? [$singlePackageSide] : $orderedPackageSides->pluck('side')->all();
+    @endphp
     @php
         $previewPackageSides = $hasSelectableSinglePackageSide
             ? collect([$singlePackageSide, $singlePackageSide === 'LELAKI' ? 'PEREMPUAN' : 'LELAKI'])
@@ -349,12 +353,16 @@
             </div>
         </fieldset>
         @foreach ($formPackageSides as $side)
-            @php($packageSide = $order->packageSides->firstWhere('side', $side))
-            @php($event = $packageSide?->event)
-            @php($hideFoldedDesign = $order->package_count === 2 && $order->package_format === 'FOLDED' && ! $loop->first)
+            @php
+                $packageSide = $order->packageSides->firstWhere('side', $side);
+                $event = $packageSide?->event;
+                $hideFoldedDesign = $order->package_count === 2 && $order->package_format === 'FOLDED' && ! $loop->first;
+            @endphp
             <fieldset data-package-side="{{ $side }}">
                 <legend data-package-legend>{{ $hasSelectableSinglePackageSide ? 'Wedding Card Details' : ($order->package_count === 2 ? 'Event '.$loop->iteration.' – ' : 'Package – ').($side === 'LELAKI' ? "Groom's Side" : "Bride's Side") }}</legend>
-                @php($selectedQuantity = old("sides.$side.card_quantity", $packageSide?->card_quantity))
+                @php
+                    $selectedQuantity = old("sides.$side.card_quantity", $packageSide?->card_quantity);
+                @endphp
 
                 <div>
                     <label for="card_quantity_{{ strtolower($side) }}" data-package-quantity-label>
@@ -387,7 +395,9 @@
 <div class="grid">
     <div>
         <label>Theme</label>
-        @php($selectedTheme = old("sides.$side.design.theme", $packageSide?->design?->theme))
+        @php
+            $selectedTheme = old("sides.$side.design.theme", $packageSide?->design?->theme);
+        @endphp
 
 <select name="sides[{{ $side }}][design][theme]">
     <option value="">-- Select theme --</option>
@@ -420,7 +430,9 @@
         >
     </div>
 
-@php($selectedCardTitle = old("sides.$side.design.card_title", $packageSide?->design?->card_title))
+@php
+    $selectedCardTitle = old("sides.$side.design.card_title", $packageSide?->design?->card_title);
+@endphp
 
 <div>
     <label>Event Title</label>
@@ -479,7 +491,9 @@
                 </div>
                 <h3>Event</h3>
                 <div class="grid">
-                    @php($selectedDay = old("sides.$side.event.day_name", $event?->day_name))
+                    @php
+                        $selectedDay = old("sides.$side.event.day_name", $event?->day_name);
+                    @endphp
 
 <div>
     <label>Day</label>
@@ -523,7 +537,9 @@
                 <h3>Contact Persons</h3>
 
 @for ($contactNumber = 1; $contactNumber <= 3; $contactNumber++)
-    @php($contact = $event?->contacts?->firstWhere('contact_number', $contactNumber))
+    @php
+        $contact = $event?->contacts?->firstWhere('contact_number', $contactNumber);
+    @endphp
 
     <div class="grid">
         <div>
@@ -557,7 +573,9 @@
         <fieldset>
     <legend>Delivery / Pickup</legend>
 
-    @php($fulfilmentMethod = old('fulfilment.method', $order->fulfilment?->method))
+    @php
+        $fulfilmentMethod = old('fulfilment.method', $order->fulfilment?->method);
+    @endphp
 
     <p class="field-help">
         Choose how you would like to receive your completed order.

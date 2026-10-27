@@ -60,7 +60,9 @@
                 <div class="card-front-copy">
                     <p class="card-title" data-preview-field="card_title">{{ $jawiCardTitle }}</p>
                     <div class="card-couple-names">
-                        @php($hostIsGroom = $packageSide->side === 'LELAKI')
+                        @php
+                            $hostIsGroom = $packageSide->side === 'LELAKI';
+                        @endphp
                         <span data-preview-field="{{ $hostIsGroom ? 'groom_display' : 'bride_display' }}">{{ $hostIsGroom ? ($couple?->groom_abbreviation ?: $couple?->groom_name ?: 'Groom') : ($couple?->bride_abbreviation ?: $couple?->bride_name ?: 'Bride') }}</span>
                         <b>&amp;</b>
                         <span data-preview-field="{{ $hostIsGroom ? 'bride_display' : 'groom_display' }}">{{ $hostIsGroom ? ($couple?->bride_abbreviation ?: $couple?->bride_name ?: 'Bride') : ($couple?->groom_abbreviation ?: $couple?->groom_name ?: 'Groom') }}</span>
@@ -90,7 +92,16 @@
                 <div class="card-info-grid">
                     <section><small>Date</small><b data-preview-field="day_name">{{ ['Ahad' => 'Sunday', 'Isnin' => 'Monday', 'Selasa' => 'Tuesday', 'Rabu' => 'Wednesday', 'Khamis' => 'Thursday', 'Jumaat' => 'Friday', 'Sabtu' => 'Saturday'][$packageSide->event?->day_name ?? ''] ?? 'DAY' }}</b><strong data-preview-field="event_date">{{ $packageSide->event?->event_date?->format('d/m/Y') ?: '-' }}</strong><span data-preview-field="hijri_date">{{ $packageSide->event?->hijri_date ?: '' }}</span></section>
                     <section><small>Schedule</small><b>Meal</b><span data-preview-field="meal_time">{{ $packageSide->event?->meal_time ? substr($packageSide->event->meal_time, 0, 5) : '-' }}</span><b>Reception</b><span data-preview-field="bersanding_time">{{ $packageSide->event?->bersanding_time ? substr($packageSide->event->bersanding_time, 0, 5) : '-' }}</span></section>
-                    <section class="card-contacts"><small>Contacts</small>@for ($contactNumber = 1; $contactNumber <= 3; $contactNumber++) @php($contact = $packageSide->event?->contacts?->firstWhere('contact_number', $contactNumber)) <b data-preview-field="contact_{{ $contactNumber }}_name">{{ $contact?->contact_name ?: 'Contact '.$contactNumber }}</b><span data-preview-field="contact_{{ $contactNumber }}_phone">{{ $contact?->contact_phone ?: '-' }}</span>@endfor</section>
+                    <section class="card-contacts">
+                        <small>Contacts</small>
+                        @for ($contactNumber = 1; $contactNumber <= 3; $contactNumber++)
+                            @php
+                                $contact = $packageSide->event?->contacts?->firstWhere('contact_number', $contactNumber);
+                            @endphp
+                            <b data-preview-field="contact_{{ $contactNumber }}_name">{{ $contact?->contact_name ?: 'Contact '.$contactNumber }}</b>
+                            <span data-preview-field="contact_{{ $contactNumber }}_phone">{{ $contact?->contact_phone ?: '-' }}</span>
+                        @endfor
+                    </section>
                 </div>
 
                 <div class="card-location">
