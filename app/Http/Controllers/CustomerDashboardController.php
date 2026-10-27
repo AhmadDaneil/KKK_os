@@ -71,10 +71,12 @@ class CustomerDashboardController extends Controller
         $orderSides = $order->packageSides->pluck('side')->all();
 
         if ((int) $order->package_count === 1) {
-            $side = $orderSides[0] ?? null;
+            $sides = $orderSides !== []
+                ? $orderSides
+                : ['LELAKI', 'PEREMPUAN'];
 
             foreach ($quantityOptions as $quantity) {
-                if ($side !== null) {
+                foreach ($sides as $side) {
                     $validQuantityPairs[] = [$side => $quantity];
                 }
             }

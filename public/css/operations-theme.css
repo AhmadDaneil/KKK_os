@@ -183,9 +183,16 @@ html[data-operations-theme="dark"] :is(.logout-confirmation-dialog h2,.logout-co
 html[data-operations-theme="dark"] :is(.logout-confirmation-actions button:not(.is-danger)) { color: var(--operations-text); border-color: var(--operations-line); background: var(--operations-soft); }
 
 @media (max-width: 520px) { .operations-theme-toggle-label { display: none; } }
-html[data-operations-theme="dark"] .staff-design-tools { color: var(--operations-text); border-color: var(--operations-line); background: var(--operations-surface); }
+
+html[data-operations-theme="dark"] .staff-design-tools {
+    color: var(--operations-text) !important;
+    border-color: var(--operations-line) !important;
+    background: var(--operations-surface) !important;
+    box-shadow: 0 10px 24px rgba(0, 0, 0, .18);
+}
+html[data-operations-theme="dark"] .staff-design-tools h3 { color: var(--operations-text) !important; }
 html[data-operations-theme="dark"] .staff-design-tools ol,
-html[data-operations-theme="dark"] .staff-design-tools-note { color: var(--operations-muted); }
+html[data-operations-theme="dark"] .staff-design-tools-note { color: var(--operations-muted) !important; }
 html[data-operations-theme="dark"] .staff-design-tools a { color: #f0ce7d; }
 html[data-operations-theme="dark"] :is(.staff-supplementary-artworks,.staff-supplementary-grid .staff-field) { color: var(--operations-text); border-color: var(--operations-line); background: var(--operations-soft); }
 html[data-operations-theme="dark"] .staff-supplementary-heading h4 { color: var(--operations-text); }
