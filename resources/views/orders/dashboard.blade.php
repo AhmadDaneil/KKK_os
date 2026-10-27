@@ -489,7 +489,7 @@
             'Sabtu',
         ] as $day)
             <option value="{{ $day }}" @selected($selectedDay === $day)>
-                {{ match ($day) { 'Ahad' => 'Sunday', 'Isnin' => 'Monday', 'Selasa' => 'Tuesday', 'Rabu' => 'Wednesday', 'Khamis' => 'Thursday', 'Jumaat' => 'Friday', 'Sabtu' => 'Saturday' } }}
+                {{ ['Ahad' => 'Sunday', 'Isnin' => 'Monday', 'Selasa' => 'Tuesday', 'Rabu' => 'Wednesday', 'Khamis' => 'Thursday', 'Jumaat' => 'Friday', 'Sabtu' => 'Saturday'][$day] ?? $day }}
             </option>
         @endforeach
     </select>
