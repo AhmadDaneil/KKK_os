@@ -45,7 +45,9 @@ class CreateWabotDraftOrderService
                         ->get();
 
                     foreach ($previousBookings as $previousBooking) {
-                        if (! $this->isActiveBooking($previousBooking)) {
+                        if (! $this->isActiveBooking($previousBooking)
+                            || ! $this->matchesConversationBooking($previousBooking, $data, $phone, $channel)
+                            || ! $this->usesConfiguredBillplzEnvironment($previousBooking)) {
                             continue;
                         }
 
@@ -59,7 +61,10 @@ class CreateWabotDraftOrderService
                     }
                 }
 
-                if ($existing !== null && $this->isActiveBooking($existing)) {
+                if ($existing !== null
+                    && $this->isActiveBooking($existing)
+                    && $this->matchesConversationBooking($existing, $data, $phone, $channel)
+                    && $this->usesConfiguredBillplzEnvironment($existing)) {
                     if ($existing->wabot_conversation_id === null && $conversationId !== null) {
                         $existing->update(['wabot_conversation_id' => $conversationId]);
                     }
@@ -89,7 +94,10 @@ class CreateWabotDraftOrderService
                 ->where('wabot_active_booking_key', $activeKey)
                 ->first();
 
-            if ($existing === null || ! $this->isActiveBooking($existing)) {
+            if ($existing === null
+                || ! $this->isActiveBooking($existing)
+                || ! $this->matchesConversationBooking($existing, $data, $phone, $channel)
+                || ! $this->usesConfiguredBillplzEnvironment($existing)) {
                 throw $exception;
             }
 
@@ -128,6 +136,58 @@ class CreateWabotDraftOrderService
         $payment = $order->payments()->where('payment_type', 'BOOKING_DEPOSIT')->latest('id')->first();
 
         return $payment === null || $payment->status === 'PENDING';
+    }
+
+    private function matchesConversationBooking(Order $order, array $data, string $phone, string $channel): bool
+    {
+        if (($order->wabot_channel ?? 'kingkadkahwin') !== $channel
+            || (string) $order->customer_phone !== $phone
+            || (int) $order->package_count !== (int) $data['package_count']
+            || Str::lower(trim((string) $order->customer_name)) !== Str::lower(trim((string) $data['customer_name']))
+            || $order->package_type !== ($data['package_type'] ?? null)
+            || $order->wabot_package_code !== ($data['wabot_package_code'] ?? null)) {
+            return false;
+        }
+
+        if (array_key_exists('customer_email', $data)
+            && (string) $order->customer_email !== strtolower(trim((string) ($data['customer_email'] ?? '')))) {
+            return false;
+        }
+
+        if (array_key_exists('side', $data)
+            && (int) $order->package_count === 1
+            && $order->packageSides()->value('side') !== $data['side']) {
+            return false;
+        }
+
+        if (array_key_exists('package_format', $data)
+            && (int) $order->package_count === 2
+            && $order->package_format !== $data['package_format']) {
+            return false;
+        }
+
+        return ! array_key_exists('first_event_side', $data)
+            || (int) $order->package_count !== 2
+            || $order->first_event_side === $data['first_event_side'];
+    }
+
+    private function usesConfiguredBillplzEnvironment(Order $order): bool
+    {
+        $configuredHost = parse_url((string) config('services.billplz.base_url', ''), PHP_URL_HOST);
+        if (! in_array($configuredHost, ['www.billplz.com', 'www.billplz-sandbox.com'], true)) {
+            return false;
+        }
+
+        $payment = $order->payments()
+            ->where('payment_type', 'BOOKING_DEPOSIT')
+            ->latest('id')
+            ->first();
+        $checkoutUrl = $payment?->metadata['billplz']['checkout_url'] ?? null;
+
+        return ! is_string($checkoutUrl)
+            || trim($checkoutUrl) === ''
+            || (parse_url($checkoutUrl, PHP_URL_SCHEME) === 'https'
+                && parse_url($checkoutUrl, PHP_URL_HOST) === $configuredHost);
     }
 
     /** @return array{order: Order, payment_url: string, reused: bool} */
