@@ -33,9 +33,10 @@ class RoyaliciousProductionBookingWebhookController extends Controller
         }
 
         $billplzBaseUrl = trim((string) config('services.billplz.base_url', ''));
+        $billplzBaseHost = parse_url($billplzBaseUrl, PHP_URL_HOST);
         if (parse_url($billplzBaseUrl, PHP_URL_SCHEME) !== 'https'
-            || parse_url($billplzBaseUrl, PHP_URL_HOST) !== 'www.billplz.com') {
-            return response()->json(['success' => false, 'code' => 'PRODUCTION_BILLPLZ_REQUIRED'], 503);
+            || ! in_array($billplzBaseHost, ['www.billplz.com', 'www.billplz-sandbox.com'], true)) {
+            return response()->json(['success' => false, 'code' => 'BILLPLZ_ENVIRONMENT_INVALID'], 503);
         }
 
         if (! config('services.billplz.enabled')
@@ -99,19 +100,23 @@ class RoyaliciousProductionBookingWebhookController extends Controller
         $paymentUrlHost = parse_url($result['payment_url'], PHP_URL_HOST);
         $paymentUrlScheme = parse_url($result['payment_url'], PHP_URL_SCHEME);
 
-        if ($paymentUrlScheme !== 'https' || $paymentUrlHost !== 'www.billplz.com') {
-            Log::error('Royalicious production webhook rejected a non-production payment URL.', [
+        if ($paymentUrlScheme !== 'https' || $paymentUrlHost !== $billplzBaseHost) {
+            Log::error('Royalicious booking webhook rejected a payment URL from another Billplz environment.', [
                 'order_id' => $result['order']->order_id,
             ]);
 
-            return response()->json(['success' => false, 'code' => 'NON_PRODUCTION_PAYMENT_URL'], 409);
+            return response()->json(['success' => false, 'code' => 'BILLPLZ_ENVIRONMENT_MISMATCH'], 409);
         }
+
+        $paymentLinkLabel = $billplzBaseHost === 'www.billplz-sandbox.com'
+            ? 'Pautan ujian Billplz Sandbox untuk bayaran deposit anda:'
+            : 'Pautan rasmi Billplz untuk bayaran deposit anda:';
 
         $delivery = $wabot->sendText(
             'royalicious',
             $phone,
             "Terima kasih kerana meneruskan tempahan Royalicious anda.\n\n"
-                ."Pautan rasmi Billplz untuk bayaran deposit anda:\n{$result['payment_url']}\n\n"
+                ."{$paymentLinkLabel}\n{$result['payment_url']}\n\n"
                 .'Sila semak jumlah pada halaman Billplz sebelum membuat bayaran. Selepas bayaran disahkan, anda boleh melengkapkan maklumat tempahan.',
         );
 
