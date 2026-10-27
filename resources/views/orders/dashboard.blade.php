@@ -255,7 +255,14 @@
     @php($orderedPackageSides = $order->packageSides->sortBy(fn ($item) => $item->side === $firstEventSide ? 0 : 1)->values())
     @php($hasSelectableSinglePackageSide = (int) $order->package_count === 1 && $orderedPackageSides->isEmpty())
     @php($singlePackageSide = old('single_package_side') === 'PEREMPUAN' ? 'PEREMPUAN' : 'LELAKI')
+    @php($selectedSinglePackageSide = in_array(old('single_package_side'), ['LELAKI', 'PEREMPUAN'], true) ? old('single_package_side') : '')
     @php($formPackageSides = $hasSelectableSinglePackageSide ? [$singlePackageSide] : $orderedPackageSides->pluck('side')->all())
+    @php
+        $previewPackageSides = $hasSelectableSinglePackageSide
+            ? collect([$singlePackageSide, $singlePackageSide === 'LELAKI' ? 'PEREMPUAN' : 'LELAKI'])
+                ->map(fn ($side) => (object) ['side' => $side, 'design' => null, 'parents' => null, 'event' => null])
+            : $orderedPackageSides;
+    @endphp
 
     @if (! $isEditable)
         <div class="notice readonly-notice">
@@ -293,9 +300,10 @@
             <fieldset class="single-package-side-selection">
                 <legend>Wedding Card Package</legend>
                 <label for="single-package-side">Which side is this package for?</label>
-                <select id="single-package-side" name="single_package_side" data-single-package-side-selector data-selected-side="{{ $singlePackageSide }}">
-                    <option value="LELAKI" @selected($singlePackageSide === 'LELAKI')>Groom's Side</option>
-                    <option value="PEREMPUAN" @selected($singlePackageSide === 'PEREMPUAN')>Bride's Side</option>
+                <select id="single-package-side" name="single_package_side" data-single-package-side-selector data-selected-side="{{ $singlePackageSide }}" required>
+                    <option value="" @selected($selectedSinglePackageSide === '')>Choose a side</option>
+                    <option value="LELAKI" @selected($selectedSinglePackageSide === 'LELAKI')>Groom's Side</option>
+                    <option value="PEREMPUAN" @selected($selectedSinglePackageSide === 'PEREMPUAN')>Bride's Side</option>
                 </select>
                 <p class="field-help">Choose the side so we can show the complete card, event and delivery details form.</p>
             </fieldset>
@@ -1066,6 +1074,12 @@ document.addEventListener('DOMContentLoaded', function () {
         }
 
         function scheduleAutosave(event) {
+            const singlePackageSideSelector = form.querySelector('[data-single-package-side-selector]');
+            if (singlePackageSideSelector && !singlePackageSideSelector.value) {
+                setStatus('Choose the package side before saving your details.', 'pending');
+                return;
+            }
+
             const includeFiles = event.target instanceof HTMLInputElement && event.target.type === 'file';
 
             window.clearTimeout(autosaveTimer);
@@ -1273,6 +1287,30 @@ document.addEventListener('DOMContentLoaded', function () {
                         && tab.dataset.previewFoldedFace === activeFace
                 );
             });
+        }
+
+        const singlePackageSideSelector = form.querySelector('[data-single-package-side-selector]');
+        if (singlePackageSideSelector) {
+            const sidePreviewNote = preview.querySelector('[data-single-package-preview-note]');
+            const updateSidePreviewNote = function () {
+                if (!sidePreviewNote) {
+                    return;
+                }
+
+                const sideLabel = singlePackageSideSelector.value === 'PEREMPUAN' ? "Bride's side" : "Groom's side";
+                sidePreviewNote.textContent = singlePackageSideSelector.value
+                    ? 'Previewing ' + sideLabel + '.'
+                    : 'Sample layout — choose the package side in the order form.';
+            };
+
+            singlePackageSideSelector.addEventListener('change', function () {
+                activeSide = singlePackageSideSelector.value || singlePackageSideSelector.dataset.selectedSide;
+                updateSidePreviewNote();
+                syncCard(activeSide);
+                showSelection();
+            });
+
+            updateSidePreviewNote();
         }
 
         function updateTwoPackageOrder() {
