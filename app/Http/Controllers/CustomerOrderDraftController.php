@@ -3,10 +3,12 @@
 namespace App\Http\Controllers;
 
 use App\Services\Orders\CustomerOrderSessionAccessService;
+use App\Services\Orders\InitializeOrderStructureService;
 use App\Services\Orders\SaveOrderDraftService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Validation\ValidationException;
 
 class CustomerOrderDraftController extends Controller
 {
@@ -14,9 +16,13 @@ class CustomerOrderDraftController extends Controller
         Request $request,
         string $orderId,
         CustomerOrderSessionAccessService $access,
+        InitializeOrderStructureService $initializeOrderStructure,
         SaveOrderDraftService $saveDraft,
     ): RedirectResponse|JsonResponse {
         $order = $access->resolve($request, $orderId);
+        $order->loadMissing('packageSides');
+        $needsSinglePackageSide = (int) $order->package_count === 1
+            && $order->packageSides->isEmpty();
 
         $validated = $request->validate([
             'card_quantity' => ['sometimes', 'nullable', 'integer', 'min:1'],
@@ -33,6 +39,11 @@ class CustomerOrderDraftController extends Controller
             'second_couple.bride_abbreviation' => ['nullable', 'string', 'max:100'],
 
             'sides' => ['sometimes', 'array'],
+            'single_package_side' => [
+                $needsSinglePackageSide ? 'required' : ((int) $order->package_count === 1 ? 'sometimes' : 'prohibited'),
+                'nullable',
+                'in:LELAKI,PEREMPUAN',
+            ],
             'package_format' => ['sometimes', 'string', 'in:SEPARATE,FOLDED'],
             'first_event_side' => ['sometimes', 'string', 'in:LELAKI,PEREMPUAN'],
             'jumlah_hantaran' => [(int) $order->package_count === 2 ? 'sometimes' : 'prohibited', 'nullable', 'string', 'max:255'],
@@ -98,6 +109,33 @@ class CustomerOrderDraftController extends Controller
             'sides.*.event.contacts.*.contact_phone.regex' => 'The phone number must contain 10 or 11 digits and start with 01.',
             'fulfilment.recipient_phone.regex' => 'The phone number must contain 10 or 11 digits and start with 01.',
         ]);
+
+        if ($needsSinglePackageSide) {
+            $selectedSide = $validated['single_package_side'];
+            $initializeOrderStructure->initialize($order, $selectedSide);
+
+            if ($selectedSide === 'PEREMPUAN' && isset($validated['sides']['LELAKI'])) {
+                $validated['sides']['PEREMPUAN'] = $validated['sides']['LELAKI'];
+                unset($validated['sides']['LELAKI']);
+            }
+
+            unset($validated['single_package_side']);
+        } elseif (isset($validated['single_package_side'])) {
+            $selectedSide = $validated['single_package_side'];
+            $currentPackageSide = $order->packageSides->first();
+
+            if ($currentPackageSide?->side !== $selectedSide) {
+                if ($order->packageSides->count() !== 1 || $order->status !== 'DETAILS_INCOMPLETE') {
+                    throw ValidationException::withMessages([
+                        'single_package_side' => 'The selected side does not match this order.',
+                    ]);
+                }
+
+                $currentPackageSide->update(['side' => $selectedSide]);
+            }
+
+            unset($validated['single_package_side']);
+        }
 
         $saveDraft->save($order, $validated);
 
