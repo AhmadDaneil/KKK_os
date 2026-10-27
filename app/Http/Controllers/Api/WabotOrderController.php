@@ -152,7 +152,7 @@ class WabotOrderController extends Controller
                 'currency' => $payment->currency,
                 'status' => $payment->status,
                 'checkout_url' => $payment->status === 'PENDING'
-                    ? ($payment->metadata['billplz']['checkout_url'] ?? null)
+                    ? $this->currentBillplzCheckoutUrl($payment->metadata['billplz']['checkout_url'] ?? null)
                     : null,
             ] : null,
         ];
@@ -223,9 +223,23 @@ class WabotOrderController extends Controller
             'currency' => $payment?->currency ?? 'MYR',
             'status' => $payment?->status ?? 'DUE',
             'checkout_url' => $payment?->status === 'PENDING' && $payment->provider === 'BILLPLZ'
-                ? ($payment->metadata['billplz']['checkout_url'] ?? null)
+                ? $this->currentBillplzCheckoutUrl($payment->metadata['billplz']['checkout_url'] ?? null)
                 : null,
             'payment_options' => ['ONLINE_BANKING', 'DUITNOW_QR'],
         ];
+    }
+
+    private function currentBillplzCheckoutUrl(mixed $url): ?string
+    {
+        $configuredHost = parse_url((string) config('services.billplz.base_url', ''), PHP_URL_HOST);
+
+        if (! is_string($url)
+            || ! in_array($configuredHost, ['www.billplz.com', 'www.billplz-sandbox.com'], true)
+            || parse_url($url, PHP_URL_SCHEME) !== 'https'
+            || parse_url($url, PHP_URL_HOST) !== $configuredHost) {
+            return null;
+        }
+
+        return $url;
     }
 }
