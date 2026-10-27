@@ -3,6 +3,7 @@
 namespace App\Services\Orders;
 
 use App\Models\Order;
+use App\Services\Payments\BillplzPaymentMethod;
 use App\Services\Payments\CreateBillplzBookingPaymentService;
 use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Support\Facades\DB;
@@ -17,7 +18,7 @@ class CreateWabotDraftOrderService
     ) {}
 
     /** @return array{order: Order, payment_url: string, reused: bool} */
-    public function createForConversation(array $data): array
+    public function createForConversation(array $data, string $paymentMethod = BillplzPaymentMethod::BILLPLZ): array
     {
         $phone = $this->phones->normalize((string) $data['customer_phone']);
         $channel = (string) $data['wabot_channel'];
@@ -109,7 +110,11 @@ class CreateWabotDraftOrderService
             }
         }
 
-        $checkout = $this->bookingPayments->create($order, throwGatewayFailure: true);
+        $checkout = $this->bookingPayments->create(
+            $order,
+            throwGatewayFailure: true,
+            paymentMethod: $paymentMethod,
+        );
 
         return ['order' => $order, 'payment_url' => $checkout['payment_url'], 'reused' => $selection['reused']];
     }

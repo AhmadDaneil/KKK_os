@@ -1,5 +1,7 @@
 <?php
 
+use App\Http\Controllers\Api\RoyaliciousAutomationProbeController;
+use App\Http\Controllers\Api\RoyaliciousBookingWebhookController;
 use App\Http\Controllers\Api\WabotBalancePaymentController;
 use App\Http\Controllers\Api\WabotBookingIntentController;
 use App\Http\Controllers\Api\WabotOrderController;
@@ -15,6 +17,13 @@ Route::post('/v1/payments/billplz/callback', BillplzWebhookController::class)
 Route::post('/v1/booking-intents', [WabotOrderController::class, 'store'])
     ->middleware(['booking-intent.auth', 'throttle:60,1'])
     ->name('api.booking-intents.store');
+
+Route::post('/v1/integrations/wabot/royalicious/automation-probe/{token}', RoyaliciousAutomationProbeController::class)
+    ->middleware('throttle:20,1')
+    ->name('api.wabot.royalicious.automation-probe');
+Route::post('/v1/integrations/wabot/royalicious/booking/{token}', RoyaliciousBookingWebhookController::class)
+    ->middleware('throttle:10,1')
+    ->name('api.wabot.royalicious.booking');
 
 Route::middleware(['wabot.auth', 'throttle:60,1'])->prefix('/v1/wabot')->group(function (): void {
     Route::post('/booking-intent', [WabotBookingIntentController::class, 'store'])
