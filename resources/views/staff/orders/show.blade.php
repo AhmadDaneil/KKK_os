@@ -520,12 +520,12 @@
                     @if ($canUsePhotoshop)
                         <div class="staff-design-tools">
                             <div>
-                                <p class="staff-kicker">Photoshop Auto Merge V34</p>
+                                <p class="staff-kicker">Photoshop Auto Merge V35</p>
                                 <h3>Prepare this customer order in Photoshop</h3>
                                 <ol>
                                     <li>Download the customer order CSV file.</li>
-                                    <li>Open Photoshop on a Windows workstation and run the approved V11 JavaScript.</li>
-                                    <li>Select the ROOT folder, then choose the downloaded CSV file.</li>
+                                    <li>Open Photoshop on a Windows workstation and run the approved V35 JavaScript.</li>
+                                    <li>Select the MASTER folder, then choose the downloaded CSV file.</li>
                                 </ol>
                                 <p class="staff-design-tools-note">
                                     KKK OS provides the customer CSV for the Photoshop Auto Merge workflow.
