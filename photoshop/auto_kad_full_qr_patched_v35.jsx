@@ -1,4 +1,4 @@
-/* V34 - V33 portrait handling plus two-package Cek Hantaran mockup.
+/* V35 - V33 portrait handling plus two-package Cek Hantaran mockup.
    The cleaned cek_hantaran_master_clean.png must be beside this JSX. */
 /* auto_kad_full_qr_patched.jsx
    Full pipeline: Auto Kad Full (patched V32 - Arrow visible image + compatible transparent VIP PNG)
@@ -19,7 +19,7 @@
      - Guna PowerShell untuk download QR (Windows).
 */
 
-#target photoshop
+//target photoshop
 var KKK_ORIGINAL_DIALOGS = app.displayDialogs;
 var KKK_ORIGINAL_UNITS = app.preferences.rulerUnits;
 app.displayDialogs = DialogModes.NO;
@@ -1300,8 +1300,8 @@ var KKK_PORTRAIT_FRAMES = {
     "VIP CARD":    [0, 0, 1, 0.55]
 };
 
-// One optional visual check per template: adjust crop using 0..100 X/Y sliders.
-// Default automatic centered crop. Turn on via the batch confirmation dialog.
+// One optional visual check per template: adjust crop position and zoom.
+// Turn on via the batch confirmation dialog.
 var KKK_REVIEW_PORTRAIT_CROP = false;
 
 function kkkPortraitItem(name) {
@@ -1412,28 +1412,40 @@ function kkkMovePhotoGroupBehindArtwork(doc, group) {
 function kkkPositionPhoto(photo, box, x, y, state) {
     // Keep unmasked geometry: clipped layer.bounds may be smaller than the image.
     var b = state || _boundsPx(photo);
-    var targetX = box.x - Math.max(0, b.w - box.w) * x;
-    var targetY = box.y - Math.max(0, b.h - box.h) * y;
+    // Let the image travel across the full overflow OR empty gap in the frame.
+    // A smaller image therefore remains movable instead of being pinned to top-left.
+    var targetX = box.x + (box.w - b.w) * x;
+    var targetY = box.y + (box.h - b.h) * y;
     photo.translate(UnitValue(targetX - b.x, "px"), UnitValue(targetY - b.y, "px"));
     b.x = targetX; b.y = targetY;
     return b;
 }
 
 function kkkReviewCrop(doc, photo, box, state) {
-    // Photoshop canvas previews the crop; sliders pan without stretching or zooming.
+    // Photoshop canvas previews crop position and zoom; proportions stay locked.
     var dialog = new Window("dialog", "Semak kedua-dua pengantin - " + doc.name);
     dialog.orientation = "column";
-    dialog.add("statictext", undefined, "Alih gambar supaya kedua-dua pengantin berada dalam ruang foto.");
+    dialog.add("statictext", undefined, "Laraskan saiz dan kedudukan gambar dalam ruang foto.");
+    dialog.add("statictext", undefined, "Saiz gambar");
+    var zoom = dialog.add("slider", undefined, 100, 50, 250); zoom.preferredSize.width = 360;
     dialog.add("statictext", undefined, "Kiri / kanan");
     var x = dialog.add("slider", undefined, 50, 0, 100); x.preferredSize.width = 360;
     dialog.add("statictext", undefined, "Atas / bawah");
     var y = dialog.add("slider", undefined, 50, 0, 100); y.preferredSize.width = 360;
+    var lastZoom = 100;
     var update = function() {
         app.activeDocument = doc;
+        var nextZoom = zoom.value;
+        if (Math.abs(nextZoom - lastZoom) > 0.01) {
+            var factor = nextZoom / lastZoom;
+            photo.resize(factor * 100, factor * 100, AnchorPosition.MIDDLECENTER);
+            lastZoom = nextZoom;
+        }
+        state = _boundsPx(photo);
         kkkPositionPhoto(photo, box, x.value / 100, y.value / 100, state);
         app.refresh();
     };
-    x.onChanging = update; y.onChanging = update;
+    zoom.onChanging = update; x.onChanging = update; y.onChanging = update;
     var buttons = dialog.add("group");
     buttons.add("button", undefined, "Teruskan", {name: "ok"});
     buttons.add("button", undefined, "Langkau item ini", {name: "cancel"});
@@ -1534,17 +1546,18 @@ try{
     //   OUTPUT/
     //
     // Example on KKK laptop:
-    // ROOT   = C:\KAD KAHWIN\MASTER
-    // MASTER = C:\KAD KAHWIN\MASTER\MASTER
-    // OUTPUT = C:\KAD KAHWIN\MASTER\OUTPUT
-    var root = Folder.selectDialog("Pilih ROOT folder KKK (folder yang mengandungi MASTER)");
+    // ROOT   = C:\KAD KAHWIN
+    // MASTER = C:\KAD KAHWIN\MASTER
+    // OUTPUT = C:\KAD KAHWIN\OUTPUT
+    var root = Folder.selectDialog("Pilih folder MASTER kad kahwin", new Folder("C:/KAD KAHWIN/MASTER"));
     if(!root){
         alert("Dibatalkan.");
         throw "User cancelled";
     }
-    var ROOT = root.fsName;
-
-    var MASTER = new Folder(ROOT + "/MASTER");
+    // Accept either the MASTER folder itself or its parent ROOT folder.
+    var selectedIsMaster = root.name.toLowerCase() === "master";
+    var ROOT = selectedIsMaster ? root.parent.fsName : root.fsName;
+    var MASTER = selectedIsMaster ? root : new Folder(ROOT + "/MASTER");
     if(!MASTER.exists){
         alert(
             "Folder MASTER tidak ditemui dalam ROOT yang dipilih:\n" +
@@ -1624,7 +1637,7 @@ try{
     var logPath = OUTPUT.fsName + "/_customer_log.txt";
     logAppend(logPath, "===== " + nowStamp() + " | START BATCH: " + batchName + " =====");
 
-    KKK_REVIEW_PORTRAIT_CROP = confirm("V34: Semak crop POTRAIT sebelum eksport?\n\nOK = semak dan laras kedudukan supaya kedua-dua pengantin kelihatan.\nCancel = crop tengah automatik (tanpa pengesanan muka).");
+    KKK_REVIEW_PORTRAIT_CROP = confirm("V35: Semak crop POTRAIT sebelum eksport?\n\nOK = semak dan laras kedudukan supaya kedua-dua pengantin kelihatan.\nCancel = crop tengah automatik (tanpa pengesanan muka).");
     var portraitFailCount = 0;
     var exportSuccessCount = 0;
     var templateMissingCount = 0;
