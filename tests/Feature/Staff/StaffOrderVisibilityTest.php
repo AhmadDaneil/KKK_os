@@ -933,7 +933,7 @@ class StaffOrderVisibilityTest extends TestCase
         $this->actingAs($designer, 'staff')
             ->get(route('staff.orders.show', $order->order_id))
             ->assertOk()
-            ->assertSee('Photoshop Auto Merge V34')
+            ->assertSee('Photoshop Auto Merge V35')
             ->assertSee('Download Customer CSV')
             ->assertSee(route('staff.orders.photoshop.csv', $order), false)
             ->assertDontSee(route('staff.orders.photoshop.launch', $order), false);
