@@ -40,8 +40,8 @@ return [
         ),
         'script' => env(
             'KKK_PHOTOSHOP_SCRIPT',
-            base_path('photoshop/auto_kad_full_qr_patched_v34_cek_hantaran.jsx')
+            base_path('photoshop/auto_kad_full_qr_patched_v35.jsx')
         ),
-        'script_sha256' => '18ff1f50917b5dfe2b4ea22d39d9f98aadac2e6737046c9d58a2a25d8ea0adea',
+        'script_sha256' => '46b5e869aa622712c475a694281d671db25ab4d9aea84a9bf3a92e6701af90ee',
     ],
 ];
