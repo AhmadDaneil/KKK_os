@@ -34,7 +34,7 @@ class CustomerDashboardController extends Controller
         try {
             $order = $sessionAccess->resolve($request, $orderId);
         } catch (HttpException $exception) {
-            if ($exception->getStatusCode() !== 403) {
+            if (! in_array($exception->getStatusCode(), [403, 404], true)) {
                 throw $exception;
             }
 
