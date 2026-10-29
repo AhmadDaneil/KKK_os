@@ -219,6 +219,8 @@ Route::middleware(['auth:admin', 'active.staff', 'staff.role:ADMIN'])
             ->name('packing-jobs.collect-pickup');
         Route::get('/packing-jobs/{packingJob}/proof', [StaffPackingWorkflowController::class, 'showProof'])
             ->name('packing-jobs.proof.show');
+        Route::get('/packing-jobs/{packingJob}/proof-files/{packingJobProof}', [StaffPackingWorkflowController::class, 'showProofFile'])
+            ->name('packing-jobs.proof-files.show');
     });
 
 /*
@@ -237,6 +239,10 @@ Route::get('/order/{orderId}/courier-proof', [CustomerCourierProofController::cl
 Route::get('/order/{orderId}/packing-proof', [CustomerPackingProofController::class, 'show'])
     ->middleware('throttle:60,1')
     ->name('orders.packing-proof.show');
+Route::get('/order/{orderId}/packing-proofs/{packingJobProof}', [CustomerPackingProofController::class, 'showFile'])
+    ->middleware('throttle:60,1')
+    ->whereNumber('packingJobProof')
+    ->name('orders.packing-proofs.show');
 
 Route::post(
     '/order/{orderId}/draft',
@@ -495,6 +501,11 @@ Route::middleware(['auth:staff', 'active.staff'])
                 '/packing-jobs/{packingJob}/proof',
                 [StaffPackingWorkflowController::class, 'showProof']
             )->name('packing-jobs.proof.show');
+
+            Route::get(
+                '/packing-jobs/{packingJob}/proof-files/{packingJobProof}',
+                [StaffPackingWorkflowController::class, 'showProofFile']
+            )->name('packing-jobs.proof-files.show');
 
             Route::post(
                 '/packing-jobs/{packingJob}/start',
