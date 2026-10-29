@@ -353,3 +353,20 @@ html[data-customer-theme="dark"] .wedding-card-back .card-social-logo {
         max-width: none;
     }
 }
+
+/* Keep the Puteri Manis preview on the 12-column grid used by its item positions. */
+.live-product-grid.live-product-grid--puteri-manis {
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+}
+
+@media (max-width: 760px) {
+    .live-product-grid.live-product-grid--puteri-manis {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 520px) {
+    .live-product-grid.live-product-grid--puteri-manis {
+        grid-template-columns: 1fr;
+    }
+}
