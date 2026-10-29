@@ -131,7 +131,7 @@
                 @endforeach
             </ol>
         @else
-            <p class="customer-progress-updates-empty">Belum ada progress atau proofing yang dikongsi untuk tempahan ini.</p>
+            <p class="customer-progress-updates-empty">No progress updates or proofs have been shared for this order yet.</p>
         @endif
     </section>
     @if ($order->fulfilmentJob?->method === 'COURIER' && $order->fulfilmentJob?->tracking_number)
