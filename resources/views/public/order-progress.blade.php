@@ -96,15 +96,17 @@
                         @if (($balance['status'] ?? null) === 'PENDING')
                             @if (($balance['provider'] ?? null) === 'BILLPLZ')
                                 <div class="balance-status-message"><strong>Awaiting payment</strong><span>Complete your secure payment to continue your order.</span></div>
-                                @if (! empty($balance['checkout_url']))
-                                    <a class="button button-primary" href="{{ $balance['checkout_url'] }}">Continue to {{ ($balance['payment_method'] ?? null) === 'DUITNOW_QR' ? 'DuitNow QR' : 'Billplz Payment' }}</a>
-                                @else
-                                    <form method="POST" action="{{ route('orders.balance-payment.billplz.store', ['orderId' => $orderId]) }}">
-                                        @csrf
-                                        <input type="hidden" name="payment_method" value="{{ $balance['payment_method'] ?? 'BILLPLZ' }}">
-                                        <button class="button button-primary" type="submit">Continue to {{ ($balance['payment_method'] ?? null) === 'DUITNOW_QR' ? 'DuitNow QR' : 'Billplz Payment' }}</button>
-                                    </form>
-                                @endif
+                                <div class="balance-payment-action">
+                                    @if (! empty($balance['checkout_url']))
+                                        <a class="button button-primary" href="{{ $balance['checkout_url'] }}">Continue to {{ ($balance['payment_method'] ?? null) === 'DUITNOW_QR' ? 'DuitNow QR' : 'Billplz Payment' }}</a>
+                                    @else
+                                        <form method="POST" action="{{ route('orders.balance-payment.billplz.store', ['orderId' => $orderId]) }}">
+                                            @csrf
+                                            <input type="hidden" name="payment_method" value="{{ $balance['payment_method'] ?? 'BILLPLZ' }}">
+                                            <button class="button button-primary" type="submit">Continue to {{ ($balance['payment_method'] ?? null) === 'DUITNOW_QR' ? 'DuitNow QR' : 'Billplz Payment' }}</button>
+                                        </form>
+                                    @endif
+                                </div>
                                 @error('billplz')<p class="field-error" role="alert">{{ $message }}</p>@enderror
                                 @error('payment_method')<p class="field-error" role="alert">{{ $message }}</p>@enderror
                             @else
