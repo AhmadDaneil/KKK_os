@@ -33,6 +33,6 @@
     </div>
     <div class="footer-bottom">
         <span>© {{ date('Y') }} KingKadKahwin</span>
-        <span><a href="{{ route('public.privacy') }}">Privacy</a> · <a href="{{ route('public.terms') }}">Order Terms</a> · <a href="{{ route('home') }}#pemulangan">Cancellations &amp; Refunds</a></span>
+        <span><a href="{{ route('public.privacy') }}">Privacy</a> · <a href="{{ route('public.terms') }}">Order Terms</a></span>
     </div>
 </footer>
