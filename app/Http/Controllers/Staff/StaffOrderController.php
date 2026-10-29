@@ -83,6 +83,7 @@ class StaffOrderController extends Controller
                 'printJobs.assignedUser',
                 'packingJob.assignedUser',
                 'packingJob.items',
+                'packingJob.proofs',
                 'designJobs.events.actor',
                 'printJobs.events.actor',
                 'packingJob.events.actor',

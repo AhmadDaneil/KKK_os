@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class PackingJob extends Model
 {
@@ -43,8 +44,14 @@ class PackingJob extends Model
     {
         return $this->hasMany(PackingJobEvent::class);
     }
+
+    public function proofs(): HasMany
+    {
+        return $this->hasMany(PackingJobProof::class)->oldest('id');
+    }
+
     public function fulfilmentJob()
     {
-        return $this->hasOne(\App\Models\FulfilmentJob::class);
+        return $this->hasOne(FulfilmentJob::class);
     }
 }

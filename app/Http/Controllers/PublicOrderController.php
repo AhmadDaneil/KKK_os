@@ -153,7 +153,7 @@ class PublicOrderController extends Controller
         $order->load([
             'designJobs.artworkVersions',
             'printJobs',
-            'packingJob',
+            'packingJob.proofs',
             'fulfilmentJob',
             'progressUpdates' => fn ($query) => $query
                 ->customerVisible()
@@ -162,14 +162,22 @@ class PublicOrderController extends Controller
         ]);
 
         $packingJob = $order->packingJob;
+        $packingProofs = $packingJob?->status === 'PACKED'
+            ? $packingJob->proofs
+                ->filter(fn ($proof) => in_array($proof->mime_type, ['image/jpeg', 'image/png', 'image/webp'], true)
+                    && Storage::disk('local')->exists($proof->storage_path))
+                ->values()
+            : collect();
         $packingProofAvailable = $packingJob?->status === 'PACKED'
-            && filled($packingJob->proof_storage_path)
-            && Storage::disk('local')->exists($packingJob->proof_storage_path);
+            && ($packingProofs->isNotEmpty()
+                || (filled($packingJob->proof_storage_path)
+                    && Storage::disk('local')->exists($packingJob->proof_storage_path)));
 
         return view('public.order-proofing', [
             'order' => $order,
             'progress' => $customerProgress->build($order),
             'packingProofAvailable' => $packingProofAvailable,
+            'packingProofs' => $packingProofs,
             'proofingExpiresAt' => now()->addMinutes(30),
         ]);
     }
