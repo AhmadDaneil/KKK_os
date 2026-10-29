@@ -32,6 +32,10 @@ class RoyaliciousProductionBookingWebhookController extends Controller
             return response()->json(['success' => false, 'code' => 'PAYLOAD_TOO_LARGE'], 413);
         }
 
+        if (! app()->environment('production')) {
+            return response()->json(['success' => false, 'code' => 'PRODUCTION_ONLY'], 503);
+        }
+
         $billplzBaseUrl = trim((string) config('services.billplz.base_url', ''));
         $billplzBaseHost = parse_url($billplzBaseUrl, PHP_URL_HOST);
         if (parse_url($billplzBaseUrl, PHP_URL_SCHEME) !== 'https'
@@ -145,4 +149,3 @@ class RoyaliciousProductionBookingWebhookController extends Controller
         ], $result['reused'] ? 200 : 201);
     }
 }
-
