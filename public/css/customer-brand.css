@@ -371,8 +371,8 @@ body:is(.brand-order-progress, .brand-customer-flow) .payment-method-actions but
     width: 100%;
 }
 
-body.brand-order-progress .balance-payment-card > :is(a.button-primary, form) + .field-error {
-    margin-top: 16px;
+body.brand-order-progress .balance-payment-action {
+    padding-top: 12px;
 }
 
 body.brand-order-dashboard :is(.back-home-button, .form-actions button, .cancel-card-image, .customer-view-switcher-button:not(.is-active), .preview-side-tab:not(.is-active), .preview-face-tab:not(.is-active), .preview-page-tab:not(.is-active)),
