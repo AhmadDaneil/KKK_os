@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Staff;
 use App\Http\Controllers\Controller;
 use App\Models\PackingJob;
 use App\Models\PackingJobItem;
+use App\Models\PackingJobProof;
 use App\Models\User;
 use App\Services\Fulfilment\CompleteCourierFulfilmentService;
 use App\Services\Fulfilment\InitializeFulfilmentJobForOrderService;
@@ -43,6 +44,36 @@ class StaffPackingWorkflowController extends Controller
             $path,
             $packingJob->proof_original_name ?? 'packing-proof',
             ['Content-Type' => $packingJob->proof_mime_type ?? 'application/octet-stream']
+        );
+    }
+
+    public function showProofFile(
+        Request $request,
+        PackingJob $packingJob,
+        PackingJobProof $packingJobProof,
+    ): StreamedResponse {
+        $user = $request->user();
+
+        abort_unless(
+            $user->isOperationManagement()
+                || ($user->hasStaffRole(User::ROLE_OM)
+                    && $packingJob->assigned_user_id === $user->id),
+            404,
+        );
+
+        abort_unless($packingJobProof->packing_job_id === $packingJob->id, 404);
+
+        $path = $packingJobProof->storage_path;
+
+        abort_unless(filled($path) && Storage::disk('local')->exists($path), 404);
+
+        return Storage::disk('local')->response(
+            $path,
+            $packingJobProof->original_name,
+            [
+                'Content-Type' => $packingJobProof->mime_type,
+                'X-Content-Type-Options' => 'nosniff',
+            ],
         );
     }
 
@@ -114,45 +145,87 @@ class StaffPackingWorkflowController extends Controller
         $validated = $request->validate([
             'courier_provider' => [$isCourier ? 'nullable' : 'exclude', 'required_with:tracking_number', 'string', 'max:255'],
             'tracking_number' => [$isCourier ? 'nullable' : 'exclude', 'required_with:courier_provider', 'string', 'max:255'],
+            'packing_proofs' => [
+                $isCourier ? 'nullable' : 'required_without:packing_proof',
+                'array',
+                'min:1',
+                'max:10',
+            ],
+            'packing_proofs.*' => [
+                'required',
+                'image',
+                'mimes:jpg,jpeg,png,webp',
+                'max:10240',
+            ],
             'packing_proof' => [
-                $isCourier ? 'nullable' : 'required',
+                $isCourier ? 'nullable' : 'required_without:packing_proofs',
                 'image',
                 'mimes:jpg,jpeg,png,webp',
                 'max:10240',
             ],
         ], [
-            'packing_proof.required' => 'A photo of the packed items is required.',
+            'packing_proofs.required_without' => 'Upload at least one photo of the packed items.',
+            'packing_proofs.min' => 'Upload at least one photo of the packed items.',
+            'packing_proofs.max' => 'You may upload up to 10 packing photos at a time.',
+            'packing_proofs.*.image' => 'Packing proof files must be images.',
+            'packing_proofs.*.max' => 'Each packing photo must not exceed 10 MB.',
+            'packing_proof.required_without' => 'Upload at least one photo of the packed items.',
             'packing_proof.image' => 'Packing proof must be an image file.',
             'packing_proof.max' => 'Packing proof must not exceed 10 MB.',
         ]);
 
-        $proof = $validated['packing_proof'] ?? null;
-        $proofPath = null;
+        $proofUploads = array_values($validated['packing_proofs'] ?? []);
 
-        if ($proof) {
-            $proofPath = $proof->store(
-                "packing-proofs/{$packingJob->id}",
-                'local'
-            );
+        if (isset($validated['packing_proof'])) {
+            $proofUploads[] = $validated['packing_proof'];
         }
 
+        $storedProofs = [];
+
         try {
+            foreach ($proofUploads as $proof) {
+                $proofPath = $proof->store(
+                    "packing-proofs/{$packingJob->id}",
+                    'local',
+                );
+
+                if (! is_string($proofPath) || $proofPath === '') {
+                    throw new RuntimeException('A packing photo could not be stored.');
+                }
+
+                $storedProofs[] = [
+                    'file' => $proof,
+                    'path' => $proofPath,
+                ];
+            }
+
             DB::transaction(function () use (
                 $packingJob,
                 $service,
                 $initializeFulfilment,
                 $request,
-                $proof,
-                $proofPath,
+                $storedProofs,
                 $validated,
                 $isCourier
             ) {
-                if ($proof && $proofPath) {
+                foreach ($storedProofs as $storedProof) {
+                    $proof = $storedProof['file'];
+
+                    $packingJob->proofs()->create([
+                        'uploaded_by_user_id' => $request->user()->id,
+                        'storage_path' => $storedProof['path'],
+                        'original_name' => basename($proof->getClientOriginalName()),
+                        'mime_type' => $proof->getMimeType(),
+                    ]);
+                }
+
+                if ($storedProofs !== []) {
+                    $primaryProof = $storedProofs[0];
+                    $proof = $primaryProof['file'];
+
                     $packingJob->update([
-                        'proof_storage_path' => $proofPath,
-                        'proof_original_name' => basename(
-                            $proof->getClientOriginalName()
-                        ),
+                        'proof_storage_path' => $primaryProof['path'],
+                        'proof_original_name' => basename($proof->getClientOriginalName()),
                         'proof_mime_type' => $proof->getMimeType(),
                     ]);
                 }
@@ -174,17 +247,13 @@ class StaffPackingWorkflowController extends Controller
                 }
             });
         } catch (RuntimeException $exception) {
-            if ($proofPath) {
-                Storage::disk('local')->delete($proofPath);
-            }
+            Storage::disk('local')->delete(array_column($storedProofs, 'path'));
 
             return back()->withErrors([
                 'packing_job' => $exception->getMessage(),
             ]);
         } catch (Throwable $exception) {
-            if ($proofPath) {
-                Storage::disk('local')->delete($proofPath);
-            }
+            Storage::disk('local')->delete(array_column($storedProofs, 'path'));
 
             throw $exception;
         }
