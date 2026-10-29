@@ -7,6 +7,7 @@ use App\Services\Orders\BuildCustomerProgressService;
 use App\Services\Orders\CustomerOrderSessionAccessService;
 use App\Services\Orders\ResolveOrderAccessService;
 use Illuminate\Http\Request;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 
 class CustomerDashboardController extends Controller
 {
@@ -30,7 +31,17 @@ class CustomerDashboardController extends Controller
                 ]);
         }
 
-        $order = $sessionAccess->resolve($request, $orderId);
+        try {
+            $order = $sessionAccess->resolve($request, $orderId);
+        } catch (HttpException $exception) {
+            if ($exception->getStatusCode() !== 403) {
+                throw $exception;
+            }
+
+            return redirect()->route('orders.access.create', [
+                'order_id' => $orderId,
+            ]);
+        }
 
         $order->load([
             'couples',
