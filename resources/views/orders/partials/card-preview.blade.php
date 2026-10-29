@@ -183,13 +183,13 @@
                                     <stop offset="1" stop-color="#a96f35" />
                                 </linearGradient>
                                 <clipPath id="hanger-body-{{ strtolower($packageSide->side) }}">
-                                    <path d="M286 114 Q360 76 434 114 L650 250 Q673 264 662 291 Q649 318 620 304 L360 185 L100 304 Q71 318 58 291 Q47 264 70 250 Z" />
+                                    <path d="M286 114 Q360 78 434 114 L688 254 Q709 266 700 287 Q690 307 665 298 L360 164 L55 298 Q30 307 20 287 Q11 266 32 254 Z" />
                                 </clipPath>
                             </defs>
 
                             <path class="hanger-hook" d="M360 107 V63 C360 37 382 24 401 31 C425 40 424 67 408 82 C400 90 390 94 380 96" />
                             <path class="hanger-hook-inner" d="M360 104 V64 C360 42 380 32 397 38 C414 45 415 63 405 75" />
-                            <path class="hanger-body" d="M286 114 Q360 76 434 114 L650 250 Q673 264 662 291 Q649 318 620 304 L360 185 L100 304 Q71 318 58 291 Q47 264 70 250 Z" fill="url(#hanger-wood-{{ strtolower($packageSide->side) }})" />
+                            <path class="hanger-body" d="M286 114 Q360 78 434 114 L688 254 Q709 266 700 287 Q690 307 665 298 L360 164 L55 298 Q30 307 20 287 Q11 266 32 254 Z" fill="url(#hanger-wood-{{ strtolower($packageSide->side) }})" />
                             <g class="hanger-grain" clip-path="url(#hanger-body-{{ strtolower($packageSide->side) }})" aria-hidden="true">
                                 <path d="M74 269 Q210 208 345 112" />
                                 <path d="M95 296 Q224 237 349 143" />
