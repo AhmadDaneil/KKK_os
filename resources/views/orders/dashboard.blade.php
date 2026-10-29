@@ -483,7 +483,7 @@
                     <h3 id="included-design-items-{{ strtolower($side) }}">Included in the Card Package</h3>
                     <p class="field-help">Each wedding card package includes banner and bunting previews. The designer will use the short names and selected card design theme. Couple photos are used only for the PORTRAIT theme.</p>
                 </section>
-                <h3>{{ $hasSelectableSinglePackageSide ? 'Parents' : ($side === 'LELAKI' ? "Groom's Parents" : "Bride's Parents") }}</h3>
+                <h3>{{ $hasSelectableSinglePackageSide ? 'Parents' : ($side === 'LELAKI' ? "Groom's" : "Bride's').' Parents' }}</h3>
                 <p class="field-help">Enter the names of the parents hosting this event.</p>
                 <div class="grid">
                     <div><label>Father's Name</label><input name="sides[{{ $side }}][parents][father_name]" placeholder="Example: Mr Rahim Bin Abdullah" value="{{ old("sides.$side.parents.father_name", $packageSide?->parents?->father_name) }}"></div>
