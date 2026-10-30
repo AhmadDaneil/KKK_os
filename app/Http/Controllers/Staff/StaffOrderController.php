@@ -24,7 +24,7 @@ class StaffOrderController extends Controller
         $this->applyWorkstream($query, $workstream);
         $this->applyFilters($query, $request, $user);
 
-        $perPage = $request->routeIs('staff.orders.index') ? 10 : 25;
+        $perPage = 10;
 
         $orders = $query
             ->latest('id')
