@@ -228,6 +228,10 @@
                             <dt>Customer Reference</dt>
                             <dd>{{ $order->customer_reference ?: '-' }}</dd>
                         </div>
+                        <div>
+                            <dt>Order Date</dt>
+                            <dd><time datetime="{{ $order->created_at->toIso8601String() }}">{{ $order->created_at->timezone(config('app.display_timezone'))->format('d/m/Y') }}</time></dd>
+                        </div>
                     </dl>
                 </section>
 
@@ -248,6 +252,10 @@
                         <div>
                             <dt>Phone</dt>
                             <dd>{{ $order->customer_phone ?: '-' }}</dd>
+                        </div>
+                        <div>
+                            <dt>Order Time</dt>
+                            <dd><time datetime="{{ $order->created_at->toIso8601String() }}">{{ $order->created_at->timezone(config('app.display_timezone'))->format('H:i') }}</time></dd>
                         </div>
                     </dl>
 
