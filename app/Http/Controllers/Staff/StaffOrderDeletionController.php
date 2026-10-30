@@ -30,6 +30,11 @@ class StaffOrderDeletionController extends Controller
             ]);
         }
 
-        return back()->with('status', "Order {$orderId} deleted successfully.");
+        $ordersIndexRoute = $request->routeIs('admin.orders.destroy')
+            ? 'admin.orders.index'
+            : 'staff.orders.index';
+
+        return redirect()->route($ordersIndexRoute)
+            ->with('status', "Order {$orderId} deleted successfully.");
     }
 }

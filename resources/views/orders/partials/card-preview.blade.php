@@ -121,12 +121,12 @@
             <div class="live-product-heading">
                 <div>
                     <p class="eyebrow">Included in your package</p>
-                    <h3>Banner, Bunting, Arrow Posters &amp; Sticker</h3>
+                    <h3>{{ $order->package_type === 'PUTERI_MANIS' ? 'Banner, Bunting, Arrow Posters, Sticker & Wooden Hanger' : 'Banner, Bunting, Arrow Posters & Sticker' }}</h3>
                 </div>
                 <span>{{ $packageSide->side === 'LELAKI' ? "Groom's Side" : "Bride's Side" }}</span>
             </div>
 
-            <div class="live-product-grid">
+            <div class="live-product-grid{{ $order->package_type === 'PUTERI_MANIS' ? ' live-product-grid--puteri-manis' : '' }}">
                 <article class="live-product live-product--banner" data-live-product-theme>
                     <span class="live-product-label">Banner</span>
                     <p data-preview-field="card_title">Wedding Reception</p>
@@ -158,6 +158,52 @@
                         <path d="M22 125 260 20v52h315v106H260v52Z" fill="#363636" stroke="#fff" stroke-width="15" stroke-linejoin="round" />
                     </svg>
                 </article>
+
+                @if ($order->package_type === 'PUTERI_MANIS')
+                    <article class="live-product live-product--hanger">
+                        <span class="live-product-label">Wooden Hanger</span>
+                        <svg
+                            class="hanger-illustration"
+                            viewBox="0 0 720 390"
+                            role="img"
+                            aria-labelledby="hanger-preview-title-{{ strtolower($packageSide->side) }}"
+                        >
+                            <title id="hanger-preview-title-{{ strtolower($packageSide->side) }}">Wooden wedding hanger preview</title>
+                            <defs>
+                                <linearGradient id="hanger-wood-{{ strtolower($packageSide->side) }}" x1="0" y1="0" x2="1" y2="1">
+                                    <stop offset="0" stop-color="#f1d39a" />
+                                    <stop offset=".48" stop-color="#c89652" />
+                                    <stop offset="1" stop-color="#a96f35" />
+                                </linearGradient>
+                                <clipPath id="hanger-body-{{ strtolower($packageSide->side) }}">
+                                    <path d="M286 114 Q360 76 434 114 L650 250 Q673 264 662 291 Q649 318 620 304 L360 185 L100 304 Q71 318 58 291 Q47 264 70 250 Z" />
+                                </clipPath>
+                            </defs>
+
+                            <path class="hanger-hook" d="M360 107 V63 C360 37 382 24 401 31 C425 40 424 67 408 82 C400 90 390 94 380 96" />
+                            <path class="hanger-hook-inner" d="M360 104 V64 C360 42 380 32 397 38 C414 45 415 63 405 75" />
+                            <path class="hanger-body" d="M286 114 Q360 76 434 114 L650 250 Q673 264 662 291 Q649 318 620 304 L360 185 L100 304 Q71 318 58 291 Q47 264 70 250 Z" fill="url(#hanger-wood-{{ strtolower($packageSide->side) }})" />
+                            <g class="hanger-grain" clip-path="url(#hanger-body-{{ strtolower($packageSide->side) }})" aria-hidden="true">
+                                <path d="M74 269 Q210 208 345 112" />
+                                <path d="M95 296 Q224 237 349 143" />
+                                <path d="M646 269 Q510 208 375 112" />
+                                <path d="M625 296 Q496 237 371 143" />
+                            </g>
+                            <path class="hanger-crossbar" d="M91 308 Q360 298 629 308" />
+
+                            <g class="hanger-engraving" aria-hidden="true">
+                                <path class="hanger-flourish" d="M299 131 Q319 117 339 128 Q350 134 360 126 Q370 134 381 128 Q401 117 421 131 M309 129 Q313 120 320 123 M334 126 Q331 117 325 118 M386 126 Q389 117 395 118 M411 129 Q407 120 400 123" />
+                                <circle cx="360" cy="124" r="2.5" />
+                            </g>
+                            <text class="hanger-couple-names" x="360" y="157" text-anchor="middle">
+                                <tspan data-preview-field="groom_display">Groom</tspan>
+                                <tspan class="hanger-name-ampersand"> &amp; </tspan>
+                                <tspan data-preview-field="bride_display">Bride</tspan>
+                            </text>
+                            <text class="hanger-event-date" x="360" y="180" text-anchor="middle" data-preview-field="event_date">Event Date</text>
+                        </svg>
+                    </article>
+                @endif
 
                 <article class="live-product live-product--sticker" data-live-product-theme>
                     <span class="live-product-label">Sticker</span>

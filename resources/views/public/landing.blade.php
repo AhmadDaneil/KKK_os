@@ -35,12 +35,13 @@
                         <a class="button button-primary" href="{{ route('orders.dashboard', ['orderId' => $activeDraft->order_id]) }}#customer-order-form">Complete Order Details →</a>
                     </div>
                 @endif
-                @unless ($activeDraft)
-                    <div class="hero-actions">
+                <div class="hero-actions">
+                    @unless ($activeDraft)
                         <a class="button button-primary" href="{{ route('public.orders.create') }}"><span>Chat to Book</span><span class="button-arrow" aria-hidden="true">→</span></a>
                         <a class="button button-secondary" href="{{ route('public.orders.progress') }}"><span>Track Order</span></a>
-                    </div>
-                @endunless
+                    @endunless
+                    <a class="button button-secondary" href="{{ route('orders.access.create') }}"><span>Continue Existing Order</span><span class="button-arrow" aria-hidden="true">→</span></a>
+                </div>
                 <ul class="trust-list" aria-label="Key benefits">
                     <li><span>✓</span> Live preview</li>
                     <li><span>✓</span> Automatic saving</li>

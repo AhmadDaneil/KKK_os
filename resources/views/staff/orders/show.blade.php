@@ -228,6 +228,10 @@
                             <dt>Customer Reference</dt>
                             <dd>{{ $order->customer_reference ?: '-' }}</dd>
                         </div>
+                        <div>
+                            <dt>Order Date</dt>
+                            <dd><time datetime="{{ $order->created_at->toIso8601String() }}">{{ $order->created_at->timezone(config('app.display_timezone'))->format('d/m/Y') }}</time></dd>
+                        </div>
                     </dl>
                 </section>
 
@@ -248,6 +252,10 @@
                         <div>
                             <dt>Phone</dt>
                             <dd>{{ $order->customer_phone ?: '-' }}</dd>
+                        </div>
+                        <div>
+                            <dt>Order Time</dt>
+                            <dd><time datetime="{{ $order->created_at->toIso8601String() }}">{{ $order->created_at->timezone(config('app.display_timezone'))->format('H:i') }}</time></dd>
                         </div>
                     </dl>
 
@@ -1267,7 +1275,17 @@
                             </div>
                         @endif
 
-                        @if ($order->packingJob->proof_storage_path)
+                        @if ($order->packingJob->proofs->isNotEmpty())
+                            <div class="staff-proof-status">
+                                <strong>Packing photos:</strong>
+
+                                @if (auth()->user()->isOperationManagement())
+                                    @foreach ($order->packingJob->proofs as $packingProof)
+                                        <a href="{{ route($operationRoutePrefix.'packing-jobs.proof-files.show', ['packingJob' => $order->packingJob, 'packingJobProof' => $packingProof]) }}" class="staff-button staff-button-small" target="_blank" rel="noopener">View {{ $packingProof->original_name }}</a>
+                                    @endforeach
+                                @endif
+                            </div>
+                        @elseif ($order->packingJob->proof_storage_path)
                             <div class="staff-proof-status">
                                 <strong>Packing proof:</strong> {{ $order->packingJob->proof_original_name ?? 'Uploaded' }}
 
@@ -1286,10 +1304,12 @@
                                     <form method="POST" enctype="multipart/form-data" action="{{ route($operationRoutePrefix.'packing-jobs.mark-packed', $order->packingJob) }}" class="staff-packing-complete-form js-staff-confirmation-form" data-confirm-title="Upload proof and mark packing complete?" data-confirm-message="{{ $order->fulfilment?->method === 'COURIER' ? 'Check that the packing photo, courier name and tracking number are correct. Packing will be marked complete after dispatch.' : 'Check that the photo shows all items packed. Packing will be marked complete for self pickup.' }}" data-confirm-button="Yes, mark packing complete">
                                         @csrf
                                         <label for="packing-proof">Photo proof of packed items</label>
-                                        <div class="staff-file-picker">
-                                            <input id="packing-proof" type="file" name="packing_proof" accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp" required>
-                                            <button type="button" class="staff-file-cancel" hidden aria-controls="packing-proof">Cancel</button>
+                                        <div class="staff-multi-file-picker" data-file-kind="packing proof photos">
+                                            <input id="packing-proof" type="file" name="packing_proofs[]" accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp" multiple required>
+                                            <button type="button" class="staff-file-add" aria-controls="packing-proof">+ Add Photos</button>
+                                            <ul class="staff-selected-files" aria-live="polite"></ul>
                                         </div>
+                                        <p class="staff-field-help">Upload up to 10 photos, maximum 10 MB each.</p>
                                         @if ($order->fulfilment?->method === 'COURIER')
                                             <label for="courier-provider">Courier Name</label><input id="courier-provider" name="courier_provider" value="{{ old('courier_provider') }}" placeholder="Example: Pos Laju" required>
                                             <label for="tracking-number">Tracking Number</label><input id="tracking-number" name="tracking_number" value="{{ old('tracking_number') }}" required>

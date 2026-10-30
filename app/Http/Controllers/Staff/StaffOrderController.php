@@ -24,9 +24,11 @@ class StaffOrderController extends Controller
         $this->applyWorkstream($query, $workstream);
         $this->applyFilters($query, $request, $user);
 
+        $perPage = 10;
+
         $orders = $query
             ->latest('id')
-            ->paginate(25)
+            ->paginate($perPage)
             ->withQueryString();
 
         $statusOptions = Order::query()->whereNotNull('status');
@@ -83,6 +85,7 @@ class StaffOrderController extends Controller
                 'printJobs.assignedUser',
                 'packingJob.assignedUser',
                 'packingJob.items',
+                'packingJob.proofs',
                 'designJobs.events.actor',
                 'printJobs.events.actor',
                 'packingJob.events.actor',

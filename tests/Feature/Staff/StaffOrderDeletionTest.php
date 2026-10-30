@@ -18,8 +18,9 @@ class StaffOrderDeletionTest extends TestCase
         $order = $this->incompleteOrder();
 
         $this->actingAs($admin, 'admin')
+            ->from(route('admin.orders.show', $order->order_id))
             ->delete(route('admin.orders.destroy', $order->order_id))
-            ->assertRedirect();
+            ->assertRedirectToRoute('admin.orders.index');
 
         $this->assertDatabaseMissing('orders', ['id' => $order->id]);
         $this->assertDatabaseMissing('order_package_sides', ['order_id' => $order->id]);
@@ -31,8 +32,9 @@ class StaffOrderDeletionTest extends TestCase
         $order = $this->incompleteOrder(2);
 
         $this->actingAs($manager)
+            ->from(route('staff.orders.show', $order->order_id))
             ->delete(route('staff.orders.destroy', $order->order_id))
-            ->assertRedirect();
+            ->assertRedirectToRoute('staff.orders.index');
 
         $this->assertDatabaseMissing('orders', ['id' => $order->id]);
         $this->assertDatabaseMissing('order_package_sides', ['order_id' => $order->id]);

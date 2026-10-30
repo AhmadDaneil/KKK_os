@@ -168,7 +168,9 @@
             <section class="design-proof-card production-proof-section" aria-labelledby="packing-proof-title">
                 <div class="design-proof-card-heading">
                     <span>Packing Proof</span>
-                    @if ($packingProofAvailable)
+                    @if ($packingProofs->isNotEmpty())
+                        <b>{{ $packingProofs->count() }} {{ \Illuminate\Support\Str::plural('file', $packingProofs->count()) }}</b>
+                    @elseif ($packingProofAvailable)
                         <b>1 file</b>
                     @endif
                 </div>
@@ -177,9 +179,17 @@
 
                 @if ($packingProofAvailable)
                     <div class="design-proof-actions">
-                        <a class="button button-primary" href="{{ $customerProofUrl('orders.packing-proof.show', ['orderId' => $order->order_id]) }}" target="_blank" rel="noopener noreferrer">
-                            View Packing Proof
-                        </a>
+                        @if ($packingProofs->isNotEmpty())
+                            @foreach ($packingProofs as $packingProof)
+                                <a class="button button-primary" href="{{ $customerProofUrl('orders.packing-proofs.show', ['orderId' => $order->order_id, 'packingJobProof' => $packingProof]) }}" target="_blank" rel="noopener noreferrer">
+                                    View Packing Proof · Photo {{ $loop->iteration }}
+                                </a>
+                            @endforeach
+                        @else
+                            <a class="button button-primary" href="{{ $customerProofUrl('orders.packing-proof.show', ['orderId' => $order->order_id]) }}" target="_blank" rel="noopener noreferrer">
+                                View Packing Proof
+                            </a>
+                        @endif
                     </div>
                 @else
                     <p class="production-proof-empty">No packing proof has been shared yet.</p>
