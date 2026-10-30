@@ -139,19 +139,30 @@
     @endif
 </header>
 
-@if ($order->customer_reference || $order->invoice)
+@if ($order->customer_reference || $order->invoice || $order->payments->isNotEmpty())
+    @php
+        $paidPayments = $order->payments->where('status', 'PAID');
+        $bookingPaidAmount = $paidPayments
+            ->where('payment_type', 'BOOKING_DEPOSIT')
+            ->sum(fn ($payment) => (float) $payment->amount);
+        $hasFinalOrderTotal = $order->pricingSnapshot !== null;
+    @endphp
     <section class="deposit-status-card" aria-label="Financial summary">
         <div><span>Customer Reference</span><strong>{{ $order->customer_reference ?: '-' }}</strong></div>
-        @if ($order->invoice)
-            <div><span>Invoice Total</span><strong>RM {{ number_format((float) $order->invoice->total_amount, 2) }}</strong></div>
-            <div><span>Amount Paid</span><strong>RM {{ number_format((float) $order->invoice->amount_paid, 2) }}</strong></div>
-            <div><span>Balance Due</span><strong>RM {{ number_format((float) $order->invoice->balance_due, 2) }}</strong></div>
+        <div><span>Booking Paid</span><strong>RM {{ number_format($bookingPaidAmount, 2) }}</strong></div>
+        @if ($hasFinalOrderTotal)
+            <div><span>Order Total</span><strong>RM {{ number_format((float) $order->pricingSnapshot->total_amount, 2) }}</strong></div>
+            <div><span>Total Payments</span><strong>RM {{ number_format((float) ($order->invoice?->amount_paid ?? $paidPayments->sum(fn ($payment) => (float) $payment->amount)), 2) }}</strong></div>
+            <div><span>Balance Due</span><strong>RM {{ number_format((float) ($order->invoice?->balance_due ?? $order->pricingSnapshot->outstanding_amount), 2) }}</strong></div>
+        @else
+            <div><span>Order Total</span><strong>Pending / To Be Calculated</strong></div>
+            <div><span>Balance</span><strong>Pending / To Be Calculated</strong></div>
         @endif
-        @if ($order->payments->where('status', 'PAID')->isNotEmpty())
+        @if ($paidPayments->isNotEmpty())
             <h2>Payment History</h2>
             <ul>
-                @foreach ($order->payments->where('status', 'PAID')->sortByDesc('paid_at') as $payment)
-                    <li>{{ $payment->payment_type === 'BOOKING_DEPOSIT' ? 'Booking deposit' : 'Remaining balance' }} — RM {{ number_format((float) $payment->amount, 2) }} — {{ $payment->paid_at?->format('d/m/Y H:i') }}</li>
+                @foreach ($paidPayments->sortByDesc('paid_at') as $payment)
+                    <li>{{ $payment->payment_type === 'BOOKING_DEPOSIT' ? 'Booking deposit' : 'Remaining balance' }} — RM {{ number_format((float) $payment->amount, 2) }} — {{ $payment->paid_at?->timezone(config('app.display_timezone'))->format('d/m/Y H:i') }}</li>
                 @endforeach
             </ul>
         @endif

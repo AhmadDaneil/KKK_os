@@ -53,6 +53,7 @@ class CustomerDashboardController extends Controller
             'packingJob',
             'payments',
             'invoice',
+            'pricingSnapshot',
             'confirmation',
             'designJobs.artworkVersions',
             'progressUpdates' => fn ($query) => $query
