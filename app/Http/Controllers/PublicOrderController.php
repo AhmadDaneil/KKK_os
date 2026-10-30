@@ -67,7 +67,7 @@ class PublicOrderController extends Controller
         ]);
 
         $validated = $request->validate([
-            'order_id' => ['required', 'string', 'max:32', 'regex:/^KKK-[A-Za-z0-9-]+$/'],
+            'order_id' => ['required', 'string', 'max:32', 'regex:/^(?:KKK-\d{6}-\d{4}|[A-Z]{2,3}\d{6}-\d{3})$/'],
         ], [
             'order_id.required' => 'Please enter your order ID.',
             'order_id.regex' => 'Invalid order ID format.',

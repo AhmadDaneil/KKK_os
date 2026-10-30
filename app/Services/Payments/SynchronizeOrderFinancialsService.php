@@ -22,7 +22,11 @@ class SynchronizeOrderFinancialsService
             $lockedOrder = Order::query()->whereKey($order->id)->lockForUpdate()->firstOrFail();
             $snapshot = $lockedOrder->pricingSnapshot()->lockForUpdate()->first();
 
-            $currency = $snapshot?->currency ?? 'MYR';
+            if ($snapshot === null) {
+                return null;
+            }
+
+            $currency = $snapshot->currency;
 
             $paidCents = $lockedOrder->payments()
                 ->where('status', 'PAID')
@@ -34,9 +38,7 @@ class SynchronizeOrderFinancialsService
                 return null;
             }
 
-            $totalCents = $snapshot === null
-                ? $paidCents
-                : $this->toCents((string) $snapshot->total_amount);
+            $totalCents = $this->toCents((string) $snapshot->total_amount);
 
             if ($totalCents <= 0 || $paidCents > $totalCents) {
                 throw new RuntimeException('The total payments exceed the order price snapshot.');
