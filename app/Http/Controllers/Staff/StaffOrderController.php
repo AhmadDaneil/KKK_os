@@ -24,9 +24,11 @@ class StaffOrderController extends Controller
         $this->applyWorkstream($query, $workstream);
         $this->applyFilters($query, $request, $user);
 
+        $perPage = $request->routeIs('staff.orders.index') ? 10 : 25;
+
         $orders = $query
             ->latest('id')
-            ->paginate(25)
+            ->paginate($perPage)
             ->withQueryString();
 
         $statusOptions = Order::query()->whereNotNull('status');
