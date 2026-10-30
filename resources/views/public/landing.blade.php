@@ -31,8 +31,11 @@
                 @if ($activeDraft)
                     <div class="landing-resume-order" role="status">
                         <strong>Booking payment confirmed</strong>
-                        <p>Your booking is ready. Please complete your order details before tracking its progress.</p>
-                        <a class="button button-primary" href="{{ route('orders.dashboard', ['orderId' => $activeDraft->order_id]) }}#customer-order-form">Complete Order Details →</a>
+                        <p>Your booking is ready. Complete your details or track your order progress below.</p>
+                        <div class="hero-actions">
+                            <a class="button button-primary" href="{{ route('orders.dashboard', ['orderId' => $activeDraft->order_id]) }}#customer-order-form">Complete Order Details →</a>
+                            <a class="button button-secondary" href="{{ route('public.orders.progress', ['order_id' => $activeDraft->order_id]) }}">Track Progress →</a>
+                        </div>
                     </div>
                 @endif
                 <div class="hero-actions">
