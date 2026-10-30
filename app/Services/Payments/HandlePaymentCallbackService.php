@@ -9,6 +9,8 @@ use App\Services\Orders\ActivateCustomerDashboardService;
 use App\Services\Orders\AdvancePaidConfirmedOrderToDesignService;
 use App\Services\Printing\InitializePrintJobsForOrderService;
 use App\Services\Printing\SyncOrderPrintStatusService;
+use Carbon\CarbonImmutable;
+use Carbon\Exceptions\InvalidFormatException;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use RuntimeException;
@@ -73,7 +75,7 @@ class HandlePaymentCallbackService
                 if ($payment->status !== 'PAID') {
                     $payment->update([
                         'status' => 'PAID',
-                        'paid_at' => ! empty($verified['paid_at']) ? $verified['paid_at'] : now(),
+                        'paid_at' => $this->normalizePaidAt($verified['paid_at'] ?? null),
                         'metadata' => $metadata,
                     ]);
                 } elseif ($metadata !== ($payment->metadata ?? [])) {
@@ -164,6 +166,19 @@ class HandlePaymentCallbackService
         }
 
         return $payment->fresh();
+    }
+
+    private function normalizePaidAt(mixed $paidAt): CarbonImmutable
+    {
+        if (! is_string($paidAt) || trim($paidAt) === '') {
+            return CarbonImmutable::now('UTC');
+        }
+
+        try {
+            return CarbonImmutable::parse($paidAt, (string) config('app.display_timezone'))->utc();
+        } catch (InvalidFormatException) {
+            return CarbonImmutable::now('UTC');
+        }
     }
 
     private function toSen(string $amount): int
