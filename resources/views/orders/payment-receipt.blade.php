@@ -18,7 +18,7 @@
             <dt>Status</dt>
             <dd>Paid</dd>
             <dt>Payment date</dt>
-            <dd>{{ $payment->paid_at?->format('d/m/Y H:i') }}</dd>
+            <dd>{{ $payment->paid_at?->timezone(config('app.display_timezone'))->format('d/m/Y H:i') }}</dd>
         </dl>
         <p>This receipt applies only to the transaction above.</p>
     </main>

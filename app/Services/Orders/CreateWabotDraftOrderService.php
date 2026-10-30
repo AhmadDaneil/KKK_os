@@ -5,6 +5,7 @@ namespace App\Services\Orders;
 use App\Models\Order;
 use App\Services\Payments\BillplzPaymentMethod;
 use App\Services\Payments\CreateBillplzBookingPaymentService;
+use App\Services\Orders\GenerateCustomerReferenceService;
 use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -15,6 +16,7 @@ class CreateWabotDraftOrderService
         private CreateOrderService $orders,
         private CreateBillplzBookingPaymentService $bookingPayments,
         private NormalizeCustomerPhoneService $phones,
+        private GenerateCustomerReferenceService $customerReferences,
     ) {}
 
     /** @return array{order: Order, payment_url: string, reused: bool} */
@@ -85,6 +87,7 @@ class CreateWabotDraftOrderService
                     'customer_phone' => $phone,
                     'wabot_channel' => $channel,
                 ]);
+                $order = $this->alignOrderIdWithCustomerReference($order);
 
                 return ['order' => $order, 'reused' => false];
             }, 3);
@@ -229,14 +232,18 @@ class CreateWabotDraftOrderService
         }
 
         try {
-            $order = DB::transaction(fn (): Order => $this->orders->create([
-                ...$data,
-                'source' => 'WABOT',
-                'source_reference' => $sourceReference,
-                'wabot_channel' => $channel,
-                'wabot_idempotency_key' => $idempotencyKey,
-                'customer_phone' => $phone,
-            ]), 3);
+            $order = DB::transaction(function () use ($data, $sourceReference, $channel, $idempotencyKey, $phone): Order {
+                $order = $this->orders->create([
+                    ...$data,
+                    'source' => 'WABOT',
+                    'source_reference' => $sourceReference,
+                    'wabot_channel' => $channel,
+                    'wabot_idempotency_key' => $idempotencyKey,
+                    'customer_phone' => $phone,
+                ]);
+
+                return $this->alignOrderIdWithCustomerReference($order);
+            }, 3);
         } catch (UniqueConstraintViolationException $exception) {
             $existing = $this->existing($sourceReference, $idempotencyKey);
 
@@ -249,6 +256,17 @@ class CreateWabotDraftOrderService
         $checkout = $this->bookingPayments->create($order, throwGatewayFailure: true);
 
         return ['order' => $order, 'payment_url' => $checkout['payment_url'], 'reused' => false];
+    }
+
+    private function alignOrderIdWithCustomerReference(Order $order): Order
+    {
+        $reference = $this->customerReferences->generate($order);
+
+        if ($order->order_id !== $reference) {
+            $order->update(['order_id' => $reference]);
+        }
+
+        return $order->fresh();
     }
 
     private function existing(string $sourceReference, ?string $idempotencyKey): ?Order
