@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="referrer" content="no-referrer">
-    <title>Design Review - {{ $order->order_id }}</title>
+    <title>Design Review - {{ $order->displayCustomerReference() ?: $order->order_id }}</title>
     <link rel="stylesheet" href="{{ asset('css/artwork-review.css') }}?v={{ filemtime(public_path('css/artwork-review.css')) }}">
     <link rel="stylesheet" href="{{ asset('css/customer-theme.css') }}?v={{ filemtime(public_path('css/customer-theme.css')) }}">
     <link rel="stylesheet" href="{{ asset('css/customer-service.css') }}?v={{ filemtime(public_path('css/customer-service.css')) }}">
@@ -54,8 +54,8 @@
 
         <div class="order-summary">
             <div>
-                <span class="summary-label">Order ID</span>
-                <strong>{{ $order->order_id }}</strong>
+                <span class="summary-label">{{ $order->displayCustomerReference() ? 'Customer Reference' : 'Order ID' }}</span>
+                <strong>{{ $order->displayCustomerReference() ?: $order->order_id }}</strong>
             </div>
             <div>
                 <span class="summary-label">Status</span>
@@ -325,7 +325,7 @@
     <div class="page-actions">
         <a
             class="button button-secondary"
-            href="{{ route('public.orders.progress', ['order_id' => $order->order_id]) }}"
+            href="{{ route('public.orders.progress', ['order_id' => $order->displayCustomerReference() ?: $order->order_id]) }}"
         >
             &larr; Back to Order Tracking
         </a>

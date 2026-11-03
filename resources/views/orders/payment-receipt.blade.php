@@ -3,14 +3,14 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Receipt {{ $order->customer_reference }}</title>
+    <title>Receipt {{ $order->displayCustomerReference() ?: $order->order_id }}</title>
 </head>
 <body>
     <main>
         <h1>Payment Receipt</h1>
         <dl>
-            <dt>Customer reference</dt>
-            <dd>{{ $order->customer_reference }}</dd>
+            <dt>{{ $order->displayCustomerReference() ? 'Customer reference' : 'Order ID' }}</dt>
+            <dd>{{ $order->displayCustomerReference() ?: $order->order_id }}</dd>
             <dt>Payment type</dt>
             <dd>{{ $payment->payment_type === 'BOOKING_DEPOSIT' ? 'Booking deposit' : 'Remaining balance' }}</dd>
             <dt>Amount</dt>

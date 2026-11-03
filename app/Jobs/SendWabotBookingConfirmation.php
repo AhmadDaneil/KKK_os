@@ -43,7 +43,7 @@ class SendWabotBookingConfirmation implements ShouldQueue
 
         $dashboardUrl = Crypt::decryptString($encryptedUrl);
         $message = "Booking anda telah berjaya ✅\n\n"
-            ."No Tempahan: {$order->customer_reference}\n"
+            .'No Tempahan: '.($order->displayCustomerReference() ?? $order->order_id)."\n"
             .'Bayaran Booking: RM'.number_format((float) $payment->amount, 2)."\n\n"
             ."Sila lengkapkan maklumat tempahan anda di:\n{$dashboardUrl}";
 

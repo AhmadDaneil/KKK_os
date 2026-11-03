@@ -1,5 +1,7 @@
 @php
-    $customerServiceOrderId = $order->order_id ?? $orderId ?? null;
+    $customerServiceOrderId = isset($order)
+        ? ($order->displayCustomerReference() ?: $order->order_id)
+        : ($orderId ?? null);
     $customerServiceUrl = route('public.orders.create', array_filter([
         'purpose' => 'support',
         'order_id' => $customerServiceOrderId,

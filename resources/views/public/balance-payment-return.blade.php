@@ -27,7 +27,7 @@
                 <h1>Payment Successful</h1>
                 <p class="payment-return-lead">Your balance payment has been verified securely. Your order can now continue to the next stage.</p>
                 <dl class="payment-return-summary">
-                    <div><dt>Order ID</dt><dd>{{ $order->order_id }}</dd></div>
+                    <div><dt>{{ $order->displayCustomerReference() ? 'Customer Reference' : 'Order ID' }}</dt><dd>{{ $order->displayCustomerReference() ?: $order->order_id }}</dd></div>
                     <div><dt>Amount paid</dt><dd>MYR {{ number_format((float) $payment->amount, 2) }}</dd></div>
                     <div><dt>Payment status</dt><dd>Paid</dd></div>
                     @if ($payment->paid_at)<div><dt>Payment date</dt><dd>{{ $payment->paid_at->timezone(config('app.display_timezone'))->format('d/m/Y, H:i') }}</dd></div>@endif
@@ -36,9 +36,9 @@
                     @if ($receiptUrl)
                         <a class="button button-secondary" href="{{ $receiptUrl }}" target="_blank" rel="noopener noreferrer">View Billplz E-Receipt</a>
                     @endif
-                    <a class="button button-primary" href="{{ route('public.orders.progress', ['order_id' => $order->order_id]) }}">Continue to Track Progress →</a>
+                    <a class="button button-primary" href="{{ route('public.orders.progress', ['order_id' => $order->displayCustomerReference() ?: $order->order_id]) }}">Continue to Track Progress →</a>
                 </div>
-                <a class="payment-return-merchant" href="{{ route('public.orders.progress', ['order_id' => $order->order_id]) }}">Return to Merchant</a>
+                <a class="payment-return-merchant" href="{{ route('public.orders.progress', ['order_id' => $order->displayCustomerReference() ?: $order->order_id]) }}">Return to Merchant</a>
             @else
                 <span class="payment-return-icon is-pending" aria-hidden="true">…</span>
                 <p class="eyebrow">Payment confirmation</p>
@@ -46,7 +46,7 @@
                 <p class="payment-return-lead">Please wait a moment while Billplz confirms your payment. Do not make another payment for this order.</p>
                 <div class="payment-return-actions">
                     <a class="button button-primary" href="{{ route('payments.balance.return', ['reference' => $payment->public_reference]) }}">Check Payment Again</a>
-                    <a class="button button-secondary" href="{{ route('public.orders.progress', ['order_id' => $order->order_id]) }}">Return to Merchant</a>
+                    <a class="button button-secondary" href="{{ route('public.orders.progress', ['order_id' => $order->displayCustomerReference() ?: $order->order_id]) }}">Return to Merchant</a>
                 </div>
             @endif
         </section>

@@ -148,10 +148,10 @@
         <div class="admin-panel-heading"><div><p class="admin-eyebrow">Recent</p><h2>Recent Orders</h2></div><a href="{{ route('admin.orders.index') }}">All orders →</a></div>
         <div class="admin-table-wrap">
             <table class="admin-table">
-                <thead><tr><th>Order ID</th><th>Customer</th><th>Packages</th><th>Status</th><th>Date</th><th></th></tr></thead>
+                <thead><tr><th>Customer Reference</th><th>Customer</th><th>Packages</th><th>Status</th><th>Date</th><th></th></tr></thead>
                 <tbody>
                 @forelse ($recentOrders as $order)
-                    <tr><td><strong>{{ $order->order_id }}</strong></td><td>{{ $order->customer_name ?: 'Not provided' }}</td><td>{{ $order->package_count }} {{ $order->package_count === 1 ? 'package' : 'packages' }}</td><td><span class="admin-status">{{ $statusLabels[$order->status] ?? 'Order Status' }}</span></td><td>{{ $order->created_at->timezone(config('app.display_timezone'))->format('d M Y') }}</td><td><a href="{{ route('admin.orders.show', $order->order_id) }}">Open</a></td></tr>
+                    <tr><td><strong>{{ $order->displayCustomerReference() ?: $order->order_id }}</strong></td><td>{{ $order->customer_name ?: 'Not provided' }}</td><td>{{ $order->package_count }} {{ $order->package_count === 1 ? 'package' : 'packages' }}</td><td><span class="admin-status">{{ $statusLabels[$order->status] ?? 'Order Status' }}</span></td><td>{{ $order->created_at->timezone(config('app.display_timezone'))->format('d M Y') }}</td><td><a href="{{ route('admin.orders.show', $order->order_id) }}">Open</a></td></tr>
                 @empty
                     <tr><td colspan="6" class="admin-empty">No orders yet.</td></tr>
                 @endforelse
