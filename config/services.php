@@ -55,6 +55,9 @@ return [
         'royalicious_booking_webhook_token' => env('WABOT_RYC_BOOKING_WEBHOOK_TOKEN'),
         'royalicious_booking_test_phone' => env('WABOT_RYC_BOOKING_TEST_PHONE'),
         'royalicious_production_booking_webhook_token' => env('WABOT_RYC_PRODUCTION_BOOKING_WEBHOOK_TOKEN'),
+        'cetaking_booking_webhook_token' => env('WABOT_CK_BOOKING_WEBHOOK_TOKEN'),
+        'cetaking_booking_test_phone' => env('WABOT_CK_BOOKING_TEST_PHONE'),
+        'cetaking_production_booking_webhook_token' => env('WABOT_CK_PRODUCTION_BOOKING_WEBHOOK_TOKEN'),
         'base_url' => env('WABOT_BASE_URL', 'https://app.wabot.my'),
         'channels' => [
             'kingkadkahwin' => ['instance_id' => env('WABOT_KKK_INSTANCE_ID'), 'access_token' => env('WABOT_KKK_ACCESS_TOKEN')],
