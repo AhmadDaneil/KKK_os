@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="referrer" content="no-referrer">
-    <title>KKK OS - {{ $order->order_id }}</title>
+    <title>KKK OS - {{ $order->displayCustomerReference() ?: $order->order_id }}</title>
     <link rel="stylesheet" href="{{ asset('css/customer-dashboard.css') }}?v={{ filemtime(public_path('css/customer-dashboard.css')) }}">
     <link rel="stylesheet" href="{{ asset('css/customer-theme.css') }}?v={{ filemtime(public_path('css/customer-theme.css')) }}">
     <link rel="stylesheet" href="{{ asset('css/customer-service.css') }}?v={{ filemtime(public_path('css/customer-service.css')) }}">
@@ -20,7 +20,7 @@
         </div>
 
         <div class="order-summary-actions">
-            <a href="{{ route('public.orders.progress', ['order_id' => $order->order_id]) }}" class="back-home-button">
+            <a href="{{ route('public.orders.progress', ['order_id' => $order->displayCustomerReference() ?: $order->order_id]) }}" class="back-home-button">
                 <span aria-hidden="true">&larr;</span>
                 {{ __('ui.back') }}
             </a>
@@ -38,8 +38,8 @@
 
     <div class="order-summary-grid">
         <div>
-            <span class="summary-label">Order ID</span>
-            <strong>{{ $order->order_id }}</strong>
+            <span class="summary-label">{{ $order->displayCustomerReference() ? 'Customer Reference' : 'Order ID' }}</span>
+            <strong>{{ $order->displayCustomerReference() ?: $order->order_id }}</strong>
         </div>
 
         <div>
@@ -148,7 +148,7 @@
         $hasFinalOrderTotal = $order->pricingSnapshot !== null;
     @endphp
     <section class="deposit-status-card" aria-label="Financial summary">
-        <div><span>Customer Reference</span><strong>{{ $order->customer_reference ?: '-' }}</strong></div>
+        <div><span>{{ $order->displayCustomerReference() ? 'Customer Reference' : 'Order ID' }}</span><strong>{{ $order->displayCustomerReference() ?: $order->order_id }}</strong></div>
         <div><span>Booking Paid</span><strong>RM {{ number_format($bookingPaidAmount, 2) }}</strong></div>
         @if ($hasFinalOrderTotal)
             <div><span>Order Total</span><strong>RM {{ number_format((float) $order->pricingSnapshot->total_amount, 2) }}</strong></div>
@@ -267,7 +267,8 @@
         $isEditable = $order->status === 'DETAILS_INCOMPLETE';
         $firstEventSide = old('first_event_side', $order->first_event_side ?: 'LELAKI');
         $orderedPackageSides = $order->packageSides->sortBy(fn ($item) => $item->side === $firstEventSide ? 0 : 1)->values();
-        $hasSelectableSinglePackageSide = (int) $order->package_count === 1 && $orderedPackageSides->isEmpty();
+        $hasSelectableSinglePackageSide = $isEditable && (int) $order->package_count === 1 && $orderedPackageSides->isEmpty();
+        $needsSinglePackageSide = $hasSelectableSinglePackageSide;
         $singlePackageSide = old('single_package_side') === 'PEREMPUAN' ? 'PEREMPUAN' : 'LELAKI';
         $selectedSinglePackageSide = in_array(old('single_package_side'), ['LELAKI', 'PEREMPUAN'], true) ? old('single_package_side') : '';
         $formPackageSides = $hasSelectableSinglePackageSide ? [$singlePackageSide] : $orderedPackageSides->pluck('side')->all();
@@ -303,6 +304,7 @@
             method="POST"
             action="{{ route('orders.draft.update', ['orderId' => $order->order_id]) }}"
             enctype="multipart/form-data"
+            data-single-package-setup="{{ $needsSinglePackageSide ? 'true' : 'false' }}"
         >
             @csrf
 
@@ -671,19 +673,21 @@
 
 @if ($isEditable)
     <div class="form-actions">
-        <button type="submit">Save Draft</button>
+        <button type="submit">{{ $needsSinglePackageSide ? 'Continue to event details' : 'Save Draft' }}</button>
 
         <span id="autosave-status" class="autosave-status" data-state="saved" role="status" aria-live="polite">
             <span class="autosave-indicator" aria-hidden="true"></span>
             <span id="autosave-message">All changes saved</span>
         </span>
 
-        <a
-            id="review-order-link"
-            href="{{ route('orders.review.show', ['orderId' => $order->order_id]) }}"
-        >
-            Review Details & Continue
-        </a>
+        @unless ($needsSinglePackageSide)
+            <a
+                id="review-order-link"
+                href="{{ route('orders.review.show', ['orderId' => $order->order_id]) }}"
+            >
+                Review Details & Continue
+            </a>
+        @endunless
     </div>
 @endif
 

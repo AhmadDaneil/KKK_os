@@ -18,7 +18,7 @@ class CustomerDashboardAccessController extends Controller
         $orderId = strtoupper(trim((string) $request->query('order_id', '')));
 
         return view('orders.access', [
-            'prefilledOrderId' => preg_match('/^KKK-\d{6}-\d{4}$/', $orderId) === 1
+            'prefilledOrderId' => preg_match('/^(?:KKK-\d{6}-\d{4}|[A-Z]{2,3}\d{6}-\d{3})$/', $orderId) === 1
                 ? $orderId
                 : null,
         ]);
@@ -57,9 +57,10 @@ class CustomerDashboardAccessController extends Controller
         }
 
         $phone = $phones->normalize($validated['customer_phone']);
+        $referenceCandidates = Order::customerReferenceLookupCandidates($identifier);
         $order = Order::query()
-            ->where(function ($query) use ($identifier): void {
-                $query->where('customer_reference', $identifier)
+            ->where(function ($query) use ($identifier, $referenceCandidates): void {
+                $query->whereIn('customer_reference', $referenceCandidates)
                     ->orWhere('order_id', $identifier);
             })
             ->first();

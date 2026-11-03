@@ -18,7 +18,7 @@
             <span><b>KingKadKahwin</b><small>Beautiful cards, meaningful memories</small></span>
         </a>
         <nav aria-label="Proofing navigation">
-            <a class="header-link nav-progress" href="{{ route('public.orders.progress', ['order_id' => $order->order_id]) }}">← Track Progress</a>
+            <a class="header-link nav-progress" href="{{ route('public.orders.progress', ['order_id' => $order->displayCustomerReference() ?: $order->order_id]) }}">← Track Progress</a>
             <a class="header-link nav-progress" href="{{ route('home') }}">Back to Home</a>
         </nav>
     </header>
@@ -41,8 +41,8 @@
                 <p>View the latest customer-visible updates and proofs shared by the KingKadKahwin team.</p>
             </div>
             <div class="proofing-order-id">
-                <span>ORDER ID</span>
-                <strong>{{ $order->order_id }}</strong>
+                <span>{{ $order->displayCustomerReference() ? 'CUSTOMER REFERENCE' : 'ORDER ID' }}</span>
+                <strong>{{ $order->displayCustomerReference() ?: $order->order_id }}</strong>
                 <b>{{ $progress['percentage'] }}%</b>
             </div>
             <div class="public-progress-track" data-progress-tone="{{ $progress['tone'] }}" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="{{ $progress['percentage'] }}">

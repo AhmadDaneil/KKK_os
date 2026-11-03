@@ -74,12 +74,16 @@ class PublicOrderController extends Controller
         ]);
 
         $orderId = $validated['order_id'];
-        $order = Order::query()->where('order_id', $orderId)->first();
+        $referenceCandidates = Order::customerReferenceLookupCandidates($orderId);
+        $order = Order::query()
+            ->where('order_id', $orderId)
+            ->orWhereIn('customer_reference', $referenceCandidates)
+            ->first();
 
         if (! $order || ($order->source === 'WABOT' && $order->booking_payment_status !== 'PAID')) {
             return back()
                 ->withInput()
-                ->withErrors(['order_id' => 'Order ID not found. Please check it and try again.']);
+                ->withErrors(['order_id' => 'Order ID or customer reference not found. Please check it and try again.']);
         }
 
         $proofingExpiresAt = $sessionAccess->establishFromProgressLookup($request, $order);
@@ -105,6 +109,7 @@ class PublicOrderController extends Controller
 
         return view('public.order-progress', [
             'orderId' => $order->order_id,
+            'customerReference' => $order->displayCustomerReference(),
             'orderStatus' => $order->status,
             'progress' => $customerProgress->build($order),
             'shipment' => $order->fulfilmentJob && $order->fulfilmentJob->method === 'COURIER'

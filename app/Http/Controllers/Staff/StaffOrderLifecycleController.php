@@ -32,7 +32,9 @@ class StaffOrderLifecycleController extends Controller
             ]);
         }
 
-        return back()->with('status', "Order {$order->order_id} cancelled. Its record has been retained.");
+        $displayOrderIdentifier = $order->displayCustomerReference() ?: $order->order_id;
+
+        return back()->with('status', "Order {$displayOrderIdentifier} cancelled. Its record has been retained.");
     }
 
     public function archive(
@@ -56,7 +58,9 @@ class StaffOrderLifecycleController extends Controller
             ]);
         }
 
-        return back()->with('status', "Order {$order->order_id} archived. Its record has been retained.");
+        $displayOrderIdentifier = $order->displayCustomerReference() ?: $order->order_id;
+
+        return back()->with('status', "Order {$displayOrderIdentifier} archived. Its record has been retained.");
     }
 
     /** @return array{reason: string} */

@@ -288,6 +288,17 @@ class CreateWabotDraftOrderService
             ->first();
     }
 
+    private function alignOrderIdWithCustomerReference(Order $order): Order
+    {
+        $reference = $this->customerReferences->generate($order);
+
+        if ($order->order_id !== $reference) {
+            $order->update(['order_id' => $reference]);
+        }
+
+        return $order->fresh();
+    }
+
     private function ensureSameBooking(
         Order $order,
         array $data,
