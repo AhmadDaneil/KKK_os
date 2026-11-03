@@ -189,17 +189,3 @@ class HandlePaymentCallbackService
 
         return ((int) $matches[1] * 100) + (int) $matches[2];
     }
-
-    private function normalizePaidAt(mixed $paidAt): CarbonImmutable
-    {
-        if (! is_string($paidAt) || trim($paidAt) === '') {
-            return CarbonImmutable::now('UTC');
-        }
-
-        try {
-            return CarbonImmutable::parse($paidAt, (string) config('app.display_timezone'))->utc();
-        } catch (InvalidFormatException) {
-            return CarbonImmutable::now('UTC');
-        }
-    }
-}
