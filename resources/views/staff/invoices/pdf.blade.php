@@ -73,7 +73,7 @@
             <td><h1 class="invoice-title">INVOICE</h1><div class="invoice-meta"><div><span class="meta-label">Invoice No.</span> <strong>{{ $invoice->invoice_number }}</strong></div>
                 <div><span class="meta-label">Invoice Date</span> <strong>{{ $invoice->issued_at->timezone(config('app.timezone'))->format('d F Y') }}</strong></div></div></td>
         </tr></table>
-        <div class="order-strip"><strong>Order No.:</strong> {{ $order->order_id }} &nbsp; | &nbsp; <strong>Status:</strong> {{ str_replace('_', ' ', $invoice->payment_status) }}</div>
+        <div class="order-strip"><strong>{{ $order->displayCustomerReference() ? 'Customer Reference:' : 'Order No.:' }}</strong> {{ $order->displayCustomerReference() ?: $order->order_id }} &nbsp; | &nbsp; <strong>Status:</strong> {{ str_replace('_', ' ', $invoice->payment_status) }}</div>
         <table class="columns"><tr>
             <td><h2 class="section-label">Bill To</h2><table class="details">
                 <tr><td>Name</td><td><strong>{{ $order->fulfilment?->recipient_name ?: $order->customer_name ?: '-' }}</strong></td></tr>

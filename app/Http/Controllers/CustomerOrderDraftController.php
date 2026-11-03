@@ -21,7 +21,8 @@ class CustomerOrderDraftController extends Controller
     ): RedirectResponse|JsonResponse {
         $order = $access->resolve($request, $orderId);
         $order->loadMissing('packageSides');
-        $needsSinglePackageSide = (int) $order->package_count === 1
+        $needsSinglePackageSide = $order->status === 'DETAILS_INCOMPLETE'
+            && (int) $order->package_count === 1
             && $order->packageSides->isEmpty();
 
         $validated = $request->validate([

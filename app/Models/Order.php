@@ -83,6 +83,62 @@ class Order extends Model
         return $this->status === 'COMPLETED' || $this->isTerminalOperationalStatus();
     }
 
+    public function displayCustomerReference(): ?string
+    {
+        $reference = strtoupper(trim((string) $this->customer_reference));
+
+        if ($reference === '') {
+            return null;
+        }
+
+        $channel = (string) ($this->wabot_channel ?: '');
+        $channels = array_values(array_unique(array_filter([
+            $channel,
+            ...array_keys((array) config('kingkadkahwin.booking.reference_prefix_aliases', [])),
+        ])));
+
+        foreach ($channels as $candidateChannel) {
+            $prefix = strtoupper((string) config("kingkadkahwin.booking.reference_prefixes.{$candidateChannel}", ''));
+
+            foreach ((array) config("kingkadkahwin.booking.reference_prefix_aliases.{$candidateChannel}", []) as $legacyPrefix) {
+                $legacyPrefix = strtoupper((string) $legacyPrefix);
+
+                if ($prefix !== '' && preg_match('/^'.preg_quote($legacyPrefix, '/').'((?:\\d{6}-\\d{3}))$/', $reference, $matches) === 1) {
+                    return $prefix.$matches[1];
+                }
+            }
+        }
+
+        return $reference;
+    }
+
+    /** @return list<string> */
+    public static function customerReferenceLookupCandidates(string $reference): array
+    {
+        $reference = strtoupper(trim($reference));
+        $candidates = [$reference];
+
+        foreach ((array) config('kingkadkahwin.booking.reference_prefixes', []) as $channel => $prefix) {
+            $prefix = strtoupper((string) $prefix);
+
+            if ($prefix !== '' && preg_match('/^'.preg_quote($prefix, '/').'((?:\\d{6}-\\d{3}))$/', $reference, $matches) === 1) {
+                foreach ((array) config("kingkadkahwin.booking.reference_prefix_aliases.{$channel}", []) as $legacyPrefix) {
+                    $candidates[] = strtoupper((string) $legacyPrefix).$matches[1];
+                }
+            }
+
+            foreach ((array) config("kingkadkahwin.booking.reference_prefix_aliases.{$channel}", []) as $legacyPrefix) {
+                $legacyPrefix = strtoupper((string) $legacyPrefix);
+
+                if (preg_match('/^'.preg_quote($legacyPrefix, '/').'((?:\\d{6}-\\d{3}))$/', $reference, $matches) === 1) {
+                    $candidates[] = $prefix.$matches[1];
+                }
+            }
+        }
+
+        return array_values(array_unique($candidates));
+    }
+
     public function accessTokens(): HasMany
     {
         return $this->hasMany(OrderAccessToken::class, 'order_fk');

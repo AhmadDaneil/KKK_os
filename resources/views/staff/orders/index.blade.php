@@ -143,7 +143,7 @@
             <form class="staff-order-filter" method="GET" action="{{ route($ordersIndexRoute) }}" data-live-search data-live-search-list="staff-order-list" data-live-search-pagination="staff-order-pagination" data-live-search-count="staff-order-count" data-live-search-notice="staff-order-filter-notice">
                 @if ($workstream)<input type="hidden" name="workstream" value="{{ $workstream }}">@endif
                 @if (request('attention'))<input type="hidden" name="attention" value="{{ request('attention') }}">@endif
-                <label><span>Search orders or customers</span><input type="search" name="search" value="{{ request('search') }}" placeholder="Order ID, name, email or phone"></label>
+                <label><span>Search orders or customers</span><input type="search" name="search" value="{{ request('search') }}" placeholder="Customer reference, order ID, name or phone"></label>
                 <label><span>Order status</span><select name="status"><option value="">All statuses</option><option value="{{ \App\Models\Order::STATUS_FILTER_NOT_COMPLETED }}" @selected(request('status') === \App\Models\Order::STATUS_FILTER_NOT_COMPLETED)>Not completed</option>@foreach ($statusOptions as $status)<option value="{{ $status }}" @selected(request('status') === $status)>{{ $statusLabels[$status] ?? str_replace('_', ' ', $status) }}</option>@endforeach</select></label>
                 <div class="staff-filter-actions"><button class="staff-button staff-button-primary" type="submit">Filter Orders</button>@if (request()->hasAny(['search', 'status', 'attention']))<a class="staff-button" href="{{ route($ordersIndexRoute, array_filter(['workstream' => $workstream])) }}">Clear</a>@endif</div>
             </form>
@@ -166,7 +166,7 @@
                         <div class="staff-order-primary">
                             <div class="staff-order-heading">
                                 <strong class="staff-order-id">
-                                    {{ $order->order_id }}
+                                    {{ $order->displayCustomerReference() ?: $order->order_id }}
                                 </strong>
 
                                 <span class="staff-status staff-status--{{ $statusTone($order->status) }}">
@@ -215,7 +215,7 @@
                                 <form
                                     method="POST"
                                     action="{{ route($isAdminPortal ? 'admin.orders.destroy' : 'staff.orders.destroy', $order->order_id) }}"
-                                    onsubmit="return confirm('Delete order {{ $order->order_id }}? All order details, payments and workflow records will be permanently deleted.');"
+                                    onsubmit="return confirm('Delete order {{ $order->displayCustomerReference() ?: $order->order_id }}? All order details, payments and workflow records will be permanently deleted.');"
                                 >
                                     @csrf
                                     @method('DELETE')

@@ -26,6 +26,7 @@ class BuildFinalReviewService
 
         return [
             'order_id' => $order->order_id,
+            'customer_reference' => $order->displayCustomerReference(),
             'customer_name' => $order->customer_name,
             'package_count' => $order->package_count,
             'card_quantity' => $order->card_quantity,

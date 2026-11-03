@@ -29,7 +29,10 @@ return [
             'kingkadkahwin' => 'KKK',
             'destinasi-raja-sehari' => 'DRS',
             'cetaking' => 'CK',
-            'royalicious' => 'RYC',
+            'royalicious' => 'RYL',
+        ],
+        'reference_prefix_aliases' => [
+            'royalicious' => ['RYC'],
         ],
     ],
 

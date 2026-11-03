@@ -46,7 +46,7 @@ class WabotOrderController extends Controller
             $rules['external_reference'] = ['nullable', 'string', 'max:128'];
             $rules['conversation_id'] = ['nullable', 'string', 'max:128', 'regex:/^[A-Za-z0-9._:-]+$/'];
             $rules['idempotency_key'] = ['nullable', 'string', 'max:160'];
-            $rules['business_unit'] = ['required', 'string', 'in:KKK,DRS,CK,RYC'];
+            $rules['business_unit'] = ['required', 'string', 'in:KKK,DRS,CK,RYC,RYL'];
             $rules['phone'] = ['required', 'string', 'max:32'];
             $rules['email'] = ['nullable', 'email', 'max:255'];
             $rules['package_code'] = ['nullable', 'string', 'max:64'];
@@ -70,7 +70,7 @@ class WabotOrderController extends Controller
         }
 
         if ($canonical) {
-            $channels = ['KKK' => 'kingkadkahwin', 'DRS' => 'destinasi-raja-sehari', 'CK' => 'cetaking', 'RYC' => 'royalicious'];
+            $channels = ['KKK' => 'kingkadkahwin', 'DRS' => 'destinasi-raja-sehari', 'CK' => 'cetaking', 'RYC' => 'royalicious', 'RYL' => 'royalicious'];
             $validated['wabot_conversation_id'] = $validated['conversation_id'] ?? null;
             $validated['brand'] = $channels[$validated['business_unit']];
             $validated['customer_phone'] = $validated['phone'];
@@ -171,9 +171,9 @@ class WabotOrderController extends Controller
         $encryptedUrl = $payment->metadata['customer_access']['dashboard_url_encrypted'] ?? null;
 
         return [
-            'order_reference' => $order->customer_reference,
+            'order_reference' => $order->displayCustomerReference(),
             'payment_status' => 'PAID',
-            'customer_reference' => $order->customer_reference,
+            'customer_reference' => $order->displayCustomerReference(),
             'invoice_number' => $order->invoice()->value('invoice_number'),
             'dashboard_url' => is_string($encryptedUrl) ? Crypt::decryptString($encryptedUrl) : null,
             'receipt_url' => URL::temporarySignedRoute(

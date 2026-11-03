@@ -342,9 +342,14 @@ class StaffOrderController extends Controller
             $query->where(function (Builder $builder) use ($search, $orderIdSearch): void {
                 $builder
                     ->where('order_id', 'like', "%{$search}%")
+                    ->orWhere('customer_reference', 'like', "%{$search}%")
                     ->orWhere('customer_name', 'like', "%{$search}%")
                     ->orWhere('customer_email', 'like', "%{$search}%")
                     ->orWhere('customer_phone', 'like', "%{$search}%");
+
+                foreach (Order::customerReferenceLookupCandidates($search) as $referenceCandidate) {
+                    $builder->orWhere('customer_reference', 'like', "%{$referenceCandidate}%");
+                }
 
                 if ($orderIdSearch !== '') {
                     $builder->orWhereRaw(

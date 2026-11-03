@@ -22,13 +22,13 @@
         <section class="progress-search">
             <p class="eyebrow">Your order status</p>
             <h1>Track your order</h1>
-            <p>Enter the order ID you received when placing your order.</p>
+            <p>Enter the customer reference or order ID you received when placing your order.</p>
             <form method="POST" action="{{ route('public.orders.progress.lookup') }}">
                 @csrf
                 <div class="progress-lookup-fields">
                     <div>
-                        <label for="order_id">Order ID</label>
-                        <input id="order_id" name="order_id" value="{{ old('order_id', $orderId ?? '') }}" placeholder="Example: KKK-260917-0001" autocomplete="off" required>
+                        <label for="order_id">Customer Reference or Order ID</label>
+                        <input id="order_id" name="order_id" value="{{ old('order_id', $customerReference ?? $orderId ?? '') }}" placeholder="Example: KKK260917-001" autocomplete="off" required>
                     </div>
                     <button class="button button-primary" type="submit">Track Order</button>
                 </div>
@@ -48,7 +48,7 @@
                         <a href="#balance-payment">Make Payment</a>
                     </div>
                 @endif
-                <div class="progress-card-heading"><div><small>ORDER ID</small><h2>{{ $orderId }}</h2></div><strong>{{ $progress['percentage'] }}%</strong></div>
+                <div class="progress-card-heading"><div><small>{{ $customerReference ? 'CUSTOMER REFERENCE' : 'ORDER ID' }}</small><h2>{{ $customerReference ?: $orderId }}</h2></div><strong>{{ $progress['percentage'] }}%</strong></div>
                 <div class="public-progress-track" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="{{ $progress['percentage'] }}"><span style="width: {{ $progress['percentage'] }}%"></span></div>
                 <section class="order-lifecycle" aria-labelledby="order-lifecycle-title">
                     <div class="order-lifecycle-heading">
