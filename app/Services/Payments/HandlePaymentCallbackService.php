@@ -189,4 +189,3 @@ class HandlePaymentCallbackService
 
         return ((int) $matches[1] * 100) + (int) $matches[2];
     }
-}
