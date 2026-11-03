@@ -3,6 +3,8 @@
 use App\Http\Controllers\Api\RoyaliciousAutomationProbeController;
 use App\Http\Controllers\Api\RoyaliciousBookingWebhookController;
 use App\Http\Controllers\Api\RoyaliciousProductionBookingWebhookController;
+use App\Http\Controllers\Api\CetakingBookingWebhookController;
+use App\Http\Controllers\Api\CetakingProductionBookingWebhookController;
 use App\Http\Controllers\Api\WabotBalancePaymentController;
 use App\Http\Controllers\Api\WabotBookingIntentController;
 use App\Http\Controllers\Api\WabotOrderController;
@@ -28,6 +30,12 @@ Route::post('/v1/integrations/wabot/royalicious/booking/{token}', RoyaliciousBoo
 Route::post('/v1/integrations/wabot/royalicious/production-booking/{token}', RoyaliciousProductionBookingWebhookController::class)
     ->middleware('throttle:10,1')
     ->name('api.wabot.royalicious.production-booking');
+Route::post('/v1/integrations/wabot/cetaking/production-booking/{token}', CetakingProductionBookingWebhookController::class)
+    ->middleware('throttle:10,1')
+    ->name('api.wabot.cetaking.production-booking');
+Route::post('/v1/integrations/wabot/cetaking/booking/{token}', CetakingBookingWebhookController::class)
+    ->middleware('throttle:10,1')
+    ->name('api.wabot.cetaking.booking');
 
 Route::middleware(['wabot.auth', 'throttle:60,1'])->prefix('/v1/wabot')->group(function (): void {
     Route::post('/booking-intent', [WabotBookingIntentController::class, 'store'])
