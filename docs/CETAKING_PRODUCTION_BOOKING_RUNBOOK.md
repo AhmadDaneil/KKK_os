@@ -8,17 +8,21 @@ webhook creates a Cetaking booking, creates or reuses its pending Billplz bill,
 and sends the production payment URL to the customer through the Cetaking Wabot
 sender.
 
-The endpoints are:
+Use the staging host for the sandbox endpoint and the production domain only
+for the production endpoint:
 
 ```text
-POST https://order.kingkadkahwin.com/api/v1/integrations/wabot/cetaking/booking/{sandbox-token}
+POST https://167.71.196.30/api/v1/integrations/wabot/cetaking/booking/{sandbox-token}
 POST https://order.kingkadkahwin.com/api/v1/integrations/wabot/cetaking/production-booking/{token}
 ```
 
+The staging URL must resolve to the staging application and have a valid HTTPS
+certificate. The production domain must resolve to the production application.
 The sandbox endpoint accepts only the phone number configured in
-`WABOT_CK_BOOKING_TEST_PHONE` and only when the server uses the Billplz Sandbox
-base URL. Its token is `WABOT_CK_BOOKING_WEBHOOK_TOKEN`. The production endpoint
-uses a separate 64-character lowercase hexadecimal token in
+`WABOT_CK_BOOKING_TEST_PHONE` and only when the staging server uses Billplz
+Sandbox credentials and base URL. Its token is
+`WABOT_CK_BOOKING_WEBHOOK_TOKEN`. The production endpoint uses a separate
+64-character lowercase hexadecimal token in
 `WABOT_CK_PRODUCTION_BOOKING_WEBHOOK_TOKEN`. Do not reuse either Royalicious
 token or place a real token in this document, source control, or support chat.
 
@@ -55,17 +59,23 @@ only when the shared `BILLPLZ_DUITNOW_QR_ENABLED=true` setting is enabled.
 
 ## Server configuration
 
-The server must have the shared production Billplz settings and Cetaking's own
-Wabot sender credentials configured:
+Configure staging and production independently. Staging must use the Billplz
+Sandbox account and collection; production must use the approved shared live
+Billplz account and collection. Both environments need Cetaking's Wabot sender
+credentials:
 
 - `BILLPLZ_ENABLED=true`
-- `BILLPLZ_BASE_URL=https://www.billplz.com/api`
-- `BILLPLZ_SECRET_KEY` and `BILLPLZ_COLLECTION_ID` from the approved shared
-  production Billplz account
-- `BILLPLZ_DUITNOW_QR_ENABLED=true` if Cetaking is to offer QR payments
+- On staging, `BILLPLZ_BASE_URL=https://www.billplz-sandbox.com/api` and Sandbox
+  credentials and collection ID
+- On production, `BILLPLZ_BASE_URL=https://www.billplz.com/api` and the approved
+  shared production credentials and collection ID
+- `BILLPLZ_DUITNOW_QR_ENABLED=true` in an environment if Cetaking is to offer QR
+  payments there
 - `WABOT_CK_INSTANCE_ID` and `WABOT_CK_ACCESS_TOKEN` for the Cetaking sender
 - `WABOT_CK_BOOKING_WEBHOOK_TOKEN` and `WABOT_CK_BOOKING_TEST_PHONE` on staging
 - `WABOT_CK_PRODUCTION_BOOKING_WEBHOOK_TOKEN` as a separate 64-character token
+- `APP_URL` set to the HTTPS address of the matching environment, so Billplz
+  returns customers to the correct staging or production application
 
 Never print or share secret values while checking configuration. Verify only
 whether each setting is present. After updating Laravel environment settings,
