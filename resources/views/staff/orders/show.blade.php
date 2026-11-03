@@ -4,12 +4,15 @@
     $ordersIndexRoute = $isAdminPortal ? 'admin.orders.index' : 'staff.orders.index';
     $operationRoutePrefix = $isAdminPortal ? 'admin.' : 'staff.';
     $hasFullQueueView = auth()->user()->canMonitorAllDepartments();
+    $displayCustomerReference = $order->displayCustomerReference();
+    $displayOrderIdentifier = $displayCustomerReference ?: $order->order_id;
+    $displayOrderIdentifierLabel = $displayCustomerReference ? 'Customer Reference' : 'Order ID';
     $customerWhatsappNumber = preg_replace('/\D+/', '', (string) $order->customer_phone);
     if (str_starts_with($customerWhatsappNumber, '0')) {
         $customerWhatsappNumber = '6'.$customerWhatsappNumber;
     }
-    $customerFeedbackMessage = "Hello {$order->customer_name}, thank you for choosing KingKadKahwin. We would appreciate your feedback and are happy to help with any questions about order {$order->order_id}.";
-    $customerPaymentReminder = "Hello {$order->customer_name}, this is a friendly reminder from KingKadKahwin about the outstanding balance or charges for order {$order->order_id}. Please contact us if you need help.";
+    $customerFeedbackMessage = "Hello {$order->customer_name}, thank you for choosing KingKadKahwin. We would appreciate your feedback and are happy to help with any questions about order {$displayOrderIdentifier}.";
+    $customerPaymentReminder = "Hello {$order->customer_name}, this is a friendly reminder from KingKadKahwin about the outstanding balance or charges for order {$displayOrderIdentifier}. Please contact us if you need help.";
     $hasDesignJobs = $order->relationLoaded('designJobs');
     $batchArtworkJobs = $hasDesignJobs
         ? $order->designJobs->filter(fn ($job) =>
@@ -73,7 +76,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>{{ $order->order_id }} - KKK OS Staff</title>
+    <title>{{ $displayOrderIdentifier }} - KKK OS Staff</title>
 
     <link rel="stylesheet" href="{{ asset('css/staff.css') }}?v={{ filemtime(public_path('css/staff.css')) }}">
     <link rel="stylesheet" href="{{ asset('css/dashboard-compact.css') }}?v={{ filemtime(public_path('css/dashboard-compact.css')) }}">
@@ -85,7 +88,7 @@
         @include('staff.partials.sidebar')
         <div class="staff-workspace">
             <header class="staff-topbar">
-                <div><p class="staff-kicker">{{ auth()->user()->isAdmin() ? __('ui.admin_operations') : __('ui.staff_operations') }} · {{ __('ui.order_detail') }}</p><h1>{{ $order->order_id }}</h1></div>
+                <div><p class="staff-kicker">{{ auth()->user()->isAdmin() ? __('ui.admin_operations') : __('ui.staff_operations') }} · {{ __('ui.order_detail') }}</p><h1>{{ $displayOrderIdentifier }}</h1></div>
                 <div class="staff-topbar-actions">
                     @include('staff.partials.theme-toggle')
                     <form class="js-logout-form staff-logout-profile" method="POST" action="{{ route($logoutRoute) }}">@csrf<button type="submit"><span class="staff-topbar-avatar" aria-hidden="true"></span><span>{{ __('ui.logout') }}</span></button></form>
@@ -117,7 +120,7 @@
                     </a>
 
                     <div class="staff-detail-heading">
-                        <h1>{{ $order->order_id }}</h1>
+                        <h1 aria-label="{{ $displayOrderIdentifierLabel }}: {{ $displayOrderIdentifier }}">{{ $displayOrderIdentifier }}</h1>
 
                         <span class="staff-status staff-status--{{ $statusTone($order->status) }}">
                             {{ $statusLabels[$order->status] ?? str_replace('_', ' ', $order->status) }}
@@ -144,7 +147,7 @@
                             method="POST"
                             action="{{ route($operationRoutePrefix.'orders.destroy', $order) }}"
                             class="js-staff-confirmation-form"
-                            data-confirm-title="Padam tempahan {{ $order->order_id }}?"
+                            data-confirm-title="Padam tempahan {{ $displayOrderIdentifier }}?"
                             data-confirm-message="Semua maklumat tempahan ini akan dipadam secara kekal. Tindakan ini tidak boleh dibuat asal."
                             data-confirm-button="Ya, padam tempahan"
                             data-confirm-tone="danger"
@@ -168,14 +171,14 @@
                     <p>Use this action only after an operational review. Order and audit records will be retained.</p>
 
                     <div class="staff-payment-actions">
-                        <form method="POST" action="{{ route($operationRoutePrefix.'orders.cancel', $order) }}" class="staff-reject-payment-form js-staff-confirmation-form" data-confirm-title="Cancel order {{ $order->order_id }}?" data-confirm-message="The order record will be retained with CANCELLED status and cannot be reactivated." data-confirm-button="Yes, cancel order" data-confirm-tone="danger">
+                        <form method="POST" action="{{ route($operationRoutePrefix.'orders.cancel', $order) }}" class="staff-reject-payment-form js-staff-confirmation-form" data-confirm-title="Cancel order {{ $displayOrderIdentifier }}?" data-confirm-message="The order record will be retained with CANCELLED status and cannot be reactivated." data-confirm-button="Yes, cancel order" data-confirm-tone="danger">
                             @csrf
                             <label for="cancel-reason">Cancellation reason</label>
                             <textarea id="cancel-reason" name="reason" maxlength="1000" required>{{ old('reason') }}</textarea>
                             <button class="staff-button staff-button-danger" type="submit">Cancel Order</button>
                         </form>
 
-                        <form method="POST" action="{{ route($operationRoutePrefix.'orders.archive', $order) }}" class="staff-reject-payment-form js-staff-confirmation-form" data-confirm-title="Archive order {{ $order->order_id }}?" data-confirm-message="The order record will be retained with ARCHIVED status and cannot be reactivated." data-confirm-button="Yes, archive order">
+                        <form method="POST" action="{{ route($operationRoutePrefix.'orders.archive', $order) }}" class="staff-reject-payment-form js-staff-confirmation-form" data-confirm-title="Archive order {{ $displayOrderIdentifier }}?" data-confirm-message="The order record will be retained with ARCHIVED status and cannot be reactivated." data-confirm-button="Yes, archive order">
                             @csrf
                             <label for="archive-reason">Archive reason</label>
                             <textarea id="archive-reason" name="reason" maxlength="1000" required>{{ old('reason') }}</textarea>
@@ -226,7 +229,7 @@
 
                         <div>
                             <dt>Customer Reference</dt>
-                            <dd>{{ $order->customer_reference ?: '-' }}</dd>
+                            <dd>{{ $displayCustomerReference ?: '-' }}</dd>
                         </div>
                         <div>
                             <dt>Order Date</dt>

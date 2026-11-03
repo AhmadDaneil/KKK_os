@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="referrer" content="no-referrer">
-    <title>Thank You - {{ $review['order_id'] }}</title>
+    <title>Thank You - {{ $review['customer_reference'] ?: $review['order_id'] }}</title>
     <link rel="stylesheet" href="{{ asset('css/thank-you.css') }}?v={{ filemtime(public_path('css/thank-you.css')) }}">
     <link rel="stylesheet" href="{{ asset('css/customer-theme.css') }}?v={{ filemtime(public_path('css/customer-theme.css')) }}">
     <link rel="stylesheet" href="{{ asset('css/customer-service.css') }}?v={{ filemtime(public_path('css/customer-service.css')) }}">
@@ -33,7 +33,7 @@
             <div class="section-heading">
                 <div>
                     <p class="eyebrow">Order Details</p>
-                    <h2>{{ $review['order_id'] }}</h2>
+                    <h2>{{ $review['customer_reference'] ?: $review['order_id'] }}</h2>
                 </div>
                 <span class="confirmed-badge">Confirmed</span>
             </div>
@@ -93,7 +93,7 @@
                 @endforeach
             </div>
 
-            <a class="progress-button" href="{{ route('public.orders.progress', ['order_id' => $review['order_id']]) }}">
+            <a class="progress-button" href="{{ route('public.orders.progress', ['order_id' => $review['customer_reference'] ?: $review['order_id']]) }}">
                 Track Order
             </a>
         </section>

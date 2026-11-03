@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="referrer" content="no-referrer">
-    <title>Final Review - {{ $review['order_id'] }}</title>
+    <title>Final Review - {{ $review['customer_reference'] ?: $review['order_id'] }}</title>
     <link rel="stylesheet" href="{{ asset('css/final-review.css') }}?v={{ filemtime(public_path('css/final-review.css')) }}">
     <link rel="stylesheet" href="{{ asset('css/customer-theme.css') }}?v={{ filemtime(public_path('css/customer-theme.css')) }}">
     <link rel="stylesheet" href="{{ asset('css/customer-service.css') }}?v={{ filemtime(public_path('css/customer-service.css')) }}">
@@ -30,7 +30,7 @@
                     <h1>Final Review</h1>
                 </div>
 
-                <span class="order-badge">{{ $review['order_id'] }}</span>
+                <span class="order-badge">{{ $review['customer_reference'] ?: $review['order_id'] }}</span>
             </div>
 
             <p class="review-intro">
@@ -55,8 +55,8 @@
 
             <div class="review-grid">
                 <div class="review-item">
-                    <span class="review-label">Order ID</span>
-                    <span class="review-value">{{ $review['order_id'] }}</span>
+                    <span class="review-label">{{ $review['customer_reference'] ? 'Customer Reference' : 'Order ID' }}</span>
+                    <span class="review-value">{{ $review['customer_reference'] ?: $review['order_id'] }}</span>
                 </div>
 
                 <div class="review-item">

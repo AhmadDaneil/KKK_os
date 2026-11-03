@@ -27,7 +27,7 @@
                 <h1>Payment Successful</h1>
                 <p class="payment-return-lead">Your booking payment has been verified securely. Your order dashboard is now ready.</p>
                 <dl class="payment-return-summary">
-                    <div><dt>Order ID</dt><dd>{{ $order->customer_reference }}</dd></div>
+                    <div><dt>{{ $order->displayCustomerReference() ? 'Customer Reference' : 'Order ID' }}</dt><dd>{{ $order->displayCustomerReference() ?: $order->order_id }}</dd></div>
                     <div><dt>Amount paid</dt><dd>MYR {{ number_format((float) $payment->amount, 2) }}</dd></div>
                     <div><dt>Payment status</dt><dd>Paid</dd></div>
                     @if ($payment->paid_at)<div><dt>Payment date</dt><dd>{{ $payment->paid_at->timezone(config('app.display_timezone'))->format('d/m/Y, H:i') }}</dd></div>@endif

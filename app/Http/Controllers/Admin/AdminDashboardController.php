@@ -26,14 +26,18 @@ class AdminDashboardController extends Controller
         ]);
 
         $orderId = strtoupper(trim($validated['order_id']));
+        $referenceCandidates = Order::customerReferenceLookupCandidates($orderId);
         $order = Order::query()
-            ->where('order_id', $orderId)
+            ->where(function ($query) use ($orderId, $referenceCandidates): void {
+                $query->where('order_id', $orderId)
+                    ->orWhereIn('customer_reference', $referenceCandidates);
+            })
             ->where('status', '!=', 'DETAILS_INCOMPLETE')
             ->first();
 
         if (! $order) {
             return back()
-                ->withErrors(['order_id' => 'Order ID not found.'])
+                ->withErrors(['order_id' => 'Order ID or customer reference not found.'])
                 ->withInput();
         }
 
