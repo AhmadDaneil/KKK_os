@@ -1061,18 +1061,18 @@ document.addEventListener('DOMContentLoaded', function () {
                 },
                 signal: controller.signal
             }).then(function (response) {
-                if (!response.ok) {
-                    return response.json().catch(function () { return {}; }).then(function (payload) {
+                return response.json().catch(function () { return {}; }).then(function (payload) {
+                    if (!response.ok || payload.saved !== true) {
                         const errors = payload.errors ? Object.values(payload.errors).flat().join(' ') : '';
                         throw new Error(errors || payload.message || 'We could not save these changes.');
-                    });
-                }
+                    }
 
-                savedRevision = Math.max(savedRevision, revision);
+                    savedRevision = Math.max(savedRevision, revision);
 
-                if (savedRevision === draftRevision) {
-                    setStatus('All changes have been saved', 'saved');
-                }
+                    if (savedRevision === draftRevision) {
+                        setStatus('All changes have been saved', 'saved');
+                    }
+                });
             }).catch(function (error) {
                 if (retryAttempt === 0) {
                     return new Promise(function (resolve) {
@@ -1125,6 +1125,32 @@ document.addEventListener('DOMContentLoaded', function () {
 
         form.addEventListener('input', scheduleAutosave);
         form.addEventListener('change', scheduleAutosave);
+
+        form.addEventListener('submit', function (event) {
+            event.preventDefault();
+            window.clearTimeout(autosaveTimer);
+
+            const submitButton = event.submitter instanceof HTMLButtonElement ? event.submitter : null;
+
+            if (submitButton) {
+                submitButton.disabled = true;
+            }
+
+            setStatus('Saving draft...', 'saving');
+
+            queueSave(true)
+                .then(function () {
+                    if (savedRevision === draftRevision) {
+                        setStatus('Draft saved', 'saved');
+                    }
+                })
+                .catch(function () {})
+                .finally(function () {
+                    if (submitButton) {
+                        submitButton.disabled = false;
+                    }
+                });
+        });
 
         document.addEventListener('visibilitychange', function () {
             if (document.visibilityState !== 'hidden' || savedRevision === draftRevision) {
