@@ -42,6 +42,9 @@
                     @unless ($activeDraft)
                         <a class="button button-primary" href="{{ route('public.orders.create') }}"><span>Chat to Book</span><span class="button-arrow" aria-hidden="true">→</span></a>
                         <a class="button button-secondary" href="{{ route('public.orders.progress') }}"><span>Track Order</span></a>
+                        @if ($canTestOrder)
+                            <a class="button button-secondary" href="{{ route('public.orders.test.create') }}"><span>Place Test Order (Sandbox)</span><span class="button-arrow" aria-hidden="true">→</span></a>
+                        @endif
                     @endunless
                     <a class="button button-secondary" href="{{ route('orders.access.create') }}"><span>Continue Existing Order</span><span class="button-arrow" aria-hidden="true">→</span></a>
                 </div>
