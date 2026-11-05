@@ -1305,6 +1305,24 @@ document.addEventListener('DOMContentLoaded', function () {
             });
         }
 
+        function formatTime12Hour(raw) {
+            const value = String(raw || '').trim();
+            const match = value.match(/^(\d{1,2}):(\d{2})(?::\d{2})?$/);
+
+            if (!match) {
+                return value || '-';
+            }
+
+            const hour = Number(match[1]);
+            const minute = Number(match[2]);
+
+            if (hour > 23 || minute > 59) {
+                return value;
+            }
+
+            return (hour % 12 || 12) + ':' + match[2] + ' ' + (hour >= 12 ? 'PM' : 'AM');
+        }
+
         function formatDate(raw) {
             if (!raw) {
                 return 'EVENT DATE';
@@ -1358,8 +1376,8 @@ document.addEventListener('DOMContentLoaded', function () {
             setText(scope, 'day_name', ({ Ahad: 'Sunday', Isnin: 'Monday', Selasa: 'Tuesday', Rabu: 'Wednesday', Khamis: 'Thursday', Jumaat: 'Friday', Sabtu: 'Saturday' })[value(prefix + '[event][day_name]', '')] || 'DAY');
             setText(scope, 'event_date', formatDate(value(prefix + '[event][event_date]', '')));
             setText(scope, 'hijri_date', value(prefix + '[event][hijri_date]', ''));
-            setText(scope, 'meal_time', value(prefix + '[event][meal_time]', '-'));
-            setText(scope, 'bersanding_time', value(prefix + '[event][bersanding_time]', '-'));
+            setText(scope, 'meal_time', formatTime12Hour(value(prefix + '[event][meal_time]', '')));
+            setText(scope, 'bersanding_time', formatTime12Hour(value(prefix + '[event][bersanding_time]', '')));
             setText(scope, 'venue_name', value(prefix + '[event][venue_name]', 'VENUE NAME'));
             setText(scope, 'full_address', value(prefix + '[event][full_address]', 'Full event address'));
 
