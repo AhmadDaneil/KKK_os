@@ -44,6 +44,9 @@
                         <a class="button button-secondary" href="{{ route('public.orders.progress') }}"><span>Track Order</span></a>
                     @endunless
                     <a class="button button-secondary" href="{{ route('orders.access.create') }}"><span>Continue Existing Order</span><span class="button-arrow" aria-hidden="true">→</span></a>
+                    @if ($canTestOrder)
+                        <a class="button button-secondary" href="{{ route('public.orders.test.create') }}"><span>Place Test Order (Sandbox)</span><span class="button-arrow" aria-hidden="true">→</span></a>
+                    @endif
                 </div>
                 <ul class="trust-list" aria-label="Key benefits">
                     <li><span>✓</span> Live preview</li>
