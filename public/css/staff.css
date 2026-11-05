@@ -1226,6 +1226,28 @@ a.staff-pagination-link:hover {
     border-top: 1px solid var(--staff-border);
 }
 
+.staff-design-actions--with-picture {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.staff-design-actions--with-picture > form {
+    margin: 0;
+}
+
+.staff-design-photo-download {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 12px;
+}
+
+.staff-design-actions--with-picture .staff-design-photo-download {
+    margin-top: 0;
+}
+
 .staff-design-tools {
     display: flex;
     align-items: center;

@@ -582,14 +582,6 @@
                                         {{ str_replace('_', ' ', $job->status) }}
                                     </span>
 
-                                    @if (auth()->user()->hasStaffRole(\App\Models\User::ROLE_DESIGNER)
-                                        && $job->assigned_user_id === auth()->id()
-                                        && $hasCustomerPhoto)
-                                        <a
-                                            href="{{ route($operationRoutePrefix.'orders.customer-photo', ['orderId' => $order->order_id, 'side' => $jobPackageSide->side]) }}"
-                                            class="staff-button staff-button-small"
-                                        >Download Picture</a>
-                                    @endif
                                 </div>
 
                                 <dl class="staff-detail-list">
@@ -713,7 +705,11 @@
                                 @endif
                                 @if (auth()->user()->hasStaffRole(\App\Models\User::ROLE_DESIGNER)
                                     && $job->assigned_user_id === auth()->id())
-                                    <div class="staff-design-actions">
+                                    <div @class([
+                                        'staff-design-actions',
+                                        'staff-design-actions--with-picture' => $hasCustomerPhoto
+                                            && in_array($job->status, ['READY_FOR_DESIGN', 'CORRECTION_REQUESTED'], true),
+                                    ])>
                                         @if ($job->status === 'READY_FOR_DESIGN')
                                             <form
                                                 method="POST"
@@ -829,7 +825,7 @@
                                                                 <p class="staff-field-help"><strong>PORTRAIT theme:</strong> use the uploaded couple photo for banner and bunting artwork.
                                                                     @if (auth()->user()->hasStaffRole(\App\Models\User::ROLE_DESIGNER)
                                                                         && $job->assigned_user_id === auth()->id())
-                                                                        Use the Download Picture button above.
+                                                                        Use the Download Picture button below.
                                                                     @else
                                                                         <a href="{{ route($operationRoutePrefix.'orders.customer-photo', ['orderId' => $order->order_id, 'side' => $jobPackageSide->side]) }}">Download couple photo</a>
                                                                     @endif
@@ -918,6 +914,15 @@
                                             <p class="staff-work-message">
                                                 Design is ready for customer review.
                                             </p>
+                                        @endif
+
+                                        @if ($hasCustomerPhoto)
+                                            <div class="staff-design-photo-download">
+                                                <a
+                                                    href="{{ route($operationRoutePrefix.'orders.customer-photo', ['orderId' => $order->order_id, 'side' => $jobPackageSide->side]) }}"
+                                                    class="staff-button staff-button-small"
+                                                >Download Picture</a>
+                                            </div>
                                         @endif
                                     </div>
                                 @endif
