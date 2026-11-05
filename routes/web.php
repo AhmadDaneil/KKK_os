@@ -65,6 +65,12 @@ Route::get('/tempah', [PublicOrderController::class, 'create'])
 Route::get('/tempah/{brand}', [PublicOrderController::class, 'create'])
     ->whereIn('brand', ['kingkadkahwin', 'destinasi-raja-sehari', 'cetaking', 'royalicious'])
     ->name('public.orders.create.brand');
+Route::get('/tempah-ujian', [PublicOrderController::class, 'testOrder'])
+    ->middleware('throttle:20,1')
+    ->name('public.orders.test.create');
+Route::post('/tempah-ujian', [PublicOrderController::class, 'storeTestOrder'])
+    ->middleware('throttle:5,1')
+    ->name('public.orders.test.store');
 
 Route::get('/pembayaran/booking/{reference}', [BookingPaymentReturnController::class, 'show'])
     ->middleware('throttle:30,1')
