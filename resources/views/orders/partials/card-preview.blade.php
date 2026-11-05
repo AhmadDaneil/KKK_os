@@ -93,7 +93,7 @@
 
                 <div class="card-info-grid">
                     <section><small>Date</small><b data-preview-field="day_name">{{ ['Ahad' => 'Sunday', 'Isnin' => 'Monday', 'Selasa' => 'Tuesday', 'Rabu' => 'Wednesday', 'Khamis' => 'Thursday', 'Jumaat' => 'Friday', 'Sabtu' => 'Saturday'][$packageSide->event?->day_name ?? ''] ?? 'DAY' }}</b><strong data-preview-field="event_date">{{ $packageSide->event?->event_date?->format('d/m/Y') ?: '-' }}</strong><span data-preview-field="hijri_date">{{ $packageSide->event?->hijri_date ?: '' }}</span></section>
-                    <section><small>Schedule</small><b>Meal</b><span data-preview-field="meal_time">{{ $packageSide->event?->meal_time ? substr($packageSide->event->meal_time, 0, 5) : '-' }}</span><b>Reception</b><span data-preview-field="bersanding_time">{{ $packageSide->event?->bersanding_time ? substr($packageSide->event->bersanding_time, 0, 5) : '-' }}</span></section>
+                    <section><small>Schedule</small><b>Meal</b><span data-preview-field="meal_time">{{ $packageSide->event?->meal_time ? \Carbon\CarbonImmutable::parse($packageSide->event->meal_time)->format('g:i A') : '-' }}</span><b>Reception</b><span data-preview-field="bersanding_time">{{ $packageSide->event?->bersanding_time ? \Carbon\CarbonImmutable::parse($packageSide->event->bersanding_time)->format('g:i A') : '-' }}</span></section>
                     <section class="card-contacts">
                         <small>Contacts</small>
                         @for ($contactNumber = 1; $contactNumber <= 3; $contactNumber++)

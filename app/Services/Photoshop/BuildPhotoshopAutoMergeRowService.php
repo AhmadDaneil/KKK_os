@@ -115,8 +115,8 @@ class BuildPhotoshopAutoMergeRowService
             'bulanislam' => $this->text($event['hijri_date'] ?? ''),
 
             // Current JSX writes these values exactly; no Photoshop-side formatting.
-            'masabersanding' => $this->text($event['bersanding_time'] ?? ''),
-            'masajamuanmakan' => $this->text($event['meal_time'] ?? ''),
+            'masabersanding' => $this->formatTime($event['bersanding_time'] ?? ''),
+            'masajamuanmakan' => $this->formatTime($event['meal_time'] ?? ''),
 
             'alamat' => $this->text($event['full_address'] ?? ''),
             'qrlink' => trim((string) ($event['google_maps_url'] ?? '')),
@@ -230,6 +230,17 @@ class BuildPhotoshopAutoMergeRowService
         );
 
         return mb_strtoupper($firstCharacter, 'UTF-8').$remainingCharacters;
+    }
+
+    private function formatTime(mixed $value): string
+    {
+        $value = trim((string) $value);
+
+        if ($value === '') {
+            return '';
+        }
+
+        return CarbonImmutable::parse($value)->format('g:i A');
     }
 
     private function phone(mixed $value): string
