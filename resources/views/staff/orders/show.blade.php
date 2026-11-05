@@ -482,12 +482,12 @@
 
                                         <div>
                                             <dt>Meal Time</dt>
-                                            <dd>{{ $packageSide->event->meal_time ?? '-' }}</dd>
+                                            <dd>{{ $packageSide->event?->meal_time ? \Carbon\CarbonImmutable::parse($packageSide->event->meal_time)->format('g:i A') : '-' }}</dd>
                                         </div>
 
                                         <div>
                                             <dt>Wedding Reception Time</dt>
-                                            <dd>{{ $packageSide->event->bersanding_time ?? '-' }}</dd>
+                                            <dd>{{ $packageSide->event?->bersanding_time ? \Carbon\CarbonImmutable::parse($packageSide->event->bersanding_time)->format('g:i A') : '-' }}</dd>
                                         </div>
 
                                         <div>
