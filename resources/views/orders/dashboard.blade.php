@@ -464,17 +464,58 @@
 
 @php
     $selectedCardTitle = old("sides.$side.design.card_title", $packageSide?->design?->card_title);
+    $legacyEventTitles = [
+        'Walimatul Urus' => 'WALIMATULURUS',
+        'Majlis Perkahwinan' => 'MAJLIS PERKAHWINAN',
+        'Kenduri Kesyukuran' => 'MAJLIS KESYUKURAN',
+    ];
+    $standardEventTitles = ['MAJLIS PERKAHWINAN', 'WALIMATULURUS', 'MAJLIS KESYUKURAN'];
+    $normalizedCardTitle = $legacyEventTitles[$selectedCardTitle] ?? $selectedCardTitle;
+    $selectedEventTitleChoice = in_array($normalizedCardTitle, $standardEventTitles, true)
+        ? $normalizedCardTitle
+        : (filled($selectedCardTitle) ? 'CUSTOM' : '');
+    $selectedCustomEventTitle = old(
+        "sides.$side.design.custom_card_title",
+        $selectedEventTitleChoice === 'CUSTOM' ? $selectedCardTitle : ''
+    );
 @endphp
 
-<div>
-    <label>Event Title</label>
+<div data-event-title-controls>
+    <label for="event-title-choice-{{ strtolower($side) }}">Event Title</label>
 
-    <select name="sides[{{ $side }}][design][card_title]">
+    <select
+        id="event-title-choice-{{ strtolower($side) }}"
+        name="sides[{{ $side }}][design][card_title_choice]"
+        aria-controls="custom-event-title-wrapper-{{ strtolower($side) }}"
+        aria-expanded="{{ $selectedEventTitleChoice === 'CUSTOM' ? 'true' : 'false' }}"
+        data-event-title-choice
+    >
         <option value="">-- Select event title --</option>
-        <option value="Walimatul Urus" @selected($selectedCardTitle === 'Walimatul Urus')>Wedding Reception</option>
-        <option value="Majlis Perkahwinan" @selected($selectedCardTitle === 'Majlis Perkahwinan')>Wedding Ceremony</option>
-        <option value="Kenduri Kesyukuran" @selected($selectedCardTitle === 'Kenduri Kesyukuran')>Thanksgiving Celebration</option>
+        <option value="MAJLIS PERKAHWINAN" @selected($selectedEventTitleChoice === 'MAJLIS PERKAHWINAN')>MAJLIS PERKAHWINAN</option>
+        <option value="WALIMATULURUS" @selected($selectedEventTitleChoice === 'WALIMATULURUS')>WALIMATULURUS</option>
+        <option value="MAJLIS KESYUKURAN" @selected($selectedEventTitleChoice === 'MAJLIS KESYUKURAN')>MAJLIS KESYUKURAN</option>
+        <option value="CUSTOM" @selected($selectedEventTitleChoice === 'CUSTOM')>Custom Event Title</option>
     </select>
+
+    <input
+        type="hidden"
+        name="sides[{{ $side }}][design][card_title]"
+        value="{{ $selectedCardTitle }}"
+        data-event-title-value
+    >
+
+    <div id="custom-event-title-wrapper-{{ strtolower($side) }}" data-event-title-custom-wrapper @if ($selectedEventTitleChoice !== 'CUSTOM') hidden @endif>
+        <label for="custom-event-title-{{ strtolower($side) }}">Custom Event Title</label>
+        <input
+            id="custom-event-title-{{ strtolower($side) }}"
+            type="text"
+            name="sides[{{ $side }}][design][custom_card_title]"
+            value="{{ $selectedCustomEventTitle }}"
+            maxlength="20"
+            data-event-title-custom
+        >
+        <p class="field-help">Maximum 20 characters.</p>
+    </div>
 </div>
 </div>
 
@@ -1142,6 +1183,28 @@ document.addEventListener('DOMContentLoaded', function () {
             }, 800);
         }
 
+        form.querySelectorAll('[data-event-title-choice]').forEach(function (choice) {
+            const controls = choice.closest('[data-event-title-controls]');
+            const customWrapper = controls.querySelector('[data-event-title-custom-wrapper]');
+            const customInput = controls.querySelector('[data-event-title-custom]');
+            const titleValue = controls.querySelector('[data-event-title-value]');
+
+            function syncEventTitle() {
+                const isCustom = choice.value === 'CUSTOM';
+
+                customWrapper.hidden = !isCustom;
+                customInput.disabled = !isCustom;
+                customInput.required = isCustom;
+                choice.setAttribute('aria-expanded', String(isCustom));
+                titleValue.value = isCustom ? customInput.value : choice.value;
+                titleValue.dispatchEvent(new Event('input', { bubbles: true }));
+            }
+
+            choice.addEventListener('change', syncEventTitle);
+            customInput.addEventListener('input', syncEventTitle);
+            syncEventTitle();
+        });
+
         form.addEventListener('input', scheduleAutosave);
         form.addEventListener('change', scheduleAutosave);
 
@@ -1290,14 +1353,18 @@ document.addEventListener('DOMContentLoaded', function () {
             }).format(date);
         }
 
-        function jawiCardTitle(title) {
-            const translations = {
+        function displayCardTitle(title) {
+            const legacyTranslations = {
                 'Walimatul Urus': 'Wedding Reception',
                 'Majlis Perkahwinan': 'Wedding Ceremony',
                 'Kenduri Kesyukuran': 'Thanksgiving Celebration'
             };
 
-            return translations[title] || translations['Walimatul Urus'];
+            return legacyTranslations[title] || title || 'Wedding Reception';
+        }
+
+        function jawiCardTitle(title) {
+            return displayCardTitle(title);
         }
 
         function syncPreviewScope(scope, side) {
@@ -1316,7 +1383,7 @@ document.addEventListener('DOMContentLoaded', function () {
             setText(scope, 'groom_display', groomDisplay);
             setText(scope, 'bride_display', brideDisplay);
             const cardTitle = value(prefix + '[design][card_title]', 'Walimatul Urus');
-            setText(scope, 'card_title', ({ 'Walimatul Urus': 'Wedding Reception', 'Majlis Perkahwinan': 'Wedding Ceremony', 'Kenduri Kesyukuran': 'Thanksgiving Celebration' })[cardTitle] || cardTitle);
+            setText(scope, 'card_title', displayCardTitle(cardTitle));
             setText(scope, 'card_title_jawi', jawiCardTitle(cardTitle));
             setText(scope, 'father_name', value(prefix + '[parents][father_name]', "FATHER'S NAME"));
             setText(scope, 'mother_name', value(prefix + '[parents][mother_name]', "MOTHER'S NAME"));
