@@ -49,12 +49,12 @@
     @foreach ($previewPackageSides as $packageSide)
         @php
             $storedCardTitle = $packageSide->design?->card_title;
-            $legacyCardTitleTranslations = [
-                'Walimatul Urus' => 'Wedding Reception',
-                'Majlis Perkahwinan' => 'Wedding Ceremony',
-                'Kenduri Kesyukuran' => 'Thanksgiving Celebration',
-            ];
-            $jawiCardTitle = $legacyCardTitleTranslations[$storedCardTitle] ?? ($storedCardTitle ?: 'Wedding Reception');
+            $normalizedCardTitle = strtoupper(trim((string) $storedCardTitle));
+            $jawiCardTitle = match ($normalizedCardTitle) {
+                'WALIMATULURUS', 'WALIMATUL URUS', 'MAJLIS PERKAHWINAN' => 'Wedding Ceremony',
+                'KENDURI KESYUKURAN', 'MAJLIS KESYUKURAN' => 'Thanksgiving Celebration',
+                default => 'Wedding Ceremony',
+            };
         @endphp
         <div class="card-preview-wrap @if (! $loop->first) is-hidden @endif" data-card-preview="{{ $packageSide->side }}">
             <article class="wedding-card wedding-card-front" data-card-face="front" data-theme="{{ strtolower($packageSide->design?->theme ?: 'songket') }}">
