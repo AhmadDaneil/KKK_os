@@ -52,6 +52,8 @@ class CustomerOrderDraftController extends Controller
             'sides.LELAKI.design.theme' => ['nullable', 'string', 'max:255'],
             'sides.LELAKI.design.design_code' => ['nullable', 'string', 'max:100'],
             'sides.LELAKI.design.card_title' => ['nullable', 'string', 'max:255'],
+            'sides.LELAKI.design.card_title_choice' => ['nullable', 'string', 'in:MAJLIS PERKAHWINAN,WALIMATULURUS,MAJLIS KESYUKURAN,CUSTOM'],
+            'sides.LELAKI.design.custom_card_title' => ['required_if:sides.LELAKI.design.card_title_choice,CUSTOM', 'nullable', 'string', 'max:20'],
             'sides.LELAKI.design.card_image' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:10240'],
             'sides.LELAKI.additional_products' => ['sometimes', 'array'],
             'sides.LELAKI.additional_products.*.enabled' => ['nullable', 'boolean'],
@@ -78,6 +80,8 @@ class CustomerOrderDraftController extends Controller
             'sides.PEREMPUAN.design.theme' => ['nullable', 'string', 'max:255'],
             'sides.PEREMPUAN.design.design_code' => ['nullable', 'string', 'max:100'],
             'sides.PEREMPUAN.design.card_title' => ['nullable', 'string', 'max:255'],
+            'sides.PEREMPUAN.design.card_title_choice' => ['nullable', 'string', 'in:MAJLIS PERKAHWINAN,WALIMATULURUS,MAJLIS KESYUKURAN,CUSTOM'],
+            'sides.PEREMPUAN.design.custom_card_title' => ['required_if:sides.PEREMPUAN.design.card_title_choice,CUSTOM', 'nullable', 'string', 'max:20'],
             'sides.PEREMPUAN.design.card_image' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:10240'],
             'sides.PEREMPUAN.additional_products' => ['sometimes', 'array'],
             'sides.PEREMPUAN.additional_products.*.enabled' => ['nullable', 'boolean'],
@@ -136,6 +140,23 @@ class CustomerOrderDraftController extends Controller
             }
 
             unset($validated['single_package_side']);
+        }
+
+        foreach ($validated['sides'] ?? [] as $side => $sideData) {
+            if (! array_key_exists('card_title_choice', $sideData['design'] ?? [])) {
+                continue;
+            }
+
+            $design = $sideData['design'];
+            $choice = $design['card_title_choice'];
+            $validated['sides'][$side]['design']['card_title'] = $choice === 'CUSTOM'
+                ? trim((string) ($design['custom_card_title'] ?? ''))
+                : (string) ($choice ?? '');
+
+            unset(
+                $validated['sides'][$side]['design']['card_title_choice'],
+                $validated['sides'][$side]['design']['custom_card_title']
+            );
         }
 
         $saveDraft->save($order, $validated);
