@@ -305,6 +305,7 @@
             action="{{ route('orders.draft.update', ['orderId' => $order->order_id]) }}"
             enctype="multipart/form-data"
             data-single-package-setup="{{ $needsSinglePackageSide ? 'true' : 'false' }}"
+            data-design-code-options="{{ json_encode(config('kingkadkahwin.design_codes', [])) }}"
         >
             @csrf
 
@@ -410,12 +411,17 @@
         <label>Theme</label>
         @php
             $selectedTheme = old("sides.$side.design.theme", $packageSide?->design?->theme);
+            $selectedDesignCode = old("sides.$side.design.design_code", $packageSide?->design?->design_code);
+            $designCodeOptions = config('kingkadkahwin.design_codes', []);
+            $selectedDesignCodes = $designCodeOptions[strtoupper((string) $selectedTheme)] ?? [];
+            $normalizedSelectedDesignCode = strtoupper((string) $selectedDesignCode);
         @endphp
 
 <select name="sides[{{ $side }}][design][theme]">
     <option value="">-- Select theme --</option>
 
     @foreach ([
+        'AKIKAH',
         'PORTRAIT',
         'ARCH',
         'CARTOON',
@@ -435,12 +441,25 @@
     </div>
 
     <div>
-        <label>Design Code</label>
-        <input
+        <label for="design-code-{{ strtolower($side) }}">Design Code</label>
+        <select
+            id="design-code-{{ strtolower($side) }}"
             name="sides[{{ $side }}][design][design_code]"
-            placeholder="Example: KKK-001"
-            value="{{ old("sides.$side.design.design_code", $packageSide?->design?->design_code) }}"
+            data-design-code-select
+            @disabled($selectedTheme === null || $selectedTheme === '')
         >
+            <option value="">-- Select design code --</option>
+            @foreach ($selectedDesignCodes as $designCode)
+                <option value="{{ $designCode }}" @selected($normalizedSelectedDesignCode === $designCode)>
+                    {{ $designCode }}
+                </option>
+            @endforeach
+            @if ($selectedDesignCode && ! in_array($normalizedSelectedDesignCode, $selectedDesignCodes, true))
+                <option value="{{ $selectedDesignCode }}" selected>
+                    {{ $selectedDesignCode }} (current code)
+                </option>
+            @endif
+        </select>
     </div>
 
 @php
@@ -1585,6 +1604,49 @@ document.addEventListener('DOMContentLoaded', function () {
         form.addEventListener('submit', function () {
             button.disabled = true;
             button.textContent = 'Menghantar...';
+        });
+    });
+</script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const form = document.getElementById('customer-order-form');
+
+        if (!form) {
+            return;
+        }
+
+        let designCodeOptions = {};
+
+        try {
+            designCodeOptions = JSON.parse(form.dataset.designCodeOptions || '{}');
+        } catch (error) {
+            return;
+        }
+
+        form.querySelectorAll('select[name$="[design][theme]"]').forEach(function (themeSelect) {
+            const packageSide = themeSelect.closest('fieldset[data-package-side]');
+            const designCodeSelect = packageSide?.querySelector('[data-design-code-select]');
+
+            if (!designCodeSelect) {
+                return;
+            }
+
+            themeSelect.addEventListener('change', function () {
+                const selectedCode = designCodeSelect.value;
+                const theme = themeSelect.value.trim().toUpperCase();
+                const codes = designCodeOptions[theme] || [];
+
+                designCodeSelect.replaceChildren(new Option('-- Select design code --', ''));
+                codes.forEach(function (code) {
+                    designCodeSelect.add(new Option(code, code));
+                });
+
+                designCodeSelect.disabled = theme === '';
+
+                if (codes.includes(selectedCode)) {
+                    designCodeSelect.value = selectedCode;
+                }
+            });
         });
     });
 </script>

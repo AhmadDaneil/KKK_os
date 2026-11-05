@@ -1,6 +1,25 @@
 <?php
 
+$designCodeRange = static fn (string $prefix, int $first, int $last): array => array_map(
+    static fn (int $number): string => sprintf('%s-%03d', $prefix, $number),
+    range($first, $last)
+);
+
 return [
+    'design_codes' => [
+        'AKIKAH' => $designCodeRange('CKQ', 1, 8),
+        'ARCH' => $designCodeRange('CKA', 1, 24),
+        'CARTOON' => $designCodeRange('CKC', 1, 24),
+        'DESA' => $designCodeRange('CKD', 1, 8),
+        'GARDEN' => $designCodeRange('CKG', 1, 8),
+        'ISLAMIC' => $designCodeRange('CKI', 801, 824),
+        'MINIMALIST' => $designCodeRange('CKM', 1, 24),
+        'NOSTALGIA' => $designCodeRange('CKN', 1, 8),
+        'PORTRAIT' => $designCodeRange('CKP', 1, 8),
+        'RUSTY' => $designCodeRange('CKR', 1, 24),
+        'SONGKET' => $designCodeRange('CKS', 201, 224),
+    ],
+
     'deposit' => [
         'amount' => env('KKK_DEPOSIT_AMOUNT', '0.00'),
         'qr_image' => env('KKK_DEPOSIT_QR_IMAGE', 'images/payment/maybank-qr.jpg'),
