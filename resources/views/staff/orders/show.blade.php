@@ -567,6 +567,13 @@
 
                     <div class="staff-work-grid">
                         @forelse ($order->designJobs as $job)
+                            @php
+                                $jobPackageSide = $order->packageSides
+                                    ->firstWhere('id', $job->order_package_side_id);
+                                $jobTheme = strtoupper((string) $jobPackageSide?->design?->theme);
+                                $hasCustomerPhoto = $jobTheme === 'PORTRAIT'
+                                    && filled($jobPackageSide?->design?->card_image_path);
+                            @endphp
                             <article class="staff-card" data-design-job-id="{{ $job->id }}">
                                 <div class="staff-card-heading">
                                     <h3>{{ $job->side === 'LELAKI' ? 'Groom' : 'Bride' }}</h3>
@@ -574,6 +581,15 @@
                                     <span class="staff-status">
                                         {{ str_replace('_', ' ', $job->status) }}
                                     </span>
+
+                                    @if (auth()->user()->hasStaffRole(\App\Models\User::ROLE_DESIGNER)
+                                        && $job->assigned_user_id === auth()->id()
+                                        && $hasCustomerPhoto)
+                                        <a
+                                            href="{{ route($operationRoutePrefix.'orders.customer-photo', ['orderId' => $order->order_id, 'side' => $jobPackageSide->side]) }}"
+                                            class="staff-button staff-button-small"
+                                        >Download Picture</a>
+                                    @endif
                                 </div>
 
                                 <dl class="staff-detail-list">
@@ -805,17 +821,19 @@
                                                         </div>
                                                     </div>
 
-                                                    @php
-                                                        $jobPackageSide = $order->packageSides
-                                                            ->firstWhere('id', $job->order_package_side_id);
-                                                        $jobTheme = strtoupper((string) $jobPackageSide?->design?->theme);
-                                                    @endphp
                                                     <div class="staff-supplementary-artworks">
                                                         <div class="staff-supplementary-heading">
                                                             <h4>Card Package Preview</h4>
                                                             <p>Banner and bunting are included with every wedding card package. Use the same short names and card design theme.</p>
-                                                            @if ($jobTheme === 'PORTRAIT' && $jobPackageSide?->design?->card_image_path)
-                                                                <p class="staff-field-help"><strong>PORTRAIT theme:</strong> use the uploaded couple photo for banner and bunting artwork. <a href="{{ route($operationRoutePrefix.'orders.customer-photo', ['orderId' => $order->order_id, 'side' => $jobPackageSide->side]) }}">Download couple photo</a></p>
+                                                            @if ($hasCustomerPhoto)
+                                                                <p class="staff-field-help"><strong>PORTRAIT theme:</strong> use the uploaded couple photo for banner and bunting artwork.
+                                                                    @if (auth()->user()->hasStaffRole(\App\Models\User::ROLE_DESIGNER)
+                                                                        && $job->assigned_user_id === auth()->id())
+                                                                        Use the Download Picture button above.
+                                                                    @else
+                                                                        <a href="{{ route($operationRoutePrefix.'orders.customer-photo', ['orderId' => $order->order_id, 'side' => $jobPackageSide->side]) }}">Download couple photo</a>
+                                                                    @endif
+                                                                </p>
                                                             @else
                                                                 <p class="staff-field-help"><strong>Theme {{ $jobTheme ?: '-' }}:</strong> prepare the banner and bunting using the design theme only, without a couple photo.</p>
                                                             @endif
