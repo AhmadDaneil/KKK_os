@@ -215,12 +215,12 @@
 
                     <div class="review-item">
                         <span class="review-label">Meal Time</span>
-                        <span class="review-value">{{ $event['meal_time'] ? substr($event['meal_time'], 0, 5) : '-' }}</span>
+                        <span class="review-value">{{ $event['meal_time'] ? \Carbon\CarbonImmutable::parse($event['meal_time'])->format('g:i A') : '-' }}</span>
                     </div>
 
                     <div class="review-item">
                         <span class="review-label">Wedding Reception Time</span>
-                        <span class="review-value">{{ $event['bersanding_time'] ? substr($event['bersanding_time'], 0, 5) : '-' }}</span>
+                        <span class="review-value">{{ $event['bersanding_time'] ? \Carbon\CarbonImmutable::parse($event['bersanding_time'])->format('g:i A') : '-' }}</span>
                     </div>
 
                     <div class="review-item">
