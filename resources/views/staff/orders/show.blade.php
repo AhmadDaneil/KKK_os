@@ -420,14 +420,25 @@
                             <div class="staff-detail-group">
                                 <h4>Couple's Short Names</h4>
                                 <dl class="staff-detail-list">
-                                    <div>
-                                        <dt>Groom</dt>
-                                        <dd>{{ $packageCouple?->groom_abbreviation ?: $packageCouple?->groom_name ?: '-' }}</dd>
-                                    </div>
-                                    <div>
-                                        <dt>Bride</dt>
-                                        <dd>{{ $packageCouple?->bride_abbreviation ?: $packageCouple?->bride_name ?: '-' }}</dd>
-                                    </div>
+                                    @if ($packageSide->side === 'PEREMPUAN')
+                                        <div>
+                                            <dt>Bride</dt>
+                                            <dd>{{ $packageCouple?->bride_abbreviation ?: $packageCouple?->bride_name ?: '-' }}</dd>
+                                        </div>
+                                        <div>
+                                            <dt>Groom</dt>
+                                            <dd>{{ $packageCouple?->groom_abbreviation ?: $packageCouple?->groom_name ?: '-' }}</dd>
+                                        </div>
+                                    @else
+                                        <div>
+                                            <dt>Groom</dt>
+                                            <dd>{{ $packageCouple?->groom_abbreviation ?: $packageCouple?->groom_name ?: '-' }}</dd>
+                                        </div>
+                                        <div>
+                                            <dt>Bride</dt>
+                                            <dd>{{ $packageCouple?->bride_abbreviation ?: $packageCouple?->bride_name ?: '-' }}</dd>
+                                        </div>
+                                    @endif
                                 </dl>
                             </div>
 
