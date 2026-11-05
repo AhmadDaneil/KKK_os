@@ -464,58 +464,32 @@
 
 @php
     $selectedCardTitle = old("sides.$side.design.card_title", $packageSide?->design?->card_title);
-    $legacyEventTitles = [
-        'Walimatul Urus' => 'WALIMATULURUS',
-        'Majlis Perkahwinan' => 'MAJLIS PERKAHWINAN',
-        'Kenduri Kesyukuran' => 'MAJLIS KESYUKURAN',
-    ];
-    $standardEventTitles = ['MAJLIS PERKAHWINAN', 'WALIMATULURUS', 'MAJLIS KESYUKURAN'];
-    $normalizedCardTitle = $legacyEventTitles[$selectedCardTitle] ?? $selectedCardTitle;
-    $selectedEventTitleChoice = in_array($normalizedCardTitle, $standardEventTitles, true)
-        ? $normalizedCardTitle
-        : (filled($selectedCardTitle) ? 'CUSTOM' : '');
-    $selectedCustomEventTitle = old(
-        "sides.$side.design.custom_card_title",
-        $selectedEventTitleChoice === 'CUSTOM' ? $selectedCardTitle : ''
-    );
+    $normalizedCardTitle = strtoupper(trim((string) $selectedCardTitle));
+    $selectedEventTitleChoice = match ($normalizedCardTitle) {
+        'WALIMATULURUS', 'WALIMATUL URUS', 'MAJLIS PERKAHWINAN' => 'MAJLIS PERKAHWINAN',
+        'KENDURI KESYUKURAN', 'MAJLIS KESYUKURAN' => 'MAJLIS KESYUKURAN',
+        default => filled($selectedCardTitle) ? 'MAJLIS PERKAHWINAN' : '',
+    };
 @endphp
 
 <div data-event-title-controls>
     <label for="event-title-choice-{{ strtolower($side) }}">Event Title</label>
-
     <select
         id="event-title-choice-{{ strtolower($side) }}"
         name="sides[{{ $side }}][design][card_title_choice]"
-        aria-controls="custom-event-title-wrapper-{{ strtolower($side) }}"
-        aria-expanded="{{ $selectedEventTitleChoice === 'CUSTOM' ? 'true' : 'false' }}"
         data-event-title-choice
     >
         <option value="">-- Select event title --</option>
         <option value="MAJLIS PERKAHWINAN" @selected($selectedEventTitleChoice === 'MAJLIS PERKAHWINAN')>MAJLIS PERKAHWINAN</option>
-        <option value="WALIMATULURUS" @selected($selectedEventTitleChoice === 'WALIMATULURUS')>WALIMATULURUS</option>
         <option value="MAJLIS KESYUKURAN" @selected($selectedEventTitleChoice === 'MAJLIS KESYUKURAN')>MAJLIS KESYUKURAN</option>
-        <option value="CUSTOM" @selected($selectedEventTitleChoice === 'CUSTOM')>Custom Event Title</option>
     </select>
 
     <input
         type="hidden"
         name="sides[{{ $side }}][design][card_title]"
-        value="{{ $selectedCardTitle }}"
+        value="{{ $selectedEventTitleChoice }}"
         data-event-title-value
     >
-
-    <div id="custom-event-title-wrapper-{{ strtolower($side) }}" data-event-title-custom-wrapper @if ($selectedEventTitleChoice !== 'CUSTOM') hidden @endif>
-        <label for="custom-event-title-{{ strtolower($side) }}">Custom Event Title</label>
-        <input
-            id="custom-event-title-{{ strtolower($side) }}"
-            type="text"
-            name="sides[{{ $side }}][design][custom_card_title]"
-            value="{{ $selectedCustomEventTitle }}"
-            maxlength="20"
-            data-event-title-custom
-        >
-        <p class="field-help">Maximum 20 characters.</p>
-    </div>
 </div>
 </div>
 
@@ -1185,23 +1159,14 @@ document.addEventListener('DOMContentLoaded', function () {
 
         form.querySelectorAll('[data-event-title-choice]').forEach(function (choice) {
             const controls = choice.closest('[data-event-title-controls]');
-            const customWrapper = controls.querySelector('[data-event-title-custom-wrapper]');
-            const customInput = controls.querySelector('[data-event-title-custom]');
             const titleValue = controls.querySelector('[data-event-title-value]');
 
             function syncEventTitle() {
-                const isCustom = choice.value === 'CUSTOM';
-
-                customWrapper.hidden = !isCustom;
-                customInput.disabled = !isCustom;
-                customInput.required = isCustom;
-                choice.setAttribute('aria-expanded', String(isCustom));
-                titleValue.value = isCustom ? customInput.value : choice.value;
+                titleValue.value = choice.value;
                 titleValue.dispatchEvent(new Event('input', { bubbles: true }));
             }
 
             choice.addEventListener('change', syncEventTitle);
-            customInput.addEventListener('input', syncEventTitle);
             syncEventTitle();
         });
 
@@ -1354,13 +1319,16 @@ document.addEventListener('DOMContentLoaded', function () {
         }
 
         function displayCardTitle(title) {
+            const normalizedTitle = String(title || '').trim().toUpperCase();
             const legacyTranslations = {
-                'Walimatul Urus': 'Wedding Reception',
-                'Majlis Perkahwinan': 'Wedding Ceremony',
-                'Kenduri Kesyukuran': 'Thanksgiving Celebration'
+                'WALIMATULURUS': 'Wedding Ceremony',
+                'WALIMATUL URUS': 'Wedding Ceremony',
+                'MAJLIS PERKAHWINAN': 'Wedding Ceremony',
+                'KENDURI KESYUKURAN': 'Thanksgiving Celebration',
+                'MAJLIS KESYUKURAN': 'Thanksgiving Celebration'
             };
 
-            return legacyTranslations[title] || title || 'Wedding Reception';
+            return legacyTranslations[normalizedTitle] || 'Wedding Ceremony';
         }
 
         function jawiCardTitle(title) {
@@ -1382,7 +1350,7 @@ document.addEventListener('DOMContentLoaded', function () {
             setText(scope, 'bride_name', brideName);
             setText(scope, 'groom_display', groomDisplay);
             setText(scope, 'bride_display', brideDisplay);
-            const cardTitle = value(prefix + '[design][card_title]', 'Walimatul Urus');
+            const cardTitle = value(prefix + '[design][card_title]', 'MAJLIS PERKAHWINAN');
             setText(scope, 'card_title', displayCardTitle(cardTitle));
             setText(scope, 'card_title_jawi', jawiCardTitle(cardTitle));
             setText(scope, 'father_name', value(prefix + '[parents][father_name]', "FATHER'S NAME"));
