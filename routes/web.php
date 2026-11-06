@@ -39,6 +39,7 @@ use App\Http\Controllers\Staff\StaffCorrectionPaymentController;
 use App\Http\Controllers\Staff\StaffDashboardController;
 use App\Http\Controllers\Staff\StaffDepositPaymentController;
 use App\Http\Controllers\Staff\StaffDesignWorkflowController;
+use App\Http\Controllers\Staff\StaffDigitalDesignerController;
 use App\Http\Controllers\Staff\StaffInvoiceController;
 use App\Http\Controllers\Staff\StaffJobAssignmentController;
 use App\Http\Controllers\Staff\StaffOrderController;
@@ -328,6 +329,13 @@ Route::middleware(['auth:staff', 'active.staff'])
 
         Route::post('/logout', [StaffAuthController::class, 'destroy'])
             ->name('logout');
+
+        Route::get('/digital-designer/orders', [StaffDigitalDesignerController::class, 'index'])
+            ->middleware('staff.role:'.User::ROLE_DIGITAL_DESIGNER)
+            ->name('digital-designer.orders.index');
+        Route::get('/digital-designer/orders/{order}/csv', [StaffDigitalDesignerController::class, 'downloadCsv'])
+            ->middleware('staff.role:'.User::ROLE_DIGITAL_DESIGNER)
+            ->name('digital-designer.orders.csv');
 
         Route::get('/orders', [StaffOrderController::class, 'index'])
             ->name('orders.index');
