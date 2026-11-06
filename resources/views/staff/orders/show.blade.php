@@ -821,7 +821,7 @@
                                                             <h4>Card Package Preview</h4>
                                                             <p>Banner and bunting are included with every wedding card package. Use the same short names and card design theme.</p>
                                                             @if ($hasCustomerPhoto)
-                                                                <p class="staff-field-help"><strong>PORTRAIT theme:</strong> use the uploaded couple photo for banner and bunting artwork.
+                                                                <p class="staff-field-help"><strong>Customer photo uploaded:</strong> use it for all items with the PORTRAIT theme, or for banner and bunting only with other themes. Use the supplied template for other items.
                                                                     @if (auth()->user()->hasStaffRole(\App\Models\User::ROLE_DESIGNER)
                                                                         && $job->assigned_user_id === auth()->id())
                                                                         Use the Download Picture button below.
