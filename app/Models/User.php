@@ -34,6 +34,8 @@ class User extends Authenticatable
 
     public const ROLE_DESIGNER = 'DESIGNER';
 
+    public const ROLE_DIGITAL_DESIGNER = 'DIGITAL_DESIGNER';
+
     public const ROLE_PRODUCTION = 'PRODUCTION';
 
     public const STAFF_THEME_DEFAULT = 'default';
@@ -59,6 +61,7 @@ class User extends Authenticatable
         self::ROLE_OM,
         self::ROLE_CUSTOMER_SERVICE,
         self::ROLE_DESIGNER,
+        self::ROLE_DIGITAL_DESIGNER,
         self::ROLE_PRODUCTION,
     ];
 
