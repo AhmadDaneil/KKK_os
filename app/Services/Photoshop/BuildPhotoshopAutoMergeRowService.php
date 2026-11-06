@@ -90,11 +90,8 @@ class BuildPhotoshopAutoMergeRowService
             'tema' => $theme,
             'designcode' => $designCode,
 
-            // Customer photos are used exclusively with the PORTRAIT theme.
-            // A non-portrait design must reach Photoshop without a customer photo.
-            'gambar' => $theme === 'PORTRAIT'
-                ? $this->cardImagePath($cardImagePath)
-                : '',
+            // V35 decides which Photoshop items receive a provided customer photo.
+            'gambar' => $this->cardImagePath($cardImagePath),
 
             // `majlis` is now actively consumed by the approved side-aware JSX:
             // LELAKI = groom above bride; PEREMPUAN = bride above groom.
