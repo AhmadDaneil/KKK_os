@@ -42,7 +42,7 @@
             </section>
         @else
             <section class="staff-nav-section">
-                <h2>{{ __('ui.operation_management') }}</h2>
+                <h2>{{ $canViewDigitalDesignerQueue ? 'Digital Designer' : __('ui.operation_management') }}</h2>
                 <a href="{{ route('staff.dashboard') }}" @class(['staff-nav-link', 'is-active' => request()->routeIs('staff.dashboard')])><span class="staff-nav-icon" aria-hidden="true">OV</span>{{ __('ui.overview') }}</a>
                 @unless ($canViewDigitalDesignerQueue)
                     <a href="{{ route($ordersIndexRoute) }}" @class(['staff-nav-link', 'is-active' => request()->routeIs('staff.orders.*') && ! $activeWorkstream && ! request()->query('attention')])><span class="staff-nav-icon" aria-hidden="true">OR</span>{{ __('ui.all_orders') }}</a>
@@ -54,7 +54,7 @@
 
         @if ($canViewDigitalDesignerQueue)
             <section class="staff-nav-section">
-                <h2>Digital Designer</h2>
+                <h2>Work Queue</h2>
                 <a href="{{ route('staff.digital-designer.orders.index') }}" @class(['staff-nav-link', 'is-active' => request()->routeIs('staff.digital-designer.orders.*')])><span class="staff-nav-icon" aria-hidden="true">DA</span>Motion Video & Alive Card Premium</a>
             </section>
         @endif
