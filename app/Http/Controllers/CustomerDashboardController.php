@@ -174,5 +174,4 @@ class CustomerDashboardController extends Controller
             'X-Content-Type-Options' => 'nosniff',
         ]);
     }
-
 }
