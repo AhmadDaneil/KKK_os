@@ -148,6 +148,7 @@ class CustomerDashboardController extends Controller
             'validQuantityPairs' => $validQuantityPairs,
         ]);
     }
+
     public function photoPreview(
         Request $request,
         string $orderId,
