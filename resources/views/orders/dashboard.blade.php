@@ -493,7 +493,7 @@
 </div>
 </div>
 
-<div class="image-upload-field" data-card-image-upload data-has-card-image="{{ filled($packageSide?->design?->card_image_path) ? 'true' : 'false' }}">
+<div class="image-upload-field" data-card-image-upload data-has-card-image="{{ filled($packageSide?->design?->card_image_path) ? 'true' : 'false' }}" data-saved-photo-url="{{ route('orders.customer-photo-preview', ['orderId' => $order->order_id, 'side' => $side]) }}">
     <label for="card-image-{{ strtolower($side) }}">
         Couple Photo
     </label>
@@ -1773,6 +1773,126 @@ document.addEventListener('DOMContentLoaded', function () {
                 }
             });
         });
+    });
+</script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const form = document.getElementById('customer-order-form');
+        const preview = document.querySelector('[data-live-preview]');
+
+        if (!form || !preview) {
+            return;
+        }
+
+        const customerPhotoPreviewUrls = new Map();
+
+        function setImageSource(image, source, shouldShow) {
+            if (!shouldShow || !source) {
+                image.hidden = true;
+                return;
+            }
+
+            if (image.getAttribute('src') !== source) {
+                image.setAttribute('src', source);
+            }
+
+            image.hidden = false;
+        }
+
+        function updateSidePhotoPreview(side) {
+            const packageSide = form.querySelector('fieldset[data-package-side="' + side + '"]');
+            const uploadField = packageSide?.querySelector('[data-card-image-upload]');
+            const photoInput = uploadField?.querySelector('input[type="file"]');
+            const selectedFile = photoInput?.files?.[0];
+            const theme = (packageSide?.querySelector('[name="sides[' + side + '][design][theme]"]')?.value || '').toUpperCase();
+
+            if (!uploadField) {
+                return;
+            }
+
+            let photoUrl = '';
+
+            if (selectedFile) {
+                let current = customerPhotoPreviewUrls.get(side);
+
+                if (!current || current.file !== selectedFile) {
+                    if (current) {
+                        URL.revokeObjectURL(current.url);
+                    }
+
+                    current = {
+                        file: selectedFile,
+                        url: URL.createObjectURL(selectedFile),
+                    };
+                    customerPhotoPreviewUrls.set(side, current);
+                }
+
+                photoUrl = current.url;
+            } else if (uploadField.dataset.hasCardImage === 'true') {
+                photoUrl = uploadField.dataset.savedPhotoUrl || '';
+            } else {
+                const current = customerPhotoPreviewUrls.get(side);
+
+                if (current) {
+                    URL.revokeObjectURL(current.url);
+                    customerPhotoPreviewUrls.delete(side);
+                }
+            }
+
+            const cardPreview = preview.querySelector('[data-card-preview="' + side + '"]');
+            const portraitImage = cardPreview?.querySelector('[data-live-photo-preview="portrait"]');
+            const frontCard = portraitImage?.closest('.wedding-card-front');
+            const showPortraitPhoto = Boolean(photoUrl) && theme === 'PORTRAIT';
+
+            if (portraitImage) {
+                setImageSource(portraitImage, photoUrl, showPortraitPhoto);
+            }
+
+            frontCard?.classList.toggle('has-customer-photo', showPortraitPhoto);
+
+            const productPreview = preview.querySelector('[data-live-product-preview="' + side + '"]');
+
+            productPreview?.querySelectorAll('[data-live-photo-preview="item"]').forEach(function (image) {
+                const product = image.closest('.live-product');
+                const isBannerOrBunting = product?.classList.contains('live-product--banner')
+                    || product?.classList.contains('live-product--banting');
+                const showProductPhoto = Boolean(photoUrl) && (theme === 'PORTRAIT' || isBannerOrBunting);
+
+                setImageSource(image, photoUrl, showProductPhoto);
+            });
+        }
+
+        function updateAllPhotoPreviews() {
+            form.querySelectorAll('[data-card-image-upload]').forEach(function (uploadField) {
+                const side = uploadField.closest('[data-package-side]')?.dataset.packageSide;
+
+                if (side) {
+                    updateSidePhotoPreview(side);
+                }
+            });
+        }
+
+        form.addEventListener('change', function (event) {
+            if (
+                event.target.matches?.('[data-card-image-upload] input[type="file"]')
+                || event.target.name?.endsWith('[design][theme]')
+            ) {
+                const side = event.target.closest('[data-package-side]')?.dataset.packageSide;
+
+                if (side) {
+                    updateSidePhotoPreview(side);
+                }
+            }
+        });
+
+        window.addEventListener('pagehide', function () {
+            customerPhotoPreviewUrls.forEach(function (photo) {
+                URL.revokeObjectURL(photo.url);
+            });
+            customerPhotoPreviewUrls.clear();
+        });
+
+        updateAllPhotoPreviews();
     });
 </script>
 @include('public.partials.customer-service')
