@@ -236,6 +236,11 @@ Route::middleware(['auth:admin', 'active.staff', 'staff.role:ADMIN'])
 Route::get('/order/{orderId}', [CustomerDashboardController::class, 'show'])
     ->name('orders.dashboard');
 
+Route::get('/order/{orderId}/sides/{side}/customer-photo-preview', [CustomerDashboardController::class, 'photoPreview'])
+    ->whereIn('side', ['LELAKI', 'PEREMPUAN'])
+    ->middleware('throttle:30,1')
+    ->name('orders.customer-photo-preview');
+
 Route::get('/order/{orderId}/progress-updates/{progressUpdate}/attachment', [CustomerProgressUpdateController::class, 'attachment'])
     ->name('orders.progress-updates.attachment');
 Route::get('/order/{orderId}/courier-proof', [CustomerCourierProofController::class, 'show'])
