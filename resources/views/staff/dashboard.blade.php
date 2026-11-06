@@ -104,13 +104,6 @@
                     </section>
                     @endif
 
-                    @if ($canViewDigitalDesignerQueue)
-                    <section class="staff-dashboard-group">
-                        <div class="staff-dashboard-group-heading"><span class="staff-group-number">04</span><div><h2>Digital Designer</h2><p>Motion Video and Alive Card Premium orders after deposit payment.</p></div></div>
-                        <a href="{{ route('staff.digital-designer.orders.index') }}" class="staff-feature-card"><span class="staff-feature-icon">DA</span><div><h3>Motion Video & Alive Card Premium</h3><p>{{ $digitalDesignerQueue }} paid bookings available for CSV download.</p></div><span class="staff-card-arrow">→</span></a>
-                    </section>
-                    @endif
-
                     @if ($canViewDesignQueue)
                     <section class="staff-dashboard-group">
                         <div class="staff-dashboard-group-heading"><span class="staff-group-number">02</span><div><h2>Design</h2><p>Confirmed details, merging and design review.</p></div></div>
@@ -130,6 +123,12 @@
                                 <a href="{{ route('staff.orders.index', ['workstream' => 'fulfilment']) }}" class="staff-feature-card"><span class="staff-feature-icon">PT</span><div><h3>Order Fulfilment</h3><p>Monitor courier handover and customer pickups.</p></div><span class="staff-card-arrow">→</span></a>
                             @endif
                         </div>
+                    </section>
+                    @endif
+                    @if ($canViewDigitalDesignerQueue)
+                    <section class="staff-dashboard-group">
+                        <div class="staff-dashboard-group-heading"><span class="staff-group-number">04</span><div><h2>Digital Designer</h2><p>Motion Video and Alive Card Premium orders after deposit payment.</p></div></div>
+                        <a href="{{ route('staff.digital-designer.orders.index') }}" class="staff-feature-card"><span class="staff-feature-icon">DA</span><div><h3>Motion Video & Alive Card Premium</h3><p>{{ $digitalDesignerQueue }} paid bookings available for CSV download.</p></div><span class="staff-card-arrow">→</span></a>
                     </section>
                     @endif
                 </div>
