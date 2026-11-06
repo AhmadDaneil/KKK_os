@@ -493,14 +493,17 @@
 </div>
 </div>
 
-<div class="image-upload-field" data-card-image-upload @if (strtoupper((string) $selectedTheme) !== 'PORTRAIT') hidden @endif>
+<div class="image-upload-field" data-card-image-upload data-has-card-image="{{ filled($packageSide?->design?->card_image_path) ? 'true' : 'false' }}">
     <label for="card-image-{{ strtolower($side) }}">
         Couple Photo
     </label>
 
-    <p class="field-help">
-        For the PORTRAIT theme only. Use a clear portrait-oriented photo, preferably with a 3:4 ratio.
-        Landscape or square images will be cropped to 900 × 1200 px (3:4).
+    <p class="field-help" data-card-image-guidance>
+        @if (strtoupper((string) $selectedTheme) === 'PORTRAIT')
+            A clear customer photo is required to continue with the PORTRAIT theme. It will be placed into the Portrait design items.
+        @else
+            Photo upload is optional for this theme. If uploaded, it will be used only for Banner and Bunting. Leave it blank to use the supplied templates.
+        @endif
         JPG, JPEG, PNG or WEBP format. Maximum 10 MB.
     </p>
 
@@ -528,7 +531,7 @@
                 </div>
                 <section class="additional-products" aria-labelledby="included-design-items-{{ strtolower($side) }}">
                     <h3 id="included-design-items-{{ strtolower($side) }}">Included in the Card Package</h3>
-                    <p class="field-help">Each wedding card package includes banner and bunting previews. The designer will use the short names and selected card design theme. Couple photos are used only for the PORTRAIT theme.</p>
+                    <p class="field-help">Banner and bunting are included automatically. An uploaded photo is used throughout PORTRAIT design items; for other themes it is used only in Banner and Bunting. Without a photo, the supplied templates are used.</p>
                 </section>
                 <h3>{{ $hasSelectableSinglePackageSide ? 'Parents' : ($side === 'LELAKI' ? "Groom's Parents" : "Bride's Parents") }}</h3>
                 <p class="field-help">Enter the names of the parents hosting this event.</p>
@@ -996,6 +999,37 @@ document.addEventListener('DOMContentLoaded', function () {
                 });
             });
 
+        document
+            .querySelectorAll('fieldset[data-package-side]')
+            .forEach(function (fieldset) {
+                const side = fieldset.dataset.packageSide;
+                const themeField = fieldset.querySelector(
+                    '[name="sides[' + side + '][design][theme]"]'
+                );
+
+                if ((themeField?.value ?? '').toUpperCase() !== 'PORTRAIT') {
+                    return;
+                }
+
+                const uploadField = fieldset.querySelector('[data-card-image-upload]');
+                const photoInput = uploadField?.querySelector('input[type="file"]');
+                const hasSavedPhoto = uploadField?.dataset.hasCardImage === 'true';
+                const hasSelectedPhoto = Boolean(photoInput && photoInput.files.length > 0);
+
+                if (!hasSavedPhoto && !hasSelectedPhoto) {
+                    const sideLabel = side === 'LELAKI'
+                        ? "Groom's Package"
+                        : "Bride's Package";
+
+                    addRequiredError(
+                        photoInput,
+                        'a customer photo for the PORTRAIT design on ' + sideLabel
+                    );
+
+                    valid = false;
+                }
+            });
+
         /*
          * Courier fields are required only when the customer selects courier delivery.
          */
@@ -1099,6 +1133,18 @@ document.addEventListener('DOMContentLoaded', function () {
                     if (!response.ok || payload.saved !== true) {
                         const errors = payload.errors ? Object.values(payload.errors).flat().join(' ') : '';
                         throw new Error(errors || payload.message || 'We could not save these changes.');
+                    }
+
+                    if (includeFiles) {
+                        form.querySelectorAll('[data-card-image-upload]').forEach(function (uploadField) {
+                            const photoInput = uploadField.querySelector('input[type="file"]');
+
+                            if (photoInput && photoInput.files.length > 0) {
+                                uploadField.dataset.hasCardImage = 'true';
+                            }
+                        });
+
+                        updatePortraitImageFields();
                     }
 
                     savedRevision = Math.max(savedRevision, revision);
@@ -1537,7 +1583,30 @@ document.addEventListener('DOMContentLoaded', function () {
                 }
 
                 const theme = value('sides[' + packageSide + '][design][theme]', '').toUpperCase();
-                uploadField.hidden = theme !== 'PORTRAIT';
+                const photoInput = uploadField.querySelector('input[type="file"]');
+                const hasPhoto = uploadField.dataset.hasCardImage === 'true'
+                    || Boolean(photoInput && photoInput.files.length > 0);
+                const guidance = uploadField.querySelector('[data-card-image-guidance]');
+
+                uploadField.hidden = false;
+
+                if (!guidance) {
+                    return;
+                }
+
+                if (theme === 'PORTRAIT') {
+                    guidance.textContent = hasPhoto
+                        ? 'A customer photo is attached for the PORTRAIT design. ' +
+                            'JPG, JPEG, PNG or WEBP format. Maximum 10 MB.'
+                        : 'Upload a clear customer photo to continue with the PORTRAIT theme. ' +
+                            'JPG, JPEG, PNG or WEBP format. Maximum 10 MB.';
+                } else {
+                    guidance.textContent = hasPhoto
+                        ? 'The uploaded photo will be used only for Banner and Bunting. ' +
+                            'JPG, JPEG, PNG or WEBP format. Maximum 10 MB.'
+                        : 'Photo upload is optional. If uploaded, it will be used only for Banner and Bunting. ' +
+                            'Leave it blank to use the supplied templates. JPG, JPEG, PNG or WEBP format. Maximum 10 MB.';
+                }
             });
         }
 
@@ -1585,7 +1654,10 @@ document.addEventListener('DOMContentLoaded', function () {
             if (event.target.name === 'package_format') {
                 updatePackageFormatPreview();
             }
-            if (event.target.name?.endsWith('[design][theme]')) {
+            if (
+                event.target.name?.endsWith('[design][theme]')
+                || event.target.matches?.('[data-card-image-upload] input[type="file"]')
+            ) {
                 updatePortraitImageFields();
             }
         });
