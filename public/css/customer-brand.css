@@ -603,17 +603,42 @@ body:is(.brand-privacy, .brand-terms) .customer-legal-language-nav {
 }
 
 body:is(.brand-privacy, .brand-terms) .customer-legal-language-nav a {
+    display: inline-flex;
     padding: 9px 14px;
     border: 1px solid var(--brand-line);
     border-radius: 999px;
+    align-items: center;
     color: var(--brand-green);
     font-size: .84rem;
     font-weight: 700;
     text-decoration: none;
+    transition: color .22s ease, background-color .22s ease, border-color .22s ease, box-shadow .22s ease, transform .22s cubic-bezier(.22, 1, .36, 1);
+}
+
+body:is(.brand-privacy, .brand-terms) .customer-legal-language-nav a::after {
+    content: none;
 }
 
 body:is(.brand-privacy, .brand-terms) .customer-legal-language-nav a:hover {
+    border-color: #b9852c;
+    color: var(--brand-green);
     background: var(--brand-soft);
+    box-shadow: 0 6px 14px rgba(63, 47, 17, .12);
+    transform: translateY(-2px);
+}
+
+body:is(.brand-privacy, .brand-terms) .customer-legal-language-nav a:active {
+    box-shadow: none;
+    transform: translateY(0) scale(.98);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    body:is(.brand-privacy, .brand-terms) .customer-legal-language-nav a,
+    body:is(.brand-privacy, .brand-terms) .customer-legal-language-nav a:hover,
+    body:is(.brand-privacy, .brand-terms) .customer-legal-language-nav a:active {
+        transition: none;
+        transform: none;
+    }
 }
 
 body:is(.brand-privacy, .brand-terms) .customer-legal-document {
