@@ -179,7 +179,7 @@
                 <div class="review-grid">
                     <div class="review-item">
                         <span class="review-label">Banner & bunting</span>
-                        <span class="review-value">Included automatically. The preview uses the short names and selected card design theme. Couple photos are used only for the PORTRAIT theme.</span>
+                        <span class="review-value">Included automatically. If uploaded, a photo is used throughout PORTRAIT design items; for other themes, it is used only in Banner and Bunting. Without an uploaded photo, the supplied templates are used.</span>
                     </div>
                 </div>
 
