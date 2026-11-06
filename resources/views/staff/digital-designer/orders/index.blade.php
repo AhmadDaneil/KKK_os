@@ -55,7 +55,24 @@
                     </div>
 
                     @if ($orders->hasPages())
-                        <div class="staff-order-pagination">{{ $orders->links() }}</div>
+                        <nav class="staff-pagination" aria-label="Digital Designer order pages">
+                            <p class="staff-pagination-summary">Showing {{ $orders->firstItem() }}–{{ $orders->lastItem() }} of {{ $orders->total() }} orders</p>
+                            <div class="staff-pagination-links">
+                                @if ($orders->onFirstPage())
+                                    <span class="staff-pagination-link is-disabled" aria-disabled="true">Previous</span>
+                                @else
+                                    <a href="{{ $orders->previousPageUrl() }}" class="staff-pagination-link" rel="prev">Previous</a>
+                                @endif
+
+                                <span class="staff-pagination-summary">Page {{ $orders->currentPage() }} of {{ $orders->lastPage() }}</span>
+
+                                @if ($orders->hasMorePages())
+                                    <a href="{{ $orders->nextPageUrl() }}" class="staff-pagination-link" rel="next">Next</a>
+                                @else
+                                    <span class="staff-pagination-link is-disabled" aria-disabled="true">Next</span>
+                                @endif
+                            </div>
+                        </nav>
                     @endif
                 </section>
             </main>
