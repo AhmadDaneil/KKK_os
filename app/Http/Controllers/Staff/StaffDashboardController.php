@@ -19,6 +19,7 @@ class StaffDashboardController extends Controller
         $user = auth()->user();
         $attention = [];
         $designerAttention = 0;
+        $digitalDesignerQueue = 0;
         $productionAttention = ['ready' => 0, 'printing' => 0];
         $packingAttention = ['ready' => 0, 'packing' => 0, 'fulfilment' => 0];
 
@@ -35,6 +36,13 @@ class StaffDashboardController extends Controller
             $designerAttention = DesignJob::where('assigned_user_id', $user->id)
                 ->whereIn('status', ['READY_FOR_DESIGN', 'CORRECTION_REQUESTED'])
                 ->whereHas('order', fn ($query) => $query->whereNotIn('status', Order::TERMINAL_OPERATIONAL_STATUSES))
+                ->count();
+        }
+
+        if ($user->hasStaffRole(User::ROLE_DIGITAL_DESIGNER)) {
+            $digitalDesignerQueue = Order::query()
+                ->where('booking_payment_status', 'PAID')
+                ->whereNotIn('status', Order::TERMINAL_OPERATIONAL_STATUSES)
                 ->count();
         }
 
@@ -64,6 +72,6 @@ class StaffDashboardController extends Controller
             ];
         }
 
-        return view('staff.dashboard', compact('attention', 'designerAttention', 'productionAttention', 'packingAttention'));
+        return view('staff.dashboard', compact('attention', 'designerAttention', 'digitalDesignerQueue', 'productionAttention', 'packingAttention'));
     }
 }

@@ -10,6 +10,7 @@
             'OPERATION_MANAGEMENT' => 'OM (Packing & Order Fulfilment)',
             'CUSTOMER_SERVICE' => 'Customer Service',
             'DESIGNER' => 'Designer',
+            'DIGITAL_DESIGNER' => 'Digital Designer',
             'PRODUCTION' => 'Production Staff',
         ];
     @endphp
