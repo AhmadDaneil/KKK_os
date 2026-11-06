@@ -3,10 +3,12 @@
     $dashboardUser = auth()->user();
     $canMonitorOperations = $dashboardUser->canMonitorAllDepartments();
     $canViewDesignQueue = $canMonitorOperations || $dashboardUser->hasStaffRole(\App\Models\User::ROLE_DESIGNER);
+    $canViewDigitalDesignerQueue = $dashboardUser->hasStaffRole(\App\Models\User::ROLE_DIGITAL_DESIGNER);
     $canViewProductionQueue = $canMonitorOperations || $dashboardUser->hasStaffRole(\App\Models\User::ROLE_PRODUCTION);
     $roleLabels = [
         'OPERATION_MANAGEMENT' => 'Operations Management',
         'DESIGNER' => 'Designer',
+        'DIGITAL_DESIGNER' => 'Digital Designer',
         'PRODUCTION' => 'Production',
         'CUSTOMER_SERVICE' => 'Customer Service',
         'ADMIN' => 'Admin',
@@ -99,6 +101,13 @@
                     <section class="staff-dashboard-group">
                         <div class="staff-dashboard-group-heading"><span class="staff-group-number">01</span><div><h2>Operations Management</h2><p>Monitor all departments, tasks and order statuses in one view.</p></div></div>
                         <a href="{{ route('staff.orders.index') }}" class="staff-feature-card"><span class="staff-feature-icon">TP</span><div><h3>All Orders</h3><p>View customer details, packages, payments and operational status.</p></div><span class="staff-card-arrow">→</span></a>
+                    </section>
+                    @endif
+
+                    @if ($canViewDigitalDesignerQueue)
+                    <section class="staff-dashboard-group">
+                        <div class="staff-dashboard-group-heading"><span class="staff-group-number">04</span><div><h2>Digital Designer</h2><p>Motion Video and Alive Card Premium orders after deposit payment.</p></div></div>
+                        <a href="{{ route('staff.digital-designer.orders.index') }}" class="staff-feature-card"><span class="staff-feature-icon">DA</span><div><h3>Motion Video & Alive Card Premium</h3><p>{{ $digitalDesignerQueue }} paid bookings available for CSV download.</p></div><span class="staff-card-arrow">→</span></a>
                     </section>
                     @endif
 
