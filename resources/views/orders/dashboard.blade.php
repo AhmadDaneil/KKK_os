@@ -531,7 +531,7 @@
                 </div>
                 <section class="additional-products" aria-labelledby="included-design-items-{{ strtolower($side) }}">
                     <h3 id="included-design-items-{{ strtolower($side) }}">Included in the Card Package</h3>
-                    <p class="field-help">Each wedding card package includes banner and bunting previews. The designer will use the short names and selected card design theme. Couple photos are used only for the PORTRAIT theme.</p>
+                    <p class="field-help">Banner and bunting are included automatically. An uploaded photo is used throughout PORTRAIT design items; for other themes it is used only in Banner and Bunting. Without a photo, the supplied templates are used.</p>
                 </section>
                 <h3>{{ $hasSelectableSinglePackageSide ? 'Parents' : ($side === 'LELAKI' ? "Groom's Parents" : "Bride's Parents") }}</h3>
                 <p class="field-help">Enter the names of the parents hosting this event.</p>
@@ -1133,6 +1133,18 @@ document.addEventListener('DOMContentLoaded', function () {
                     if (!response.ok || payload.saved !== true) {
                         const errors = payload.errors ? Object.values(payload.errors).flat().join(' ') : '';
                         throw new Error(errors || payload.message || 'We could not save these changes.');
+                    }
+
+                    if (includeFiles) {
+                        form.querySelectorAll('[data-card-image-upload]').forEach(function (uploadField) {
+                            const photoInput = uploadField.querySelector('input[type="file"]');
+
+                            if (photoInput && photoInput.files.length > 0) {
+                                uploadField.dataset.hasCardImage = 'true';
+                            }
+                        });
+
+                        updatePortraitImageFields();
                     }
 
                     savedRevision = Math.max(savedRevision, revision);
