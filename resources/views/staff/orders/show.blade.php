@@ -571,8 +571,7 @@
                                 $jobPackageSide = $order->packageSides
                                     ->firstWhere('id', $job->order_package_side_id);
                                 $jobTheme = strtoupper((string) $jobPackageSide?->design?->theme);
-                                $hasCustomerPhoto = $jobTheme === 'PORTRAIT'
-                                    && filled($jobPackageSide?->design?->card_image_path);
+                                $hasCustomerPhoto = filled($jobPackageSide?->design?->card_image_path);
                             @endphp
                             <article class="staff-card" data-design-job-id="{{ $job->id }}">
                                 <div class="staff-card-heading">
