@@ -217,8 +217,7 @@ class StaffOrderController extends Controller
         $photoPath = $packageSide?->design?->card_image_path;
 
         abort_unless(
-            strtoupper((string) $packageSide?->design?->theme) === 'PORTRAIT'
-                && is_string($photoPath)
+            is_string($photoPath)
                 && $photoPath !== ''
                 && Storage::disk('local')->exists($photoPath),
             404
