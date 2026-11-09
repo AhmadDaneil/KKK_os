@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Models\Order;
 use App\Services\Orders\BuildCustomerProgressService;
-use App\Services\Orders\BuildTestOrderQuantityOptionsService;
 use App\Services\Orders\CreateOrderService;
 use App\Services\Orders\CustomerOrderSessionAccessService;
 use App\Services\Orders\NormalizeCustomerPhoneService;
@@ -12,8 +11,6 @@ use App\Services\Payments\CreateBillplzBookingPaymentService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
-use Illuminate\Validation\Rule;
-use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 
 class PublicOrderController extends Controller
@@ -33,86 +30,48 @@ class PublicOrderController extends Controller
             ->header('Cache-Control', 'private, no-store');
     }
 
-    public function testOrder(BuildTestOrderQuantityOptionsService $quantityOptions): Response
+    public function testOrder(): Response
     {
         abort_unless($this->sandboxCheckoutEnabled(), 404);
 
-        return response()->view('public.test-order', [
-            'quantityOptions' => $quantityOptions->build(),
-        ])
+        return response()->view('public.test-order')
             ->header('Cache-Control', 'private, no-store');
     }
 
     public function storeTestOrder(
         Request $request,
-        BuildTestOrderQuantityOptionsService $quantityOptionBuilder,
         CreateOrderService $createOrder,
         NormalizeCustomerPhoneService $phones,
         CreateBillplzBookingPaymentService $bookingPayment,
+        CustomerOrderSessionAccessService $sessionAccess,
     ): RedirectResponse {
         abort_unless($this->sandboxCheckoutEnabled(), 404);
-
-        $quantityOptions = $quantityOptionBuilder->build();
-        $packageType = strtoupper(trim((string) $request->input('package_type')));
-        $selectedPackageOptions = $quantityOptions[$packageType] ?? ['single' => [], 'pairs' => []];
 
         $validated = $request->validate([
             'package_count' => ['required', 'integer', 'in:1,2'],
             'side' => ['nullable', 'string', 'in:LELAKI,PEREMPUAN', 'required_if:package_count,1'],
             'package_type' => ['required', 'string', 'in:PUTERI_MANIS,JELATA'],
-            'payment_plan' => ['required', Rule::in(['DEPOSIT', 'FULL'])],
-            'card_quantity' => [
-                'exclude_unless:package_count,1',
-                'required',
-                'integer',
-                Rule::in(array_column($selectedPackageOptions['single'], 'quantity')),
-            ],
-            'two_package_quantities' => [
-                'exclude_unless:package_count,2',
-                'required',
-                'string',
-                Rule::in(array_column($selectedPackageOptions['pairs'], 'value')),
-            ],
+            'payment_plan' => ['required', 'in:DEPOSIT,FULL'],
             'package_format' => ['nullable', 'string', 'in:SEPARATE,FOLDED', 'required_if:package_count,2'],
             'first_event_side' => ['nullable', 'string', 'in:LELAKI,PEREMPUAN', 'required_if:package_count,2'],
             'customer_name' => ['required', 'string', 'max:255'],
             'customer_email' => ['required', 'email', 'max:255'],
-            'customer_phone' => ['required', 'string', 'regex:/^01\d{8,9}$/'],
+            'customer_phone' => ['required', 'string', 'regex:/^01\\d{8,9}$/'],
         ]);
-
-        $selectedCardAmount = (int) $validated['package_count'] === 1
-            ? collect($selectedPackageOptions['single'])
-                ->firstWhere('quantity', (int) $validated['card_quantity'])['amount']
-            : collect($selectedPackageOptions['pairs'])
-                ->firstWhere('value', $validated['two_package_quantities'])['amount'];
-
-        $requiredDeposit = (int) $validated['package_count'] === 1 ? 50 : 100;
-
-        if ($validated['payment_plan'] === 'DEPOSIT' && (float) $selectedCardAmount < $requiredDeposit) {
-            throw ValidationException::withMessages([
-                'payment_plan' => 'The selected package price is lower than its booking deposit. Choose full payment or a higher card quantity.',
-            ]);
-        }
 
         $validated['customer_phone'] = $phones->normalize($validated['customer_phone']);
         $validated['source'] = 'TEST';
 
-        if ((int) $validated['package_count'] === 1) {
-            $validated['side_quantities'] = [
-                $validated['side'] => (int) $validated['card_quantity'],
-            ];
-        } else {
-            [$groomQuantity, $brideQuantity] = array_map(
-                'intval',
-                explode(':', $validated['two_package_quantities'])
-            );
-            $validated['side_quantities'] = [
-                'LELAKI' => $groomQuantity,
-                'PEREMPUAN' => $brideQuantity,
-            ];
+        $order = $createOrder->create($validated);
+
+        if ($validated['payment_plan'] === 'FULL') {
+            $sessionAccess->establishForTestOrderCompletion($request, $order);
+
+            return redirect()->route('orders.dashboard', [
+                'orderId' => $order->order_id,
+            ]);
         }
 
-        $order = $createOrder->create($validated);
         $checkout = $bookingPayment->create($order);
 
         return redirect()->away($checkout['payment_url']);
@@ -181,6 +140,7 @@ class PublicOrderController extends Controller
         $order->load(['fulfilmentJob', 'payments', 'designJobs.artworkVersions', 'pricingSnapshot']);
         $deposit = $order->payments->firstWhere('payment_type', 'BOOKING_DEPOSIT');
         $balance = $order->payments->where('payment_type', 'BALANCE')->sortByDesc('id')->first();
+
         return view('public.order-progress', [
             'orderId' => $order->order_id,
             'customerReference' => $order->displayCustomerReference(),
@@ -221,3 +181,4 @@ class PublicOrderController extends Controller
             && parse_url((string) config('services.billplz.base_url', ''), PHP_URL_HOST) === 'www.billplz-sandbox.com';
     }
 }
+
