@@ -14,6 +14,7 @@
     @php
         $secondCouple = $review['second_couple'] ?? [];
         $hasSecondCouple = collect($secondCouple)->filter(fn ($value) => filled($value))->isNotEmpty();
+        $isFullTestPayment = $order->source === 'TEST' && $order->payment_plan === 'FULL';
 
         $fulfilmentLabel = match ($review['fulfilment']['method'] ?? null) {
             'COURIER' => 'Post / Courier',
@@ -286,6 +287,76 @@
             </div>
         </section>
 
+<section class="review-card confirmation-card">
+            <h2>Final Confirmation</h2>
+
+            <p class="confirmation-note">
+                After confirmation, these order details can no longer be edited by the customer.
+                Make sure all names, dates, times, addresses, design choices and phone numbers are correct.
+            </p>
+
+            @if ($isFullTestPayment && $order->booking_payment_status !== 'PAID')
+                <label class="confirmation-checkbox">
+                    <input
+                        type="checkbox"
+                        name="responsibility_acknowledged"
+                        value="1"
+                        form="full-payment-form"
+                        required
+                        @checked(old('responsibility_acknowledged'))
+                    >
+                    <span>
+                        I have reviewed all the details above and confirm that they are correct.
+                    </span>
+                </label>
+                @error('responsibility_acknowledged')<p class="field-error" role="alert">{{ $message }}</p>@enderror
+
+                <label class="confirmation-checkbox">
+                    <input
+                        type="checkbox"
+                        name="post_confirmation_liability_acknowledged"
+                        value="1"
+                        form="full-payment-form"
+                        required
+                        @checked(old('post_confirmation_liability_acknowledged'))
+                    >
+                    <span>
+                        I understand and agree that KingKadKahwin is not responsible for errors in the information found after this final confirmation.
+                    </span>
+                </label>
+                @error('post_confirmation_liability_acknowledged')<p class="field-error" role="alert">{{ $message }}</p>@enderror
+
+                <p class="confirmation-note">After checking both boxes, complete the full card payment below. Successful payment will confirm your order.</p>
+
+                <div class="review-actions">
+                    <a class="back-link" href="{{ route('orders.dashboard', ['orderId' => $review['order_id']]) }}">
+                        Back &amp; Edit Details
+                    </a>
+                </div>
+            @else
+                <form id="final-confirmation-form" method="POST" action="{{ route('orders.confirm.store', ['orderId' => $review['order_id']]) }}">
+                    @csrf
+
+                    <label class="confirmation-checkbox">
+                        <input type="checkbox" name="responsibility_acknowledged" value="1" required @checked(old('responsibility_acknowledged'))>
+                        <span>I have reviewed all the details above and confirm that they are correct.</span>
+                    </label>
+                    @error('responsibility_acknowledged')<p class="field-error" role="alert">{{ $message }}</p>@enderror
+
+                    <label class="confirmation-checkbox">
+                        <input type="checkbox" name="post_confirmation_liability_acknowledged" value="1" required @checked(old('post_confirmation_liability_acknowledged'))>
+                        <span>I understand and agree that KingKadKahwin is not responsible for errors in the information found after this final confirmation.</span>
+                    </label>
+                    @error('post_confirmation_liability_acknowledged')<p class="field-error" role="alert">{{ $message }}</p>@enderror
+
+                    <div class="review-actions">
+                        <a class="back-link" href="{{ route('orders.dashboard', ['orderId' => $review['order_id']]) }}">Back &amp; Edit Details</a>
+                        <button id="final-confirmation-submit" class="confirm-button" type="submit">Confirm Order Details</button>
+                    </div>
+                </form>
+            @endif
+        </section>
+
         <section class="review-card payment-card">
             <div class="payment-heading">
                 <div>
@@ -339,80 +410,43 @@
             @else
                 <div class="deposit-notice">
                     <strong>{{ $order->source === 'TEST' && $order->payment_plan === 'FULL' ? 'Full card payment is still outstanding.' : 'Booking payment is still outstanding.' }}</strong>
-                    <p>Complete your booking payment before final confirmation.</p>
+                    <p>{{ $isFullTestPayment ? 'Review the acknowledgements below, then complete full payment to confirm your order.' : 'Complete your booking payment before final confirmation.' }}</p>
                     <div class="payment-method-actions">
-                        <form method="POST" action="{{ route('orders.booking-payment.store', ['orderId' => $order->order_id]) }}">
-                            @csrf
-                            <input type="hidden" name="payment_method" value="BILLPLZ">
-                            <button class="confirm-button" type="submit">
-                                {{ $order->source === 'TEST' && $order->payment_plan === 'FULL' ? 'Pay full card package' : 'Pay booking deposit' }} · RM {{ number_format((float) $review['pricing']['deposit_amount'], 2) }} · Billplz
-                            </button>
-                        </form>
-                        @if (config('services.billplz.duitnow_qr_enabled'))
+                        @if ($isFullTestPayment)
+                            <form id="full-payment-form" method="POST" action="{{ route('orders.booking-payment.store', ['orderId' => $order->order_id]) }}">
+                                @csrf
+                                <button class="confirm-button" type="submit" name="payment_method" value="BILLPLZ">
+                                    Pay full card package · RM {{ number_format((float) $review['pricing']['deposit_amount'], 2) }} · Billplz
+                                </button>
+                                @if (config('services.billplz.duitnow_qr_enabled'))
+                                    <button class="confirm-button" type="submit" name="payment_method" value="DUITNOW_QR">
+                                        Pay full card package · RM {{ number_format((float) $review['pricing']['deposit_amount'], 2) }} · DuitNow QR
+                                    </button>
+                                @endif
+                            </form>
+                        @else
                             <form method="POST" action="{{ route('orders.booking-payment.store', ['orderId' => $order->order_id]) }}">
                                 @csrf
-                                <input type="hidden" name="payment_method" value="DUITNOW_QR">
+                                <input type="hidden" name="payment_method" value="BILLPLZ">
                                 <button class="confirm-button" type="submit">
-                                    {{ $order->source === 'TEST' && $order->payment_plan === 'FULL' ? 'Pay full card package' : 'Pay booking deposit' }} · RM {{ number_format((float) $review['pricing']['deposit_amount'], 2) }} · DuitNow QR
+                                    Pay booking deposit · RM {{ number_format((float) $review['pricing']['deposit_amount'], 2) }} · Billplz
                                 </button>
                             </form>
+                            @if (config('services.billplz.duitnow_qr_enabled'))
+                                <form method="POST" action="{{ route('orders.booking-payment.store', ['orderId' => $order->order_id]) }}">
+                                    @csrf
+                                    <input type="hidden" name="payment_method" value="DUITNOW_QR">
+                                    <button class="confirm-button" type="submit">
+                                        Pay booking deposit · RM {{ number_format((float) $review['pricing']['deposit_amount'], 2) }} · DuitNow QR
+                                    </button>
+                                </form>
+                            @endif
                         @endif
                     </div>
                     @error('payment')<p class="field-error" role="alert">{{ $message }}</p>@enderror
                     @error('payment_method')<p class="field-error" role="alert">{{ $message }}</p>@enderror
                 </div>
             @endif
-        </section>
-
-        <section class="review-card confirmation-card">
-            <h2>Final Confirmation</h2>
-
-            <p class="confirmation-note">
-                After confirmation, these order details can no longer be edited by the customer.
-                Make sure all names, dates, times, addresses, design choices and phone numbers are correct.
-            </p>
-
-            <form id="final-confirmation-form" method="POST" action="{{ route('orders.confirm.store', ['orderId' => $review['order_id']]) }}">
-                @csrf
-
-                <label class="confirmation-checkbox">
-                    <input
-                        type="checkbox"
-                        name="responsibility_acknowledged"
-                        value="1"
-                        required
-                        @checked(old('responsibility_acknowledged'))
-                    >
-                    <span>
-                        I have reviewed all the details above and confirm that they are correct.
-                    </span>
-                </label>
-                @error('responsibility_acknowledged')<p class="field-error" role="alert">{{ $message }}</p>@enderror
-
-                <label class="confirmation-checkbox">
-                    <input
-                        type="checkbox"
-                        name="post_confirmation_liability_acknowledged"
-                        value="1"
-                        required
-                        @checked(old('post_confirmation_liability_acknowledged'))
-                    >
-                    <span>
-                        I understand and agree that KingKadKahwin is not responsible for errors in the information found after this final confirmation.
-                    </span>
-                </label>
-                @error('post_confirmation_liability_acknowledged')<p class="field-error" role="alert">{{ $message }}</p>@enderror
-
-                <div class="review-actions">
-                    <a class="back-link" href="{{ route('orders.dashboard', ['orderId' => $review['order_id']]) }}">
-                        Back & Edit Details
-                    </a>
-
-                    <button id="final-confirmation-submit" class="confirm-button" type="submit">
-                        Confirm Order Details
-                    </button>
-                </div>
-            </form>
         </section>
     </main>
 
@@ -429,6 +463,10 @@
     <script>
         document.addEventListener('DOMContentLoaded', function () {
             const confirmationForm = document.getElementById('final-confirmation-form');
+            if (!confirmationForm) {
+                return;
+            }
+
             const submitButton = document.getElementById('final-confirmation-submit');
             const confirmationDialog = document.getElementById('final-confirmation-dialog');
             const confirmButton = document.getElementById('confirm-final-confirmation');
