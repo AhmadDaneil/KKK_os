@@ -162,6 +162,19 @@ class CustomerOrderSessionAccessService
         $this->rememberActiveDraft($request, $order, now()->addHours(2)->toIso8601String());
     }
 
+    public function establishForTestOrderCompletion(Request $request, Order $order): void
+    {
+        abort_unless($order->source === 'TEST' && $order->status === 'DETAILS_INCOMPLETE', 403);
+
+        $expiresAt = now()->addHours(2)->toIso8601String();
+        $request->session()->regenerate();
+        $request->session()->put($this->sessionKey($order->order_id), [
+            'order_fk' => $order->id,
+            'expires_at' => $expiresAt,
+        ]);
+        $this->rememberActiveDraft($request, $order, $expiresAt);
+    }
+
     public function revoke(Request $request, Order $order): void
     {
         $request->session()->forget($this->sessionKey($order->order_id));
@@ -261,3 +274,4 @@ class CustomerOrderSessionAccessService
         ]);
     }
 }
+

@@ -45,25 +45,6 @@ class SaveOrderDraftService
                     'fulfilment',
                 ]);
 
-                if ($order->source === 'TEST') {
-                    foreach ((array) ($data['sides'] ?? []) as $sideName => $sideData) {
-                        if (! is_array($sideData) || ! array_key_exists('card_quantity', $sideData)) {
-                            continue;
-                        }
-
-                        $packageSide = $order->packageSides->firstWhere('side', $sideName);
-
-                        if (
-                            $packageSide === null
-                            || (int) $sideData['card_quantity'] !== (int) $packageSide->card_quantity
-                        ) {
-                            throw ValidationException::withMessages([
-                                "sides.$sideName.card_quantity" => 'Card quantity is fixed from the test order page.',
-                            ]);
-                        }
-                    }
-                }
-
                 if ((int) $order->package_count === 2) {
                     $order->forceFill([
                         'package_format' => $data['package_format']
@@ -555,3 +536,4 @@ class SaveOrderDraftService
         return $value === '' ? null : $value;
     }
 }
+

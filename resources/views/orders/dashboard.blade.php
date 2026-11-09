@@ -378,14 +378,6 @@
                     $selectedQuantity = old("sides.$side.card_quantity", $packageSide?->card_quantity);
                 @endphp
 
-                @if ($order->source === 'TEST')
-                    <div>
-                        <label data-package-quantity-label>
-                            {{ $hasSelectableSinglePackageSide ? 'Card Quantity' : 'Card Quantity — '.($side === 'LELAKI' ? "Groom's Side" : "Bride's Side") }}
-                        </label>
-                        <p>{{ $selectedQuantity ?: '-' }} cards <span class="field-help">(selected on the test order page)</span></p>
-                    </div>
-                @else
                 <div>
                     <label for="card_quantity_{{ strtolower($side) }}" data-package-quantity-label>
                         {{ $hasSelectableSinglePackageSide ? 'Card Quantity' : 'Card Quantity — '.($side === 'LELAKI' ? "Groom's Side" : "Bride's Side") }}
@@ -411,7 +403,6 @@
                         <p class="field-error">{{ $message }}</p>
                     @enderror
                 </div>
-                @endif
                 <div data-folded-second-design="{{ ! $loop->first ? 'true' : 'false' }}" @if ($hideFoldedDesign) hidden @endif>
                 <h3>Design</h3>
 
