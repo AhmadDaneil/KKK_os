@@ -54,21 +54,8 @@ class CreateOrderService
                 $data['side'] ?? null
             );
 
-            if ($order->source === 'TEST' && ! empty($data['side_quantities'])) {
-                $sideQuantities = (array) $data['side_quantities'];
-
-                foreach ($sideQuantities as $side => $quantity) {
-                    $order->packageSides()
-                        ->where('side', $side)
-                        ->update(['card_quantity' => (int) $quantity]);
-                }
-
-                $order->forceFill([
-                    'card_quantity' => array_sum(array_map('intval', $sideQuantities)),
-                ])->save();
-            }
-
             return $order->fresh();
         });
     }
 }
+
