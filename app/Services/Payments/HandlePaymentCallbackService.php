@@ -3,9 +3,13 @@
 namespace App\Services\Payments;
 
 use App\Jobs\SendWabotBookingConfirmation;
+use App\Models\Order;
 use App\Models\PaymentTransaction;
 use App\Models\WabotMessageLog;
 use App\Services\Orders\ActivateCustomerDashboardService;
+use App\Services\Orders\BuildFinalReviewService;
+use App\Services\Orders\BuildOrderPricingService;
+use App\Services\Orders\ConfirmOrderDetailsService;
 use App\Services\Orders\AdvancePaidConfirmedOrderToDesignService;
 use App\Services\Printing\InitializePrintJobsForOrderService;
 use App\Services\Printing\SyncOrderPrintStatusService;
@@ -21,6 +25,9 @@ class HandlePaymentCallbackService
     public function __construct(
         private SynchronizeOrderFinancialsService $financials,
         private ActivateCustomerDashboardService $dashboard,
+        private BuildFinalReviewService $finalReview,
+        private ConfirmOrderDetailsService $confirmOrder,
+        private BuildOrderPricingService $pricing,
         private AdvancePaidConfirmedOrderToDesignService $designReadiness,
         private InitializePrintJobsForOrderService $initializePrintJobs,
         private SyncOrderPrintStatusService $syncPrintStatus,
@@ -132,9 +139,19 @@ class HandlePaymentCallbackService
 
         if ($payment->payment_type === 'BOOKING_DEPOSIT' && $payment->status === 'PAID') {
             try {
+                $this->confirmFullTestOrderAfterPayment($payment);
+            } catch (Throwable $exception) {
+                report($exception);
+                Log::warning('Full test order payment could not confirm the order details.', [
+                    'payment_id' => $payment->id,
+                    'order_id' => $payment->order_id,
+                ]);
+            }
+
+            try {
                 $this->designReadiness->advance(
                     $payment->order()->firstOrFail(),
-                    eventType: 'BOOKING_PAYMENT_CONFIRMED',
+                    eventType: $this->isFullTestOrder($payment) ? 'FULL_TEST_PAYMENT_CONFIRMED' : 'BOOKING_PAYMENT_CONFIRMED',
                     metadata: ['payment_transaction_id' => $payment->id],
                 );
             } catch (Throwable $exception) {
@@ -166,6 +183,49 @@ class HandlePaymentCallbackService
         }
 
         return $payment->fresh();
+    }
+
+    private function confirmFullTestOrderAfterPayment(PaymentTransaction $payment): void
+    {
+        $order = $payment->order()->firstOrFail();
+        $acknowledgements = data_get($payment->metadata, 'confirmation_acknowledgements', []);
+
+        if (! $this->isFullTestOrder($payment)
+            || $order->status !== 'DETAILS_INCOMPLETE'
+            || ! (bool) ($acknowledgements['responsibility_acknowledged'] ?? false)
+            || ! (bool) ($acknowledgements['post_confirmation_liability_acknowledged'] ?? false)) {
+            return;
+        }
+
+        $livePreview = $this->finalReview->build($order);
+
+        DB::transaction(function () use ($order, $livePreview): void {
+            $lockedOrder = Order::query()->whereKey($order->id)->lockForUpdate()->firstOrFail();
+
+            if ($lockedOrder->status !== 'DETAILS_INCOMPLETE') {
+                return;
+            }
+
+            $confirmedOrder = $this->confirmOrder->confirm($lockedOrder, $livePreview);
+            $this->pricing->createSnapshot($confirmedOrder);
+            $confirmation = $confirmedOrder->confirmation;
+            $confirmation->update([
+                'confirmed_snapshot' => array_merge($confirmation->confirmed_snapshot ?? [], [
+                    'responsibility_acknowledged' => true,
+                    'post_confirmation_liability_acknowledged' => true,
+                ]),
+            ]);
+            $this->financials->synchronize($confirmedOrder);
+        }, 3);
+    }
+
+    private function isFullTestOrder(PaymentTransaction $payment): bool
+    {
+        $order = $payment->order;
+
+        return $payment->payment_type === 'BOOKING_DEPOSIT'
+            && $order?->source === 'TEST'
+            && $order?->payment_plan === 'FULL';
     }
 
     private function normalizePaidAt(mixed $paidAt): CarbonImmutable
