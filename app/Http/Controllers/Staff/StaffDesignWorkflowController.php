@@ -135,7 +135,7 @@ class StaffDesignWorkflowController extends Controller
 
         $validated = $request->validate([
             'source_artwork' => ['required', 'array', 'min:1', 'max:20'],
-            'source_artwork.*' => ['required', 'file', 'mimes:psd,pdf', 'max:102400'],
+            'source_artwork.*' => ['required', 'file', 'mimes:psd,pdf', 'max:307200'],
             'customer_preview' => ['required', 'array', 'min:1', 'max:20'],
             'customer_preview.*' => ['required', 'file', 'mimes:jpg,jpeg,png', 'max:20480'],
             'banner_preview' => ['nullable', 'file', 'mimes:jpg,jpeg,png', 'max:20480'],
@@ -147,6 +147,7 @@ class StaffDesignWorkflowController extends Controller
             ],
         ], [
             'source_artwork.*.uploaded' => 'The source file could not be uploaded. Ensure it is within the server file-size limit.',
+            'source_artwork.*.max' => 'Each PSD or PDF source file must be 300 MB or smaller.',
             'customer_preview.*.uploaded' => 'The internal preview could not be uploaded. Ensure it is within the server file-size limit.',
             'banner_preview.uploaded' => 'The banner preview could not be uploaded. Ensure it is within the server file-size limit.',
             'banting_preview.uploaded' => 'The bunting preview could not be uploaded. Ensure it is within the server file-size limit.',

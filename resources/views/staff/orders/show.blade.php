@@ -791,7 +791,7 @@
                                                         </div>
 
                                                         <span class="staff-field-help">
-                                                            PSD or PDF. Maximum 100 MB.
+                                                            PSD or PDF. Maximum 300 MB per source file.
                                                         </span>
                                                     </div>
 
@@ -1872,11 +1872,19 @@
                         'X-Requested-With': 'XMLHttpRequest',
                     },
                 });
-                const payload = await response.json().catch(function () { return {}; });
+                const payload = await response.json().catch(function () { return null; });
 
                 if (!response.ok) {
-                    const errors = payload.errors ? Object.values(payload.errors).flat().join(' ') : null;
-                    throw new Error(errors || payload.message || 'Could not upload the design.');
+                    const errors = payload?.errors ? Object.values(payload.errors).flat().join(' ') : null;
+                    let fallbackMessage = 'Upload failed (HTTP ' + response.status + '). Please try again.';
+
+                    if (response.status === 413) {
+                        fallbackMessage = 'The combined upload is larger than the server allows. Reduce the file sizes or ask an administrator to increase the server upload limit.';
+                    } else if (response.status === 419 || (response.redirected && /login/i.test(response.url))) {
+                        fallbackMessage = 'Your session has expired. Refresh the page, sign in again, and retry the upload.';
+                    }
+
+                    throw new Error(errors || payload?.message || fallbackMessage);
                 }
 
                 const selector = form.id

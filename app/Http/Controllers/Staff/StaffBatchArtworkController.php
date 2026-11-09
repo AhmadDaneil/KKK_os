@@ -120,7 +120,7 @@ class StaffBatchArtworkController extends Controller
             'artworks' => ['required', 'array', 'min:2'],
             'artworks.*' => ['required', 'array:source_artwork,customer_preview,banner_preview,banting_preview,internal_note'],
             'artworks.*.source_artwork' => ['required', 'array', 'min:1', 'max:20'],
-            'artworks.*.source_artwork.*' => ['required', 'file', 'mimes:psd,pdf', 'max:102400'],
+            'artworks.*.source_artwork.*' => ['required', 'file', 'mimes:psd,pdf', 'max:307200'],
             'artworks.*.customer_preview' => ['required', 'array', 'min:1', 'max:20'],
             'artworks.*.customer_preview.*' => ['required', 'file', 'mimes:jpg,jpeg,png', 'max:20480'],
             'artworks.*.banner_preview' => ['required', 'file', 'mimes:jpg,jpeg,png', 'max:20480'],
@@ -129,6 +129,8 @@ class StaffBatchArtworkController extends Controller
         ], [
             'artworks.*.banner_preview.required' => 'Upload a banner preview for each package.',
             'artworks.*.banting_preview.required' => 'Upload a bunting preview for each package.',
+            'artworks.*.source_artwork.*.uploaded' => 'A source file could not be uploaded. Ensure it is within the server file-size limit.',
+            'artworks.*.source_artwork.*.max' => 'Each PSD or PDF source file must be 300 MB or smaller.',
             'artworks.*.banner_preview.uploaded' => 'The banner preview could not be uploaded. Ensure the file is no larger than 20 MB.',
             'artworks.*.banting_preview.uploaded' => 'The bunting preview could not be uploaded. Ensure the file is no larger than 20 MB.',
         ]);
