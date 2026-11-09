@@ -42,7 +42,7 @@
     ];
     $statusLabels = [
         'DETAILS_INCOMPLETE' => 'Details incomplete', 'READY_FOR_DESIGN' => 'Ready for design',
-        'DESIGN_IN_PROGRESS' => 'Design in progress', 'DESIGN_READY' => 'Awaiting customer review',
+        'DESIGN_IN_PROGRESS' => 'Design in progress', 'DESIGN_READY' => 'Ready for internal review',
         'CORRECTION_REQUESTED' => 'Correction required', 'DESIGN_APPROVED' => 'Design approved',
         'BALANCE_PENDING' => 'Awaiting balance payment', 'READY_FOR_PRINT' => 'Ready for production',
         'PRINTING' => 'Production in progress', 'PRINTED' => 'Production complete',
@@ -659,8 +659,8 @@
 
                                 @if (auth()->user()->isOperationManagement() && $hasDesignProof)
                                     <div class="staff-proof-status">
-                                        <strong>Designer Proof · Version {{ $latestProofArtwork->version_number }}</strong>
-                                        <label class="staff-proof-status-label" for="{{ $proofPreviewSelectId }}">Preview</label>
+                                        <strong>Internal Design Preview · Version {{ $latestProofArtwork->version_number }}</strong>
+                                        <label class="staff-proof-status-label" for="{{ $proofPreviewSelectId }}">Select preview</label>
                                         <select id="{{ $proofPreviewSelectId }}" class="staff-proof-preview-select" data-proof-preview-select>
                                             @foreach ($proofPreviewOptions as $previewOption)
                                                 <option
@@ -674,7 +674,7 @@
                                             class="staff-button staff-button-small js-proof-preview-link"
                                             target="_blank"
                                             rel="noopener"
-                                        >View Proof</a>
+                                        >View Preview</a>
                                     </div>
                                 @endif
 
@@ -752,7 +752,7 @@
 
                                                     <p>
                                                         Upload editable source files and
-                                                        customer previews.
+                                                        internal previews for Admin and Operations Management.
                                                     </p>
                                                 </div>
 
@@ -765,7 +765,7 @@
                                                         enctype="multipart/form-data"
                                                         class="staff-artwork-form js-staff-confirmation-form js-async-artwork-upload"
                                                         data-confirm-title="Upload design {{ $job->side === 'LELAKI' ? 'Groom' : 'Bride' }}?"
-                                                        data-confirm-message="Check that the selected source files and customer previews are correct. They will be saved as a new design version."
+                                                        data-confirm-message="Check that the selected source files and internal previews are correct. They will be saved as a new design version for Admin and Operations Management to view."
                                                         data-confirm-button="Yes, upload"
                                                     >
                                                         @csrf
@@ -798,7 +798,7 @@
                                                     <div class="staff-supplementary-artworks">
                                                         <div class="staff-supplementary-heading">
                                                             <h4>Wedding Card Preview</h4>
-                                                            <p>Upload both sides of the card for customer review.</p>
+                                                            <p>Upload both sides of the card as internal previews.</p>
                                                         </div>
                                                         <div class="staff-supplementary-grid">
                                                             <div class="staff-field">
@@ -891,27 +891,27 @@
                                                             method="POST"
                                                             action="{{ route($operationRoutePrefix.'design-jobs.mark-ready', $job) }}"
                                                             class="js-staff-confirmation-form"
-                                                            data-confirm-title="Send design {{ $job->side === 'LELAKI' ? 'Groom' : 'Bride' }} to the customer?"
-                                                            data-confirm-message="Version {{ $job->artworkVersions->max('version_number') }} will be sent for customer review. Confirm that the previews are correct."
-                                                            data-confirm-button="Yes, send for review"
+                                                            data-confirm-title="Mark {{ $job->side === 'LELAKI' ? 'Groom' : 'Bride' }} design as done?"
+                                                            data-confirm-message="Version {{ $job->artworkVersions->max('version_number') }} will be marked complete for internal tracking. Admin and Operations Management can view the uploaded previews; they will not be sent to the customer."
+                                                            data-confirm-button="Yes, mark as done"
                                                         >
                                                             @csrf
                                                             <button
                                                                 type="submit"
                                                                 class="staff-button staff-button-primary"
                                                             >
-                                                                Send for Customer Review
+                                                                Mark as Done
                                                             </button>
                                                         </form>
                                                     </div>
                                                     <p class="staff-work-message" data-artwork-upload-hint @if ($job->artworkVersions->isNotEmpty()) hidden @endif>
-                                                        Upload source files and customer previews first.
-                                                        The button to send the design to the customer will then appear.
+                                                        Upload source files and internal previews first.
+                                                        The Mark as Done button will then appear.
                                                     </p>
                                             </div>
                                         @elseif ($job->status === 'DESIGN_READY')
                                             <p class="staff-work-message">
-                                                Design is ready for customer review.
+                                                Design is ready for internal review.
                                             </p>
                                         @endif
 
@@ -940,8 +940,8 @@
                             action="{{ route('staff.orders.design-artworks.store', $order) }}"
                             enctype="multipart/form-data"
                             class="staff-batch-artwork-form js-staff-confirmation-form js-async-artwork-upload"
-                            data-confirm-title="Upload both design files?"
-                            data-confirm-message="Check the source files and customer previews for the groom's and bride's packages. Both will be saved as new design versions."
+                            data-confirm-title="Upload both designs?"
+                            data-confirm-message="Check the source files and internal previews for the groom's and bride's packages. Both will be saved as new design versions for Admin and Operations Management to view."
                             data-confirm-button="Yes, upload both"
                         >
                             @csrf
@@ -957,13 +957,13 @@
                             method="POST"
                             action="{{ route('staff.orders.design-jobs.mark-ready', $order) }}"
                             class="staff-batch-review-form js-staff-confirmation-form"
-                            data-confirm-title="Send both designs for customer review?"
-                            data-confirm-message="Both packages will be sent together. Check that the card, banner and bunting previews for each package have been uploaded and reviewed."
-                            data-confirm-button="Yes, send both"
+                            data-confirm-title="Mark both designs as done?"
+                            data-confirm-message="Both packages will be marked complete for internal tracking. Admin and Operations Management can view the uploaded card, banner and bunting previews; they will not be sent to the customer."
+                            data-confirm-button="Yes, mark both as done"
                         >
                             @csrf
                             <button type="submit" class="staff-button staff-button-primary">
-                                Send Both for Customer Review
+                                Mark Both as Done
                             </button>
                         </form>
                     @endif
@@ -1915,7 +1915,7 @@
 
                     if (reviewForm && artworkJob.version_number) {
                         reviewForm.dataset.confirmMessage = 'Version ' + artworkJob.version_number
-                            + ' will be sent for customer review. Make sure the previews have been checked and are correct.';
+                            + ' will be marked complete for internal tracking. Admin and Operations Management can view the uploaded previews; they will not be sent to the customer.';
                     }
 
                     if (reviewPanel) {

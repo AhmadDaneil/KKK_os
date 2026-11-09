@@ -97,7 +97,7 @@ class StaffDesignWorkflowController extends Controller
                 throw new RuntimeException(
                     'Upload previews for '.implode(' and ', $missingProducts->all())
                     .' for the '.($designJob->side === 'LELAKI' ? "groom's" : "bride's")
-                    .' package before sending the artwork to the customer.'
+                    .' package before marking the design as done.'
                 );
             }
 
@@ -119,7 +119,7 @@ class StaffDesignWorkflowController extends Controller
 
         return back()->with(
             'status',
-            'The artwork has been approved internally.'
+            'Design marked as done. Admin and Operations Management can view the uploaded previews.'
         );
     }
 
@@ -147,7 +147,7 @@ class StaffDesignWorkflowController extends Controller
             ],
         ], [
             'source_artwork.*.uploaded' => 'The source file could not be uploaded. Ensure it is within the server file-size limit.',
-            'customer_preview.*.uploaded' => 'The customer preview could not be uploaded. Ensure it is within the server file-size limit.',
+            'customer_preview.*.uploaded' => 'The internal preview could not be uploaded. Ensure it is within the server file-size limit.',
             'banner_preview.uploaded' => 'The banner preview could not be uploaded. Ensure it is within the server file-size limit.',
             'banting_preview.uploaded' => 'The bunting preview could not be uploaded. Ensure it is within the server file-size limit.',
         ]);
