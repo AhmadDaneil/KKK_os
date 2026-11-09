@@ -1144,7 +1144,6 @@ document.addEventListener('DOMContentLoaded', function () {
                             }
                         });
 
-                        updatePortraitImageFields();
                     }
 
                     savedRevision = Math.max(savedRevision, revision);
