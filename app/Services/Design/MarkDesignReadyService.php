@@ -26,13 +26,13 @@ class MarkDesignReadyService
 
             if (! $latestArtwork) {
                 throw new RuntimeException(
-                    "Design job {$designJob->id} has no artwork version to review."
+                    "Design job {$designJob->id} has no uploaded artwork version to mark as done."
                 );
             }
 
             if (! filled($latestArtwork->preview_storage_path)) {
                 throw new RuntimeException(
-                "Design job {$designJob->id} has no customer preview."
+                "Design job {$designJob->id} has no uploaded preview."
                 );
             }
 
