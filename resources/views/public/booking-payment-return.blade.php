@@ -36,7 +36,7 @@
                     @if ($receiptUrl)
                         <a class="button button-secondary" href="{{ $receiptUrl }}" target="_blank" rel="noopener noreferrer">View Billplz E-Receipt</a>
                     @endif
-                    <a class="button button-primary" href="{{ route('home') }}">Continue to Landing Page →</a>
+                    <a class="button button-primary" href="{{ route('public.orders.progress', ['order_id' => $order->displayCustomerReference() ?: $order->order_id]) }}">Continue →</a>
                 </div>
                 <a class="payment-return-merchant" href="{{ route('home') }}">Return to Merchant</a>
             @else
