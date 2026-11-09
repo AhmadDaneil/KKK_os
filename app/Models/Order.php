@@ -30,6 +30,7 @@ class Order extends Model
         'wabot_idempotency_key',
         'wabot_package_code',
         'package_count',
+        'payment_plan',
         'package_type',
         'package_format',
         'first_event_side',

@@ -101,10 +101,13 @@ class CreateBillplzBookingPaymentService
                 'amount' => $amount['amount'],
                 'currency' => $amount['currency'],
                 'status' => 'PENDING',
-                'metadata' => ['billplz' => [
-                    'checkout_status' => 'CREATING',
-                    'payment_method' => $paymentMethod,
-                ]],
+                'metadata' => [
+                    'payment_plan' => $lockedOrder->payment_plan ?? 'DEPOSIT',
+                    'billplz' => [
+                        'checkout_status' => 'CREATING',
+                        'payment_method' => $paymentMethod,
+                    ],
+                ],
             ]);
             $payment->events()->create([
                 'event_type' => 'BOOKING_PAYMENT_CREATED',

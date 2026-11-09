@@ -290,7 +290,7 @@
             <div class="payment-heading">
                 <div>
                     <p class="eyebrow">Order Payment</p>
-                    <h2>Deposit Payment</h2>
+                    <h2>{{ $order->source === 'TEST' && $order->payment_plan === 'FULL' ? 'Full Card Payment' : 'Deposit Payment' }}</h2>
                 </div>
                 <span class="deposit-amount">
                     RM {{ number_format((float) $review['pricing']['deposit_amount'], 2) }}
@@ -314,26 +314,38 @@
                 </div>
             </div>
 
-            <div class="deposit-notice">
-                <strong>This is the deposit payment only.</strong>
-                <p>The remaining balance is due after the design has been approved and you have been notified.</p>
-            </div>
-
-            @if ($order->booking_payment_status === 'PAID')
+            @if ($order->source === 'TEST' && $order->payment_plan === 'FULL')
                 <div class="deposit-notice">
-                    <strong>Booking payment has been confirmed.</strong>
-                    <p>The remaining balance is due after design approval.</p>
+                    <strong>This payment covers the selected card package.</strong>
+                    <p>Postage and add-ons are excluded from this test checkout.</p>
                 </div>
             @else
                 <div class="deposit-notice">
-                    <strong>Booking payment is still outstanding.</strong>
+                    <strong>This is the deposit payment only.</strong>
+                    <p>The remaining balance is due after the design has been approved and you have been notified.</p>
+                </div>
+            @endif
+
+            @if ($order->booking_payment_status === 'PAID')
+                <div class="deposit-notice">
+                    @if ($order->source === 'TEST' && $order->payment_plan === 'FULL')
+                        <strong>Full card payment has been confirmed.</strong>
+                        <p>No further card balance is due for this test order.</p>
+                    @else
+                        <strong>Booking payment has been confirmed.</strong>
+                        <p>The remaining balance is due after design approval.</p>
+                    @endif
+                </div>
+            @else
+                <div class="deposit-notice">
+                    <strong>{{ $order->source === 'TEST' && $order->payment_plan === 'FULL' ? 'Full card payment is still outstanding.' : 'Booking payment is still outstanding.' }}</strong>
                     <p>Complete your booking payment before final confirmation.</p>
                     <div class="payment-method-actions">
                         <form method="POST" action="{{ route('orders.booking-payment.store', ['orderId' => $order->order_id]) }}">
                             @csrf
                             <input type="hidden" name="payment_method" value="BILLPLZ">
                             <button class="confirm-button" type="submit">
-                                Pay booking deposit · RM {{ number_format((float) $review['pricing']['deposit_amount'], 2) }} · Billplz
+                                {{ $order->source === 'TEST' && $order->payment_plan === 'FULL' ? 'Pay full card package' : 'Pay booking deposit' }} · RM {{ number_format((float) $review['pricing']['deposit_amount'], 2) }} · Billplz
                             </button>
                         </form>
                         @if (config('services.billplz.duitnow_qr_enabled'))
@@ -341,7 +353,7 @@
                                 @csrf
                                 <input type="hidden" name="payment_method" value="DUITNOW_QR">
                                 <button class="confirm-button" type="submit">
-                                    Pay booking deposit · RM {{ number_format((float) $review['pricing']['deposit_amount'], 2) }} · DuitNow QR
+                                    {{ $order->source === 'TEST' && $order->payment_plan === 'FULL' ? 'Pay full card package' : 'Pay booking deposit' }} · RM {{ number_format((float) $review['pricing']['deposit_amount'], 2) }} · DuitNow QR
                                 </button>
                             </form>
                         @endif
