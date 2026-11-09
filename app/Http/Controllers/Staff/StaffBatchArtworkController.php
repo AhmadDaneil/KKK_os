@@ -5,10 +5,12 @@ namespace App\Http\Controllers\Staff;
 use App\Http\Controllers\Controller;
 use App\Models\DesignJob;
 use App\Models\Order;
+use App\Services\Design\ApproveArtworkService;
 use App\Services\Design\CreateArtworkVersionService;
 use App\Services\Design\MarkDesignReadyService;
 use App\Services\Design\SyncOrderDesignStatusService;
 use App\Services\Design\WatermarkArtworkPreviewService;
+use App\Services\Printing\InitializePrintJobsForOrderService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -25,7 +27,9 @@ class StaffBatchArtworkController extends Controller
         Request $request,
         Order $order,
         MarkDesignReadyService $service,
-        SyncOrderDesignStatusService $sync
+        SyncOrderDesignStatusService $sync,
+        ApproveArtworkService $approve,
+        InitializePrintJobsForOrderService $initializePrintJobs
     ): RedirectResponse {
         $jobs = $order->designJobs()
             ->where('assigned_user_id', $request->user()->id)
@@ -39,14 +43,14 @@ class StaffBatchArtworkController extends Controller
 
         if ($jobs->count() !== 2) {
             return back()->withErrors([
-                'design_job' => 'Combined submission is available only when both package design jobs are assigned to you.',
+                'design_job' => 'Both package design jobs must be assigned to you before you can mark them as done together.',
             ]);
         }
 
         foreach ($jobs as $job) {
             if ($job->status !== 'DESIGN_IN_PROGRESS') {
                 return back()->withErrors([
-                    'design_job' => 'Both jobs must be in the design-in-progress state before a combined submission.',
+                    'design_job' => 'Both jobs must be in the design-in-progress state before you can mark them as done together.',
                 ]);
             }
 
@@ -54,7 +58,7 @@ class StaffBatchArtworkController extends Controller
 
             if (! $latestArtwork) {
                 return back()->withErrors([
-                    'design_job' => 'Upload the latest artwork for the '.($job->side === 'LELAKI' ? "groom's" : "bride's").' package before submitting both.',
+                    'design_job' => 'Upload the latest artwork for the '.($job->side === 'LELAKI' ? "groom's" : "bride's").' package before marking both designs as done.',
                 ]);
             }
 
@@ -72,26 +76,36 @@ class StaffBatchArtworkController extends Controller
                 });
 
                 return back()->withErrors([
-                    'design_job' => 'Previews for '.$missingLabels->join(' and ').' are missing from the latest '.($job->side === 'LELAKI' ? "groom's" : "bride's").' package version. Upload a new design version with all previews before submitting both packages.',
+                    'design_job' => 'Previews for '.$missingLabels->join(' and ').' are missing from the latest '.($job->side === 'LELAKI' ? "groom's" : "bride's").' package version. Upload a new design version with all previews before marking both designs as done.',
                 ]);
             }
         }
 
         try {
-            DB::transaction(function () use ($jobs, $service, $request): void {
+            DB::transaction(function () use ($jobs, $service, $request, $approve, $sync, $order): void {
                 foreach ($jobs as $job) {
                     $service->markReady($job, $request->user());
                 }
+
+                foreach ($jobs as $job) {
+                    $approve->approve($job->fresh(), $request->user());
+                }
+
+                $sync->sync($order);
             });
 
-            $sync->sync($order);
+            $order->refresh();
+
+            if ($order->status === 'DESIGN_APPROVED') {
+                $initializePrintJobs->initialize($order);
+            }
         } catch (RuntimeException $exception) {
             return back()->withErrors([
                 'design_job' => $exception->getMessage(),
             ]);
         }
 
-        return back()->with('status', 'Both designs have been submitted for customer review.');
+        return back()->with('status', 'Both designs have been marked done for internal tracking.');
     }
 
     public function store(
