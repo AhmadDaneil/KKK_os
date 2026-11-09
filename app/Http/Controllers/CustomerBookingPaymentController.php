@@ -24,14 +24,30 @@ class CustomerBookingPaymentController extends Controller
             $availablePaymentMethods[] = BillplzPaymentMethod::DUITNOW_QR;
         }
 
-        $validated = $request->validate([
-            'payment_method' => ['nullable', Rule::in($availablePaymentMethods)],
-        ]);
-
         $order = $access->resolve($request, $orderId);
+        $isFullTestPayment = $order->source === 'TEST' && $order->payment_plan === 'FULL';
+
+        $rules = [
+            'payment_method' => ['nullable', Rule::in($availablePaymentMethods)],
+        ];
+
+        if ($isFullTestPayment) {
+            $rules['responsibility_acknowledged'] = ['required', 'accepted'];
+            $rules['post_confirmation_liability_acknowledged'] = ['required', 'accepted'];
+        }
+
+        $validated = $request->validate($rules);
+        $confirmationAcknowledgements = $isFullTestPayment
+            ? [
+                'responsibility_acknowledged' => true,
+                'post_confirmation_liability_acknowledged' => true,
+            ]
+            : [];
+
         $result = $checkout->create(
             $order,
             paymentMethod: $validated['payment_method'] ?? BillplzPaymentMethod::BILLPLZ,
+            confirmationAcknowledgements: $confirmationAcknowledgements,
         );
 
         return redirect()->away($result['payment_url']);
