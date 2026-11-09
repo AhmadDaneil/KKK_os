@@ -58,7 +58,9 @@ class BillplzPaymentGateway implements PaymentGatewayContract
             'name' => Str::limit(trim((string) $order->customer_name), 255, ''),
             'amount' => $amountSen,
             'description' => Str::limit(
-                ($payment->payment_type === 'BOOKING_DEPOSIT' ? 'Order booking fee ' : 'Order balance payment ').$order->order_id,
+                ($payment->payment_type === 'BOOKING_DEPOSIT'
+                    ? (($payment->metadata['payment_plan'] ?? null) === 'FULL' ? 'Full card package payment ' : 'Order booking fee ')
+                    : 'Order balance payment ').$order->order_id,
                 200,
                 '',
             ),

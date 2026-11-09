@@ -32,6 +32,7 @@ class CreateOrderService
                 'wabot_idempotency_key' => $data['wabot_idempotency_key'] ?? null,
                 'wabot_package_code' => $data['wabot_package_code'] ?? null,
                 'package_count' => $data['package_count'],
+                'payment_plan' => $data['payment_plan'] ?? 'DEPOSIT',
                 'package_type' => $data['package_type'] ?? null,
                 'package_format' => (int) $data['package_count'] === 2
                     ? ($data['package_format'] ?? 'SEPARATE')
@@ -52,6 +53,20 @@ class CreateOrderService
                 $order,
                 $data['side'] ?? null
             );
+
+            if ($order->source === 'TEST' && ! empty($data['side_quantities'])) {
+                $sideQuantities = (array) $data['side_quantities'];
+
+                foreach ($sideQuantities as $side => $quantity) {
+                    $order->packageSides()
+                        ->where('side', $side)
+                        ->update(['card_quantity' => (int) $quantity]);
+                }
+
+                $order->forceFill([
+                    'card_quantity' => array_sum(array_map('intval', $sideQuantities)),
+                ])->save();
+            }
 
             return $order->fresh();
         });
