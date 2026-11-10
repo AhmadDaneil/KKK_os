@@ -26,7 +26,7 @@
     <main>
         <section class="hero">
             <div class="hero-copy">
-                <h1>Celebrate your special day with a card that feels <em>uniquely yours.</em></h1>
+                <h1>Make your special day <em>unforgettable.</em></h1>
                 <p class="hero-text">Chat with us on WhatsApp to choose your package and pay the booking fee. After payment is confirmed, you can complete your order and preview your card in the Customer Dashboard.</p>
                 @if ($activeDraft)
                     <div class="landing-resume-order" role="status">
