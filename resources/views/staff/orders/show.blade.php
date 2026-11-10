@@ -1193,15 +1193,7 @@
                                                         <a href="{{ route($operationRoutePrefix.'print-jobs.progress-files.show', ['printJob' => $job, 'file' => $loop->index]) }}" class="staff-button staff-button-small" target="_blank" rel="noopener">
                                                             View · {{ isset($file['uploaded_at']) ? \Illuminate\Support\Carbon::parse($file['uploaded_at'])->timezone(config('app.display_timezone'))->format('Y-m-d H:i') : '-' }}
                                                         </a>
-                                                        @if (($file['customer_visible'] ?? false) === true)
-                                                            <span class="staff-muted-text">Shared with customer</span>
-                                                        @elseif (auth()->user()->isOperationManagement() || (auth()->user()->hasStaffRole(\App\Models\User::ROLE_PRODUCTION) && $job->assigned_user_id === auth()->id()))
-                                                            <form method="POST" action="{{ route($operationRoutePrefix.'print-jobs.progress-files.visibility', ['printJob' => $job, 'file' => $loop->index]) }}">
-                                                                @csrf
-                                                                <input type="hidden" name="customer_visible" value="1">
-                                                                <button type="submit" class="staff-button staff-button-small staff-button-primary">Share with customer</button>
-                                                            </form>
-                                                        @endif
+                                                        <span class="staff-muted-text">Internal staff file</span>
                                                     </div>
                                                 </div>
                                             @endforeach
@@ -1232,10 +1224,6 @@
                                                 <button type="button" class="staff-file-cancel" hidden aria-controls="print-progress-{{ $job->id }}">Cancel</button>
                                             </div>
                                             <p class="staff-muted-text">Upload images or PDFs showing production progress. Maximum 10 files, 20 MB each.</p>
-                                            <label class="staff-progress-visibility">
-                                                <input type="checkbox" name="customer_visible" value="1">
-                                                Share these production proofs with the customer
-                                            </label>
                                             <button type="submit" class="staff-button staff-button-secondary">Upload Progress</button>
                                             <p class="staff-upload-notice" role="status" aria-live="polite" hidden></p>
                                         </form>
