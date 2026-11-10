@@ -132,6 +132,7 @@ class PublicOrderController extends Controller
             'orderId' => $order->order_id,
             'customerReference' => $order->displayCustomerReference(),
             'orderStatus' => $order->status,
+            'paymentPlan' => strtoupper((string) data_get($order->pricingSnapshot?->calculation_snapshot, 'payment_plan', $order->payment_plan ?? 'DEPOSIT')),
             'progress' => $customerProgress->build($order),
             'shipment' => $order->fulfilmentJob && $order->fulfilmentJob->method === 'COURIER'
                 ? [
