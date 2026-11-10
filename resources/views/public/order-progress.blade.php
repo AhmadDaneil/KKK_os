@@ -15,7 +15,7 @@
         <a class="brand" href="{{ route('home') }}"><img class="brand-logo-image" src="{{ asset('images/landing/kingkadkahwin-logo.png') }}" alt="" width="62" height="62" decoding="async"><span><b>KingKadKahwin</b><small>Beautiful cards, meaningful memories</small></span></a>
         <nav aria-label="Order tracking navigation">
             <a class="header-link nav-progress" href="{{ route('home') }}">← Back</a>
-            <a class="header-link nav-progress" href="{{ route('public.orders.create') }}">Booking Now</a>
+            <a class="header-link nav-progress" href="{{ route('public.orders.test.create') }}">Booking Now</a>
         </nav>
     </header>
     <main class="progress-page">
