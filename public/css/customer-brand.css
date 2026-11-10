@@ -375,6 +375,10 @@ body.brand-order-progress .balance-payment-action {
     padding-top: 12px;
 }
 
+body.brand-order-progress .balance-payment-card + .balance-payment-notice {
+    margin: 20px 0 0;
+}
+
 body.brand-order-progress .balance-payment-card > :is(a.button-primary, form) + .field-error {
     margin-top: 16px;
 }
