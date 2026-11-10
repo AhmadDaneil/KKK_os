@@ -36,6 +36,11 @@ class User extends Authenticatable
 
     public const ROLE_DIGITAL_DESIGNER = 'DIGITAL_DESIGNER';
 
+    public const DESIGNER_ROLES = [
+        self::ROLE_DESIGNER,
+        self::ROLE_DIGITAL_DESIGNER,
+    ];
+
     public const ROLE_PRODUCTION = 'PRODUCTION';
 
     public const STAFF_THEME_DEFAULT = 'default';
@@ -80,7 +85,8 @@ class User extends Authenticatable
     public function hasStaffRole(string $role): bool
     {
         return $this->isActiveStaff()
-            && $this->role === $role;
+            && ($this->role === $role
+                || ($role === self::ROLE_DESIGNER && in_array($this->role, self::DESIGNER_ROLES, true)));
     }
 
     public function isOperationManagement(): bool

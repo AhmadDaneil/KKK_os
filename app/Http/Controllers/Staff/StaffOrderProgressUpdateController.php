@@ -82,7 +82,7 @@ class StaffOrderProgressUpdateController extends Controller
     private function authorizeUpload(User $user, Order $order): void
     {
         $authorized = match ($user->role) {
-            User::ROLE_DESIGNER => $order->designJobs()
+            User::ROLE_DESIGNER, User::ROLE_DIGITAL_DESIGNER => $order->designJobs()
                 ->where('assigned_user_id', $user->id)
                 ->exists(),
             User::ROLE_PRODUCTION => $order->printJobs()

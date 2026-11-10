@@ -26,7 +26,7 @@ class StaffJobAssignmentController extends Controller
         $this->ensureOrderIsAssignable($designJob->order);
         $assignee = $this->validatedAssignee(
             $request,
-            User::ROLE_DESIGNER
+            User::DESIGNER_ROLES
         );
 
         $service->assign(

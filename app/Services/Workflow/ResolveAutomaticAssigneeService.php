@@ -3,13 +3,14 @@
 namespace App\Services\Workflow;
 
 use App\Models\User;
+use Illuminate\Database\Eloquent\Builder;
 use RuntimeException;
 
 class ResolveAutomaticAssigneeService
 {
     public function designLead(): User
     {
-        return $this->activeStaff(User::ROLE_DESIGNER)
+        return $this->activeStaff(User::DESIGNER_ROLES)
             ->orderByDesc('is_design_lead')
             ->orderBy('id')
             ->first()
@@ -18,7 +19,7 @@ class ResolveAutomaticAssigneeService
 
     public function correctionDesigner(?int $previousDesignerId): User
     {
-        $backupDesigner = $this->activeStaff(User::ROLE_DESIGNER)
+        $backupDesigner = $this->activeStaff(User::DESIGNER_ROLES)
             ->when($previousDesignerId, fn ($query) => $query->where('id', '!=', $previousDesignerId))
             ->orderBy('is_design_lead')
             ->orderBy('id')
@@ -36,10 +37,10 @@ class ResolveAutomaticAssigneeService
             ?? throw new RuntimeException('Please activate a production staff member to receive automatically assigned print jobs.');
     }
 
-    private function activeStaff(string $role)
+    private function activeStaff(string|array $roles): Builder
     {
         return User::query()
-            ->where('role', $role)
+            ->whereIn('role', (array) $roles)
             ->where('is_active', true);
     }
 }
