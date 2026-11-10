@@ -185,38 +185,20 @@
 @endif
 
 @php
-    $customerDesignProofJobs = $order->designJobs->filter(function ($job) {
-        $artwork = $job->artworkVersions->sortByDesc('version_number')->first();
-        $previewFiles = $artwork?->preview_files ?: array_filter([
-            $artwork?->preview_storage_path ? ['path' => $artwork->preview_storage_path] : null,
-        ]);
-
-        return in_array($job->status, ['DESIGN_READY', 'CORRECTION_REQUESTED', 'DESIGN_APPROVED'], true)
-            && collect($previewFiles)->contains(
-                fn ($file) => filled(data_get($file, 'watermarked_path')) || filled(data_get($file, 'path'))
-            );
-    });
     $hasCustomerCourierProof = $order->fulfilmentJob?->method === 'COURIER'
         && $order->fulfilmentJob?->status === 'COMPLETED'
         && filled($order->packingJob?->proof_storage_path);
 @endphp
-@if ($customerDesignProofJobs->isNotEmpty() || $hasCustomerCourierProof)
+@if ($hasCustomerCourierProof)
     <section class="customer-proof-panel" aria-labelledby="customer-proof-title">
         <div>
-            <span>Progress proof</span>
-            <h2 id="customer-proof-title">View Order Proof</h2>
+            <span>Delivery confirmation</span>
+            <h2 id="customer-proof-title">View Courier Proof</h2>
         </div>
         <div class="customer-proof-actions">
-            @foreach ($customerDesignProofJobs as $designJob)
-                <a href="{{ route('orders.artwork.review', ['orderId' => $order->order_id]).'#design-job-'.$designJob->id }}">
-                    View Designer Proof · {{ $designJob->side === 'LELAKI' ? 'Groom' : 'Bride' }}
-                </a>
-            @endforeach
-            @if ($hasCustomerCourierProof)
-                <a href="{{ route('orders.courier-proof.show', ['orderId' => $order->order_id]) }}" target="_blank" rel="noopener">
-                    View Courier Proof
-                </a>
-            @endif
+            <a href="{{ route('orders.courier-proof.show', ['orderId' => $order->order_id]) }}" target="_blank" rel="noopener">
+                Open courier proof
+            </a>
         </div>
     </section>
 @endif
