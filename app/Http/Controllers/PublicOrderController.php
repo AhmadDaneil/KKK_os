@@ -137,6 +137,8 @@ class PublicOrderController extends Controller
                 ->withErrors(['order_id' => 'Order ID or customer reference not found. Please check it and try again.']);
         }
 
+        $sessionAccess->establishFromProgressLookup($request, $order);
+
         $order->load(['fulfilmentJob', 'payments', 'designJobs.artworkVersions', 'pricingSnapshot']);
         $deposit = $order->payments->firstWhere('payment_type', 'BOOKING_DEPOSIT');
         $balance = $order->payments->where('payment_type', 'BALANCE')->sortByDesc('id')->first();
