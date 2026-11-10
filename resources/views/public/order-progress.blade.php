@@ -63,13 +63,6 @@
                     <h3>{{ $progress['label'] }}</h3>
                     <p>{{ $progress['message'] }}</p>
                 @endif
-                <div class="public-artwork-action">
-                    <div>
-                        <strong>Order progress and proofing</strong>
-                        <span>See the latest updates and proofs shared for your order.</span>
-                    </div>
-                    <a class="button button-primary" href="{{ $proofingUrl }}">View progress</a>
-                </div>
                 @if ($deposit)
                     <div class="deposit-public-status" data-status="{{ strtolower($deposit['status']) }}">
                         <span>{{ ($paymentPlan ?? null) === 'FULL' ? 'Full card payment' : 'Deposit' }}</span>
