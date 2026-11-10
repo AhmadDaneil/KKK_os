@@ -12,6 +12,7 @@ use App\Services\Design\StartDesignJobService;
 use App\Services\Design\SyncOrderDesignStatusService;
 use App\Services\Design\WatermarkArtworkPreviewService;
 use App\Services\Printing\InitializePrintJobsForOrderService;
+use App\Services\Printing\SyncOrderPrintStatusService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -81,7 +82,8 @@ class StaffDesignWorkflowController extends Controller
         MarkDesignReadyService $service,
         SyncOrderDesignStatusService $sync,
         ApproveArtworkService $approve,
-        InitializePrintJobsForOrderService $initializePrintJobs
+        InitializePrintJobsForOrderService $initializePrintJobs,
+        SyncOrderPrintStatusService $syncPrintStatus
     ): RedirectResponse {
         $this->authorizeAssignedDesigner($request, $designJob);
 
@@ -110,6 +112,10 @@ class StaffDesignWorkflowController extends Controller
 
             if (in_array($order->status, ['DESIGN_APPROVED', 'PAID'], true)) {
                 $initializePrintJobs->initialize($order);
+
+                if ($order->status === 'PAID') {
+                    $syncPrintStatus->sync($order);
+                }
             }
         } catch (RuntimeException $exception) {
             return back()->withErrors([
