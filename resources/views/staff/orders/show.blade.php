@@ -27,7 +27,7 @@
         && $hasDesignJobs
         && $order->designJobs->contains('assigned_user_id', auth()->id());
     $canUploadProgressUpdate = match (auth()->user()->role) {
-        \App\Models\User::ROLE_DESIGNER => $hasDesignJobs
+        \App\Models\User::ROLE_DESIGNER, \App\Models\User::ROLE_DIGITAL_DESIGNER => $hasDesignJobs
             && $order->designJobs->contains('assigned_user_id', auth()->id()),
         \App\Models\User::ROLE_PRODUCTION => $order->relationLoaded('printJobs')
             && $order->printJobs->contains('assigned_user_id', auth()->id()),
@@ -37,6 +37,7 @@
     };
     $progressRoleLabels = [
         \App\Models\User::ROLE_DESIGNER => 'Designer',
+        \App\Models\User::ROLE_DIGITAL_DESIGNER => 'Digital Designer',
         \App\Models\User::ROLE_PRODUCTION => 'Production',
         \App\Models\User::ROLE_OM => 'OM',
     ];
