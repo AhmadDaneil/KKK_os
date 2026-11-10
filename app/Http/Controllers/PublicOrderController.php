@@ -128,12 +128,13 @@ class PublicOrderController extends Controller
         $order->load(['fulfilmentJob', 'payments', 'designJobs.artworkVersions', 'pricingSnapshot']);
         $deposit = $order->payments->firstWhere('payment_type', 'BOOKING_DEPOSIT');
         $balance = $order->payments->where('payment_type', 'BALANCE')->sortByDesc('id')->first();
+        $progressStatus = $customerProgress->resolveStatus($order);
         return view('public.order-progress', [
             'orderId' => $order->order_id,
             'customerReference' => $order->displayCustomerReference(),
-            'orderStatus' => $order->status,
+            'orderStatus' => $progressStatus,
             'paymentPlan' => strtoupper((string) data_get($order->pricingSnapshot?->calculation_snapshot, 'payment_plan', $order->payment_plan ?? 'DEPOSIT')),
-            'progress' => $customerProgress->build($order),
+            'progress' => $customerProgress->build($order, $progressStatus),
             'shipment' => $order->fulfilmentJob && $order->fulfilmentJob->method === 'COURIER'
                 ? [
                     'courier_provider' => $order->fulfilmentJob->courier_provider,
