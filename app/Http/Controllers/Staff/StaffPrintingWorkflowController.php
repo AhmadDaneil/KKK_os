@@ -104,18 +104,16 @@ class StaffPrintingWorkflowController extends Controller
         $validated = $request->validate([
             'progress_files' => ['required', 'array', 'min:1', 'max:10'],
             'progress_files.*' => ['required', 'file', 'mimes:jpg,jpeg,png,webp,pdf', 'max:20480'],
-            'customer_visible' => ['sometimes', 'boolean'],
         ]);
 
         $disk = Storage::disk('local');
         $directory = 'printing-progress/'.$printJob->id.'/'.Str::uuid();
         $storedPaths = [];
-        $customerVisible = (bool) ($validated['customer_visible'] ?? false);
 
         try {
             $newFiles = collect($validated['progress_files'])
                 ->values()
-                ->map(function (UploadedFile $file, int $index) use ($disk, $directory, &$storedPaths, $request, $customerVisible): array {
+                ->map(function (UploadedFile $file, int $index) use ($disk, $directory, &$storedPaths, $request): array {
                     $path = $disk->putFileAs(
                         $directory,
                         $file,
@@ -136,7 +134,7 @@ class StaffPrintingWorkflowController extends Controller
                         'uploaded_at' => now()->toIso8601String(),
                         'uploaded_by_user_id' => $request->user()->id,
                         'uploaded_by_role' => User::ROLE_PRODUCTION,
-                        'customer_visible' => $customerVisible,
+                        'customer_visible' => false,
                     ];
                 })
                 ->all();
@@ -153,7 +151,7 @@ class StaffPrintingWorkflowController extends Controller
                 'actor_user_id' => $request->user()->id,
                 'metadata' => [
                     'file_count' => count($newFiles),
-                    'customer_visible_file_count' => $customerVisible ? count($newFiles) : 0,
+                    'customer_visible_file_count' => 0,
                 ],
                 'occurred_at' => now(),
             ]);
@@ -203,61 +201,6 @@ class StaffPrintingWorkflowController extends Controller
             $path,
             data_get($progressFile, 'original_name', 'printing-progress'),
             ['Content-Type' => data_get($progressFile, 'mime_type', 'application/octet-stream')]
-        );
-    }
-
-    public function setProgressFileVisibility(
-        Request $request,
-        PrintJob $printJob,
-        int $file
-    ): RedirectResponse {
-        $user = $request->user();
-        abort_unless(
-            $user->isOperationManagement()
-                || ($user->hasStaffRole(User::ROLE_PRODUCTION)
-                    && $printJob->assigned_user_id === $user->id),
-            404,
-        );
-
-        $validated = $request->validate([
-            'customer_visible' => ['required', 'boolean'],
-        ]);
-
-        $progressFiles = $printJob->progress_files ?? [];
-        abort_unless(array_key_exists($file, $progressFiles), 404);
-
-        $progressFile = $progressFiles[$file];
-        $path = data_get($progressFile, 'path');
-        abort_unless(
-            filled($path)
-                && str_starts_with($path, 'printing-progress/'.$printJob->id.'/')
-                && filled(data_get($progressFile, 'uploaded_by_user_id'))
-                && in_array(data_get($progressFile, 'uploaded_by_role'), [null, User::ROLE_PRODUCTION], true)
-                && Storage::disk('local')->exists($path),
-            404,
-        );
-
-        $customerVisible = (bool) $validated['customer_visible'];
-        $progressFiles[$file]['uploaded_by_role'] = User::ROLE_PRODUCTION;
-        $progressFiles[$file]['customer_visible'] = $customerVisible;
-        $printJob->update(['progress_files' => $progressFiles]);
-        $printJob->events()->create([
-            'event_type' => 'PRINT_PROGRESS_VISIBILITY_CHANGED',
-            'from_status' => $printJob->status,
-            'to_status' => $printJob->status,
-            'actor_user_id' => $user->id,
-            'metadata' => [
-                'file_index' => $file,
-                'customer_visible' => $customerVisible,
-            ],
-            'occurred_at' => now(),
-        ]);
-
-        return back()->with(
-            'status',
-            $customerVisible
-                ? 'Production proof shared with the customer.'
-                : 'Production proof hidden from the customer.'
         );
     }
 
