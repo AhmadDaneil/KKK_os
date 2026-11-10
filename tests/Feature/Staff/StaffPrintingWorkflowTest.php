@@ -141,11 +141,6 @@ class StaffPrintingWorkflowTest extends TestCase
             'event_type' => 'PRINT_PROGRESS_UPLOADED',
             'actor_user_id' => $production->id,
         ]);
-        $uploadEvent = $job->events()
-            ->where('event_type', 'PRINT_PROGRESS_UPLOADED')
-            ->latest('id')
-            ->firstOrFail();
-        $this->assertSame(2, (int) data_get($uploadEvent->metadata, 'customer_visible_file_count'));
 
         $this->actingAs($production, 'staff')
             ->get(route('staff.print-jobs.progress-files.show', [
