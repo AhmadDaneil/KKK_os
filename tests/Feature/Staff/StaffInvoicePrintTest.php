@@ -101,18 +101,18 @@ class StaffInvoicePrintTest extends TestCase
         $order = $this->pricedOrder(1, 'PAID');
         $order->update(['package_type' => 'PUTERI_MANIS']);
         $side = $order->packageSides()->firstOrFail();
-        $side->update(['card_quantity' => 200]);
+        $side->update(['card_quantity' => 250]);
         $side->design()->updateOrCreate([], ['design_code' => 'CKP-006']);
         $side->event()->updateOrCreate([], ['event_date' => '2026-12-20']);
-        $order->forceFill(['card_quantity' => 200])->save();
+        $order->forceFill(['card_quantity' => 250])->save();
         $invoice = app(SynchronizeOrderFinancialsService::class)->synchronize($order->fresh());
 
         $this->actingAs($this->staff(User::ROLE_OM))
             ->get(route('staff.invoices.print', $invoice))
             ->assertOk()
             ->assertSee('Pakej Puteri Manis')
-            ->assertSee('Kad Kahwin 4x6 200 pcs')
-            ->assertSee('White Envelope 4x6 200 pcs')
+            ->assertSee('Kad Kahwin 4x6 250 pcs')
+            ->assertSee('White Envelope 4x6 250 pcs')
             ->assertSee('Banting 2x4 1 pc')
             ->assertSee('Banner 3x6 1 pc')
             ->assertSee('Arrow A4 4 pcs')
@@ -121,12 +121,12 @@ class StaffInvoicePrintTest extends TestCase
             ->assertSee('FREE Alive Card Premium')
             ->assertSee('FREE Motion Video')
             ->assertSee('FREE Wooden Hanger 1 pc')
-            ->assertSee('Male: 200 | Female: 0 | Total: 200')
+            ->assertSee('Male: 250 | Female: 0 | Total: 250')
             ->assertSee('Booking Date')
             ->assertSee('Event Date')
             ->assertSee('Design Code')
             ->assertSee('CKP-006')
-            ->assertDontSee('Kad Kahwin 4x6 200 pcs;');
+            ->assertDontSee('Kad Kahwin 4x6 250 pcs;');
     }
 
     public function test_invoice_shows_rm50_and_rm100_deposit_examples(): void
