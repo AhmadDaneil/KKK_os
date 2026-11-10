@@ -385,6 +385,24 @@ class AdminDashboardTest extends TestCase
         $this->assertFalse($designer->fresh()->is_active);
     }
 
+    public function test_admin_can_create_digital_designer_account(): void
+    {
+        $admin = $this->staff(User::ROLE_ADMIN);
+
+        $this->actingAs($admin)->post(route('admin.staff.store'), [
+            'name' => 'Digital Designer Test',
+            'email' => 'digital-designer@kkk.local',
+            'role' => User::ROLE_DIGITAL_DESIGNER,
+            'password' => 'Admin8!x',
+            'password_confirmation' => 'Admin8!x',
+            'is_design_lead' => '1',
+        ])->assertRedirect()->assertSessionHas('admin_success');
+
+        $designer = User::where('email', 'digital-designer@kkk.local')->firstOrFail();
+        $this->assertSame(User::ROLE_DIGITAL_DESIGNER, $designer->role);
+        $this->assertTrue($designer->is_design_lead);
+    }
+
     public function test_admin_cannot_deactivate_own_account(): void
     {
         $admin = $this->staff(User::ROLE_ADMIN);

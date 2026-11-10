@@ -19,6 +19,7 @@ class StaffRoleAuthorizationTest extends TestCase
             User::ROLE_OM,
             User::ROLE_CUSTOMER_SERVICE,
             User::ROLE_DESIGNER,
+            User::ROLE_DIGITAL_DESIGNER,
             User::ROLE_PRODUCTION,
         ] as $requiredRole) {
             $this->assertAllowed($user, $requiredRole);
@@ -29,6 +30,16 @@ class StaffRoleAuthorizationTest extends TestCase
     {
         $user = $this->staffUser(User::ROLE_DESIGNER);
 
+        $this->assertAllowed($user, User::ROLE_DESIGNER);
+        $this->assertForbidden($user, User::ROLE_OM);
+        $this->assertForbidden($user, User::ROLE_PRODUCTION);
+    }
+
+    public function test_digital_designer_can_access_design_role_only(): void
+    {
+        $user = $this->staffUser(User::ROLE_DIGITAL_DESIGNER);
+
+        $this->assertTrue($user->isActiveStaff());
         $this->assertAllowed($user, User::ROLE_DESIGNER);
         $this->assertForbidden($user, User::ROLE_OM);
         $this->assertForbidden($user, User::ROLE_PRODUCTION);

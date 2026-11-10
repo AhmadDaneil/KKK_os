@@ -2,7 +2,6 @@
 
 namespace App\Http\Middleware;
 
-use App\Models\User;
 use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -22,7 +21,10 @@ class EnsureStaffRole
             abort(403);
         }
 
-        if ($user->role !== User::ROLE_ADMIN && ! in_array($user->role, $roles, true)) {
+        $hasRequiredRole = collect($roles)
+            ->contains(fn (string $role): bool => $user->hasStaffRole($role));
+
+        if (! $user->isAdmin() && ! $hasRequiredRole) {
             abort(403);
         }
 
