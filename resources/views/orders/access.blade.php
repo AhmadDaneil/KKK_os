@@ -19,6 +19,7 @@
         </a>
         <nav aria-label="Order access navigation">
             <a class="header-link nav-progress" href="{{ route('public.orders.progress', array_filter(['order_id' => $prefilledOrderId])) }}">← Track Progress</a>
+            <a class="header-link nav-progress" href="{{ route('public.orders.create') }}">Booking Now</a>
             <a class="header-link nav-progress" href="{{ route('home') }}">Back to Home</a>
         </nav>
     </header>
