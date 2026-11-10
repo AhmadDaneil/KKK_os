@@ -6,9 +6,9 @@ use App\Models\Order;
 
 class BuildCustomerProgressService
 {
-    public function build(Order $order): array
+    public function build(Order $order, ?string $statusOverride = null): array
     {
-        $status = $order->status;
+        $status = $statusOverride ?? $this->resolveStatus($order);
 
         [$percentage, $label, $message] = match ($status) {
             'BOOKING_PENDING' => [5, 'Order Processing', 'Your order is being processed.'],
@@ -49,6 +49,23 @@ class BuildCustomerProgressService
             'message' => $message,
             'stages' => $this->stages($status),
         ];
+    }
+
+    public function resolveStatus(Order $order): string
+    {
+        if (! in_array($order->status, ['DESIGN_APPROVED', 'BALANCE_PENDING'], true)) {
+            return $order->status;
+        }
+
+        $snapshot = $order->relationLoaded('pricingSnapshot')
+            ? $order->pricingSnapshot
+            : ($order->exists ? $order->pricingSnapshot()->first() : null);
+
+        if ($snapshot === null || (float) $snapshot->outstanding_amount > 0) {
+            return $order->status;
+        }
+
+        return 'PAID';
     }
 
     /**
