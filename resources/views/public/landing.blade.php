@@ -90,7 +90,16 @@
                             decoding="async"
                             draggable="false">
 </article>
+                </div>                <div class="card-runner card-runner-jelata">
+                    <article class="sample-card sample-card-jelata sample-card-image">
+                        <img src="{{ asset('images/landing/puteri-manis-jelata.png') }}"
+                            alt="Jelata wedding card packages and product promotion"
+                            loading="lazy"
+                            decoding="async"
+                            draggable="false">
+                    </article>
                 </div>
+
             </div>
         </section>
 
