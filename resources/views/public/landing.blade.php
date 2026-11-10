@@ -54,58 +54,42 @@
                 </ul>
             </div>
 
-            <div class="hero-art" aria-label="KingKadKahwin wedding card samples">
+            <div class="hero-art" aria-label="Puteri Manis wedding service promotions">
                 <div class="card-runner card-runner-back">
                     <article class="sample-card sample-card-back sample-card-image">
-                        <img src="{{ asset('images/landing/card-nostalgia-ckn-008.jpg') }}"
-                            alt="Nostalgia wedding card design"
+                        <img src="{{ asset('images/landing/puteri-manis-pricing.png') }}"
+                            alt="Puteri Manis package pricing and wedding product promotions"
                             loading="eager"
                             decoding="async"
                             draggable="false">
-                        <span class="landing-card-watermark" aria-hidden="true">
-                            <span>KING KAD KAHWIN · PREVIEW</span>
-                            <span>KING KAD KAHWIN · PREVIEW</span>
-                        </span>
-                    </article>
+</article>
                 </div>
                 <div class="card-runner card-runner-front">
                     <article class="sample-card sample-card-front sample-card-image">
-                        <img src="{{ asset('images/landing/card-desa-ckd-008.jpg') }}"
-                            alt="Countryside wedding card design"
+                        <img src="{{ asset('images/landing/puteri-manis-hangers.png') }}"
+                            alt="Puteri Manis wedding hanger promotion"
                             loading="eager"
                             decoding="async"
                             draggable="false">
-                        <span class="landing-card-watermark" aria-hidden="true">
-                            <span>KING KAD KAHWIN · PREVIEW</span>
-                            <span>KING KAD KAHWIN · PREVIEW</span>
-                        </span>
-                    </article>
+</article>
                 </div>
                 <div class="card-runner card-runner-garden">
                     <article class="sample-card sample-card-garden sample-card-image">
-                        <img src="{{ asset('images/landing/card-garden-purple.png') }}"
-                            alt="Purple garden wedding card design"
+                        <img src="{{ asset('images/landing/puteri-manis-exclusive-cheque.png') }}"
+                            alt="Puteri Manis exclusive cheque promotion"
                             loading="eager"
                             decoding="async"
                             draggable="false">
-                        <span class="landing-card-watermark" aria-hidden="true">
-                            <span>KING KAD KAHWIN · PREVIEW</span>
-                            <span>KING KAD KAHWIN · PREVIEW</span>
-                        </span>
-                    </article>
+</article>
                 </div>
                 <div class="card-runner card-runner-islamic">
                     <article class="sample-card sample-card-islamic sample-card-image">
-                        <img src="{{ asset('images/landing/card-islamic-gold.png') }}"
-                            alt="Gold Islamic wedding card design"
+                        <img src="{{ asset('images/landing/puteri-manis-alive-card-motion-video.png') }}"
+                            alt="Puteri Manis Alive Card and Motion Video promotion"
                             loading="lazy"
                             decoding="async"
                             draggable="false">
-                        <span class="landing-card-watermark" aria-hidden="true">
-                            <span>KING KAD KAHWIN · PREVIEW</span>
-                            <span>KING KAD KAHWIN · PREVIEW</span>
-                        </span>
-                    </article>
+</article>
                 </div>
             </div>
         </section>
