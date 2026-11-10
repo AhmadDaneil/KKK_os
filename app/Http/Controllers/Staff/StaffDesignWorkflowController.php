@@ -108,7 +108,7 @@ class StaffDesignWorkflowController extends Controller
             $approve->approve($designJob->fresh(), $request->user());
             $order = $sync->sync($designJob->order);
 
-            if ($order->status === 'DESIGN_APPROVED') {
+            if (in_array($order->status, ['DESIGN_APPROVED', 'PAID'], true)) {
                 $initializePrintJobs->initialize($order);
             }
         } catch (RuntimeException $exception) {
