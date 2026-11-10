@@ -13,6 +13,7 @@ class OrderProgressUpdate extends Model
 
     public const CUSTOMER_PUBLISHER_ROLES = [
         User::ROLE_DESIGNER,
+        User::ROLE_DIGITAL_DESIGNER,
         User::ROLE_PRODUCTION,
         User::ROLE_OM,
     ];

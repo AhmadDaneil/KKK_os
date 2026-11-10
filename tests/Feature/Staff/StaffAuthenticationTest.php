@@ -62,6 +62,24 @@ class StaffAuthenticationTest extends TestCase
         $this->assertAuthenticatedAs($staff, 'staff');
     }
 
+    public function test_active_digital_designer_can_log_in(): void
+    {
+        $staff = User::factory()->create([
+            'email' => 'digital-designer@kkk.test',
+            'password' => Hash::make('secret-password'),
+            'role' => User::ROLE_DIGITAL_DESIGNER,
+            'is_active' => true,
+        ]);
+
+        $this->post(route('staff.login.store'), [
+            'email' => $staff->email,
+            'password' => 'secret-password',
+        ])->assertRedirect(route('staff.dashboard'));
+
+        $this->assertAuthenticatedAs($staff, 'staff');
+        $this->get(route('staff.dashboard'))->assertOk();
+    }
+
     public function test_inactive_or_non_staff_user_cannot_log_in(): void
     {
         $user = User::factory()->create([

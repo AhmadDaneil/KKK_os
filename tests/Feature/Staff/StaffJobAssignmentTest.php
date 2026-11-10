@@ -57,6 +57,21 @@ class StaffJobAssignmentTest extends TestCase
         );
     }
 
+    public function test_admin_can_assign_design_job_to_active_digital_designer(): void
+    {
+        $admin = $this->admin();
+        $designer = $this->staff(User::ROLE_DIGITAL_DESIGNER);
+        $job = $this->designJob();
+
+        $this->actingAs($admin, 'staff')
+            ->post(route('staff.design-jobs.assign', $job), [
+                'assigned_user_id' => $designer->id,
+            ])
+            ->assertRedirect();
+
+        $this->assertSame($designer->id, $job->fresh()->assigned_user_id);
+    }
+
     public function test_admin_can_assign_print_job_to_active_production_staff(): void
     {
         $admin = $this->admin();

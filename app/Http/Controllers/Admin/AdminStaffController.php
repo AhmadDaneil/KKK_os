@@ -158,7 +158,7 @@ class AdminStaffController extends Controller
     private function normaliseWorkflowRoles(Request $request, array $data, bool $isActive): array
     {
         $data['is_design_lead'] = $isActive
-            && $data['role'] === User::ROLE_DESIGNER
+            && in_array($data['role'], User::DESIGNER_ROLES, true)
             && $request->boolean('is_design_lead');
         $data['is_primary_production'] = $isActive
             && $data['role'] === User::ROLE_PRODUCTION
@@ -171,7 +171,7 @@ class AdminStaffController extends Controller
     {
         if ($staff->is_design_lead) {
             User::query()
-                ->where('role', User::ROLE_DESIGNER)
+                ->whereIn('role', User::DESIGNER_ROLES)
                 ->where('id', '!=', $staff->id)
                 ->update(['is_design_lead' => false]);
         }
