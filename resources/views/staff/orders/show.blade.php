@@ -558,6 +558,9 @@
                                 <a
                                     href="{{ route('staff.orders.photoshop.csv', $order) }}"
                                     class="staff-button"
+                                    data-save-file
+                                    data-save-file-type="csv"
+                                    data-save-filename="{{ $order->order_id }}_READY_TO_MERGE.csv"
                                 >
                                     Download Customer CSV
                                 </a>
@@ -920,6 +923,9 @@
                                                 <a
                                                     href="{{ route($operationRoutePrefix.'orders.customer-photo', ['orderId' => $order->order_id, 'side' => $jobPackageSide->side]) }}"
                                                     class="staff-button staff-button-small"
+                                                    data-save-file
+                                                    data-save-file-type="image"
+                                                    data-save-filename="gambar-pengantin-{{ $order->order_id }}-{{ strtolower($jobPackageSide->side) }}.jpg"
                                                 >Download Picture</a>
                                             </div>
                                         @endif
@@ -1655,6 +1661,81 @@
             });
 
             updateCancelButton();
+        });
+    });
+</script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        document.querySelectorAll('a[data-save-file]').forEach(function (link) {
+            let isSaving = false;
+
+            link.addEventListener('click', async function (event) {
+                event.preventDefault();
+                event.stopPropagation();
+
+                if (isSaving) {
+                    return;
+                }
+
+                if (!window.isSecureContext || typeof window.showSaveFilePicker !== 'function') {
+                    window.alert('Save As is not available in this browser. Open this page in Chrome or Edge over HTTPS or localhost.');
+                    return;
+                }
+
+                isSaving = true;
+                link.setAttribute('aria-busy', 'true');
+
+                const fileType = link.dataset.saveFileType;
+                const pickerOptions = {
+                    suggestedName: link.dataset.saveFilename,
+                    id: fileType === 'csv' ? 'staff-customer-csv' : 'staff-customer-photo',
+                };
+
+                if (fileType === 'csv') {
+                    pickerOptions.types = [{
+                        description: 'CSV file',
+                        accept: { 'text/csv': ['.csv'] },
+                    }];
+                } else if (fileType === 'image') {
+                    pickerOptions.types = [{
+                        description: 'JPEG image',
+                        accept: { 'image/jpeg': ['.jpg', '.jpeg'] },
+                    }];
+                }
+
+                try {
+                    // Open the native Save As dialog while the click still has user activation.
+                    const saveHandle = await window.showSaveFilePicker(pickerOptions);
+                    const response = await fetch(link.href, { credentials: 'same-origin' });
+
+                    if (!response.ok) {
+                        throw new Error('The download request failed.');
+                    }
+
+                    const contentType = response.headers.get('content-type') || '';
+
+                    if (contentType.toLowerCase().includes('text/html')) {
+                        throw new Error('The server returned a page instead of the requested file.');
+                    }
+
+                    const writable = await saveHandle.createWritable();
+
+                    try {
+                        await writable.write(await response.blob());
+                        await writable.close();
+                    } catch (error) {
+                        await writable.abort();
+                        throw error;
+                    }
+                } catch (error) {
+                    if (error.name !== 'AbortError') {
+                        window.alert('The file could not be saved. Please try again.');
+                    }
+                } finally {
+                    isSaving = false;
+                    link.removeAttribute('aria-busy');
+                }
+            });
         });
     });
 </script>
