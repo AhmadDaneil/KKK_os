@@ -6,6 +6,7 @@ use App\Http\Controllers\Admin\AdminPasswordResetController;
 use App\Http\Controllers\Admin\AdminStaffController;
 use App\Http\Controllers\BalancePaymentReturnController;
 use App\Http\Controllers\BookingPaymentReturnController;
+use App\Http\Controllers\CustomerArtworkReviewController;
 use App\Http\Controllers\CustomerBalanceReceiptController;
 use App\Http\Controllers\CustomerBillplzBalancePaymentController;
 use App\Http\Controllers\CustomerBookingPaymentController;
@@ -19,6 +20,7 @@ use App\Http\Controllers\CustomerOrderReviewController;
 use App\Http\Controllers\CustomerOrderThankYouController;
 use App\Http\Controllers\CustomerPackingProofController;
 use App\Http\Controllers\CustomerPaymentReceiptController;
+use App\Http\Controllers\CustomerProductionProofController;
 use App\Http\Controllers\CustomerProgressUpdateController;
 use App\Http\Controllers\DevBalancePaymentController;
 use App\Http\Controllers\DevDesignJobController;
@@ -96,6 +98,16 @@ Route::get('/semak-progress', [PublicOrderController::class, 'progress'])
 Route::post('/semak-progress', [PublicOrderController::class, 'lookupProgress'])
     ->middleware('throttle:10,1')
     ->name('public.orders.progress.lookup');
+
+Route::get('/semak-progress/{orderId}/proofing', [PublicOrderController::class, 'proofing'])
+    ->middleware('throttle:30,1')
+    ->name('public.orders.proofing');
+
+Route::get('/semak-progress/{orderId}/production-proof/{printJobId}/{file}', [CustomerProductionProofController::class, 'show'])
+    ->middleware('throttle:60,1')
+    ->whereNumber(['printJobId', 'file'])
+    ->name('public.orders.production-proof');
+
 
 
 Route::post('/order/{orderId}/balance-receipt', [CustomerBalanceReceiptController::class, 'store'])
@@ -237,6 +249,13 @@ Route::get('/order/{orderId}/sides/{side}/customer-photo-preview', [CustomerDash
 
 Route::get('/order/{orderId}/progress-updates/{progressUpdate}/attachment', [CustomerProgressUpdateController::class, 'attachment'])
     ->name('orders.progress-updates.attachment');
+Route::get(
+    '/order/{orderId}/artwork/{designJobId}/preview',
+    [CustomerArtworkReviewController::class, 'preview']
+)->middleware('throttle:60,1')
+    ->whereNumber('designJobId')
+    ->name('orders.artwork.preview');
+
 Route::get('/order/{orderId}/courier-proof', [CustomerCourierProofController::class, 'show'])
     ->name('orders.courier-proof.show');
 Route::get('/order/{orderId}/packing-proof', [CustomerPackingProofController::class, 'show'])

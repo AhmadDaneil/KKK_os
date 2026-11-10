@@ -104,16 +104,18 @@ class StaffPrintingWorkflowController extends Controller
         $validated = $request->validate([
             'progress_files' => ['required', 'array', 'min:1', 'max:10'],
             'progress_files.*' => ['required', 'file', 'mimes:jpg,jpeg,png,webp,pdf', 'max:20480'],
+            'customer_visible' => ['sometimes', 'boolean'],
         ]);
 
         $disk = Storage::disk('local');
         $directory = 'printing-progress/'.$printJob->id.'/'.Str::uuid();
         $storedPaths = [];
+        $customerVisible = (bool) ($validated['customer_visible'] ?? false);
 
         try {
             $newFiles = collect($validated['progress_files'])
                 ->values()
-                ->map(function (UploadedFile $file, int $index) use ($disk, $directory, &$storedPaths, $request): array {
+                ->map(function (UploadedFile $file, int $index) use ($disk, $directory, &$storedPaths, $request, $customerVisible): array {
                     $path = $disk->putFileAs(
                         $directory,
                         $file,
@@ -134,7 +136,7 @@ class StaffPrintingWorkflowController extends Controller
                         'uploaded_at' => now()->toIso8601String(),
                         'uploaded_by_user_id' => $request->user()->id,
                         'uploaded_by_role' => User::ROLE_PRODUCTION,
-                        'customer_visible' => false,
+                        'customer_visible' => $customerVisible,
                     ];
                 })
                 ->all();
@@ -151,7 +153,7 @@ class StaffPrintingWorkflowController extends Controller
                 'actor_user_id' => $request->user()->id,
                 'metadata' => [
                     'file_count' => count($newFiles),
-                    'customer_visible_file_count' => 0,
+                    'customer_visible_file_count' => $customerVisible ? count($newFiles) : 0,
                 ],
                 'occurred_at' => now(),
             ]);
