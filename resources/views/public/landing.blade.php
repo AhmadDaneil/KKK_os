@@ -56,7 +56,7 @@
 
             <div class="hero-art" aria-label="Puteri Manis wedding service promotions">
                 <div class="card-runner card-runner-back">
-                    <article class="sample-card sample-card-back sample-card-image">
+                    <article class="sample-card sample-card-back sample-card-image sample-card-square">
                         <img src="{{ asset('images/landing/puteri-manis-pricing.png') }}"
                             alt="Puteri Manis package pricing and wedding product promotions"
                             loading="eager"
@@ -74,7 +74,7 @@
 </article>
                 </div>
                 <div class="card-runner card-runner-garden">
-                    <article class="sample-card sample-card-garden sample-card-image">
+                    <article class="sample-card sample-card-garden sample-card-image sample-card-square">
                         <img src="{{ asset('images/landing/puteri-manis-exclusive-cheque.png') }}"
                             alt="Puteri Manis exclusive cheque promotion"
                             loading="eager"
