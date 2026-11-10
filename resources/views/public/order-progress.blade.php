@@ -110,7 +110,7 @@
                 @endif
                 @if ($deposit)
                     <div class="deposit-public-status" data-status="{{ strtolower($deposit['status']) }}">
-                        <span>Deposit</span>
+                        <span>{{ ($paymentPlan ?? null) === 'FULL' ? 'Full card payment' : 'Deposit' }}</span>
                         <strong>{{ match ($deposit['status']) { 'PAID' => 'Confirmed', 'FAILED' => 'Receipt Rejected', default => 'Awaiting Payment' } }}</strong>
                         @if ($deposit['status'] === 'FAILED' && $deposit['reason'])<p>Reason: {{ $deposit['reason'] }}</p>@endif
                     </div>
