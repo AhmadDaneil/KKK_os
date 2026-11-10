@@ -6,7 +6,6 @@ use App\Http\Controllers\Admin\AdminPasswordResetController;
 use App\Http\Controllers\Admin\AdminStaffController;
 use App\Http\Controllers\BalancePaymentReturnController;
 use App\Http\Controllers\BookingPaymentReturnController;
-use App\Http\Controllers\CustomerArtworkReviewController;
 use App\Http\Controllers\CustomerBalanceReceiptController;
 use App\Http\Controllers\CustomerBillplzBalancePaymentController;
 use App\Http\Controllers\CustomerBookingPaymentController;
@@ -20,7 +19,6 @@ use App\Http\Controllers\CustomerOrderReviewController;
 use App\Http\Controllers\CustomerOrderThankYouController;
 use App\Http\Controllers\CustomerPackingProofController;
 use App\Http\Controllers\CustomerPaymentReceiptController;
-use App\Http\Controllers\CustomerProductionProofController;
 use App\Http\Controllers\CustomerProgressUpdateController;
 use App\Http\Controllers\DevBalancePaymentController;
 use App\Http\Controllers\DevDesignJobController;
@@ -98,10 +96,7 @@ Route::get('/semak-progress', [PublicOrderController::class, 'progress'])
 Route::post('/semak-progress', [PublicOrderController::class, 'lookupProgress'])
     ->middleware('throttle:10,1')
     ->name('public.orders.progress.lookup');
-Route::get('/semak-progress/{orderId}/production-proof/{printJobId}/{file}', [CustomerProductionProofController::class, 'show'])
-    ->middleware('throttle:60,1')
-    ->whereNumber(['printJobId', 'file'])
-    ->name('public.orders.production-proof');
+
 
 Route::post('/order/{orderId}/balance-receipt', [CustomerBalanceReceiptController::class, 'store'])
     ->middleware('throttle:10,1')
@@ -206,8 +201,7 @@ Route::middleware(['auth:admin', 'active.staff', 'staff.role:ADMIN'])
             ->name('print-jobs.mark-printed');
         Route::get('/print-jobs/{printJob}/progress-files/{file}', [StaffPrintingWorkflowController::class, 'showProgressFile'])
             ->name('print-jobs.progress-files.show');
-        Route::post('/print-jobs/{printJob}/progress-files/{file}/visibility', [StaffPrintingWorkflowController::class, 'setProgressFileVisibility'])
-            ->name('print-jobs.progress-files.visibility');
+        
 
         Route::post('/packing-jobs/{packingJob}/assign', [StaffJobAssignmentController::class, 'assignPacking'])
             ->name('packing-jobs.assign');
@@ -286,25 +280,7 @@ Route::get(
     [CustomerOrderThankYouController::class, 'show']
 )->name('orders.thank-you.show');
 
-Route::get(
-    '/order/{orderId}/artwork',
-    [CustomerArtworkReviewController::class, 'show']
-)->name('orders.artwork.review');
 
-Route::get(
-    '/order/{orderId}/artwork/{designJobId}/preview',
-    [CustomerArtworkReviewController::class, 'preview']
-)->name('orders.artwork.preview');
-
-Route::post(
-    '/order/{orderId}/artwork/{designJobId}/correction',
-    [CustomerArtworkReviewController::class, 'correction']
-)->name('orders.artwork.correction');
-
-Route::post(
-    '/order/{orderId}/artwork/{designJobId}/approve',
-    [CustomerArtworkReviewController::class, 'approve']
-)->name('orders.artwork.approve');
 
 /*
 |--------------------------------------------------------------------------
@@ -497,10 +473,7 @@ Route::middleware(['auth:staff', 'active.staff'])
             )->name('print-jobs.mark-printed');
         });
 
-        Route::post(
-            '/print-jobs/{printJob}/progress-files/{file}/visibility',
-            [StaffPrintingWorkflowController::class, 'setProgressFileVisibility']
-        )->name('print-jobs.progress-files.visibility');
+        
 
         /*
             |--------------------------------------------------------------------------
