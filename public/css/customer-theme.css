@@ -244,8 +244,11 @@ html[data-customer-theme="dark"] .customer-policies article > p { color:#c3d2ca!
 }
 
 .desa-card-artwork[hidden],
+.desa-card-back-artwork[hidden],
+.desa-card-back-live-names[hidden],
 .desa-card-name-overlay[hidden],
 .desa-product-artwork[hidden],
+.desa-product-name-overlay[hidden],
 [data-desa-product-placeholder][hidden] {
     display: none !important;
 }
@@ -303,6 +306,52 @@ html[data-customer-theme="dark"] .customer-policies article > p { color:#c3d2ca!
     color: #806536;
 }
 
+.wedding-card-back[data-desa-artwork] {
+    position: relative;
+    display: block;
+    overflow: hidden;
+    padding: 0;
+    background: #fff;
+}
+
+.wedding-card-back .desa-card-back-artwork {
+    position: absolute;
+    z-index: 0;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.wedding-card-back .desa-card-back-live-names {
+    position: absolute;
+    z-index: 1;
+    top: 44%;
+    right: 12%;
+    left: 12%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: .3em;
+    color: #493b21;
+    font-family: Georgia, serif;
+    font-size: clamp(.45rem, 2.2vw, .78rem);
+    font-weight: 700;
+    line-height: 1.1;
+    text-align: center;
+}
+
+.wedding-card-back .desa-card-back-live-names span {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.wedding-card-back .desa-card-back-live-names b {
+    flex: 0 0 auto;
+}
+
 .live-product {
     position: relative;
 }
@@ -317,6 +366,46 @@ html[data-customer-theme="dark"] .customer-policies article > p { color:#c3d2ca!
     object-fit: contain;
     background: #fff;
 }
+
+.live-product .desa-product-name-overlay {
+    position: absolute;
+    z-index: 1;
+    right: 5%;
+    left: 5%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: .28em;
+    padding: .2em .35em;
+    overflow: hidden;
+    border-radius: 4px;
+    color: #463918;
+    background: rgba(255, 250, 231, .88);
+    font-family: Georgia, serif;
+    font-size: clamp(.42rem, 1.6vw, .72rem);
+    font-weight: 700;
+    line-height: 1.1;
+    text-align: center;
+    text-shadow: 0 1px 0 rgba(255, 255, 255, .65);
+}
+
+.live-product .desa-product-name-overlay span {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.live-product .desa-product-name-overlay b {
+    flex: 0 0 auto;
+}
+
+.live-product--banner .desa-product-name-overlay { top: 61%; right: 8%; left: 48%; }
+.live-product--banting .desa-product-name-overlay { top: 25%; }
+.live-product--arrow .desa-product-name-overlay { top: 24%; }
+.live-product--sticker .desa-product-name-overlay { top: 38%; }
+.live-product--card-back .desa-product-name-overlay { top: 45%; right: 12%; left: 12%; }
+.live-product--hanger .desa-product-name-overlay { top: 49%; right: 12%; left: 12%; }
 
 .live-product--banner .desa-product-artwork {
     padding: 0;

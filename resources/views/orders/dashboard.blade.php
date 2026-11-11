@@ -1394,6 +1394,9 @@ document.addEventListener('DOMContentLoaded', function () {
             const front = scope.matches('[data-card-preview]')
                 ? scope.querySelector('[data-card-face="front"]')
                 : null;
+            const back = scope.matches('[data-card-preview]')
+                ? scope.querySelector('[data-card-face="back"]')
+                : null;
 
             if (front) {
                 const artwork = front.querySelector('[data-desa-card-artwork]');
@@ -1418,14 +1421,35 @@ document.addEventListener('DOMContentLoaded', function () {
                 }
             }
 
+            if (back) {
+                const artwork = back.querySelector('[data-desa-card-back-artwork]');
+                const liveNames = back.querySelector('[data-desa-card-back-live-names]');
+                const placeholder = back.querySelector('[data-desa-back-placeholder]');
+
+                artwork.hidden = !hasDesaArtwork;
+                liveNames.hidden = !hasDesaArtwork;
+                placeholder.hidden = hasDesaArtwork;
+                back.toggleAttribute('data-desa-artwork', hasDesaArtwork);
+
+                if (hasDesaArtwork) {
+                    artwork.src = assetBase + 'card-back.webp';
+                    artwork.alt = normalizedCode + ' Desa wedding card back';
+                } else {
+                    artwork.removeAttribute('src');
+                    artwork.alt = '';
+                }
+            }
+
             scope.querySelectorAll('[data-desa-product]').forEach(function (product) {
                 const type = product.dataset.desaProduct;
                 const artwork = product.querySelector('[data-desa-product-artwork]');
+                const nameOverlay = product.querySelector('[data-desa-product-name-overlay]');
                 const placeholder = product.querySelector('[data-desa-product-placeholder]');
                 const shouldShowArtwork = hasDesaArtwork;
 
                 product.hidden = type === 'card-back' && !hasDesaArtwork;
                 artwork.hidden = !shouldShowArtwork;
+                nameOverlay.hidden = !shouldShowArtwork;
                 placeholder.hidden = Boolean(shouldShowArtwork);
 
                 if (shouldShowArtwork) {
