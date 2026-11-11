@@ -236,6 +236,139 @@ html[data-customer-theme="dark"] .customer-policies article > p { color:#c3d2ca!
     border-radius: 8px;
 }
 
+.live-product--card-back {
+    grid-column: 1 / -1;
+    grid-row: 4;
+    max-width: 320px;
+    aspect-ratio: 1100 / 1600;
+}
+
+.desa-card-artwork[hidden],
+.desa-card-name-overlay[hidden],
+.desa-product-artwork[hidden],
+[data-desa-product-placeholder][hidden] {
+    display: none !important;
+}
+
+.live-product[hidden] {
+    display: none !important;
+}
+
+.wedding-card-front .desa-card-artwork {
+    position: absolute;
+    z-index: 0;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.wedding-card-front[data-desa-artwork]::before,
+.wedding-card-front[data-desa-artwork]::after {
+    display: none;
+}
+
+.wedding-card-front .desa-card-name-overlay {
+    position: absolute;
+    z-index: 2;
+    top: 8%;
+    right: 7%;
+    left: 7%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: .45em;
+    padding: .48em .6em;
+    border: 1px solid rgba(255, 255, 255, .68);
+    border-radius: 999px;
+    background: rgba(255, 250, 230, .9);
+    color: #263d2c;
+    font-family: Georgia, serif;
+    font-size: clamp(.6rem, 2.7vw, .92rem);
+    font-weight: 700;
+    line-height: 1.1;
+    text-align: center;
+    box-shadow: 0 2px 8px rgba(20, 35, 20, .2);
+}
+
+.wedding-card-front .desa-card-name-overlay span {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.wedding-card-front .desa-card-name-overlay b {
+    flex: 0 0 auto;
+    color: #806536;
+}
+
+.live-product {
+    position: relative;
+}
+
+.live-product .desa-product-artwork {
+    position: absolute;
+    z-index: 0;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    padding: 8px;
+    object-fit: contain;
+    background: #fff;
+}
+
+.live-product--banner .desa-product-artwork {
+    padding: 0;
+}
+
+.live-product--banting .desa-product-artwork,
+.live-product--arrow .desa-product-artwork {
+    padding: 0;
+}
+
+.live-product--sticker .desa-product-artwork {
+    padding: 0;
+}
+
+.live-product--card-back .desa-product-artwork {
+    padding: 0;
+}
+
+@media (max-width: 760px) {
+    .live-product--card-back {
+        grid-column: 1 / -1;
+        grid-row: auto;
+    }
+}
+
+@media (max-width: 520px) {
+    .live-product--card-back {
+        grid-column: 1 / -1;
+        grid-row: auto;
+    }
+}
+
+.live-product[data-desa-product] > [data-desa-product-placeholder] {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    width: 100%;
+    height: 100%;
+    align-items: center;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.live-product--card-back[data-desa-product] > [data-desa-product-placeholder] {
+    min-height: 100%;
+}
+
+.live-product--card-back .live-product-label {
+    position: static;
+    margin-bottom: 10px;
+}
+
 .live-product :is(p, strong, small) {
     width: 100%;
     text-align: center;
