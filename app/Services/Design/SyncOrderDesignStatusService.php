@@ -8,7 +8,7 @@ class SyncOrderDesignStatusService
 {
     public function sync(Order $order): Order
     {
-        $order->refresh()->load('designJobs');
+        $order->refresh()->load(['designJobs', 'pricingSnapshot']);
 
         if ($order->isTerminalOperationalStatus()) {
             return $order;
@@ -20,9 +20,12 @@ class SyncOrderDesignStatusService
             return $order;
         }
 
+        $hasNoOutstandingBalance = $order->pricingSnapshot !== null
+            && (float) $order->pricingSnapshot->outstanding_amount <= 0;
+
         $newStatus = match (true) {
-    $statuses->every(fn ($status) => $status === 'DESIGN_APPROVED')
-        => 'DESIGN_APPROVED',
+            $statuses->every(fn ($status) => $status === 'DESIGN_APPROVED')
+                => $hasNoOutstandingBalance ? 'PAID' : 'DESIGN_APPROVED',
 
     $statuses->contains('CORRECTION_REQUESTED')
         => 'CORRECTION_REQUESTED',

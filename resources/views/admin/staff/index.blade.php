@@ -10,6 +10,7 @@
             'OPERATION_MANAGEMENT' => 'OM (Packing & Order Fulfilment)',
             'CUSTOMER_SERVICE' => 'Customer Service',
             'DESIGNER' => 'Designer',
+            'DIGITAL_DESIGNER' => 'Digital Designer',
             'PRODUCTION' => 'Production Staff',
         ];
     @endphp
@@ -62,7 +63,7 @@
             <div><label for="new-email">Email</label><input id="new-email" type="email" name="email" value="{{ old('email') }}" placeholder="Example: aisyah@kkk.local" required></div>
             <div><label for="new-role">Department / Role</label><select id="new-role" name="role" required data-workflow-role-select>@foreach ($roleLabels as $value => $label)<option value="{{ $value }}" @selected(old('role') === $value)>{{ $label }}</option>@endforeach</select></div>
             <div class="admin-workflow-options">
-                <label class="admin-workflow-option" data-workflow-role="DESIGNER"><input type="checkbox" name="is_design_lead" value="1" @checked(old('is_design_lead'))><span><strong>Lead Designer</strong><small>Receive design tasks automatically</small></span></label>
+                <label class="admin-workflow-option" data-workflow-role="{{ implode(',', \App\Models\User::DESIGNER_ROLES) }}"><input type="checkbox" name="is_design_lead" value="1" @checked(old('is_design_lead'))><span><strong>Lead Designer</strong><small>Receive design tasks automatically</small></span></label>
                 <label class="admin-workflow-option" data-workflow-role="PRODUCTION"><input type="checkbox" name="is_primary_production" value="1" @checked(old('is_primary_production'))><span><strong>Lead Production Staff</strong><small>Receive printing tasks automatically</small></span></label>
             </div>
             <div><label for="new-password">Temporary Password</label><input id="new-password" type="password" name="password" minlength="8" required></div>
@@ -94,7 +95,7 @@
                             <div><label>Department / Role</label><select name="role" data-workflow-role-select @disabled(auth()->user()->is($staff))>@foreach ($roleLabels as $value => $label)<option value="{{ $value }}" @selected($staff->role === $value)>{{ $label }}</option>@endforeach</select>@if (auth()->user()->is($staff))<input type="hidden" name="role" value="ADMIN">@endif</div>
                             <div><label>Account Status</label><select name="is_active" @disabled(auth()->user()->is($staff))><option value="1" @selected($staff->is_active)>Active</option><option value="0" @selected(! $staff->is_active)>Inactive</option></select>@if (auth()->user()->is($staff))<input type="hidden" name="is_active" value="1">@endif</div>
                             <div class="admin-workflow-options">
-                                <label class="admin-workflow-option" data-workflow-role="DESIGNER"><input type="checkbox" name="is_design_lead" value="1" @checked($staff->is_design_lead)><span><strong>Lead Designer</strong><small>Receive design tasks automatically</small></span></label>
+                                <label class="admin-workflow-option" data-workflow-role="{{ implode(',', \App\Models\User::DESIGNER_ROLES) }}"><input type="checkbox" name="is_design_lead" value="1" @checked($staff->is_design_lead)><span><strong>Lead Designer</strong><small>Receive design tasks automatically</small></span></label>
                                 <label class="admin-workflow-option" data-workflow-role="PRODUCTION"><input type="checkbox" name="is_primary_production" value="1" @checked($staff->is_primary_production)><span><strong>Lead Production Staff</strong><small>Receive printing tasks automatically</small></span></label>
                             </div>
                             <div class="admin-form-submit"><button class="admin-button admin-button-primary admin-action-hover" type="submit">Save Changes</button></div>
@@ -137,7 +138,7 @@
 
         function syncWorkflowOptions() {
             options.forEach(function (option) {
-                const isRelevant = role && role.value === option.dataset.workflowRole;
+                const isRelevant = role && option.dataset.workflowRole.split(',').includes(role.value);
                 option.hidden = !isRelevant;
                 option.querySelector('input').disabled = !isRelevant;
             });

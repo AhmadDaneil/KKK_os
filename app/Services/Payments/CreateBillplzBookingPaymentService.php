@@ -18,7 +18,7 @@ class CreateBillplzBookingPaymentService
     ) {}
 
     /** @return array{payment: PaymentTransaction, payment_url: string} */
-    public function create(Order $order, bool $throwGatewayFailure = false, string $paymentMethod = BillplzPaymentMethod::BILLPLZ): array
+    public function create(Order $order, bool $throwGatewayFailure = false, string $paymentMethod = BillplzPaymentMethod::BILLPLZ, array $confirmationAcknowledgements = []): array
     {
         if (! config('services.billplz.enabled')) {
             if ($throwGatewayFailure) {
@@ -32,7 +32,7 @@ class CreateBillplzBookingPaymentService
 
         BillplzPaymentMethod::assertEnabled($paymentMethod);
 
-        $checkout = DB::transaction(function () use ($order, $paymentMethod): array {
+        $checkout = DB::transaction(function () use ($order, $paymentMethod, $confirmationAcknowledgements): array {
             $lockedOrder = Order::query()->whereKey($order->id)->lockForUpdate()->firstOrFail();
 
             if ($lockedOrder->booking_payment_status === 'PAID') {
@@ -101,10 +101,14 @@ class CreateBillplzBookingPaymentService
                 'amount' => $amount['amount'],
                 'currency' => $amount['currency'],
                 'status' => 'PENDING',
-                'metadata' => ['billplz' => [
-                    'checkout_status' => 'CREATING',
-                    'payment_method' => $paymentMethod,
-                ]],
+                'metadata' => array_filter([
+                    'payment_plan' => $lockedOrder->payment_plan ?? 'DEPOSIT',
+                    'confirmation_acknowledgements' => $confirmationAcknowledgements === [] ? null : $confirmationAcknowledgements,
+                    'billplz' => [
+                        'checkout_status' => 'CREATING',
+                        'payment_method' => $paymentMethod,
+                    ],
+                ], fn ($value) => $value !== null),
             ]);
             $payment->events()->create([
                 'event_type' => 'BOOKING_PAYMENT_CREATED',

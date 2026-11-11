@@ -357,6 +357,36 @@ class StaffOrderVisibilityTest extends TestCase
             ->assertSee($order->order_id);
     }
 
+    public function test_digital_designer_can_open_order_assigned_to_them(): void
+    {
+        $designer = $this->staff(User::ROLE_DIGITAL_DESIGNER);
+        $admin = $this->staff(User::ROLE_ADMIN);
+        $order = $this->confirmedOrder(1, 'LELAKI', 'Digital Designer Detail Mine');
+        $job = $this->initializeDesignJobs($order)->first();
+
+        app(AssignDesignJobService::class)->assign($job, $designer, $admin);
+
+        $this->actingAs($designer)
+            ->get(route('staff.orders.show', $order->order_id))
+            ->assertOk()
+            ->assertSee($order->order_id);
+    }
+
+    public function test_digital_designer_gets_404_for_order_assigned_to_another_designer(): void
+    {
+        $designer = $this->staff(User::ROLE_DIGITAL_DESIGNER);
+        $otherDesigner = $this->staff(User::ROLE_DESIGNER);
+        $admin = $this->staff(User::ROLE_ADMIN);
+        $order = $this->confirmedOrder(1, 'LELAKI', 'Digital Designer Detail Other');
+        $job = $this->initializeDesignJobs($order)->first();
+
+        app(AssignDesignJobService::class)->assign($job, $otherDesigner, $admin);
+
+        $this->actingAs($designer)
+            ->get(route('staff.orders.show', $order->order_id))
+            ->assertNotFound();
+    }
+
     public function test_designer_gets_404_for_order_assigned_to_another_designer(): void
     {
         $designer = $this->staff(User::ROLE_DESIGNER);

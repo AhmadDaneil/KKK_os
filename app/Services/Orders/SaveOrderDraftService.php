@@ -148,13 +148,7 @@ class SaveOrderDraftService
                         $cardImage = Arr::get($sideData, 'design.card_image');
                         $oldPath = $packageSide->design->card_image_path;
 
-                        $effectiveTheme = Arr::has($sideData, 'design.theme')
-                            ? $designData['theme']
-                            : $packageSide->design->theme;
-
-                        $isPortraitTheme = strtoupper((string) $effectiveTheme) === 'PORTRAIT';
-
-                        if ($isPortraitTheme && $cardImage instanceof UploadedFile) {
+                        if ($cardImage instanceof UploadedFile) {
                             $newPath = $this->storeCardImage(
                                 $order->order_id,
                                 $sideName,
@@ -167,15 +161,6 @@ class SaveOrderDraftService
                             if (is_string($oldPath) && $oldPath !== '') {
                                 $oldPathsToDelete[] = $oldPath;
                             }
-                        } elseif (
-                            ! $isPortraitTheme
-                            && is_string($oldPath)
-                            && $oldPath !== ''
-                        ) {
-                            // Customer photos are reserved for the PORTRAIT theme.
-                            // Remove an old portrait image when the customer switches theme.
-                            $designData['card_image_path'] = null;
-                            $oldPathsToDelete[] = $oldPath;
                         }
 
                         $packageSide->design->update($designData);
@@ -551,3 +536,4 @@ class SaveOrderDraftService
         return $value === '' ? null : $value;
     }
 }
+

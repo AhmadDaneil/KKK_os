@@ -51,9 +51,18 @@ class BuildOrderPricingService
         }
 
         $packageCents = $this->toCents((string) $package['amount']);
-        $delivery = $this->postageCalculator->quote($order);
+        $delivery = $order->source === 'TEST'
+            ? [
+                'amount' => '0.00',
+                'region' => null,
+                'region_label' => 'Test order — card package only',
+                'description' => '',
+            ]
+            : $this->postageCalculator->quote($order);
         $postageCents = $this->toCents($delivery['amount']);
-        $depositCents = $this->toCents((string) $profile->deposit_value);
+        $depositCents = $order->source === 'TEST' && $order->payment_plan === 'FULL'
+            ? $packageCents
+            : $this->toCents((string) $profile->deposit_value);
 
         if ($depositCents > ($packageCents + $postageCents)) {
             throw ValidationException::withMessages([
@@ -115,6 +124,7 @@ class BuildOrderPricingService
                     'postage_region' => $quote['delivery']['region'],
                     'deposit_profile_code' => $quote['profile']->code,
                     'deposit_amount' => $quote['deposit_amount'],
+                    'payment_plan' => $lockedOrder->payment_plan,
                 ],
             ]);
 

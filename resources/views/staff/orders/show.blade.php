@@ -27,7 +27,7 @@
         && $hasDesignJobs
         && $order->designJobs->contains('assigned_user_id', auth()->id());
     $canUploadProgressUpdate = match (auth()->user()->role) {
-        \App\Models\User::ROLE_DESIGNER => $hasDesignJobs
+        \App\Models\User::ROLE_DESIGNER, \App\Models\User::ROLE_DIGITAL_DESIGNER => $hasDesignJobs
             && $order->designJobs->contains('assigned_user_id', auth()->id()),
         \App\Models\User::ROLE_PRODUCTION => $order->relationLoaded('printJobs')
             && $order->printJobs->contains('assigned_user_id', auth()->id()),
@@ -37,12 +37,13 @@
     };
     $progressRoleLabels = [
         \App\Models\User::ROLE_DESIGNER => 'Designer',
+        \App\Models\User::ROLE_DIGITAL_DESIGNER => 'Digital Designer',
         \App\Models\User::ROLE_PRODUCTION => 'Production',
         \App\Models\User::ROLE_OM => 'OM',
     ];
     $statusLabels = [
         'DETAILS_INCOMPLETE' => 'Details incomplete', 'READY_FOR_DESIGN' => 'Ready for design',
-        'DESIGN_IN_PROGRESS' => 'Design in progress', 'DESIGN_READY' => 'Awaiting customer review',
+        'DESIGN_IN_PROGRESS' => 'Design in progress', 'DESIGN_READY' => 'Ready for internal review',
         'CORRECTION_REQUESTED' => 'Correction required', 'DESIGN_APPROVED' => 'Design approved',
         'BALANCE_PENDING' => 'Awaiting balance payment', 'READY_FOR_PRINT' => 'Ready for production',
         'PRINTING' => 'Production in progress', 'PRINTED' => 'Production complete',
@@ -420,14 +421,25 @@
                             <div class="staff-detail-group">
                                 <h4>Couple's Short Names</h4>
                                 <dl class="staff-detail-list">
-                                    <div>
-                                        <dt>Groom</dt>
-                                        <dd>{{ $packageCouple?->groom_abbreviation ?: $packageCouple?->groom_name ?: '-' }}</dd>
-                                    </div>
-                                    <div>
-                                        <dt>Bride</dt>
-                                        <dd>{{ $packageCouple?->bride_abbreviation ?: $packageCouple?->bride_name ?: '-' }}</dd>
-                                    </div>
+                                    @if ($packageSide->side === 'PEREMPUAN')
+                                        <div>
+                                            <dt>Bride</dt>
+                                            <dd>{{ $packageCouple?->bride_abbreviation ?: $packageCouple?->bride_name ?: '-' }}</dd>
+                                        </div>
+                                        <div>
+                                            <dt>Groom</dt>
+                                            <dd>{{ $packageCouple?->groom_abbreviation ?: $packageCouple?->groom_name ?: '-' }}</dd>
+                                        </div>
+                                    @else
+                                        <div>
+                                            <dt>Groom</dt>
+                                            <dd>{{ $packageCouple?->groom_abbreviation ?: $packageCouple?->groom_name ?: '-' }}</dd>
+                                        </div>
+                                        <div>
+                                            <dt>Bride</dt>
+                                            <dd>{{ $packageCouple?->bride_abbreviation ?: $packageCouple?->bride_name ?: '-' }}</dd>
+                                        </div>
+                                    @endif
                                 </dl>
                             </div>
 
@@ -471,12 +483,12 @@
 
                                         <div>
                                             <dt>Meal Time</dt>
-                                            <dd>{{ $packageSide->event->meal_time ?? '-' }}</dd>
+                                            <dd>{{ $packageSide->event?->meal_time ? \Carbon\CarbonImmutable::parse($packageSide->event->meal_time)->format('g:i A') : '-' }}</dd>
                                         </div>
 
                                         <div>
                                             <dt>Wedding Reception Time</dt>
-                                            <dd>{{ $packageSide->event->bersanding_time ?? '-' }}</dd>
+                                            <dd>{{ $packageSide->event?->bersanding_time ? \Carbon\CarbonImmutable::parse($packageSide->event->bersanding_time)->format('g:i A') : '-' }}</dd>
                                         </div>
 
                                         <div>
@@ -547,6 +559,9 @@
                                 <a
                                     href="{{ route('staff.orders.photoshop.csv', $order) }}"
                                     class="staff-button"
+                                    data-save-file
+                                    data-save-file-type="csv"
+                                    data-save-filename="{{ $order->order_id }}_READY_TO_MERGE.csv"
                                 >
                                     Download Customer CSV
                                 </a>
@@ -556,6 +571,12 @@
 
                     <div class="staff-work-grid">
                         @forelse ($order->designJobs as $job)
+                            @php
+                                $jobPackageSide = $order->packageSides
+                                    ->firstWhere('id', $job->order_package_side_id);
+                                $jobTheme = strtoupper((string) $jobPackageSide?->design?->theme);
+                                $hasCustomerPhoto = filled($jobPackageSide?->design?->card_image_path);
+                            @endphp
                             <article class="staff-card" data-design-job-id="{{ $job->id }}">
                                 <div class="staff-card-heading">
                                     <h3>{{ $job->side === 'LELAKI' ? 'Groom' : 'Bride' }}</h3>
@@ -563,6 +584,7 @@
                                     <span class="staff-status">
                                         {{ str_replace('_', ' ', $job->status) }}
                                     </span>
+
                                 </div>
 
                                 <dl class="staff-detail-list">
@@ -641,8 +663,8 @@
 
                                 @if (auth()->user()->isOperationManagement() && $hasDesignProof)
                                     <div class="staff-proof-status">
-                                        <strong>Designer Proof · Version {{ $latestProofArtwork->version_number }}</strong>
-                                        <label class="staff-proof-status-label" for="{{ $proofPreviewSelectId }}">Preview</label>
+                                        <strong>Internal Design Preview · Version {{ $latestProofArtwork->version_number }}</strong>
+                                        <label class="staff-proof-status-label" for="{{ $proofPreviewSelectId }}">Select preview</label>
                                         <select id="{{ $proofPreviewSelectId }}" class="staff-proof-preview-select" data-proof-preview-select>
                                             @foreach ($proofPreviewOptions as $previewOption)
                                                 <option
@@ -656,7 +678,7 @@
                                             class="staff-button staff-button-small js-proof-preview-link"
                                             target="_blank"
                                             rel="noopener"
-                                        >View Proof</a>
+                                        >View Preview</a>
                                     </div>
                                 @endif
 
@@ -686,7 +708,11 @@
                                 @endif
                                 @if (auth()->user()->hasStaffRole(\App\Models\User::ROLE_DESIGNER)
                                     && $job->assigned_user_id === auth()->id())
-                                    <div class="staff-design-actions">
+                                    <div @class([
+                                        'staff-design-actions',
+                                        'staff-design-actions--with-picture' => $hasCustomerPhoto
+                                            && in_array($job->status, ['READY_FOR_DESIGN', 'CORRECTION_REQUESTED'], true),
+                                    ])>
                                         @if ($job->status === 'READY_FOR_DESIGN')
                                             <form
                                                 method="POST"
@@ -730,7 +756,7 @@
 
                                                     <p>
                                                         Upload editable source files and
-                                                        customer previews.
+                                                        internal previews for Admin and Operations Management.
                                                     </p>
                                                 </div>
 
@@ -743,7 +769,7 @@
                                                         enctype="multipart/form-data"
                                                         class="staff-artwork-form js-staff-confirmation-form js-async-artwork-upload"
                                                         data-confirm-title="Upload design {{ $job->side === 'LELAKI' ? 'Groom' : 'Bride' }}?"
-                                                        data-confirm-message="Check that the selected source files and customer previews are correct. They will be saved as a new design version."
+                                                        data-confirm-message="Check that the selected source files and internal previews are correct. They will be saved as a new design version for Admin and Operations Management to view."
                                                         data-confirm-button="Yes, upload"
                                                     >
                                                         @csrf
@@ -769,14 +795,14 @@
                                                         </div>
 
                                                         <span class="staff-field-help">
-                                                            PSD or PDF. Maximum 100 MB.
+                                                            PSD or PDF. Maximum 300 MB per source file.
                                                         </span>
                                                     </div>
 
                                                     <div class="staff-supplementary-artworks">
                                                         <div class="staff-supplementary-heading">
                                                             <h4>Wedding Card Preview</h4>
-                                                            <p>Upload both sides of the card for customer review.</p>
+                                                            <p>Upload both sides of the card as internal previews.</p>
                                                         </div>
                                                         <div class="staff-supplementary-grid">
                                                             <div class="staff-field">
@@ -794,17 +820,19 @@
                                                         </div>
                                                     </div>
 
-                                                    @php
-                                                        $jobPackageSide = $order->packageSides
-                                                            ->firstWhere('id', $job->order_package_side_id);
-                                                        $jobTheme = strtoupper((string) $jobPackageSide?->design?->theme);
-                                                    @endphp
                                                     <div class="staff-supplementary-artworks">
                                                         <div class="staff-supplementary-heading">
                                                             <h4>Card Package Preview</h4>
                                                             <p>Banner and bunting are included with every wedding card package. Use the same short names and card design theme.</p>
-                                                            @if ($jobTheme === 'PORTRAIT' && $jobPackageSide?->design?->card_image_path)
-                                                                <p class="staff-field-help"><strong>PORTRAIT theme:</strong> use the uploaded couple photo for banner and bunting artwork. <a href="{{ route($operationRoutePrefix.'orders.customer-photo', ['orderId' => $order->order_id, 'side' => $jobPackageSide->side]) }}">Download couple photo</a></p>
+                                                            @if ($hasCustomerPhoto)
+                                                                <p class="staff-field-help"><strong>Customer photo uploaded:</strong> use it for all items with the PORTRAIT theme, or for banner and bunting only with other themes. Use the supplied template for other items.
+                                                                    @if (auth()->user()->hasStaffRole(\App\Models\User::ROLE_DESIGNER)
+                                                                        && $job->assigned_user_id === auth()->id())
+                                                                        Use the Download Picture button below.
+                                                                    @else
+                                                                        <a href="{{ route($operationRoutePrefix.'orders.customer-photo', ['orderId' => $order->order_id, 'side' => $jobPackageSide->side]) }}">Download couple photo</a>
+                                                                    @endif
+                                                                </p>
                                                             @else
                                                                 <p class="staff-field-help"><strong>Theme {{ $jobTheme ?: '-' }}:</strong> prepare the banner and bunting using the design theme only, without a couple photo.</p>
                                                             @endif
@@ -867,28 +895,40 @@
                                                             method="POST"
                                                             action="{{ route($operationRoutePrefix.'design-jobs.mark-ready', $job) }}"
                                                             class="js-staff-confirmation-form"
-                                                            data-confirm-title="Send design {{ $job->side === 'LELAKI' ? 'Groom' : 'Bride' }} to the customer?"
-                                                            data-confirm-message="Version {{ $job->artworkVersions->max('version_number') }} will be sent for customer review. Confirm that the previews are correct."
-                                                            data-confirm-button="Yes, send for review"
+                                                            data-confirm-title="Mark {{ $job->side === 'LELAKI' ? 'Groom' : 'Bride' }} design as done?"
+                                                            data-confirm-message="Version {{ $job->artworkVersions->max('version_number') }} will be marked complete for internal tracking. Admin and Operations Management can view the uploaded previews; they will not be sent to the customer."
+                                                            data-confirm-button="Yes, mark as done"
                                                         >
                                                             @csrf
                                                             <button
                                                                 type="submit"
                                                                 class="staff-button staff-button-primary"
                                                             >
-                                                                Send for Customer Review
+                                                                Mark as Done
                                                             </button>
                                                         </form>
                                                     </div>
                                                     <p class="staff-work-message" data-artwork-upload-hint @if ($job->artworkVersions->isNotEmpty()) hidden @endif>
-                                                        Upload source files and customer previews first.
-                                                        The button to send the design to the customer will then appear.
+                                                        Upload source files and internal previews first.
+                                                        The Mark as Done button will then appear.
                                                     </p>
                                             </div>
                                         @elseif ($job->status === 'DESIGN_READY')
                                             <p class="staff-work-message">
-                                                Design is ready for customer review.
+                                                Design is ready for internal review.
                                             </p>
+                                        @endif
+
+                                        @if ($hasCustomerPhoto)
+                                            <div class="staff-design-photo-download">
+                                                <a
+                                                    href="{{ route($operationRoutePrefix.'orders.customer-photo', ['orderId' => $order->order_id, 'side' => $jobPackageSide->side]) }}"
+                                                    class="staff-button staff-button-small"
+                                                    data-save-file
+                                                    data-save-file-type="image"
+                                                    data-save-filename="gambar-pengantin-{{ $order->order_id }}-{{ strtolower($jobPackageSide->side) }}.jpg"
+                                                >Download Picture</a>
+                                            </div>
                                         @endif
                                     </div>
                                 @endif
@@ -907,8 +947,8 @@
                             action="{{ route('staff.orders.design-artworks.store', $order) }}"
                             enctype="multipart/form-data"
                             class="staff-batch-artwork-form js-staff-confirmation-form js-async-artwork-upload"
-                            data-confirm-title="Upload both design files?"
-                            data-confirm-message="Check the source files and customer previews for the groom's and bride's packages. Both will be saved as new design versions."
+                            data-confirm-title="Upload both designs?"
+                            data-confirm-message="Check the source files and internal previews for the groom's and bride's packages. Both will be saved as new design versions for Admin and Operations Management to view."
                             data-confirm-button="Yes, upload both"
                         >
                             @csrf
@@ -924,13 +964,13 @@
                             method="POST"
                             action="{{ route('staff.orders.design-jobs.mark-ready', $order) }}"
                             class="staff-batch-review-form js-staff-confirmation-form"
-                            data-confirm-title="Send both designs for customer review?"
-                            data-confirm-message="Both packages will be sent together. Check that the card, banner and bunting previews for each package have been uploaded and reviewed."
-                            data-confirm-button="Yes, send both"
+                            data-confirm-title="Mark both designs as done?"
+                            data-confirm-message="Both packages will be marked complete for internal tracking. Admin and Operations Management can view the uploaded card, banner and bunting previews; they will not be sent to the customer."
+                            data-confirm-button="Yes, mark both as done"
                         >
                             @csrf
                             <button type="submit" class="staff-button staff-button-primary">
-                                Send Both for Customer Review
+                                Mark Both as Done
                             </button>
                         </form>
                     @endif
@@ -1160,15 +1200,7 @@
                                                         <a href="{{ route($operationRoutePrefix.'print-jobs.progress-files.show', ['printJob' => $job, 'file' => $loop->index]) }}" class="staff-button staff-button-small" target="_blank" rel="noopener">
                                                             View · {{ isset($file['uploaded_at']) ? \Illuminate\Support\Carbon::parse($file['uploaded_at'])->timezone(config('app.display_timezone'))->format('Y-m-d H:i') : '-' }}
                                                         </a>
-                                                        @if (($file['customer_visible'] ?? false) === true)
-                                                            <span class="staff-muted-text">Shared with customer</span>
-                                                        @elseif (auth()->user()->isOperationManagement() || (auth()->user()->hasStaffRole(\App\Models\User::ROLE_PRODUCTION) && $job->assigned_user_id === auth()->id()))
-                                                            <form method="POST" action="{{ route($operationRoutePrefix.'print-jobs.progress-files.visibility', ['printJob' => $job, 'file' => $loop->index]) }}">
-                                                                @csrf
-                                                                <input type="hidden" name="customer_visible" value="1">
-                                                                <button type="submit" class="staff-button staff-button-small staff-button-primary">Share with customer</button>
-                                                            </form>
-                                                        @endif
+                                                        <span class="staff-muted-text">Internal staff file</span>
                                                     </div>
                                                 </div>
                                             @endforeach
@@ -1199,10 +1231,6 @@
                                                 <button type="button" class="staff-file-cancel" hidden aria-controls="print-progress-{{ $job->id }}">Cancel</button>
                                             </div>
                                             <p class="staff-muted-text">Upload images or PDFs showing production progress. Maximum 10 files, 20 MB each.</p>
-                                            <label class="staff-progress-visibility">
-                                                <input type="checkbox" name="customer_visible" value="1">
-                                                Share these production proofs with the customer
-                                            </label>
                                             <button type="submit" class="staff-button staff-button-secondary">Upload Progress</button>
                                             <p class="staff-upload-notice" role="status" aria-live="polite" hidden></p>
                                         </form>
@@ -1637,6 +1665,81 @@
         });
     });
 </script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        document.querySelectorAll('a[data-save-file]').forEach(function (link) {
+            let isSaving = false;
+
+            link.addEventListener('click', async function (event) {
+                event.preventDefault();
+                event.stopPropagation();
+
+                if (isSaving) {
+                    return;
+                }
+
+                if (!window.isSecureContext || typeof window.showSaveFilePicker !== 'function') {
+                    window.alert('Save As is not available in this browser. Open this page in Chrome or Edge over HTTPS or localhost.');
+                    return;
+                }
+
+                isSaving = true;
+                link.setAttribute('aria-busy', 'true');
+
+                const fileType = link.dataset.saveFileType;
+                const pickerOptions = {
+                    suggestedName: link.dataset.saveFilename,
+                    id: fileType === 'csv' ? 'staff-customer-csv' : 'staff-customer-photo',
+                };
+
+                if (fileType === 'csv') {
+                    pickerOptions.types = [{
+                        description: 'CSV file',
+                        accept: { 'text/csv': ['.csv'] },
+                    }];
+                } else if (fileType === 'image') {
+                    pickerOptions.types = [{
+                        description: 'JPEG image',
+                        accept: { 'image/jpeg': ['.jpg', '.jpeg'] },
+                    }];
+                }
+
+                try {
+                    // Open the native Save As dialog while the click still has user activation.
+                    const saveHandle = await window.showSaveFilePicker(pickerOptions);
+                    const response = await fetch(link.href, { credentials: 'same-origin' });
+
+                    if (!response.ok) {
+                        throw new Error('The download request failed.');
+                    }
+
+                    const contentType = response.headers.get('content-type') || '';
+
+                    if (contentType.toLowerCase().includes('text/html')) {
+                        throw new Error('The server returned a page instead of the requested file.');
+                    }
+
+                    const writable = await saveHandle.createWritable();
+
+                    try {
+                        await writable.write(await response.blob());
+                        await writable.close();
+                    } catch (error) {
+                        await writable.abort();
+                        throw error;
+                    }
+                } catch (error) {
+                    if (error.name !== 'AbortError') {
+                        window.alert('The file could not be saved. Please try again.');
+                    }
+                } finally {
+                    isSaving = false;
+                    link.removeAttribute('aria-busy');
+                }
+            });
+        });
+    });
+</script>
 @include('staff.partials.logout-confirmation')
 <dialog id="staff-action-confirmation-dialog" class="logout-confirmation-dialog" aria-labelledby="staff-action-confirmation-title">
     <div class="logout-confirmation-icon" aria-hidden="true">?</div>
@@ -1839,11 +1942,19 @@
                         'X-Requested-With': 'XMLHttpRequest',
                     },
                 });
-                const payload = await response.json().catch(function () { return {}; });
+                const payload = await response.json().catch(function () { return null; });
 
                 if (!response.ok) {
-                    const errors = payload.errors ? Object.values(payload.errors).flat().join(' ') : null;
-                    throw new Error(errors || payload.message || 'Could not upload the design.');
+                    const errors = payload?.errors ? Object.values(payload.errors).flat().join(' ') : null;
+                    let fallbackMessage = 'Upload failed (HTTP ' + response.status + '). Please try again.';
+
+                    if (response.status === 413) {
+                        fallbackMessage = 'The combined upload is larger than the server allows. Reduce the file sizes or ask an administrator to increase the server upload limit.';
+                    } else if (response.status === 419 || (response.redirected && /login/i.test(response.url))) {
+                        fallbackMessage = 'Your session has expired. Refresh the page, sign in again, and retry the upload.';
+                    }
+
+                    throw new Error(errors || payload?.message || fallbackMessage);
                 }
 
                 const selector = form.id
@@ -1882,7 +1993,7 @@
 
                     if (reviewForm && artworkJob.version_number) {
                         reviewForm.dataset.confirmMessage = 'Version ' + artworkJob.version_number
-                            + ' will be sent for customer review. Make sure the previews have been checked and are correct.';
+                            + ' will be marked complete for internal tracking. Admin and Operations Management can view the uploaded previews; they will not be sent to the customer.';
                     }
 
                     if (reviewPanel) {

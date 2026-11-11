@@ -8,6 +8,10 @@ use Illuminate\Validation\ValidationException;
 
 class ResolveBookingAmountService
 {
+    public function __construct(
+        private ResolvePackagePriceService $packagePriceResolver,
+    ) {}
+
     /** @return array{amount: string, currency: string, profile: OrderPricingProfile} */
     public function resolve(Order $order): array
     {
@@ -37,8 +41,12 @@ class ResolveBookingAmountService
             ]);
         }
 
+        $amount = $order->source === 'TEST' && $order->payment_plan === 'FULL'
+            ? $this->packagePriceResolver->resolve($order)['amount']
+            : $expectedAmount;
+
         return [
-            'amount' => $expectedAmount,
+            'amount' => $amount,
             'currency' => $profile->currency,
             'profile' => $profile,
         ];

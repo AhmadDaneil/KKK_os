@@ -63,10 +63,11 @@ class BuildPhotoshopAutoMergeRowService
         $parents = $payload['parents'] ?? [];
         $event = $payload['event'] ?? [];
 
-        $orderId = trim((string) ($source['order_id'] ?? ''));
-        $theme = trim((string) ($design['theme'] ?? ''));
-        $designCode = strtoupper(trim((string) ($design['design_code'] ?? '')));
-        $majlis = strtoupper(trim((string) ($source['side'] ?? '')));
+        $orderId = $this->uppercaseText($source['order_id'] ?? '');
+        $theme = $this->uppercaseText($design['theme'] ?? '');
+        $designCode = $this->uppercaseText($design['design_code'] ?? '');
+        $majlis = $this->uppercaseText($source['side'] ?? '');
+        $cardImagePath = trim((string) ($design['card_image_path'] ?? ''));
 
         if ($orderId === '' || $theme === '' || $designCode === '') {
             throw new RuntimeException(
@@ -89,11 +90,8 @@ class BuildPhotoshopAutoMergeRowService
             'tema' => $theme,
             'designcode' => $designCode,
 
-            // Customer photos are used exclusively with the PORTRAIT theme.
-            // A non-portrait design must reach Photoshop without a customer photo.
-            'gambar' => strtoupper($theme) === 'PORTRAIT'
-                ? $this->cardImagePath($design['card_image_path'] ?? null)
-                : '',
+            // V35 decides which Photoshop items receive a provided customer photo.
+            'gambar' => $this->cardImagePath($cardImagePath),
 
             // `majlis` is now actively consumed by the approved side-aware JSX:
             // LELAKI = groom above bride; PEREMPUAN = bride above groom.
@@ -102,20 +100,20 @@ class BuildPhotoshopAutoMergeRowService
 
             'namapengantinlelaki' => $this->text($couple['groom_name'] ?? ''),
             'namapengantinperempuan' => $this->text($couple['bride_name'] ?? ''),
-            'singkatanlelaki' => $this->text($couple['groom_abbreviation'] ?? ''),
-            'singkatanperempuan' => $this->text($couple['bride_abbreviation'] ?? ''),
+            'singkatanlelaki' => $this->abbreviation($couple['groom_abbreviation'] ?? ''),
+            'singkatanperempuan' => $this->abbreviation($couple['bride_abbreviation'] ?? ''),
             'namaayah' => $this->text($parents['father_name'] ?? ''),
             'namaibu' => $this->text($parents['mother_name'] ?? ''),
 
-            'hari' => strtoupper($this->text($event['day_name'] ?? '')),
+            'hari' => $this->text($event['day_name'] ?? ''),
             'tarikh' => $date ? $this->fullMalayDate($date) : '',
             'tarikhhari' => $date ? (string) $date->day : '',
             'bulan' => $date ? self::MONTH_SHORT_MS[$date->month].' '.$date->year : '',
             'bulanislam' => $this->text($event['hijri_date'] ?? ''),
 
             // Current JSX writes these values exactly; no Photoshop-side formatting.
-            'masabersanding' => $this->text($event['bersanding_time'] ?? ''),
-            'masajamuanmakan' => $this->text($event['meal_time'] ?? ''),
+            'masabersanding' => $this->formatTime($event['bersanding_time'] ?? ''),
+            'masajamuanmakan' => $this->formatTime($event['meal_time'] ?? ''),
 
             'alamat' => $this->text($event['full_address'] ?? ''),
             'qrlink' => trim((string) ($event['google_maps_url'] ?? '')),
@@ -127,7 +125,7 @@ class BuildPhotoshopAutoMergeRowService
             'nama3' => $this->text($contacts[3]['contact_name'] ?? ''),
             'notel3' => $this->phone($contacts[3]['contact_phone'] ?? ''),
 
-            'flaggambar' => '',
+            'flaggambar' => $cardImagePath !== '' ? 'ADA GAMBAR' : 'TIADA GAMBAR',
         ];
     }
 
@@ -204,18 +202,60 @@ class BuildPhotoshopAutoMergeRowService
 
     private function text(mixed $value): string
     {
-        return trim((string) $value);
+        return $this->uppercaseText($value);
+    }
+
+    private function uppercaseText(mixed $value): string
+    {
+        return mb_strtoupper(trim((string) $value), 'UTF-8');
+    }
+
+    private function abbreviation(mixed $value): string
+    {
+        $value = mb_strtolower(trim((string) $value), 'UTF-8');
+
+        if ($value === '') {
+            return '';
+        }
+
+        $firstCharacter = mb_substr($value, 0, 1, 'UTF-8');
+        $remainingCharacters = mb_substr(
+            $value,
+            1,
+            mb_strlen($value, 'UTF-8'),
+            'UTF-8'
+        );
+
+        return mb_strtoupper($firstCharacter, 'UTF-8').$remainingCharacters;
+    }
+
+    private function formatTime(mixed $value): string
+    {
+        $value = trim((string) $value);
+
+        if ($value === '') {
+            return '';
+        }
+
+        return CarbonImmutable::parse($value)->format('g:i A');
     }
 
     private function phone(mixed $value): string
     {
-        $value = trim((string) $value);
+        $digits = (string) preg_replace('/\D+/', '', trim((string) $value));
 
-        // Preserve optional leading + and numeric digits.
-        if (str_starts_with($value, '+')) {
-            return '+'.preg_replace('/\D+/', '', substr($value, 1));
+        if ($digits === '') {
+            return '';
         }
 
-        return preg_replace('/\D+/', '', $value);
+        if (str_starts_with($digits, '0060')) {
+            return '0'.substr($digits, 4);
+        }
+
+        if (str_starts_with($digits, '60')) {
+            return '0'.substr($digits, 2);
+        }
+
+        return str_starts_with($digits, '0') ? $digits : '0'.$digits;
     }
 }

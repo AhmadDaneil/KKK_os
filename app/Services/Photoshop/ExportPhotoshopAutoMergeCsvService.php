@@ -85,7 +85,7 @@ class ExportPhotoshopAutoMergeCsvService
             if ($hasMockup) {
                 $eventRow = $cardRowsBySide[$order->first_event_side] ?? $firstCardRow;
                 $mockupRow = array_fill_keys($headers, '');
-                $mockupRow['noinvoice'] = $order->order_id;
+                $mockupRow['noinvoice'] = mb_strtoupper($order->order_id, 'UTF-8');
                 $mockupRow['tema'] = PhotoshopCekHantaranContractV2::MOCKUP_THEME;
                 $mockupRow['designcode'] = PhotoshopCekHantaranContractV2::MOCKUP_DESIGN_CODE;
                 $mockupRow['majlis'] = PhotoshopCekHantaranContractV2::MOCKUP_SIDE;
@@ -93,8 +93,12 @@ class ExportPhotoshopAutoMergeCsvService
                 $mockupRow['namapengantinperempuan'] = $firstCardRow['namapengantinperempuan'] ?? '';
                 $mockupRow['hari'] = $eventRow['hari'] ?? '';
                 $mockupRow['tarikh'] = $eventRow['tarikh'] ?? '';
-                $mockupRow['output_id'] = $order->order_id.'-CH';
-                $mockupRow['jumlah_hantaran'] = $order->jumlah_hantaran;
+                $mockupRow['flaggambar'] = 'TIADA GAMBAR';
+                $mockupRow['output_id'] = mb_strtoupper($order->order_id.'-CH', 'UTF-8');
+                $mockupRow['jumlah_hantaran'] = mb_strtoupper(
+                    trim((string) $order->jumlah_hantaran),
+                    'UTF-8'
+                );
 
                 fputcsv($handle, array_values($mockupRow));
             }

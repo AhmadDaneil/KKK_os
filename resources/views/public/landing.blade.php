@@ -26,7 +26,7 @@
     <main>
         <section class="hero">
             <div class="hero-copy">
-                <h1>Celebrate your special day with a card that feels <em>uniquely yours.</em></h1>
+                <h1>Make your special day <em>unforgettable.</em></h1>
                 <p class="hero-text">Chat with us on WhatsApp to choose your package and pay the booking fee. After payment is confirmed, you can complete your order and preview your card in the Customer Dashboard.</p>
                 @if ($activeDraft)
                     <div class="landing-resume-order" role="status">
@@ -40,8 +40,10 @@
                 @endif
                 <div class="hero-actions">
                     @unless ($activeDraft)
-                        <a class="button button-primary" href="{{ route('public.orders.create') }}"><span>Chat to Book</span><span class="button-arrow" aria-hidden="true">→</span></a>
                         <a class="button button-secondary" href="{{ route('public.orders.progress') }}"><span>Track Order</span></a>
+                        @if ($canTestOrder)
+                            <a class="button button-primary" href="{{ route('public.orders.test.create') }}"><span>Booking Now</span><span class="button-arrow" aria-hidden="true">→</span></a>
+                        @endif
                     @endunless
                     <a class="button button-secondary" href="{{ route('orders.access.create') }}"><span>Continue Existing Order</span><span class="button-arrow" aria-hidden="true">→</span></a>
                 </div>
@@ -52,59 +54,52 @@
                 </ul>
             </div>
 
-            <div class="hero-art" aria-label="KingKadKahwin wedding card samples">
+            <div class="hero-art" aria-label="Puteri Manis wedding service promotions">
                 <div class="card-runner card-runner-back">
-                    <article class="sample-card sample-card-back sample-card-image">
-                        <img src="{{ asset('images/landing/card-nostalgia-ckn-008.jpg') }}"
-                            alt="Nostalgia wedding card design"
+                    <article class="sample-card sample-card-back sample-card-image sample-card-square">
+                        <img src="{{ asset('images/landing/puteri-manis-pricing.png') }}"
+                            alt="Puteri Manis package pricing and wedding product promotions"
                             loading="eager"
                             decoding="async"
                             draggable="false">
-                        <span class="landing-card-watermark" aria-hidden="true">
-                            <span>KING KAD KAHWIN · PREVIEW</span>
-                            <span>KING KAD KAHWIN · PREVIEW</span>
-                        </span>
-                    </article>
+</article>
                 </div>
                 <div class="card-runner card-runner-front">
                     <article class="sample-card sample-card-front sample-card-image">
-                        <img src="{{ asset('images/landing/card-desa-ckd-008.jpg') }}"
-                            alt="Countryside wedding card design"
+                        <img src="{{ asset('images/landing/puteri-manis-hangers.png') }}"
+                            alt="Puteri Manis wedding hanger promotion"
                             loading="eager"
                             decoding="async"
                             draggable="false">
-                        <span class="landing-card-watermark" aria-hidden="true">
-                            <span>KING KAD KAHWIN · PREVIEW</span>
-                            <span>KING KAD KAHWIN · PREVIEW</span>
-                        </span>
-                    </article>
+</article>
                 </div>
                 <div class="card-runner card-runner-garden">
-                    <article class="sample-card sample-card-garden sample-card-image">
-                        <img src="{{ asset('images/landing/card-garden-purple.png') }}"
-                            alt="Purple garden wedding card design"
+                    <article class="sample-card sample-card-garden sample-card-image sample-card-square">
+                        <img src="{{ asset('images/landing/puteri-manis-exclusive-cheque.png') }}"
+                            alt="Puteri Manis exclusive cheque promotion"
                             loading="eager"
                             decoding="async"
                             draggable="false">
-                        <span class="landing-card-watermark" aria-hidden="true">
-                            <span>KING KAD KAHWIN · PREVIEW</span>
-                            <span>KING KAD KAHWIN · PREVIEW</span>
-                        </span>
-                    </article>
+</article>
                 </div>
                 <div class="card-runner card-runner-islamic">
                     <article class="sample-card sample-card-islamic sample-card-image">
-                        <img src="{{ asset('images/landing/card-islamic-gold.png') }}"
-                            alt="Gold Islamic wedding card design"
+                        <img src="{{ asset('images/landing/puteri-manis-alive-card-motion-video.png') }}"
+                            alt="Puteri Manis Alive Card and Motion Video promotion"
                             loading="lazy"
                             decoding="async"
                             draggable="false">
-                        <span class="landing-card-watermark" aria-hidden="true">
-                            <span>KING KAD KAHWIN · PREVIEW</span>
-                            <span>KING KAD KAHWIN · PREVIEW</span>
-                        </span>
+</article>
+                </div>                <div class="card-runner card-runner-jelata">
+                    <article class="sample-card sample-card-jelata sample-card-image">
+                        <img src="{{ asset('images/landing/puteri-manis-jelata.png') }}"
+                            alt="Jelata wedding card packages and product promotion"
+                            loading="lazy"
+                            decoding="async"
+                            draggable="false">
                     </article>
                 </div>
+
             </div>
         </section>
 

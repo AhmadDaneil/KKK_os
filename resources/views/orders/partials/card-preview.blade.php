@@ -48,10 +48,12 @@
 
     @foreach ($previewPackageSides as $packageSide)
         @php
-            $jawiCardTitle = match ($packageSide->design?->card_title) {
-                'Majlis Perkahwinan' => 'Wedding Ceremony',
-                'Kenduri Kesyukuran' => 'Thanksgiving Celebration',
-                default => 'Wedding Reception',
+            $storedCardTitle = $packageSide->design?->card_title;
+            $normalizedCardTitle = strtoupper(trim((string) $storedCardTitle));
+            $jawiCardTitle = match ($normalizedCardTitle) {
+                'WALIMATULURUS', 'WALIMATUL URUS', 'MAJLIS PERKAHWINAN' => 'Wedding Ceremony',
+                'KENDURI KESYUKURAN', 'MAJLIS KESYUKURAN' => 'Thanksgiving Celebration',
+                default => 'Wedding Ceremony',
             };
         @endphp
         <div class="card-preview-wrap @if (! $loop->first) is-hidden @endif" data-card-preview="{{ $packageSide->side }}">
@@ -65,6 +67,7 @@
                 <div class="card-ornament ornament-top" aria-hidden="true"></div>
                 <div class="card-front-copy">
                     <p class="card-title" data-preview-field="card_title">{{ $jawiCardTitle }}</p>
+                    <img class="card-customer-photo-preview" data-live-photo-preview="portrait" alt="Uploaded customer photo preview" hidden>
                     <div class="card-couple-names">
                         @php
                             $hostIsGroom = $packageSide->side === 'LELAKI';
@@ -137,6 +140,7 @@
                     <img class="desa-product-artwork" data-desa-product-artwork alt="" hidden>
                     <div data-desa-product-placeholder>
                         <span class="live-product-label">Banner</span>
+                        <img class="live-product-customer-photo" data-live-photo-preview="item" alt="Uploaded customer photo preview" hidden>
                         <p data-preview-field="card_title">Wedding Reception</p>
                         <strong><span data-preview-field="groom_display">Groom</span> <i>&amp;</i> <span data-preview-field="bride_display">Bride</span></strong>
                         <small data-preview-field="event_date">Event Date</small>
@@ -147,6 +151,7 @@
                     <img class="desa-product-artwork" data-desa-product-artwork alt="" hidden>
                     <div data-desa-product-placeholder>
                         <span class="live-product-label">Bunting</span>
+                        <img class="live-product-customer-photo" data-live-photo-preview="item" alt="Uploaded customer photo preview" hidden>
                         <p data-preview-field="card_title">Wedding Reception</p>
                         <strong><span data-preview-field="groom_display">Groom</span><i>&amp;</i><span data-preview-field="bride_display">Bride</span></strong>
                         <small><span data-preview-field="day_name">DAY</span> · <span data-preview-field="event_date">Event Date</span></small>
@@ -157,6 +162,7 @@
                     <img class="desa-product-artwork" data-desa-product-artwork alt="" hidden>
                     <div data-desa-product-placeholder>
                         <span class="live-product-label">Left Arrow Poster</span>
+                        <img class="live-product-customer-photo" data-live-photo-preview="item" alt="Uploaded customer photo preview" hidden>
                         <p>Wedding Invitation</p>
                         <strong><span data-preview-field="groom_display">Groom</span> <i>&amp;</i> <span data-preview-field="bride_display">Bride</span></strong>
                         <svg class="arrow-shape" viewBox="0 0 600 250" aria-hidden="true" focusable="false">
@@ -169,6 +175,7 @@
                     <img class="desa-product-artwork" data-desa-product-artwork alt="" hidden>
                     <div data-desa-product-placeholder>
                         <span class="live-product-label">Right Arrow Poster</span>
+                        <img class="live-product-customer-photo" data-live-photo-preview="item" alt="Uploaded customer photo preview" hidden>
                         <p>Wedding Invitation</p>
                         <strong><span data-preview-field="groom_display">Groom</span> <i>&amp;</i> <span data-preview-field="bride_display">Bride</span></strong>
                         <svg class="arrow-shape" viewBox="0 0 600 250" aria-hidden="true" focusable="false">
@@ -181,6 +188,7 @@
                     <img class="desa-product-artwork" data-desa-product-artwork alt="" hidden>
                     <div data-desa-product-placeholder>
                         <span class="live-product-label">Sticker</span>
+                        <img class="live-product-customer-photo" data-live-photo-preview="item" alt="Uploaded customer photo preview" hidden>
                         <p>Thank You</p>
                         <strong><span data-preview-field="groom_display">Groom</span> <i>&amp;</i> <span data-preview-field="bride_display">Bride</span></strong>
                         <small data-preview-field="event_date">Event Date</small>

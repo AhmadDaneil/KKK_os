@@ -29,6 +29,7 @@ class BuildFinalReviewService
             'customer_reference' => $order->displayCustomerReference(),
             'customer_name' => $order->customer_name,
             'package_count' => $order->package_count,
+            'payment_plan' => $order->payment_plan ?? 'DEPOSIT',
             'card_quantity' => $order->card_quantity,
             'package_format' => $order->package_format,
             'first_event_side' => $order->first_event_side,

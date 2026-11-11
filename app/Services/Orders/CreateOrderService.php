@@ -32,6 +32,7 @@ class CreateOrderService
                 'wabot_idempotency_key' => $data['wabot_idempotency_key'] ?? null,
                 'wabot_package_code' => $data['wabot_package_code'] ?? null,
                 'package_count' => $data['package_count'],
+                'payment_plan' => $data['payment_plan'] ?? 'DEPOSIT',
                 'package_type' => $data['package_type'] ?? null,
                 'package_format' => (int) $data['package_count'] === 2
                     ? ($data['package_format'] ?? 'SEPARATE')
@@ -57,3 +58,4 @@ class CreateOrderService
         });
     }
 }
+

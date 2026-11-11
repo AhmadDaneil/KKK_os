@@ -42,6 +42,35 @@ class CustomerThankYouPageTest extends TestCase
         ]);
     }
 
+    public function test_customer_can_save_draft_without_creating_another_order(): void
+    {
+        $order = app(CreateOrderService::class)->create([
+            'package_count' => 1,
+            'side' => 'LELAKI',
+            'customer_name' => 'Manual Draft Customer',
+        ]);
+        $this->establishCustomerSession($order);
+
+        $response = $this->post(route('orders.draft.update', [
+            'orderId' => $order->order_id,
+        ]), [
+            'couple' => [
+                'groom_name' => 'Nama Simpan Draf',
+            ],
+        ]);
+
+        $response
+            ->assertRedirect(route('orders.dashboard', ['orderId' => $order->order_id]))
+            ->assertSessionHas('draft_saved', true);
+
+        $this->assertDatabaseHas('order_couples', [
+            'order_id' => $order->id,
+            'couple_number' => 1,
+            'groom_name' => 'Nama Simpan Draf',
+        ]);
+        $this->assertDatabaseCount('orders', 1);
+    }
+
     public function test_successful_confirmation_redirects_to_thank_you_page(): void
     {
         $order = $this->completeOrder();

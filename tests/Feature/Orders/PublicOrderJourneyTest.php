@@ -234,7 +234,7 @@ class PublicOrderJourneyTest extends TestCase
         ]);
         $order->update(['status' => 'PRINTED', 'booking_payment_status' => 'PAID']);
 
-        $this->post(route('public.orders.progress.lookup'), [
+        $response = $this->post(route('public.orders.progress.lookup'), [
             'order_id' => $order->order_id,
             'customer_phone' => $order->customer_phone,
         ])
@@ -242,6 +242,14 @@ class PublicOrderJourneyTest extends TestCase
             ->assertSee('88%')
             ->assertSee('Printing Completed')
             ->assertSee('Printing is complete and your order will proceed to packing.');
+
+        $this->assertSame(
+            1,
+            preg_match(
+                '/<li class="is-complete"[^>]*>\\s*<span class="order-lifecycle-marker"[^>]*>✓<\\/span>\\s*<strong>Printing<\\/strong>/s',
+                $response->getContent(),
+            ),
+        );
     }
 
     public function test_printing_order_opens_proofing_without_granting_private_dashboard_access(): void
