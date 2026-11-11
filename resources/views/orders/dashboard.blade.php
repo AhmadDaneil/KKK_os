@@ -1255,6 +1255,64 @@ document.addEventListener('DOMContentLoaded', function () {
             return translations[title] || translations['Walimatul Urus'];
         }
 
+        const desaDesignCodes = new Set([
+            'CKD-001', 'CKD-002', 'CKD-003', 'CKD-004',
+            'CKD-005', 'CKD-006', 'CKD-007', 'CKD-008'
+        ]);
+
+        function syncDesaArtwork(scope, theme, designCode) {
+            const normalizedCode = designCode.trim().toUpperCase();
+            const hasDesaArtwork = theme === 'desa' && desaDesignCodes.has(normalizedCode);
+            const assetBase = hasDesaArtwork
+                ? '/images/designs/desa/' + normalizedCode + '/'
+                : '';
+            const front = scope.matches('[data-card-preview]')
+                ? scope.querySelector('[data-card-face="front"]')
+                : null;
+
+            if (front) {
+                const artwork = front.querySelector('[data-desa-card-artwork]');
+                const nameOverlay = front.querySelector('[data-desa-card-name-overlay]');
+                const genericCopy = front.querySelector('.card-front-copy');
+                const ornaments = front.querySelectorAll('.card-ornament');
+
+                artwork.hidden = !hasDesaArtwork;
+                nameOverlay.hidden = !hasDesaArtwork;
+                genericCopy.hidden = hasDesaArtwork;
+                front.toggleAttribute('data-desa-artwork', hasDesaArtwork);
+                ornaments.forEach(function (ornament) {
+                    ornament.hidden = hasDesaArtwork;
+                });
+
+                if (hasDesaArtwork) {
+                    artwork.src = assetBase + 'card-front.webp';
+                    artwork.alt = normalizedCode + ' Desa wedding card front';
+                } else {
+                    artwork.removeAttribute('src');
+                    artwork.alt = '';
+                }
+            }
+
+            scope.querySelectorAll('[data-desa-product]').forEach(function (product) {
+                const type = product.dataset.desaProduct;
+                const artwork = product.querySelector('[data-desa-product-artwork]');
+                const placeholder = product.querySelector('[data-desa-product-placeholder]');
+                const shouldShowArtwork = hasDesaArtwork;
+
+                product.hidden = type === 'card-back' && !hasDesaArtwork;
+                artwork.hidden = !shouldShowArtwork;
+                placeholder.hidden = Boolean(shouldShowArtwork);
+
+                if (shouldShowArtwork) {
+                    artwork.src = assetBase + type + '.webp';
+                    artwork.alt = normalizedCode + ' Desa ' + type.replaceAll('-', ' ') + ' design';
+                } else {
+                    artwork.removeAttribute('src');
+                    artwork.alt = '';
+                }
+            });
+        }
+
         function syncPreviewScope(scope, side) {
             if (!scope) {
                 return;
@@ -1290,9 +1348,11 @@ document.addEventListener('DOMContentLoaded', function () {
             }
 
             const theme = value(prefix + '[design][theme]', 'songket').toLowerCase();
+            const designCode = value(prefix + '[design][design_code]', '');
             scope.querySelectorAll('[data-live-product-theme], .wedding-card-front').forEach(function (item) {
                 item.setAttribute('data-theme', theme);
             });
+            syncDesaArtwork(scope, theme, designCode);
         }
 
         function syncCard(side) {

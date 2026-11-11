@@ -57,6 +57,52 @@ class CustomerDashboardAccessTest extends TestCase
             ->assertDontSee('token=');
     }
 
+    public function test_desa_design_code_maps_to_all_preview_artwork_and_keeps_live_names(): void
+    {
+        $order = app(CreateOrderService::class)->create([
+            'package_count' => 1,
+            'package_type' => 'PUTERI_MANIS',
+            'side' => 'LELAKI',
+            'customer_name' => 'Desa Preview Customer',
+        ]);
+
+        $side = $order->packageSides()->firstOrFail();
+        $side->design()->create([
+            'theme' => 'DESA',
+            'design_code' => 'CKD-003',
+        ]);
+
+        $this->get(app(GenerateOrderAccessLinkService::class)->generate($order));
+
+        $this->get(route('orders.dashboard', ['orderId' => $order->order_id]))
+            ->assertOk()
+            ->assertSee('value="CKD-003"', false)
+            ->assertSee('data-desa-card-artwork', false)
+            ->assertSee('data-desa-card-name-overlay', false)
+            ->assertSee('data-preview-field="groom_display"', false)
+            ->assertSee('data-preview-field="bride_display"', false)
+            ->assertSee('data-desa-product="card-back"', false)
+            ->assertSee("'CKD-008'", false)
+            ->assertSee('/images/designs/desa/', false);
+
+        foreach (range(1, 8) as $designNumber) {
+            $designCode = sprintf('CKD-%03d', $designNumber);
+
+            foreach ([
+                'arrow-left',
+                'arrow-right',
+                'banner',
+                'bunting',
+                'card-back',
+                'card-front',
+                'sticker',
+                'wooden-hanger',
+            ] as $artwork) {
+                $this->assertFileExists(public_path("images/designs/desa/{$designCode}/{$artwork}.webp"));
+            }
+        }
+    }
+
     public function test_invalid_token_is_rejected(): void
     {
         $order = app(CreateOrderService::class)->create([
