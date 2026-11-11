@@ -208,16 +208,6 @@
                     </div>
                 </article>
 
-                <article class="live-product live-product--card-back" data-live-product-theme data-desa-product="card-back">
-                    <img class="desa-product-artwork" data-desa-product-artwork alt="" hidden>
-                    <div class="desa-product-name-overlay" data-desa-product-name-overlay hidden><span data-preview-field="groom_display">Groom</span><b>&amp;</b><span data-preview-field="bride_display">Bride</span></div>
-                    <div data-desa-product-placeholder>
-                        <span class="live-product-label">Card Back</span>
-                        <strong>Invitation Details</strong>
-                        <small>See the Back tab for live event details.</small>
-                    </div>
-                </article>
-
                 @if (($order->package_type ?: $order->wabot_package_code) === 'PUTERI_MANIS')
                     <article class="live-product live-product--hanger" data-live-product-theme data-desa-product="wooden-hanger">
                         <img class="desa-product-artwork" data-desa-product-artwork alt="" hidden>
