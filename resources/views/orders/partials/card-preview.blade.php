@@ -86,6 +86,13 @@
             </article>
 
             <article class="wedding-card wedding-card-back is-hidden" data-card-face="back">
+                <img class="desa-card-back-artwork" data-desa-card-back-artwork alt="" hidden>
+                <div class="desa-card-back-live-names" data-desa-card-back-live-names hidden>
+                    <span data-preview-field="groom_display">Groom</span>
+                    <b>&amp;</b>
+                    <span data-preview-field="bride_display">Bride</span>
+                </div>
+                <div data-desa-back-placeholder>
                 <header class="card-invitation-header">
                     <span class="arabic-mark" lang="en" dir="ltr" data-preview-field="card_title_jawi">{{ $jawiCardTitle }}</span>
                     <p>With heartfelt gratitude, we</p>
@@ -121,6 +128,7 @@
                     <span>Your presence will make this celebration even more memorable.</span>
                     <span class="card-social-handle"><span class="card-social-logo" aria-hidden="true">◎</span> @kingkadkahwin</span>
                 </footer>
+                </div>
             </article>
         </div>
     @endforeach
@@ -138,6 +146,7 @@
             <div class="live-product-grid{{ ($order->package_type ?: $order->wabot_package_code) === 'PUTERI_MANIS' ? ' live-product-grid--puteri-manis' : '' }}">
                 <article class="live-product live-product--banner" data-live-product-theme data-desa-product="banner">
                     <img class="desa-product-artwork" data-desa-product-artwork alt="" hidden>
+                    <div class="desa-product-name-overlay" data-desa-product-name-overlay hidden><span data-preview-field="groom_display">Groom</span><b>&amp;</b><span data-preview-field="bride_display">Bride</span></div>
                     <div data-desa-product-placeholder>
                         <span class="live-product-label">Banner</span>
                         <img class="live-product-customer-photo" data-live-photo-preview="item" alt="Uploaded customer photo preview" hidden>
@@ -149,6 +158,7 @@
 
                 <article class="live-product live-product--banting" data-live-product-theme data-desa-product="bunting">
                     <img class="desa-product-artwork" data-desa-product-artwork alt="" hidden>
+                    <div class="desa-product-name-overlay" data-desa-product-name-overlay hidden><span data-preview-field="groom_display">Groom</span><b>&amp;</b><span data-preview-field="bride_display">Bride</span></div>
                     <div data-desa-product-placeholder>
                         <span class="live-product-label">Bunting</span>
                         <img class="live-product-customer-photo" data-live-photo-preview="item" alt="Uploaded customer photo preview" hidden>
@@ -160,6 +170,7 @@
 
                 <article class="live-product live-product--arrow live-product--arrow-left" data-live-product-theme data-desa-product="arrow-left">
                     <img class="desa-product-artwork" data-desa-product-artwork alt="" hidden>
+                    <div class="desa-product-name-overlay" data-desa-product-name-overlay hidden><span data-preview-field="groom_display">Groom</span><b>&amp;</b><span data-preview-field="bride_display">Bride</span></div>
                     <div data-desa-product-placeholder>
                         <span class="live-product-label">Left Arrow Poster</span>
                         <img class="live-product-customer-photo" data-live-photo-preview="item" alt="Uploaded customer photo preview" hidden>
@@ -173,6 +184,7 @@
 
                 <article class="live-product live-product--arrow live-product--arrow-right" data-live-product-theme data-desa-product="arrow-right">
                     <img class="desa-product-artwork" data-desa-product-artwork alt="" hidden>
+                    <div class="desa-product-name-overlay" data-desa-product-name-overlay hidden><span data-preview-field="groom_display">Groom</span><b>&amp;</b><span data-preview-field="bride_display">Bride</span></div>
                     <div data-desa-product-placeholder>
                         <span class="live-product-label">Right Arrow Poster</span>
                         <img class="live-product-customer-photo" data-live-photo-preview="item" alt="Uploaded customer photo preview" hidden>
@@ -186,6 +198,7 @@
 
                 <article class="live-product live-product--sticker" data-live-product-theme data-desa-product="sticker">
                     <img class="desa-product-artwork" data-desa-product-artwork alt="" hidden>
+                    <div class="desa-product-name-overlay" data-desa-product-name-overlay hidden><span data-preview-field="groom_display">Groom</span><b>&amp;</b><span data-preview-field="bride_display">Bride</span></div>
                     <div data-desa-product-placeholder>
                         <span class="live-product-label">Sticker</span>
                         <img class="live-product-customer-photo" data-live-photo-preview="item" alt="Uploaded customer photo preview" hidden>
@@ -197,6 +210,7 @@
 
                 <article class="live-product live-product--card-back" data-live-product-theme data-desa-product="card-back">
                     <img class="desa-product-artwork" data-desa-product-artwork alt="" hidden>
+                    <div class="desa-product-name-overlay" data-desa-product-name-overlay hidden><span data-preview-field="groom_display">Groom</span><b>&amp;</b><span data-preview-field="bride_display">Bride</span></div>
                     <div data-desa-product-placeholder>
                         <span class="live-product-label">Card Back</span>
                         <strong>Invitation Details</strong>
@@ -207,6 +221,7 @@
                 @if (($order->package_type ?: $order->wabot_package_code) === 'PUTERI_MANIS')
                     <article class="live-product live-product--hanger" data-live-product-theme data-desa-product="wooden-hanger">
                         <img class="desa-product-artwork" data-desa-product-artwork alt="" hidden>
+                        <div class="desa-product-name-overlay" data-desa-product-name-overlay hidden><span data-preview-field="groom_display">Groom</span><b>&amp;</b><span data-preview-field="bride_display">Bride</span></div>
                         <div data-desa-product-placeholder>
                             <span class="live-product-label">Wooden Hanger</span>
                             <svg
