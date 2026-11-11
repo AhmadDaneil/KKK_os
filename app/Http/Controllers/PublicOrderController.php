@@ -4,12 +4,13 @@ namespace App\Http\Controllers;
 
 use App\Models\Order;
 use App\Services\Orders\BuildCustomerProgressService;
+use App\Services\Orders\CreateOrderService;
 use App\Services\Orders\CustomerOrderSessionAccessService;
+use App\Services\Orders\NormalizeCustomerPhoneService;
+use App\Services\Payments\CreateBillplzBookingPaymentService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
-use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Facades\URL;
 use Illuminate\View\View;
 
 class PublicOrderController extends Controller
@@ -22,8 +23,46 @@ class PublicOrderController extends Controller
             $activeDraft = null;
         }
 
-        return response()->view('public.landing', ['activeDraft' => $activeDraft])
+        return response()->view('public.landing', [
+            'activeDraft' => $activeDraft,
+            'canTestOrder' => $this->sandboxCheckoutEnabled(),
+        ])
             ->header('Cache-Control', 'private, no-store');
+    }
+
+    public function testOrder(): Response
+    {
+        abort_unless($this->sandboxCheckoutEnabled(), 404);
+
+        return response()->view('public.test-order')
+            ->header('Cache-Control', 'private, no-store');
+    }
+
+    public function storeTestOrder(
+        Request $request,
+        CreateOrderService $createOrder,
+        NormalizeCustomerPhoneService $phones,
+        CreateBillplzBookingPaymentService $bookingPayment,
+    ): RedirectResponse {
+        abort_unless($this->sandboxCheckoutEnabled(), 404);
+
+        $validated = $request->validate([
+            'package_count' => ['required', 'integer', 'in:1,2'],
+            'side' => ['nullable', 'string', 'in:LELAKI,PEREMPUAN', 'required_if:package_count,1'],
+            'package_type' => ['required', 'string', 'in:PUTERI_MANIS,JELATA'],
+            'package_format' => ['nullable', 'string', 'in:SEPARATE,FOLDED', 'required_if:package_count,2'],
+            'first_event_side' => ['nullable', 'string', 'in:LELAKI,PEREMPUAN', 'required_if:package_count,2'],
+            'customer_name' => ['required', 'string', 'max:255'],
+            'customer_email' => ['required', 'email', 'max:255'],
+            'customer_phone' => ['required', 'string', 'regex:/^01\d{8,9}$/'],
+        ]);
+
+        $validated['customer_phone'] = $phones->normalize($validated['customer_phone']);
+
+        $order = $createOrder->create($validated);
+        $checkout = $bookingPayment->create($order);
+
+        return redirect()->away($checkout['payment_url']);
     }
 
     public function create(Request $request): RedirectResponse
@@ -86,32 +125,18 @@ class PublicOrderController extends Controller
                 ->withErrors(['order_id' => 'Order ID or customer reference not found. Please check it and try again.']);
         }
 
-        $proofingExpiresAt = $sessionAccess->establishFromProgressLookup($request, $order);
+        $sessionAccess->establishFromProgressLookup($request, $order);
 
         $order->load(['fulfilmentJob', 'payments', 'designJobs.artworkVersions', 'pricingSnapshot']);
         $deposit = $order->payments->firstWhere('payment_type', 'BOOKING_DEPOSIT');
         $balance = $order->payments->where('payment_type', 'BALANCE')->sortByDesc('id')->first();
-        $artworkReady = in_array($order->status, [
-            'DESIGN_READY',
-            'CORRECTION_REQUESTED',
-            'DESIGN_APPROVED',
-            'BALANCE_PENDING',
-            'PAID',
-            'READY_FOR_PRINT',
-            'PRINTING',
-            'PRINTED',
-            'READY_FOR_PACKING',
-            'PACKING',
-            'PACKED',
-            'READY_FOR_FULFILMENT',
-            'COMPLETED',
-        ], true);
-
+        $progressStatus = $customerProgress->resolveStatus($order);
         return view('public.order-progress', [
             'orderId' => $order->order_id,
             'customerReference' => $order->displayCustomerReference(),
-            'orderStatus' => $order->status,
-            'progress' => $customerProgress->build($order),
+            'orderStatus' => $progressStatus,
+            'paymentPlan' => strtoupper((string) data_get($order->pricingSnapshot?->calculation_snapshot, 'payment_plan', $order->payment_plan ?? 'DEPOSIT')),
+            'progress' => $customerProgress->build($order, $progressStatus),
             'shipment' => $order->fulfilmentJob && $order->fulfilmentJob->method === 'COURIER'
                 ? [
                     'courier_provider' => $order->fulfilmentJob->courier_provider,
@@ -138,52 +163,12 @@ class PublicOrderController extends Controller
             'balanceAmount' => (string) ($order->pricingSnapshot?->outstanding_amount ?? config('kingkadkahwin.balance.amount', '0.00')),
             'balanceBillplzAmount' => $order->pricingSnapshot?->outstanding_amount,
             'balanceQrImage' => (string) config('kingkadkahwin.balance.qr_image'),
-            'artworkReady' => $artworkReady,
-            'proofingUrl' => URL::temporarySignedRoute(
-                'public.orders.proofing',
-                $proofingExpiresAt,
-                ['orderId' => $order->order_id],
-                false,
-            ),
         ]);
     }
 
-    public function proofing(
-        Request $request,
-        string $orderId,
-        BuildCustomerProgressService $customerProgress,
-        CustomerOrderSessionAccessService $sessionAccess,
-    ): View {
-        $order = $sessionAccess->resolveProofing($request, $orderId);
-        $order->load([
-            'designJobs.artworkVersions',
-            'printJobs',
-            'packingJob.proofs',
-            'fulfilmentJob',
-            'progressUpdates' => fn ($query) => $query
-                ->customerVisible()
-                ->with('uploader:id,name')
-                ->latest(),
-        ]);
-
-        $packingJob = $order->packingJob;
-        $packingProofs = $packingJob?->status === 'PACKED'
-            ? $packingJob->proofs
-                ->filter(fn ($proof) => in_array($proof->mime_type, ['image/jpeg', 'image/png', 'image/webp'], true)
-                    && Storage::disk('local')->exists($proof->storage_path))
-                ->values()
-            : collect();
-        $packingProofAvailable = $packingJob?->status === 'PACKED'
-            && ($packingProofs->isNotEmpty()
-                || (filled($packingJob->proof_storage_path)
-                    && Storage::disk('local')->exists($packingJob->proof_storage_path)));
-
-        return view('public.order-proofing', [
-            'order' => $order,
-            'progress' => $customerProgress->build($order),
-            'packingProofAvailable' => $packingProofAvailable,
-            'packingProofs' => $packingProofs,
-            'proofingExpiresAt' => now()->addMinutes(30),
-        ]);
+    private function sandboxCheckoutEnabled(): bool
+    {
+        return (bool) config('services.billplz.enabled')
+            && parse_url((string) config('services.billplz.base_url', ''), PHP_URL_HOST) === 'www.billplz-sandbox.com';
     }
 }

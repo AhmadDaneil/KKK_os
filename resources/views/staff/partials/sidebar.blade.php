@@ -6,10 +6,12 @@
     $ordersIndexRoute = $isAdminPortal ? 'admin.orders.index' : 'staff.orders.index';
     $canMonitorOperations = $staffUser->canMonitorAllDepartments();
     $canViewDesignQueue = $canMonitorOperations || $staffUser->hasStaffRole(\App\Models\User::ROLE_DESIGNER);
+    $canViewDigitalDesignerQueue = $staffUser->hasStaffRole(\App\Models\User::ROLE_DIGITAL_DESIGNER);
     $canViewProductionQueue = $canMonitorOperations || $staffUser->hasStaffRole(\App\Models\User::ROLE_PRODUCTION);
     $roleLabel = $staffUser->isAdmin() ? 'Admin' : match ($staffUser->role) {
         \App\Models\User::ROLE_OM => 'Operations Management',
         \App\Models\User::ROLE_CUSTOMER_SERVICE => 'Customer Service',
+        \App\Models\User::ROLE_DIGITAL_DESIGNER => 'Digital Designer',
         \App\Models\User::ROLE_PRODUCTION => 'Production',
         default => str_replace('_', ' ', $staffUser->role),
     };
@@ -40,13 +42,22 @@
             </section>
         @else
             <section class="staff-nav-section">
-                <h2>{{ __('ui.operation_management') }}</h2>
+                <h2>{{ $canViewDigitalDesignerQueue ? 'Digital Designer' : __('ui.operation_management') }}</h2>
                 <a href="{{ route('staff.dashboard') }}" @class(['staff-nav-link', 'is-active' => request()->routeIs('staff.dashboard')])><span class="staff-nav-icon" aria-hidden="true">OV</span>{{ __('ui.overview') }}</a>
-                <a href="{{ route($ordersIndexRoute) }}" @class(['staff-nav-link', 'is-active' => request()->routeIs('staff.orders.*') && ! $activeWorkstream && ! request()->query('attention')])><span class="staff-nav-icon" aria-hidden="true">OR</span>{{ __('ui.all_orders') }}</a>
+                @unless ($canViewDigitalDesignerQueue)
+                    <a href="{{ route($ordersIndexRoute) }}" @class(['staff-nav-link', 'is-active' => request()->routeIs('staff.orders.*') && ! $activeWorkstream && ! request()->query('attention')])><span class="staff-nav-icon" aria-hidden="true">OR</span>{{ __('ui.all_orders') }}</a>
+                @endunless
                 @if ($staffUser->isOperationManagement())
                     <a href="{{ route($ordersIndexRoute, ['attention' => 'pending_payment']) }}" @class(['staff-nav-link', 'is-active' => request()->query('attention') === 'pending_payment'])><span class="staff-nav-icon" aria-hidden="true">RM</span>{{ __('ui.payment_review') }}</a>
                 @endif
             </section>
+
+        @if ($canViewDigitalDesignerQueue)
+            <section class="staff-nav-section">
+                <h2>Work Queue</h2>
+                <a href="{{ route('staff.digital-designer.orders.index') }}" @class(['staff-nav-link', 'is-active' => request()->routeIs('staff.digital-designer.orders.*')])><span class="staff-nav-icon" aria-hidden="true">DA</span>Motion Video & Alive Card Premium</a>
+            </section>
+        @endif
 
         @if ($canViewDesignQueue)
             <section class="staff-nav-section">

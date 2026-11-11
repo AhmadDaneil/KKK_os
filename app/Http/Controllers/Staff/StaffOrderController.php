@@ -114,7 +114,7 @@ class StaffOrderController extends Controller
                     ->with('uploader:id,name')
                     ->latest(),
             ]);
-        } elseif (in_array($user->role, [User::ROLE_DESIGNER, User::ROLE_PRODUCTION], true)) {
+        } elseif (in_array($user->role, [User::ROLE_DESIGNER, User::ROLE_DIGITAL_DESIGNER, User::ROLE_PRODUCTION], true)) {
             $order->load([
                 'progressUpdates' => fn ($query) => $query
                     ->where('uploader_user_id', $user->id)
@@ -217,8 +217,7 @@ class StaffOrderController extends Controller
         $photoPath = $packageSide?->design?->card_image_path;
 
         abort_unless(
-            strtoupper((string) $packageSide?->design?->theme) === 'PORTRAIT'
-                && is_string($photoPath)
+            is_string($photoPath)
                 && $photoPath !== ''
                 && Storage::disk('local')->exists($photoPath),
             404
@@ -244,7 +243,7 @@ class StaffOrderController extends Controller
         return match ($user->role) {
             User::ROLE_ADMIN => $query,
 
-            User::ROLE_DESIGNER => $query->whereHas(
+            User::ROLE_DESIGNER, User::ROLE_DIGITAL_DESIGNER => $query->whereHas(
                 'designJobs',
                 fn (Builder $jobQuery) => $jobQuery
                     ->where('assigned_user_id', $user->id)
@@ -279,7 +278,7 @@ class StaffOrderController extends Controller
         $allowed = $user->canMonitorAllDepartments()
             ? ['design', 'printing', 'packing', 'fulfilment']
             : match ($user->role) {
-                User::ROLE_DESIGNER => ['design'],
+                User::ROLE_DESIGNER, User::ROLE_DIGITAL_DESIGNER => ['design'],
                 User::ROLE_PRODUCTION => ['printing'],
                 default => [],
             };

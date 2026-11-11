@@ -139,6 +139,7 @@
                 <div><dt>Admin</dt><dd>{{ $teamCounts['ADMIN'] ?? 0 }}</dd></div>
                 <div><dt>Operations Management</dt><dd>{{ $teamCounts['OPERATION_MANAGEMENT'] ?? 0 }}</dd></div>
                 <div><dt>Designers</dt><dd>{{ $teamCounts['DESIGNER'] ?? 0 }}</dd></div>
+                <div><dt>Digital Designers</dt><dd>{{ $teamCounts['DIGITAL_DESIGNER'] ?? 0 }}</dd></div>
                 <div><dt>Production</dt><dd>{{ $teamCounts['PRODUCTION'] ?? 0 }}</dd></div>
             </dl>
         </section>

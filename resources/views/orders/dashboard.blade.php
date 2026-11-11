@@ -185,38 +185,20 @@
 @endif
 
 @php
-    $customerDesignProofJobs = $order->designJobs->filter(function ($job) {
-        $artwork = $job->artworkVersions->sortByDesc('version_number')->first();
-        $previewFiles = $artwork?->preview_files ?: array_filter([
-            $artwork?->preview_storage_path ? ['path' => $artwork->preview_storage_path] : null,
-        ]);
-
-        return in_array($job->status, ['DESIGN_READY', 'CORRECTION_REQUESTED', 'DESIGN_APPROVED'], true)
-            && collect($previewFiles)->contains(
-                fn ($file) => filled(data_get($file, 'watermarked_path')) || filled(data_get($file, 'path'))
-            );
-    });
     $hasCustomerCourierProof = $order->fulfilmentJob?->method === 'COURIER'
         && $order->fulfilmentJob?->status === 'COMPLETED'
         && filled($order->packingJob?->proof_storage_path);
 @endphp
-@if ($customerDesignProofJobs->isNotEmpty() || $hasCustomerCourierProof)
+@if ($hasCustomerCourierProof)
     <section class="customer-proof-panel" aria-labelledby="customer-proof-title">
         <div>
-            <span>Progress proof</span>
-            <h2 id="customer-proof-title">View Order Proof</h2>
+            <span>Delivery confirmation</span>
+            <h2 id="customer-proof-title">View Courier Proof</h2>
         </div>
         <div class="customer-proof-actions">
-            @foreach ($customerDesignProofJobs as $designJob)
-                <a href="{{ route('orders.artwork.review', ['orderId' => $order->order_id]).'#design-job-'.$designJob->id }}">
-                    View Designer Proof · {{ $designJob->side === 'LELAKI' ? 'Groom' : 'Bride' }}
-                </a>
-            @endforeach
-            @if ($hasCustomerCourierProof)
-                <a href="{{ route('orders.courier-proof.show', ['orderId' => $order->order_id]) }}" target="_blank" rel="noopener">
-                    View Courier Proof
-                </a>
-            @endif
+            <a href="{{ route('orders.courier-proof.show', ['orderId' => $order->order_id]) }}" target="_blank" rel="noopener">
+                Open courier proof
+            </a>
         </div>
     </section>
 @endif
@@ -305,6 +287,7 @@
             action="{{ route('orders.draft.update', ['orderId' => $order->order_id]) }}"
             enctype="multipart/form-data"
             data-single-package-setup="{{ $needsSinglePackageSide ? 'true' : 'false' }}"
+            data-design-code-options="{{ json_encode(config('kingkadkahwin.design_codes', [])) }}"
         >
             @csrf
 
@@ -410,12 +393,17 @@
         <label>Theme</label>
         @php
             $selectedTheme = old("sides.$side.design.theme", $packageSide?->design?->theme);
+            $selectedDesignCode = old("sides.$side.design.design_code", $packageSide?->design?->design_code);
+            $designCodeOptions = config('kingkadkahwin.design_codes', []);
+            $selectedDesignCodes = $designCodeOptions[strtoupper((string) $selectedTheme)] ?? [];
+            $normalizedSelectedDesignCode = strtoupper((string) $selectedDesignCode);
         @endphp
 
 <select name="sides[{{ $side }}][design][theme]">
     <option value="">-- Select theme --</option>
 
     @foreach ([
+        'AKIKAH',
         'PORTRAIT',
         'ARCH',
         'CARTOON',
@@ -435,38 +423,69 @@
     </div>
 
     <div>
-        <label>Design Code</label>
-        <input
+        <label for="design-code-{{ strtolower($side) }}">Design Code</label>
+        <select
+            id="design-code-{{ strtolower($side) }}"
             name="sides[{{ $side }}][design][design_code]"
-            placeholder="Example: KKK-001"
-            value="{{ old("sides.$side.design.design_code", $packageSide?->design?->design_code) }}"
+            data-design-code-select
+            @disabled($selectedTheme === null || $selectedTheme === '')
         >
+            <option value="">-- Select design code --</option>
+            @foreach ($selectedDesignCodes as $designCode)
+                <option value="{{ $designCode }}" @selected($normalizedSelectedDesignCode === $designCode)>
+                    {{ $designCode }}
+                </option>
+            @endforeach
+            @if ($selectedDesignCode && ! in_array($normalizedSelectedDesignCode, $selectedDesignCodes, true))
+                <option value="{{ $selectedDesignCode }}" selected>
+                    {{ $selectedDesignCode }} (current code)
+                </option>
+            @endif
+        </select>
     </div>
 
 @php
     $selectedCardTitle = old("sides.$side.design.card_title", $packageSide?->design?->card_title);
+    $normalizedCardTitle = strtoupper(trim((string) $selectedCardTitle));
+    $selectedEventTitleChoice = match ($normalizedCardTitle) {
+        'WALIMATULURUS', 'WALIMATUL URUS', 'MAJLIS PERKAHWINAN' => 'MAJLIS PERKAHWINAN',
+        'KENDURI KESYUKURAN', 'MAJLIS KESYUKURAN' => 'MAJLIS KESYUKURAN',
+        default => filled($selectedCardTitle) ? 'MAJLIS PERKAHWINAN' : '',
+    };
 @endphp
 
-<div>
-    <label>Event Title</label>
-
-    <select name="sides[{{ $side }}][design][card_title]">
+<div data-event-title-controls>
+    <label for="event-title-choice-{{ strtolower($side) }}">Event Title</label>
+    <select
+        id="event-title-choice-{{ strtolower($side) }}"
+        name="sides[{{ $side }}][design][card_title_choice]"
+        data-event-title-choice
+    >
         <option value="">-- Select event title --</option>
-        <option value="Walimatul Urus" @selected($selectedCardTitle === 'Walimatul Urus')>Wedding Reception</option>
-        <option value="Majlis Perkahwinan" @selected($selectedCardTitle === 'Majlis Perkahwinan')>Wedding Ceremony</option>
-        <option value="Kenduri Kesyukuran" @selected($selectedCardTitle === 'Kenduri Kesyukuran')>Thanksgiving Celebration</option>
+        <option value="MAJLIS PERKAHWINAN" @selected($selectedEventTitleChoice === 'MAJLIS PERKAHWINAN')>MAJLIS PERKAHWINAN</option>
+        <option value="MAJLIS KESYUKURAN" @selected($selectedEventTitleChoice === 'MAJLIS KESYUKURAN')>MAJLIS KESYUKURAN</option>
     </select>
+
+    <input
+        type="hidden"
+        name="sides[{{ $side }}][design][card_title]"
+        value="{{ $selectedEventTitleChoice }}"
+        data-event-title-value
+    >
 </div>
 </div>
 
-<div class="image-upload-field" data-card-image-upload @if (strtoupper((string) $selectedTheme) !== 'PORTRAIT') hidden @endif>
+<div class="image-upload-field" data-card-image-upload data-has-card-image="{{ filled($packageSide?->design?->card_image_path) ? 'true' : 'false' }}" data-saved-photo-url="{{ route('orders.customer-photo-preview', ['orderId' => $order->order_id, 'side' => $side]) }}">
     <label for="card-image-{{ strtolower($side) }}">
         Couple Photo
     </label>
 
-    <p class="field-help">
-        For the PORTRAIT theme only. Use a clear portrait-oriented photo, preferably with a 3:4 ratio.
-        Landscape or square images will be cropped to 900 × 1200 px (3:4).
+    <p class="field-help" data-card-image-guidance>
+        @if (strtoupper((string) $selectedTheme) === 'PORTRAIT')
+            A clear customer photo is required to continue with the PORTRAIT theme. It will be placed into the Portrait design items.
+        @else
+            Photo upload is optional for this theme. If uploaded, it will be used only for Banner and Bunting. Leave it blank to use the supplied templates.
+        @endif
         JPG, JPEG, PNG or WEBP format. Maximum 10 MB.
     </p>
 
@@ -494,7 +513,7 @@
                 </div>
                 <section class="additional-products" aria-labelledby="included-design-items-{{ strtolower($side) }}">
                     <h3 id="included-design-items-{{ strtolower($side) }}">Included in the Card Package</h3>
-                    <p class="field-help">Each wedding card package includes banner and bunting previews. The designer will use the short names and selected card design theme. Couple photos are used only for the PORTRAIT theme.</p>
+                    <p class="field-help">Banner and bunting are included automatically. An uploaded photo is used throughout PORTRAIT design items; for other themes it is used only in Banner and Bunting. Without a photo, the supplied templates are used.</p>
                 </section>
                 <h3>{{ $hasSelectableSinglePackageSide ? 'Parents' : ($side === 'LELAKI' ? "Groom's Parents" : "Bride's Parents") }}</h3>
                 <p class="field-help">Enter the names of the parents hosting this event.</p>
@@ -962,6 +981,37 @@ document.addEventListener('DOMContentLoaded', function () {
                 });
             });
 
+        document
+            .querySelectorAll('fieldset[data-package-side]')
+            .forEach(function (fieldset) {
+                const side = fieldset.dataset.packageSide;
+                const themeField = fieldset.querySelector(
+                    '[name="sides[' + side + '][design][theme]"]'
+                );
+
+                if ((themeField?.value ?? '').toUpperCase() !== 'PORTRAIT') {
+                    return;
+                }
+
+                const uploadField = fieldset.querySelector('[data-card-image-upload]');
+                const photoInput = uploadField?.querySelector('input[type="file"]');
+                const hasSavedPhoto = uploadField?.dataset.hasCardImage === 'true';
+                const hasSelectedPhoto = Boolean(photoInput && photoInput.files.length > 0);
+
+                if (!hasSavedPhoto && !hasSelectedPhoto) {
+                    const sideLabel = side === 'LELAKI'
+                        ? "Groom's Package"
+                        : "Bride's Package";
+
+                    addRequiredError(
+                        photoInput,
+                        'a customer photo for the PORTRAIT design on ' + sideLabel
+                    );
+
+                    valid = false;
+                }
+            });
+
         /*
          * Courier fields are required only when the customer selects courier delivery.
          */
@@ -1061,18 +1111,29 @@ document.addEventListener('DOMContentLoaded', function () {
                 },
                 signal: controller.signal
             }).then(function (response) {
-                if (!response.ok) {
-                    return response.json().catch(function () { return {}; }).then(function (payload) {
+                return response.json().catch(function () { return {}; }).then(function (payload) {
+                    if (!response.ok || payload.saved !== true) {
                         const errors = payload.errors ? Object.values(payload.errors).flat().join(' ') : '';
                         throw new Error(errors || payload.message || 'We could not save these changes.');
-                    });
-                }
+                    }
 
-                savedRevision = Math.max(savedRevision, revision);
+                    if (includeFiles) {
+                        form.querySelectorAll('[data-card-image-upload]').forEach(function (uploadField) {
+                            const photoInput = uploadField.querySelector('input[type="file"]');
 
-                if (savedRevision === draftRevision) {
-                    setStatus('All changes have been saved', 'saved');
-                }
+                            if (photoInput && photoInput.files.length > 0) {
+                                uploadField.dataset.hasCardImage = 'true';
+                            }
+                        });
+
+                    }
+
+                    savedRevision = Math.max(savedRevision, revision);
+
+                    if (savedRevision === draftRevision) {
+                        setStatus('All changes have been saved', 'saved');
+                    }
+                });
             }).catch(function (error) {
                 if (retryAttempt === 0) {
                     return new Promise(function (resolve) {
@@ -1123,8 +1184,47 @@ document.addEventListener('DOMContentLoaded', function () {
             }, 800);
         }
 
+        form.querySelectorAll('[data-event-title-choice]').forEach(function (choice) {
+            const controls = choice.closest('[data-event-title-controls]');
+            const titleValue = controls.querySelector('[data-event-title-value]');
+
+            function syncEventTitle() {
+                titleValue.value = choice.value;
+                titleValue.dispatchEvent(new Event('input', { bubbles: true }));
+            }
+
+            choice.addEventListener('change', syncEventTitle);
+            syncEventTitle();
+        });
+
         form.addEventListener('input', scheduleAutosave);
         form.addEventListener('change', scheduleAutosave);
+
+        form.addEventListener('submit', function (event) {
+            event.preventDefault();
+            window.clearTimeout(autosaveTimer);
+
+            const submitButton = event.submitter instanceof HTMLButtonElement ? event.submitter : null;
+
+            if (submitButton) {
+                submitButton.disabled = true;
+            }
+
+            setStatus('Saving draft...', 'saving');
+
+            queueSave(true)
+                .then(function () {
+                    if (savedRevision === draftRevision) {
+                        setStatus('Draft saved', 'saved');
+                    }
+                })
+                .catch(function () {})
+                .finally(function () {
+                    if (submitButton) {
+                        submitButton.disabled = false;
+                    }
+                });
+        });
 
         document.addEventListener('visibilitychange', function () {
             if (document.visibilityState !== 'hidden' || savedRevision === draftRevision) {
@@ -1232,6 +1332,24 @@ document.addEventListener('DOMContentLoaded', function () {
             });
         }
 
+        function formatTime12Hour(raw) {
+            const value = String(raw || '').trim();
+            const match = value.match(/^(\d{1,2}):(\d{2})(?::\d{2})?$/);
+
+            if (!match) {
+                return value || '-';
+            }
+
+            const hour = Number(match[1]);
+            const minute = Number(match[2]);
+
+            if (hour > 23 || minute > 59) {
+                return value;
+            }
+
+            return (hour % 12 || 12) + ':' + match[2] + ' ' + (hour >= 12 ? 'PM' : 'AM');
+        }
+
         function formatDate(raw) {
             if (!raw) {
                 return 'EVENT DATE';
@@ -1245,14 +1363,21 @@ document.addEventListener('DOMContentLoaded', function () {
             }).format(date);
         }
 
-        function jawiCardTitle(title) {
-            const translations = {
-                'Walimatul Urus': 'Wedding Reception',
-                'Majlis Perkahwinan': 'Wedding Ceremony',
-                'Kenduri Kesyukuran': 'Thanksgiving Celebration'
+        function displayCardTitle(title) {
+            const normalizedTitle = String(title || '').trim().toUpperCase();
+            const legacyTranslations = {
+                'WALIMATULURUS': 'Wedding Ceremony',
+                'WALIMATUL URUS': 'Wedding Ceremony',
+                'MAJLIS PERKAHWINAN': 'Wedding Ceremony',
+                'KENDURI KESYUKURAN': 'Thanksgiving Celebration',
+                'MAJLIS KESYUKURAN': 'Thanksgiving Celebration'
             };
 
-            return translations[title] || translations['Walimatul Urus'];
+            return legacyTranslations[normalizedTitle] || 'Wedding Ceremony';
+        }
+
+        function jawiCardTitle(title) {
+            return displayCardTitle(title);
         }
 
         const desaDesignCodes = new Set([
@@ -1328,16 +1453,16 @@ document.addEventListener('DOMContentLoaded', function () {
             setText(scope, 'bride_name', brideName);
             setText(scope, 'groom_display', groomDisplay);
             setText(scope, 'bride_display', brideDisplay);
-            const cardTitle = value(prefix + '[design][card_title]', 'Walimatul Urus');
-            setText(scope, 'card_title', ({ 'Walimatul Urus': 'Wedding Reception', 'Majlis Perkahwinan': 'Wedding Ceremony', 'Kenduri Kesyukuran': 'Thanksgiving Celebration' })[cardTitle] || cardTitle);
+            const cardTitle = value(prefix + '[design][card_title]', 'MAJLIS PERKAHWINAN');
+            setText(scope, 'card_title', displayCardTitle(cardTitle));
             setText(scope, 'card_title_jawi', jawiCardTitle(cardTitle));
             setText(scope, 'father_name', value(prefix + '[parents][father_name]', "FATHER'S NAME"));
             setText(scope, 'mother_name', value(prefix + '[parents][mother_name]', "MOTHER'S NAME"));
             setText(scope, 'day_name', ({ Ahad: 'Sunday', Isnin: 'Monday', Selasa: 'Tuesday', Rabu: 'Wednesday', Khamis: 'Thursday', Jumaat: 'Friday', Sabtu: 'Saturday' })[value(prefix + '[event][day_name]', '')] || 'DAY');
             setText(scope, 'event_date', formatDate(value(prefix + '[event][event_date]', '')));
             setText(scope, 'hijri_date', value(prefix + '[event][hijri_date]', ''));
-            setText(scope, 'meal_time', value(prefix + '[event][meal_time]', '-'));
-            setText(scope, 'bersanding_time', value(prefix + '[event][bersanding_time]', '-'));
+            setText(scope, 'meal_time', formatTime12Hour(value(prefix + '[event][meal_time]', '')));
+            setText(scope, 'bersanding_time', formatTime12Hour(value(prefix + '[event][bersanding_time]', '')));
             setText(scope, 'venue_name', value(prefix + '[event][venue_name]', 'VENUE NAME'));
             setText(scope, 'full_address', value(prefix + '[event][full_address]', 'Full event address'));
 
@@ -1499,7 +1624,30 @@ document.addEventListener('DOMContentLoaded', function () {
                 }
 
                 const theme = value('sides[' + packageSide + '][design][theme]', '').toUpperCase();
-                uploadField.hidden = theme !== 'PORTRAIT';
+                const photoInput = uploadField.querySelector('input[type="file"]');
+                const hasPhoto = uploadField.dataset.hasCardImage === 'true'
+                    || Boolean(photoInput && photoInput.files.length > 0);
+                const guidance = uploadField.querySelector('[data-card-image-guidance]');
+
+                uploadField.hidden = false;
+
+                if (!guidance) {
+                    return;
+                }
+
+                if (theme === 'PORTRAIT') {
+                    guidance.textContent = hasPhoto
+                        ? 'A customer photo is attached for the PORTRAIT design. ' +
+                            'JPG, JPEG, PNG or WEBP format. Maximum 10 MB.'
+                        : 'Upload a clear customer photo to continue with the PORTRAIT theme. ' +
+                            'JPG, JPEG, PNG or WEBP format. Maximum 10 MB.';
+                } else {
+                    guidance.textContent = hasPhoto
+                        ? 'The uploaded photo will be used only for Banner and Bunting. ' +
+                            'JPG, JPEG, PNG or WEBP format. Maximum 10 MB.'
+                        : 'Photo upload is optional. If uploaded, it will be used only for Banner and Bunting. ' +
+                            'Leave it blank to use the supplied templates. JPG, JPEG, PNG or WEBP format. Maximum 10 MB.';
+                }
             });
         }
 
@@ -1547,7 +1695,10 @@ document.addEventListener('DOMContentLoaded', function () {
             if (event.target.name === 'package_format') {
                 updatePackageFormatPreview();
             }
-            if (event.target.name?.endsWith('[design][theme]')) {
+            if (
+                event.target.name?.endsWith('[design][theme]')
+                || event.target.matches?.('[data-card-image-upload] input[type="file"]')
+            ) {
                 updatePortraitImageFields();
             }
         });
@@ -1620,6 +1771,169 @@ document.addEventListener('DOMContentLoaded', function () {
             button.disabled = true;
             button.textContent = 'Menghantar...';
         });
+    });
+</script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const form = document.getElementById('customer-order-form');
+
+        if (!form) {
+            return;
+        }
+
+        let designCodeOptions = {};
+
+        try {
+            designCodeOptions = JSON.parse(form.dataset.designCodeOptions || '{}');
+        } catch (error) {
+            return;
+        }
+
+        form.querySelectorAll('select[name$="[design][theme]"]').forEach(function (themeSelect) {
+            const packageSide = themeSelect.closest('fieldset[data-package-side]');
+            const designCodeSelect = packageSide?.querySelector('[data-design-code-select]');
+
+            if (!designCodeSelect) {
+                return;
+            }
+
+            themeSelect.addEventListener('change', function () {
+                const selectedCode = designCodeSelect.value;
+                const theme = themeSelect.value.trim().toUpperCase();
+                const codes = designCodeOptions[theme] || [];
+
+                designCodeSelect.replaceChildren(new Option('-- Select design code --', ''));
+                codes.forEach(function (code) {
+                    designCodeSelect.add(new Option(code, code));
+                });
+
+                designCodeSelect.disabled = theme === '';
+
+                if (codes.includes(selectedCode)) {
+                    designCodeSelect.value = selectedCode;
+                }
+            });
+        });
+    });
+</script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const form = document.getElementById('customer-order-form');
+        const preview = document.querySelector('[data-live-preview]');
+
+        if (!form || !preview) {
+            return;
+        }
+
+        const customerPhotoPreviewUrls = new Map();
+
+        function setImageSource(image, source, shouldShow) {
+            if (!shouldShow || !source) {
+                image.hidden = true;
+                return;
+            }
+
+            if (image.getAttribute('src') !== source) {
+                image.setAttribute('src', source);
+            }
+
+            image.hidden = false;
+        }
+
+        function updateSidePhotoPreview(side) {
+            const packageSide = form.querySelector('fieldset[data-package-side="' + side + '"]');
+            const uploadField = packageSide?.querySelector('[data-card-image-upload]');
+            const photoInput = uploadField?.querySelector('input[type="file"]');
+            const selectedFile = photoInput?.files?.[0];
+            const theme = (packageSide?.querySelector('[name="sides[' + side + '][design][theme]"]')?.value || '').toUpperCase();
+
+            if (!uploadField) {
+                return;
+            }
+
+            let photoUrl = '';
+
+            if (selectedFile) {
+                let current = customerPhotoPreviewUrls.get(side);
+
+                if (!current || current.file !== selectedFile) {
+                    if (current) {
+                        URL.revokeObjectURL(current.url);
+                    }
+
+                    current = {
+                        file: selectedFile,
+                        url: URL.createObjectURL(selectedFile),
+                    };
+                    customerPhotoPreviewUrls.set(side, current);
+                }
+
+                photoUrl = current.url;
+            } else if (uploadField.dataset.hasCardImage === 'true') {
+                photoUrl = uploadField.dataset.savedPhotoUrl || '';
+            } else {
+                const current = customerPhotoPreviewUrls.get(side);
+
+                if (current) {
+                    URL.revokeObjectURL(current.url);
+                    customerPhotoPreviewUrls.delete(side);
+                }
+            }
+
+            const cardPreview = preview.querySelector('[data-card-preview="' + side + '"]');
+            const portraitImage = cardPreview?.querySelector('[data-live-photo-preview="portrait"]');
+            const frontCard = portraitImage?.closest('.wedding-card-front');
+            const showPortraitPhoto = Boolean(photoUrl) && theme === 'PORTRAIT';
+
+            if (portraitImage) {
+                setImageSource(portraitImage, photoUrl, showPortraitPhoto);
+            }
+
+            frontCard?.classList.toggle('has-customer-photo', showPortraitPhoto);
+
+            const productPreview = preview.querySelector('[data-live-product-preview="' + side + '"]');
+
+            productPreview?.querySelectorAll('[data-live-photo-preview="item"]').forEach(function (image) {
+                const product = image.closest('.live-product');
+                const isBannerOrBunting = product?.classList.contains('live-product--banner')
+                    || product?.classList.contains('live-product--banting');
+                const showProductPhoto = Boolean(photoUrl) && (theme === 'PORTRAIT' || isBannerOrBunting);
+
+                setImageSource(image, photoUrl, showProductPhoto);
+            });
+        }
+
+        function updateAllPhotoPreviews() {
+            form.querySelectorAll('[data-card-image-upload]').forEach(function (uploadField) {
+                const side = uploadField.closest('[data-package-side]')?.dataset.packageSide;
+
+                if (side) {
+                    updateSidePhotoPreview(side);
+                }
+            });
+        }
+
+        form.addEventListener('change', function (event) {
+            if (
+                event.target.matches?.('[data-card-image-upload] input[type="file"]')
+                || event.target.name?.endsWith('[design][theme]')
+            ) {
+                const side = event.target.closest('[data-package-side]')?.dataset.packageSide;
+
+                if (side) {
+                    updateSidePhotoPreview(side);
+                }
+            }
+        });
+
+        window.addEventListener('pagehide', function () {
+            customerPhotoPreviewUrls.forEach(function (photo) {
+                URL.revokeObjectURL(photo.url);
+            });
+            customerPhotoPreviewUrls.clear();
+        });
+
+        updateAllPhotoPreviews();
     });
 </script>
 @include('public.partials.customer-service')

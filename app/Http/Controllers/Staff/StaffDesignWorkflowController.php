@@ -12,6 +12,7 @@ use App\Services\Design\StartDesignJobService;
 use App\Services\Design\SyncOrderDesignStatusService;
 use App\Services\Design\WatermarkArtworkPreviewService;
 use App\Services\Printing\InitializePrintJobsForOrderService;
+use App\Services\Printing\SyncOrderPrintStatusService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -81,7 +82,8 @@ class StaffDesignWorkflowController extends Controller
         MarkDesignReadyService $service,
         SyncOrderDesignStatusService $sync,
         ApproveArtworkService $approve,
-        InitializePrintJobsForOrderService $initializePrintJobs
+        InitializePrintJobsForOrderService $initializePrintJobs,
+        SyncOrderPrintStatusService $syncPrintStatus
     ): RedirectResponse {
         $this->authorizeAssignedDesigner($request, $designJob);
 
@@ -97,7 +99,7 @@ class StaffDesignWorkflowController extends Controller
                 throw new RuntimeException(
                     'Upload previews for '.implode(' and ', $missingProducts->all())
                     .' for the '.($designJob->side === 'LELAKI' ? "groom's" : "bride's")
-                    .' package before sending the artwork to the customer.'
+                    .' package before marking the design as done.'
                 );
             }
 
@@ -108,8 +110,12 @@ class StaffDesignWorkflowController extends Controller
             $approve->approve($designJob->fresh(), $request->user());
             $order = $sync->sync($designJob->order);
 
-            if ($order->status === 'DESIGN_APPROVED') {
+            if (in_array($order->status, ['DESIGN_APPROVED', 'PAID'], true)) {
                 $initializePrintJobs->initialize($order);
+
+                if ($order->status === 'PAID') {
+                    $syncPrintStatus->sync($order);
+                }
             }
         } catch (RuntimeException $exception) {
             return back()->withErrors([
@@ -119,7 +125,7 @@ class StaffDesignWorkflowController extends Controller
 
         return back()->with(
             'status',
-            'The artwork has been approved internally.'
+            'Design marked as done. Admin and Operations Management can view the uploaded previews.'
         );
     }
 
@@ -135,7 +141,7 @@ class StaffDesignWorkflowController extends Controller
 
         $validated = $request->validate([
             'source_artwork' => ['required', 'array', 'min:1', 'max:20'],
-            'source_artwork.*' => ['required', 'file', 'mimes:psd,pdf', 'max:102400'],
+            'source_artwork.*' => ['required', 'file', 'mimes:psd,pdf', 'max:307200'],
             'customer_preview' => ['required', 'array', 'min:1', 'max:20'],
             'customer_preview.*' => ['required', 'file', 'mimes:jpg,jpeg,png', 'max:20480'],
             'banner_preview' => ['nullable', 'file', 'mimes:jpg,jpeg,png', 'max:20480'],
@@ -147,7 +153,8 @@ class StaffDesignWorkflowController extends Controller
             ],
         ], [
             'source_artwork.*.uploaded' => 'The source file could not be uploaded. Ensure it is within the server file-size limit.',
-            'customer_preview.*.uploaded' => 'The customer preview could not be uploaded. Ensure it is within the server file-size limit.',
+            'source_artwork.*.max' => 'Each PSD or PDF source file must be 300 MB or smaller.',
+            'customer_preview.*.uploaded' => 'The internal preview could not be uploaded. Ensure it is within the server file-size limit.',
             'banner_preview.uploaded' => 'The banner preview could not be uploaded. Ensure it is within the server file-size limit.',
             'banting_preview.uploaded' => 'The bunting preview could not be uploaded. Ensure it is within the server file-size limit.',
         ]);

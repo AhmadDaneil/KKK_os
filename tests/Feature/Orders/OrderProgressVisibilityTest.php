@@ -251,34 +251,19 @@ class OrderProgressVisibilityTest extends TestCase
             ->assertDontSee('View progress attachment');
     }
 
-    public function test_track_progress_opens_only_customer_visible_proofs_for_that_order(): void
+    public function test_track_progress_hides_the_proof_button_and_page(): void
     {
-        Storage::fake('local');
         $order = $this->confirmedOrder(1);
-        $otherOrder = $this->confirmedOrder(1);
-        $designer = $this->staff(User::ROLE_DESIGNER);
-        $om = $this->staff(User::ROLE_OM);
-        $customerService = $this->staff(User::ROLE_CUSTOMER_SERVICE);
-        $visible = $this->makeUpdate($order, $designer, 'Design proof for customer', true, 'progress/design-visible.jpg');
-        $this->makeUpdate($order, $om, 'Internal operations note', false);
-        $this->makeUpdate($order, $customerService, 'Unsupported publisher update', true);
-        $this->makeUpdate($otherOrder, $designer, 'Another customer proof', true);
-        Storage::disk('local')->put($visible->attachment_path, 'visible');
 
         $this->post(route('public.orders.progress.lookup'), [
             'order_id' => $order->order_id,
-        ])->assertOk();
-
-        $this->get(route('public.orders.proofing', ['orderId' => $order->order_id]))
+        ])
             ->assertOk()
-            ->assertSee('Design proof for customer')
-            ->assertSee('View Proof')
-            ->assertDontSee('Internal operations note')
-            ->assertDontSee('Unsupported publisher update')
-            ->assertDontSee('Another customer proof');
+            ->assertDontSee('Order progress and proofing')
+            ->assertDontSee('View progress');
 
-        $this->get(route('orders.progress-updates.attachment', [$order->order_id, $visible]))
-            ->assertOk();
+        $this->get('/semak-progress/'.$order->order_id.'/proofing')
+            ->assertNotFound();
     }
 
     public function test_staff_attachment_is_available_only_to_management_or_the_uploader(): void
@@ -414,23 +399,16 @@ class OrderProgressVisibilityTest extends TestCase
             ->assertOk()
             ->assertHeader('Cache-Control', 'max-age=0, no-store, private');
 
-        $this->post(route('public.orders.progress.lookup'), ['order_id' => $order->order_id])
-            ->assertOk();
-        $this->get(route('public.orders.proofing', ['orderId' => $order->order_id]))
-            ->assertOk()
-            ->assertSee('Designer Proof')
-            ->assertSee('View Designer Proof · Groom · Wedding Card')
-            ->assertSee('Packing Proof')
-            ->assertSee('View Packing Proof')
-            ->assertSee('Courier Proof')
-            ->assertSee('View Courier Proof');
-        $this->get(route('orders.packing-proof.show', $order->order_id))
+        $this->withSession($session)
+            ->get(route('orders.packing-proof.show', $order->order_id))
             ->assertOk()
             ->assertHeader('Cache-Control', 'max-age=0, no-store, private');
-        $this->get(route('orders.courier-proof.show', $order->order_id))
+        $this->withSession($session)
+            ->get(route('orders.courier-proof.show', $order->order_id))
             ->assertOk()
             ->assertHeader('Cache-Control', 'max-age=0, no-store, private');
-        $this->get(route('orders.artwork.preview', [
+        $this->withSession($session)
+            ->get(route('orders.artwork.preview', [
             'orderId' => $order->order_id,
             'designJobId' => $designJob->id,
             'file' => 0,
@@ -458,14 +436,6 @@ class OrderProgressVisibilityTest extends TestCase
             'completion_reference' => 'TWO-PACKAGE-PICKUP',
             'collected_at' => now(),
         ]);
-        $designer = $this->staff(User::ROLE_DESIGNER);
-        $progressProof = $this->makeUpdate(
-            $order,
-            $designer,
-            'Proofing progress dua pakej',
-            true,
-            'progress/two-package-proofing.jpg',
-        );
         foreach ($order->designJobs()->get() as $index => $designJob) {
             $designJob->update(['status' => 'DESIGN_APPROVED']);
             $path = 'proofs/design-'.$designJob->side.'.jpg';
@@ -486,16 +456,6 @@ class OrderProgressVisibilityTest extends TestCase
 
         $this->assertSame(2, substr_count($response->getContent(), 'View Designer Proof'));
 
-        $this->post(route('public.orders.progress.lookup'), ['order_id' => $order->order_id])
-            ->assertOk();
-        $proofing = $this->get(route('public.orders.proofing', ['orderId' => $order->order_id]))
-            ->assertOk()
-            ->assertSee('View Designer Proof · Groom · Wedding Card')
-            ->assertSee('View Designer Proof · Bride · Wedding Card')
-            ->assertSee('View Packing Proof')
-            ->assertSee('TWO-PACKAGE-PICKUP');
-
-        $this->assertSame(2, substr_count($proofing->getContent(), 'View Designer Proof'));
     }
 
     public function test_customer_cannot_view_courier_proof_before_courier_completion(): void
@@ -533,7 +493,7 @@ class OrderProgressVisibilityTest extends TestCase
             ->assertDontSee('View Courier Proof');
     }
 
-    public function test_customer_proofing_shows_pickup_completion_reference_and_packing_proof(): void
+    public function test_customer_proofing_page_is_removed_and_packing_proof_remains_available(): void
     {
         Storage::fake('local');
         $order = $this->confirmedOrder(1);
@@ -545,28 +505,14 @@ class OrderProgressVisibilityTest extends TestCase
             'proof_mime_type' => 'image/jpeg',
         ]);
         Storage::disk('local')->put($packingJob->proof_storage_path, 'packing-proof');
-        FulfilmentJob::create([
-            'order_id' => $order->id,
-            'order_fulfilment_id' => $order->fulfilment->id,
-            'packing_job_id' => $packingJob->id,
-            'method' => 'PICKUP',
-            'status' => 'COLLECTED',
-            'completion_reference' => 'PICKUP-REF-123',
-            'collected_at' => now(),
-        ]);
 
-        $this->withSession($this->customerSession($order))
-            ->get(route('public.orders.proofing', ['orderId' => $order->order_id]))
-            ->assertOk()
-            ->assertSee('Packing Proof')
-            ->assertSee('View Packing Proof')
-            ->assertSee('Pickup Confirmation')
-            ->assertSee('Pickup confirmation')
-            ->assertSee('PICKUP-REF-123');
+        $this->get('/semak-progress/'.$order->order_id.'/proofing')
+            ->assertNotFound();
 
         $this->withSession($this->customerSession($order))
             ->get(route('orders.packing-proof.show', $order->order_id))
-            ->assertOk();
+            ->assertOk()
+            ->assertHeader('Cache-Control', 'max-age=0, no-store, private');
     }
 
     public function test_customer_can_view_production_progress_proof_for_their_one_package_order(): void
@@ -599,57 +545,31 @@ class OrderProgressVisibilityTest extends TestCase
                 'uploaded_by_user_id' => $production->id,
                 'uploaded_by_role' => User::ROLE_PRODUCTION,
                 'customer_visible' => true,
-            ]],
-        ]);
-
-        $session = $this->customerSession($order);
-        $proofing = $this->withSession($session)
-            ->get(route('public.orders.proofing', ['orderId' => $order->order_id]))
-            ->assertOk()
-            ->assertSee('Production Proof')
-            ->assertSee('View Production Proof · Groom · File 1')
-            ->assertSee('signature=', false);
-
-        $this->assertSame(
-            1,
-            preg_match('/href="([^"]+)"[^>]*>\s*View Production Proof/', $proofing->getContent(), $productionProofLink),
-        );
-        $productionProofUrl = html_entity_decode($productionProofLink[1], ENT_QUOTES);
-
-        $this->flushSession()
-            ->get($productionProofUrl)
-            ->assertOk()
-            ->assertHeader('Cache-Control', 'max-age=0, no-store, private');
-
-        $printJob->update([
-            'progress_files' => array_merge($printJob->progress_files, [[
+            ], [
                 'path' => $path,
                 'original_name' => 'internal-production-note.jpg',
                 'mime_type' => 'image/jpeg',
                 'uploaded_by_user_id' => $production->id,
                 'uploaded_by_role' => User::ROLE_PRODUCTION,
                 'customer_visible' => false,
-            ]]),
+            ]],
         ]);
-        $this->withSession($session)
-            ->get(route('public.orders.proofing', ['orderId' => $order->order_id]))
-            ->assertOk()
-            ->assertSee('View Production Proof · Groom · File 1')
-            ->assertDontSee('View Production Proof · Groom · File 2');
-        $this->withSession($session)
-            ->get(route('public.orders.production-proof', [
-                'orderId' => $order->order_id,
-                'printJobId' => $printJob->id,
-                'file' => 1,
-            ]))
-            ->assertNotFound();
 
-        $this->flushSession()
-            ->get(route('public.orders.production-proof', [
-                'orderId' => $order->order_id,
-                'printJobId' => $printJob->id,
-                'file' => 0,
-            ]))
+        $customerSession = $this->customerSession($order);
+        $productionProofRoute = fn (int $file): string => route('public.orders.production-proof', [
+            'orderId' => $order->order_id,
+            'printJobId' => $printJob->id,
+            'file' => $file,
+        ]);
+
+        $this->get($productionProofRoute(0))
+            ->assertNotFound();
+        $this->withSession($customerSession)
+            ->get($productionProofRoute(0))
+            ->assertOk()
+            ->assertHeader('Cache-Control', 'max-age=0, no-store, private');
+        $this->withSession($customerSession)
+            ->get($productionProofRoute(1))
             ->assertNotFound();
     }
 
@@ -712,15 +632,6 @@ class OrderProgressVisibilityTest extends TestCase
             ]));
         }
 
-        $response = $this->withSession($this->customerSession($order))
-            ->get(route('public.orders.proofing', ['orderId' => $order->order_id]))
-            ->assertOk()
-            ->assertSee('Production Proof')
-            ->assertSee('View Production Proof · Groom · File 1')
-            ->assertSee('View Production Proof · Bride · File 2')
-            ->assertDontSee('other-order.jpg');
-
-        $this->assertSame(2, substr_count($response->getContent(), 'View Production Proof'));
 
         foreach ($visiblePrintJobs as $printJob) {
             $this->withSession($this->customerSession($order))

@@ -15,7 +15,7 @@
         <a class="brand" href="{{ route('home') }}"><img class="brand-logo-image" src="{{ asset('images/landing/kingkadkahwin-logo.png') }}" alt="" width="62" height="62" decoding="async"><span><b>KingKadKahwin</b><small>Beautiful cards, meaningful memories</small></span></a>
         <nav aria-label="Order tracking navigation">
             <a class="header-link nav-progress" href="{{ route('home') }}">← Back</a>
-            <a class="header-link nav-progress" href="{{ route('public.orders.create') }}">Chat to Book</a>
+            <a class="header-link nav-progress" href="{{ route('public.orders.test.create') }}">Booking Now</a>
         </nav>
     </header>
     <main class="progress-page">
@@ -39,15 +39,6 @@
         @isset($progress)
             <section class="public-progress-card" data-progress-tone="{{ $progress['tone'] }}">
                 @if (session('balance_success'))<div class="payment-success-message">{{ session('balance_success') }}</div>@endif
-                @if (($orderStatus ?? null) === 'DESIGN_APPROVED' && ($balance['status'] ?? null) !== 'PAID')
-                    <div class="balance-payment-notice" role="status">
-                        <div>
-                            <strong>Action required: pay the remaining balance</strong>
-                            <span>The design has been approved. Please pay the remaining balance so your order can proceed to printing.</span>
-                        </div>
-                        <a href="#balance-payment">Make Payment</a>
-                    </div>
-                @endif
                 <div class="progress-card-heading"><div><small>{{ $customerReference ? 'CUSTOMER REFERENCE' : 'ORDER ID' }}</small><h2>{{ $customerReference ?: $orderId }}</h2></div><strong>{{ $progress['percentage'] }}%</strong></div>
                 <div class="public-progress-track" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="{{ $progress['percentage'] }}"><span style="width: {{ $progress['percentage'] }}%"></span></div>
                 <section class="order-lifecycle" aria-labelledby="order-lifecycle-title">
@@ -72,16 +63,9 @@
                     <h3>{{ $progress['label'] }}</h3>
                     <p>{{ $progress['message'] }}</p>
                 @endif
-                <div class="public-artwork-action">
-                    <div>
-                        <strong>Order progress and proofing</strong>
-                        <span>See the latest updates and proofs shared for your order.</span>
-                    </div>
-                    <a class="button button-primary" href="{{ $proofingUrl }}">View progress</a>
-                </div>
                 @if ($deposit)
                     <div class="deposit-public-status" data-status="{{ strtolower($deposit['status']) }}">
-                        <span>Deposit</span>
+                        <span>{{ ($paymentPlan ?? null) === 'FULL' ? 'Full card payment' : 'Deposit' }}</span>
                         <strong>{{ match ($deposit['status']) { 'PAID' => 'Confirmed', 'FAILED' => 'Receipt Rejected', default => 'Awaiting Payment' } }}</strong>
                         @if ($deposit['status'] === 'FAILED' && $deposit['reason'])<p>Reason: {{ $deposit['reason'] }}</p>@endif
                     </div>
@@ -96,19 +80,7 @@
                         @if (($balance['status'] ?? null) === 'PENDING')
                             @if (($balance['provider'] ?? null) === 'BILLPLZ')
                                 <div class="balance-status-message"><strong>Awaiting payment</strong><span>Complete your secure payment to continue your order.</span></div>
-                                <div class="balance-payment-action">
-                                    @if (! empty($balance['checkout_url']))
-                                        <a class="button button-primary" href="{{ $balance['checkout_url'] }}">Continue to {{ ($balance['payment_method'] ?? null) === 'DUITNOW_QR' ? 'DuitNow QR' : 'Billplz Payment' }}</a>
-                                    @else
-                                        <form method="POST" action="{{ route('orders.balance-payment.billplz.store', ['orderId' => $orderId]) }}">
-                                            @csrf
-                                            <input type="hidden" name="payment_method" value="{{ $balance['payment_method'] ?? 'BILLPLZ' }}">
-                                            <button class="button button-primary" type="submit">Continue to {{ ($balance['payment_method'] ?? null) === 'DUITNOW_QR' ? 'DuitNow QR' : 'Billplz Payment' }}</button>
-                                        </form>
-                                    @endif
-                                </div>
-                                @error('billplz')<p class="field-error" role="alert">{{ $message }}</p>@enderror
-                                @error('payment_method')<p class="field-error" role="alert">{{ $message }}</p>@enderror
+
                             @else
                                 <div class="balance-status-message"><strong>Receipt under review</strong><span>Our operations team will confirm payment before printing begins.</span></div>
                             @endif
@@ -118,7 +90,33 @@
                             @if (($balance['status'] ?? null) === 'FAILED')
                                 <div class="balance-status-message is-failed"><strong>Payment failed</strong><span>{{ $balance['reason'] ?: 'Please try your payment again.' }}</span></div>
                             @endif
-                            @if (config('services.billplz.enabled') && $balanceBillplzAmount !== null && (float) $balanceBillplzAmount > 0)
+
+                        @endif
+                    </section>
+                @endif
+                @if (in_array(($orderStatus ?? null), ['DESIGN_APPROVED', 'BALANCE_PENDING'], true) && ($balance['status'] ?? null) !== 'PAID')
+                    <div class="balance-payment-notice">
+                        @if (($balance['status'] ?? null) === 'PENDING' && ($balance['provider'] ?? null) !== 'BILLPLZ')
+                            <div>
+                                <strong>Balance payment is under review</strong>
+                                <span>Our operations team will confirm the payment before printing begins.</span>
+                            </div>
+                        @else
+                            <div>
+                                <strong>Action required: pay the remaining balance</strong>
+                                <span>The design check is complete. Pay the remaining balance so your order can proceed to printing.</span>
+                            </div>
+                            @if (($balance['status'] ?? null) === 'PENDING' && ($balance['provider'] ?? null) === 'BILLPLZ')
+                                @if (! empty($balance['checkout_url']))
+                                    <a class="button button-primary" href="{{ $balance['checkout_url'] }}">Continue payment</a>
+                                @else
+                                    <form method="POST" action="{{ route('orders.balance-payment.billplz.store', ['orderId' => $orderId]) }}">
+                                        @csrf
+                                        <input type="hidden" name="payment_method" value="{{ $balance['payment_method'] ?? 'BILLPLZ' }}">
+                                        <button class="button button-primary" type="submit">Continue payment</button>
+                                    </form>
+                                @endif
+                            @elseif (config('services.billplz.enabled') && $balanceBillplzAmount !== null && (float) $balanceBillplzAmount > 0)
                                 <div class="payment-method-actions">
                                     <form method="POST" action="{{ route('orders.balance-payment.billplz.store', ['orderId' => $orderId]) }}">
                                         @csrf
@@ -133,11 +131,13 @@
                                         </form>
                                     @endif
                                 </div>
-                                @error('billplz')<p class="field-error" role="alert">{{ $message }}</p>@enderror
-                                @error('payment_method')<p class="field-error" role="alert">{{ $message }}</p>@enderror
+                            @else
+                                <a href="#balance-payment">View payment details</a>
                             @endif
                         @endif
-                    </section>
+                        @error('billplz')<p class="field-error" role="alert">{{ $message }}</p>@enderror
+                        @error('payment_method')<p class="field-error" role="alert">{{ $message }}</p>@enderror
+                    </div>
                 @endif
                 @if (! empty($shipment['tracking_number']))
                     <div class="tracking-card">

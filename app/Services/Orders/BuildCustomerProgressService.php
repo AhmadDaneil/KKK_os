@@ -6,9 +6,9 @@ use App\Models\Order;
 
 class BuildCustomerProgressService
 {
-    public function build(Order $order): array
+    public function build(Order $order, ?string $statusOverride = null): array
     {
-        $status = $order->status;
+        $status = $statusOverride ?? $this->resolveStatus($order);
 
         [$percentage, $label, $message] = match ($status) {
             'BOOKING_PENDING' => [5, 'Order Processing', 'Your order is being processed.'],
@@ -51,6 +51,23 @@ class BuildCustomerProgressService
         ];
     }
 
+    public function resolveStatus(Order $order): string
+    {
+        if (! in_array($order->status, ['DESIGN_APPROVED', 'BALANCE_PENDING'], true)) {
+            return $order->status;
+        }
+
+        $snapshot = $order->relationLoaded('pricingSnapshot')
+            ? $order->pricingSnapshot
+            : ($order->exists ? $order->pricingSnapshot()->first() : null);
+
+        if ($snapshot === null || (float) $snapshot->outstanding_amount > 0) {
+            return $order->status;
+        }
+
+        return 'PAID';
+    }
+
     /**
      * @return array{string, string}
      */
@@ -91,8 +108,8 @@ class BuildCustomerProgressService
             'READY_FOR_DESIGN', 'DESIGN_IN_PROGRESS' => 3,
             'DESIGN_READY', 'CORRECTION_REQUESTED' => 4,
             'DESIGN_APPROVED', 'BALANCE_PENDING' => 5,
-            'PAID', 'READY_FOR_PRINT', 'PRINTING', 'PRINTED' => 6,
-            'READY_FOR_PACKING', 'PACKING', 'PACKED', 'READY_FOR_FULFILMENT' => 7,
+            'PAID', 'READY_FOR_PRINT', 'PRINTING' => 6,
+            'PRINTED', 'READY_FOR_PACKING', 'PACKING', 'PACKED', 'READY_FOR_FULFILMENT' => 7,
             'READY_FOR_PICKUP', 'SHIPPED' => 8,
             'COMPLETED', 'ARCHIVED' => 9,
             default => null,

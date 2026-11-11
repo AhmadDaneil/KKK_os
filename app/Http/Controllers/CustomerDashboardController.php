@@ -7,6 +7,8 @@ use App\Services\Orders\BuildCustomerProgressService;
 use App\Services\Orders\CustomerOrderSessionAccessService;
 use App\Services\Orders\ResolveOrderAccessService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 
 class CustomerDashboardController extends Controller
@@ -144,6 +146,32 @@ class CustomerDashboardController extends Controller
             'progress' => $customerProgress->build($order),
             'quantityOptions' => $quantityOptions,
             'validQuantityPairs' => $validQuantityPairs,
+        ]);
+    }
+
+    public function photoPreview(
+        Request $request,
+        string $orderId,
+        string $side,
+        CustomerOrderSessionAccessService $sessionAccess,
+    ): BinaryFileResponse {
+        $order = $sessionAccess->resolve($request, $orderId);
+        $packageSide = $order->packageSides()
+            ->with('design')
+            ->where('side', strtoupper($side))
+            ->firstOrFail();
+        $photoPath = $packageSide->design?->card_image_path;
+
+        abort_unless(
+            is_string($photoPath)
+                && $photoPath !== ''
+                && Storage::disk('local')->exists($photoPath),
+            404
+        );
+
+        return response()->file(Storage::disk('local')->path($photoPath), [
+            'Cache-Control' => 'private, no-store',
+            'X-Content-Type-Options' => 'nosniff',
         ]);
     }
 }

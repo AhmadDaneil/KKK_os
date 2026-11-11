@@ -57,6 +57,7 @@ class StaffIdentityTest extends TestCase
             User::ROLE_OM,
             User::ROLE_CUSTOMER_SERVICE,
             User::ROLE_DESIGNER,
+            User::ROLE_DIGITAL_DESIGNER,
             User::ROLE_PRODUCTION,
         ] as $role) {
             $user = new User([

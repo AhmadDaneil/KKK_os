@@ -42,7 +42,8 @@ class BuildInvoiceLineItemsService
             $rows[] = $this->row('Banting 2x4 1 pc', 1, 0, 0);
             $rows[] = $this->row('Banner 3x6 1 pc', 1, 0, 0);
             $rows[] = $this->row('Arrow A4 4 pcs', 4, 0, 0);
-            $rows[] = $this->row('Sticker 3cm '.number_format(max(0, $totalQuantity - 50)).' pcs', max(0, $totalQuantity - 50), 0, 0);
+            $stickerQuantity = 150;
+            $rows[] = $this->row("Sticker 3cm {$stickerQuantity} pcs", $stickerQuantity, 0, 0);
             $rows[] = $this->row('E-Card (PDF File)', 1, 0, 0);
             $rows[] = $this->row('FREE Alive Card Premium', 1, 0, 0);
             $rows[] = $this->row('FREE Motion Video', 1, 0, 0);

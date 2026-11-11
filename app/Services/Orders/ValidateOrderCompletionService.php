@@ -45,6 +45,13 @@ class ValidateOrderCompletionService
             $parents = $packageSide->parents;
             $event = $packageSide->event;
 
+            if (
+                strtoupper((string) $design?->theme) === 'PORTRAIT'
+                && blank($design?->card_image_path)
+            ) {
+                $missing[] = "{$label}: Couple photo (required for PORTRAIT theme)";
+            }
+
             if (! $design?->design_code) {
                 $missing[] = "{$label}: Design code";
             }
