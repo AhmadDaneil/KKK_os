@@ -88,7 +88,7 @@ class CustomerDashboardAccessTest extends TestCase
 
         $slots = ['arrow-left', 'arrow-right', 'banner', 'bunting', 'card-back', 'card-front', 'sticker', 'wooden-hanger'];
         $codeCounts = ['AKIKAH' => 8, 'ARCH' => 24, 'DESA' => 8, 'GARDEN' => 8, 'ISLAMIC' => 24, 'NOSTALGIA' => 8, 'PORTRAIT' => 8];
-        $missingArtwork = ['CKI-816' => 'arrow-left', 'CKP-003' => 'banner', 'CKQ-007' => 'arrow-left'];
+        $missingArtwork = ['CKP-003' => 'banner'];
 
         foreach ($codeCounts as $theme => $count) {
             $codes = config("kingkadkahwin.design_codes.{$theme}");
