@@ -1251,6 +1251,16 @@ html[data-customer-theme="dark"] .wedding-card-back .card-social-logo {
 .live-product--arrow[data-design-code] .desa-product-copy-couple span:last-child {
     padding-left: .06em;
 }
+/* Match the reference name gap and alignment on every Banting design. */
+.live-product--banting[data-design-code] .desa-product-copy-couple {
+    grid-template-columns: minmax(0, 1fr) 1.9em minmax(0, 1fr);
+}
+.live-product--banting[data-design-code] .desa-product-copy-couple span:first-child {
+    padding-right: .06em;
+}
+.live-product--banting[data-design-code] .desa-product-copy-couple span:last-child {
+    padding-left: .06em;
+}
 .live-product--sticker[data-design-code] .desa-product-copy-couple {
     grid-template-columns: minmax(0, 1fr) 1.65em minmax(0, 1fr);
 }
