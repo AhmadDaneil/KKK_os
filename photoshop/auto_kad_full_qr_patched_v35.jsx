@@ -19,7 +19,7 @@
      - Guna PowerShell untuk download QR (Windows).
 */
 
-//target photoshop
+#target photoshop
 var KKK_ORIGINAL_DIALOGS = app.displayDialogs;
 var KKK_ORIGINAL_UNITS = app.preferences.rulerUnits;
 app.displayDialogs = DialogModes.NO;
