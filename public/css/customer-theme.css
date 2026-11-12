@@ -973,7 +973,7 @@ html[data-customer-theme="dark"] .wedding-card-back .card-social-logo {
 /* CKD-003 overlays use the clean artwork's existing text, ampersands, borders and footer. */
 .wedding-card-front[data-design-code="CKD-003"] .desa-card-ckd003-couple {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: minmax(0, 1fr) 1.5em minmax(0, 1fr);
     right: 9%;
     left: 9%;
 }
@@ -1144,7 +1144,7 @@ html[data-customer-theme="dark"] .wedding-card-back .card-social-logo {
 }
 .live-product[data-design-code="CKD-003"] .desa-product-copy-couple {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: minmax(0, 1fr) 1.5em minmax(0, 1fr);
 }
 .live-product[data-design-code="CKD-003"] .desa-product-copy-couple span:first-child {
     padding-right: .12em;
@@ -1231,4 +1231,10 @@ html[data-customer-theme="dark"] .wedding-card-back .card-social-logo {
 .wedding-card-back[data-design-code="CKD-003"],
 .live-product--arrow[data-design-code="CKD-003"] {
     aspect-ratio: 2 / 3;
+}
+
+
+/* Reserve the artwork's printed ampersand between the two entered names. */
+.desa-couple-ampersand-spacer {
+    visibility: hidden;
 }
