@@ -1241,27 +1241,125 @@ html[data-customer-theme="dark"] .wedding-card-back .card-social-logo {
     visibility: hidden;
 }
 
-/* Keep the artwork's printed ampersand centered for every design code and item. */
-.live-product--arrow[data-design-code] .desa-product-copy-couple {
-    grid-template-columns: minmax(0, 1fr) 1.9em minmax(0, 1fr);
+/* Name anchors follow the ampersand baked into each source artwork.
+   Spacer percentages account for the name area's 92% width. */
+.live-product[data-design-code="CKD-001"] {
+    --desa-bunting-couple-x: 50.93%;
+    --desa-bunting-couple-y: 18.86%;
+    --desa-bunting-couple-spacer: 10.40%;
+    --desa-arrow-couple-x: 50.29%;
+    --desa-arrow-couple-y: 20%;
+    --desa-arrow-couple-spacer: 11.18%;
+    --desa-sticker-couple-x: 49.64%;
+    --desa-sticker-couple-y: 32%;
+    --desa-sticker-couple-spacer: 9.47%;
 }
-.live-product--arrow[data-design-code] .desa-product-copy-couple span:first-child {
-    padding-right: .06em;
+.live-product[data-design-code="CKD-002"] {
+    --desa-bunting-couple-x: 49.93%;
+    --desa-bunting-couple-y: 17.07%;
+    --desa-bunting-couple-spacer: 7.92%;
+    --desa-arrow-couple-x: 49.93%;
+    --desa-arrow-couple-y: 16.38%;
+    --desa-arrow-couple-spacer: 7.92%;
+    --desa-sticker-couple-x: 48.7%;
+    --desa-sticker-couple-y: 32.4%;
+    --desa-sticker-couple-spacer: 10.11%;
 }
-.live-product--arrow[data-design-code] .desa-product-copy-couple span:last-child {
-    padding-left: .06em;
+.live-product[data-design-code="CKD-003"] {
+    --desa-bunting-couple-x: 50.36%;
+    --desa-bunting-couple-y: 20%;
+    --desa-bunting-couple-spacer: 8.23%;
+    --desa-arrow-couple-x: 50.07%;
+    --desa-arrow-couple-y: 17.24%;
+    --desa-arrow-couple-spacer: 7.92%;
+    --desa-sticker-couple-x: 49.21%;
+    --desa-sticker-couple-y: 33.14%;
+    --desa-sticker-couple-spacer: 9.47%;
 }
-/* Match the reference name gap and alignment on every Banting design. */
-.live-product--banting[data-design-code] .desa-product-copy-couple {
-    grid-template-columns: minmax(0, 1fr) 1.9em minmax(0, 1fr);
+.live-product[data-design-code="CKD-004"] {
+    --desa-bunting-couple-x: 50.36%;
+    --desa-bunting-couple-y: 20%;
+    --desa-bunting-couple-spacer: 8.23%;
+    --desa-arrow-couple-x: 50.07%;
+    --desa-arrow-couple-y: 17.33%;
+    --desa-arrow-couple-spacer: 7.92%;
+    --desa-sticker-couple-x: 49.21%;
+    --desa-sticker-couple-y: 32.71%;
+    --desa-sticker-couple-spacer: 9.47%;
 }
-.live-product--banting[data-design-code] .desa-product-copy-couple span:first-child {
-    padding-right: .06em;
+.live-product[data-design-code="CKD-005"] {
+    --desa-bunting-couple-x: 49%;
+    --desa-bunting-couple-y: 19%;
+    --desa-bunting-couple-spacer: 9.01%;
+    --desa-arrow-couple-x: 50.21%;
+    --desa-arrow-couple-y: 17.24%;
+    --desa-arrow-couple-spacer: 7.92%;
+    --desa-sticker-couple-x: 49.21%;
+    --desa-sticker-couple-y: 33.71%;
+    --desa-sticker-couple-spacer: 9.47%;
 }
-.live-product--banting[data-design-code] .desa-product-copy-couple span:last-child {
-    padding-left: .06em;
+.live-product[data-design-code="CKD-006"] {
+    --desa-bunting-couple-x: 50.36%;
+    --desa-bunting-couple-y: 18%;
+    --desa-bunting-couple-spacer: 12.89%;
+    --desa-arrow-couple-x: 50.21%;
+    --desa-arrow-couple-y: 17.24%;
+    --desa-arrow-couple-spacer: 7.92%;
+    --desa-sticker-couple-x: 49.5%;
+    --desa-sticker-couple-y: 32.86%;
+    --desa-sticker-couple-spacer: 9.47%;
 }
-.live-product--sticker[data-design-code] .desa-product-copy-couple {
-    grid-template-columns: minmax(0, 1fr) 1.65em minmax(0, 1fr);
+.live-product[data-design-code="CKD-007"] {
+    --desa-bunting-couple-x: 49%;
+    --desa-bunting-couple-y: 18.93%;
+    --desa-bunting-couple-spacer: 9.01%;
+    --desa-arrow-couple-x: 50.21%;
+    --desa-arrow-couple-y: 17.24%;
+    --desa-arrow-couple-spacer: 7.92%;
+    --desa-sticker-couple-x: 48.79%;
+    --desa-sticker-couple-y: 34.14%;
+    --desa-sticker-couple-spacer: 9.47%;
+}
+.live-product[data-design-code="CKD-008"] {
+    --desa-bunting-couple-x: 49%;
+    --desa-bunting-couple-y: 18.93%;
+    --desa-bunting-couple-spacer: 9.01%;
+    --desa-arrow-couple-x: 50.21%;
+    --desa-arrow-couple-y: 17.24%;
+    --desa-arrow-couple-spacer: 7.92%;
+    --desa-sticker-couple-x: 49%;
+    --desa-sticker-couple-y: 34.57%;
+    --desa-sticker-couple-spacer: 9.93%;
+}
+.live-product--banting[data-design-code^="CKD-"] {
+    --desa-couple-x: var(--desa-bunting-couple-x, 50%);
+    --desa-couple-y: var(--desa-bunting-couple-y);
+    --desa-couple-spacer: var(--desa-bunting-couple-spacer);
+}
+.live-product--arrow[data-design-code^="CKD-"] {
+    --desa-couple-x: var(--desa-arrow-couple-x, 50%);
+    --desa-couple-y: var(--desa-arrow-couple-y);
+    --desa-couple-spacer: var(--desa-arrow-couple-spacer);
+}
+.live-product--sticker[data-design-code^="CKD-"] {
+    --desa-couple-x: var(--desa-sticker-couple-x, 50%);
+    --desa-couple-y: var(--desa-sticker-couple-y);
+    --desa-couple-spacer: var(--desa-sticker-couple-spacer);
 }
 
+.live-product[data-design-code^="CKD-"]:is(.live-product--banting, .live-product--arrow, .live-product--sticker) .desa-product-copy-couple {
+    top: var(--desa-couple-y);
+    right: auto;
+    left: var(--desa-couple-x);
+    width: 92%;
+    margin: 0;
+    grid-template-columns: minmax(0, 1fr) calc(var(--desa-couple-spacer) + .6em) minmax(0, 1fr);
+    gap: 0;
+    transform: translate(-50%, -50%);
+}
+.live-product[data-design-code^="CKD-"]:is(.live-product--banting, .live-product--arrow, .live-product--sticker) .desa-product-copy-couple span:first-child {
+    padding-right: 0;
+}
+.live-product[data-design-code^="CKD-"]:is(.live-product--banting, .live-product--arrow, .live-product--sticker) .desa-product-copy-couple span:last-child {
+    padding-left: 0;
+}
