@@ -1363,3 +1363,25 @@ html[data-customer-theme="dark"] .wedding-card-back .card-social-logo {
 .live-product[data-design-code^="CKD-"]:is(.live-product--banting, .live-product--arrow, .live-product--sticker) .desa-product-copy-couple span:last-child {
     padding-left: 0;
 }
+
+/* Keep customer-entered names and dates readable over the preview artwork. */
+[data-live-preview] :is(
+    [data-preview-field="groom_display"],
+    [data-preview-field="bride_display"],
+    [data-preview-field="day_name"],
+    [data-preview-field="day_name_malay"],
+    [data-preview-field="event_date"],
+    [data-preview-field="event_date_day"],
+    [data-preview-field="event_date_month_year"],
+    [data-preview-field="hijri_date"]
+) {
+    text-shadow:
+        -.06em -.06em 0 #fff,
+        0 -.06em 0 #fff,
+        .06em -.06em 0 #fff,
+        -.06em 0 0 #fff,
+        .06em 0 0 #fff,
+        -.06em .06em 0 #fff,
+        0 .06em 0 #fff,
+        .06em .06em 0 #fff;
+}
