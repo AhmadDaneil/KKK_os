@@ -57,7 +57,7 @@ class CustomerDashboardAccessTest extends TestCase
             ->assertDontSee('token=');
     }
 
-    public function test_desa_design_code_maps_to_all_preview_artwork_and_keeps_live_names(): void
+    public function test_catalog_preview_artwork_is_available_and_keeps_live_names(): void
     {
         $order = app(CreateOrderService::class)->create([
             'package_count' => 1,
@@ -81,24 +81,34 @@ class CustomerDashboardAccessTest extends TestCase
             ->assertSee('data-desa-card-name-overlay', false)
             ->assertSee('data-preview-field="groom_display"', false)
             ->assertSee('data-preview-field="bride_display"', false)
-            ->assertSee('data-desa-product="card-back"', false)
-            ->assertSee("'CKD-008'", false)
-            ->assertSee('/images/designs/desa/', false);
+            ->assertSee('data-preview-artwork-slot="card-back"', false)
+            ->assertSee('data-preview-artwork-slot="vip-card"', false)
+            ->assertSee('CKD-008')
+            ->assertSee('CKI-824');
 
-        foreach (range(1, 8) as $designNumber) {
-            $designCode = sprintf('CKD-%03d', $designNumber);
+        $slots = ['arrow-left', 'arrow-right', 'banner', 'bunting', 'card-back', 'card-front', 'sticker', 'wooden-hanger'];
+        $codeCounts = ['AKIKAH' => 8, 'ARCH' => 24, 'DESA' => 8, 'GARDEN' => 8, 'ISLAMIC' => 24, 'NOSTALGIA' => 8, 'PORTRAIT' => 8];
+        $missingArtwork = ['CKI-816' => 'arrow-left', 'CKP-003' => 'banner', 'CKQ-007' => 'arrow-left'];
 
-            foreach ([
-                'arrow-left',
-                'arrow-right',
-                'banner',
-                'bunting',
-                'card-back',
-                'card-front',
-                'sticker',
-                'wooden-hanger',
-            ] as $artwork) {
-                $this->assertFileExists(public_path("images/designs/desa/{$designCode}/{$artwork}.webp"));
+        foreach ($codeCounts as $theme => $count) {
+            $codes = config("kingkadkahwin.design_codes.{$theme}");
+            $this->assertCount($count, $codes);
+            $artworkSlots = $theme === 'PORTRAIT' ? [...$slots, 'vip-card'] : $slots;
+
+            foreach ($codes as $code) {
+                $directory = public_path('images/designs/'.strtolower($theme).'/'.$code);
+
+                foreach ($artworkSlots as $slot) {
+                    if (($missingArtwork[$code] ?? null) === $slot) {
+                        continue;
+                    }
+
+                    $this->assertFileExists("{$directory}/{$slot}.webp");
+
+                    if ($theme === 'PORTRAIT' && ! in_array($slot, ['card-back', 'wooden-hanger'], true)) {
+                        $this->assertFileExists("{$directory}/{$slot}-photo-mask.webp");
+                    }
+                }
             }
         }
     }
