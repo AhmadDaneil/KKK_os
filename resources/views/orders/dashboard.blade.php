@@ -7,6 +7,7 @@
     <title>KKK OS - {{ $order->displayCustomerReference() ?: $order->order_id }}</title>
     <link rel="stylesheet" href="{{ asset('css/customer-dashboard.css') }}?v={{ filemtime(public_path('css/customer-dashboard.css')) }}">
     <link rel="stylesheet" href="{{ asset('css/customer-theme.css') }}?v={{ filemtime(public_path('css/customer-theme.css')) }}">
+    <link rel="stylesheet" href="{{ asset('css/customer-preview-layout.css') }}?v={{ filemtime(public_path('css/customer-preview-layout.css')) }}">
     <link rel="stylesheet" href="{{ asset('css/customer-service.css') }}?v={{ filemtime(public_path('css/customer-service.css')) }}">
     <link rel="stylesheet" href="{{ asset('css/customer-brand.css') }}?v={{ filemtime(public_path('css/customer-brand.css')) }}">
 </head>
@@ -1393,16 +1394,41 @@ document.addEventListener('DOMContentLoaded', function () {
             return displayCardTitle(title);
         }
 
-        const desaDesignCodes = new Set([
-            'CKD-001', 'CKD-002', 'CKD-003', 'CKD-004',
-            'CKD-005', 'CKD-006', 'CKD-007', 'CKD-008'
-        ]);
+        const artworkThemes = new Set(['akikah', 'arch', 'desa', 'garden', 'islamic', 'nostalgia', 'portrait']);
+        const artworkBase = @json(asset('images/designs'));
+        const artworkDesignCodes = JSON.parse(form.dataset.designCodeOptions || '{}');
+        const unavailableArtwork = {
+            'CKI-816': ['arrow-left'],
+            'CKP-003': ['banner'],
+            'CKQ-007': ['arrow-left'],
+        };
 
-        function syncDesaArtwork(scope, theme, designCode) {
+        function syncArtworkImage(image, source, label) {
+            image.hidden = !source;
+            image.alt = source ? label : '';
+
+            if (source && image.getAttribute('src') !== source) {
+                image.setAttribute('src', source);
+            } else if (!source) {
+                image.removeAttribute('src');
+            }
+        }
+
+        function syncArtworkPhotoMask(item, source) {
+            if (source) {
+                item.style.setProperty('--preview-photo-mask', 'url("' + source + '")');
+            } else {
+                item.style.removeProperty('--preview-photo-mask');
+            }
+        }
+
+        function syncDesignArtwork(scope, theme, designCode) {
             const normalizedCode = designCode.trim().toUpperCase();
-            const hasDesaArtwork = theme === 'desa' && desaDesignCodes.has(normalizedCode);
-            const assetBase = hasDesaArtwork
-                ? '/images/designs/desa/' + normalizedCode + '/'
+            const themeName = theme.toUpperCase();
+            const hasArtwork = artworkThemes.has(theme) && (artworkDesignCodes[themeName] || []).includes(normalizedCode);
+            const isCatalogArtwork = hasArtwork && theme !== 'desa';
+            const assetBase = hasArtwork
+                ? artworkBase + '/' + theme + '/' + normalizedCode + '/'
                 : '';
             const front = scope.matches('[data-card-preview]')
                 ? scope.querySelector('[data-card-face="front"]')
@@ -1413,54 +1439,41 @@ document.addEventListener('DOMContentLoaded', function () {
 
             if (front) {
                 const artwork = front.querySelector('[data-desa-card-artwork]');
-                front.dataset.designCode = hasDesaArtwork ? normalizedCode : '';
+                front.dataset.designCode = hasArtwork ? normalizedCode : '';
                 const nameOverlay = front.querySelector('[data-desa-card-name-overlay]');
                 const genericNameCopy = nameOverlay.querySelector('[data-desa-generic-copy]');
                 const customNameCopy = nameOverlay.querySelector('[data-desa-card-custom-copy]');
                 const genericCopy = front.querySelector('.card-front-copy');
                 const ornaments = front.querySelectorAll('.card-ornament');
 
-                artwork.hidden = !hasDesaArtwork;
-                nameOverlay.hidden = !hasDesaArtwork;
-                genericNameCopy.hidden = hasDesaArtwork;
-                customNameCopy.hidden = !hasDesaArtwork;
-                genericCopy.hidden = hasDesaArtwork;
-                front.toggleAttribute('data-desa-artwork', hasDesaArtwork);
+                nameOverlay.hidden = !hasArtwork;
+                genericNameCopy.hidden = hasArtwork;
+                customNameCopy.hidden = !hasArtwork;
+                genericCopy.hidden = hasArtwork;
+                front.toggleAttribute('data-design-artwork', hasArtwork);
+                front.toggleAttribute('data-catalog-artwork', isCatalogArtwork);
                 ornaments.forEach(function (ornament) {
-                    ornament.hidden = hasDesaArtwork;
+                    ornament.hidden = hasArtwork;
                 });
-
-                if (hasDesaArtwork) {
-                    artwork.src = assetBase + 'card-front.webp';
-                    artwork.alt = normalizedCode + ' Desa wedding card front';
-                } else {
-                    artwork.removeAttribute('src');
-                    artwork.alt = '';
-                }
+                syncArtworkImage(artwork, hasArtwork ? assetBase + 'card-front.webp' : '', normalizedCode + ' ' + themeName + ' card front');
+                syncArtworkPhotoMask(front, hasArtwork && theme === 'portrait' ? assetBase + 'card-front-photo-mask.webp' : '');
             }
 
             if (back) {
                 const artwork = back.querySelector('[data-desa-card-back-artwork]');
-                back.dataset.designCode = hasDesaArtwork ? normalizedCode : '';
+                back.dataset.designCode = hasArtwork ? normalizedCode : '';
                 const liveNames = back.querySelector('[data-desa-card-back-live-names]');
                 const genericNameCopy = liveNames.querySelector('[data-desa-generic-copy]');
                 const customNameCopy = liveNames.querySelector('[data-desa-card-back-custom-copy]');
                 const placeholder = back.querySelector('[data-desa-back-placeholder]');
 
-                artwork.hidden = !hasDesaArtwork;
-                liveNames.hidden = !hasDesaArtwork;
-                genericNameCopy.hidden = hasDesaArtwork;
-                customNameCopy.hidden = !hasDesaArtwork;
-                placeholder.hidden = hasDesaArtwork;
-                back.toggleAttribute('data-desa-artwork', hasDesaArtwork);
-
-                if (hasDesaArtwork) {
-                    artwork.src = assetBase + 'card-back.webp';
-                    artwork.alt = normalizedCode + ' Desa wedding card back';
-                } else {
-                    artwork.removeAttribute('src');
-                    artwork.alt = '';
-                }
+                liveNames.hidden = !hasArtwork;
+                genericNameCopy.hidden = hasArtwork;
+                customNameCopy.hidden = !hasArtwork;
+                placeholder.hidden = hasArtwork;
+                back.toggleAttribute('data-design-artwork', hasArtwork);
+                back.toggleAttribute('data-catalog-artwork', isCatalogArtwork);
+                syncArtworkImage(artwork, hasArtwork ? assetBase + 'card-back.webp' : '', normalizedCode + ' ' + themeName + ' card back');
             }
 
             scope.querySelectorAll('[data-desa-product]').forEach(function (product) {
@@ -1470,23 +1483,22 @@ document.addEventListener('DOMContentLoaded', function () {
                 const genericNameCopy = nameOverlay.querySelector('[data-desa-generic-copy]');
                 const productCustomNameCopy = nameOverlay.querySelector('[data-desa-product-custom-copy]');
                 const placeholder = product.querySelector('[data-desa-product-placeholder]');
-                const shouldShowArtwork = hasDesaArtwork;
+                const isVipCard = type === 'vip-card';
+                const shouldShowArtwork = hasArtwork
+                    && (!isVipCard || theme === 'portrait')
+                    && !(unavailableArtwork[normalizedCode] || []).includes(type);
                 product.dataset.designCode = shouldShowArtwork ? normalizedCode : '';
+                product.toggleAttribute('data-design-artwork', shouldShowArtwork);
+                product.toggleAttribute('data-catalog-artwork', shouldShowArtwork && isCatalogArtwork);
 
-                product.hidden = type === 'card-back' && !hasDesaArtwork;
-                artwork.hidden = !shouldShowArtwork;
+                product.hidden = (type === 'card-back' || isVipCard) && !shouldShowArtwork;
                 nameOverlay.hidden = !shouldShowArtwork;
                 genericNameCopy.hidden = shouldShowArtwork;
                 productCustomNameCopy.hidden = !shouldShowArtwork;
-                placeholder.hidden = Boolean(shouldShowArtwork);
-
-                if (shouldShowArtwork) {
-                    artwork.src = assetBase + type + '.webp';
-                    artwork.alt = normalizedCode + ' Desa ' + type.replaceAll('-', ' ') + ' design';
-                } else {
-                    artwork.removeAttribute('src');
-                    artwork.alt = '';
-                }
+                placeholder.hidden = shouldShowArtwork;
+                syncArtworkImage(artwork, shouldShowArtwork ? assetBase + type + '.webp' : '', normalizedCode + ' ' + themeName + ' ' + type.replaceAll('-', ' ') + ' design');
+                const hasPhotoMask = shouldShowArtwork && theme === 'portrait' && type !== 'wooden-hanger' && type !== 'card-back';
+                syncArtworkPhotoMask(product, hasPhotoMask ? assetBase + type + '-photo-mask.webp' : '');
             });
         }
 
@@ -1540,7 +1552,7 @@ document.addEventListener('DOMContentLoaded', function () {
             scope.querySelectorAll('[data-live-product-theme], .wedding-card-front').forEach(function (item) {
                 item.setAttribute('data-theme', theme);
             });
-            syncDesaArtwork(scope, theme, designCode);
+            syncDesignArtwork(scope, theme, designCode);
         }
 
         function syncCard(side) {
@@ -1952,6 +1964,10 @@ document.addEventListener('DOMContentLoaded', function () {
                 setImageSource(portraitImage, photoUrl, showPortraitPhoto);
             }
 
+            cardPreview?.querySelectorAll('[data-live-photo-preview="artwork"]').forEach(function (image) {
+                setImageSource(image, photoUrl, showPortraitPhoto);
+            });
+
             frontCard?.classList.toggle('has-customer-photo', showPortraitPhoto);
 
             const productPreview = preview.querySelector('[data-live-product-preview="' + side + '"]');
@@ -1963,6 +1979,10 @@ document.addEventListener('DOMContentLoaded', function () {
                 const showProductPhoto = Boolean(photoUrl) && (theme === 'PORTRAIT' || isBannerOrBunting);
 
                 setImageSource(image, photoUrl, showProductPhoto);
+            });
+
+            productPreview?.querySelectorAll('[data-live-photo-preview="artwork"]').forEach(function (image) {
+                setImageSource(image, photoUrl, showPortraitPhoto);
             });
         }
 

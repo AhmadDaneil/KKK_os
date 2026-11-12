@@ -62,8 +62,9 @@
             };
         @endphp
         <div class="card-preview-wrap @if (! $loop->first) is-hidden @endif" data-card-preview="{{ $packageSide->side }}">
-            <article class="wedding-card wedding-card-front" data-card-face="front" data-theme="{{ strtolower($packageSide->design?->theme ?: 'songket') }}">
+            <article class="wedding-card wedding-card-front" data-card-face="front" data-preview-artwork-slot="card-front" data-theme="{{ strtolower($packageSide->design?->theme ?: 'songket') }}">
                 <img class="desa-card-artwork" data-desa-card-artwork alt="" hidden>
+                <img class="catalog-preview-photo" data-live-photo-preview="artwork" alt="Uploaded customer photo preview" hidden>
                 <div class="desa-card-name-overlay" data-desa-card-name-overlay hidden>
                     <div class="desa-card-generic-copy" data-desa-generic-copy>
                         <span data-preview-field="groom_display">Groom</span>
@@ -105,7 +106,7 @@
                 <div class="card-ornament ornament-bottom" aria-hidden="true"></div>
             </article>
 
-            <article class="wedding-card wedding-card-back is-hidden" data-card-face="back">
+            <article class="wedding-card wedding-card-back is-hidden" data-card-face="back" data-preview-artwork-slot="card-back">
                 <img class="desa-card-back-artwork" data-desa-card-back-artwork alt="" hidden>
                 <div class="desa-card-back-live-names" data-desa-card-back-live-names hidden>
                     <div class="desa-card-back-generic-copy" data-desa-generic-copy>
@@ -193,7 +194,7 @@
             </div>
 
             <div class="live-product-grid{{ ($order->package_type ?: $order->wabot_package_code) === 'PUTERI_MANIS' ? ' live-product-grid--puteri-manis' : '' }}">
-                <article class="live-product live-product--banner" data-live-product-theme data-desa-product="banner">
+                <article class="live-product live-product--banner" data-live-product-theme data-desa-product="banner" data-preview-artwork-slot="banner">
                     <img class="desa-product-artwork" data-desa-product-artwork alt="" hidden>
                                                             <div class="desa-product-name-overlay" data-desa-product-name-overlay hidden>
                         <div class="desa-product-generic-copy" data-desa-generic-copy>
@@ -214,7 +215,7 @@
                     </div>
                 </article>
 
-                <article class="live-product live-product--banting" data-live-product-theme data-desa-product="bunting">
+                <article class="live-product live-product--banting" data-live-product-theme data-desa-product="bunting" data-preview-artwork-slot="bunting">
                     <img class="desa-product-artwork" data-desa-product-artwork alt="" hidden>
                                                             <div class="desa-product-name-overlay" data-desa-product-name-overlay hidden>
                         <div class="desa-product-generic-copy" data-desa-generic-copy>
@@ -235,8 +236,12 @@
                     </div>
                 </article>
 
-                <article class="live-product live-product--arrow live-product--arrow-left" data-live-product-theme data-desa-product="arrow-left">
+                <article class="live-product live-product--arrow live-product--arrow-left" data-live-product-theme data-desa-product="arrow-left" data-preview-artwork-slot="arrow-left">
                     <img class="desa-product-artwork" data-desa-product-artwork alt="" hidden>
+                    <svg class="catalog-left-arrow-marker" viewBox="0 0 600 250" preserveAspectRatio="none" aria-hidden="true" focusable="false">
+                        <path d="M22 125 260 20v52h315v106H260v52Z" fill="#ef2b1c" stroke="#fff" stroke-width="10" stroke-linejoin="round" />
+                    </svg>
+                    <img class="catalog-preview-photo" data-live-photo-preview="artwork" alt="Uploaded customer photo preview" hidden>
                                                             <div class="desa-product-name-overlay" data-desa-product-name-overlay hidden>
                         <div class="desa-product-generic-copy" data-desa-generic-copy>
                             <span data-preview-field="groom_display">Groom</span><b>&amp;</b><span data-preview-field="bride_display">Bride</span>
@@ -258,8 +263,9 @@
                     </div>
                 </article>
 
-                <article class="live-product live-product--arrow live-product--arrow-right" data-live-product-theme data-desa-product="arrow-right">
+                <article class="live-product live-product--arrow live-product--arrow-right" data-live-product-theme data-desa-product="arrow-right" data-preview-artwork-slot="arrow-right">
                     <img class="desa-product-artwork" data-desa-product-artwork alt="" hidden>
+                    <img class="catalog-preview-photo" data-live-photo-preview="artwork" alt="Uploaded customer photo preview" hidden>
                                                             <div class="desa-product-name-overlay" data-desa-product-name-overlay hidden>
                         <div class="desa-product-generic-copy" data-desa-generic-copy>
                             <span data-preview-field="groom_display">Groom</span><b>&amp;</b><span data-preview-field="bride_display">Bride</span>
@@ -281,8 +287,9 @@
                     </div>
                 </article>
 
-                <article class="live-product live-product--sticker" data-live-product-theme data-desa-product="sticker">
+                <article class="live-product live-product--sticker" data-live-product-theme data-desa-product="sticker" data-preview-artwork-slot="sticker">
                     <img class="desa-product-artwork" data-desa-product-artwork alt="" hidden>
+                    <img class="catalog-preview-photo" data-live-photo-preview="artwork" alt="Uploaded customer photo preview" hidden>
                                                             <div class="desa-product-name-overlay" data-desa-product-name-overlay hidden>
                         <div class="desa-product-generic-copy" data-desa-generic-copy>
                             <span data-preview-field="groom_display">Groom</span><b>&amp;</b><span data-preview-field="bride_display">Bride</span>
@@ -301,8 +308,26 @@
                     </div>
                 </article>
 
+                <article class="live-product live-product--vip-card" data-live-product-theme data-desa-product="vip-card" data-preview-artwork-slot="vip-card" hidden>
+                    <img class="desa-product-artwork" data-desa-product-artwork alt="" hidden>
+                    <img class="catalog-preview-photo" data-live-photo-preview="artwork" alt="Uploaded customer photo preview" hidden>
+                    <div class="desa-product-name-overlay" data-desa-product-name-overlay hidden>
+                        <div class="desa-product-generic-copy" data-desa-generic-copy hidden></div>
+                        <div class="desa-product-custom-copy" data-desa-product-custom-copy hidden>
+                            <span class="desa-product-copy-kicker" data-preview-field="card_title_malay">MAJLIS PERKAHWINAN</span>
+                            <strong class="desa-product-copy-couple">
+                                <span data-preview-field="groom_display">Groom</span>
+                                <b class="desa-couple-ampersand-spacer" aria-hidden="true">&amp;</b>
+                                <span data-preview-field="bride_display">Bride</span>
+                            </strong>
+                            <span class="desa-product-copy-date" data-preview-field="event_date">TARIKH MAJLIS</span>
+                        </div>
+                    </div>
+                    <div data-desa-product-placeholder hidden></div>
+                </article>
+
                 @if (($order->package_type ?: $order->wabot_package_code) === 'PUTERI_MANIS')
-                    <article class="live-product live-product--hanger" data-live-product-theme data-desa-product="wooden-hanger">
+                    <article class="live-product live-product--hanger" data-live-product-theme data-desa-product="wooden-hanger" data-preview-artwork-slot="wooden-hanger">
                         <img class="desa-product-artwork" data-desa-product-artwork alt="" hidden>
                                                                         <div class="desa-product-name-overlay" data-desa-product-name-overlay hidden>
                         <div class="desa-product-generic-copy" data-desa-generic-copy>
