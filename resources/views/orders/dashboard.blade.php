@@ -1984,6 +1984,10 @@ document.addEventListener('DOMContentLoaded', function () {
                     && !product?.hasAttribute('data-artwork-unavailable');
 
                 setImageSource(image, photoUrl, showProductPhoto);
+
+                if (product) {
+                    product.classList.toggle('has-live-customer-photo', showProductPhoto);
+                }
             });
 
             productPreview?.querySelectorAll('[data-live-photo-preview="artwork"]').forEach(function (image) {
