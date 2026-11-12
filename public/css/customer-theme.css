@@ -1385,3 +1385,20 @@ html[data-customer-theme="dark"] .wedding-card-back .card-social-logo {
         0 .06em 0 #fff,
         .06em .06em 0 #fff;
 }
+
+/* These banners place the printed ampersand left of the shared text-area center. */
+.live-product--banner:is(
+    [data-design-code="CKD-005"],
+    [data-design-code="CKD-006"],
+    [data-design-code="CKD-007"],
+    [data-design-code="CKD-008"]
+) .desa-product-copy-couple {
+    top: 50.85%;
+    right: auto;
+    left: 42.3%;
+    width: 92%;
+    transform: translate(-50%, -50%);
+}
+.live-product--banner[data-design-code="CKD-006"] .desa-product-copy-couple {
+    top: 45.8%;
+}
