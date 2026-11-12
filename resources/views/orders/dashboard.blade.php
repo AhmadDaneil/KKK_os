@@ -150,7 +150,7 @@
     @endphp
     <section class="deposit-status-card" aria-label="Financial summary">
         <div><span>{{ $order->displayCustomerReference() ? 'Customer Reference' : 'Order ID' }}</span><strong>{{ $order->displayCustomerReference() ?: $order->order_id }}</strong></div>
-        <div><span>{{ $order->source === 'TEST' && $order->payment_plan === 'FULL' ? 'Full Card Payment' : 'Booking Paid' }}</span><strong>RM {{ number_format($bookingPaidAmount, 2) }}</strong></div>
+        <div><span>Booking Paid</span><strong>RM {{ number_format($bookingPaidAmount, 2) }}</strong></div>
         @if ($hasFinalOrderTotal)
             <div><span>Order Total</span><strong>RM {{ number_format((float) $order->pricingSnapshot->total_amount, 2) }}</strong></div>
             <div><span>Total Payments</span><strong>RM {{ number_format((float) ($order->invoice?->amount_paid ?? $paidPayments->sum(fn ($payment) => (float) $payment->amount)), 2) }}</strong></div>
@@ -163,7 +163,7 @@
             <h2>Payment History</h2>
             <ul>
                 @foreach ($paidPayments->sortByDesc('paid_at') as $payment)
-                    <li>{{ $payment->payment_type === 'BOOKING_DEPOSIT' ? (($payment->metadata['payment_plan'] ?? null) === 'FULL' ? 'Full card package payment' : 'Booking deposit') : 'Remaining balance' }} — RM {{ number_format((float) $payment->amount, 2) }} — {{ $payment->paid_at?->timezone(config('app.display_timezone'))->format('d/m/Y H:i') }}</li>
+                    <li>{{ $payment->payment_type === 'BOOKING_DEPOSIT' ? 'Booking deposit' : 'Remaining balance' }} — RM {{ number_format((float) $payment->amount, 2) }} — {{ $payment->paid_at?->timezone(config('app.display_timezone'))->format('d/m/Y H:i') }}</li>
                 @endforeach
             </ul>
         @endif
@@ -209,10 +209,10 @@
 @endphp
 @if ($depositPayment)
     <section class="deposit-status-card" data-deposit-status="{{ strtolower($depositPayment->status) }}">
-        <div><span>{{ $order->source === 'TEST' && $order->payment_plan === 'FULL' ? 'Full payment status' : __('ui.deposit_status') }}</span><strong>{{ match ($depositPayment->status) { 'PAID' => $order->source === 'TEST' && $order->payment_plan === 'FULL' ? 'Full payment confirmed' : __('ui.deposit_confirmed'), 'FAILED' => __('ui.receipt_rejected'), default => __('ui.pending_review') } }}</strong></div>
+        <div><span>{{ __('ui.deposit_status') }}</span><strong>{{ match ($depositPayment->status) { 'PAID' => __('ui.deposit_confirmed'), 'FAILED' => __('ui.receipt_rejected'), default => __('ui.pending_review') } }}</strong></div>
         @if (session('deposit_status'))<p class="deposit-success">{{ session('deposit_status') }}</p>@endif
-        @if ($depositPayment->status === 'PENDING')<p>{{ $order->source === 'TEST' && $order->payment_plan === 'FULL' ? 'Your full card payment is being reviewed.' : 'Your deposit receipt has been received and is being reviewed by Operations Management.' }}</p>@endif
-        @if ($depositPayment->status === 'PAID')<p>{{ $order->source === 'TEST' && $order->payment_plan === 'FULL' ? 'The full card package payment is confirmed. No further card balance is due.' : 'Your deposit payment has been confirmed. Your order can proceed to design.' }}</p>@endif
+        @if ($depositPayment->status === 'PENDING')<p>Your deposit receipt has been received and is being reviewed by Operations Management.</p>@endif
+        @if ($depositPayment->status === 'PAID')<p>Your deposit payment has been confirmed. Your order can proceed to design.</p>@endif
         @if ($depositPayment->status === 'FAILED')
             <p><strong>Rejection reason:</strong> {{ $depositPayment->metadata['rejection_reason'] ?? 'The receipt could not be verified.' }}</p>
             <form method="POST" enctype="multipart/form-data" action="{{ route('orders.deposit-receipt.update', ['orderId' => $order->order_id]) }}" data-deposit-resubmission-form>
@@ -1984,6 +1984,10 @@ document.addEventListener('DOMContentLoaded', function () {
                     && !product?.hasAttribute('data-artwork-unavailable');
 
                 setImageSource(image, photoUrl, showProductPhoto);
+
+                if (product) {
+                    product.classList.toggle('has-live-customer-photo', showProductPhoto);
+                }
             });
 
             productPreview?.querySelectorAll('[data-live-photo-preview="artwork"]').forEach(function (image) {
