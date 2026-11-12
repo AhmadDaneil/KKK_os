@@ -1469,7 +1469,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 const artwork = product.querySelector('[data-desa-product-artwork]');
                 const nameOverlay = product.querySelector('[data-desa-product-name-overlay]');
                 const genericNameCopy = nameOverlay.querySelector('[data-desa-generic-copy]');
-                const ckd003NameCopy = nameOverlay.querySelector('[data-desa-ckd003-copy]');
+                const productCustomNameCopy = nameOverlay.querySelector('[data-desa-product-custom-copy]');
                 const placeholder = product.querySelector('[data-desa-product-placeholder]');
                 const shouldShowArtwork = hasDesaArtwork;
                 product.dataset.designCode = shouldShowArtwork ? normalizedCode : '';
@@ -1477,8 +1477,8 @@ document.addEventListener('DOMContentLoaded', function () {
                 product.hidden = type === 'card-back' && !hasDesaArtwork;
                 artwork.hidden = !shouldShowArtwork;
                 nameOverlay.hidden = !shouldShowArtwork;
-                genericNameCopy.hidden = isCkd003Artwork;
-                ckd003NameCopy.hidden = !isCkd003Artwork;
+                genericNameCopy.hidden = shouldShowArtwork;
+                productCustomNameCopy.hidden = !shouldShowArtwork;
                 placeholder.hidden = Boolean(shouldShowArtwork);
 
                 if (shouldShowArtwork) {
