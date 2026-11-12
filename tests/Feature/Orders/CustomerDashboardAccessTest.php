@@ -67,7 +67,7 @@ class CustomerDashboardAccessTest extends TestCase
         ]);
 
         $side = $order->packageSides()->firstOrFail();
-        $side->design()->create([
+        $side->design()->updateOrCreate([], [
             'theme' => 'DESA',
             'design_code' => 'CKD-003',
         ]);
