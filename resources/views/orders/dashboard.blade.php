@@ -1401,7 +1401,6 @@ document.addEventListener('DOMContentLoaded', function () {
         function syncDesaArtwork(scope, theme, designCode) {
             const normalizedCode = designCode.trim().toUpperCase();
             const hasDesaArtwork = theme === 'desa' && desaDesignCodes.has(normalizedCode);
-            const isCkd003Artwork = hasDesaArtwork && normalizedCode === 'CKD-003';
             const assetBase = hasDesaArtwork
                 ? '/images/designs/desa/' + normalizedCode + '/'
                 : '';
@@ -1417,14 +1416,14 @@ document.addEventListener('DOMContentLoaded', function () {
                 front.dataset.designCode = hasDesaArtwork ? normalizedCode : '';
                 const nameOverlay = front.querySelector('[data-desa-card-name-overlay]');
                 const genericNameCopy = nameOverlay.querySelector('[data-desa-generic-copy]');
-                const ckd003NameCopy = nameOverlay.querySelector('[data-desa-ckd003-copy]');
+                const customNameCopy = nameOverlay.querySelector('[data-desa-card-custom-copy]');
                 const genericCopy = front.querySelector('.card-front-copy');
                 const ornaments = front.querySelectorAll('.card-ornament');
 
                 artwork.hidden = !hasDesaArtwork;
                 nameOverlay.hidden = !hasDesaArtwork;
-                genericNameCopy.hidden = isCkd003Artwork;
-                ckd003NameCopy.hidden = !isCkd003Artwork;
+                genericNameCopy.hidden = hasDesaArtwork;
+                customNameCopy.hidden = !hasDesaArtwork;
                 genericCopy.hidden = hasDesaArtwork;
                 front.toggleAttribute('data-desa-artwork', hasDesaArtwork);
                 ornaments.forEach(function (ornament) {
@@ -1445,13 +1444,13 @@ document.addEventListener('DOMContentLoaded', function () {
                 back.dataset.designCode = hasDesaArtwork ? normalizedCode : '';
                 const liveNames = back.querySelector('[data-desa-card-back-live-names]');
                 const genericNameCopy = liveNames.querySelector('[data-desa-generic-copy]');
-                const ckd003NameCopy = liveNames.querySelector('[data-desa-ckd003-copy]');
+                const customNameCopy = liveNames.querySelector('[data-desa-card-back-custom-copy]');
                 const placeholder = back.querySelector('[data-desa-back-placeholder]');
 
                 artwork.hidden = !hasDesaArtwork;
                 liveNames.hidden = !hasDesaArtwork;
-                genericNameCopy.hidden = isCkd003Artwork;
-                ckd003NameCopy.hidden = !isCkd003Artwork;
+                genericNameCopy.hidden = hasDesaArtwork;
+                customNameCopy.hidden = !hasDesaArtwork;
                 placeholder.hidden = hasDesaArtwork;
                 back.toggleAttribute('data-desa-artwork', hasDesaArtwork);
 
