@@ -1402,3 +1402,33 @@ html[data-customer-theme="dark"] .wedding-card-back .card-social-logo {
 .live-product--banner[data-design-code="CKD-006"] .desa-product-copy-couple {
     top: 45.8%;
 }
+
+/* Uploaded customer photos replace the photo area in Banner and Bunting previews. */
+.live-product--banner .live-product-customer-photo,
+.live-product--banting .live-product-customer-photo {
+    position: absolute;
+    z-index: 1;
+    display: block;
+    margin: 0;
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+    object-fit: cover;
+}
+
+.live-product--banner .live-product-customer-photo {
+    inset: 0 auto 0 0;
+    width: 51%;
+    height: 100%;
+}
+
+.live-product--banting .live-product-customer-photo {
+    inset: 0;
+    width: 100%;
+    height: 100%;
+}
+
+.live-product--banner .desa-product-name-overlay,
+.live-product--banting .desa-product-name-overlay {
+    z-index: 2;
+}
