@@ -930,8 +930,8 @@ html[data-customer-theme="dark"] .wedding-card-back .card-social-logo {
 .live-product--banner[data-design-code^="CKD-"] .desa-product-copy-kicker { top: 12%; }
 .live-product--banner[data-design-code^="CKD-"] .desa-product-copy-subtitle { top: 25%; }
 .live-product--banner[data-design-code^="CKD-"] .desa-product-copy-couple { top: 41%; font-size: clamp(.8rem, 3vw, 2.5rem); }
-.live-product--banner[data-design-code^="CKD-"] .desa-product-copy-date { top: 73%; flex-direction: column; gap: .05rem; font-size: clamp(.48rem, 1.65vw, .9rem); }
-.live-product--banner[data-design-code^="CKD-"] .desa-product-copy-quote { top: 84.5%; }
+.live-product--banner[data-design-code^="CKD-"] .desa-product-copy-date { top: 71.5%; flex-direction: column; gap: .05rem; font-size: clamp(.48rem, 1.65vw, .9rem); }
+.live-product--banner[data-design-code^="CKD-"] .desa-product-copy-quote { top: 86.5%; }
 
 .live-product--banting[data-design-code^="CKD-"] .desa-product-name-overlay,
 .live-product--arrow[data-design-code^="CKD-"] .desa-product-name-overlay,
