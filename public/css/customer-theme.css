@@ -1667,17 +1667,19 @@ html[data-customer-theme="dark"] .wedding-card-back .card-social-logo {
     z-index: 2;
 }
 
-.catalog-left-arrow-marker {
+.live-product[data-artwork-unavailable] {
+    background: var(--surface, #f8f6f0);
+}
+
+.live-product[data-artwork-unavailable]::before,
+.live-product[data-artwork-unavailable]::after {
     display: none;
 }
 
-.live-product--arrow-left[data-design-code="CKI-801"] .catalog-left-arrow-marker {
-    position: absolute;
-    z-index: 1;
-    top: 67%;
-    left: 15%;
-    display: block;
-    width: 70%;
-    height: 28%;
-    filter: drop-shadow(2px 3px 2px #0004);
+.artwork-unavailable-message {
+    margin: auto;
+    padding: 1.5rem;
+    color: #625b4e;
+    font: 500 0.875rem/1.6 system-ui, sans-serif;
+    text-align: center;
 }
