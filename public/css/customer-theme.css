@@ -604,15 +604,15 @@ html[data-customer-theme="dark"] .wedding-card-back .card-social-logo {
 }
 
 
-/* CKD-003 live artwork text positions follow the supplied print layouts. */
-.wedding-card-front[data-design-code="CKD-003"] {
+/* Desa live card text positions follow the supplied print layouts. */
+.wedding-card-front[data-design-code^="CKD-"] {
     aspect-ratio: 3 / 4;
     padding: 0;
 }
-.wedding-card-front[data-design-code="CKD-003"] .desa-card-artwork {
+.wedding-card-front[data-design-code^="CKD-"] .desa-card-artwork {
     object-fit: fill;
 }
-.wedding-card-front[data-design-code="CKD-003"] .desa-card-name-overlay {
+.wedding-card-front[data-design-code^="CKD-"] .desa-card-name-overlay {
     inset: 0;
     display: block;
     padding: 0;
@@ -629,7 +629,7 @@ html[data-customer-theme="dark"] .wedding-card-back .card-social-logo {
     text-shadow: 0 1px 1px rgba(255,255,255,.55);
     box-shadow: none;
 }
-.wedding-card-front[data-design-code="CKD-003"] .desa-card-ckd003-title {
+.wedding-card-front[data-design-code^="CKD-"] .desa-card-custom-title {
     position: absolute;
     top: 8.2%;
     right: 8%;
@@ -638,7 +638,7 @@ html[data-customer-theme="dark"] .wedding-card-back .card-social-logo {
     font-size: clamp(.42rem, 1.9vw, .74rem);
     letter-spacing: .01em;
 }
-.wedding-card-front[data-design-code="CKD-003"] .desa-card-ckd003-couple {
+.wedding-card-front[data-design-code^="CKD-"] .desa-card-custom-couple {
     position: absolute;
     top: 15.5%;
     right: 7%;
@@ -653,18 +653,18 @@ html[data-customer-theme="dark"] .wedding-card-back .card-social-logo {
     font-weight: 500;
     line-height: .95;
 }
-.wedding-card-front[data-design-code="CKD-003"] .desa-card-ckd003-couple span {
+.wedding-card-front[data-design-code^="CKD-"] .desa-card-custom-couple span {
     min-width: 0;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
 }
-.wedding-card-front[data-design-code="CKD-003"] .desa-card-ckd003-couple b {
+.wedding-card-front[data-design-code^="CKD-"] .desa-card-custom-couple b {
     flex: 0 0 auto;
     color: #b39d6d;
     font-size: .9em;
 }
-.wedding-card-front[data-design-code="CKD-003"] .desa-card-ckd003-date {
+.wedding-card-front[data-design-code^="CKD-"] .desa-card-custom-date {
     position: absolute;
     top: 27%;
     right: 8%;
@@ -676,14 +676,14 @@ html[data-customer-theme="dark"] .wedding-card-back .card-social-logo {
     letter-spacing: .035em;
     text-transform: uppercase;
 }
-.wedding-card-front[data-design-code="CKD-003"] .desa-card-ckd003-date span:last-child {
+.wedding-card-front[data-design-code^="CKD-"] .desa-card-custom-date span:last-child {
     font-size: 1.02em;
 }
 
-.wedding-card-back[data-design-code="CKD-003"] .desa-card-back-artwork {
+.wedding-card-back[data-design-code^="CKD-"] .desa-card-back-artwork {
     object-fit: fill;
 }
-.wedding-card-back[data-design-code="CKD-003"] .desa-card-back-live-names {
+.wedding-card-back[data-design-code^="CKD-"] .desa-card-back-live-names {
     inset: 6.5% 7.5% 5.5%;
     display: flex;
     box-sizing: border-box;
@@ -700,13 +700,13 @@ html[data-customer-theme="dark"] .wedding-card-back .card-social-logo {
     line-height: 1.05;
     text-align: center;
 }
-.wedding-card-back[data-design-code="CKD-003"] .desa-card-back-ckd003-copy span {
+.wedding-card-back[data-design-code^="CKD-"] .desa-card-back-custom-copy span {
     min-width: 0;
     overflow: visible;
     text-overflow: clip;
     white-space: normal;
 }
-.desa-back-ckd003-header {
+.desa-back-custom-header {
     display: flex;
     min-height: 0;
     flex: 0 0 39%;
@@ -716,28 +716,28 @@ html[data-customer-theme="dark"] .wedding-card-back .card-social-logo {
     gap: .06rem;
     padding: 0 1%;
 }
-.desa-back-ckd003-header p {
+.desa-back-custom-header p {
     margin: .08rem 0;
     font-size: .92em;
 }
-.desa-back-ckd003-arabic {
+.desa-back-custom-arabic {
     font-family: Georgia, serif;
     font-size: 1.45em;
 }
-.desa-back-ckd003-header strong {
+.desa-back-custom-header strong {
     display: block;
     font-family: Georgia, serif;
     font-size: 1.32em;
     letter-spacing: .04em;
     text-transform: uppercase;
 }
-.desa-back-ckd003-header .desa-back-ckd003-couple {
+.desa-back-custom-header .desa-back-custom-couple {
     font-size: 1.55em;
 }
-.desa-back-ckd003-ampersand {
+.desa-back-custom-ampersand {
     font-weight: 800;
 }
-.desa-back-ckd003-info {
+.desa-back-custom-info {
     display: grid;
     min-height: 0;
     flex: 0 0 21%;
@@ -745,7 +745,7 @@ html[data-customer-theme="dark"] .wedding-card-back .card-social-logo {
     border-top: 1px solid #161616;
     border-bottom: 1px solid #161616;
 }
-.desa-back-ckd003-info section {
+.desa-back-custom-info section {
     display: flex;
     min-width: 0;
     padding: 2% 1%;
@@ -756,37 +756,37 @@ html[data-customer-theme="dark"] .wedding-card-back .card-social-logo {
     overflow: hidden;
     border-right: 1px solid #161616;
 }
-.desa-back-ckd003-info section:last-child {
+.desa-back-custom-info section:last-child {
     border-right: 0;
 }
-.desa-back-ckd003-info b {
+.desa-back-custom-info b {
     font-size: 1.16em;
     line-height: 1.05;
     text-transform: uppercase;
 }
-.desa-back-ckd003-info strong {
+.desa-back-custom-info strong {
     max-width: 100%;
     font-size: 1.02em;
     line-height: 1.05;
     overflow-wrap: anywhere;
 }
-.desa-back-ckd003-date strong {
+.desa-back-custom-date strong {
     font-size: 1.45em;
 }
-.desa-back-ckd003-info small,
-.desa-back-ckd003-info span {
+.desa-back-custom-info small,
+.desa-back-custom-info span {
     font-size: .76em;
     line-height: 1;
 }
-.desa-back-ckd003-schedule span {
+.desa-back-custom-schedule span {
     text-decoration: underline;
     text-underline-offset: 1px;
 }
-.desa-back-ckd003-contacts span {
+.desa-back-custom-contacts span {
     margin-top: .08rem;
     font-weight: 700;
 }
-.desa-back-ckd003-location {
+.desa-back-custom-location {
     display: grid;
     min-height: 0;
     flex: 0 0 29%;
@@ -796,11 +796,11 @@ html[data-customer-theme="dark"] .wedding-card-back .card-social-logo {
     padding: 2% 3%;
     border-bottom: 1px solid #161616;
 }
-.desa-back-ckd003-location .qr-placeholder {
+.desa-back-custom-location .qr-placeholder {
     width: 88%;
     margin: auto;
 }
-.desa-back-ckd003-location > div:last-child {
+.desa-back-custom-location > div:last-child {
     display: flex;
     min-width: 0;
     align-items: flex-start;
@@ -808,20 +808,20 @@ html[data-customer-theme="dark"] .wedding-card-back .card-social-logo {
     gap: .08rem;
     text-align: left;
 }
-.desa-back-ckd003-location b,
-.desa-back-ckd003-location strong,
-.desa-back-ckd003-location small {
+.desa-back-custom-location b,
+.desa-back-custom-location strong,
+.desa-back-custom-location small {
     display: block;
     font-size: .82em;
     line-height: 1.05;
 }
-.desa-back-ckd003-location p {
+.desa-back-custom-location p {
     margin: .08rem 0 0;
     font-size: .82em;
     line-height: 1.08;
     overflow-wrap: anywhere;
 }
-.desa-back-ckd003-footer {
+.desa-back-custom-footer {
     display: flex;
     min-height: 0;
     flex: 1 1 auto;
@@ -833,7 +833,7 @@ html[data-customer-theme="dark"] .wedding-card-back .card-social-logo {
     font-size: .8em;
     font-style: italic;
 }
-.desa-back-ckd003-footer strong {
+.desa-back-custom-footer strong {
     color: #59411a;
     font-size: 1.05em;
     font-style: normal;
@@ -959,7 +959,7 @@ html[data-customer-theme="dark"] .wedding-card-back .card-social-logo {
 .live-product--hanger[data-design-code^="CKD-"] .desa-product-copy-date { top: 64%; color: #241d18; font-size: clamp(.55rem, 1.5vw, .8rem); }
 
 @media (max-width: 520px) {
-    .wedding-card-front[data-design-code="CKD-003"] .desa-card-ckd003-couple {
+    .wedding-card-front[data-design-code^="CKD-"] .desa-card-custom-couple {
         font-size: clamp(.72rem, 4.6vw, 1.3rem);
     }
     .live-product--banner[data-design-code^="CKD-"] .desa-product-copy-couple {
@@ -971,23 +971,23 @@ html[data-customer-theme="dark"] .wedding-card-back .card-social-logo {
     }
 }
 
-/* CKD-003 overlays use the clean artwork's existing text, ampersands, borders and footer. */
-.wedding-card-front[data-design-code="CKD-003"] .desa-card-ckd003-couple {
+/* Desa overlays use the artwork's existing text, ampersands, borders and footer. */
+.wedding-card-front[data-design-code^="CKD-"] .desa-card-custom-couple {
     display: grid;
     grid-template-columns: minmax(0, 1fr) 1.5em minmax(0, 1fr);
     right: 9%;
     left: 9%;
 }
-.wedding-card-front[data-design-code="CKD-003"] .desa-card-ckd003-couple span:first-child {
+.wedding-card-front[data-design-code^="CKD-"] .desa-card-custom-couple span:first-child {
     padding-right: .14em;
     text-align: right;
 }
-.wedding-card-front[data-design-code="CKD-003"] .desa-card-ckd003-couple span:last-child {
+.wedding-card-front[data-design-code^="CKD-"] .desa-card-custom-couple span:last-child {
     padding-left: .14em;
     text-align: left;
 }
 
-.wedding-card-back[data-design-code="CKD-003"] .desa-card-back-live-names {
+.wedding-card-back[data-design-code^="CKD-"] .desa-card-back-live-names {
     inset: 0;
     display: block;
     padding: 0;
@@ -997,14 +997,14 @@ html[data-customer-theme="dark"] .wedding-card-back .card-social-logo {
     font-size: clamp(.32rem, 1.25vw, .49rem);
     line-height: 1.05;
 }
-.wedding-card-back[data-design-code="CKD-003"] .desa-card-back-ckd003-copy > strong,
-.wedding-card-back[data-design-code="CKD-003"] .desa-card-back-ckd003-copy > div {
+.wedding-card-back[data-design-code^="CKD-"] .desa-card-back-custom-copy > strong,
+.wedding-card-back[data-design-code^="CKD-"] .desa-card-back-custom-copy > div {
     position: absolute;
 }
-.desa-back-ckd003-father,
-.desa-back-ckd003-mother,
-.desa-back-ckd003-groom,
-.desa-back-ckd003-bride {
+.desa-back-custom-father,
+.desa-back-custom-mother,
+.desa-back-custom-groom,
+.desa-back-custom-bride {
     right: 12%;
     left: 12%;
     display: block;
@@ -1013,11 +1013,11 @@ html[data-customer-theme="dark"] .wedding-card-back .card-social-logo {
     letter-spacing: .04em;
     text-transform: uppercase;
 }
-.desa-back-ckd003-father { top: 14.5%; }
-.desa-back-ckd003-mother { top: 20.7%; }
-.desa-back-ckd003-groom { top: 35.7%; }
-.desa-back-ckd003-bride { top: 41.6%; }
-.desa-back-ckd003-date {
+.desa-back-custom-father { top: 14.5%; }
+.desa-back-custom-mother { top: 20.7%; }
+.desa-back-custom-groom { top: 35.7%; }
+.desa-back-custom-bride { top: 41.6%; }
+.desa-back-custom-date {
     top: 47.2%;
     bottom: 65%;
     left: 8.2%;
@@ -1029,22 +1029,22 @@ html[data-customer-theme="dark"] .wedding-card-back .card-social-logo {
     gap: .06rem;
     padding: 1%;
 }
-.desa-back-ckd003-date span {
+.desa-back-custom-date span {
     font-size: 1.08em;
     font-weight: 800;
     text-transform: uppercase;
 }
-.desa-back-ckd003-date strong {
+.desa-back-custom-date strong {
     font-size: clamp(.8rem, 2.4vw, 1.2rem);
     line-height: .9;
 }
-.desa-back-ckd003-date small,
-.desa-back-ckd003-date em {
+.desa-back-custom-date small,
+.desa-back-custom-date em {
     font-size: .75em;
     font-style: normal;
     text-transform: uppercase;
 }
-.desa-back-ckd003-schedule {
+.desa-back-custom-schedule {
     top: 47.2%;
     bottom: 65%;
     left: 38%;
@@ -1056,12 +1056,12 @@ html[data-customer-theme="dark"] .wedding-card-back .card-social-logo {
     gap: .55rem;
     padding: 1%;
 }
-.desa-back-ckd003-schedule strong {
+.desa-back-custom-schedule strong {
     font-size: .95em;
     font-weight: 500;
     text-transform: uppercase;
 }
-.desa-back-ckd003-contacts {
+.desa-back-custom-contacts {
     top: 47.2%;
     right: 8.2%;
     bottom: 65%;
@@ -1073,31 +1073,31 @@ html[data-customer-theme="dark"] .wedding-card-back .card-social-logo {
     gap: .08rem;
     padding: 1%;
 }
-.desa-back-ckd003-contacts > div {
+.desa-back-custom-contacts > div {
     display: grid;
     width: 100%;
     justify-items: center;
     gap: .02rem;
 }
-.desa-back-ckd003-contacts span {
+.desa-back-custom-contacts span {
     font-size: .72em;
     font-weight: 800;
 }
-.desa-back-ckd003-contacts strong,
-.desa-back-ckd003-contacts small {
+.desa-back-custom-contacts strong,
+.desa-back-custom-contacts small {
     max-width: 100%;
     font-size: .72em;
     line-height: 1;
     overflow-wrap: anywhere;
 }
-.desa-back-ckd003-qr {
+.desa-back-custom-qr {
     top: 66%;
     left: 12%;
     width: 30%;
     aspect-ratio: 1;
     border: 0;
 }
-.desa-back-ckd003-venue {
+.desa-back-custom-venue {
     top: 79%;
     right: 9%;
     left: 44%;
@@ -1106,15 +1106,15 @@ html[data-customer-theme="dark"] .wedding-card-back .card-social-logo {
     gap: .1rem;
     text-align: left;
 }
-.desa-back-ckd003-venue strong,
-.desa-back-ckd003-venue p {
+.desa-back-custom-venue strong,
+.desa-back-custom-venue p {
     margin: 0;
     font-size: .78em;
     line-height: 1.05;
     overflow-wrap: anywhere;
 }
-.desa-back-ckd003-venue strong { text-transform: uppercase; }
-.desa-back-ckd003-venue p { font-size: .82em; }
+.desa-back-custom-venue strong { text-transform: uppercase; }
+.desa-back-custom-venue p { font-size: .82em; }
 
 .live-product--banner[data-design-code^="CKD-"] {
     aspect-ratio: 2 / 1;
@@ -1158,16 +1158,16 @@ html[data-customer-theme="dark"] .wedding-card-back .card-social-logo {
 
 
 /* Keep the rear card fields inside the artwork's printed information band. */
-.desa-back-ckd003-date,
-.desa-back-ckd003-schedule,
-.desa-back-ckd003-contacts {
+.desa-back-custom-date,
+.desa-back-custom-schedule,
+.desa-back-custom-contacts {
     bottom: auto;
     height: 17.8%;
     box-sizing: border-box;
 }
 
 
-/* Keep the general Desa preview intact while CKD-003 uses its print-specific layout. */
+/* Keep the general Desa preview intact while CKD designs use their print-specific layouts. */
 .desa-card-generic-copy,
 .desa-card-back-generic-copy,
 .desa-product-generic-copy {
@@ -1178,18 +1178,18 @@ html[data-customer-theme="dark"] .wedding-card-back .card-social-logo {
     gap: .35em;
 }
 .desa-card-generic-copy[hidden],
-.desa-card-ckd003-copy[hidden],
+.desa-card-custom-copy[hidden],
 .desa-card-back-generic-copy[hidden],
-.desa-card-back-ckd003-copy[hidden],
+.desa-card-back-custom-copy[hidden],
 .desa-product-generic-copy[hidden],
 .desa-product-custom-copy[hidden] {
     display: none !important;
 }
-.wedding-card-front[data-design-code="CKD-003"] .desa-card-ckd003-copy {
+.wedding-card-front[data-design-code^="CKD-"] .desa-card-custom-copy {
     position: absolute;
     inset: 0;
 }
-.wedding-card-back[data-design-code="CKD-003"] .desa-card-back-live-names {
+.wedding-card-back[data-design-code^="CKD-"] .desa-card-back-live-names {
     inset: 0;
     display: block;
     padding: 0;
@@ -1197,7 +1197,7 @@ html[data-customer-theme="dark"] .wedding-card-back .card-social-logo {
     background: transparent;
     box-shadow: none;
 }
-.wedding-card-back[data-design-code="CKD-003"] .desa-card-back-ckd003-copy {
+.wedding-card-back[data-design-code^="CKD-"] .desa-card-back-custom-copy {
     position: absolute;
     inset: 0;
 }
@@ -1229,7 +1229,7 @@ html[data-customer-theme="dark"] .wedding-card-back .card-social-logo {
 
 
 /* Match the printed 2:3 proportions for the rear card and arrow artwork. */
-.wedding-card-back[data-design-code="CKD-003"],
+.wedding-card-back[data-design-code^="CKD-"],
 .live-product--arrow[data-design-code^="CKD-"] {
     aspect-ratio: 2 / 3;
 }
