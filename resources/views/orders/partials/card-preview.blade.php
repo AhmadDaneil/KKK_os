@@ -199,7 +199,7 @@
                         <div class="desa-product-generic-copy" data-desa-generic-copy>
                             <span data-preview-field="groom_display">Groom</span><b>&amp;</b><span data-preview-field="bride_display">Bride</span>
                         </div>
-                        <div class="desa-product-ckd003-copy" data-desa-ckd003-copy hidden>
+                        <div class="desa-product-custom-copy" data-desa-product-custom-copy hidden>
                         <span class="desa-product-copy-subtitle">Ke <span data-preview-field="card_title_malay">{{ $designCardTitle }}</span></span>
                         <strong class="desa-product-copy-couple"><span data-preview-field="groom_display">Groom</span><b class="desa-couple-ampersand-spacer" aria-hidden="true">&amp;</b><span data-preview-field="bride_display">Bride</span></strong>
                         <span class="desa-product-copy-date"><span data-preview-field="day_name_malay">HARI</span><span data-preview-field="event_date">TARIKH MAJLIS</span></span>
@@ -220,7 +220,7 @@
                         <div class="desa-product-generic-copy" data-desa-generic-copy>
                             <span data-preview-field="groom_display">Groom</span><b>&amp;</b><span data-preview-field="bride_display">Bride</span>
                         </div>
-                        <div class="desa-product-ckd003-copy" data-desa-ckd003-copy hidden>
+                        <div class="desa-product-custom-copy" data-desa-product-custom-copy hidden>
                         <span class="desa-product-copy-kicker" data-preview-field="card_title_malay">WALIMATUL URUS</span>
                         <strong class="desa-product-copy-couple"><span data-preview-field="groom_display">Groom</span><b class="desa-couple-ampersand-spacer" aria-hidden="true">&amp;</b><span data-preview-field="bride_display">Bride</span></strong>
                         <span class="desa-product-copy-date"><span data-preview-field="day_name_malay">HARI</span><span data-preview-field="event_date">TARIKH MAJLIS</span></span>
@@ -241,7 +241,7 @@
                         <div class="desa-product-generic-copy" data-desa-generic-copy>
                             <span data-preview-field="groom_display">Groom</span><b>&amp;</b><span data-preview-field="bride_display">Bride</span>
                         </div>
-                        <div class="desa-product-ckd003-copy" data-desa-ckd003-copy hidden>
+                        <div class="desa-product-custom-copy" data-desa-product-custom-copy hidden>
                         <span class="desa-product-copy-kicker" data-preview-field="card_title_malay">WALIMATUL URUS</span>
                         <strong class="desa-product-copy-couple"><span data-preview-field="groom_display">Groom</span><b class="desa-couple-ampersand-spacer" aria-hidden="true">&amp;</b><span data-preview-field="bride_display">Bride</span></strong>
                         <span class="desa-product-copy-date"><span data-preview-field="day_name_malay">HARI</span><span data-preview-field="event_date">TARIKH MAJLIS</span></span>
@@ -264,7 +264,7 @@
                         <div class="desa-product-generic-copy" data-desa-generic-copy>
                             <span data-preview-field="groom_display">Groom</span><b>&amp;</b><span data-preview-field="bride_display">Bride</span>
                         </div>
-                        <div class="desa-product-ckd003-copy" data-desa-ckd003-copy hidden>
+                        <div class="desa-product-custom-copy" data-desa-product-custom-copy hidden>
                         <span class="desa-product-copy-kicker" data-preview-field="card_title_malay">WALIMATUL URUS</span>
                         <strong class="desa-product-copy-couple"><span data-preview-field="groom_display">Groom</span><b class="desa-couple-ampersand-spacer" aria-hidden="true">&amp;</b><span data-preview-field="bride_display">Bride</span></strong>
                         <span class="desa-product-copy-date"><span data-preview-field="day_name_malay">HARI</span><span data-preview-field="event_date">TARIKH MAJLIS</span></span>
@@ -287,7 +287,7 @@
                         <div class="desa-product-generic-copy" data-desa-generic-copy>
                             <span data-preview-field="groom_display">Groom</span><b>&amp;</b><span data-preview-field="bride_display">Bride</span>
                         </div>
-                        <div class="desa-product-ckd003-copy" data-desa-ckd003-copy hidden>
+                        <div class="desa-product-custom-copy" data-desa-product-custom-copy hidden>
                         <strong class="desa-product-copy-couple"><span data-preview-field="groom_display">Groom</span><b class="desa-couple-ampersand-spacer" aria-hidden="true">&amp;</b><span data-preview-field="bride_display">Bride</span></strong>
                         <span class="desa-product-copy-date" data-preview-field="event_date">TARIKH MAJLIS</span>
                     </div>
@@ -308,7 +308,7 @@
                         <div class="desa-product-generic-copy" data-desa-generic-copy>
                             <span data-preview-field="groom_display">Groom</span><b>&amp;</b><span data-preview-field="bride_display">Bride</span>
                         </div>
-                        <div class="desa-product-ckd003-copy" data-desa-ckd003-copy hidden>
+                        <div class="desa-product-custom-copy" data-desa-product-custom-copy hidden>
                             <strong class="desa-product-copy-couple"><span data-preview-field="groom_display">Groom</span><b class="desa-couple-ampersand-spacer" aria-hidden="true">&amp;</b><span data-preview-field="bride_display">Bride</span></strong>
                             <span class="desa-product-copy-date" data-preview-field="event_date">TARIKH MAJLIS</span>
                         </div>
