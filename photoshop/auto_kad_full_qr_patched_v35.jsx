@@ -19,7 +19,7 @@
      - Guna PowerShell untuk download QR (Windows).
 */
 
-#target photoshop
+//target photoshop
 var KKK_ORIGINAL_DIALOGS = app.displayDialogs;
 var KKK_ORIGINAL_UNITS = app.preferences.rulerUnits;
 app.displayDialogs = DialogModes.NO;
@@ -1274,6 +1274,47 @@ function findTemplates(masterPath, tema, designCode){
     return list;
 }
 
+function kkkUsePortraitBannerAndBantingForPhoto(masterPath, tema, templates, imagePath) {
+    var result = {templates: templates, overridePaths: [], applied: false, error: ""};
+    if (!imagePath || containsPortraitWord(tema)) return result;
+
+    var portraitTemplates = findTemplates(masterPath, "POTRAIT", "CKP-002");
+    var replacements = [];
+    var foundBanner = false, foundBanting = false;
+    for (var i = 0; i < portraitTemplates.length; i++) {
+        var fileName = (new File(portraitTemplates[i])).name.toLowerCase();
+        if (fileName.indexOf("banner") >= 0) {
+            replacements.push(portraitTemplates[i]);
+            foundBanner = true;
+        } else if (fileName.indexOf("banting") >= 0) {
+            replacements.push(portraitTemplates[i]);
+            foundBanting = true;
+        }
+    }
+    if (!foundBanner || !foundBanting) {
+        result.error = "Template BANNER/BANTING POTRAIT/CKP-002 tidak lengkap; template asal dikekalkan.";
+        return result;
+    }
+
+    var selectedDesignTemplates = [];
+    for (var j = 0; j < templates.length; j++) {
+        var selectedName = (new File(templates[j])).name.toLowerCase();
+        if (selectedName.indexOf("banner") < 0 && selectedName.indexOf("banting") < 0) {
+            selectedDesignTemplates.push(templates[j]);
+        }
+    }
+    result.templates = selectedDesignTemplates.concat(replacements);
+    result.overridePaths = replacements;
+    result.templates.sort(function(a, b) {
+        var first = a.toLowerCase(), second = b.toLowerCase();
+        if (first < second) return -1;
+        if (first > second) return 1;
+        return 0;
+    });
+    result.applied = true;
+    return result;
+}
+
 // ------------------ Item quantity mapping ------------------
 function fixedQtyForItem(tplName, qtyFromCSV) {
     var nm = (tplName||"").toLowerCase();
@@ -1300,6 +1341,13 @@ var KKK_PORTRAIT_FRAMES = {
     "VIP CARD":    [0, 0, 1, 0.55]
 };
 
+// Non-portrait customer-photo areas. A PSD layer named KKK_PHOTO_FRAME or
+// PHOTO_FRAME overrides these defaults when a template needs a custom crop.
+var KKK_TEMPLATE_PHOTO_FRAMES = {
+    "BANNER":  [0, 0, 0.51, 1],
+    "BANTING": [0, 0, 1, 1]
+};
+
 // One optional visual check per template: adjust crop position and zoom.
 // Turn on via the batch confirmation dialog.
 var KKK_REVIEW_PORTRAIT_CROP = false;
@@ -1312,6 +1360,13 @@ function kkkPortraitItem(name) {
             (n === key || n.indexOf(key + "_") === 0 ||
              n.indexOf(key + " ") === 0 || n.indexOf(key + "(") === 0)) return key;
     }
+    return "";
+}
+
+function kkkTemplatePhotoItem(name) {
+    var n = t(name).toUpperCase().replace(/\.PSD$/i, "");
+    if (n === "BANNER" || n.indexOf("BANNER ") === 0 || n.indexOf("BANNER_") === 0) return "BANNER";
+    if (n === "BANTING" || n.indexOf("BANTING ") === 0 || n.indexOf("BANTING_") === 0) return "BANTING";
     return "";
 }
 
@@ -1346,7 +1401,7 @@ function kkkEffectiveVisible(layer) {
     return true;
 }
 
-function kkkFrameForDocument(doc, item) {
+function kkkFrameForDocument(doc, item, fallbackFrames) {
     var frames = [];
     kkkWalkLayers(doc, function(layer) {
         var name = t(layer.name).toLowerCase();
@@ -1360,7 +1415,7 @@ function kkkFrameForDocument(doc, item) {
         // Hidden or opacity-0 shape/SO must still have measurable geometry.
         // An empty transparent pixel layer has no geometry and is rejected.
     } else {
-        var rect = KKK_PORTRAIT_FRAMES[item];
+        var rect = (fallbackFrames && fallbackFrames[item]) || KKK_PORTRAIT_FRAMES[item];
         if (!rect) throw new Error("Tiada profil bingkai untuk " + item);
         box = {x: Math.round(w * rect[0]), y: Math.round(h * rect[1]),
             w: Math.round(w * rect[2]) - Math.round(w * rect[0]),
@@ -1421,12 +1476,212 @@ function kkkPositionPhoto(photo, box, x, y, state) {
     return b;
 }
 
-function kkkReviewCrop(doc, photo, box, state) {
+function kkkBringTextLayersAbovePhoto(doc, photoLayer) {
+    var textLayers = [];
+    function collect(container) {
+        for (var i = 0; i < container.layers.length; i++) {
+            var layer = container.layers[i];
+            if (layer.typename === "LayerSet") collect(layer);
+            else if (layer.kind === LayerKind.TEXT) textLayers.push(layer);
+        }
+    }
+    collect(doc);
+
+    // Promote only text layers so artwork cannot obscure the photo frame.
+    // Traversal and move order preserve the text layers' existing stacking order.
+    for (var j = 0; j < textLayers.length; j++) {
+        try { textLayers[j].move(photoLayer, ElementPlacement.PLACEBEFORE); } catch (moveTextError) {}
+    }
+}
+
+function kkkAddLightOutlineToDarkText(doc, layer) {
+    try {
+        if (!layer || layer.kind !== LayerKind.TEXT || /signature/i.test(t(layer.name))) return false;
+        var rgb = layer.textItem.color.rgb;
+        var luminance = (0.2126 * rgb.red) + (0.7152 * rgb.green) + (0.0722 * rgb.blue);
+        if (luminance > 155) return false;
+
+        var stroke = new ActionDescriptor();
+        stroke.putBoolean(charIDToTypeID("enab"), true);
+        stroke.putBoolean(charIDToTypeID("present"), true);
+        stroke.putBoolean(charIDToTypeID("showInDialog"), true);
+        stroke.putEnumerated(charIDToTypeID("Styl"), charIDToTypeID("FStl"), charIDToTypeID("OutF"));
+        stroke.putEnumerated(charIDToTypeID("PntT"), charIDToTypeID("FrFl"), charIDToTypeID("SClr"));
+        stroke.putEnumerated(charIDToTypeID("Md  "), charIDToTypeID("BlnM"), charIDToTypeID("Nrml"));
+        stroke.putUnitDouble(charIDToTypeID("Opct"), charIDToTypeID("#Prc"), 92);
+        stroke.putUnitDouble(charIDToTypeID("Sz  "), charIDToTypeID("#Pxl"), 3);
+
+        var outlineColor = new ActionDescriptor();
+        outlineColor.putDouble(charIDToTypeID("Rd  "), 255);
+        outlineColor.putDouble(charIDToTypeID("Grn "), 247);
+        outlineColor.putDouble(charIDToTypeID("Bl  "), 229);
+        stroke.putObject(charIDToTypeID("Clr "), charIDToTypeID("RGBC"), outlineColor);
+
+        var layerEffects = new ActionDescriptor();
+        layerEffects.putUnitDouble(charIDToTypeID("Scl "), charIDToTypeID("#Prc"), 100);
+        layerEffects.putObject(charIDToTypeID("FrFX"), charIDToTypeID("FrFX"), stroke);
+
+        var setDescriptor = new ActionDescriptor();
+        var layerReference = new ActionReference();
+        layerReference.putProperty(charIDToTypeID("Prpr"), stringIDToTypeID("layerEffects"));
+        layerReference.putEnumerated(charIDToTypeID("Lyr "), charIDToTypeID("Ordn"), charIDToTypeID("Trgt"));
+        setDescriptor.putReference(charIDToTypeID("null"), layerReference);
+        setDescriptor.putObject(charIDToTypeID("T   "), stringIDToTypeID("layerEffects"), layerEffects);
+        doc.activeLayer = layer;
+        executeAction(charIDToTypeID("setd"), setDescriptor, DialogModes.NO);
+        return true;
+    } catch (applyTextOutlineError) {
+        return false;
+    }
+}
+
+function kkkOutlineDarkPhotoText(doc) {
+    var textLayers = [], applied = 0, skipped = 0, failed = 0;
+    function collect(container) {
+        for (var i = 0; i < container.layers.length; i++) {
+            var layer = container.layers[i];
+            if (layer.typename === "LayerSet") collect(layer);
+            else if (layer.kind === LayerKind.TEXT) textLayers.push(layer);
+        }
+    }
+    collect(doc);
+    for (var j = 0; j < textLayers.length; j++) {
+        var result = kkkAddLightOutlineToDarkText(doc, textLayers[j]);
+        if (result) applied++;
+        else if (/signature/i.test(t(textLayers[j].name))) skipped++;
+        else {
+            try {
+                var textRgb = textLayers[j].textItem.color.rgb;
+                var textLuminance = (0.2126 * textRgb.red) + (0.7152 * textRgb.green) + (0.0722 * textRgb.blue);
+                if (textLuminance > 155) skipped++;
+                else failed++;
+            } catch (readTextColorError) {
+                failed++;
+            }
+        }
+    }
+    return "light-outline applied=" + applied + ", skipped=" + skipped + ", failed=" + failed;
+}
+
+function kkkBringNamedLayerAbovePhoto(doc, layerName, photoGroup) {
+    var layer = findLayerByNames(doc, [t(layerName).toLowerCase()]);
+    if (!layer || !photoGroup) return false;
+    try {
+        layer.move(photoGroup, ElementPlacement.PLACEBEFORE);
+        return true;
+    } catch (moveNamedLayerError) {
+        return false;
+    }
+}
+
+function kkkBringNamedLayerToTop(doc, layerName) {
+    var layer = findLayerByNames(doc, [t(layerName).toLowerCase()]);
+    var firstLayer = doc.layers.length ? doc.layers[0] : null;
+    if (!layer || !firstLayer || layer === firstLayer) return !!layer;
+    try {
+        layer.move(firstLayer, ElementPlacement.PLACEBEFORE);
+        return true;
+    } catch (moveNamedLayerToTopError) {
+        return false;
+    }
+}
+
+function kkkInsertTemplatePhoto(doc, imagePath, item) {
+    var oldUnits = app.preferences.rulerUnits;
+    var sourceDoc = null, photoDoc = null, imported = null, photoGroup = null, maskLayer = null, frame = null;
+    var sourceWasOpen = false, markerWasVisible = false;
+    try {
+        if (!imagePath || !(new File(imagePath)).exists) throw new Error("Gambar pengantin tidak ditemui.");
+        app.activeDocument = doc;
+        app.preferences.rulerUnits = Units.PIXELS;
+        frame = kkkFrameForDocument(doc, item, KKK_TEMPLATE_PHOTO_FRAMES);
+
+        var alreadyOpen = [], d;
+        for (d = 0; d < app.documents.length; d++) alreadyOpen.push(app.documents[d]);
+        sourceDoc = app.open(new File(imagePath));
+        for (d = 0; d < alreadyOpen.length; d++) {
+            if (alreadyOpen[d] === sourceDoc) sourceWasOpen = true;
+        }
+        try {
+            photoDoc = sourceDoc.duplicate("KKK temporary template photo", true);
+        } finally {
+            if (!sourceWasOpen) closeDocNoSave(sourceDoc);
+            sourceDoc = null;
+        }
+
+        imported = photoDoc.activeLayer.duplicate(doc, ElementPlacement.PLACEATBEGINNING);
+        closeDocNoSave(photoDoc);
+        photoDoc = null;
+        app.activeDocument = doc;
+        imported.name = "Gambar Pengantin - " + item + " - customer photo";
+        imported.visible = true;
+        imported.allLocked = false;
+        doc.activeLayer = imported;
+
+        var before = _boundsPx(imported);
+        var placement = kkkCoverGeometry(before.w, before.h, frame.box, 0.5, 0.5);
+        imported.resize(placement.scale * 100, placement.scale * 100, AnchorPosition.MIDDLECENTER);
+        var cropState = kkkPositionPhoto(imported, frame.box, 0.5, 0.5);
+
+        // Build an explicit clipping stack for Banting. A solid base alpha keeps
+        // the full photo frame visible while the template artwork stays below it.
+        photoGroup = doc.layerSets.add();
+        photoGroup.name = "KKK PHOTO CLIPPING - " + item;
+        maskLayer = photoGroup.artLayers.add();
+        maskLayer.name = "KKK " + item + " Photo Clipping Base";
+        maskLayer.visible = true;
+        maskLayer.allLocked = false;
+
+        var b = frame.box;
+        doc.selection.select([[b.x, b.y], [b.x + b.w, b.y],
+            [b.x + b.w, b.y + b.h], [b.x, b.y + b.h]]);
+        var maskWhite = new SolidColor();
+        maskWhite.rgb.red = 255;
+        maskWhite.rgb.green = 255;
+        maskWhite.rgb.blue = 255;
+        doc.activeLayer = maskLayer;
+        doc.selection.fill(maskWhite, ColorBlendMode.NORMAL, 100, false);
+        doc.selection.deselect();
+
+        imported.move(photoGroup, ElementPlacement.INSIDE);
+        imported.move(maskLayer, ElementPlacement.PLACEBEFORE);
+        imported.grouped = true;
+
+        if (frame.marker) {
+            markerWasVisible = frame.marker.visible;
+            frame.marker.visible = false;
+        }
+        kkkBringTextLayersAbovePhoto(doc, photoGroup);
+        kkkBringNamedLayerToTop(doc, "SIGNATURE " + item);
+        if (item === "BANTING" && !kkkReviewCrop(doc, imported, frame.box, cropState, "Banting")) {
+            throw new Error("Operator membatalkan pelarasan crop Banting.");
+        }
+        var outlineResult = kkkOutlineDarkPhotoText(doc);
+        LAST_PORTRAIT_IMAGE_LAYER = imported.name;
+        LAST_PORTRAIT_IMAGE_METHOD = "full-canvas clipping mask + artwork behind photo + interactive crop + text above | " + frame.source + " | " + outlineResult;
+        return {box: frame.box, source: frame.source};
+    } catch (error) {
+        if (photoGroup) { try { photoGroup.remove(); } catch (removePhotoGroupError) {} }
+        else if (imported) { try { imported.remove(); } catch (removePhotoError) {} }
+        if (frame && frame.marker && markerWasVisible) {
+            try { frame.marker.visible = true; } catch (restoreMarkerError) {}
+        }
+        throw error;
+    } finally {
+        if (sourceDoc && !sourceWasOpen) closeDocNoSave(sourceDoc);
+        if (photoDoc) closeDocNoSave(photoDoc);
+        try { app.activeDocument = doc; doc.selection.deselect(); } catch (restoreDocError) {}
+        app.preferences.rulerUnits = oldUnits;
+    }
+}
+
+function kkkReviewCrop(doc, photo, box, state, label) {
     // Photoshop canvas previews crop position and zoom; proportions stay locked.
-    var dialog = new Window("dialog", "Semak kedua-dua pengantin - " + doc.name);
+    var dialogTitle = label ? "Laraskan gambar " + label : "Semak crop POTRAIT";
+    var dialog = new Window("dialog", dialogTitle + " - " + doc.name);
     dialog.orientation = "column";
-    dialog.add("statictext", undefined, "Laraskan saiz dan kedudukan gambar dalam ruang foto.");
-    dialog.add("statictext", undefined, "Saiz gambar");
+    dialog.add("statictext", undefined, "Laraskan zum dan kedudukan gambar sebelum eksport.");
+    dialog.add("statictext", undefined, "Saiz / zum gambar");
     var zoom = dialog.add("slider", undefined, 100, 50, 250); zoom.preferredSize.width = 360;
     dialog.add("statictext", undefined, "Kiri / kanan");
     var x = dialog.add("slider", undefined, 50, 0, 100); x.preferredSize.width = 360;
@@ -1439,9 +1694,14 @@ function kkkReviewCrop(doc, photo, box, state) {
         if (Math.abs(nextZoom - lastZoom) > 0.01) {
             var factor = nextZoom / lastZoom;
             photo.resize(factor * 100, factor * 100, AnchorPosition.MIDDLECENTER);
+            var centerX = state.x + (state.w / 2);
+            var centerY = state.y + (state.h / 2);
+            state.w *= factor;
+            state.h *= factor;
+            state.x = centerX - (state.w / 2);
+            state.y = centerY - (state.h / 2);
             lastZoom = nextZoom;
         }
-        state = _boundsPx(photo);
         kkkPositionPhoto(photo, box, x.value / 100, y.value / 100, state);
         app.refresh();
     };
@@ -1453,15 +1713,15 @@ function kkkReviewCrop(doc, photo, box, state) {
     return dialog.show() === 1;
 }
 
-function kkkInsertFramedPortrait(doc, imagePath, item) {
+function kkkInsertFramedPortrait(doc, imagePath, item, placeBehindArtwork, fallbackFrames, forceCropReview) {
     var oldUnits = app.preferences.rulerUnits;
-    var photoDoc = null, imported = null, group = null, hidden = [];
+    var photoDoc = null, imported = null, group = null, matteLayer = null, hidden = [];
     var frame, stack;
     try {
         if (!imagePath || !(new File(imagePath)).exists) throw new Error("Gambar pengantin tidak ditemui.");
         app.activeDocument = doc;
         app.preferences.rulerUnits = Units.PIXELS;
-        frame = kkkFrameForDocument(doc, item);
+        frame = kkkFrameForDocument(doc, item, fallbackFrames);
         stack = kkkPhotoStack(doc);
 
         // Keep all original layers for editability; hide only the old photo stack.
@@ -1511,23 +1771,46 @@ function kkkInsertFramedPortrait(doc, imagePath, item) {
         doc.selection.deselect();
         imported.grouped = true;
 
-        kkkMovePhotoGroupBehindArtwork(doc, group);
+        if (placeBehindArtwork !== false) kkkMovePhotoGroupBehindArtwork(doc, group);
+        if (item === "BANNER" && placeBehindArtwork === false) {
+            matteLayer = doc.artLayers.add();
+            matteLayer.name = "KKK BANNER PHOTO AREA CLEAN BACKING";
+            matteLayer.visible = true;
+            matteLayer.allLocked = false;
+            var bannerMatteColor = new SolidColor();
+            bannerMatteColor.rgb.red = 246;
+            bannerMatteColor.rgb.green = 242;
+            bannerMatteColor.rgb.blue = 232;
+            var bannerBox = frame.box;
+            doc.selection.select([[bannerBox.x, bannerBox.y], [bannerBox.x + bannerBox.w, bannerBox.y],
+                [bannerBox.x + bannerBox.w, bannerBox.y + bannerBox.h], [bannerBox.x, bannerBox.y + bannerBox.h]]);
+            doc.activeLayer = matteLayer;
+            doc.selection.fill(bannerMatteColor, ColorBlendMode.NORMAL, 100, false);
+            doc.selection.deselect();
+            matteLayer.move(group, ElementPlacement.PLACEAFTER);
+        }
         var old = [stack.base];
         for (var p = 0; p < stack.photos.length; p++) old.push(stack.photos[p]);
         if (frame.marker) old.push(frame.marker);
         for (var v = 0; v < old.length; v++) {
             hidden.push({layer: old[v], visible: old[v].visible}); old[v].visible = false;
         }
-        if (KKK_REVIEW_PORTRAIT_CROP && !kkkReviewCrop(doc, imported, frame.box, cropState)) {
+        if ((KKK_REVIEW_PORTRAIT_CROP || forceCropReview) &&
+            !kkkReviewCrop(doc, imported, frame.box, cropState, forceCropReview ? "Banting" : null)) {
             throw new Error("Operator melangkau crop item ini.");
         }
+        if (item === "BANNER" && placeBehindArtwork === false) {
+            kkkBringNamedLayerAbovePhoto(doc, "SIGNATURE BANNER", group);
+        }
         LAST_PORTRAIT_IMAGE_LAYER = imported.name;
-        LAST_PORTRAIT_IMAGE_METHOD = "V33 uniform-cover + rectangle-mask + original-brush + behind-artwork | " + frame.source;
+        LAST_PORTRAIT_IMAGE_METHOD = "V33 uniform-cover + clipping-mask + original-brush + " +
+            (placeBehindArtwork === false ? "above-artwork" : "behind-artwork") + " | " + frame.source;
         return {box: frame.box, source: frame.source};
     } catch (error) {
         for (var h = 0; h < hidden.length; h++) {
             try { hidden[h].layer.visible = hidden[h].visible; } catch (restoreVisibilityErr) {}
         }
+        if (matteLayer) { try { matteLayer.remove(); } catch (removeMatteError) {} }
         if (group) { try { group.remove(); } catch (removeGroupErr) {} }
         throw error;
     } finally {
@@ -1755,6 +2038,16 @@ try{
         if(gambarRaw !== "" && gambarPath === "") logBoth(logPath, custLogPath, "[IMAGE] Fail gambar pengantin tidak ditemui: " + gambarRaw);
 
         var templates = findTemplates(MASTER.fsName, tema, code);
+        var photoTemplateSelection = kkkUsePortraitBannerAndBantingForPhoto(
+            MASTER.fsName, tema, templates, gambarPath
+        );
+        templates = photoTemplateSelection.templates;
+        if (photoTemplateSelection.applied) {
+            logBoth(logPath, custLogPath, "[PHOTO DESIGN OVERRIDE] Customer photo detected; using " +
+                "POTRAIT/CKP-002 BANNER and BANTING while retaining " + tema + "/" + code + " for other templates.");
+        } else if (photoTemplateSelection.error !== "") {
+            logBoth(logPath, custLogPath, "[PHOTO DESIGN OVERRIDE FAIL] " + photoTemplateSelection.error);
+        }
         logBoth(logPath, custLogPath, "[TEMPLATE COUNT] " + (templates ? templates.length : 0) + " | Tema: " + tema + " | Code: " + code);
         if(templates && templates.length > 0){
             for(var tli=0; tli<templates.length; tli++){
@@ -1896,11 +2189,23 @@ try{
             // Do NOT rely on the PSD filename. The family may be identified by Tema
             // or by the parent folder, e.g. POTRAIT/CKP-005/KAD DEPAN.psd.
             var portraitDesign = isPortraitDesign(tema, tplPath, tplName);
+            var usesPhotoPortraitTemplate = false;
+            for (var overrideIndex = 0; overrideIndex < photoTemplateSelection.overridePaths.length; overrideIndex++) {
+                if (t(photoTemplateSelection.overridePaths[overrideIndex]).toLowerCase() === t(tplPath).toLowerCase()) {
+                    usesPhotoPortraitTemplate = true;
+                    break;
+                }
+            }
+            var forceBantingCropReview = usesPhotoPortraitTemplate && tplLower.indexOf("banting") >= 0;
 
             var portraitItem = portraitDesign ? kkkPortraitItem(tplName) : "";
+            var templatePhotoItem = !portraitDesign ? kkkTemplatePhotoItem(tplName) : "";
+            var templatePhotoApplied = false;
             if (portraitItem !== "") {
                 try {
-                    var frameResult = kkkInsertFramedPortrait(doc, gambarPath, portraitItem);
+                    var frameResult = kkkInsertFramedPortrait(
+                        doc, gambarPath, portraitItem, undefined, undefined, forceBantingCropReview
+                    );
                     logBoth(logPath, custLogPath, "[PORTRAIT V33] " + tplName + " | " +
                         LAST_PORTRAIT_IMAGE_METHOD + " | crop=" + frameResult.box.x + "," +
                         frameResult.box.y + "," + frameResult.box.w + "," + frameResult.box.h);
@@ -1911,12 +2216,34 @@ try{
                 }
             } else if (portraitDesign) {
                 logBoth(logPath, custLogPath, "[PORTRAIT V33] NO CUSTOMER PHOTO (outside seven-item scope): " + tplName);
+            } else if (templatePhotoItem !== "" && gambarPath !== "") {
+                try {
+                    var templatePhotoResult;
+                    if (templatePhotoItem === "BANNER") {
+                        // Banner PSDs have a real Mask/clipping stack; replace its
+                        // photo contents and keep the masked image above the artwork.
+                        templatePhotoResult = kkkInsertFramedPortrait(
+                            doc, gambarPath, "BANNER", false, KKK_TEMPLATE_PHOTO_FRAMES
+                        );
+                    } else {
+                        // Banting uses the couple photo as its full-canvas background.
+                        templatePhotoResult = kkkInsertTemplatePhoto(doc, gambarPath, templatePhotoItem);
+                    }
+                    templatePhotoApplied = true;
+                    logBoth(logPath, custLogPath, "[CUSTOMER PHOTO] " + tplName + " | " +
+                        LAST_PORTRAIT_IMAGE_METHOD + " | crop=" + templatePhotoResult.box.x + "," +
+                        templatePhotoResult.box.y + "," + templatePhotoResult.box.w + "," + templatePhotoResult.box.h);
+                } catch (templatePhotoError) {
+                    logBoth(logPath, custLogPath, "[CUSTOMER PHOTO FAIL - NO EXPORT] " + tplName + " | " + templatePhotoError);
+                    continue;
+                }
             }
 
             var outBase = safeName(
                 (cardOutputId !== "" ? cardOutputId : NoInv) + " " + majlis + " " + tplName +
                 (namesShort!==""?(" " + namesShort):"") +
-                (itemQty?(" " + itemQty + " PCS"):"")
+                (itemQty?(" " + itemQty + " PCS"):"") +
+                (templatePhotoApplied ? " GAMBAR PENGANTIN" : "")
             );
 
             
@@ -1956,26 +2283,6 @@ try{
                     logBoth(logPath, custLogPath, "[EXPORT FAIL] PSD -> " + psdOut + " | " + LAST_SAVE_ERROR);
                 }
             }catch(e){ logBoth(logPath, custLogPath, "[EXPORT FAIL] PSD -> " + e); }
-
-            // For PORTRAIT/POTRAIT designs the customer image has already been
-            // replaced BEFORE the normal export above. Do not create a second
-            // template-photo version for Banner/Banting.
-            if(!portraitDesign && gambarPath !== "" && (tplLower.indexOf("banner") >= 0 || tplLower.indexOf("banting") >= 0)){
-                var isBanner = tplLower.indexOf("banner") >= 0;
-                var imageAdded = hasCustomerPhotoLayer(doc) && replaceCardImageIfExists(doc, gambarPath);
-                if(!imageAdded) imageAdded = addCustomerPhotoBackground(doc, gambarPath);
-                if(imageAdded){
-                    var photoBase = safeName(outBase + " GAMBAR PENGANTIN");
-                    var photoJpeg = fJPEG.fsName + "/" + photoBase + ".jpg";
-                    var photoPsd = fPSD.fsName + "/" + photoBase + ".psd";
-                    if(saveJPG(doc, photoJpeg, 12)) logBoth(logPath, custLogPath, "[EXPORT] JPEG gambar pengantin -> " + photoJpeg);
-                    else logBoth(logPath, custLogPath, "[EXPORT FAIL] JPEG gambar pengantin -> " + photoJpeg + " | " + LAST_SAVE_ERROR);
-                    if(savePSDdoc(doc, photoPsd)) logBoth(logPath, custLogPath, "[EXPORT] PSD gambar pengantin -> " + photoPsd);
-                    else logBoth(logPath, custLogPath, "[EXPORT FAIL] PSD gambar pengantin -> " + photoPsd + " | " + LAST_SAVE_ERROR);
-                }else{
-                    logBoth(logPath, custLogPath, "[IMAGE] Gagal memasukkan gambar pengantin untuk " + tplName);
-                }
-            }
 
                 logBoth(logPath, custLogPath, "[TEMPLATE DONE] " + tplPath);
             }catch(templateErr){
@@ -2018,3 +2325,4 @@ try{
     app.displayDialogs = KKK_ORIGINAL_DIALOGS;
     app.preferences.rulerUnits = KKK_ORIGINAL_UNITS;
 }
+
