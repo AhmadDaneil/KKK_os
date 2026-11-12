@@ -59,7 +59,14 @@
         <div class="card-preview-wrap @if (! $loop->first) is-hidden @endif" data-card-preview="{{ $packageSide->side }}">
             <article class="wedding-card wedding-card-front" data-card-face="front" data-theme="{{ strtolower($packageSide->design?->theme ?: 'songket') }}">
                 <img class="desa-card-artwork" data-desa-card-artwork alt="" hidden>
-                <div class="desa-card-name-overlay desa-card-ckd003-copy" data-desa-card-name-overlay hidden>
+                <div class="desa-card-name-overlay" data-desa-card-name-overlay hidden>
+                    <div class="desa-card-generic-copy" data-desa-generic-copy>
+                        <span data-preview-field="groom_display">Groom</span>
+                        <b>&amp;</b>
+                        <span data-preview-field="bride_display">Bride</span>
+                    </div>
+                    <div class="desa-card-ckd003-copy" data-desa-ckd003-copy hidden>
+
                     <span class="desa-card-ckd003-title" data-preview-field="card_title_malay">WALIMATUL URUS</span>
                     <div class="desa-card-ckd003-couple">
                         <span data-preview-field="groom_display">Groom</span>
@@ -68,6 +75,7 @@
                     <div class="desa-card-ckd003-date">
                         <span data-preview-field="day_name_malay">HARI</span>
                         <span data-preview-field="event_date">TARIKH MAJLIS</span>
+                    </div>
                     </div>
                 </div>
                 <div class="card-ornament ornament-top" aria-hidden="true"></div>
@@ -93,7 +101,14 @@
 
             <article class="wedding-card wedding-card-back is-hidden" data-card-face="back">
                 <img class="desa-card-back-artwork" data-desa-card-back-artwork alt="" hidden>
-                <div class="desa-card-back-live-names desa-card-back-ckd003-copy" data-desa-card-back-live-names hidden>
+                <div class="desa-card-back-live-names" data-desa-card-back-live-names hidden>
+                    <div class="desa-card-back-generic-copy" data-desa-generic-copy>
+                        <span data-preview-field="groom_display">Groom</span>
+                        <b>&amp;</b>
+                        <span data-preview-field="bride_display">Bride</span>
+                    </div>
+                    <div class="desa-card-back-ckd003-copy" data-desa-ckd003-copy hidden>
+
                     <strong class="desa-back-ckd003-father" data-preview-field="father_name">NAMA BAPA</strong>
                     <strong class="desa-back-ckd003-mother" data-preview-field="mother_name">NAMA IBU</strong>
                     <strong class="desa-back-ckd003-groom" data-preview-field="groom_name">NAMA PENGANTIN</strong>
@@ -117,6 +132,7 @@
                     <div class="desa-back-ckd003-venue">
                         <strong data-preview-field="venue_name">LOKASI MAJLIS</strong>
                         <p data-preview-field="full_address">ALAMAT MAJLIS</p>
+                    </div>
                     </div>
                 </div>
                 <div data-desa-back-placeholder>
@@ -173,9 +189,14 @@
             <div class="live-product-grid{{ ($order->package_type ?: $order->wabot_package_code) === 'PUTERI_MANIS' ? ' live-product-grid--puteri-manis' : '' }}">
                 <article class="live-product live-product--banner" data-live-product-theme data-desa-product="banner">
                     <img class="desa-product-artwork" data-desa-product-artwork alt="" hidden>
-                                                            <div class="desa-product-name-overlay desa-product-ckd003-copy" data-desa-product-name-overlay hidden>
+                                                            <div class="desa-product-name-overlay" data-desa-product-name-overlay hidden>
+                        <div class="desa-product-generic-copy" data-desa-generic-copy>
+                            <span data-preview-field="groom_display">Groom</span><b>&amp;</b><span data-preview-field="bride_display">Bride</span>
+                        </div>
+                        <div class="desa-product-ckd003-copy" data-desa-ckd003-copy hidden>
                         <strong class="desa-product-copy-couple"><span data-preview-field="groom_display">Groom</span><span data-preview-field="bride_display">Bride</span></strong>
                         <span class="desa-product-copy-date"><span data-preview-field="day_name_malay">HARI</span><span data-preview-field="event_date">TARIKH MAJLIS</span></span>
+                    </div>
                     </div>
                     <div data-desa-product-placeholder>
                         <span class="live-product-label">Banner</span>
@@ -188,10 +209,15 @@
 
                 <article class="live-product live-product--banting" data-live-product-theme data-desa-product="bunting">
                     <img class="desa-product-artwork" data-desa-product-artwork alt="" hidden>
-                                                            <div class="desa-product-name-overlay desa-product-ckd003-copy" data-desa-product-name-overlay hidden>
+                                                            <div class="desa-product-name-overlay" data-desa-product-name-overlay hidden>
+                        <div class="desa-product-generic-copy" data-desa-generic-copy>
+                            <span data-preview-field="groom_display">Groom</span><b>&amp;</b><span data-preview-field="bride_display">Bride</span>
+                        </div>
+                        <div class="desa-product-ckd003-copy" data-desa-ckd003-copy hidden>
                         <span class="desa-product-copy-kicker" data-preview-field="card_title_malay">WALIMATUL URUS</span>
                         <strong class="desa-product-copy-couple"><span data-preview-field="groom_display">Groom</span><span data-preview-field="bride_display">Bride</span></strong>
                         <span class="desa-product-copy-date"><span data-preview-field="day_name_malay">HARI</span><span data-preview-field="event_date">TARIKH MAJLIS</span></span>
+                    </div>
                     </div>
                     <div data-desa-product-placeholder>
                         <span class="live-product-label">Bunting</span>
@@ -204,10 +230,15 @@
 
                 <article class="live-product live-product--arrow live-product--arrow-left" data-live-product-theme data-desa-product="arrow-left">
                     <img class="desa-product-artwork" data-desa-product-artwork alt="" hidden>
-                                                            <div class="desa-product-name-overlay desa-product-ckd003-copy" data-desa-product-name-overlay hidden>
+                                                            <div class="desa-product-name-overlay" data-desa-product-name-overlay hidden>
+                        <div class="desa-product-generic-copy" data-desa-generic-copy>
+                            <span data-preview-field="groom_display">Groom</span><b>&amp;</b><span data-preview-field="bride_display">Bride</span>
+                        </div>
+                        <div class="desa-product-ckd003-copy" data-desa-ckd003-copy hidden>
                         <span class="desa-product-copy-kicker" data-preview-field="card_title_malay">WALIMATUL URUS</span>
                         <strong class="desa-product-copy-couple"><span data-preview-field="groom_display">Groom</span><span data-preview-field="bride_display">Bride</span></strong>
                         <span class="desa-product-copy-date"><span data-preview-field="day_name_malay">HARI</span><span data-preview-field="event_date">TARIKH MAJLIS</span></span>
+                    </div>
                     </div>
                     <div data-desa-product-placeholder>
                         <span class="live-product-label">Left Arrow Poster</span>
@@ -222,10 +253,15 @@
 
                 <article class="live-product live-product--arrow live-product--arrow-right" data-live-product-theme data-desa-product="arrow-right">
                     <img class="desa-product-artwork" data-desa-product-artwork alt="" hidden>
-                                                            <div class="desa-product-name-overlay desa-product-ckd003-copy" data-desa-product-name-overlay hidden>
+                                                            <div class="desa-product-name-overlay" data-desa-product-name-overlay hidden>
+                        <div class="desa-product-generic-copy" data-desa-generic-copy>
+                            <span data-preview-field="groom_display">Groom</span><b>&amp;</b><span data-preview-field="bride_display">Bride</span>
+                        </div>
+                        <div class="desa-product-ckd003-copy" data-desa-ckd003-copy hidden>
                         <span class="desa-product-copy-kicker" data-preview-field="card_title_malay">WALIMATUL URUS</span>
                         <strong class="desa-product-copy-couple"><span data-preview-field="groom_display">Groom</span><span data-preview-field="bride_display">Bride</span></strong>
                         <span class="desa-product-copy-date"><span data-preview-field="day_name_malay">HARI</span><span data-preview-field="event_date">TARIKH MAJLIS</span></span>
+                    </div>
                     </div>
                     <div data-desa-product-placeholder>
                         <span class="live-product-label">Right Arrow Poster</span>
@@ -240,9 +276,14 @@
 
                 <article class="live-product live-product--sticker" data-live-product-theme data-desa-product="sticker">
                     <img class="desa-product-artwork" data-desa-product-artwork alt="" hidden>
-                                                            <div class="desa-product-name-overlay desa-product-ckd003-copy" data-desa-product-name-overlay hidden>
+                                                            <div class="desa-product-name-overlay" data-desa-product-name-overlay hidden>
+                        <div class="desa-product-generic-copy" data-desa-generic-copy>
+                            <span data-preview-field="groom_display">Groom</span><b>&amp;</b><span data-preview-field="bride_display">Bride</span>
+                        </div>
+                        <div class="desa-product-ckd003-copy" data-desa-ckd003-copy hidden>
                         <strong class="desa-product-copy-couple"><span data-preview-field="groom_display">Groom</span><span data-preview-field="bride_display">Bride</span></strong>
                         <span class="desa-product-copy-date" data-preview-field="event_date">TARIKH MAJLIS</span>
+                    </div>
                     </div>
                     <div data-desa-product-placeholder>
                         <span class="live-product-label">Sticker</span>
@@ -256,10 +297,15 @@
                 @if (($order->package_type ?: $order->wabot_package_code) === 'PUTERI_MANIS')
                     <article class="live-product live-product--hanger" data-live-product-theme data-desa-product="wooden-hanger">
                         <img class="desa-product-artwork" data-desa-product-artwork alt="" hidden>
-                                                                        <div class="desa-product-name-overlay desa-product-ckd003-copy" data-desa-product-name-overlay hidden>
+                                                                        <div class="desa-product-name-overlay" data-desa-product-name-overlay hidden>
+                        <div class="desa-product-generic-copy" data-desa-generic-copy>
+                            <span data-preview-field="groom_display">Groom</span><b>&amp;</b><span data-preview-field="bride_display">Bride</span>
+                        </div>
+                        <div class="desa-product-ckd003-copy" data-desa-ckd003-copy hidden>
                             <strong class="desa-product-copy-couple"><span data-preview-field="groom_display">Groom</span><span data-preview-field="bride_display">Bride</span></strong>
                             <span class="desa-product-copy-date" data-preview-field="event_date">TARIKH MAJLIS</span>
                         </div>
+                    </div>
                         <div data-desa-product-placeholder>
                             <span class="live-product-label">Wooden Hanger</span>
                             <svg
