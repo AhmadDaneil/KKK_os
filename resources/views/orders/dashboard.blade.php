@@ -1398,9 +1398,7 @@ document.addEventListener('DOMContentLoaded', function () {
         const artworkBase = @json(asset('images/designs'));
         const artworkDesignCodes = JSON.parse(form.dataset.designCodeOptions || '{}');
         const unavailableArtwork = {
-            'CKI-816': ['arrow-left'],
             'CKP-003': ['banner'],
-            'CKQ-007': ['arrow-left'],
         };
 
         function syncArtworkImage(image, source, label) {
@@ -1483,19 +1481,25 @@ document.addEventListener('DOMContentLoaded', function () {
                 const genericNameCopy = nameOverlay.querySelector('[data-desa-generic-copy]');
                 const productCustomNameCopy = nameOverlay.querySelector('[data-desa-product-custom-copy]');
                 const placeholder = product.querySelector('[data-desa-product-placeholder]');
+                const unavailableMessage = product.querySelector('[data-artwork-unavailable-message]');
+                const isUnavailable = hasArtwork && (unavailableArtwork[normalizedCode] || []).includes(type);
                 const isVipCard = type === 'vip-card';
                 const shouldShowArtwork = hasArtwork
                     && (!isVipCard || theme === 'portrait')
-                    && !(unavailableArtwork[normalizedCode] || []).includes(type);
+                    && !isUnavailable;
                 product.dataset.designCode = shouldShowArtwork ? normalizedCode : '';
                 product.toggleAttribute('data-design-artwork', shouldShowArtwork);
                 product.toggleAttribute('data-catalog-artwork', shouldShowArtwork && isCatalogArtwork);
+                product.toggleAttribute('data-artwork-unavailable', isUnavailable);
+                if (unavailableMessage) {
+                    unavailableMessage.hidden = !isUnavailable;
+                }
 
                 product.hidden = (type === 'card-back' || isVipCard) && !shouldShowArtwork;
                 nameOverlay.hidden = !shouldShowArtwork;
                 genericNameCopy.hidden = shouldShowArtwork;
                 productCustomNameCopy.hidden = !shouldShowArtwork;
-                placeholder.hidden = shouldShowArtwork;
+                placeholder.hidden = shouldShowArtwork || isUnavailable;
                 syncArtworkImage(artwork, shouldShowArtwork ? assetBase + type + '.webp' : '', normalizedCode + ' ' + themeName + ' ' + type.replaceAll('-', ' ') + ' design');
                 const hasPhotoMask = shouldShowArtwork && theme === 'portrait' && type !== 'wooden-hanger' && type !== 'card-back';
                 syncArtworkPhotoMask(product, hasPhotoMask ? assetBase + type + '-photo-mask.webp' : '');
@@ -1976,7 +1980,8 @@ document.addEventListener('DOMContentLoaded', function () {
                 const product = image.closest('.live-product');
                 const isBannerOrBunting = product?.classList.contains('live-product--banner')
                     || product?.classList.contains('live-product--banting');
-                const showProductPhoto = Boolean(photoUrl) && (theme === 'PORTRAIT' || isBannerOrBunting);
+                const showProductPhoto = Boolean(photoUrl) && (theme === 'PORTRAIT' || isBannerOrBunting)
+                    && !product?.hasAttribute('data-artwork-unavailable');
 
                 setImageSource(image, photoUrl, showProductPhoto);
             });
