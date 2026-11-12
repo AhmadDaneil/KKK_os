@@ -1376,6 +1376,19 @@ document.addEventListener('DOMContentLoaded', function () {
             return legacyTranslations[normalizedTitle] || 'Wedding Ceremony';
         }
 
+        function designCardTitle(title) {
+            const normalizedTitle = String(title || '').trim().toUpperCase().replace(/\s+/g, ' ');
+            const malayTitles = {
+                'WALIMATULURUS': 'WALIMATUL URUS',
+                'WALIMATUL URUS': 'WALIMATUL URUS',
+                'MAJLIS PERKAHWINAN': 'WALIMATUL URUS',
+                'KENDURI KESYUKURAN': 'KENDURI KESYUKURAN',
+                'MAJLIS KESYUKURAN': 'MAJLIS KESYUKURAN'
+            };
+
+            return malayTitles[normalizedTitle] || 'WALIMATUL URUS';
+        }
+
         function jawiCardTitle(title) {
             return displayCardTitle(title);
         }
@@ -1388,6 +1401,7 @@ document.addEventListener('DOMContentLoaded', function () {
         function syncDesaArtwork(scope, theme, designCode) {
             const normalizedCode = designCode.trim().toUpperCase();
             const hasDesaArtwork = theme === 'desa' && desaDesignCodes.has(normalizedCode);
+            const isCkd003Artwork = hasDesaArtwork && normalizedCode === 'CKD-003';
             const assetBase = hasDesaArtwork
                 ? '/images/designs/desa/' + normalizedCode + '/'
                 : '';
@@ -1400,12 +1414,17 @@ document.addEventListener('DOMContentLoaded', function () {
 
             if (front) {
                 const artwork = front.querySelector('[data-desa-card-artwork]');
+                front.dataset.designCode = hasDesaArtwork ? normalizedCode : '';
                 const nameOverlay = front.querySelector('[data-desa-card-name-overlay]');
+                const genericNameCopy = nameOverlay.querySelector('[data-desa-generic-copy]');
+                const ckd003NameCopy = nameOverlay.querySelector('[data-desa-ckd003-copy]');
                 const genericCopy = front.querySelector('.card-front-copy');
                 const ornaments = front.querySelectorAll('.card-ornament');
 
                 artwork.hidden = !hasDesaArtwork;
                 nameOverlay.hidden = !hasDesaArtwork;
+                genericNameCopy.hidden = isCkd003Artwork;
+                ckd003NameCopy.hidden = !isCkd003Artwork;
                 genericCopy.hidden = hasDesaArtwork;
                 front.toggleAttribute('data-desa-artwork', hasDesaArtwork);
                 ornaments.forEach(function (ornament) {
@@ -1423,11 +1442,16 @@ document.addEventListener('DOMContentLoaded', function () {
 
             if (back) {
                 const artwork = back.querySelector('[data-desa-card-back-artwork]');
+                back.dataset.designCode = hasDesaArtwork ? normalizedCode : '';
                 const liveNames = back.querySelector('[data-desa-card-back-live-names]');
+                const genericNameCopy = liveNames.querySelector('[data-desa-generic-copy]');
+                const ckd003NameCopy = liveNames.querySelector('[data-desa-ckd003-copy]');
                 const placeholder = back.querySelector('[data-desa-back-placeholder]');
 
                 artwork.hidden = !hasDesaArtwork;
                 liveNames.hidden = !hasDesaArtwork;
+                genericNameCopy.hidden = isCkd003Artwork;
+                ckd003NameCopy.hidden = !isCkd003Artwork;
                 placeholder.hidden = hasDesaArtwork;
                 back.toggleAttribute('data-desa-artwork', hasDesaArtwork);
 
@@ -1444,12 +1468,17 @@ document.addEventListener('DOMContentLoaded', function () {
                 const type = product.dataset.desaProduct;
                 const artwork = product.querySelector('[data-desa-product-artwork]');
                 const nameOverlay = product.querySelector('[data-desa-product-name-overlay]');
+                const genericNameCopy = nameOverlay.querySelector('[data-desa-generic-copy]');
+                const ckd003NameCopy = nameOverlay.querySelector('[data-desa-ckd003-copy]');
                 const placeholder = product.querySelector('[data-desa-product-placeholder]');
                 const shouldShowArtwork = hasDesaArtwork;
+                product.dataset.designCode = shouldShowArtwork ? normalizedCode : '';
 
                 product.hidden = type === 'card-back' && !hasDesaArtwork;
                 artwork.hidden = !shouldShowArtwork;
                 nameOverlay.hidden = !shouldShowArtwork;
+                genericNameCopy.hidden = isCkd003Artwork;
+                ckd003NameCopy.hidden = !isCkd003Artwork;
                 placeholder.hidden = Boolean(shouldShowArtwork);
 
                 if (shouldShowArtwork) {
@@ -1480,10 +1509,21 @@ document.addEventListener('DOMContentLoaded', function () {
             const cardTitle = value(prefix + '[design][card_title]', 'MAJLIS PERKAHWINAN');
             setText(scope, 'card_title', displayCardTitle(cardTitle));
             setText(scope, 'card_title_jawi', jawiCardTitle(cardTitle));
+            setText(scope, 'card_title_malay', designCardTitle(cardTitle));
             setText(scope, 'father_name', value(prefix + '[parents][father_name]', "FATHER'S NAME"));
             setText(scope, 'mother_name', value(prefix + '[parents][mother_name]', "MOTHER'S NAME"));
-            setText(scope, 'day_name', ({ Ahad: 'Sunday', Isnin: 'Monday', Selasa: 'Tuesday', Rabu: 'Wednesday', Khamis: 'Thursday', Jumaat: 'Friday', Sabtu: 'Saturday' })[value(prefix + '[event][day_name]', '')] || 'DAY');
-            setText(scope, 'event_date', formatDate(value(prefix + '[event][event_date]', '')));
+            const eventDay = value(prefix + '[event][day_name]', '');
+            setText(scope, 'day_name', ({ Ahad: 'Sunday', Isnin: 'Monday', Selasa: 'Tuesday', Rabu: 'Wednesday', Khamis: 'Thursday', Jumaat: 'Friday', Sabtu: 'Saturday' })[eventDay] || 'DAY');
+            setText(scope, 'day_name_malay', ({ Ahad: 'AHAD', Isnin: 'ISNIN', Selasa: 'SELASA', Rabu: 'RABU', Khamis: 'KHAMIS', Jumaat: 'JUMAAT', Sabtu: 'SABTU' })[eventDay] || 'HARI');
+            const rawEventDate = value(prefix + '[event][event_date]', '');
+            const parsedEventDate = rawEventDate ? new Date(rawEventDate + 'T00:00:00') : null;
+            setText(scope, 'event_date', formatDate(rawEventDate));
+            setText(scope, 'event_date_day', parsedEventDate
+                ? new Intl.DateTimeFormat('en-MY', { day: 'numeric' }).format(parsedEventDate)
+                : 'DD');
+            setText(scope, 'event_date_month_year', parsedEventDate
+                ? new Intl.DateTimeFormat('en-MY', { month: 'long', year: 'numeric' }).format(parsedEventDate).toUpperCase()
+                : 'BULAN TAHUN');
             setText(scope, 'hijri_date', value(prefix + '[event][hijri_date]', ''));
             setText(scope, 'meal_time', formatTime12Hour(value(prefix + '[event][meal_time]', '')));
             setText(scope, 'bersanding_time', formatTime12Hour(value(prefix + '[event][bersanding_time]', '')));
