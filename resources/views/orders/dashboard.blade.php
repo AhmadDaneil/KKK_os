@@ -1379,14 +1379,14 @@ document.addEventListener('DOMContentLoaded', function () {
         function designCardTitle(title) {
             const normalizedTitle = String(title || '').trim().toUpperCase().replace(/\s+/g, ' ');
             const malayTitles = {
-                'WALIMATULURUS': 'WALIMATUL URUS',
-                'WALIMATUL URUS': 'WALIMATUL URUS',
-                'MAJLIS PERKAHWINAN': 'WALIMATUL URUS',
-                'KENDURI KESYUKURAN': 'KENDURI KESYUKURAN',
+                'WALIMATULURUS': 'MAJLIS PERKAHWINAN',
+                'WALIMATUL URUS': 'MAJLIS PERKAHWINAN',
+                'MAJLIS PERKAHWINAN': 'MAJLIS PERKAHWINAN',
+                'KENDURI KESYUKURAN': 'MAJLIS KESYUKURAN',
                 'MAJLIS KESYUKURAN': 'MAJLIS KESYUKURAN'
             };
 
-            return malayTitles[normalizedTitle] || 'WALIMATUL URUS';
+            return malayTitles[normalizedTitle] || 'MAJLIS PERKAHWINAN';
         }
 
         function jawiCardTitle(title) {
