@@ -248,6 +248,7 @@ html[data-customer-theme="dark"] .customer-policies article > p { color:#c3d2ca!
 .desa-card-back-artwork[hidden],
 .desa-card-back-live-names[hidden],
 .desa-card-name-overlay[hidden],
+.card-front-copy[hidden],
 .desa-product-artwork[hidden],
 .desa-product-name-overlay[hidden],
 [data-desa-product-placeholder][hidden] {
