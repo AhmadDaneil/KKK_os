@@ -972,18 +972,18 @@ html[data-customer-theme="dark"] .wedding-card-back .card-social-logo {
 }
 
 /* Desa overlays use the artwork's existing text, ampersands, borders and footer. */
-.wedding-card-front[data-design-code^="CKD-"] .desa-card-custom-couple {
+.wedding-card-front[data-design-code] .desa-card-custom-couple {
     display: grid;
     grid-template-columns: minmax(0, 1fr) 1.5em minmax(0, 1fr);
     right: 9%;
     left: 9%;
 }
-.wedding-card-front[data-design-code^="CKD-"] .desa-card-custom-couple span:first-child {
-    padding-right: .14em;
+.wedding-card-front[data-design-code] .desa-card-custom-couple span:first-child {
+    padding-right: .1em;
     text-align: right;
 }
-.wedding-card-front[data-design-code^="CKD-"] .desa-card-custom-couple span:last-child {
-    padding-left: .08em;
+.wedding-card-front[data-design-code] .desa-card-custom-couple span:last-child {
+    padding-left: .1em;
     text-align: left;
 }
 
@@ -1143,17 +1143,17 @@ html[data-customer-theme="dark"] .wedding-card-back .card-social-logo {
     min-height: 0;
     padding: 0;
 }
-.live-product[data-design-code^="CKD-"] .desa-product-copy-couple {
+.live-product[data-design-code] .desa-product-copy-couple {
     display: grid;
     align-items: center;
     grid-template-columns: minmax(0, 1fr) 1.5em minmax(0, 1fr);
 }
-.live-product[data-design-code^="CKD-"] .desa-product-copy-couple span:first-child {
-    padding-right: .12em;
+.live-product[data-design-code] .desa-product-copy-couple span:first-child {
+    padding-right: .1em;
     text-align: right;
 }
-.live-product[data-design-code^="CKD-"] .desa-product-copy-couple span:last-child {
-    padding-left: .04em;
+.live-product[data-design-code] .desa-product-copy-couple span:last-child {
+    padding-left: .1em;
     text-align: left;
 }
 
@@ -1240,3 +1240,18 @@ html[data-customer-theme="dark"] .wedding-card-back .card-social-logo {
 .desa-couple-ampersand-spacer {
     visibility: hidden;
 }
+
+/* Keep the artwork's printed ampersand centered for every design code and item. */
+.live-product--arrow[data-design-code] .desa-product-copy-couple {
+    grid-template-columns: minmax(0, 1fr) 1.9em minmax(0, 1fr);
+}
+.live-product--arrow[data-design-code] .desa-product-copy-couple span:first-child {
+    padding-right: .06em;
+}
+.live-product--arrow[data-design-code] .desa-product-copy-couple span:last-child {
+    padding-left: .06em;
+}
+.live-product--sticker[data-design-code] .desa-product-copy-couple {
+    grid-template-columns: minmax(0, 1fr) 1.65em minmax(0, 1fr);
+}
+
