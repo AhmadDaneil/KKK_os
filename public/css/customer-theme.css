@@ -640,7 +640,7 @@ html[data-customer-theme="dark"] .wedding-card-back .card-social-logo {
 }
 .wedding-card-front[data-design-code^="CKD-"] .desa-card-custom-couple {
     position: absolute;
-    top: 15.5%;
+    top: 17%;
     right: 7%;
     left: 7%;
     display: flex;
@@ -929,9 +929,9 @@ html[data-customer-theme="dark"] .wedding-card-back .card-social-logo {
 }
 .live-product--banner[data-design-code^="CKD-"] .desa-product-copy-kicker { top: 12%; }
 .live-product--banner[data-design-code^="CKD-"] .desa-product-copy-subtitle { top: 25%; }
-.live-product--banner[data-design-code^="CKD-"] .desa-product-copy-couple { top: 39%; font-size: clamp(.8rem, 3vw, 2.5rem); }
-.live-product--banner[data-design-code^="CKD-"] .desa-product-copy-date { top: 68%; flex-direction: column; gap: .05rem; font-size: clamp(.48rem, 1.65vw, .9rem); }
-.live-product--banner[data-design-code^="CKD-"] .desa-product-copy-quote { top: 79%; }
+.live-product--banner[data-design-code^="CKD-"] .desa-product-copy-couple { top: 41%; font-size: clamp(.8rem, 3vw, 2.5rem); }
+.live-product--banner[data-design-code^="CKD-"] .desa-product-copy-date { top: 73%; flex-direction: column; gap: .05rem; font-size: clamp(.48rem, 1.65vw, .9rem); }
+.live-product--banner[data-design-code^="CKD-"] .desa-product-copy-quote { top: 84.5%; }
 
 .live-product--banting[data-design-code^="CKD-"] .desa-product-name-overlay,
 .live-product--arrow[data-design-code^="CKD-"] .desa-product-name-overlay,
@@ -943,19 +943,19 @@ html[data-customer-theme="dark"] .wedding-card-back .card-social-logo {
     color: #59441b;
 }
 .live-product--banting[data-design-code^="CKD-"] .desa-product-copy-kicker { top: 8.2%; font-size: .95em; font-weight: 700; }
-.live-product--banting[data-design-code^="CKD-"] .desa-product-copy-couple { top: 17%; font-size: clamp(.66rem, 2.5vw, 1.25rem); }
+.live-product--banting[data-design-code^="CKD-"] .desa-product-copy-couple { top: 18.5%; font-size: clamp(.66rem, 2.5vw, 1.25rem); }
 .live-product--banting[data-design-code^="CKD-"] .desa-product-copy-date { top: 29%; flex-direction: column; gap: .08rem; font-size: .82em; }
 
 .live-product--arrow[data-design-code^="CKD-"] .desa-product-copy-kicker { top: 7.8%; font-size: .9em; font-weight: 700; }
-.live-product--arrow[data-design-code^="CKD-"] .desa-product-copy-couple { top: 16%; font-size: clamp(.62rem, 2.15vw, 1.1rem); }
+.live-product--arrow[data-design-code^="CKD-"] .desa-product-copy-couple { top: 17.5%; font-size: clamp(.62rem, 2.15vw, 1.1rem); }
 .live-product--arrow[data-design-code^="CKD-"] .desa-product-copy-date { top: 27%; flex-direction: column; gap: .06rem; font-size: .74em; }
 
 .live-product--sticker[data-design-code^="CKD-"] .desa-product-copy-kicker { top: 12%; font-family: "Brush Script MT", "Segoe Script", cursive; font-size: 1.5em; }
 .live-product--sticker[data-design-code^="CKD-"] .desa-product-copy-subtitle { top: 21%; font-size: 1.06em; }
-.live-product--sticker[data-design-code^="CKD-"] .desa-product-copy-couple { top: 34%; font-size: clamp(.72rem, 2.4vw, 1.4rem); }
+.live-product--sticker[data-design-code^="CKD-"] .desa-product-copy-couple { top: 35.5%; font-size: clamp(.72rem, 2.4vw, 1.4rem); }
 .live-product--sticker[data-design-code^="CKD-"] .desa-product-copy-date { top: 49%; font-size: .82em; }
 
-.live-product--hanger[data-design-code^="CKD-"] .desa-product-copy-couple { top: 43%; font-size: clamp(.8rem, 2.6vw, 1.45rem); color: #241d18; }
+.live-product--hanger[data-design-code^="CKD-"] .desa-product-copy-couple { top: 44.5%; font-size: clamp(.8rem, 2.6vw, 1.45rem); color: #241d18; }
 .live-product--hanger[data-design-code^="CKD-"] .desa-product-copy-date { top: 64%; color: #241d18; font-size: clamp(.55rem, 1.5vw, .8rem); }
 
 @media (max-width: 520px) {
@@ -983,7 +983,7 @@ html[data-customer-theme="dark"] .wedding-card-back .card-social-logo {
     text-align: right;
 }
 .wedding-card-front[data-design-code^="CKD-"] .desa-card-custom-couple span:last-child {
-    padding-left: .14em;
+    padding-left: .08em;
     text-align: left;
 }
 
@@ -1153,7 +1153,7 @@ html[data-customer-theme="dark"] .wedding-card-back .card-social-logo {
     text-align: right;
 }
 .live-product[data-design-code^="CKD-"] .desa-product-copy-couple span:last-child {
-    padding-left: .12em;
+    padding-left: .04em;
     text-align: left;
 }
 
