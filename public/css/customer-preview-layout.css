@@ -2798,6 +2798,7 @@
     --preview-aspect-ratio: 310 / 437;
 }
 
+[data-preview-artwork-slot="arrow-left"][data-design-code="CKQ-007"],
 [data-preview-artwork-slot="arrow-right"][data-design-code="CKQ-007"] {
     --preview-couple-x: 51.59%;
     --preview-couple-y: 40.59%;
@@ -4110,18 +4111,7 @@
 
 /* Islamic */
 
-[data-preview-artwork-slot="arrow-left"][data-design-code="CKI-801"] {
-    --preview-couple-x: 51.75%;
-    --preview-couple-y: 40.35%;
-    --preview-couple-width: 84%;
-    --preview-ampersand-width: 10.04%;
-    --preview-ampersand-visibility: hidden;
-    --preview-kicker-display: none;
-    --preview-date-x: 50.43%;
-    --preview-date-y: 65.08%;
-    --preview-aspect-ratio: 620 / 877;
-}
-
+[data-preview-artwork-slot="arrow-left"][data-design-code="CKI-801"],
 [data-preview-artwork-slot="arrow-right"][data-design-code="CKI-801"] {
     --preview-couple-x: 51.75%;
     --preview-couple-y: 40.35%;
@@ -5323,6 +5313,7 @@
     --preview-aspect-ratio: 1 / 1;
 }
 
+[data-preview-artwork-slot="arrow-left"][data-design-code="CKI-816"],
 [data-preview-artwork-slot="arrow-right"][data-design-code="CKI-816"] {
     --preview-couple-x: 50.34%;
     --preview-couple-y: 43.8%;

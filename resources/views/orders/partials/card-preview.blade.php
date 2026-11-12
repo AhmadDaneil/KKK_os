@@ -195,6 +195,7 @@
 
             <div class="live-product-grid{{ ($order->package_type ?: $order->wabot_package_code) === 'PUTERI_MANIS' ? ' live-product-grid--puteri-manis' : '' }}">
                 <article class="live-product live-product--banner" data-live-product-theme data-desa-product="banner" data-preview-artwork-slot="banner">
+                    <p class="artwork-unavailable-message" data-artwork-unavailable-message hidden role="status">Banner preview is not available for this design yet.</p>
                     <img class="desa-product-artwork" data-desa-product-artwork alt="" hidden>
                                                             <div class="desa-product-name-overlay" data-desa-product-name-overlay hidden>
                         <div class="desa-product-generic-copy" data-desa-generic-copy>
@@ -238,9 +239,6 @@
 
                 <article class="live-product live-product--arrow live-product--arrow-left" data-live-product-theme data-desa-product="arrow-left" data-preview-artwork-slot="arrow-left">
                     <img class="desa-product-artwork" data-desa-product-artwork alt="" hidden>
-                    <svg class="catalog-left-arrow-marker" viewBox="0 0 600 250" preserveAspectRatio="none" aria-hidden="true" focusable="false">
-                        <path d="M22 125 260 20v52h315v106H260v52Z" fill="#ef2b1c" stroke="#fff" stroke-width="10" stroke-linejoin="round" />
-                    </svg>
                     <img class="catalog-preview-photo" data-live-photo-preview="artwork" alt="Uploaded customer photo preview" hidden>
                                                             <div class="desa-product-name-overlay" data-desa-product-name-overlay hidden>
                         <div class="desa-product-generic-copy" data-desa-generic-copy>
