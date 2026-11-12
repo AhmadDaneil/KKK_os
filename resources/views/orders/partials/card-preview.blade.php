@@ -50,6 +50,11 @@
         @php
             $storedCardTitle = $packageSide->design?->card_title;
             $normalizedCardTitle = strtoupper(trim((string) $storedCardTitle));
+            $designCardTitle = match ($normalizedCardTitle) {
+                'WALIMATULURUS', 'WALIMATUL URUS', 'MAJLIS PERKAHWINAN' => 'MAJLIS PERKAHWINAN',
+                'KENDURI KESYUKURAN', 'MAJLIS KESYUKURAN' => 'MAJLIS KESYUKURAN',
+                default => 'MAJLIS PERKAHWINAN',
+            };
             $jawiCardTitle = match ($normalizedCardTitle) {
                 'WALIMATULURUS', 'WALIMATUL URUS', 'MAJLIS PERKAHWINAN' => 'Wedding Ceremony',
                 'KENDURI KESYUKURAN', 'MAJLIS KESYUKURAN' => 'Thanksgiving Celebration',
@@ -67,7 +72,7 @@
                     </div>
                     <div class="desa-card-ckd003-copy" data-desa-ckd003-copy hidden>
 
-                    <span class="desa-card-ckd003-title" data-preview-field="card_title_malay">WALIMATUL URUS</span>
+                    <span class="desa-card-ckd003-title" data-preview-field="card_title_malay">{{ $designCardTitle }}</span>
                     <div class="desa-card-ckd003-couple">
                         <span data-preview-field="groom_display">Groom</span>
                         <b class="desa-couple-ampersand-spacer" aria-hidden="true">&amp;</b>
