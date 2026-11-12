@@ -1164,3 +1164,64 @@ html[data-customer-theme="dark"] .wedding-card-back .card-social-logo {
     height: 17.8%;
     box-sizing: border-box;
 }
+
+
+/* Keep the general Desa preview intact while CKD-003 uses its print-specific layout. */
+.desa-card-generic-copy,
+.desa-card-back-generic-copy,
+.desa-product-generic-copy {
+    display: flex;
+    width: 100%;
+    align-items: center;
+    justify-content: center;
+    gap: .35em;
+}
+.desa-card-generic-copy[hidden],
+.desa-card-ckd003-copy[hidden],
+.desa-card-back-generic-copy[hidden],
+.desa-card-back-ckd003-copy[hidden],
+.desa-product-generic-copy[hidden],
+.desa-product-ckd003-copy[hidden] {
+    display: none !important;
+}
+.wedding-card-front[data-design-code="CKD-003"] .desa-card-ckd003-copy {
+    position: absolute;
+    inset: 0;
+}
+.wedding-card-back[data-design-code="CKD-003"] .desa-card-back-live-names {
+    inset: 0;
+    display: block;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    box-shadow: none;
+}
+.wedding-card-back[data-design-code="CKD-003"] .desa-card-back-ckd003-copy {
+    position: absolute;
+    inset: 0;
+}
+.live-product[data-design-code="CKD-003"] .desa-product-name-overlay {
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    display: block;
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    color: #4d3b1d;
+    box-shadow: none;
+}
+.live-product--banner[data-design-code="CKD-003"] .desa-product-name-overlay {
+    top: 0;
+    right: 4%;
+    bottom: 0;
+    left: 49%;
+}
+.live-product[data-design-code="CKD-003"] .desa-product-generic-copy {
+    display: none !important;
+}
+.live-product[data-design-code="CKD-003"] .desa-product-ckd003-copy {
+    position: absolute;
+}
