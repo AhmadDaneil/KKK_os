@@ -205,9 +205,9 @@
                         <span class="desa-product-copy-date"><span data-preview-field="day_name_malay">HARI</span><span data-preview-field="event_date">TARIKH MAJLIS</span></span>
                     </div>
                     </div>
+                    <img class="live-product-customer-photo" data-live-photo-preview="item" alt="Uploaded customer photo preview" hidden>
                     <div data-desa-product-placeholder>
                         <span class="live-product-label">Banner</span>
-                        <img class="live-product-customer-photo" data-live-photo-preview="item" alt="Uploaded customer photo preview" hidden>
                         <p data-preview-field="card_title">Wedding Reception</p>
                         <strong><span data-preview-field="groom_display">Groom</span> <i>&amp;</i> <span data-preview-field="bride_display">Bride</span></strong>
                         <small data-preview-field="event_date">Event Date</small>
@@ -226,9 +226,9 @@
                         <span class="desa-product-copy-date"><span data-preview-field="day_name_malay">HARI</span><span data-preview-field="event_date">TARIKH MAJLIS</span></span>
                     </div>
                     </div>
+                    <img class="live-product-customer-photo" data-live-photo-preview="item" alt="Uploaded customer photo preview" hidden>
                     <div data-desa-product-placeholder>
                         <span class="live-product-label">Bunting</span>
-                        <img class="live-product-customer-photo" data-live-photo-preview="item" alt="Uploaded customer photo preview" hidden>
                         <p data-preview-field="card_title">Wedding Reception</p>
                         <strong><span data-preview-field="groom_display">Groom</span><i>&amp;</i><span data-preview-field="bride_display">Bride</span></strong>
                         <small><span data-preview-field="day_name">DAY</span> · <span data-preview-field="event_date">Event Date</span></small>
