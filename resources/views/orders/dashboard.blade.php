@@ -1401,6 +1401,7 @@ document.addEventListener('DOMContentLoaded', function () {
         function syncDesaArtwork(scope, theme, designCode) {
             const normalizedCode = designCode.trim().toUpperCase();
             const hasDesaArtwork = theme === 'desa' && desaDesignCodes.has(normalizedCode);
+            const isCkd003Artwork = hasDesaArtwork && normalizedCode === 'CKD-003';
             const assetBase = hasDesaArtwork
                 ? '/images/designs/desa/' + normalizedCode + '/'
                 : '';
@@ -1415,11 +1416,15 @@ document.addEventListener('DOMContentLoaded', function () {
                 const artwork = front.querySelector('[data-desa-card-artwork]');
                 front.dataset.designCode = hasDesaArtwork ? normalizedCode : '';
                 const nameOverlay = front.querySelector('[data-desa-card-name-overlay]');
+                const genericNameCopy = nameOverlay.querySelector('[data-desa-generic-copy]');
+                const ckd003NameCopy = nameOverlay.querySelector('[data-desa-ckd003-copy]');
                 const genericCopy = front.querySelector('.card-front-copy');
                 const ornaments = front.querySelectorAll('.card-ornament');
 
                 artwork.hidden = !hasDesaArtwork;
                 nameOverlay.hidden = !hasDesaArtwork;
+                genericNameCopy.hidden = isCkd003Artwork;
+                ckd003NameCopy.hidden = !isCkd003Artwork;
                 genericCopy.hidden = hasDesaArtwork;
                 front.toggleAttribute('data-desa-artwork', hasDesaArtwork);
                 ornaments.forEach(function (ornament) {
@@ -1439,10 +1444,14 @@ document.addEventListener('DOMContentLoaded', function () {
                 const artwork = back.querySelector('[data-desa-card-back-artwork]');
                 back.dataset.designCode = hasDesaArtwork ? normalizedCode : '';
                 const liveNames = back.querySelector('[data-desa-card-back-live-names]');
+                const genericNameCopy = liveNames.querySelector('[data-desa-generic-copy]');
+                const ckd003NameCopy = liveNames.querySelector('[data-desa-ckd003-copy]');
                 const placeholder = back.querySelector('[data-desa-back-placeholder]');
 
                 artwork.hidden = !hasDesaArtwork;
                 liveNames.hidden = !hasDesaArtwork;
+                genericNameCopy.hidden = isCkd003Artwork;
+                ckd003NameCopy.hidden = !isCkd003Artwork;
                 placeholder.hidden = hasDesaArtwork;
                 back.toggleAttribute('data-desa-artwork', hasDesaArtwork);
 
@@ -1459,6 +1468,8 @@ document.addEventListener('DOMContentLoaded', function () {
                 const type = product.dataset.desaProduct;
                 const artwork = product.querySelector('[data-desa-product-artwork]');
                 const nameOverlay = product.querySelector('[data-desa-product-name-overlay]');
+                const genericNameCopy = nameOverlay.querySelector('[data-desa-generic-copy]');
+                const ckd003NameCopy = nameOverlay.querySelector('[data-desa-ckd003-copy]');
                 const placeholder = product.querySelector('[data-desa-product-placeholder]');
                 const shouldShowArtwork = hasDesaArtwork;
                 product.dataset.designCode = shouldShowArtwork ? normalizedCode : '';
@@ -1466,6 +1477,8 @@ document.addEventListener('DOMContentLoaded', function () {
                 product.hidden = type === 'card-back' && !hasDesaArtwork;
                 artwork.hidden = !shouldShowArtwork;
                 nameOverlay.hidden = !shouldShowArtwork;
+                genericNameCopy.hidden = isCkd003Artwork;
+                ckd003NameCopy.hidden = !isCkd003Artwork;
                 placeholder.hidden = Boolean(shouldShowArtwork);
 
                 if (shouldShowArtwork) {
