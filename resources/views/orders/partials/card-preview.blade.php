@@ -70,15 +70,15 @@
                         <b>&amp;</b>
                         <span data-preview-field="bride_display">Bride</span>
                     </div>
-                    <div class="desa-card-ckd003-copy" data-desa-ckd003-copy hidden>
+                    <div class="desa-card-custom-copy" data-desa-card-custom-copy hidden>
 
-                    <span class="desa-card-ckd003-title" data-preview-field="card_title_malay">{{ $designCardTitle }}</span>
-                    <div class="desa-card-ckd003-couple">
+                    <span class="desa-card-custom-title" data-preview-field="card_title_malay">{{ $designCardTitle }}</span>
+                    <div class="desa-card-custom-couple">
                         <span data-preview-field="groom_display">Groom</span>
                         <b class="desa-couple-ampersand-spacer" aria-hidden="true">&amp;</b>
                         <span data-preview-field="bride_display">Bride</span>
                     </div>
-                    <div class="desa-card-ckd003-date">
+                    <div class="desa-card-custom-date">
                         <span data-preview-field="day_name_malay">HARI</span>
                         <span data-preview-field="event_date">TARIKH MAJLIS</span>
                     </div>
@@ -113,29 +113,29 @@
                         <b>&amp;</b>
                         <span data-preview-field="bride_display">Bride</span>
                     </div>
-                    <div class="desa-card-back-ckd003-copy" data-desa-ckd003-copy hidden>
+                    <div class="desa-card-back-custom-copy" data-desa-card-back-custom-copy hidden>
 
-                    <strong class="desa-back-ckd003-father" data-preview-field="father_name">NAMA BAPA</strong>
-                    <strong class="desa-back-ckd003-mother" data-preview-field="mother_name">NAMA IBU</strong>
-                    <strong class="desa-back-ckd003-groom" data-preview-field="groom_name">NAMA PENGANTIN</strong>
-                    <strong class="desa-back-ckd003-bride" data-preview-field="bride_name">NAMA PENGANTIN</strong>
-                    <div class="desa-back-ckd003-date">
+                    <strong class="desa-back-custom-father" data-preview-field="father_name">NAMA BAPA</strong>
+                    <strong class="desa-back-custom-mother" data-preview-field="mother_name">NAMA IBU</strong>
+                    <strong class="desa-back-custom-groom" data-preview-field="groom_name">NAMA PENGANTIN</strong>
+                    <strong class="desa-back-custom-bride" data-preview-field="bride_name">NAMA PENGANTIN</strong>
+                    <div class="desa-back-custom-date">
                         <span data-preview-field="day_name_malay">HARI</span>
                         <strong data-preview-field="event_date_day">DD</strong>
                         <small data-preview-field="event_date_month_year">BULAN TAHUN</small>
                         <em data-preview-field="hijri_date"></em>
                     </div>
-                    <div class="desa-back-ckd003-schedule">
+                    <div class="desa-back-custom-schedule">
                         <strong data-preview-field="meal_time">-</strong>
                         <strong data-preview-field="bersanding_time">-</strong>
                     </div>
-                    <div class="desa-back-ckd003-contacts">
+                    <div class="desa-back-custom-contacts">
                         <div><span>AHLI 1</span><strong data-preview-field="contact_1_name">Contact 1</strong><small data-preview-field="contact_1_phone">-</small></div>
                         <div><span>AHLI 2</span><strong data-preview-field="contact_2_name">Contact 2</strong><small data-preview-field="contact_2_phone">-</small></div>
                         <div><span>AHLI 3</span><strong data-preview-field="contact_3_name">Contact 3</strong><small data-preview-field="contact_3_phone">-</small></div>
                     </div>
-                    <div class="qr-placeholder desa-back-ckd003-qr" aria-hidden="true"><span></span></div>
-                    <div class="desa-back-ckd003-venue">
+                    <div class="qr-placeholder desa-back-custom-qr" aria-hidden="true"><span></span></div>
+                    <div class="desa-back-custom-venue">
                         <strong data-preview-field="venue_name">LOKASI MAJLIS</strong>
                         <p data-preview-field="full_address">ALAMAT MAJLIS</p>
                     </div>
