@@ -1683,3 +1683,19 @@ html[data-customer-theme="dark"] .wedding-card-back .card-social-logo {
     font: 500 0.875rem/1.6 system-ui, sans-serif;
     text-align: center;
 }
+
+/* Show the ampersand when an uploaded photo covers its printed artwork version. */
+.live-product--banner.has-live-customer-photo .desa-couple-ampersand-spacer,
+.live-product--banting.has-live-customer-photo .desa-couple-ampersand-spacer {
+    visibility: visible;
+    color: #806536;
+    text-shadow:
+        -.06em -.06em 0 #fff,
+        0 -.06em 0 #fff,
+        .06em -.06em 0 #fff,
+        -.06em 0 0 #fff,
+        .06em 0 0 #fff,
+        -.06em .06em 0 #fff,
+        0 .06em 0 #fff,
+        .06em .06em 0 #fff;
+}
