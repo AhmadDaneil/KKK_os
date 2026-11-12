@@ -1225,3 +1225,10 @@ html[data-customer-theme="dark"] .wedding-card-back .card-social-logo {
 .live-product[data-design-code="CKD-003"] .desa-product-ckd003-copy {
     position: absolute;
 }
+
+
+/* Match the printed 2:3 proportions for the rear card and arrow artwork. */
+.wedding-card-back[data-design-code="CKD-003"],
+.live-product--arrow[data-design-code="CKD-003"] {
+    aspect-ratio: 2 / 3;
+}
