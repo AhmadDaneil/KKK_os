@@ -929,7 +929,7 @@ html[data-customer-theme="dark"] .wedding-card-back .card-social-logo {
 }
 .live-product--banner[data-design-code^="CKD-"] .desa-product-copy-kicker { top: 12%; }
 .live-product--banner[data-design-code^="CKD-"] .desa-product-copy-subtitle { top: 25%; }
-.live-product--banner[data-design-code^="CKD-"] .desa-product-copy-couple { top: 39%; font-size: clamp(.8rem, 3vw, 2.5rem); }
+.live-product--banner[data-design-code^="CKD-"] .desa-product-copy-couple { top: 39%; font-size: clamp(1rem, 3.2vw, 3rem); }
 .live-product--banner[data-design-code^="CKD-"] .desa-product-copy-date { top: 68%; flex-direction: column; gap: .05rem; font-size: clamp(.48rem, 1.65vw, .9rem); }
 .live-product--banner[data-design-code^="CKD-"] .desa-product-copy-quote { top: 79%; }
 
@@ -952,7 +952,7 @@ html[data-customer-theme="dark"] .wedding-card-back .card-social-logo {
 
 .live-product--sticker[data-design-code^="CKD-"] .desa-product-copy-kicker { top: 12%; font-family: "Brush Script MT", "Segoe Script", cursive; font-size: 1.5em; }
 .live-product--sticker[data-design-code^="CKD-"] .desa-product-copy-subtitle { top: 21%; font-size: 1.06em; }
-.live-product--sticker[data-design-code^="CKD-"] .desa-product-copy-couple { top: 34%; font-size: clamp(.72rem, 2.4vw, 1.4rem); }
+.live-product--sticker[data-design-code^="CKD-"] .desa-product-copy-couple { top: 34%; font-size: clamp(.9rem, 2.8vw, 1.7rem); }
 .live-product--sticker[data-design-code^="CKD-"] .desa-product-copy-date { top: 49%; font-size: .82em; }
 
 .live-product--hanger[data-design-code^="CKD-"] .desa-product-copy-couple { top: 43%; font-size: clamp(.8rem, 2.6vw, 1.45rem); color: #241d18; }
@@ -963,7 +963,10 @@ html[data-customer-theme="dark"] .wedding-card-back .card-social-logo {
         font-size: clamp(.72rem, 4.6vw, 1.3rem);
     }
     .live-product--banner[data-design-code^="CKD-"] .desa-product-copy-couple {
-        font-size: clamp(.72rem, 3.2vw, 1.4rem);
+        font-size: clamp(.86rem, 3.8vw, 1.55rem);
+    }
+    .live-product--sticker[data-design-code^="CKD-"] .desa-product-copy-couple {
+        font-size: clamp(.82rem, 3.4vw, 1.1rem);
     }
     .live-product--banting[data-design-code^="CKD-"] .desa-product-copy-couple,
     .live-product--arrow[data-design-code^="CKD-"] .desa-product-copy-couple {
@@ -1145,6 +1148,7 @@ html[data-customer-theme="dark"] .wedding-card-back .card-social-logo {
 }
 .live-product[data-design-code^="CKD-"] .desa-product-copy-couple {
     display: grid;
+    align-items: center;
     grid-template-columns: minmax(0, 1fr) 1.5em minmax(0, 1fr);
 }
 .live-product[data-design-code^="CKD-"] .desa-product-copy-couple span:first-child {
