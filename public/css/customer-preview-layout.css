@@ -6075,3 +6075,127 @@
     --preview-date-y: 79.38%;
     --preview-aspect-ratio: 1 / 1;
 }
+
+
+/* Best-effort protection for customer-facing artwork previews. */
+[data-live-preview] {
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    user-select: none;
+}
+
+[data-live-preview] img {
+    -webkit-user-drag: none;
+}
+
+.live-preview-watermark {
+    position: absolute;
+    z-index: 30;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+    overflow: hidden;
+    pointer-events: none;
+}
+
+.live-preview-watermark-line {
+    display: block;
+    width: 150%;
+    color: rgba(255, 255, 255, .78);
+    font-size: clamp(.42rem, 1vw, .68rem);
+    font-weight: 900;
+    letter-spacing: .12em;
+    line-height: 1.2;
+    text-align: center;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, .5);
+    -webkit-text-stroke: .35px rgba(26, 24, 21, .62);
+    white-space: nowrap;
+    transform: translateX(-16%) rotate(-23deg);
+}
+
+.live-preview-watermark-line:nth-child(even) {
+    transform: translateX(-28%) rotate(-23deg);
+}
+
+.vip-card-frame-bar {
+    position: absolute;
+    z-index: 12;
+    right: 0;
+    left: 0;
+    height: 3%;
+    background: #050505;
+    pointer-events: none;
+}
+
+.vip-card-frame-bar--top {
+    top: 0;
+}
+
+.vip-card-frame-bar--bottom {
+    bottom: 0;
+}
+
+.live-product--vip-card[data-catalog-artwork][data-design-code^="CKP-"] {
+    --preview-default-aspect-ratio: 310 / 437;
+    --preview-couple-x: 50%;
+    --preview-couple-y: 61%;
+    --preview-couple-width: 78%;
+    --preview-date-display: none;
+    --preview-photo-x: 0%;
+    --preview-photo-y: 4%;
+    --preview-photo-width: 100%;
+    --preview-photo-height: 40%;
+    overflow: hidden;
+    background: #fff;
+}
+
+.live-product--vip-card[data-catalog-artwork][data-design-code^="CKP-"] .desa-product-name-overlay {
+    z-index: 13;
+    inset: 0;
+    display: block;
+    background: transparent;
+}
+
+.live-product--vip-card[data-catalog-artwork][data-design-code^="CKP-"] .desa-product-copy-kicker,
+.live-product--vip-card[data-catalog-artwork][data-design-code^="CKP-"] .desa-product-copy-date {
+    display: none !important;
+}
+
+.live-product--vip-card[data-catalog-artwork][data-design-code^="CKP-"] .desa-product-copy-couple {
+    top: 61%;
+    left: 50%;
+    width: 78%;
+    color: #5d4b37;
+    font-size: clamp(.78rem, 2.8vw, 1.2rem);
+    text-shadow: 0 1px 1px rgba(255, 255, 255, .85);
+    transform: translate(-50%, -50%);
+}
+
+.vip-card-qr-placeholder {
+    position: absolute;
+    top: 76%;
+    left: 50%;
+    width: 17%;
+    aspect-ratio: 1;
+    border: 2px solid #111;
+    background:
+        linear-gradient(#111 0 0) left 8% top 8% / 26% 26% no-repeat,
+        linear-gradient(#111 0 0) right 8% top 8% / 26% 26% no-repeat,
+        linear-gradient(#111 0 0) left 8% bottom 8% / 26% 26% no-repeat,
+        repeating-conic-gradient(#111 0 25%, #fff 0 50%) 0 / 5px 5px;
+    transform: translateX(-50%);
+}
+
+.vip-card-qr-placeholder span {
+    position: absolute;
+    inset: 20%;
+    border: 2px solid #111;
+    background: #fff;
+}
+
+@media print {
+    [data-live-preview] {
+        display: none !important;
+    }
+}
