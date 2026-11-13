@@ -313,11 +313,22 @@
                     <div class="desa-product-name-overlay" data-desa-product-name-overlay hidden>
                         <div class="desa-product-generic-copy" data-desa-generic-copy hidden></div>
                         <div class="desa-product-custom-copy" data-desa-product-custom-copy hidden>
+                            <div class="vip-card-parent-names">
+                                <strong class="vip-card-parent-name vip-card-parent-name--father" data-preview-field="father_name">FATHER'S NAME</strong>
+                                <strong class="vip-card-parent-name vip-card-parent-name--mother" data-preview-field="mother_name">MOTHER'S NAME</strong>
+                            </div>
                             <div class="vip-card-couple-names">
                                 <strong class="vip-card-person-name vip-card-person-name--groom" data-preview-field="groom_name">GROOM NAME</strong>
                                 <strong class="vip-card-person-name vip-card-person-name--bride" data-preview-field="bride_name">BRIDE NAME</strong>
                             </div>
                             <div class="vip-card-qr-placeholder" aria-hidden="true"><span></span></div>
+                            <div class="vip-card-event-details" aria-label="Event details">
+                                <strong class="vip-card-event-detail-date"><span data-preview-field="day_name_malay">HARI</span> <span data-preview-field="event_date">TARIKH MAJLIS</span></strong>
+                                <span class="vip-card-event-detail-time">Jamuan <span data-preview-field="meal_time">MASA</span></span>
+                                <span class="vip-card-event-detail-time">Bersanding <span data-preview-field="bersanding_time">MASA</span></span>
+                                <strong class="vip-card-event-detail-venue" data-preview-field="venue_name">LOKASI MAJLIS</strong>
+                                <span class="vip-card-event-detail-address" data-preview-field="full_address">ALAMAT MAJLIS</span>
+                            </div>
                         </div>
                     </div>
                     <span class="vip-card-frame-bar vip-card-frame-bar--bottom" aria-hidden="true"></span>
