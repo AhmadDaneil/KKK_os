@@ -1394,7 +1394,7 @@ document.addEventListener('DOMContentLoaded', function () {
             return displayCardTitle(title);
         }
 
-        const artworkThemes = new Set(['akikah', 'arch', 'desa', 'garden', 'islamic', 'nostalgia', 'portrait']);
+        const artworkThemes = new Set(['akikah', 'arch', 'cartoon', 'desa', 'garden', 'islamic', 'nostalgia', 'portrait']);
         const artworkBase = @json(asset('images/designs'));
         const artworkDesignCodes = JSON.parse(form.dataset.designCodeOptions || '{}');
         const unavailableArtwork = {
