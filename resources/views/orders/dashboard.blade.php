@@ -282,6 +282,17 @@
     </section>
 
     <section data-customer-view-panel="form">
+        @php
+            $designCodeThumbnails = [];
+            foreach (config('kingkadkahwin.design_codes', []) as $theme => $codes) {
+                foreach ($codes as $code) {
+                    $assetPath = 'images/designs/'.strtolower($theme).'/'.$code.'/card-front.webp';
+                    if (is_file(public_path($assetPath))) {
+                        $designCodeThumbnails[$theme][$code] = asset($assetPath);
+                    }
+                }
+            }
+        @endphp
         <form
             id="customer-order-form"
             method="POST"
@@ -289,6 +300,7 @@
             enctype="multipart/form-data"
             data-single-package-setup="{{ $needsSinglePackageSide ? 'true' : 'false' }}"
             data-design-code-options="{{ json_encode(config('kingkadkahwin.design_codes', [])) }}"
+            data-design-code-thumbnails="{{ json_encode($designCodeThumbnails) }}"
         >
             @csrf
 
@@ -424,7 +436,7 @@
     </div>
 
     <div>
-        <label for="design-code-{{ strtolower($side) }}">Design Code</label>
+        <label id="design-code-label-{{ strtolower($side) }}" for="design-code-{{ strtolower($side) }}">Design Code</label>
         <select
             id="design-code-{{ strtolower($side) }}"
             name="sides[{{ $side }}][design][design_code]"
@@ -443,6 +455,21 @@
                 </option>
             @endif
         </select>
+        <div class="design-code-picker" data-design-code-picker hidden>
+            <details data-design-code-details>
+                <summary
+                    class="design-code-picker-summary"
+                    data-design-code-picker-summary
+                    aria-labelledby="design-code-label-{{ strtolower($side) }} design-code-value-{{ strtolower($side) }}"
+                    aria-haspopup="true"
+                    aria-expanded="false"
+                >
+                    <span data-design-code-selected-content>-- Select design code --</span>
+                    <span class="design-code-picker-chevron" aria-hidden="true">▾</span>
+                </summary>
+                <div class="design-code-picker-options" data-design-code-picker-options role="group" aria-label="Design code options"></div>
+            </details>
+        </div>
     </div>
 
 @php
@@ -866,11 +893,18 @@ document.addEventListener('DOMContentLoaded', function () {
 
         field.classList.add('input-error');
 
+        const designCodePicker = field.matches('[data-design-code-select]')
+            ? field.parentElement.querySelector('[data-design-code-picker]')
+            : null;
+        const errorAnchor = designCodePicker || field;
+        const visibleDesignCodeControl = designCodePicker?.querySelector('[data-design-code-picker-summary]');
+        visibleDesignCodeControl?.classList.add('input-error');
+
         const error = document.createElement('p');
         error.className = 'field-error required-field-error';
         error.textContent = 'Please enter ' + message + '.';
 
-        field.insertAdjacentElement('afterend', error);
+        errorAnchor.insertAdjacentElement('afterend', error);
     }
 
     function validateRequiredField(selector, label) {
@@ -1041,14 +1075,17 @@ document.addEventListener('DOMContentLoaded', function () {
             event.preventDefault();
 
             const firstError = document.querySelector('.input-error');
+            const focusTarget = firstError?.matches('[data-design-code-select]')
+                ? firstError.parentElement.querySelector('[data-design-code-picker-summary]') || firstError
+                : firstError;
 
-            if (firstError) {
-                firstError.scrollIntoView({
+            if (focusTarget) {
+                focusTarget.scrollIntoView({
                     behavior: 'smooth',
                     block: 'center'
                 });
 
-                firstError.focus();
+                focusTarget.focus();
             }
         }
     });
@@ -1935,9 +1972,11 @@ document.addEventListener('DOMContentLoaded', function () {
         }
 
         let designCodeOptions = {};
+        let designCodeThumbnails = {};
 
         try {
             designCodeOptions = JSON.parse(form.dataset.designCodeOptions || '{}');
+            designCodeThumbnails = JSON.parse(form.dataset.designCodeThumbnails || '{}');
         } catch (error) {
             return;
         }
@@ -1945,26 +1984,160 @@ document.addEventListener('DOMContentLoaded', function () {
         form.querySelectorAll('select[name$="[design][theme]"]').forEach(function (themeSelect) {
             const packageSide = themeSelect.closest('fieldset[data-package-side]');
             const designCodeSelect = packageSide?.querySelector('[data-design-code-select]');
+            const picker = designCodeSelect?.parentElement.querySelector('[data-design-code-picker]');
+            const details = picker?.querySelector('[data-design-code-details]');
+            const summary = picker?.querySelector('[data-design-code-picker-summary]');
+            const selectedContent = picker?.querySelector('[data-design-code-selected-content]');
+            const optionsContainer = picker?.querySelector('[data-design-code-picker-options]');
 
-            if (!designCodeSelect) {
+            if (!designCodeSelect || !picker || !details || !summary || !selectedContent || !optionsContainer) {
                 return;
             }
 
-            themeSelect.addEventListener('change', function () {
+            let pickerIsActive = false;
+            let optionsHaveRendered = false;
+
+            function updateSelectedState() {
+                const theme = themeSelect.value.trim().toUpperCase();
+                const selectedCode = designCodeSelect.value;
+                const thumbnails = designCodeThumbnails[theme] || {};
+
+                selectedContent.replaceChildren();
+                if (selectedCode && thumbnails[selectedCode]) {
+                    const image = document.createElement('img');
+                    image.src = thumbnails[selectedCode];
+                    image.alt = '';
+                    image.loading = 'lazy';
+                    image.decoding = 'async';
+                    image.setAttribute('aria-hidden', 'true');
+                    selectedContent.append(image);
+                }
+
+                const codeLabel = document.createElement('span');
+                codeLabel.id = selectedContent.id;
+                codeLabel.textContent = selectedCode || '-- Select design code --';
+                selectedContent.append(codeLabel);
+
+                optionsContainer.querySelectorAll('[data-design-code-option]').forEach(function (option) {
+                    option.setAttribute('aria-pressed', option.dataset.designCodeOption === selectedCode ? 'true' : 'false');
+                });
+            }
+
+            function renderOptions() {
+                if (optionsHaveRendered) {
+                    return;
+                }
+
+                const theme = themeSelect.value.trim().toUpperCase();
+                const codes = designCodeOptions[theme] || [];
+                const thumbnails = designCodeThumbnails[theme] || {};
+                optionsContainer.replaceChildren();
+
+                codes.forEach(function (code) {
+                    const option = document.createElement('button');
+                    option.type = 'button';
+                    option.className = 'design-code-picker-option';
+                    option.dataset.designCodeOption = code;
+                    option.setAttribute('aria-pressed', designCodeSelect.value === code ? 'true' : 'false');
+
+                    const image = document.createElement('img');
+                    image.src = thumbnails[code];
+                    image.alt = '';
+                    image.loading = 'lazy';
+                    image.decoding = 'async';
+
+                    const codeLabel = document.createElement('span');
+                    codeLabel.textContent = code;
+                    option.append(image, codeLabel);
+                    option.addEventListener('click', function () {
+                        designCodeSelect.value = code;
+                        designCodeSelect.dispatchEvent(new Event('change', { bubbles: true }));
+                        updateSelectedState();
+                        details.open = false;
+                        summary.focus();
+                    });
+
+                    optionsContainer.append(option);
+                });
+
+                optionsHaveRendered = true;
+                updateSelectedState();
+            }
+
+            function setPickerAvailability(rebuildOptions) {
                 const selectedCode = designCodeSelect.value;
                 const theme = themeSelect.value.trim().toUpperCase();
                 const codes = designCodeOptions[theme] || [];
+                const thumbnails = designCodeThumbnails[theme] || {};
 
-                designCodeSelect.replaceChildren(new Option('-- Select design code --', ''));
-                codes.forEach(function (code) {
-                    designCodeSelect.add(new Option(code, code));
-                });
+                if (rebuildOptions) {
+                    designCodeSelect.replaceChildren(new Option('-- Select design code --', ''));
+                    codes.forEach(function (code) {
+                        designCodeSelect.add(new Option(code, code));
+                    });
 
-                designCodeSelect.disabled = theme === '';
+                    designCodeSelect.disabled = theme === '';
 
-                if (codes.includes(selectedCode)) {
-                    designCodeSelect.value = selectedCode;
+                    if (codes.includes(selectedCode)) {
+                        designCodeSelect.value = selectedCode;
+                    }
                 }
+
+                const hasExactThumbnailForEveryCode = codes.length > 0
+                    && codes.every(function (code) {
+                        return typeof thumbnails[code] === 'string' && thumbnails[code] !== '';
+                    });
+                const isEditable = !designCodeSelect.matches(':disabled');
+
+                pickerIsActive = hasExactThumbnailForEveryCode && isEditable;
+                picker.hidden = !pickerIsActive;
+                designCodeSelect.classList.toggle('design-code-native-select-hidden', pickerIsActive);
+                designCodeSelect.tabIndex = pickerIsActive ? -1 : 0;
+                if (pickerIsActive) {
+                    designCodeSelect.setAttribute('aria-hidden', 'true');
+                    details.open = false;
+                    optionsContainer.replaceChildren();
+                    optionsHaveRendered = false;
+                    summary.setAttribute('aria-expanded', 'false');
+                } else {
+                    designCodeSelect.removeAttribute('aria-hidden');
+                    details.open = false;
+                    optionsContainer.replaceChildren();
+                    optionsHaveRendered = false;
+                }
+
+                updateSelectedState();
+            }
+
+            details.addEventListener('toggle', function () {
+                summary.setAttribute('aria-expanded', details.open ? 'true' : 'false');
+                if (details.open && pickerIsActive) {
+                    renderOptions();
+                }
+            });
+
+            summary.addEventListener('keydown', function (event) {
+                if (event.key === 'Escape' && details.open) {
+                    details.open = false;
+                    summary.focus();
+                }
+            });
+
+            const designCodeLabel = packageSide.querySelector('label[for="' + designCodeSelect.id + '"]');
+            designCodeLabel?.addEventListener('click', function (event) {
+                if (pickerIsActive) {
+                    event.preventDefault();
+                    summary.focus();
+                    details.open = true;
+                    renderOptions();
+                }
+            });
+
+            designCodeSelect.addEventListener('change', updateSelectedState);
+            setPickerAvailability(false);
+
+            themeSelect.addEventListener('change', function () {
+                setPickerAvailability(true);
             });
         });
     });
