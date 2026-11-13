@@ -140,7 +140,28 @@
 [data-preview-artwork-slot="card-back"][data-design-code^="CKC-"] .desa-back-custom-date,
 [data-preview-artwork-slot="card-back"][data-design-code^="CKC-"] .desa-back-custom-venue {
     z-index: 1;
+}
+
+[data-preview-artwork-slot="card-back"][data-design-code^="CKC-"] .desa-back-custom-date {
+    background: transparent;
+}
+
+[data-preview-artwork-slot="card-back"][data-design-code^="CKC-"] .desa-back-custom-venue {
     background: #fff;
+}
+
+[data-preview-artwork-slot="card-back"][data-design-code^="CKC-"] .desa-back-custom-schedule {
+    gap: .12rem;
+}
+
+[data-preview-artwork-slot="card-back"][data-design-code^="CKC-"] .desa-back-custom-schedule strong {
+    font-size: .62em;
+    line-height: 1.1;
+}
+
+[data-preview-artwork-slot="card-back"][data-design-code^="CKC-"] .desa-back-custom-contacts > div:first-child {
+    position: relative;
+    top: .65rem;
 }
 
 /* Garden */
