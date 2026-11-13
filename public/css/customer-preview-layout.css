@@ -6557,39 +6557,74 @@
 }
 
 .wedding-card-back[data-catalog-artwork][data-design-code="CKP-001"] .desa-card-back-live-names {
+    position: absolute;
+    inset: 0;
+    display: block;
+    box-sizing: border-box;
+    padding: 0;
+    overflow: visible;
+    border: 0;
+    background: transparent;
+    box-shadow: none;
     font-family: Arial, sans-serif;
-    font-size: 2cqw;
+    font-size: 1.8cqw;
     line-height: 1.05;
 }
 
+.wedding-card-back[data-catalog-artwork][data-design-code="CKP-001"] .desa-card-back-custom-copy {
+    position: absolute;
+    inset: 0;
+}
+
 .wedding-card-back[data-catalog-artwork][data-design-code="CKP-001"] .desa-card-back-custom-copy > strong {
-    display: grid;
+    display: flex;
+    box-sizing: border-box;
+    height: 3.8%;
     min-height: 0;
-    place-items: center;
-    padding: .15cqw 1cqw;
+    align-items: center;
+    justify-content: center;
+    padding: 0 1cqw;
     background: #fff;
     color: #111;
-    font-family: Georgia, "Times New Roman", serif;
-    font-size: 3.1cqw;
+    font-family: Arial, sans-serif;
+    font-size: 3cqw;
     font-weight: 700;
-    letter-spacing: .035em;
+    letter-spacing: .04em;
     line-height: 1.05;
+    overflow: hidden;
     text-align: center;
+    text-transform: uppercase;
+    white-space: nowrap;
 }
 
 .wedding-card-back[data-catalog-artwork][data-design-code="CKP-001"] .desa-back-custom-date {
     display: flex;
     align-items: center;
+    flex-direction: column;
     justify-content: center;
-    gap: .15cqw;
-    padding: 0;
-    background: #fff;
+    gap: .1cqw;
+    box-sizing: border-box;
+    padding: .5cqw;
+    background: transparent;
     color: #111;
     font-family: Arial, sans-serif;
 }
 
+.wedding-card-back[data-catalog-artwork][data-design-code="CKP-001"] .desa-back-custom-date::before {
+    position: absolute;
+    z-index: 0;
+    inset: 2.5% 2%;
+    background: #fff;
+    content: "";
+}
+
+.wedding-card-back[data-catalog-artwork][data-design-code="CKP-001"] .desa-back-custom-date > * {
+    position: relative;
+    z-index: 1;
+}
+
 .wedding-card-back[data-catalog-artwork][data-design-code="CKP-001"] .desa-back-custom-date span {
-    font-size: 4.25cqw;
+    font-size: 3.8cqw;
     font-weight: 700;
     line-height: 1;
 }
@@ -6601,44 +6636,49 @@
 }
 
 .wedding-card-back[data-catalog-artwork][data-design-code="CKP-001"] .desa-back-custom-date small {
-    font-size: 2.45cqw;
+    font-size: 2.3cqw;
     line-height: 1.05;
 }
 
 .wedding-card-back[data-catalog-artwork][data-design-code="CKP-001"] .desa-back-custom-date em {
-    font-size: 1.35cqw;
+    font-size: 1.25cqw;
     line-height: 1;
+}
+
+.wedding-card-back[data-catalog-artwork][data-design-code="CKP-001"] .desa-back-custom-date em:empty {
+    display: none;
 }
 
 .wedding-card-back[data-catalog-artwork][data-design-code="CKP-001"] .desa-back-custom-schedule {
     display: block;
     padding: 0;
-    background: #fff;
+    background: transparent;
     color: #111;
     font-family: Arial, sans-serif;
 }
 
 .wedding-card-back[data-catalog-artwork][data-design-code="CKP-001"] .desa-back-custom-schedule::before {
-    top: 13.5%;
-    right: 0;
-    left: 0;
-    height: 32%;
+    top: 9%;
+    right: 2%;
+    left: 2%;
+    height: 38%;
     background: #fff;
-    font-size: 4.15cqw;
+    font-size: 4cqw;
     line-height: .98;
 }
 
 .wedding-card-back[data-catalog-artwork][data-design-code="CKP-001"] .desa-back-custom-schedule strong {
     position: absolute;
-    left: 0;
+    left: 2%;
     display: grid;
-    width: 100%;
-    height: 9%;
+    width: 96%;
+    height: 10%;
     place-items: center;
     background: #fff;
-    font-size: 2.45cqw;
+    font-size: 2.2cqw;
     font-weight: 400;
     line-height: 1;
+    white-space: nowrap;
 }
 
 .wedding-card-back[data-catalog-artwork][data-design-code="CKP-001"] .desa-back-custom-schedule strong:first-child {
@@ -6652,31 +6692,33 @@
 .wedding-card-back[data-catalog-artwork][data-design-code="CKP-001"] .desa-back-custom-contacts {
     display: block;
     padding: 0;
-    background: #fff;
+    background: transparent;
     color: #111;
     font-family: Arial, sans-serif;
 }
 
 .wedding-card-back[data-catalog-artwork][data-design-code="CKP-001"] .desa-back-custom-contacts::before {
-    top: 14.5%;
-    right: 0;
-    left: 0;
-    height: 15%;
+    top: 10%;
+    right: 2%;
+    left: 2%;
+    height: 18%;
     background: #fff;
-    font-size: 4.15cqw;
+    font-size: 4cqw;
 }
 
 .wedding-card-back[data-catalog-artwork][data-design-code="CKP-001"] .desa-back-custom-contacts > div {
     position: absolute;
-    left: 0;
+    left: 2%;
     display: grid;
-    width: 100%;
+    width: 96%;
     height: 21%;
-    align-content: start;
+    align-content: center;
     justify-items: center;
-    gap: .1cqw;
+    gap: 0;
     background: #fff;
     line-height: 1.05;
+    overflow: hidden;
+    white-space: nowrap;
 }
 
 .wedding-card-back[data-catalog-artwork][data-design-code="CKP-001"] .desa-back-custom-contacts > div:first-child {
@@ -6692,19 +6734,19 @@
 }
 
 .wedding-card-back[data-catalog-artwork][data-design-code="CKP-001"] .desa-back-custom-contacts span {
-    font-size: 2.25cqw;
+    font-size: 1.85cqw;
     font-weight: 700;
     line-height: 1;
 }
 
 .wedding-card-back[data-catalog-artwork][data-design-code="CKP-001"] .desa-back-custom-contacts strong {
-    font-size: 1.9cqw;
+    font-size: 1.65cqw;
     font-weight: 700;
     line-height: 1.05;
 }
 
 .wedding-card-back[data-catalog-artwork][data-design-code="CKP-001"] .desa-back-custom-contacts small {
-    font-size: 2.25cqw;
+    font-size: 1.75cqw;
     line-height: 1;
 }
 
@@ -6714,16 +6756,21 @@
 
 .wedding-card-back[data-catalog-artwork][data-design-code="CKP-001"] .desa-back-custom-venue {
     display: flex;
-    gap: .15cqw;
+    gap: .25cqw;
     color: #111;
     font-family: Arial, sans-serif;
-    font-size: 2.25cqw;
+    font-size: 2cqw;
     line-height: 1.08;
     text-align: left;
 }
 
 .wedding-card-back[data-catalog-artwork][data-design-code="CKP-001"] .desa-back-custom-venue strong,
 .wedding-card-back[data-catalog-artwork][data-design-code="CKP-001"] .desa-back-custom-venue p {
+    box-sizing: border-box;
+    display: block;
+    width: 100%;
+    padding: 0 .2cqw;
+    background: #fff;
     font-size: inherit;
     line-height: inherit;
 }
