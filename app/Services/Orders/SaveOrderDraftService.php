@@ -29,13 +29,15 @@ class SaveOrderDraftService
 
         $newUploadedPaths = [];
         $oldPathsToDelete = [];
+        $unusedUploadedPaths = [];
 
         try {
             $savedOrder = DB::transaction(function () use (
                 $order,
                 $data,
                 &$newUploadedPaths,
-                &$oldPathsToDelete
+                &$oldPathsToDelete,
+                &$unusedUploadedPaths
             ): Order {
                 $order->load([
                     'couples',
@@ -146,6 +148,10 @@ class SaveOrderDraftService
                         ];
 
                         $cardImage = Arr::get($sideData, 'design.card_image');
+                        $removeCardImage = filter_var(
+                            Arr::get($sideData, 'design.remove_card_image', false),
+                            FILTER_VALIDATE_BOOLEAN
+                        );
                         $oldPath = $packageSide->design->card_image_path;
 
                         if ($cardImage instanceof UploadedFile) {
@@ -157,6 +163,12 @@ class SaveOrderDraftService
 
                             $newUploadedPaths[] = $newPath;
                             $designData['card_image_path'] = $newPath;
+
+                            if (is_string($oldPath) && $oldPath !== '') {
+                                $oldPathsToDelete[] = $oldPath;
+                            }
+                        } elseif ($removeCardImage) {
+                            $designData['card_image_path'] = null;
 
                             if (is_string($oldPath) && $oldPath !== '') {
                                 $oldPathsToDelete[] = $oldPath;
@@ -310,12 +322,59 @@ class SaveOrderDraftService
                     );
 
                     if ($firstSide?->design && $secondSide?->design) {
+                        $firstSideName = $firstSide->side;
+                        $secondSideName = $secondSide->side;
+                        $firstUpload = Arr::get(
+                            $data,
+                            "sides.$firstSideName.design.card_image"
+                        );
+                        $secondUpload = Arr::get(
+                            $data,
+                            "sides.$secondSideName.design.card_image"
+                        );
+                        $removeCardImage = filter_var(
+                            Arr::get($data, "sides.$firstSideName.design.remove_card_image", false)
+                                || Arr::get($data, "sides.$secondSideName.design.remove_card_image", false),
+                            FILTER_VALIDATE_BOOLEAN
+                        );
+
+                        if ($firstUpload instanceof UploadedFile) {
+                            $cardImagePath = $firstSide->design->card_image_path;
+                        } elseif ($secondUpload instanceof UploadedFile) {
+                            $cardImagePath = $secondSide->design->card_image_path;
+                        } elseif ($removeCardImage) {
+                            $cardImagePath = null;
+                        } else {
+                            $cardImagePath = $firstSide->design->card_image_path;
+                        }
+
+                        foreach ([
+                            $firstSide->design->card_image_path,
+                            $secondSide->design->card_image_path,
+                        ] as $existingPath) {
+                            if (! is_string($existingPath) || $existingPath === $cardImagePath) {
+                                continue;
+                            }
+
+                            if (in_array($existingPath, $newUploadedPaths, true)) {
+                                $unusedUploadedPaths[] = $existingPath;
+                            } else {
+                                $oldPathsToDelete[] = $existingPath;
+                            }
+                        }
+
                         $secondSide->design->update([
                             'theme' => $firstSide->design->theme,
                             'design_code' => $firstSide->design->design_code,
                             'card_title' => $firstSide->design->card_title,
-                            'card_image_path' => $firstSide->design->card_image_path,
+                            'card_image_path' => $cardImagePath,
                         ]);
+
+                        if ($firstSide->design->card_image_path !== $cardImagePath) {
+                            $firstSide->design->update([
+                                'card_image_path' => $cardImagePath,
+                            ]);
+                        }
                     }
                 }
 
@@ -377,6 +436,10 @@ class SaveOrderDraftService
             if (! in_array($path, $newUploadedPaths, true)) {
                 Storage::disk('local')->delete($path);
             }
+        }
+
+        foreach (array_unique($unusedUploadedPaths) as $path) {
+            Storage::disk('local')->delete($path);
         }
 
         return $savedOrder;
