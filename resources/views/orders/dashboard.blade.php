@@ -490,14 +490,18 @@
         JPG, JPEG, PNG or WEBP format. Maximum 10 MB.
     </p>
 
-    @if ($packageSide?->design?->card_image_path)
-        <p class="upload-status">
+    <p class="upload-status" data-card-image-status @if (! filled($packageSide?->design?->card_image_path)) hidden @endif>
             Photo uploaded.
             Choose a new file below only if you want to replace it.
-        </p>
-    @endif
+    </p>
 
     <div class="card-image-picker">
+    <input
+        type="hidden"
+        name="sides[{{ $side }}][design][remove_card_image]"
+        value="0"
+        data-remove-card-image
+    >
     <input
         id="card-image-{{ strtolower($side) }}"
         type="file"
@@ -505,6 +509,7 @@
         accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp"
     >
     <button type="button" class="cancel-card-image" hidden aria-controls="card-image-{{ strtolower($side) }}">Cancel</button>
+    <button type="button" class="delete-card-image" data-delete-card-image @if (! filled($packageSide?->design?->card_image_path)) hidden @endif aria-controls="card-image-{{ strtolower($side) }}">Delete</button>
     </div>
 
     @error("sides.$side.design.card_image")
@@ -1118,16 +1123,46 @@ document.addEventListener('DOMContentLoaded', function () {
                         throw new Error(errors || payload.message || 'We could not save these changes.');
                     }
 
-                    if (includeFiles) {
-                        form.querySelectorAll('[data-card-image-upload]').forEach(function (uploadField) {
-                            const photoInput = uploadField.querySelector('input[type="file"]');
+                    form.querySelectorAll('[data-card-image-upload]').forEach(function (uploadField) {
+                        const photoInput = uploadField.querySelector('input[type="file"]');
+                        const removePhotoInput = uploadField.querySelector('[data-remove-card-image]');
+                        const deleteButton = uploadField.querySelector('[data-delete-card-image]');
+                        const uploadStatus = uploadField.querySelector('[data-card-image-status]');
+                        const submittedPhoto = photoInput ? formData.get(photoInput.name) : null;
+                        const photoWasUploaded = includeFiles
+                            && submittedPhoto instanceof File
+                            && submittedPhoto.size > 0;
+                        const removalWasSaved = removePhotoInput
+                            && formData.get(removePhotoInput.name) === '1';
 
-                            if (photoInput && photoInput.files.length > 0) {
-                                uploadField.dataset.hasCardImage = 'true';
+                        if (photoWasUploaded) {
+                            uploadField.dataset.hasCardImage = 'true';
+                        } else if (removalWasSaved) {
+                            uploadField.dataset.hasCardImage = 'false';
+
+                            if (removePhotoInput.value === '1') {
+                                removePhotoInput.value = '0';
                             }
-                        });
+                        }
 
-                    }
+                        if (deleteButton) {
+                            deleteButton.hidden = uploadField.dataset.hasCardImage !== 'true'
+                                && !(photoInput && photoInput.files.length > 0);
+                        }
+
+                        if (uploadStatus) {
+                            uploadStatus.hidden = uploadField.dataset.hasCardImage !== 'true';
+                        }
+
+                        if (photoWasUploaded || removalWasSaved) {
+                            uploadField.dispatchEvent(new CustomEvent('customer-photo-state-changed', {
+                                bubbles: true,
+                                detail: {
+                                    side: uploadField.closest('[data-package-side]')?.dataset.packageSide,
+                                },
+                            }));
+                        }
+                    });
 
                     savedRevision = Math.max(savedRevision, revision);
 
@@ -1776,6 +1811,7 @@ document.addEventListener('DOMContentLoaded', function () {
             if (
                 event.target.name?.endsWith('[design][theme]')
                 || event.target.matches?.('[data-card-image-upload] input[type="file"]')
+                || event.target.matches?.('[data-remove-card-image]')
             ) {
                 updatePortraitImageFields();
             }
@@ -1820,19 +1856,58 @@ document.addEventListener('DOMContentLoaded', function () {
         document.querySelectorAll('.card-image-picker').forEach(function (picker) {
             const input = picker.querySelector('input[type="file"]');
             const cancelButton = picker.querySelector('.cancel-card-image');
+            const deleteButton = picker.querySelector('[data-delete-card-image]');
+            const removePhotoInput = picker.querySelector('[data-remove-card-image]');
+            const uploadField = picker.closest('[data-card-image-upload]');
+            const uploadStatus = uploadField?.querySelector('[data-card-image-status]');
 
-            function updateCancelButton() {
+            function updateImageButtons() {
                 cancelButton.hidden = input.files.length === 0;
+                const hasSavedPhoto = uploadField?.dataset.hasCardImage === 'true';
+                const removalPending = removePhotoInput?.value === '1';
+                deleteButton.hidden = !(hasSavedPhoto || input.files.length > 0) || (removalPending && input.files.length === 0);
+
+                if (uploadStatus) {
+                    uploadStatus.hidden = !hasSavedPhoto || removalPending;
+                }
             }
 
-            input.addEventListener('change', updateCancelButton);
+            input.addEventListener('change', function () {
+                if (input.files.length > 0 && removePhotoInput) {
+                    removePhotoInput.value = '0';
+                }
+
+                updateImageButtons();
+            });
+
             cancelButton.addEventListener('click', function () {
                 input.value = '';
-                updateCancelButton();
+                updateImageButtons();
+                input.dispatchEvent(new Event('change', { bubbles: true }));
                 input.focus();
             });
 
-            updateCancelButton();
+            deleteButton.addEventListener('click', function () {
+                const hadSavedPhoto = uploadField?.dataset.hasCardImage === 'true';
+                const hadSelectedPhoto = input.files.length > 0;
+
+                input.value = '';
+                if (removePhotoInput) {
+                    removePhotoInput.value = hadSavedPhoto || hadSelectedPhoto ? '1' : '0';
+                }
+
+                if (uploadField) {
+                    uploadField.dataset.hasCardImage = 'false';
+                }
+
+                updateImageButtons();
+
+                if (removePhotoInput) {
+                    removePhotoInput.dispatchEvent(new Event('change', { bubbles: true }));
+                }
+            });
+
+            updateImageButtons();
         });
     });
 </script>
@@ -2008,6 +2083,13 @@ document.addEventListener('DOMContentLoaded', function () {
 
                 photoUrl = current.url;
             } else if (uploadField.dataset.hasCardImage === 'true') {
+                const current = customerPhotoPreviewUrls.get(side);
+
+                if (current) {
+                    URL.revokeObjectURL(current.url);
+                    customerPhotoPreviewUrls.delete(side);
+                }
+
                 photoUrl = uploadField.dataset.savedPhotoUrl || '';
             } else {
                 const current = customerPhotoPreviewUrls.get(side);
@@ -2064,9 +2146,19 @@ document.addEventListener('DOMContentLoaded', function () {
             });
         }
 
+        form.addEventListener('customer-photo-state-changed', function (event) {
+            const side = event.detail?.side;
+
+            if (side) {
+                updateSidePhotoPreview(side);
+                updatePortraitImageFields();
+            }
+        });
+
         form.addEventListener('change', function (event) {
             if (
                 event.target.matches?.('[data-card-image-upload] input[type="file"]')
+                || event.target.matches?.('[data-remove-card-image]')
                 || event.target.name?.endsWith('[design][theme]')
             ) {
                 const side = event.target.closest('[data-package-side]')?.dataset.packageSide;

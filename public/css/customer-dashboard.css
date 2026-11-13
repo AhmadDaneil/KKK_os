@@ -75,8 +75,36 @@ label {
     background: #fce8e4;
 }
 
+.card-image-picker .delete-card-image {
+    flex-shrink: 0;
+    padding: 10px 14px;
+    border: 1px solid #e3bdb8;
+    border-radius: 8px;
+    color: #a33428;
+    background: #fff5f3;
+    font: inherit;
+}
+
+.card-image-picker .delete-card-image:hover {
+    background: #fce8e4;
+}
+
 .card-image-picker .cancel-card-image[hidden] {
     display: none;
+}
+
+.card-image-picker .delete-card-image[hidden] {
+    display: none;
+}
+
+@media (max-width: 540px) {
+    .card-image-picker {
+        flex-wrap: wrap;
+    }
+
+    .card-image-picker input[type="file"] {
+        flex-basis: 100%;
+    }
 }
 
 .field-help {
