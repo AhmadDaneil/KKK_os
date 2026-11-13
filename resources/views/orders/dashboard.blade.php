@@ -1398,7 +1398,6 @@ document.addEventListener('DOMContentLoaded', function () {
         const artworkBase = @json(asset('images/designs'));
         const artworkDesignCodes = JSON.parse(form.dataset.designCodeOptions || '{}');
         const unavailableArtwork = {
-            'CKP-003': ['banner'],
         };
 
         function syncArtworkImage(image, source, label) {
