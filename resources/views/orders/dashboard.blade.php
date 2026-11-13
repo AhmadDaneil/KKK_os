@@ -1904,6 +1904,66 @@ document.addEventListener('DOMContentLoaded', function () {
             return;
         }
 
+        const watermarkLabel = (preview.dataset.previewWatermark || 'CUSTOMER PREVIEW').trim();
+
+        function protectPreviewSurfaces() {
+            preview.querySelectorAll('.wedding-card, .live-product[data-preview-artwork-slot]').forEach(function (surface) {
+                if (surface.querySelector('[data-preview-watermark-overlay]')) {
+                    return;
+                }
+
+                const overlay = document.createElement('div');
+                overlay.className = 'live-preview-watermark';
+                overlay.setAttribute('data-preview-watermark-overlay', '');
+                overlay.setAttribute('aria-hidden', 'true');
+
+                for (let row = 0; row < 4; row += 1) {
+                    const line = document.createElement('span');
+                    line.className = 'live-preview-watermark-line';
+                    line.textContent = 'KINGKADKAHWIN · CUSTOMER PREVIEW · ' + watermarkLabel;
+                    overlay.append(line);
+                }
+
+                surface.append(overlay);
+            });
+
+            preview.querySelectorAll('img').forEach(function (image) {
+                image.draggable = false;
+            });
+        }
+
+        protectPreviewSurfaces();
+
+        preview.addEventListener('contextmenu', function (event) {
+            event.preventDefault();
+        });
+
+        preview.addEventListener('dragstart', function (event) {
+            if (event.target instanceof HTMLImageElement) {
+                event.preventDefault();
+            }
+        });
+
+        preview.addEventListener('selectstart', function (event) {
+            event.preventDefault();
+        });
+
+        preview.addEventListener('copy', function (event) {
+            event.preventDefault();
+        });
+
+        document.addEventListener('keydown', function (event) {
+            const isPreviewShortcut = (event.ctrlKey || event.metaKey)
+                && ['s', 'p'].includes(event.key.toLowerCase());
+            const previewHasFocus = preview.contains(document.activeElement);
+            const pointerIsOverPreview = preview.matches(':hover');
+
+            if (isPreviewShortcut && (previewHasFocus || pointerIsOverPreview)) {
+                event.preventDefault();
+                event.stopPropagation();
+            }
+        });
+
         const customerPhotoPreviewUrls = new Map();
 
         function setImageSource(image, source, shouldShow) {
