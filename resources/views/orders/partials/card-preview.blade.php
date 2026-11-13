@@ -313,11 +313,10 @@
                     <div class="desa-product-name-overlay" data-desa-product-name-overlay hidden>
                         <div class="desa-product-generic-copy" data-desa-generic-copy hidden></div>
                         <div class="desa-product-custom-copy" data-desa-product-custom-copy hidden>
-                            <strong class="desa-product-copy-couple">
-                                <span data-preview-field="groom_display">Groom</span>
-                                <b class="desa-couple-ampersand-spacer" aria-hidden="true">&amp;</b>
-                                <span data-preview-field="bride_display">Bride</span>
-                            </strong>
+                            <div class="vip-card-couple-names">
+                                <strong class="vip-card-person-name vip-card-person-name--groom" data-preview-field="groom_name">GROOM NAME</strong>
+                                <strong class="vip-card-person-name vip-card-person-name--bride" data-preview-field="bride_name">BRIDE NAME</strong>
+                            </div>
                             <div class="vip-card-qr-placeholder" aria-hidden="true"><span></span></div>
                         </div>
                     </div>

@@ -6157,24 +6157,49 @@
     background: transparent;
 }
 
+.live-product--vip-card[data-catalog-artwork][data-design-code^="CKP-"] .desa-product-custom-copy {
+    position: absolute;
+    inset: 0;
+}
+
 .live-product--vip-card[data-catalog-artwork][data-design-code^="CKP-"] .desa-product-copy-kicker,
 .live-product--vip-card[data-catalog-artwork][data-design-code^="CKP-"] .desa-product-copy-date {
     display: none !important;
 }
 
-.live-product--vip-card[data-catalog-artwork][data-design-code^="CKP-"] .desa-product-copy-couple {
-    top: 61%;
+.live-product--vip-card[data-catalog-artwork][data-design-code^="CKP-"] .vip-card-couple-names {
+    position: absolute;
+    inset: 0;
+    color: #fff;
+    font-family: "Brush Script MT", "Segoe Script", cursive;
+    line-height: 1.1;
+    text-align: center;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, .8);
+}
+
+.live-product--vip-card[data-catalog-artwork][data-design-code^="CKP-"] .vip-card-person-name {
+    position: absolute;
     left: 50%;
-    width: 78%;
-    color: #5d4b37;
-    font-size: clamp(.78rem, 2.8vw, 1.2rem);
-    text-shadow: 0 1px 1px rgba(255, 255, 255, .85);
-    transform: translate(-50%, -50%);
+    width: 88%;
+    overflow: hidden;
+    font-size: clamp(.54rem, 2.2vw, .86rem);
+    font-weight: 600;
+    text-overflow: ellipsis;
+    transform: translateX(-50%);
+    white-space: nowrap;
+}
+
+.live-product--vip-card[data-catalog-artwork][data-design-code^="CKP-"] .vip-card-person-name--groom {
+    top: 59.5%;
+}
+
+.live-product--vip-card[data-catalog-artwork][data-design-code^="CKP-"] .vip-card-person-name--bride {
+    top: 66.2%;
 }
 
 .vip-card-qr-placeholder {
     position: absolute;
-    top: 76%;
+    top: 70.7%;
     left: 50%;
     width: 17%;
     aspect-ratio: 1;
