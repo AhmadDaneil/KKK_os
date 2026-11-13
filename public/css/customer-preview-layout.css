@@ -113,9 +113,10 @@
     --preview-groom-y: 36.05%;
     --preview-bride-x: 50.16%;
     --preview-bride-y: 42%;
-    --preview-date-x: 20.17%;
-    --preview-date-y: 49.33%;
-    --preview-date-height: 13.73%;
+    --preview-date-x: 21.1%;
+    --preview-date-y: 47%;
+    --preview-date-width: 25.8%;
+    --preview-date-height: 17.8%;
     --preview-venue-x: 64.33%;
     --preview-venue-y: 76.67%;
     --preview-venue-width: 38%;
@@ -162,6 +163,22 @@
 [data-preview-artwork-slot="card-back"][data-design-code^="CKC-"] .desa-back-custom-contacts > div:first-child {
     position: relative;
     top: .65rem;
+}
+
+.wedding-card-back[data-catalog-artwork][data-design-code^="CKC-"] .desa-back-custom-schedule::before {
+    top: 2%;
+    right: 0;
+    left: 0;
+    height: 42%;
+    font-size: .56rem;
+}
+
+.wedding-card-back[data-catalog-artwork][data-design-code^="CKC-"] .desa-back-custom-contacts::before {
+    top: 1%;
+    right: 0;
+    left: 0;
+    height: 21%;
+    font-size: .56rem;
 }
 
 /* Garden */
