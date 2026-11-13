@@ -6286,11 +6286,14 @@
     --preview-couple-width: 78%;
     --preview-date-display: none;
     --preview-photo-x: 0%;
-    --preview-photo-y: 4%;
+    --preview-photo-y: 3.78%;
     --preview-photo-width: 100%;
-    --preview-photo-height: 40%;
+    --preview-photo-height: 39.93%;
+    container-type: inline-size;
+    width: 100%;
+    max-width: 400px;
     overflow: hidden;
-    background: #fff;
+    background: #050505;
 }
 
 .live-product--vip-card[data-catalog-artwork][data-design-code^="CKP-"] .desa-product-name-overlay {
@@ -6303,6 +6306,20 @@
 .live-product--vip-card[data-catalog-artwork][data-design-code^="CKP-"] .desa-product-custom-copy {
     position: absolute;
     inset: 0;
+    color: #f8f7f4;
+    font-family: Arial, sans-serif;
+    font-size: 2.4cqw;
+    font-style: normal;
+    font-weight: 400;
+    line-height: 1.1;
+    text-align: center;
+    text-shadow: none;
+    -webkit-text-stroke: 0;
+}
+
+.live-product--vip-card[data-catalog-artwork][data-design-code^="CKP-"] [data-preview-field] {
+    text-shadow: none;
+    -webkit-text-stroke: 0;
 }
 
 .live-product--vip-card[data-catalog-artwork][data-design-code^="CKP-"] .desa-product-copy-kicker,
@@ -6313,41 +6330,32 @@
 .live-product--vip-card[data-catalog-artwork][data-design-code^="CKP-"] .vip-card-couple-names {
     position: absolute;
     inset: 0;
-    color: #fff;
-    font-family: "Brush Script MT", "Segoe Script", cursive;
-    line-height: 1.1;
-    text-align: center;
-    text-shadow: 0 1px 2px rgba(0, 0, 0, .8);
 }
 
 .live-product--vip-card[data-catalog-artwork][data-design-code^="CKP-"] .vip-card-parent-names {
     position: absolute;
     inset: 0;
-    color: #fff;
-    font-family: Arial, sans-serif;
-    line-height: 1.05;
-    text-align: center;
-    text-shadow: 0 1px 2px rgba(0, 0, 0, .9);
 }
 
 .live-product--vip-card[data-catalog-artwork][data-design-code^="CKP-"] .vip-card-parent-name {
     position: absolute;
     left: 50%;
-    width: 92%;
+    width: 90%;
     overflow: hidden;
-    font-size: clamp(.36rem, 1vw, .48rem);
-    font-weight: 600;
+    font-size: 2.4cqw;
+    font-weight: 700;
     text-overflow: ellipsis;
+    text-transform: uppercase;
     transform: translateX(-50%);
     white-space: nowrap;
 }
 
 .live-product--vip-card[data-catalog-artwork][data-design-code^="CKP-"] .vip-card-parent-name--father {
-    top: 45.2%;
+    top: 44.8%;
 }
 
 .live-product--vip-card[data-catalog-artwork][data-design-code^="CKP-"] .vip-card-parent-name--mother {
-    top: 50.7%;
+    top: 49.04%;
 }
 
 .live-product--vip-card[data-catalog-artwork][data-design-code^="CKP-"] .vip-card-person-name {
@@ -6355,24 +6363,26 @@
     left: 50%;
     width: 92%;
     overflow: hidden;
-    font-size: clamp(.4rem, 1.15vw, .54rem);
-    font-weight: 600;
+    font-family: "Brush Script MT", "Segoe Script", cursive;
+    font-size: 5.5cqw;
+    font-style: italic;
+    font-weight: 700;
     text-overflow: ellipsis;
     transform: translateX(-50%);
     white-space: nowrap;
 }
 
 .live-product--vip-card[data-catalog-artwork][data-design-code^="CKP-"] .vip-card-person-name--groom {
-    top: 60.7%;
+    top: 57.6%;
 }
 
 .live-product--vip-card[data-catalog-artwork][data-design-code^="CKP-"] .vip-card-person-name--bride {
-    top: 65.4%;
+    top: 63.7%;
 }
 
 .vip-card-qr-placeholder {
     position: absolute;
-    top: 70.7%;
+    top: 71.1%;
     left: 50%;
     width: 17%;
     aspect-ratio: 1;
@@ -6392,41 +6402,79 @@
     background: #fff;
 }
 
-.live-product--vip-card[data-catalog-artwork][data-design-code^="CKP-"] .vip-card-event-details {
+.live-product--vip-card[data-catalog-artwork][data-design-code^="CKP-"] .vip-card-event-date {
     position: absolute;
-    z-index: 1;
-    top: 70.4%;
-    left: 5.5%;
-    display: flex;
-    width: 32%;
-    max-height: 13.2%;
-    flex-direction: column;
-    gap: .12rem;
-    overflow: hidden;
-    color: #fff;
-    font-family: Arial, sans-serif;
-    font-size: clamp(.3rem, .9vw, .4rem);
-    line-height: 1.08;
-    text-align: center;
-    text-shadow: 0 1px 2px rgba(0, 0, 0, .9);
+    inset: 0;
 }
 
-.live-product--vip-card[data-catalog-artwork][data-design-code^="CKP-"] .vip-card-event-detail-date {
-    font-size: 1.05em;
-}
-
-.live-product--vip-card[data-catalog-artwork][data-design-code^="CKP-"] .vip-card-event-detail-venue {
-    overflow: hidden;
-    text-overflow: ellipsis;
+.live-product--vip-card[data-catalog-artwork][data-design-code^="CKP-"] .vip-card-event-date span {
+    position: absolute;
+    left: 15.5%;
+    width: 24%;
+    line-height: 1;
     white-space: nowrap;
 }
 
-.live-product--vip-card[data-catalog-artwork][data-design-code^="CKP-"] .vip-card-event-detail-address {
+.live-product--vip-card[data-catalog-artwork][data-design-code^="CKP-"] .vip-card-event-day {
+    top: 70%;
+    font-size: 4.8cqw;
+}
+
+.live-product--vip-card[data-catalog-artwork][data-design-code^="CKP-"] .vip-card-event-day-number {
+    top: 73.1%;
+    font-size: 14.5cqw;
+}
+
+.live-product--vip-card[data-catalog-artwork][data-design-code^="CKP-"] .vip-card-event-month-year {
+    top: 81.5%;
+    font-size: 2.4cqw;
+    letter-spacing: .04em;
+}
+
+.live-product--vip-card[data-catalog-artwork][data-design-code^="CKP-"] .vip-card-event-time {
+    position: absolute;
+    left: 60%;
+    width: 28%;
+    font-size: 2.05cqw;
+    line-height: 1;
+    letter-spacing: .03em;
+    white-space: nowrap;
+}
+
+.live-product--vip-card[data-catalog-artwork][data-design-code^="CKP-"] .vip-card-event-time--meal {
+    top: 78.15%;
+}
+
+.live-product--vip-card[data-catalog-artwork][data-design-code^="CKP-"] .vip-card-event-time--bersanding {
+    top: 82.15%;
+}
+
+.live-product--vip-card[data-catalog-artwork][data-design-code^="CKP-"] .vip-card-event-location {
+    position: absolute;
+    top: 85.4%;
+    left: 8%;
+    display: flex;
+    width: 84%;
+    height: 6%;
+    flex-direction: column;
+    justify-content: center;
+    gap: .2cqw;
+    font-size: 2.35cqw;
+    line-height: 1.12;
+}
+
+.live-product--vip-card[data-catalog-artwork][data-design-code^="CKP-"] .vip-card-event-venue {
+    font-weight: 700;
+}
+
+.live-product--vip-card[data-catalog-artwork][data-design-code^="CKP-"] .vip-card-event-address {
     display: -webkit-box;
     overflow: hidden;
     overflow-wrap: anywhere;
+    text-overflow: clip;
+    white-space: normal;
     -webkit-box-orient: vertical;
-    -webkit-line-clamp: 3;
+    -webkit-line-clamp: 2;
 }
 
 @media print {
