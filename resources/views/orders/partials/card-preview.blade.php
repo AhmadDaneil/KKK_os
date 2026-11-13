@@ -106,7 +106,7 @@
                 <div class="card-ornament ornament-bottom" aria-hidden="true"></div>
             </article>
 
-            <article class="wedding-card wedding-card-back is-hidden" data-card-face="back" data-preview-artwork-slot="card-back">
+            <article class="wedding-card wedding-card-back is-hidden" data-card-face="back" data-preview-artwork-slot="card-back" data-back-reference-layout>
                 <img class="desa-card-back-artwork" data-desa-card-back-artwork alt="" hidden>
                 <div class="desa-card-back-live-names" data-desa-card-back-live-names hidden>
                     <div class="desa-card-back-generic-copy" data-desa-generic-copy>
@@ -142,43 +142,31 @@
                     </div>
                     </div>
                 </div>
-                <div data-desa-back-placeholder>
-                <header class="card-invitation-header">
-                    <span class="arabic-mark" lang="en" dir="ltr" data-preview-field="card_title_jawi">{{ $jawiCardTitle }}</span>
-                    <p>With heartfelt gratitude, we</p>
-                    <strong data-preview-field="father_name">{{ $packageSide->parents?->father_name ?: "FATHER'S NAME" }}</strong>
-                    <span>&amp;</span>
-                    <strong data-preview-field="mother_name">{{ $packageSide->parents?->mother_name ?: "MOTHER'S NAME" }}</strong>
-                    <p>invite you to celebrate the wedding of our beloved child</p>
-                    <strong data-preview-field="{{ $hostIsGroom ? 'groom_name' : 'bride_name' }}">{{ $hostIsGroom ? ($couple?->groom_name ?: 'GROOM NAME') : ($couple?->bride_name ?: 'BRIDE NAME') }}</strong>
-                    <span>&amp;</span>
-                    <strong data-preview-field="{{ $hostIsGroom ? 'bride_name' : 'groom_name' }}">{{ $hostIsGroom ? ($couple?->bride_name ?: 'BRIDE NAME') : ($couple?->groom_name ?: 'GROOM NAME') }}</strong>
-                </header>
-
-                <div class="card-info-grid">
-                    <section><small>Date</small><b data-preview-field="day_name">{{ ['Ahad' => 'Sunday', 'Isnin' => 'Monday', 'Selasa' => 'Tuesday', 'Rabu' => 'Wednesday', 'Khamis' => 'Thursday', 'Jumaat' => 'Friday', 'Sabtu' => 'Saturday'][$packageSide->event?->day_name ?? ''] ?? 'DAY' }}</b><strong data-preview-field="event_date">{{ $packageSide->event?->event_date?->format('d/m/Y') ?: '-' }}</strong><span data-preview-field="hijri_date">{{ $packageSide->event?->hijri_date ?: '' }}</span></section>
-                    <section><small>Schedule</small><b>Meal</b><span data-preview-field="meal_time">{{ $packageSide->event?->meal_time ? substr($packageSide->event->meal_time, 0, 5) : '-' }}</span><b>Reception</b><span data-preview-field="bersanding_time">{{ $packageSide->event?->bersanding_time ? substr($packageSide->event->bersanding_time, 0, 5) : '-' }}</span></section>
-                    <section class="card-contacts">
-                        <small>Contacts</small>
-                        @for ($contactNumber = 1; $contactNumber <= 3; $contactNumber++)
-                            @php
-                                $contact = $packageSide->event?->contacts?->firstWhere('contact_number', $contactNumber);
-                            @endphp
-                            <b data-preview-field="contact_{{ $contactNumber }}_name">{{ $contact?->contact_name ?: 'Contact '.$contactNumber }}</b>
-                            <span data-preview-field="contact_{{ $contactNumber }}_phone">{{ $contact?->contact_phone ?: '-' }}</span>
-                        @endfor
-                    </section>
-                </div>
-
-                <div class="card-location">
-                    <div class="qr-placeholder" aria-hidden="true"><span></span></div>
-                    <div><b>Event Location</b><strong data-preview-field="venue_name">{{ $packageSide->event?->venue_name ?: 'VENUE NAME' }}</strong><p data-preview-field="full_address">{{ $packageSide->event?->full_address ?: 'Full event address' }}</p></div>
-                </div>
-                <footer>
-                    <span>Your presence will make this celebration even more memorable.</span>
-                    <span class="card-social-handle"><span class="card-social-logo" aria-hidden="true">◎</span> @kingkadkahwin</span>
-                </footer>
-                </div>
+                <svg class="back-reference-template" viewBox="0 0 1200 1800" aria-hidden="true" focusable="false">
+                    <path d="M98 140H385Q600 0 815 140H1105V1648H815L780 1640H420L385 1648H98Z" fill="#fff" stroke="#111" stroke-width="2" />
+                    <g fill="#111" text-anchor="middle" font-family="Arial, sans-serif">
+                        <text x="600" y="145" font-family="serif" font-size="60" lang="ar" direction="rtl">وليمة العروس</text>
+                        <text x="600" y="197" font-size="30">Syukur ke hadrat-Nya kerana dengan limpah</text>
+                        <text x="600" y="228" font-size="30">keredhaan &amp; keizinanNya, kami</text>
+                        <text x="600" y="347" font-family="Georgia, serif" font-weight="700" font-size="38">&amp;</text>
+                        <text x="600" y="452" font-size="30">dengan segala hormatnya ingin menjemput</text>
+                        <text x="600" y="481" font-size="30">Dato’/Datin/Tuan/Puan/Encik/Cik</text>
+                        <rect x="263" y="504" width="674" height="43" rx="9" fill="#fff" stroke="#888" stroke-width="1" />
+                        <text x="600" y="592" font-size="30">sekeluarga ke majlis perkahwinan anakanda kami</text>
+                        <text x="600" y="709" font-size="30">dengan pasangannya</text>
+                        <text x="600" y="813" font-size="30">seperti ketetapan berikut :-</text>
+                        <text x="585" y="1035" font-size="30" text-decoration="underline">JAMUAN MAKAN</text>
+                        <text x="585" y="1108" font-size="30" text-decoration="underline">BERSANDING</text>
+                        <text x="770" y="1240" font-size="40" font-weight="700">SILA SCAN</text>
+                        <text x="770" y="1279" font-size="40" font-weight="700">QR CODE</text>
+                        <text x="770" y="1307" font-size="27" font-weight="700">UNTUK LOKASI</text>
+                        <text x="770" y="1326" font-size="18" font-weight="700">MAJLIS PERKAHWINAN</text>
+                        <text x="770" y="1365" font-size="25" font-weight="700">LOKASI MAJLIS PERKAHWINAN :-</text>
+                        <text x="600" y="1577" font-size="30">Semoga dengan kehadiran para hadirin akan memeriahkan</text>
+                        <text x="600" y="1608" font-size="30">lagi majlis ini dan diberkati oleh-Nya..</text>
+                    </g>
+                    <path d="M98 845H1105M413 845V1167M756 845V1167M98 1167H1105M98 1530H1105" fill="none" stroke="#111" stroke-width="5" />
+                </svg>
             </article>
         </div>
     @endforeach
