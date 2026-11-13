@@ -1534,12 +1534,10 @@ document.addEventListener('DOMContentLoaded', function () {
                 const liveNames = back.querySelector('[data-desa-card-back-live-names]');
                 const genericNameCopy = liveNames.querySelector('[data-desa-generic-copy]');
                 const customNameCopy = liveNames.querySelector('[data-desa-card-back-custom-copy]');
-                const placeholder = back.querySelector('[data-desa-back-placeholder]');
 
-                liveNames.hidden = !hasArtwork;
-                genericNameCopy.hidden = hasArtwork;
-                customNameCopy.hidden = !hasArtwork;
-                placeholder.hidden = hasArtwork;
+                liveNames.hidden = false;
+                genericNameCopy.hidden = true;
+                customNameCopy.hidden = false;
                 back.toggleAttribute('data-design-artwork', hasArtwork);
                 back.toggleAttribute('data-catalog-artwork', isCatalogArtwork);
                 syncArtworkImage(artwork, hasArtwork ? assetBase + 'card-back.webp' : '', normalizedCode + ' ' + themeName + ' card back');
