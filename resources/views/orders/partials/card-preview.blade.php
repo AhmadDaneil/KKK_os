@@ -2,7 +2,7 @@
     $isFoldedCard = $order->package_count === 2 && $order->package_format === 'FOLDED';
 @endphp
 
-<section class="live-preview" aria-labelledby="live-preview-title" data-live-preview data-folded-card-preview="{{ $isFoldedCard ? 'true' : 'false' }}">
+<section class="live-preview" aria-labelledby="live-preview-title" data-live-preview data-folded-card-preview="{{ $isFoldedCard ? 'true' : 'false' }}" data-preview-watermark="{{ $order->displayCustomerReference() ?: $order->order_id }}">
     <div class="live-preview-body" id="live-preview-panel" data-live-preview-body>
         <div class="live-preview-heading">
             <div>
@@ -307,20 +307,21 @@
                 </article>
 
                 <article class="live-product live-product--vip-card" data-live-product-theme data-desa-product="vip-card" data-preview-artwork-slot="vip-card" hidden>
+                    <span class="vip-card-frame-bar vip-card-frame-bar--top" aria-hidden="true"></span>
                     <img class="desa-product-artwork" data-desa-product-artwork alt="" hidden>
                     <img class="catalog-preview-photo" data-live-photo-preview="artwork" alt="Uploaded customer photo preview" hidden>
                     <div class="desa-product-name-overlay" data-desa-product-name-overlay hidden>
                         <div class="desa-product-generic-copy" data-desa-generic-copy hidden></div>
                         <div class="desa-product-custom-copy" data-desa-product-custom-copy hidden>
-                            <span class="desa-product-copy-kicker" data-preview-field="card_title_malay">MAJLIS PERKAHWINAN</span>
                             <strong class="desa-product-copy-couple">
                                 <span data-preview-field="groom_display">Groom</span>
                                 <b class="desa-couple-ampersand-spacer" aria-hidden="true">&amp;</b>
                                 <span data-preview-field="bride_display">Bride</span>
                             </strong>
-                            <span class="desa-product-copy-date" data-preview-field="event_date">TARIKH MAJLIS</span>
+                            <div class="vip-card-qr-placeholder" aria-hidden="true"><span></span></div>
                         </div>
                     </div>
+                    <span class="vip-card-frame-bar vip-card-frame-bar--bottom" aria-hidden="true"></span>
                     <div data-desa-product-placeholder hidden></div>
                 </article>
 
@@ -385,6 +386,6 @@
         </section>
     @endforeach
 
-    <p class="preview-note">This live preview is a layout guide. Final printed results may vary slightly depending on the selected design.</p>
+    <p class="preview-note">This live preview is watermarked for customer review. Final printed results may vary slightly depending on the selected design.</p>
     </div>
 </section>
