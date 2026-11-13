@@ -1,5 +1,148 @@
 /* Artwork dimensions and field positions are measured from the supplied Photoshop templates. */
 
+/* Cartoon */
+
+/* The CARTOON artwork already includes its heading, ampersand and date icon. Keep
+   those printed details intact and position the live customer text around them. */
+[data-preview-artwork-slot="card-front"][data-design-code^="CKC-"] {
+    --preview-couple-x: 50%;
+    --preview-couple-y: 25.5%;
+    --preview-couple-width: 84%;
+    --preview-ampersand-width: 10%;
+    --preview-ampersand-visibility: hidden;
+    --preview-title-display: none;
+    --preview-date-x: 50%;
+    --preview-date-y: 33.5%;
+    --preview-date-width: 70%;
+    --preview-aspect-ratio: 2 / 3;
+}
+
+[data-preview-artwork-slot="arrow-left"][data-design-code^="CKC-"],
+[data-preview-artwork-slot="arrow-right"][data-design-code^="CKC-"] {
+    --preview-couple-x: 50%;
+    --preview-couple-y: 79%;
+    --preview-couple-width: 78%;
+    --preview-ampersand-width: 10%;
+    --preview-ampersand-visibility: hidden;
+    --preview-kicker-display: none;
+    --preview-title-display: none;
+    --preview-quote-display: none;
+    --preview-date-x: 50%;
+    --preview-date-y: 87.5%;
+    --preview-date-width: 70%;
+    --preview-aspect-ratio: 620 / 877;
+}
+
+.live-product--arrow[data-design-code^="CKC-"] .desa-product-copy-couple,
+.live-product--arrow[data-design-code^="CKC-"] .desa-product-copy-date {
+    color: #fff;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, .9);
+}
+
+[data-preview-artwork-slot="banner"][data-design-code^="CKC-"] {
+    --preview-couple-x: 69%;
+    --preview-couple-y: 45%;
+    --preview-couple-width: 53%;
+    --preview-ampersand-width: 9%;
+    --preview-ampersand-visibility: hidden;
+    --preview-kicker-display: none;
+    --preview-title-display: none;
+    --preview-quote-display: none;
+    --preview-date-x: 69%;
+    --preview-date-y: 67%;
+    --preview-date-width: 40%;
+    --preview-aspect-ratio: 2 / 1;
+}
+
+[data-preview-artwork-slot="bunting"][data-design-code^="CKC-"] {
+    --preview-couple-x: 50%;
+    --preview-couple-y: 22%;
+    --preview-couple-width: 86%;
+    --preview-ampersand-width: 10%;
+    --preview-ampersand-visibility: hidden;
+    --preview-kicker-display: none;
+    --preview-title-display: none;
+    --preview-quote-display: none;
+    --preview-date-x: 50%;
+    --preview-date-y: 30.5%;
+    --preview-date-width: 72%;
+    --preview-aspect-ratio: 1 / 2;
+}
+
+[data-preview-artwork-slot="sticker"][data-design-code^="CKC-"] {
+    --preview-couple-x: 50%;
+    --preview-couple-y: 22%;
+    --preview-couple-width: 84%;
+    --preview-ampersand-width: 10%;
+    --preview-ampersand-visibility: hidden;
+    --preview-kicker-display: none;
+    --preview-title-display: none;
+    --preview-quote-display: none;
+    --preview-date-x: 50%;
+    --preview-date-y: 31%;
+    --preview-date-width: 72%;
+    --preview-aspect-ratio: 1 / 1;
+}
+
+[data-preview-artwork-slot="wooden-hanger"][data-design-code^="CKC-"] {
+    --preview-couple-x: 50%;
+    --preview-couple-y: 45%;
+    --preview-couple-width: 76%;
+    --preview-ampersand-width: 10%;
+    --preview-ampersand-visibility: hidden;
+    --preview-date-x: 50%;
+    --preview-date-y: 63%;
+    --preview-date-width: 70%;
+    --preview-aspect-ratio: 75 / 44;
+}
+
+.live-product--hanger[data-design-code^="CKC-"] .desa-product-copy-couple,
+.live-product--hanger[data-design-code^="CKC-"] .desa-product-copy-date {
+    color: #241d18;
+    text-shadow: 0 1px 2px rgba(255, 255, 255, .85);
+}
+
+/* The back template contains sample field labels and, on a few designs, a sample
+   date. Opaque white live fields replace those samples without altering the art. */
+[data-preview-artwork-slot="card-back"][data-design-code^="CKC-"] {
+    --preview-father-x: 49.91%;
+    --preview-father-y: 15.64%;
+    --preview-mother-x: 50.12%;
+    --preview-mother-y: 21.45%;
+    --preview-groom-x: 50.09%;
+    --preview-groom-y: 36.05%;
+    --preview-bride-x: 50.16%;
+    --preview-bride-y: 42%;
+    --preview-date-x: 20.17%;
+    --preview-date-y: 49.33%;
+    --preview-date-height: 13.73%;
+    --preview-venue-x: 64.33%;
+    --preview-venue-y: 76.67%;
+    --preview-venue-width: 38%;
+    --preview-qr-x: 28.59%;
+    --preview-qr-y: 66.11%;
+    --preview-qr-width: 26.83%;
+    --preview-aspect-ratio: 2 / 3;
+}
+
+[data-preview-artwork-slot="card-back"][data-design-code^="CKC-"] .desa-back-custom-father,
+[data-preview-artwork-slot="card-back"][data-design-code^="CKC-"] .desa-back-custom-mother,
+[data-preview-artwork-slot="card-back"][data-design-code^="CKC-"] .desa-back-custom-groom,
+[data-preview-artwork-slot="card-back"][data-design-code^="CKC-"] .desa-back-custom-bride {
+    z-index: 1;
+    display: grid;
+    min-height: 2.8%;
+    place-items: center;
+    padding: .15% 1%;
+    background: #fff;
+}
+
+[data-preview-artwork-slot="card-back"][data-design-code^="CKC-"] .desa-back-custom-date,
+[data-preview-artwork-slot="card-back"][data-design-code^="CKC-"] .desa-back-custom-venue {
+    z-index: 1;
+    background: #fff;
+}
+
 /* Garden */
 
 [data-preview-artwork-slot="arrow-right"][data-design-code="CKG-001"],

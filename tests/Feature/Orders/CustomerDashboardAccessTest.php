@@ -84,10 +84,11 @@ class CustomerDashboardAccessTest extends TestCase
             ->assertSee('data-preview-artwork-slot="card-back"', false)
             ->assertSee('data-preview-artwork-slot="vip-card"', false)
             ->assertSee('CKD-008')
-            ->assertSee('CKI-824');
+            ->assertSee('CKI-824')
+            ->assertSee("const artworkThemes = new Set(['akikah', 'arch', 'cartoon', 'desa'", false);
 
         $slots = ['arrow-left', 'arrow-right', 'banner', 'bunting', 'card-back', 'card-front', 'sticker', 'wooden-hanger'];
-        $codeCounts = ['AKIKAH' => 8, 'ARCH' => 24, 'DESA' => 8, 'GARDEN' => 8, 'ISLAMIC' => 24, 'NOSTALGIA' => 8, 'PORTRAIT' => 8];
+        $codeCounts = ['AKIKAH' => 8, 'ARCH' => 24, 'CARTOON' => 24, 'DESA' => 8, 'GARDEN' => 8, 'ISLAMIC' => 24, 'NOSTALGIA' => 8, 'PORTRAIT' => 8];
         $missingArtwork = ['CKP-003' => 'banner'];
 
         foreach ($codeCounts as $theme => $count) {
