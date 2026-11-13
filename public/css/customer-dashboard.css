@@ -1015,7 +1015,7 @@ button {
 
 .card-invitation-header { flex: 1; min-height: 0; }
 .card-invitation-header p { margin: 0.14rem 0; line-height: 1.05; }
-.card-invitation-header strong { display: block; max-width: 100%; margin-inline: auto; font-family: Georgia, serif; font-size: 0.54rem; line-height: 1.05; overflow-wrap: anywhere; text-transform: uppercase; }
+.card-invitation-header strong { display: block; max-width: 100%; margin-inline: auto; font-family: Georgia, serif; font-size: 0.41rem; line-height: 1.05; overflow-wrap: anywhere; text-transform: uppercase; }
 .arabic-mark { display: block; margin-bottom: 0.2rem; font-family: Georgia, serif; font-size: 0.78rem; }
 .card-info-grid { display: grid; grid-template-columns: 0.9fr 1.2fr 1fr; border: 1px solid #111827; }
 .card-info-grid section { display: flex; min-width: 0; flex-direction: column; justify-content: center; padding: 0.25rem 0.1rem; border-right: 1px solid #111827; }
