@@ -1615,6 +1615,38 @@ html[data-customer-theme="dark"] .wedding-card-back .card-social-logo {
     height: var(--preview-contacts-height, 17.8%);
 }
 
+.wedding-card-back[data-catalog-artwork] .desa-back-custom-schedule::before,
+.wedding-card-back[data-catalog-artwork] .desa-back-custom-contacts::before {
+    position: absolute;
+    display: grid;
+    place-items: center;
+    background: #fff;
+    color: #111;
+    font-family: Arial, sans-serif;
+    font-weight: 700;
+    line-height: 1;
+    text-align: center;
+    white-space: pre-line;
+}
+
+.wedding-card-back[data-catalog-artwork] .desa-back-custom-schedule::before {
+    top: 8%;
+    right: 15%;
+    left: 0;
+    height: 43%;
+    content: "ATURCARA\A MAJLIS";
+    font-size: .7rem;
+}
+
+.wedding-card-back[data-catalog-artwork] .desa-back-custom-contacts::before {
+    top: 8%;
+    right: 12%;
+    left: 15%;
+    height: 27%;
+    content: "HUBUNGI";
+    font-size: .62rem;
+}
+
 .wedding-card-back[data-catalog-artwork] .desa-back-custom-qr {
     top: var(--preview-qr-y, 66%);
     left: var(--preview-qr-x, 27%);
