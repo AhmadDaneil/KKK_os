@@ -1009,7 +1009,7 @@ html[data-customer-theme="dark"] .wedding-card-back .card-social-logo {
     left: 12%;
     display: block;
     font-family: Georgia, serif;
-    font-size: clamp(.5rem, 1.65vw, .72rem);
+    font-size: clamp(.38rem, 1.25vw, .54rem);
     letter-spacing: .04em;
     text-transform: uppercase;
 }
