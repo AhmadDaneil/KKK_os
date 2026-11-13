@@ -314,20 +314,24 @@
                         <div class="desa-product-generic-copy" data-desa-generic-copy hidden></div>
                         <div class="desa-product-custom-copy" data-desa-product-custom-copy hidden>
                             <div class="vip-card-parent-names">
-                                <strong class="vip-card-parent-name vip-card-parent-name--father" data-preview-field="father_name">FATHER'S NAME</strong>
-                                <strong class="vip-card-parent-name vip-card-parent-name--mother" data-preview-field="mother_name">MOTHER'S NAME</strong>
+                                <span class="vip-card-parent-name vip-card-parent-name--father" data-preview-field="father_name">FATHER'S NAME</span>
+                                <span class="vip-card-parent-name vip-card-parent-name--mother" data-preview-field="mother_name">MOTHER'S NAME</span>
                             </div>
                             <div class="vip-card-couple-names">
-                                <strong class="vip-card-person-name vip-card-person-name--groom" data-preview-field="groom_name">GROOM NAME</strong>
-                                <strong class="vip-card-person-name vip-card-person-name--bride" data-preview-field="bride_name">BRIDE NAME</strong>
+                                <span class="vip-card-person-name vip-card-person-name--groom" data-preview-field="groom_name">GROOM NAME</span>
+                                <span class="vip-card-person-name vip-card-person-name--bride" data-preview-field="bride_name">BRIDE NAME</span>
                             </div>
                             <div class="vip-card-qr-placeholder" aria-hidden="true"><span></span></div>
-                            <div class="vip-card-event-details" aria-label="Event details">
-                                <strong class="vip-card-event-detail-date"><span data-preview-field="day_name_malay">HARI</span> <span data-preview-field="event_date">TARIKH MAJLIS</span></strong>
-                                <span class="vip-card-event-detail-time">Jamuan <span data-preview-field="meal_time">MASA</span></span>
-                                <span class="vip-card-event-detail-time">Bersanding <span data-preview-field="bersanding_time">MASA</span></span>
-                                <strong class="vip-card-event-detail-venue" data-preview-field="venue_name">LOKASI MAJLIS</strong>
-                                <span class="vip-card-event-detail-address" data-preview-field="full_address">ALAMAT MAJLIS</span>
+                            <div class="vip-card-event-date" aria-label="Event date">
+                                <span class="vip-card-event-day" data-preview-field="day_name_malay">HARI</span>
+                                <span class="vip-card-event-day-number" data-preview-field="event_date_day">DD</span>
+                                <span class="vip-card-event-month-year" data-preview-field="event_date_month_year">BULAN TAHUN</span>
+                            </div>
+                            <span class="vip-card-event-time vip-card-event-time--meal" data-preview-field="meal_time">MASA</span>
+                            <span class="vip-card-event-time vip-card-event-time--bersanding" data-preview-field="bersanding_time">MASA</span>
+                            <div class="vip-card-event-location" aria-label="Event location">
+                                <span class="vip-card-event-venue" data-preview-field="venue_name">LOKASI MAJLIS</span>
+                                <span class="vip-card-event-address" data-preview-field="full_address">ALAMAT MAJLIS</span>
                             </div>
                         </div>
                     </div>
