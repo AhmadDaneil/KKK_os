@@ -6403,13 +6403,23 @@
 }
 
 .live-preview-lightbox-stage {
-    display: grid;
+    display: flex;
     min-height: 140px;
     max-height: calc(94vh - 54px);
     max-height: calc(94dvh - 54px);
-    place-items: center;
+    align-items: center;
+    justify-content: center;
     overflow: auto;
     padding: .85rem;
+}
+
+.live-preview-lightbox-frame {
+    position: relative;
+    display: flex;
+    flex: 0 0 auto;
+    align-items: center;
+    justify-content: center;
+    overflow: visible;
 }
 
 .live-preview-lightbox-item {
