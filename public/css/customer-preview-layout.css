@@ -7022,3 +7022,31 @@
     left: var(--preview-venue-x);
     width: var(--preview-venue-width);
 }
+
+
+/* PSD Mask layers: banner 2763/5400 wide; bunting starts at 652/2400. */
+.live-product--banner.has-live-customer-photo[data-theme][data-design-code] > .live-product-customer-photo:not([hidden]),
+.live-product--banting.has-live-customer-photo[data-theme][data-design-code] > .live-product-customer-photo:not([hidden]) {
+    clip-path: none;
+    -webkit-mask-repeat: no-repeat;
+    mask-repeat: no-repeat;
+    -webkit-mask-size: 100% 100%;
+    mask-size: 100% 100%;
+    mask-mode: alpha;
+    object-position: center;
+    object-fit: cover;
+}
+.live-product--banner.has-live-customer-photo[data-theme][data-design-code] > .live-product-customer-photo:not([hidden]) {
+    inset: 0 auto auto 0;
+    width: 51.166667%;
+    height: 100%;
+    -webkit-mask-image: url("/images/designs/portrait/CKP-001/banner-photo-mask.webp?v=20261117");
+    mask-image: url("/images/designs/portrait/CKP-001/banner-photo-mask.webp?v=20261117");
+}
+.live-product--banting.has-live-customer-photo[data-theme][data-design-code] > .live-product-customer-photo:not([hidden]) {
+    inset: 27.166667% auto auto 0;
+    width: 100%;
+    height: 72.833333%;
+    -webkit-mask-image: url("/images/designs/portrait/CKP-001/bunting-photo-mask.webp?v=20261117");
+    mask-image: url("/images/designs/portrait/CKP-001/bunting-photo-mask.webp?v=20261117");
+}
