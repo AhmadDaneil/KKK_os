@@ -11,6 +11,7 @@
     <link rel="stylesheet" href="{{ asset('css/customer-service.css') }}?v={{ filemtime(public_path('css/customer-service.css')) }}">
     <link rel="stylesheet" href="{{ asset('css/customer-brand.css') }}?v={{ filemtime(public_path('css/customer-brand.css')) }}">
     <link rel="stylesheet" href="{{ asset('css/customer-psd-fonts.css') }}?v={{ filemtime(public_path('css/customer-psd-fonts.css')) }}">
+    <link rel="stylesheet" href="{{ asset('css/customer-psd-item-fonts.css') }}?v={{ filemtime(public_path('css/customer-psd-item-fonts.css')) }}">
 </head>
 <body class="brand-order-dashboard">
 <main>
@@ -1529,6 +1530,7 @@ document.addEventListener('DOMContentLoaded', function () {
             if (front) {
                 const artwork = front.querySelector('[data-desa-card-artwork]');
                 front.dataset.designCode = hasArtwork ? normalizedCode : '';
+                front.dataset.fontDesignCode = normalizedCode;
                 const nameOverlay = front.querySelector('[data-desa-card-name-overlay]');
                 const genericNameCopy = nameOverlay.querySelector('[data-desa-generic-copy]');
                 const customNameCopy = nameOverlay.querySelector('[data-desa-card-custom-copy]');
