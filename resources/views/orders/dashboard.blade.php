@@ -2162,7 +2162,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 overlay.setAttribute('data-preview-watermark-overlay', '');
                 overlay.setAttribute('aria-hidden', 'true');
 
-                for (let row = 0; row < 4; row += 1) {
+                for (let row = 0; row < 2; row += 1) {
                     const line = document.createElement('span');
                     line.className = 'live-preview-watermark-line';
                     line.textContent = 'KINGKADKAHWIN · CUSTOMER PREVIEW · ' + watermarkLabel;
