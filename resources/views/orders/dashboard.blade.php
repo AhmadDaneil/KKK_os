@@ -2179,6 +2179,126 @@ document.addEventListener('DOMContentLoaded', function () {
 
         protectPreviewSurfaces();
 
+        const previewItemLabels = {
+            'card-front': 'Front card',
+            'card-back': 'Back card',
+            banner: 'Banner',
+            bunting: 'Bunting',
+            'arrow-left': 'Left arrow poster',
+            'arrow-right': 'Right arrow poster',
+            sticker: 'Sticker',
+            'vip-card': 'VIP card',
+            'wooden-hanger': 'Wooden hanger',
+        };
+        const previewLightbox = document.createElement('dialog');
+        previewLightbox.className = 'live-preview-lightbox';
+        previewLightbox.setAttribute('aria-labelledby', 'live-preview-lightbox-title');
+
+        const previewLightboxToolbar = document.createElement('div');
+        previewLightboxToolbar.className = 'live-preview-lightbox-toolbar';
+        const previewLightboxTitle = document.createElement('h2');
+        previewLightboxTitle.className = 'live-preview-lightbox-title';
+        previewLightboxTitle.id = 'live-preview-lightbox-title';
+        const previewLightboxClose = document.createElement('button');
+        previewLightboxClose.className = 'live-preview-lightbox-close';
+        previewLightboxClose.type = 'button';
+        previewLightboxClose.textContent = 'Close';
+        previewLightboxToolbar.append(previewLightboxTitle, previewLightboxClose);
+
+        const previewLightboxStage = document.createElement('div');
+        previewLightboxStage.className = 'live-preview-lightbox-stage';
+        previewLightbox.append(previewLightboxToolbar, previewLightboxStage);
+        document.body.append(previewLightbox);
+
+        let activePreviewZoomTrigger = null;
+
+        function openPreviewLightbox(surface, trigger) {
+            if (typeof previewLightbox.showModal !== 'function') {
+                return;
+            }
+
+            const bounds = surface.getBoundingClientRect();
+
+            if (bounds.width <= 0 || bounds.height <= 0) {
+                return;
+            }
+
+            const itemLabel = previewItemLabels[surface.dataset.previewArtworkSlot] || 'Preview item';
+            const enlargedItem = surface.cloneNode(true);
+            enlargedItem.classList.add('live-preview-lightbox-item');
+            enlargedItem.querySelectorAll('[data-preview-zoom-trigger]').forEach(function (button) {
+                button.remove();
+            });
+
+            const computedStyle = window.getComputedStyle(surface);
+
+            for (let index = 0; index < computedStyle.length; index += 1) {
+                const property = computedStyle[index];
+
+                if (property.startsWith('--preview-')) {
+                    enlargedItem.style.setProperty(property, computedStyle.getPropertyValue(property));
+                }
+            }
+
+            const scale = Math.min(
+                (window.innerWidth * 0.9) / bounds.width,
+                (window.innerHeight * 0.78) / bounds.height,
+            );
+            enlargedItem.style.setProperty('width', (bounds.width * scale) + 'px', 'important');
+            enlargedItem.style.setProperty('height', (bounds.height * scale) + 'px', 'important');
+            enlargedItem.style.setProperty('max-width', 'none', 'important');
+            enlargedItem.style.setProperty('max-height', 'none', 'important');
+            enlargedItem.style.setProperty('min-width', '0', 'important');
+            enlargedItem.style.setProperty('min-height', '0', 'important');
+            enlargedItem.style.setProperty('flex', '0 0 auto', 'important');
+            enlargedItem.style.setProperty('margin', '0', 'important');
+            enlargedItem.style.setProperty('aspect-ratio', (bounds.width / bounds.height).toString(), 'important');
+
+            previewLightboxTitle.textContent = itemLabel;
+            previewLightboxStage.replaceChildren(enlargedItem);
+            activePreviewZoomTrigger = trigger;
+            previewLightbox.showModal();
+            previewLightboxClose.focus();
+        }
+
+        preview.querySelectorAll('.wedding-card, .live-product[data-preview-artwork-slot]').forEach(function (surface) {
+            if (surface.querySelector('[data-preview-zoom-trigger]')) {
+                return;
+            }
+
+            const itemLabel = previewItemLabels[surface.dataset.previewArtworkSlot] || 'Preview item';
+            const trigger = document.createElement('button');
+            trigger.className = 'live-preview-zoom-trigger';
+            trigger.type = 'button';
+            trigger.setAttribute('data-preview-zoom-trigger', '');
+            trigger.setAttribute('data-zoom-label', 'Tap to view');
+            trigger.setAttribute('aria-label', 'Tap to view ' + itemLabel + ' close-up');
+            trigger.addEventListener('click', function () {
+                openPreviewLightbox(surface, trigger);
+            });
+            surface.append(trigger);
+        });
+
+        previewLightboxClose.addEventListener('click', function () {
+            previewLightbox.close();
+        });
+
+        previewLightbox.addEventListener('click', function (event) {
+            if (event.target === previewLightbox) {
+                previewLightbox.close();
+            }
+        });
+
+        previewLightbox.addEventListener('close', function () {
+            previewLightboxStage.replaceChildren();
+
+            if (activePreviewZoomTrigger?.isConnected) {
+                activePreviewZoomTrigger.focus({ preventScroll: true });
+            }
+
+            activePreviewZoomTrigger = null;
+        });
+
         preview.addEventListener('contextmenu', function (event) {
             event.preventDefault();
         });
