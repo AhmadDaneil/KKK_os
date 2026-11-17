@@ -1588,6 +1588,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 genericNameCopy.hidden = shouldShowArtwork;
                 productCustomNameCopy.hidden = !shouldShowArtwork;
                 placeholder.hidden = shouldShowArtwork || isUnavailable;
+                product.dataset.themeArtworkSrc = shouldShowArtwork ? assetBase + type + '.webp' : '';
                 syncArtworkImage(artwork, shouldShowArtwork ? assetBase + type + '.webp' : '', normalizedCode + ' ' + themeName + ' ' + type.replaceAll('-', ' ') + ' design');
                 const hasPhotoMask = shouldShowArtwork && theme === 'portrait' && type !== 'wooden-hanger' && type !== 'card-back';
                 syncArtworkPhotoMask(product, hasPhotoMask ? assetBase + type + '-photo-mask.webp' : '');
@@ -2465,6 +2466,19 @@ document.addEventListener('DOMContentLoaded', function () {
 
                 if (product) {
                     product.classList.toggle('has-live-customer-photo', showProductPhoto);
+                    if (isBannerOrBunting) {
+                        const item = product.classList.contains('live-product--banner') ? 'banner' : 'bunting';
+                        const artwork = product.querySelector('[data-desa-product-artwork]');
+                        const photoBase = artworkBase + '/portrait/CKP-001/';
+                        product.toggleAttribute('data-catalog-artwork', showProductPhoto || theme !== 'DESA');
+                        if (showProductPhoto) {
+                            product.dataset.photoDesignCode = 'CKP-001';
+                        } else {
+                            delete product.dataset.photoDesignCode;
+                        }
+                        syncArtworkImage(artwork, showProductPhoto ? photoBase + item + '.webp' : (product.dataset.themeArtworkSrc || ''), item + ' preview');
+                        syncArtworkPhotoMask(product, showProductPhoto ? photoBase + item + '-photo-mask.webp' : '');
+                    }
                 }
             });
 

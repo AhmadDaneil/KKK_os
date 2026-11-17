@@ -1276,9 +1276,9 @@ function findTemplates(masterPath, tema, designCode){
 
 function kkkUsePortraitBannerAndBantingForPhoto(masterPath, tema, templates, imagePath) {
     var result = {templates: templates, overridePaths: [], applied: false, error: ""};
-    if (!imagePath || containsPortraitWord(tema)) return result;
+    if (!imagePath) return result;
 
-    var portraitTemplates = findTemplates(masterPath, "POTRAIT", "CKP-002");
+    var portraitTemplates = findTemplates(masterPath, "POTRAIT", "CKP-001");
     var replacements = [];
     var foundBanner = false, foundBanting = false;
     for (var i = 0; i < portraitTemplates.length; i++) {
@@ -1292,27 +1292,36 @@ function kkkUsePortraitBannerAndBantingForPhoto(masterPath, tema, templates, ima
         }
     }
     if (!foundBanner || !foundBanting) {
-        result.error = "Template BANNER/BANTING POTRAIT/CKP-002 tidak lengkap; template asal dikekalkan.";
+        result.error = "Template BANNER/BANTING POTRAIT/CKP-001 tidak lengkap; template asal dikekalkan.";
         return result;
     }
 
-    var selectedDesignTemplates = [];
-    for (var j = 0; j < templates.length; j++) {
-        var selectedName = (new File(templates[j])).name.toLowerCase();
-        if (selectedName.indexOf("banner") < 0 && selectedName.indexOf("banting") < 0) {
-            selectedDesignTemplates.push(templates[j]);
-        }
-    }
-    result.templates = selectedDesignTemplates.concat(replacements);
+    result.originalTemplateCount = templates.length;
+    result.templates = templates.concat(replacements);
     result.overridePaths = replacements;
-    result.templates.sort(function(a, b) {
-        var first = a.toLowerCase(), second = b.toLowerCase();
-        if (first < second) return -1;
-        if (first > second) return 1;
-        return 0;
-    });
     result.applied = true;
     return result;
+}
+
+
+function kkkBannerBantingFonts(doc, fonts, apply) {
+    function walk(container) {
+        for (var i = 0; i < container.layers.length; i++) {
+            var layer = container.layers[i];
+            if (layer.typename === "LayerSet") {
+                walk(layer);
+            } else if (layer.kind === LayerKind.TEXT) {
+                var key = t(layer.name).toLowerCase();
+                if (apply) {
+                    if (fonts[key]) layer.textItem.font = fonts[key];
+                } else {
+                    fonts[key] = layer.textItem.font;
+                }
+            }
+        }
+    }
+    walk(doc);
+    return fonts;
 }
 
 // ------------------ Item quantity mapping ------------------
@@ -2037,6 +2046,7 @@ try{
         logBoth(logPath, custLogPath, "---- " + nowStamp() + " | " + NoInv + " | " + custFolderSafe + " ----");
         if(gambarRaw !== "" && gambarPath === "") logBoth(logPath, custLogPath, "[IMAGE] Fail gambar pengantin tidak ditemui: " + gambarRaw);
 
+        var themeBannerBantingFonts = {};
         var templates = findTemplates(MASTER.fsName, tema, code);
         var photoTemplateSelection = kkkUsePortraitBannerAndBantingForPhoto(
             MASTER.fsName, tema, templates, gambarPath
@@ -2044,7 +2054,7 @@ try{
         templates = photoTemplateSelection.templates;
         if (photoTemplateSelection.applied) {
             logBoth(logPath, custLogPath, "[PHOTO DESIGN OVERRIDE] Customer photo detected; using " +
-                "POTRAIT/CKP-002 BANNER and BANTING while retaining " + tema + "/" + code + " for other templates.");
+                "POTRAIT/CKP-001 BANNER and BANTING while retaining " + tema + "/" + code + " as the original theme variants.");
         } else if (photoTemplateSelection.error !== "") {
             logBoth(logPath, custLogPath, "[PHOTO DESIGN OVERRIDE FAIL] " + photoTemplateSelection.error);
         }
@@ -2081,12 +2091,25 @@ try{
             var doc = null;
             try{
                 logBoth(logPath, custLogPath, "[TEMPLATE START] " + tplPath);
+                var isPhotoVariant = photoTemplateSelection.applied && ti >= photoTemplateSelection.originalTemplateCount;
+                var currentPhotoItem = kkkTemplatePhotoItem((new File(tplPath)).name);
                 doc = openPSDQuiet(tplPath);
                 if(doc == null){
                     openFailCount++;
                     logBoth(logPath, custLogPath, "[OPEN FAIL] " + tplPath);
                     continue;
                 }
+
+            if (currentPhotoItem !== "") {
+                if (isPhotoVariant) {
+                    if (!themeBannerBantingFonts[currentPhotoItem]) {
+                        throw new Error("Font template tema tidak tersedia untuk " + currentPhotoItem);
+                    }
+                    kkkBannerBantingFonts(doc, themeBannerBantingFonts[currentPhotoItem], true);
+                } else {
+                    themeBannerBantingFonts[currentPhotoItem] = kkkBannerBantingFonts(doc, {}, false);
+                }
+            }
 
             // set text layers
             setTextIfExistsInDoc(doc, "namaayah", namaayah);
@@ -2189,19 +2212,14 @@ try{
             // Do NOT rely on the PSD filename. The family may be identified by Tema
             // or by the parent folder, e.g. POTRAIT/CKP-005/KAD DEPAN.psd.
             var portraitDesign = isPortraitDesign(tema, tplPath, tplName);
-            var usesPhotoPortraitTemplate = false;
-            for (var overrideIndex = 0; overrideIndex < photoTemplateSelection.overridePaths.length; overrideIndex++) {
-                if (t(photoTemplateSelection.overridePaths[overrideIndex]).toLowerCase() === t(tplPath).toLowerCase()) {
-                    usesPhotoPortraitTemplate = true;
-                    break;
-                }
-            }
+            var usesPhotoPortraitTemplate = isPhotoVariant;
             var forceBantingCropReview = usesPhotoPortraitTemplate && tplLower.indexOf("banting") >= 0;
 
             var portraitItem = portraitDesign ? kkkPortraitItem(tplName) : "";
             var templatePhotoItem = !portraitDesign ? kkkTemplatePhotoItem(tplName) : "";
             var templatePhotoApplied = false;
-            if (portraitItem !== "") {
+            var isThemeBannerBanting = currentPhotoItem !== "" && !isPhotoVariant;
+            if (portraitItem !== "" && !isThemeBannerBanting) {
                 try {
                     var frameResult = kkkInsertFramedPortrait(
                         doc, gambarPath, portraitItem, undefined, undefined, forceBantingCropReview
@@ -2216,7 +2234,7 @@ try{
                 }
             } else if (portraitDesign) {
                 logBoth(logPath, custLogPath, "[PORTRAIT V33] NO CUSTOMER PHOTO (outside seven-item scope): " + tplName);
-            } else if (templatePhotoItem !== "" && gambarPath !== "") {
+            } else if (templatePhotoItem !== "" && gambarPath !== "" && !isThemeBannerBanting) {
                 try {
                     var templatePhotoResult;
                     if (templatePhotoItem === "BANNER") {
@@ -2243,7 +2261,7 @@ try{
                 (cardOutputId !== "" ? cardOutputId : NoInv) + " " + majlis + " " + tplName +
                 (namesShort!==""?(" " + namesShort):"") +
                 (itemQty?(" " + itemQty + " PCS"):"") +
-                (templatePhotoApplied ? " GAMBAR PENGANTIN" : "")
+                (isPhotoVariant ? " DESIGN CKP-001 GAMBAR PENGANTIN" : (isThemeBannerBanting ? " DESIGN TEMA " + tema + " " + code : (templatePhotoApplied ? " GAMBAR PENGANTIN" : "")))
             );
 
             
