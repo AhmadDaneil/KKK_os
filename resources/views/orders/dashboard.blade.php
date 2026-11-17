@@ -2585,17 +2585,17 @@ document.addEventListener('DOMContentLoaded', function () {
         });
 
 
-        function fitBannerNames() {
+        function fitPreviewNames() {
             const canvas = document.createElement('canvas');
             const context = canvas.getContext('2d');
             if (!context) {
                 return;
             }
-            document.querySelectorAll('.live-product--banner').forEach(function (banner) {
+            document.querySelectorAll('.live-product--banner, .wedding-card-front, .live-product--sticker, .live-product--arrow, .live-product--hanger').forEach(function (banner) {
                 if (banner.getBoundingClientRect().width === 0) {
                     return;
                 }
-                banner.querySelectorAll('.desa-product-copy-couple > span').forEach(function (name) {
+                banner.querySelectorAll('.desa-product-copy-couple > span, .desa-card-custom-couple > span').forEach(function (name) {
                     name.style.removeProperty('font-size');
                     name.style.removeProperty('scale');
                     const style = getComputedStyle(name);
@@ -2606,7 +2606,11 @@ document.addEventListener('DOMContentLoaded', function () {
                         return;
                     }
                     const maximumSize = parseFloat(style.fontSize);
-                    const maximumHeight = banner.getBoundingClientRect().height * 0.16;
+                    const heightRatio = banner.classList.contains('wedding-card-front') ? 0.10
+                        : banner.classList.contains('live-product--arrow') ? 0.12
+                        : banner.classList.contains('live-product--hanger') ? 0.24
+                        : banner.classList.contains('live-product--sticker') ? 0.20 : 0.16;
+                    const maximumHeight = banner.getBoundingClientRect().height * heightRatio;
                     let low = 0.1;
                     let high = maximumSize;
                     for (let step = 0; step < 16; step++) {
@@ -2639,33 +2643,33 @@ document.addEventListener('DOMContentLoaded', function () {
             });
         }
 
-        let bannerFitFrame = 0;
-        function scheduleBannerNameFit() {
-            if (!bannerFitFrame) {
-                bannerFitFrame = requestAnimationFrame(function () {
-                    bannerFitFrame = 0;
-                    fitBannerNames();
+        let previewFitFrame = 0;
+        function schedulePreviewNameFit() {
+            if (!previewFitFrame) {
+                previewFitFrame = requestAnimationFrame(function () {
+                    previewFitFrame = 0;
+                    fitPreviewNames();
                 });
             }
         }
-        const bannerFitObserver = new MutationObserver(scheduleBannerNameFit);
-        bannerFitObserver.observe(document.body, {
+        const previewFitObserver = new MutationObserver(schedulePreviewNameFit);
+        previewFitObserver.observe(document.body, {
             subtree: true,
             childList: true,
             characterData: true,
             attributes: true,
             attributeFilter: ['class', 'data-font-design-code', 'data-design-code', 'data-photo-design-code'],
         });
-        const bannerResizeObserver = new ResizeObserver(scheduleBannerNameFit);
-        document.querySelectorAll('.live-product--banner').forEach(function (banner) {
-            bannerResizeObserver.observe(banner);
+        const previewResizeObserver = new ResizeObserver(schedulePreviewNameFit);
+        document.querySelectorAll('.live-product--banner, .wedding-card-front, .live-product--sticker, .live-product--arrow, .live-product--hanger').forEach(function (banner) {
+            previewResizeObserver.observe(banner);
         });
-        window.addEventListener('resize', scheduleBannerNameFit);
+        window.addEventListener('resize', schedulePreviewNameFit);
         if (document.fonts) {
-            document.fonts.ready.then(scheduleBannerNameFit);
-            document.fonts.addEventListener('loadingdone', scheduleBannerNameFit);
+            document.fonts.ready.then(schedulePreviewNameFit);
+            document.fonts.addEventListener('loadingdone', schedulePreviewNameFit);
         }
-        scheduleBannerNameFit();
+        schedulePreviewNameFit();
         updateAllPhotoPreviews();
     });
 </script>
