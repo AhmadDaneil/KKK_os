@@ -1528,11 +1528,11 @@ html[data-customer-theme="dark"] .wedding-card-back .card-social-logo {
 /* Kekalkan jarak nama dan tarikh pada setiap design bunting. */
 .live-product--banting[data-design-artwork] {
     --preview-bunting-date-safe-y: min(
-        max(var(--preview-date-y, 29%), calc(var(--preview-couple-y, 18.5%) + 14%)),
+        max(var(--preview-date-y, 29%), calc(var(--preview-couple-y, var(--desa-couple-y, 18.5%)) + 14%)),
         91%
     );
     --preview-bunting-couple-safe-y: min(
-        var(--preview-couple-y, 18.5%),
+        var(--preview-couple-y, var(--desa-couple-y, 18.5%)),
         calc(var(--preview-bunting-date-safe-y) - 14%)
     );
 }
