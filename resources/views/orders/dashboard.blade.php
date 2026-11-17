@@ -2260,11 +2260,17 @@ document.addEventListener('DOMContentLoaded', function () {
             }
 
             const scale = Math.min(
-                (window.innerWidth * 0.9) / bounds.width,
+                Math.min(window.innerWidth * 0.88, 1040) / bounds.width,
                 (window.innerHeight * 0.78) / bounds.height,
             );
-            enlargedItem.style.setProperty('width', (bounds.width * scale) + 'px', 'important');
-            enlargedItem.style.setProperty('height', (bounds.height * scale) + 'px', 'important');
+            const frame = document.createElement('div');
+            frame.className = 'live-preview-lightbox-frame';
+            frame.style.width = (bounds.width * scale) + 'px';
+            frame.style.height = (bounds.height * scale) + 'px';
+
+            enlargedItem.style.setProperty('box-sizing', 'border-box', 'important');
+            enlargedItem.style.setProperty('width', bounds.width + 'px', 'important');
+            enlargedItem.style.setProperty('height', bounds.height + 'px', 'important');
             enlargedItem.style.setProperty('max-width', 'none', 'important');
             enlargedItem.style.setProperty('max-height', 'none', 'important');
             enlargedItem.style.setProperty('min-width', '0', 'important');
@@ -2272,9 +2278,12 @@ document.addEventListener('DOMContentLoaded', function () {
             enlargedItem.style.setProperty('flex', '0 0 auto', 'important');
             enlargedItem.style.setProperty('margin', '0', 'important');
             enlargedItem.style.setProperty('aspect-ratio', (bounds.width / bounds.height).toString(), 'important');
+            enlargedItem.style.setProperty('transform', 'scale(' + scale + ')', 'important');
+            enlargedItem.style.setProperty('transform-origin', 'center center', 'important');
 
             previewLightboxTitle.textContent = itemLabel;
-            previewLightboxStage.replaceChildren(enlargedItem);
+            frame.append(enlargedItem);
+            previewLightboxStage.replaceChildren(frame);
             activePreviewZoomTrigger = trigger;
             previewLightbox.showModal();
             previewLightboxClose.focus();
