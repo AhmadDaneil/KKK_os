@@ -2584,6 +2584,88 @@ document.addEventListener('DOMContentLoaded', function () {
             customerPhotoPreviewUrls.clear();
         });
 
+
+        function fitBannerNames() {
+            const canvas = document.createElement('canvas');
+            const context = canvas.getContext('2d');
+            if (!context) {
+                return;
+            }
+            document.querySelectorAll('.live-product--banner').forEach(function (banner) {
+                if (banner.getBoundingClientRect().width === 0) {
+                    return;
+                }
+                banner.querySelectorAll('.desa-product-copy-couple > span').forEach(function (name) {
+                    name.style.removeProperty('font-size');
+                    name.style.removeProperty('scale');
+                    const style = getComputedStyle(name);
+                    const availableWidth = name.clientWidth
+                        - parseFloat(style.paddingLeft || 0)
+                        - parseFloat(style.paddingRight || 0);
+                    if (availableWidth <= 0 || !name.textContent.trim()) {
+                        return;
+                    }
+                    const maximumSize = parseFloat(style.fontSize);
+                    const maximumHeight = banner.getBoundingClientRect().height * 0.16;
+                    let low = 0.1;
+                    let high = maximumSize;
+                    for (let step = 0; step < 16; step++) {
+                        const size = (low + high) / 2;
+                        context.font = style.fontStyle + ' ' + style.fontWeight + ' ' + size + 'px ' + style.fontFamily;
+                        const metrics = context.measureText(name.textContent.trim());
+                        const inkWidth = Math.max(metrics.width,
+                            Math.abs(metrics.actualBoundingBoxLeft || 0) + Math.abs(metrics.actualBoundingBoxRight || 0));
+                        const inkHeight = (metrics.actualBoundingBoxAscent || size)
+                            + (metrics.actualBoundingBoxDescent || 0);
+                        const spacing = parseFloat(style.letterSpacing) || 0;
+                        const totalWidth = inkWidth + Math.max(0, name.textContent.trim().length - 1) * spacing;
+                        if (totalWidth <= availableWidth * 0.88 && inkHeight <= maximumHeight) {
+                            low = size;
+                        } else {
+                            high = size;
+                        }
+                    }
+                    name.style.fontSize = Math.max(0.1, Math.floor(low * 10) / 10) + 'px';
+                    const fittedStyle = getComputedStyle(name);
+                    context.font = fittedStyle.fontStyle + ' ' + fittedStyle.fontWeight + ' ' + fittedStyle.fontSize + ' ' + fittedStyle.fontFamily;
+                    const fittedMetrics = context.measureText(name.textContent.trim());
+                    const fittedWidth = Math.max(fittedMetrics.width,
+                        Math.abs(fittedMetrics.actualBoundingBoxLeft || 0) + Math.abs(fittedMetrics.actualBoundingBoxRight || 0))
+                        + Math.max(0, name.textContent.trim().length - 1) * (parseFloat(fittedStyle.letterSpacing) || 0);
+                    if (fittedWidth > availableWidth * 0.88) {
+                        name.style.scale = String(availableWidth * 0.88 / fittedWidth);
+                    }
+                });
+            });
+        }
+
+        let bannerFitFrame = 0;
+        function scheduleBannerNameFit() {
+            if (!bannerFitFrame) {
+                bannerFitFrame = requestAnimationFrame(function () {
+                    bannerFitFrame = 0;
+                    fitBannerNames();
+                });
+            }
+        }
+        const bannerFitObserver = new MutationObserver(scheduleBannerNameFit);
+        bannerFitObserver.observe(document.body, {
+            subtree: true,
+            childList: true,
+            characterData: true,
+            attributes: true,
+            attributeFilter: ['class', 'data-font-design-code', 'data-design-code', 'data-photo-design-code'],
+        });
+        const bannerResizeObserver = new ResizeObserver(scheduleBannerNameFit);
+        document.querySelectorAll('.live-product--banner').forEach(function (banner) {
+            bannerResizeObserver.observe(banner);
+        });
+        window.addEventListener('resize', scheduleBannerNameFit);
+        if (document.fonts) {
+            document.fonts.ready.then(scheduleBannerNameFit);
+            document.fonts.addEventListener('loadingdone', scheduleBannerNameFit);
+        }
+        scheduleBannerNameFit();
         updateAllPhotoPreviews();
     });
 </script>
