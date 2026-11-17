@@ -1593,6 +1593,13 @@ document.addEventListener('DOMContentLoaded', function () {
                 const hasPhotoMask = shouldShowArtwork && theme === 'portrait' && type !== 'wooden-hanger' && type !== 'card-back';
                 syncArtworkPhotoMask(product, hasPhotoMask ? assetBase + type + '-photo-mask.webp' : '');
             });
+            const artworkSide = scope.dataset.liveProductPreview || scope.dataset.cardPreview;
+            if (artworkSide) {
+                scope.dispatchEvent(new CustomEvent('customer-preview-artwork-updated', {
+                    bubbles: true,
+                    detail: {side: artworkSide},
+                }));
+            }
         }
 
         function syncPreviewScope(scope, side) {
@@ -2460,7 +2467,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 const isBannerOrBunting = product?.classList.contains('live-product--banner')
                     || product?.classList.contains('live-product--banting');
                 const showProductPhoto = Boolean(photoUrl) && (theme === 'PORTRAIT' || isBannerOrBunting)
-                    && !product?.hasAttribute('data-artwork-unavailable');
+                    && (isBannerOrBunting || !product?.hasAttribute('data-artwork-unavailable'));
 
                 setImageSource(image, photoUrl, showProductPhoto);
 
@@ -2471,6 +2478,25 @@ document.addEventListener('DOMContentLoaded', function () {
                         const artwork = product.querySelector('[data-desa-product-artwork]');
                         const photoBase = @json(asset('images/designs/portrait/CKP-001')) + '/';
                         product.toggleAttribute('data-catalog-artwork', showProductPhoto || theme !== 'DESA');
+                        if (showProductPhoto) {
+                            product.hidden = false;
+                            product.setAttribute('data-design-artwork', '');
+                            product.removeAttribute('data-artwork-unavailable');
+                            const overlay = product.querySelector('[data-desa-product-name-overlay]');
+                            if (overlay) {
+                                overlay.hidden = false;
+                                overlay.querySelector('[data-desa-generic-copy]').hidden = true;
+                                overlay.querySelector('[data-desa-product-custom-copy]').hidden = false;
+                            }
+                            const placeholder = product.querySelector('[data-desa-product-placeholder]');
+                            const unavailable = product.querySelector('[data-artwork-unavailable-message]');
+                            if (placeholder) {
+                                placeholder.hidden = true;
+                            }
+                            if (unavailable) {
+                                unavailable.hidden = true;
+                            }
+                        }
                         if (showProductPhoto) {
                             product.dataset.photoDesignCode = 'CKP-001';
                         } else {
@@ -2519,6 +2545,12 @@ document.addEventListener('DOMContentLoaded', function () {
             });
         }
 
+        document.addEventListener('customer-preview-artwork-updated', function (event) {
+            if (event.detail?.side) {
+                updateSidePhotoPreview(event.detail.side);
+            }
+        });
+
         form.addEventListener('customer-photo-state-changed', function (event) {
             const side = event.detail?.side;
 
@@ -2533,6 +2565,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 event.target.matches?.('[data-card-image-upload] input[type="file"]')
                 || event.target.matches?.('[data-remove-card-image]')
                 || event.target.name?.endsWith('[design][theme]')
+                || event.target.name?.endsWith('[design][design_code]')
             ) {
                 const side = event.target.closest('[data-package-side]')?.dataset.packageSide;
 
