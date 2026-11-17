@@ -4,7 +4,7 @@
 @font-face { font-family: "PSD GreatVibes-Regular"; src: url("../fonts/psd-preview/greatvibes-regular.woff") format("woff"); font-style: normal; font-weight: 400; font-display: swap; }
 @font-face { font-family: "PSD ChopinScript"; src: url("../fonts/psd-preview/chopinscript.woff") format("woff"); font-style: normal; font-weight: 400; font-display: swap; }
 @font-face { font-family: "PSD BerastagiDEMO-Regular"; src: url("../fonts/psd-preview/berastagidemo-regular.woff") format("woff"); font-style: normal; font-weight: 400; font-display: swap; }
-@font-face { font-family: "PSD Montserrat-Regular"; src: url("../fonts/psd-preview/montserrat-regular.woff") format("woff"); font-style: normal; font-weight: 400; font-display: swap; }
+@font-face { font-family: "PSD Montserrat-Regular"; src: url("../fonts/psd-preview/montserrat-regular.woff?v=2") format("woff"); font-style: normal; font-weight: 100 900; font-display: swap; }
 @font-face { font-family: "PSD Belladonia"; src: url("../fonts/psd-preview/belladonia.woff") format("woff"); font-style: normal; font-weight: 400; font-display: swap; }
 .live-product.live-product--banner[data-font-design-code="CKQ-001"] .desa-product-copy-couple > span:first-child { font-family: "PSD ChopinScript", cursive; font-weight: 400; font-style: normal; }
 .live-product.live-product--banner[data-font-design-code="CKQ-001"] .desa-product-copy-couple > span:last-child { font-family: "PSD ChopinScript", cursive; font-weight: 400; font-style: normal; }
