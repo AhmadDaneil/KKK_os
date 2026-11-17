@@ -1506,7 +1506,7 @@ html[data-customer-theme="dark"] .wedding-card-back .card-social-logo {
 .live-product--vip-card[data-catalog-artwork] .desa-product-copy-couple { top: var(--preview-couple-y, 74%); }
 
 [data-catalog-artwork] .desa-couple-ampersand-spacer {
-    visibility: var(--preview-ampersand-visibility, visible);
+    visibility: var(--preview-ampersand-visibility, hidden);
 }
 
 .wedding-card-front[data-catalog-artwork] .desa-card-custom-date,
@@ -1524,6 +1524,26 @@ html[data-customer-theme="dark"] .wedding-card-back .card-social-logo {
 .live-product--sticker[data-catalog-artwork] .desa-product-copy-date { top: var(--preview-date-y, 49%); }
 .live-product--hanger[data-catalog-artwork] .desa-product-copy-date { top: var(--preview-date-y, 64%); }
 .live-product--vip-card[data-catalog-artwork] .desa-product-copy-date { top: var(--preview-date-y, 85%); }
+
+/* Kekalkan jarak nama dan tarikh pada setiap design bunting. */
+.live-product--banting[data-design-artwork] {
+    --preview-bunting-date-safe-y: min(
+        max(var(--preview-date-y, 29%), calc(var(--preview-couple-y, 18.5%) + 14%)),
+        91%
+    );
+    --preview-bunting-couple-safe-y: min(
+        var(--preview-couple-y, 18.5%),
+        calc(var(--preview-bunting-date-safe-y) - 14%)
+    );
+}
+
+.live-product--banting[data-design-artwork][data-design-code] .desa-product-copy-couple {
+    top: var(--preview-bunting-couple-safe-y);
+}
+
+.live-product--banting[data-design-artwork][data-design-code] .desa-product-copy-date {
+    top: var(--preview-bunting-date-safe-y);
+}
 
 .live-product[data-catalog-artwork] .desa-product-copy-kicker,
 .live-product[data-catalog-artwork] .desa-product-copy-quote {
@@ -1716,10 +1736,10 @@ html[data-customer-theme="dark"] .wedding-card-back .card-social-logo {
     text-align: center;
 }
 
-/* Show the ampersand when an uploaded photo covers its printed artwork version. */
+/* Jangan tambah ampersand kedua apabila foto pelanggan digunakan. */
 .live-product--banner.has-live-customer-photo .desa-couple-ampersand-spacer,
 .live-product--banting.has-live-customer-photo .desa-couple-ampersand-spacer {
-    visibility: visible;
+    visibility: hidden;
     color: #806536;
     text-shadow:
         -.06em -.06em 0 #fff,
