@@ -1486,7 +1486,8 @@ document.addEventListener('DOMContentLoaded', function () {
                 }
                 signature.hidden = !source;
                 if (source) {
-                    signature.src = source;
+                    const signatureType = product.classList.contains('live-product--banner') ? 'banner' : 'bunting';
+                    signature.src = @json(asset('images/designs/portrait/CKP-001')) + '/' + signatureType + '-signature.webp';
                 } else {
                     signature.removeAttribute('src');
                 }
