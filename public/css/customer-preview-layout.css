@@ -7050,3 +7050,21 @@
     -webkit-mask-image: url("/images/designs/portrait/CKP-001/bunting-photo-mask.webp?v=20261117");
     mask-image: url("/images/designs/portrait/CKP-001/bunting-photo-mask.webp?v=20261117");
 }
+
+
+/* Keep the template signature above the uploaded photo layer. */
+.live-product > .live-product-signature-overlay {
+    position: absolute;
+    inset: 0;
+    z-index: 3;
+    width: 100%;
+    height: 100%;
+    object-fit: fill;
+    pointer-events: none;
+}
+.live-product--banner > .live-product-signature-overlay {
+    clip-path: inset(93% 74% 0 0);
+}
+.live-product--banting > .live-product-signature-overlay {
+    clip-path: inset(95.8% 0 0 0);
+}
