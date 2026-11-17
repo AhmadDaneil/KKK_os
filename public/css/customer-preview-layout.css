@@ -7128,3 +7128,12 @@
 .live-product.live-product--banting[data-photo-design-code="CKP-001"] .desa-product-copy-date {
     left: 51.41%; top: 26.69%;
 }
+
+
+/* Fit complete banner names after PSD fonts load instead of truncating them. */
+.live-product.live-product--banner[data-design-artwork] .desa-product-copy-couple > span {
+    overflow: visible;
+    text-overflow: clip;
+    white-space: nowrap;
+    line-height: 1.1;
+}
