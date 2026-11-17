@@ -10,6 +10,7 @@
     <link rel="stylesheet" href="{{ asset('css/customer-preview-layout.css') }}?v={{ filemtime(public_path('css/customer-preview-layout.css')) }}">
     <link rel="stylesheet" href="{{ asset('css/customer-service.css') }}?v={{ filemtime(public_path('css/customer-service.css')) }}">
     <link rel="stylesheet" href="{{ asset('css/customer-brand.css') }}?v={{ filemtime(public_path('css/customer-brand.css')) }}">
+    <link rel="stylesheet" href="{{ asset('css/customer-psd-fonts.css') }}?v={{ filemtime(public_path('css/customer-psd-fonts.css')) }}">
 </head>
 <body class="brand-order-dashboard">
 <main>
@@ -1576,6 +1577,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     && (!isVipCard || theme === 'portrait')
                     && !isUnavailable;
                 product.dataset.designCode = shouldShowArtwork ? normalizedCode : '';
+                product.dataset.fontDesignCode = normalizedCode;
                 product.toggleAttribute('data-design-artwork', shouldShowArtwork);
                 product.toggleAttribute('data-catalog-artwork', shouldShowArtwork && isCatalogArtwork);
                 product.toggleAttribute('data-artwork-unavailable', isUnavailable);
