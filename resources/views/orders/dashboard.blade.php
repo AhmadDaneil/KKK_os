@@ -1473,6 +1473,25 @@ document.addEventListener('DOMContentLoaded', function () {
         };
 
         function syncArtworkImage(image, source, label) {
+            const product = image.matches('[data-desa-product-artwork]') ? image.parentElement : null;
+            if (product && (product.classList.contains('live-product--banner') || product.classList.contains('live-product--banting'))) {
+                let signature = product.querySelector('.live-product-signature-overlay');
+                if (!signature) {
+                    signature = document.createElement('img');
+                    signature.className = 'live-product-signature-overlay';
+                    signature.alt = '';
+                    signature.setAttribute('aria-hidden', 'true');
+                    signature.draggable = false;
+                    product.appendChild(signature);
+                }
+                signature.hidden = !source;
+                if (source) {
+                    signature.src = source;
+                } else {
+                    signature.removeAttribute('src');
+                }
+            }
+
             image.hidden = !source;
             image.alt = source ? label : '';
 
