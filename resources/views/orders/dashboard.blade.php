@@ -2466,7 +2466,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
                 if (product) {
                     product.classList.toggle('has-live-customer-photo', showProductPhoto);
-                    if (isBannerOrBunting) {
+                    if (isBannerOrBunting && theme !== 'PORTRAIT' && theme !== 'POTRAIT') {
                         const item = product.classList.contains('live-product--banner') ? 'banner' : 'bunting';
                         const artwork = product.querySelector('[data-desa-product-artwork]');
                         const photoBase = @json(asset('images/designs/portrait/CKP-001')) + '/';
@@ -2498,6 +2498,8 @@ document.addEventListener('DOMContentLoaded', function () {
                         } else {
                             product.style.removeProperty('--preview-photo-mask');
                         }
+                    } else if (isBannerOrBunting) {
+                        delete product.dataset.photoDesignCode;
                     }
                 }
             });
