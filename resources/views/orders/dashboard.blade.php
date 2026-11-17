@@ -2469,15 +2469,35 @@ document.addEventListener('DOMContentLoaded', function () {
                     if (isBannerOrBunting) {
                         const item = product.classList.contains('live-product--banner') ? 'banner' : 'bunting';
                         const artwork = product.querySelector('[data-desa-product-artwork]');
-                        const photoBase = artworkBase + '/portrait/CKP-001/';
+                        const photoBase = @json(asset('images/designs/portrait/CKP-001')) + '/';
                         product.toggleAttribute('data-catalog-artwork', showProductPhoto || theme !== 'DESA');
                         if (showProductPhoto) {
                             product.dataset.photoDesignCode = 'CKP-001';
                         } else {
                             delete product.dataset.photoDesignCode;
                         }
-                        syncArtworkImage(artwork, showProductPhoto ? photoBase + item + '.webp' : (product.dataset.themeArtworkSrc || ''), item + ' preview');
-                        syncArtworkPhotoMask(product, showProductPhoto ? photoBase + item + '-photo-mask.webp' : '');
+                        const artworkSource = showProductPhoto ? photoBase + item + '.webp' : (product.dataset.themeArtworkSrc || '');
+                        artwork.hidden = !artworkSource;
+                        artwork.alt = item + ' preview';
+                        if (artworkSource) {
+                            artwork.src = artworkSource;
+                        } else {
+                            artwork.removeAttribute('src');
+                        }
+                        const signature = product.querySelector('.live-product-signature-overlay');
+                        if (signature) {
+                            signature.hidden = !artworkSource;
+                            if (artworkSource) {
+                                signature.src = artworkSource;
+                            } else {
+                                signature.removeAttribute('src');
+                            }
+                        }
+                        if (showProductPhoto) {
+                            product.style.setProperty('--preview-photo-mask', 'url("' + photoBase + item + '-photo-mask.webp")');
+                        } else {
+                            product.style.removeProperty('--preview-photo-mask');
+                        }
                     }
                 }
             });
