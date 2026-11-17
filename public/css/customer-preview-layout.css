@@ -7130,8 +7130,12 @@
 }
 
 
-/* Fit complete banner names after PSD fonts load instead of truncating them. */
-.live-product.live-product--banner[data-design-artwork] .desa-product-copy-couple > span {
+/* Fit complete preview names after PSD fonts load instead of truncating them. */
+.live-product.live-product--banner[data-design-artwork] .desa-product-copy-couple > span,
+.wedding-card-front .desa-card-custom-couple > span,
+.live-product.live-product--sticker .desa-product-copy-couple > span,
+.live-product.live-product--arrow .desa-product-copy-couple > span,
+.live-product.live-product--hanger .desa-product-copy-couple > span {
     overflow: visible;
     text-overflow: clip;
     white-space: nowrap;
