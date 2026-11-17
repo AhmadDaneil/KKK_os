@@ -1276,7 +1276,7 @@ function findTemplates(masterPath, tema, designCode){
 
 function kkkUsePortraitBannerAndBantingForPhoto(masterPath, tema, templates, imagePath) {
     var result = {templates: templates, overridePaths: [], applied: false, error: ""};
-    if (!imagePath) return result;
+    if (!imagePath || containsPortraitWord(tema)) return result;
 
     var portraitTemplates = findTemplates(masterPath, "POTRAIT", "CKP-001");
     var replacements = [];
@@ -2218,7 +2218,7 @@ try{
             var portraitItem = portraitDesign ? kkkPortraitItem(tplName) : "";
             var templatePhotoItem = !portraitDesign ? kkkTemplatePhotoItem(tplName) : "";
             var templatePhotoApplied = false;
-            var isThemeBannerBanting = currentPhotoItem !== "" && !isPhotoVariant;
+            var isThemeBannerBanting = currentPhotoItem !== "" && !isPhotoVariant && !containsPortraitWord(tema);
             if (portraitItem !== "" && !isThemeBannerBanting) {
                 try {
                     var frameResult = kkkInsertFramedPortrait(
