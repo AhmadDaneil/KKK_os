@@ -7063,8 +7063,8 @@
     pointer-events: none;
 }
 .live-product--banner > .live-product-signature-overlay {
-    clip-path: none;
+    clip-path: inset(91.8% 86.6% 3.15% 0 round 0 999px 999px 0);
 }
 .live-product--banting > .live-product-signature-overlay {
-    clip-path: none;
+    clip-path: inset(95.8% 0 0 0);
 }
