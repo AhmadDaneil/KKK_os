@@ -7080,3 +7080,51 @@
 .live-product--banting > .live-product-signature-overlay {
     clip-path: inset(95.8% 0 0 0);
 }
+
+/* Photo variants use CKP-001 geometry while retaining the selected theme's fonts. */
+.live-product.live-product--banner[data-photo-design-code="CKP-001"] {
+    --preview-couple-x: 73.94%;
+    --preview-couple-y: 47.65%;
+    --preview-couple-width: 44.13%;
+    --preview-ampersand-width: 32.34%;
+    --preview-ampersand-visibility: hidden;
+    --preview-kicker-display: none;
+    --preview-quote-display: none;
+    --preview-title-x: 73.27%;
+    --preview-title-y: 22.39%;
+    --preview-date-x: 74.28%;
+    --preview-date-y: 79.47%;
+    --preview-photo-x: 0%;
+    --preview-photo-y: 0%;
+    --preview-photo-width: 49.39%;
+    --preview-photo-height: 100%;
+    --preview-aspect-ratio: 2 / 1;
+}
+.live-product.live-product--banting[data-photo-design-code="CKP-001"] {
+    --preview-couple-x: 51.45%;
+    --preview-couple-y: 17.91%;
+    --preview-couple-width: 84%;
+    --preview-ampersand-width: 24.11%;
+    --preview-ampersand-visibility: hidden;
+    --preview-kicker-x: 51.67%;
+    --preview-kicker-y: 11.44%;
+    --preview-date-x: 51.41%;
+    --preview-date-y: 26.69%;
+    --preview-photo-x: 0%;
+    --preview-photo-y: 23.71%;
+    --preview-photo-width: 100%;
+    --preview-photo-height: 76.29%;
+    --preview-aspect-ratio: 1 / 2;
+}
+.live-product.live-product--banner[data-photo-design-code="CKP-001"] .desa-product-copy-couple {
+    left: 73.94%; top: 47.65%; width: 44.13%;
+}
+.live-product.live-product--banner[data-photo-design-code="CKP-001"] .desa-product-copy-date {
+    left: 74.28%; top: 79.47%;
+}
+.live-product.live-product--banting[data-photo-design-code="CKP-001"] .desa-product-copy-couple {
+    left: 51.45%; top: 17.91%; width: 84%;
+}
+.live-product.live-product--banting[data-photo-design-code="CKP-001"] .desa-product-copy-date {
+    left: 51.41%; top: 26.69%;
+}
