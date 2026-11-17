@@ -2245,6 +2245,9 @@ document.addEventListener('DOMContentLoaded', function () {
             const itemLabel = previewItemLabels[surface.dataset.previewArtworkSlot] || 'Preview item';
             const enlargedItem = surface.cloneNode(true);
             enlargedItem.classList.add('live-preview-lightbox-item');
+            enlargedItem.querySelectorAll('img').forEach(function (image) {
+                image.draggable = false;
+            });
             enlargedItem.querySelectorAll('[data-preview-zoom-trigger]').forEach(function (button) {
                 button.remove();
             });
@@ -2311,6 +2314,20 @@ document.addEventListener('DOMContentLoaded', function () {
             previewLightbox.close();
         });
 
+        previewLightbox.addEventListener('contextmenu', function (event) {
+            event.preventDefault();
+        });
+
+        previewLightbox.addEventListener('dragstart', function (event) {
+            if (event.target instanceof HTMLImageElement) {
+                event.preventDefault();
+            }
+        });
+
+        previewLightbox.addEventListener('copy', function (event) {
+            event.preventDefault();
+        });
+
         previewLightbox.addEventListener('click', function (event) {
             if (event.target === previewLightbox) {
                 previewLightbox.close();
@@ -2348,8 +2365,9 @@ document.addEventListener('DOMContentLoaded', function () {
         document.addEventListener('keydown', function (event) {
             const isPreviewShortcut = (event.ctrlKey || event.metaKey)
                 && ['s', 'p'].includes(event.key.toLowerCase());
-            const previewHasFocus = preview.contains(document.activeElement);
-            const pointerIsOverPreview = preview.matches(':hover');
+            const previewHasFocus = preview.contains(document.activeElement)
+                || previewLightbox.contains(document.activeElement);
+            const pointerIsOverPreview = preview.matches(':hover') || previewLightbox.matches(':hover');
 
             if (isPreviewShortcut && (previewHasFocus || pointerIsOverPreview)) {
                 event.preventDefault();

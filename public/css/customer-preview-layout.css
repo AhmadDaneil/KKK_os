@@ -6259,13 +6259,15 @@
 
 
 /* Best-effort protection for customer-facing artwork previews. */
-[data-live-preview] {
+[data-live-preview],
+.live-preview-lightbox {
     -webkit-touch-callout: none;
     -webkit-user-select: none;
     user-select: none;
 }
 
-[data-live-preview] img {
+[data-live-preview] img,
+.live-preview-lightbox img {
     -webkit-user-drag: none;
 }
 
