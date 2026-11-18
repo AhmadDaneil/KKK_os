@@ -8375,3 +8375,12 @@
     --cartoon-groom-height: 11.25;
     --cartoon-bride-height: 11.25;
 }
+
+
+/* Preserve complete Cartoon script letterforms instead of clipping their flourishes into dots. */
+:is(.wedding-card-front, .live-product)[data-design-artwork][data-design-code^="CKC-"][data-preview-artwork-slot]:not(.has-live-customer-photo):not(.live-product--hanger) :is(.desa-card-custom-couple, .desa-product-copy-couple) > span {
+    overflow: visible;
+    text-overflow: clip;
+    -webkit-text-stroke: 0;
+    text-shadow: none;
+}
