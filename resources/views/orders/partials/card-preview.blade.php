@@ -135,7 +135,10 @@
                         <div><span>AHLI 2</span><strong data-preview-field="contact_2_name">Contact 2</strong><small data-preview-field="contact_2_phone">-</small></div>
                         <div><span>AHLI 3</span><strong data-preview-field="contact_3_name">Contact 3</strong><small data-preview-field="contact_3_phone">-</small></div>
                     </div>
-                    <div class="qr-placeholder desa-back-custom-qr" aria-hidden="true"><span></span></div>
+                    <div class="qr-placeholder desa-back-custom-qr" data-preview-map-qr-container>
+                        <img data-preview-map-qr alt="QR code for the wedding venue Google Maps location" hidden>
+                        <span aria-hidden="true"></span>
+                    </div>
                     <div class="desa-back-custom-venue">
                         <strong data-preview-field="venue_name">LOKASI MAJLIS</strong>
                         <p data-preview-field="full_address">ALAMAT MAJLIS</p>
