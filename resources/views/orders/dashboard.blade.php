@@ -2658,7 +2658,7 @@ document.addEventListener('DOMContentLoaded', function () {
             if (!context) {
                 return;
             }
-            document.querySelectorAll('.live-product--banner, .wedding-card-front, .live-product--sticker, .live-product--arrow, .live-product--hanger').forEach(function (banner) {
+            document.querySelectorAll('.live-product--banner, .wedding-card-front, .live-product--sticker, .live-product--arrow, .live-product--hanger, .live-product--banting[data-design-code^="CKC-"]').forEach(function (banner) {
                 if (banner.getBoundingClientRect().width === 0) {
                     return;
                 }
@@ -2728,7 +2728,7 @@ document.addEventListener('DOMContentLoaded', function () {
             attributeFilter: ['class', 'data-font-design-code', 'data-design-code', 'data-photo-design-code'],
         });
         const previewResizeObserver = new ResizeObserver(schedulePreviewNameFit);
-        document.querySelectorAll('.live-product--banner, .wedding-card-front, .live-product--sticker, .live-product--arrow, .live-product--hanger').forEach(function (banner) {
+        document.querySelectorAll('.live-product--banner, .wedding-card-front, .live-product--sticker, .live-product--arrow, .live-product--hanger, .live-product--banting[data-design-code^="CKC-"]').forEach(function (banner) {
             previewResizeObserver.observe(banner);
         });
         window.addEventListener('resize', schedulePreviewNameFit);
