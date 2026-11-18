@@ -7251,3 +7251,21 @@
     padding-left: 0;
     text-align: left;
 }
+
+
+/* Theme-only banners use the CKD-008 inward name alignment within their own text area. */
+.live-product.live-product--banner[data-design-artwork][data-design-code]:not(.has-live-customer-photo) .desa-product-copy-couple {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) calc(var(--preview-ampersand-width, 7.92%) + .6em) minmax(0, 1fr);
+    gap: 0;
+    margin: 0;
+    align-items: center;
+}
+.live-product.live-product--banner[data-design-artwork][data-design-code]:not(.has-live-customer-photo) .desa-product-copy-couple span:first-child {
+    padding-right: 0;
+    text-align: right;
+}
+.live-product.live-product--banner[data-design-artwork][data-design-code]:not(.has-live-customer-photo) .desa-product-copy-couple span:last-child {
+    padding-left: 0;
+    text-align: left;
+}
