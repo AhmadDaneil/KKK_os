@@ -7173,3 +7173,22 @@
 .wedding-card-front[data-design-artwork][data-design-code="CKD-006"] .desa-card-custom-couple span:last-child {
     padding-left: 0;
 }
+
+
+/* CKD-007 front names follow the right-arrow spacing around their printed ampersand. */
+.wedding-card-front[data-design-artwork][data-design-code="CKD-007"] .desa-card-custom-couple {
+    top: 20.51638%;
+    right: auto;
+    left: 47.708333%;
+    width: 92%;
+    margin: 0;
+    grid-template-columns: minmax(0, 1fr) calc(7.92% + .6em) minmax(0, 1fr);
+    gap: 0;
+    transform: translate(-50%, -50%);
+}
+.wedding-card-front[data-design-artwork][data-design-code="CKD-007"] .desa-card-custom-couple span:first-child {
+    padding-right: 0;
+}
+.wedding-card-front[data-design-artwork][data-design-code="CKD-007"] .desa-card-custom-couple span:last-child {
+    padding-left: 0;
+}
