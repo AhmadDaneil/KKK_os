@@ -8373,3 +8373,12 @@
     -webkit-text-stroke: 0;
     text-shadow: none;
 }
+
+
+/* Enlarge CKC-006 front names to the CKD-006 reference size while retaining stacked placement. */
+.wedding-card-front[data-design-artwork][data-design-code="CKC-006"][data-preview-artwork-slot="card-front"]:not(.has-live-customer-photo) {
+    --cartoon-groom-width: 45%;
+    --cartoon-bride-width: 45%;
+    --cartoon-groom-height: 11.25;
+    --cartoon-bride-height: 11.25;
+}
