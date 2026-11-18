@@ -8384,3 +8384,44 @@
     -webkit-text-stroke: 0;
     text-shadow: none;
 }
+
+
+/* Stack Arch names on every non-banner item except the already aligned hanger.
+   Garden and Nostalgia banners use the same top-and-bottom name arrangement. */
+:is(.wedding-card-front, .live-product)[data-design-code^="CKA-"][data-preview-artwork-slot]:not([data-preview-artwork-slot="banner"]):not([data-preview-artwork-slot="wooden-hanger"]) :is(.desa-card-custom-couple, .desa-product-copy-couple),
+.live-product.live-product--banner[data-design-artwork][data-design-code^="CKG-"]:not(.has-live-customer-photo) .desa-product-copy-couple,
+.live-product.live-product--banner[data-design-artwork][data-design-code^="CKN-"]:not(.has-live-customer-photo) .desa-product-copy-couple,
+.live-product.live-product--banner[data-design-artwork][data-design-code^="CKG-"].has-live-customer-photo .desa-product-copy-couple,
+.live-product.live-product--banner[data-design-artwork][data-design-code^="CKN-"].has-live-customer-photo .desa-product-copy-couple {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto auto auto;
+}
+
+:is(.wedding-card-front, .live-product)[data-design-code^="CKA-"][data-preview-artwork-slot]:not([data-preview-artwork-slot="banner"]):not([data-preview-artwork-slot="wooden-hanger"]) :is(.desa-card-custom-couple, .desa-product-copy-couple) > span:first-child,
+:is(.wedding-card-front, .live-product)[data-design-code^="CKA-"][data-preview-artwork-slot]:not([data-preview-artwork-slot="banner"]):not([data-preview-artwork-slot="wooden-hanger"]) :is(.desa-card-custom-couple, .desa-product-copy-couple) > span:last-child,
+.live-product.live-product--banner[data-design-artwork][data-design-code^="CKG-"]:not(.has-live-customer-photo) .desa-product-copy-couple > span:first-child,
+.live-product.live-product--banner[data-design-artwork][data-design-code^="CKG-"]:not(.has-live-customer-photo) .desa-product-copy-couple > span:last-child,
+.live-product.live-product--banner[data-design-artwork][data-design-code^="CKN-"]:not(.has-live-customer-photo) .desa-product-copy-couple > span:first-child,
+.live-product.live-product--banner[data-design-artwork][data-design-code^="CKN-"]:not(.has-live-customer-photo) .desa-product-copy-couple > span:last-child,
+.live-product.live-product--banner[data-design-artwork][data-design-code^="CKG-"].has-live-customer-photo .desa-product-copy-couple > span:first-child,
+.live-product.live-product--banner[data-design-artwork][data-design-code^="CKG-"].has-live-customer-photo .desa-product-copy-couple > span:last-child,
+.live-product.live-product--banner[data-design-artwork][data-design-code^="CKN-"].has-live-customer-photo .desa-product-copy-couple > span:first-child,
+.live-product.live-product--banner[data-design-artwork][data-design-code^="CKN-"].has-live-customer-photo .desa-product-copy-couple > span:last-child {
+    text-align: center;
+}
+
+/* Place Portrait VIP names side by side around the printed ampersand.
+   Keep the existing font family, weight, style, and size intact. */
+.live-product--vip-card[data-catalog-artwork][data-design-code^="CKP-"] .vip-card-person-name--groom {
+    top: 44.3%;
+    left: 27%;
+    width: 42%;
+    text-align: right;
+}
+
+.live-product--vip-card[data-catalog-artwork][data-design-code^="CKP-"] .vip-card-person-name--bride {
+    top: 44.3%;
+    left: 73%;
+    width: 42%;
+    text-align: left;
+}
