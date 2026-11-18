@@ -4019,3 +4019,176 @@
 .live-product[data-preview-artwork-slot="wooden-hanger"][data-font-design-code="CKS-224"] [data-preview-field="bride_display"] { font-family: "PSD WeddingNightRegular", cursive; font-weight: 400; font-style: normal; }
 .live-product[data-preview-artwork-slot="wooden-hanger"][data-font-design-code="CKS-224"] [data-preview-field="day_name_malay"] { font-family: "PSD Montserrat-Regular", cursive; font-weight: 700; font-style: normal; }
 .live-product[data-preview-artwork-slot="wooden-hanger"][data-font-design-code="CKS-224"] [data-preview-field="event_date"] { font-family: "PSD Montserrat-Regular", cursive; font-weight: 700; font-style: normal; }
+
+
+/* Acardia replaces the original CKM-014 Heartway name and Sticker date fields. */
+.wedding-card-front[data-font-design-code="CKM-014"] [data-preview-field="groom_display"] { font-family: "PSD Acardia-Regular", "PSD Montserrat-Regular", cursive; font-weight: 400; font-style: normal; }
+.wedding-card-front[data-font-design-code="CKM-014"] [data-preview-field="bride_display"] { font-family: "PSD Acardia-Regular", "PSD Montserrat-Regular", cursive; font-weight: 400; font-style: normal; }
+.live-product[data-preview-artwork-slot="sticker"][data-font-design-code="CKM-014"] [data-preview-field="groom_display"] { font-family: "PSD Acardia-Regular", "PSD Montserrat-Regular", cursive; font-weight: 400; font-style: normal; }
+.live-product[data-preview-artwork-slot="sticker"][data-font-design-code="CKM-014"] [data-preview-field="bride_display"] { font-family: "PSD Acardia-Regular", "PSD Montserrat-Regular", cursive; font-weight: 400; font-style: normal; }
+.live-product[data-preview-artwork-slot="sticker"][data-font-design-code="CKM-014"] [data-preview-field="event_date"] { font-family: "PSD Acardia-Regular", "PSD Montserrat-Regular", cursive; font-weight: 400; font-style: normal; }
+.live-product[data-preview-artwork-slot="arrow-left"][data-font-design-code="CKM-014"] [data-preview-field="groom_display"] { font-family: "PSD Acardia-Regular", "PSD Montserrat-Regular", cursive; font-weight: 400; font-style: normal; }
+.live-product[data-preview-artwork-slot="arrow-left"][data-font-design-code="CKM-014"] [data-preview-field="bride_display"] { font-family: "PSD Acardia-Regular", "PSD Montserrat-Regular", cursive; font-weight: 400; font-style: normal; }
+.live-product[data-preview-artwork-slot="arrow-right"][data-font-design-code="CKM-014"] [data-preview-field="groom_display"] { font-family: "PSD Acardia-Regular", "PSD Montserrat-Regular", cursive; font-weight: 400; font-style: normal; }
+.live-product[data-preview-artwork-slot="arrow-right"][data-font-design-code="CKM-014"] [data-preview-field="bride_display"] { font-family: "PSD Acardia-Regular", "PSD Montserrat-Regular", cursive; font-weight: 400; font-style: normal; }
+
+/* Complete the source Portrait names, dates and titles for each item. */
+.wedding-card-front[data-font-design-code="CKP-001"] [data-preview-field="groom_display"] { font-family: "PSD ChopinScript", serif; font-weight: 400; font-style: normal; }
+.wedding-card-front[data-font-design-code="CKP-001"] [data-preview-field="bride_display"] { font-family: "PSD ChopinScript", serif; font-weight: 400; font-style: normal; }
+.wedding-card-front[data-font-design-code="CKP-001"] [data-preview-field="day_name_malay"] { font-family: "PSD Montserrat-Regular", serif; font-weight: 400; font-style: normal; }
+.wedding-card-front[data-font-design-code="CKP-001"] [data-preview-field="event_date"] { font-family: "PSD Montserrat-Regular", serif; font-weight: 400; font-style: normal; }
+.live-product[data-preview-artwork-slot="sticker"][data-font-design-code="CKP-001"] [data-preview-field="groom_display"] { font-family: "PSD ChopinScript", serif; font-weight: 400; font-style: normal; }
+.live-product[data-preview-artwork-slot="sticker"][data-font-design-code="CKP-001"] [data-preview-field="bride_display"] { font-family: "PSD ChopinScript", serif; font-weight: 400; font-style: normal; }
+.live-product[data-preview-artwork-slot="sticker"][data-font-design-code="CKP-001"] [data-preview-field="day_name_malay"] { font-family: "PSD Montserrat-Regular", serif; font-weight: 600; font-style: normal; }
+.live-product[data-preview-artwork-slot="sticker"][data-font-design-code="CKP-001"] [data-preview-field="event_date"] { font-family: "PSD Montserrat-Regular", serif; font-weight: 700; font-style: normal; }
+.live-product[data-preview-artwork-slot="arrow-right"][data-font-design-code="CKP-001"] [data-preview-field="groom_display"] { font-family: "PSD ChopinScript", serif; font-weight: 400; font-style: normal; }
+.live-product[data-preview-artwork-slot="arrow-right"][data-font-design-code="CKP-001"] [data-preview-field="bride_display"] { font-family: "PSD ChopinScript", serif; font-weight: 400; font-style: normal; }
+.live-product[data-preview-artwork-slot="arrow-right"][data-font-design-code="CKP-001"] [data-preview-field="day_name_malay"] { font-family: "PSD Montserrat-Regular", serif; font-weight: 600; font-style: normal; }
+.live-product[data-preview-artwork-slot="arrow-right"][data-font-design-code="CKP-001"] [data-preview-field="event_date"] { font-family: "PSD Montserrat-Regular", serif; font-weight: 600; font-style: normal; }
+.live-product[data-preview-artwork-slot="arrow-left"][data-font-design-code="CKP-001"] [data-preview-field="groom_display"] { font-family: "PSD ChopinScript", serif; font-weight: 400; font-style: normal; }
+.live-product[data-preview-artwork-slot="arrow-left"][data-font-design-code="CKP-001"] [data-preview-field="bride_display"] { font-family: "PSD ChopinScript", serif; font-weight: 400; font-style: normal; }
+.live-product[data-preview-artwork-slot="arrow-left"][data-font-design-code="CKP-001"] [data-preview-field="day_name_malay"] { font-family: "PSD Montserrat-Regular", serif; font-weight: 600; font-style: normal; }
+.live-product[data-preview-artwork-slot="arrow-left"][data-font-design-code="CKP-001"] [data-preview-field="event_date"] { font-family: "PSD Montserrat-Regular", serif; font-weight: 600; font-style: normal; }
+.live-product[data-preview-artwork-slot="wooden-hanger"][data-font-design-code="CKP-001"] [data-preview-field="groom_display"] { font-family: "PSD WeddingNightRegular", serif; font-weight: 400; font-style: normal; }
+.live-product[data-preview-artwork-slot="wooden-hanger"][data-font-design-code="CKP-001"] [data-preview-field="bride_display"] { font-family: "PSD WeddingNightRegular", serif; font-weight: 400; font-style: normal; }
+.live-product[data-preview-artwork-slot="wooden-hanger"][data-font-design-code="CKP-001"] [data-preview-field="event_date"] { font-family: "PSD Montserrat-Regular", serif; font-weight: 700; font-style: normal; }
+.wedding-card-front[data-font-design-code="CKP-002"] [data-preview-field="groom_display"] { font-family: "PSD SantillanaDaughter-Regular", serif; font-weight: 400; font-style: normal; }
+.wedding-card-front[data-font-design-code="CKP-002"] [data-preview-field="bride_display"] { font-family: "PSD SantillanaDaughter-Regular", serif; font-weight: 400; font-style: normal; }
+.wedding-card-front[data-font-design-code="CKP-002"] [data-preview-field="day_name_malay"] { font-family: "PSD Montserrat-Regular", serif; font-weight: 600; font-style: normal; }
+.wedding-card-front[data-font-design-code="CKP-002"] [data-preview-field="event_date"] { font-family: "PSD Montserrat-Regular", serif; font-weight: 400; font-style: normal; }
+.live-product[data-preview-artwork-slot="sticker"][data-font-design-code="CKP-002"] [data-preview-field="groom_display"] { font-family: "PSD SantillanaDaughter-Regular", serif; font-weight: 400; font-style: normal; }
+.live-product[data-preview-artwork-slot="sticker"][data-font-design-code="CKP-002"] [data-preview-field="bride_display"] { font-family: "PSD SantillanaDaughter-Regular", serif; font-weight: 400; font-style: normal; }
+.live-product[data-preview-artwork-slot="sticker"][data-font-design-code="CKP-002"] [data-preview-field="day_name_malay"] { font-family: "PSD Montserrat-Regular", serif; font-weight: 600; font-style: normal; }
+.live-product[data-preview-artwork-slot="sticker"][data-font-design-code="CKP-002"] [data-preview-field="event_date"] { font-family: "PSD Montserrat-Regular", serif; font-weight: 700; font-style: normal; }
+.live-product[data-preview-artwork-slot="arrow-right"][data-font-design-code="CKP-002"] [data-preview-field="groom_display"] { font-family: "PSD SantillanaDaughter-Regular", serif; font-weight: 400; font-style: normal; }
+.live-product[data-preview-artwork-slot="arrow-right"][data-font-design-code="CKP-002"] [data-preview-field="bride_display"] { font-family: "PSD SantillanaDaughter-Regular", serif; font-weight: 400; font-style: normal; }
+.live-product[data-preview-artwork-slot="arrow-right"][data-font-design-code="CKP-002"] [data-preview-field="day_name_malay"] { font-family: "PSD Montserrat-Regular", serif; font-weight: 600; font-style: normal; }
+.live-product[data-preview-artwork-slot="arrow-right"][data-font-design-code="CKP-002"] [data-preview-field="event_date"] { font-family: "PSD Montserrat-Regular", serif; font-weight: 400; font-style: normal; }
+.live-product[data-preview-artwork-slot="arrow-left"][data-font-design-code="CKP-002"] [data-preview-field="groom_display"] { font-family: "PSD SantillanaDaughter-Regular", serif; font-weight: 400; font-style: normal; }
+.live-product[data-preview-artwork-slot="arrow-left"][data-font-design-code="CKP-002"] [data-preview-field="bride_display"] { font-family: "PSD SantillanaDaughter-Regular", serif; font-weight: 400; font-style: normal; }
+.live-product[data-preview-artwork-slot="arrow-left"][data-font-design-code="CKP-002"] [data-preview-field="day_name_malay"] { font-family: "PSD Montserrat-Regular", serif; font-weight: 600; font-style: normal; }
+.live-product[data-preview-artwork-slot="arrow-left"][data-font-design-code="CKP-002"] [data-preview-field="event_date"] { font-family: "PSD Montserrat-Regular", serif; font-weight: 400; font-style: normal; }
+.live-product[data-preview-artwork-slot="wooden-hanger"][data-font-design-code="CKP-002"] [data-preview-field="groom_display"] { font-family: "PSD WeddingNightRegular", serif; font-weight: 400; font-style: normal; }
+.live-product[data-preview-artwork-slot="wooden-hanger"][data-font-design-code="CKP-002"] [data-preview-field="bride_display"] { font-family: "PSD WeddingNightRegular", serif; font-weight: 400; font-style: normal; }
+.live-product[data-preview-artwork-slot="wooden-hanger"][data-font-design-code="CKP-002"] [data-preview-field="event_date"] { font-family: "PSD Montserrat-Regular", serif; font-weight: 700; font-style: normal; }
+.wedding-card-front[data-font-design-code="CKP-003"] [data-preview-field="groom_display"] { font-family: "PSD SpecialNightDemoRegular", serif; font-weight: 400; font-style: normal; }
+.wedding-card-front[data-font-design-code="CKP-003"] [data-preview-field="bride_display"] { font-family: "PSD SpecialNightDemoRegular", serif; font-weight: 400; font-style: normal; }
+.wedding-card-front[data-font-design-code="CKP-003"] [data-preview-field="day_name_malay"] { font-family: "PSD Montserrat-Regular", serif; font-weight: 500; font-style: normal; }
+.wedding-card-front[data-font-design-code="CKP-003"] [data-preview-field="event_date"] { font-family: "PSD Montserrat-Regular", serif; font-weight: 500; font-style: normal; }
+.live-product[data-preview-artwork-slot="sticker"][data-font-design-code="CKP-003"] [data-preview-field="groom_display"] { font-family: "PSD SpecialNightDemoRegular", serif; font-weight: 400; font-style: normal; }
+.live-product[data-preview-artwork-slot="sticker"][data-font-design-code="CKP-003"] [data-preview-field="bride_display"] { font-family: "PSD SpecialNightDemoRegular", serif; font-weight: 400; font-style: normal; }
+.live-product[data-preview-artwork-slot="sticker"][data-font-design-code="CKP-003"] [data-preview-field="day_name_malay"] { font-family: "PSD Montserrat-Regular", serif; font-weight: 500; font-style: normal; }
+.live-product[data-preview-artwork-slot="sticker"][data-font-design-code="CKP-003"] [data-preview-field="event_date"] { font-family: "PSD Montserrat-Regular", serif; font-weight: 400; font-style: normal; }
+.live-product[data-preview-artwork-slot="arrow-right"][data-font-design-code="CKP-003"] [data-preview-field="groom_display"] { font-family: "PSD SpecialNightDemoRegular", serif; font-weight: 400; font-style: normal; }
+.live-product[data-preview-artwork-slot="arrow-right"][data-font-design-code="CKP-003"] [data-preview-field="bride_display"] { font-family: "PSD SpecialNightDemoRegular", serif; font-weight: 400; font-style: normal; }
+.live-product[data-preview-artwork-slot="arrow-right"][data-font-design-code="CKP-003"] [data-preview-field="day_name_malay"] { font-family: "PSD Montserrat-Regular", serif; font-weight: 500; font-style: normal; }
+.live-product[data-preview-artwork-slot="arrow-right"][data-font-design-code="CKP-003"] [data-preview-field="event_date"] { font-family: "PSD Montserrat-Regular", serif; font-weight: 400; font-style: normal; }
+.live-product[data-preview-artwork-slot="arrow-left"][data-font-design-code="CKP-003"] [data-preview-field="groom_display"] { font-family: "PSD SpecialNightDemoRegular", serif; font-weight: 400; font-style: normal; }
+.live-product[data-preview-artwork-slot="arrow-left"][data-font-design-code="CKP-003"] [data-preview-field="bride_display"] { font-family: "PSD SpecialNightDemoRegular", serif; font-weight: 400; font-style: normal; }
+.live-product[data-preview-artwork-slot="arrow-left"][data-font-design-code="CKP-003"] [data-preview-field="day_name_malay"] { font-family: "PSD Montserrat-Regular", serif; font-weight: 500; font-style: normal; }
+.live-product[data-preview-artwork-slot="arrow-left"][data-font-design-code="CKP-003"] [data-preview-field="event_date"] { font-family: "PSD Montserrat-Regular", serif; font-weight: 400; font-style: normal; }
+.live-product[data-preview-artwork-slot="wooden-hanger"][data-font-design-code="CKP-003"] [data-preview-field="groom_display"] { font-family: "PSD WeddingNightRegular", serif; font-weight: 400; font-style: normal; }
+.live-product[data-preview-artwork-slot="wooden-hanger"][data-font-design-code="CKP-003"] [data-preview-field="bride_display"] { font-family: "PSD WeddingNightRegular", serif; font-weight: 400; font-style: normal; }
+.live-product[data-preview-artwork-slot="wooden-hanger"][data-font-design-code="CKP-003"] [data-preview-field="event_date"] { font-family: "PSD Montserrat-Regular", serif; font-weight: 700; font-style: normal; }
+.wedding-card-front[data-font-design-code="CKP-004"] [data-preview-field="groom_display"] { font-family: "PSD GreatVibes-Regular", serif; font-weight: 400; font-style: normal; }
+.wedding-card-front[data-font-design-code="CKP-004"] [data-preview-field="bride_display"] { font-family: "PSD GreatVibes-Regular", serif; font-weight: 400; font-style: normal; }
+.wedding-card-front[data-font-design-code="CKP-004"] [data-preview-field="day_name_malay"] { font-family: "PSD Montserrat-Regular", serif; font-weight: 600; font-style: normal; }
+.wedding-card-front[data-font-design-code="CKP-004"] [data-preview-field="event_date"] { font-family: "PSD Montserrat-Regular", serif; font-weight: 500; font-style: normal; }
+.live-product[data-preview-artwork-slot="sticker"][data-font-design-code="CKP-004"] [data-preview-field="groom_display"] { font-family: "PSD GreatVibes-Regular", serif; font-weight: 400; font-style: normal; }
+.live-product[data-preview-artwork-slot="sticker"][data-font-design-code="CKP-004"] [data-preview-field="bride_display"] { font-family: "PSD GreatVibes-Regular", serif; font-weight: 400; font-style: normal; }
+.live-product[data-preview-artwork-slot="sticker"][data-font-design-code="CKP-004"] [data-preview-field="day_name_malay"] { font-family: "PSD Montserrat-Regular", serif; font-weight: 600; font-style: normal; }
+.live-product[data-preview-artwork-slot="sticker"][data-font-design-code="CKP-004"] [data-preview-field="event_date"] { font-family: "PSD Montserrat-Regular", serif; font-weight: 500; font-style: normal; }
+.live-product[data-preview-artwork-slot="arrow-right"][data-font-design-code="CKP-004"] [data-preview-field="groom_display"] { font-family: "PSD GreatVibes-Regular", serif; font-weight: 400; font-style: normal; }
+.live-product[data-preview-artwork-slot="arrow-right"][data-font-design-code="CKP-004"] [data-preview-field="bride_display"] { font-family: "PSD GreatVibes-Regular", serif; font-weight: 400; font-style: normal; }
+.live-product[data-preview-artwork-slot="arrow-right"][data-font-design-code="CKP-004"] [data-preview-field="day_name_malay"] { font-family: "PSD Montserrat-Regular", serif; font-weight: 600; font-style: normal; }
+.live-product[data-preview-artwork-slot="arrow-right"][data-font-design-code="CKP-004"] [data-preview-field="event_date"] { font-family: "PSD Montserrat-Regular", serif; font-weight: 500; font-style: normal; }
+.live-product[data-preview-artwork-slot="arrow-left"][data-font-design-code="CKP-004"] [data-preview-field="groom_display"] { font-family: "PSD GreatVibes-Regular", serif; font-weight: 400; font-style: normal; }
+.live-product[data-preview-artwork-slot="arrow-left"][data-font-design-code="CKP-004"] [data-preview-field="bride_display"] { font-family: "PSD GreatVibes-Regular", serif; font-weight: 400; font-style: normal; }
+.live-product[data-preview-artwork-slot="arrow-left"][data-font-design-code="CKP-004"] [data-preview-field="day_name_malay"] { font-family: "PSD Montserrat-Regular", serif; font-weight: 600; font-style: normal; }
+.live-product[data-preview-artwork-slot="arrow-left"][data-font-design-code="CKP-004"] [data-preview-field="event_date"] { font-family: "PSD Montserrat-Regular", serif; font-weight: 500; font-style: normal; }
+.live-product[data-preview-artwork-slot="wooden-hanger"][data-font-design-code="CKP-004"] [data-preview-field="groom_display"] { font-family: "PSD WeddingNightRegular", serif; font-weight: 400; font-style: normal; }
+.live-product[data-preview-artwork-slot="wooden-hanger"][data-font-design-code="CKP-004"] [data-preview-field="bride_display"] { font-family: "PSD WeddingNightRegular", serif; font-weight: 400; font-style: normal; }
+.live-product[data-preview-artwork-slot="wooden-hanger"][data-font-design-code="CKP-004"] [data-preview-field="event_date"] { font-family: "PSD Montserrat-Regular", serif; font-weight: 700; font-style: normal; }
+.wedding-card-front[data-font-design-code="CKP-005"] [data-preview-field="groom_display"] { font-family: "PSD Baskervville", serif; font-weight: 600; font-style: normal; }
+.wedding-card-front[data-font-design-code="CKP-005"] [data-preview-field="bride_display"] { font-family: "PSD Baskervville", serif; font-weight: 600; font-style: normal; }
+.wedding-card-front[data-font-design-code="CKP-005"] [data-preview-field="day_name_malay"] { font-family: "PSD Montserrat-Regular", serif; font-weight: 600; font-style: normal; }
+.wedding-card-front[data-font-design-code="CKP-005"] [data-preview-field="event_date"] { font-family: "PSD Montserrat-Regular", serif; font-weight: 500; font-style: normal; }
+.live-product[data-preview-artwork-slot="sticker"][data-font-design-code="CKP-005"] [data-preview-field="groom_display"] { font-family: "PSD Baskerville-SemiBold", serif; font-weight: 600; font-style: normal; }
+.live-product[data-preview-artwork-slot="sticker"][data-font-design-code="CKP-005"] [data-preview-field="bride_display"] { font-family: "PSD Baskerville-SemiBold", serif; font-weight: 600; font-style: normal; }
+.live-product[data-preview-artwork-slot="sticker"][data-font-design-code="CKP-005"] [data-preview-field="day_name_malay"] { font-family: "PSD Montserrat-Regular", serif; font-weight: 600; font-style: normal; }
+.live-product[data-preview-artwork-slot="sticker"][data-font-design-code="CKP-005"] [data-preview-field="event_date"] { font-family: "PSD Montserrat-Regular", serif; font-weight: 500; font-style: normal; }
+.live-product[data-preview-artwork-slot="arrow-right"][data-font-design-code="CKP-005"] [data-preview-field="groom_display"] { font-family: "PSD Baskerville-SemiBold", serif; font-weight: 600; font-style: normal; }
+.live-product[data-preview-artwork-slot="arrow-right"][data-font-design-code="CKP-005"] [data-preview-field="bride_display"] { font-family: "PSD Baskerville-SemiBold", serif; font-weight: 600; font-style: normal; }
+.live-product[data-preview-artwork-slot="arrow-right"][data-font-design-code="CKP-005"] [data-preview-field="day_name_malay"] { font-family: "PSD Montserrat-Regular", serif; font-weight: 600; font-style: normal; }
+.live-product[data-preview-artwork-slot="arrow-right"][data-font-design-code="CKP-005"] [data-preview-field="event_date"] { font-family: "PSD Montserrat-Regular", serif; font-weight: 500; font-style: normal; }
+.live-product[data-preview-artwork-slot="arrow-left"][data-font-design-code="CKP-005"] [data-preview-field="groom_display"] { font-family: "PSD Baskerville-SemiBold", serif; font-weight: 600; font-style: normal; }
+.live-product[data-preview-artwork-slot="arrow-left"][data-font-design-code="CKP-005"] [data-preview-field="bride_display"] { font-family: "PSD Baskerville-SemiBold", serif; font-weight: 600; font-style: normal; }
+.live-product[data-preview-artwork-slot="arrow-left"][data-font-design-code="CKP-005"] [data-preview-field="day_name_malay"] { font-family: "PSD Montserrat-Regular", serif; font-weight: 600; font-style: normal; }
+.live-product[data-preview-artwork-slot="arrow-left"][data-font-design-code="CKP-005"] [data-preview-field="event_date"] { font-family: "PSD Montserrat-Regular", serif; font-weight: 500; font-style: normal; }
+.live-product[data-preview-artwork-slot="wooden-hanger"][data-font-design-code="CKP-005"] [data-preview-field="groom_display"] { font-family: "PSD WeddingNightRegular", serif; font-weight: 400; font-style: normal; }
+.live-product[data-preview-artwork-slot="wooden-hanger"][data-font-design-code="CKP-005"] [data-preview-field="bride_display"] { font-family: "PSD WeddingNightRegular", serif; font-weight: 400; font-style: normal; }
+.live-product[data-preview-artwork-slot="wooden-hanger"][data-font-design-code="CKP-005"] [data-preview-field="event_date"] { font-family: "PSD Montserrat-Regular", serif; font-weight: 700; font-style: normal; }
+.wedding-card-front[data-font-design-code="CKP-006"] [data-preview-field="groom_display"] { font-family: "PSD Baskerville-Regular", serif; font-weight: 400; font-style: normal; }
+.wedding-card-front[data-font-design-code="CKP-006"] [data-preview-field="bride_display"] { font-family: "PSD Baskerville-Regular", serif; font-weight: 400; font-style: normal; }
+.wedding-card-front[data-font-design-code="CKP-006"] [data-preview-field="day_name_malay"] { font-family: "PSD Montserrat-Regular", serif; font-weight: 500; font-style: normal; }
+.wedding-card-front[data-font-design-code="CKP-006"] [data-preview-field="event_date"] { font-family: "PSD Montserrat-Regular", serif; font-weight: 500; font-style: normal; }
+.live-product[data-preview-artwork-slot="sticker"][data-font-design-code="CKP-006"] [data-preview-field="groom_display"] { font-family: "PSD Baskerville-Regular", serif; font-weight: 400; font-style: normal; }
+.live-product[data-preview-artwork-slot="sticker"][data-font-design-code="CKP-006"] [data-preview-field="bride_display"] { font-family: "PSD Baskerville-Regular", serif; font-weight: 400; font-style: normal; }
+.live-product[data-preview-artwork-slot="sticker"][data-font-design-code="CKP-006"] [data-preview-field="day_name_malay"] { font-family: "PSD Montserrat-Regular", serif; font-weight: 500; font-style: normal; }
+.live-product[data-preview-artwork-slot="sticker"][data-font-design-code="CKP-006"] [data-preview-field="event_date"] { font-family: "PSD Montserrat-Regular", serif; font-weight: 500; font-style: normal; }
+.live-product[data-preview-artwork-slot="arrow-right"][data-font-design-code="CKP-006"] [data-preview-field="groom_display"] { font-family: "PSD Baskerville-Regular", serif; font-weight: 400; font-style: normal; }
+.live-product[data-preview-artwork-slot="arrow-right"][data-font-design-code="CKP-006"] [data-preview-field="bride_display"] { font-family: "PSD Baskerville-Regular", serif; font-weight: 400; font-style: normal; }
+.live-product[data-preview-artwork-slot="arrow-right"][data-font-design-code="CKP-006"] [data-preview-field="day_name_malay"] { font-family: "PSD Montserrat-Regular", serif; font-weight: 500; font-style: normal; }
+.live-product[data-preview-artwork-slot="arrow-right"][data-font-design-code="CKP-006"] [data-preview-field="event_date"] { font-family: "PSD Montserrat-Regular", serif; font-weight: 500; font-style: normal; }
+.live-product[data-preview-artwork-slot="arrow-left"][data-font-design-code="CKP-006"] [data-preview-field="groom_display"] { font-family: "PSD Baskerville-Regular", serif; font-weight: 400; font-style: normal; }
+.live-product[data-preview-artwork-slot="arrow-left"][data-font-design-code="CKP-006"] [data-preview-field="bride_display"] { font-family: "PSD Baskerville-Regular", serif; font-weight: 400; font-style: normal; }
+.live-product[data-preview-artwork-slot="arrow-left"][data-font-design-code="CKP-006"] [data-preview-field="day_name_malay"] { font-family: "PSD Montserrat-Regular", serif; font-weight: 500; font-style: normal; }
+.live-product[data-preview-artwork-slot="arrow-left"][data-font-design-code="CKP-006"] [data-preview-field="event_date"] { font-family: "PSD Montserrat-Regular", serif; font-weight: 500; font-style: normal; }
+.live-product[data-preview-artwork-slot="wooden-hanger"][data-font-design-code="CKP-006"] [data-preview-field="groom_display"] { font-family: "PSD WeddingNightRegular", serif; font-weight: 400; font-style: normal; }
+.live-product[data-preview-artwork-slot="wooden-hanger"][data-font-design-code="CKP-006"] [data-preview-field="bride_display"] { font-family: "PSD WeddingNightRegular", serif; font-weight: 400; font-style: normal; }
+.live-product[data-preview-artwork-slot="wooden-hanger"][data-font-design-code="CKP-006"] [data-preview-field="event_date"] { font-family: "PSD Montserrat-Regular", serif; font-weight: 700; font-style: normal; }
+.wedding-card-front[data-font-design-code="CKP-007"] [data-preview-field="groom_display"] { font-family: "PSD Baskerville-Regular", serif; font-weight: 400; font-style: normal; }
+.wedding-card-front[data-font-design-code="CKP-007"] [data-preview-field="bride_display"] { font-family: "PSD Baskerville-Regular", serif; font-weight: 400; font-style: normal; }
+.wedding-card-front[data-font-design-code="CKP-007"] [data-preview-field="day_name_malay"] { font-family: "PSD Montserrat-Regular", serif; font-weight: 400; font-style: normal; }
+.wedding-card-front[data-font-design-code="CKP-007"] [data-preview-field="event_date"] { font-family: "PSD Montserrat-Regular", serif; font-weight: 400; font-style: normal; }
+.live-product[data-preview-artwork-slot="sticker"][data-font-design-code="CKP-007"] [data-preview-field="groom_display"] { font-family: "PSD Baskerville-Regular", serif; font-weight: 400; font-style: normal; }
+.live-product[data-preview-artwork-slot="sticker"][data-font-design-code="CKP-007"] [data-preview-field="bride_display"] { font-family: "PSD Baskerville-Regular", serif; font-weight: 400; font-style: normal; }
+.live-product[data-preview-artwork-slot="sticker"][data-font-design-code="CKP-007"] [data-preview-field="day_name_malay"] { font-family: "PSD Montserrat-Regular", serif; font-weight: 400; font-style: normal; }
+.live-product[data-preview-artwork-slot="sticker"][data-font-design-code="CKP-007"] [data-preview-field="event_date"] { font-family: "PSD Montserrat-Regular", serif; font-weight: 400; font-style: normal; }
+.live-product[data-preview-artwork-slot="arrow-right"][data-font-design-code="CKP-007"] [data-preview-field="groom_display"] { font-family: "PSD Baskerville-Regular", serif; font-weight: 400; font-style: normal; }
+.live-product[data-preview-artwork-slot="arrow-right"][data-font-design-code="CKP-007"] [data-preview-field="bride_display"] { font-family: "PSD Baskerville-Regular", serif; font-weight: 400; font-style: normal; }
+.live-product[data-preview-artwork-slot="arrow-right"][data-font-design-code="CKP-007"] [data-preview-field="day_name_malay"] { font-family: "PSD Montserrat-Regular", serif; font-weight: 600; font-style: normal; }
+.live-product[data-preview-artwork-slot="arrow-right"][data-font-design-code="CKP-007"] [data-preview-field="event_date"] { font-family: "PSD Montserrat-Regular", serif; font-weight: 600; font-style: normal; }
+.live-product[data-preview-artwork-slot="arrow-left"][data-font-design-code="CKP-007"] [data-preview-field="groom_display"] { font-family: "PSD Baskerville-Regular", serif; font-weight: 400; font-style: normal; }
+.live-product[data-preview-artwork-slot="arrow-left"][data-font-design-code="CKP-007"] [data-preview-field="bride_display"] { font-family: "PSD Baskerville-Regular", serif; font-weight: 400; font-style: normal; }
+.live-product[data-preview-artwork-slot="arrow-left"][data-font-design-code="CKP-007"] [data-preview-field="day_name_malay"] { font-family: "PSD Montserrat-Regular", serif; font-weight: 600; font-style: normal; }
+.live-product[data-preview-artwork-slot="arrow-left"][data-font-design-code="CKP-007"] [data-preview-field="event_date"] { font-family: "PSD Montserrat-Regular", serif; font-weight: 600; font-style: normal; }
+.live-product[data-preview-artwork-slot="wooden-hanger"][data-font-design-code="CKP-007"] [data-preview-field="groom_display"] { font-family: "PSD WeddingNightRegular", serif; font-weight: 400; font-style: normal; }
+.live-product[data-preview-artwork-slot="wooden-hanger"][data-font-design-code="CKP-007"] [data-preview-field="bride_display"] { font-family: "PSD WeddingNightRegular", serif; font-weight: 400; font-style: normal; }
+.live-product[data-preview-artwork-slot="wooden-hanger"][data-font-design-code="CKP-007"] [data-preview-field="event_date"] { font-family: "PSD Montserrat-Regular", serif; font-weight: 700; font-style: normal; }
+.wedding-card-front[data-font-design-code="CKP-008"] [data-preview-field="groom_display"] { font-family: "PSD BaskOldFace", serif; font-weight: 400; font-style: normal; }
+.wedding-card-front[data-font-design-code="CKP-008"] [data-preview-field="bride_display"] { font-family: "PSD BaskOldFace", serif; font-weight: 400; font-style: normal; }
+.wedding-card-front[data-font-design-code="CKP-008"] [data-preview-field="day_name_malay"] { font-family: "PSD Montserrat-Regular", serif; font-weight: 600; font-style: normal; }
+.wedding-card-front[data-font-design-code="CKP-008"] [data-preview-field="event_date"] { font-family: "PSD Montserrat-Regular", serif; font-weight: 600; font-style: normal; }
+.live-product[data-preview-artwork-slot="sticker"][data-font-design-code="CKP-008"] [data-preview-field="groom_display"] { font-family: "PSD BaskOldFace", serif; font-weight: 400; font-style: normal; }
+.live-product[data-preview-artwork-slot="sticker"][data-font-design-code="CKP-008"] [data-preview-field="bride_display"] { font-family: "PSD BaskOldFace", serif; font-weight: 400; font-style: normal; }
+.live-product[data-preview-artwork-slot="sticker"][data-font-design-code="CKP-008"] [data-preview-field="day_name_malay"] { font-family: "PSD Montserrat-Regular", serif; font-weight: 600; font-style: normal; }
+.live-product[data-preview-artwork-slot="sticker"][data-font-design-code="CKP-008"] [data-preview-field="event_date"] { font-family: "PSD Montserrat-Regular", serif; font-weight: 600; font-style: normal; }
+.live-product[data-preview-artwork-slot="arrow-right"][data-font-design-code="CKP-008"] [data-preview-field="groom_display"] { font-family: "PSD BaskOldFace", serif; font-weight: 400; font-style: normal; }
+.live-product[data-preview-artwork-slot="arrow-right"][data-font-design-code="CKP-008"] [data-preview-field="bride_display"] { font-family: "PSD BaskOldFace", serif; font-weight: 400; font-style: normal; }
+.live-product[data-preview-artwork-slot="arrow-right"][data-font-design-code="CKP-008"] [data-preview-field="day_name_malay"] { font-family: "PSD Montserrat-Regular", serif; font-weight: 600; font-style: normal; }
+.live-product[data-preview-artwork-slot="arrow-right"][data-font-design-code="CKP-008"] [data-preview-field="event_date"] { font-family: "PSD Montserrat-Regular", serif; font-weight: 600; font-style: normal; }
+.live-product[data-preview-artwork-slot="arrow-left"][data-font-design-code="CKP-008"] [data-preview-field="groom_display"] { font-family: "PSD BaskOldFace", serif; font-weight: 400; font-style: normal; }
+.live-product[data-preview-artwork-slot="arrow-left"][data-font-design-code="CKP-008"] [data-preview-field="bride_display"] { font-family: "PSD BaskOldFace", serif; font-weight: 400; font-style: normal; }
+.live-product[data-preview-artwork-slot="arrow-left"][data-font-design-code="CKP-008"] [data-preview-field="day_name_malay"] { font-family: "PSD Montserrat-Regular", serif; font-weight: 600; font-style: normal; }
+.live-product[data-preview-artwork-slot="arrow-left"][data-font-design-code="CKP-008"] [data-preview-field="event_date"] { font-family: "PSD Montserrat-Regular", serif; font-weight: 600; font-style: normal; }
+.live-product[data-preview-artwork-slot="wooden-hanger"][data-font-design-code="CKP-008"] [data-preview-field="groom_display"] { font-family: "PSD WeddingNightRegular", serif; font-weight: 400; font-style: normal; }
+.live-product[data-preview-artwork-slot="wooden-hanger"][data-font-design-code="CKP-008"] [data-preview-field="bride_display"] { font-family: "PSD WeddingNightRegular", serif; font-weight: 400; font-style: normal; }
+.live-product[data-preview-artwork-slot="wooden-hanger"][data-font-design-code="CKP-008"] [data-preview-field="event_date"] { font-family: "PSD Montserrat-Regular", serif; font-weight: 700; font-style: normal; }
+
+/* Preserve the full ascenders and flourishes of the source Portrait fonts. */
+.wedding-card-front[data-design-artwork][data-font-design-code^="CKP-"] .desa-card-custom-couple > span,
+.live-product[data-design-artwork][data-font-design-code^="CKP-"] .desa-product-copy-couple > span {
+    overflow: visible;
+    text-overflow: clip;
+}
