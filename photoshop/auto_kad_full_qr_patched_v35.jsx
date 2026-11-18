@@ -1393,6 +1393,27 @@ function kkkCoverGeometry(sourceW, sourceH, box, focusX, focusY) {
     };
 }
 
+
+function kkkVisiblePhotoMaskBox(doc, mask) {
+    var bounds = _boundsPx(mask);
+    var left = Math.max(0, bounds.x);
+    var top = Math.max(0, bounds.y);
+    var right = Math.min(doc.width.as("px"), bounds.x + bounds.w);
+    var bottom = Math.min(doc.height.as("px"), bounds.y + bounds.h);
+    if (right <= left || bottom <= top) throw new Error("Mask gambar tidak mempunyai kawasan visible.");
+    return {x: left, y: top, w: right - left, h: bottom - top,
+        cx: (left + right) / 2, cy: (top + bottom) / 2};
+}
+
+function kkkContainGeometry(sourceW, sourceH, box) {
+    if (!(sourceW > 0 && sourceH > 0 && box.w > 0 && box.h > 0)) {
+        throw new Error("Dimensi gambar/bingkai tidak sah.");
+    }
+    // Leave room inside the brush edge for faces near the photograph's sides.
+    var scale = Math.min(box.w / sourceW, box.h / sourceH) * 0.90;
+    return {scale: scale, w: sourceW * scale, h: sourceH * scale};
+}
+
 function kkkWalkLayers(container, visitor) {
     for (var i = 0; i < container.layers.length; i++) {
         var layer = container.layers[i];
@@ -1726,12 +1747,17 @@ function kkkInsertFramedPortrait(doc, imagePath, item, placeBehindArtwork, fallb
     var oldUnits = app.preferences.rulerUnits;
     var photoDoc = null, imported = null, group = null, matteLayer = null, hidden = [];
     var frame, stack;
+    var editablePhotoFill = item === "BANNER" || item === "BANTING";
     try {
         if (!imagePath || !(new File(imagePath)).exists) throw new Error("Gambar pengantin tidak ditemui.");
         app.activeDocument = doc;
         app.preferences.rulerUnits = Units.PIXELS;
         frame = kkkFrameForDocument(doc, item, fallbackFrames);
         stack = kkkPhotoStack(doc);
+        if (editablePhotoFill && !frame.marker) {
+            frame.box = kkkVisiblePhotoMaskBox(doc, stack.base);
+            frame.source = "original-mask-visible-bounds:" + item;
+        }
 
         // Keep all original layers for editability; hide only the old photo stack.
         group = doc.layerSets.add();
@@ -1763,7 +1789,22 @@ function kkkInsertFramedPortrait(doc, imagePath, item, placeBehindArtwork, fallb
         imported = doc.activeLayer;
 
         var before = _boundsPx(imported);
-        var placement = kkkCoverGeometry(before.w, before.h, frame.box, 0.5, 0.5);
+        var placement = editablePhotoFill
+            ? kkkContainGeometry(before.w, before.h, frame.box)
+            : kkkCoverGeometry(before.w, before.h, frame.box, 0.5, 0.5);
+        if (editablePhotoFill) {
+            var coverFill = imported.duplicate(group, ElementPlacement.INSIDE);
+            coverFill.move(brush, ElementPlacement.PLACEBEFORE);
+            coverFill.name = "Gambar Pengantin - fixed edge fill (keep below adjustable photo)";
+            coverFill.allLocked = false;
+            var fillGeometry = kkkCoverGeometry(before.w, before.h, frame.box, 0.5, 0.5);
+            coverFill.resize(fillGeometry.scale * 100, fillGeometry.scale * 100, AnchorPosition.MIDDLECENTER);
+            kkkPositionPhoto(coverFill, frame.box, 0.5, 0.5);
+            coverFill.grouped = true;
+            coverFill.allLocked = true;
+            imported.move(coverFill, ElementPlacement.PLACEBEFORE);
+            doc.activeLayer = imported;
+        }
         // Same percentage on both axes: original image proportions are preserved.
         imported.resize(placement.scale * 100, placement.scale * 100, AnchorPosition.MIDDLECENTER);
         var cropState = kkkPositionPhoto(imported, frame.box, 0.5, 0.5);
@@ -1808,11 +1849,11 @@ function kkkInsertFramedPortrait(doc, imagePath, item, placeBehindArtwork, fallb
             !kkkReviewCrop(doc, imported, frame.box, cropState, forceCropReview ? "Banting" : null)) {
             throw new Error("Operator melangkau crop item ini.");
         }
-        if (item === "BANNER" && placeBehindArtwork === false) {
-            kkkBringNamedLayerAbovePhoto(doc, "SIGNATURE BANNER", group);
+        if (editablePhotoFill) {
+            kkkBringNamedLayerAbovePhoto(doc, item === "BANNER" ? "SIGNATURE BANNER" : "SIGNATURE BANTING", group);
         }
         LAST_PORTRAIT_IMAGE_LAYER = imported.name;
-        LAST_PORTRAIT_IMAGE_METHOD = "V33 uniform-cover + clipping-mask + original-brush + " +
+        LAST_PORTRAIT_IMAGE_METHOD = (editablePhotoFill ? "contain-main + fixed-cover-fill + original-mask-bounds + " : "V33 uniform-cover + ") + "clipping-mask + original-brush + " +
             (placeBehindArtwork === false ? "above-artwork" : "behind-artwork") + " | " + frame.source;
         return {box: frame.box, source: frame.source};
     } catch (error) {
@@ -2237,11 +2278,11 @@ try{
             } else if (templatePhotoItem !== "" && gambarPath !== "" && !isThemeBannerBanting) {
                 try {
                     var templatePhotoResult;
-                    if (templatePhotoItem === "BANNER") {
+                    if (templatePhotoItem === "BANNER" || templatePhotoItem === "BANTING") {
                         // Banner PSDs have a real Mask/clipping stack; replace its
                         // photo contents and keep the masked image above the artwork.
                         templatePhotoResult = kkkInsertFramedPortrait(
-                            doc, gambarPath, "BANNER", false, KKK_TEMPLATE_PHOTO_FRAMES
+                            doc, gambarPath, templatePhotoItem, false, KKK_TEMPLATE_PHOTO_FRAMES
                         );
                     } else {
                         // Banting uses the couple photo as its full-canvas background.
