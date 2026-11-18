@@ -2665,6 +2665,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 banner.querySelectorAll('.desa-product-copy-couple > span, .desa-card-custom-couple > span').forEach(function (name) {
                     name.style.removeProperty('font-size');
                     name.style.removeProperty('scale');
+                    name.style.removeProperty('translate');
                     const style = getComputedStyle(name);
                     const availableWidth = name.clientWidth
                         - parseFloat(style.paddingLeft || 0)
@@ -2672,12 +2673,13 @@ document.addEventListener('DOMContentLoaded', function () {
                     if (availableWidth <= 0 || !name.textContent.trim()) {
                         return;
                     }
-                    const maximumSize = parseFloat(style.fontSize);
+                    const stackedHeight = parseFloat(style.getPropertyValue('--cartoon-name-height')) || 0;
+                    const maximumSize = stackedHeight > 0 ? banner.getBoundingClientRect().height * stackedHeight / 100 * 4 : parseFloat(style.fontSize);
                     const heightRatio = banner.classList.contains('wedding-card-front') ? 0.10
                         : banner.classList.contains('live-product--arrow') ? 0.12
                         : banner.classList.contains('live-product--hanger') ? 0.24
                         : banner.classList.contains('live-product--sticker') ? 0.20 : 0.16;
-                    const maximumHeight = banner.getBoundingClientRect().height * heightRatio;
+                    const maximumHeight = banner.getBoundingClientRect().height * (stackedHeight > 0 ? stackedHeight / 100 : heightRatio);
                     let low = 0.1;
                     let high = maximumSize;
                     for (let step = 0; step < 16; step++) {
@@ -2703,6 +2705,11 @@ document.addEventListener('DOMContentLoaded', function () {
                     const fittedWidth = Math.max(fittedMetrics.width,
                         Math.abs(fittedMetrics.actualBoundingBoxLeft || 0) + Math.abs(fittedMetrics.actualBoundingBoxRight || 0))
                         + Math.max(0, name.textContent.trim().length - 1) * (parseFloat(fittedStyle.letterSpacing) || 0);
+                    if (stackedHeight > 0 && fittedMetrics.fontBoundingBoxAscent !== undefined) {
+                        const inkOffset = (fittedMetrics.fontBoundingBoxAscent - fittedMetrics.fontBoundingBoxDescent
+                            - fittedMetrics.actualBoundingBoxAscent + fittedMetrics.actualBoundingBoxDescent) / 2;
+                        name.style.translate = '0 ' + (-inkOffset) + 'px';
+                    }
                     if (fittedWidth > availableWidth * 0.88) {
                         name.style.scale = String(availableWidth * 0.88 / fittedWidth);
                     }
