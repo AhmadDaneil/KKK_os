@@ -7461,3 +7461,30 @@
 .live-product:is(.live-product--banting, .live-product--arrow)[data-font-design-code^="CKA-"] .desa-product-copy-couple > span {
     font-size: clamp(1rem, 3.6vw, 1.9rem);
 }
+
+
+/* Match CKP-001 customer photos to the mask in the displayed PSD artwork. */
+.live-product.has-live-customer-photo[data-design-code]:is([data-photo-design-code="CKP-001"], [data-design-code="CKP-001"]) > :is(.live-product-customer-photo, .catalog-preview-photo):not([hidden]) {
+    clip-path: none;
+    object-fit: cover;
+    object-position: center;
+    -webkit-mask-repeat: no-repeat;
+    mask-repeat: no-repeat;
+    -webkit-mask-size: 100% 100%;
+    mask-size: 100% 100%;
+    mask-mode: alpha;
+}
+.live-product.live-product--banner.has-live-customer-photo[data-design-code]:is([data-photo-design-code="CKP-001"], [data-design-code="CKP-001"]) > :is(.live-product-customer-photo, .catalog-preview-photo):not([hidden]) {
+    inset: 0 auto auto 0;
+    width: 49.666667%;
+    height: 100%;
+    -webkit-mask-image: url("/images/designs/portrait/CKP-001/banner-aligned-photo-mask.webp");
+    mask-image: url("/images/designs/portrait/CKP-001/banner-aligned-photo-mask.webp");
+}
+.live-product.live-product--banting.has-live-customer-photo[data-design-code]:is([data-photo-design-code="CKP-001"], [data-design-code="CKP-001"]) > :is(.live-product-customer-photo, .catalog-preview-photo):not([hidden]) {
+    inset: 23.416667% auto auto 0;
+    width: 100%;
+    height: 76.583333%;
+    -webkit-mask-image: url("/images/designs/portrait/CKP-001/bunting-aligned-photo-mask.webp");
+    mask-image: url("/images/designs/portrait/CKP-001/bunting-aligned-photo-mask.webp");
+}
