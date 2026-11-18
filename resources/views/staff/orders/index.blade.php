@@ -5,7 +5,7 @@
     $ordersIndexRoute = $isAdminPortal ? 'admin.orders.index' : 'staff.orders.index';
     $ordersShowRoute = $isAdminPortal ? 'admin.orders.show' : 'staff.orders.show';
     $workstreamDescriptions = [
-        'design' => 'Orders requiring design, design review or corrections.',
+        'design' => 'Orders requiring design, internal review or corrections.',
         'printing' => 'Orders awaiting or undergoing production.',
         'packing' => 'Printed orders that still need packing by Operations Management.',
         'fulfilment' => 'Packed orders awaiting delivery or pickup.',
@@ -38,7 +38,7 @@
         'DETAILS_CONFIRMED' => 'Details Confirmed',
         'READY_FOR_DESIGN' => 'Ready for Design',
         'DESIGN_IN_PROGRESS' => 'Design in Progress',
-        'DESIGN_READY' => 'Awaiting Design Review',
+        'DESIGN_READY' => 'Internal Design Review',
         'CORRECTION_REQUESTED' => 'Correction Required',
         'DESIGN_APPROVED' => 'Design Approved',
         'BALANCE_PENDING' => 'Awaiting Balance Payment',
@@ -68,7 +68,7 @@
         'BOOKED', 'DEPOSIT_PAID' => 'Review customer order details',
         'DETAILS_CONFIRMED', 'READY_FOR_DESIGN' => 'Start or assign design work',
         'DESIGN_IN_PROGRESS' => 'Continue design work',
-        'DESIGN_READY' => 'Review the completed design',
+        'DESIGN_READY' => 'Complete internal review of the design',
         'CORRECTION_REQUESTED' => 'Complete design corrections',
         'DESIGN_APPROVED', 'BALANCE_PENDING' => 'Review balance payment',
         'PAID', 'READY_FOR_PRINT' => 'Start production',
