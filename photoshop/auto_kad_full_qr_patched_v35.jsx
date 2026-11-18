@@ -996,6 +996,48 @@ function centerShortNamesAroundAmpersand(doc){
     }catch(e){ return false; }
 }
 
+
+function kkkPairNameSlots(amp, canvasWidth, isBanner) {
+    var gap = canvasWidth * (isBanner ? 0.015 : 0.012);
+    var halfWidth = Math.min(canvasWidth * (isBanner ? 0.23 : 0.43),
+        amp.cx - canvasWidth * 0.03, canvasWidth * 0.97 - amp.cx);
+    return {leftEdge: amp.cx - halfWidth, rightEdge: amp.cx + halfWidth,
+        leftEnd: amp.x - gap, rightStart: amp.x + amp.w + gap, centerY: amp.cy};
+}
+
+function kkkAlignProductNamesToAmpersand(doc, isBanner, leftAnchor, rightAnchor) {
+    var left = findLayerByNames(doc, ["singkatanlelaki"]);
+    var right = findLayerByNames(doc, ["singkatanperempuan"]);
+    if (!left || !right || left.kind !== LayerKind.TEXT || right.kind !== LayerKind.TEXT) return false;
+    var targetY = leftAnchor && rightAnchor ? (leftAnchor.cy + rightAnchor.cy) / 2 : _boundsPx(left).cy;
+    var amp = null, distance = Number.MAX_VALUE;
+    kkkWalkLayers(doc, function(layer) {
+        var name = t(layer.name).toLowerCase();
+        if ((name === "&" || name === "&amp;") && kkkEffectiveVisible(layer)) {
+            var difference = Math.abs(_boundsPx(layer).cy - targetY);
+            if (difference < distance) { amp = layer; distance = difference; }
+        }
+    });
+    if (!amp) return false;
+    var box = _boundsPx(amp);
+    var slots = kkkPairNameSlots(box, doc.width.as("px"), isBanner);
+    var leftWidth = slots.leftEnd - slots.leftEdge;
+    var rightWidth = slots.rightEdge - slots.rightStart;
+    if (!(leftWidth > 0 && rightWidth > 0)) return false;
+    app.activeDocument = doc;
+    var names = [left, right], widths = [leftWidth, rightWidth];
+    for (var i = 0; i < names.length; i++) {
+        var bounds = _boundsPx(names[i]);
+        if (!(bounds.w > 0 && bounds.h > 0)) continue;
+        var scale = Math.min(1, widths[i] / bounds.w);
+        if (scale < 1) names[i].resize(scale * 100, scale * 100, AnchorPosition.MIDDLECENTER);
+        bounds = _boundsPx(names[i]);
+        var x = i === 0 ? slots.leftEnd - bounds.w : slots.rightStart;
+        names[i].translate(UnitValue(x - bounds.x, "px"), UnitValue(slots.centerY - bounds.cy, "px"));
+    }
+    return true;
+}
+
 function hasCustomerPhotoLayer(doc){
     return findLayerByNames(doc, ["gambar", "cardimage", "card_image", "gambar pengantin", "pengantin", "photo", "image"]) !== null;
 }
@@ -2161,9 +2203,8 @@ try{
             // "namapengantinperempuan" / "singkatanperempuan" = BOTTOM position
             // Values are swapped only for PEREMPUAN.
             //
-            // For Portrait Banner/Banting we need one extra rule:
-            // keep template layout, BUT if one short name is visually short,
-            // center that individual name on its own original template anchor.
+            // Capture original name anchors before replacing customer text so the
+            // product layout can select the matching visible ampersand.
             var singAtasAnchorBefore  = getTextLayerAnchorInfo(doc, "singkatanlelaki");
             var singBawahAnchorBefore = getTextLayerAnchorInfo(doc, "singkatanperempuan");
 
@@ -2172,45 +2213,22 @@ try{
             setTextIfExistsInDoc(doc, "singkatanlelaki", singAtas);
             setTextIfExistsInDoc(doc, "singkatanperempuan", singBawah);
 
-            // Layout singkatan:
-            // - KAD DEPAN: guna alignment khas sekitar "&".
-            // - PORTRAIT BANNER / BANTING:
-            //     ikut template 100%, tetapi jika nama singkatan nampak pendek,
-            //     center nama tersebut pada anchor asal template.
-            // - BANNER / BANTING lain: jangan gerakkan layer singkatan.
-            // - Template lain: kekalkan behaviour centering lama.
             var currentTplNameForLayout = (new File(tplPath)).name.toLowerCase();
-            try{ currentTplNameForLayout = decodeURI(currentTplNameForLayout); }catch(layoutNameDecodeErr){}
-
-            var isKadDepanLayout = (currentTplNameForLayout.indexOf("kad depan") >= 0);
-            var isBannerLayout   = (currentTplNameForLayout.indexOf("banner") >= 0);
-            var isBantingLayout  = (currentTplNameForLayout.indexOf("banting") >= 0);
-            var isPortraitLayout = isPortraitDesign(tema, tplPath, currentTplNameForLayout);
-
-            if(isKadDepanLayout){
+            try { currentTplNameForLayout = decodeURI(currentTplNameForLayout); } catch (layoutNameDecodeErr) {}
+            var isKadDepanLayout = currentTplNameForLayout.indexOf("kad depan") >= 0;
+            var isBannerLayout = currentTplNameForLayout.indexOf("banner") >= 0;
+            var isProductPairLayout = isBannerLayout || currentTplNameForLayout.indexOf("banting") >= 0 ||
+                currentTplNameForLayout.indexOf("bunting") >= 0 || currentTplNameForLayout.indexOf("arrow") >= 0 ||
+                currentTplNameForLayout.indexOf("sticker") >= 0 || currentTplNameForLayout.indexOf("hanger") >= 0;
+            if (isKadDepanLayout) {
                 centerShortNamesAroundAmpersand(doc);
-            }else if(isPortraitLayout && (isBannerLayout || isBantingLayout)){
-                var shortCenterResult = centerShortNamesForPortraitBannerBanting(
-                    doc,
-                    singAtas,
-                    singBawah,
-                    singAtasAnchorBefore,
-                    singBawahAnchorBefore
+            } else if (isProductPairLayout) {
+                var pairAligned = kkkAlignProductNamesToAmpersand(
+                    doc, isBannerLayout, singAtasAnchorBefore, singBawahAnchorBefore
                 );
-                logBoth(
-                    logPath,
-                    custLogPath,
-                    "[LAYOUT] " + currentTplNameForLayout +
-                    " | ikut template portrait | singkatan atas=" + singAtas +
-                    (shortCenterResult.topCentered ? " [CENTERED]" : " [AS TEMPLATE]") +
-                    " | singkatan bawah=" + singBawah +
-                    (shortCenterResult.bottomCentered ? " [CENTERED]" : " [AS TEMPLATE]")
-                );
-            }else if(isBannerLayout || isBantingLayout){
-                // Deliberately do nothing:
-                // preserve exact X/Y position, baseline, spacing and composition
-                // of singkatanlelaki / singkatanperempuan / "&" from the master template.
-            }else{
+                logBoth(logPath, custLogPath, "[LAYOUT] " + currentTplNameForLayout +
+                    (pairAligned ? " | names aligned around original ampersand" : " | no usable name pair; template retained"));
+            } else {
                 centerLayerGroupInDocument(doc, ["singkatanlelaki", "&", "&amp;", "singkatanperempuan"]);
             }
             setTextIfExistsInDoc(doc, "nama1", nama1); setTextIfExistsInDoc(doc, "notel1", notel1);
