@@ -8363,3 +8363,13 @@
 :is(.wedding-card-front, .live-product)[data-design-artwork][data-design-code^="CKI-"][data-preview-artwork-slot]:not(.has-live-customer-photo) :is(.desa-card-custom-copy, .desa-product-custom-copy) :is([data-preview-field="event_date"], .desa-card-custom-date, .desa-product-copy-date) { color: var(--islamic-date-color); -webkit-text-stroke: 0; text-shadow: none; }
 :is(.wedding-card-front, .live-product)[data-design-artwork][data-design-code^="CKI-"][data-preview-artwork-slot]:not(.has-live-customer-photo) :is(.desa-card-custom-copy, .desa-product-custom-copy) .desa-product-copy-subtitle { color: var(--islamic-subtitle-color); -webkit-text-stroke: 0; text-shadow: none; }
 :is(.wedding-card-front, .live-product)[data-design-artwork][data-design-code^="CKI-"][data-preview-artwork-slot]:not(.has-live-customer-photo) :is(.desa-card-custom-copy, .desa-product-custom-copy) .desa-product-copy-quote { color: var(--islamic-quote-color); -webkit-text-stroke: 0; text-shadow: none; }
+
+
+/* All Wooden Hanger lettering uses the same charcoal as the master artwork. */
+.live-product--hanger :is(.desa-product-custom-copy, .desa-product-generic-copy) :is([data-preview-field], .desa-product-copy-couple, .desa-product-copy-date, b),
+.live-product--hanger :is(.hanger-couple-names, .hanger-couple-names tspan, .hanger-event-date) {
+    color: #231f20 !important;
+    fill: #231f20 !important;
+    -webkit-text-stroke: 0;
+    text-shadow: none;
+}
