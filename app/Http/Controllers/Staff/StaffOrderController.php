@@ -32,6 +32,7 @@ class StaffOrderController extends Controller
             ->withQueryString();
 
         $statusOptions = Order::query()->whereNotNull('status');
+        $statusOptions->where('status', '!=', 'DESIGN_READY');
 
         if (! $user->canMonitorAllDepartments()) {
             $statusOptions->where('status', '!=', 'DETAILS_INCOMPLETE');
