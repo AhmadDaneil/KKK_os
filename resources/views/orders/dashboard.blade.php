@@ -601,6 +601,7 @@
                 <textarea rows="4" name="sides[{{ $side }}][event][full_address]" placeholder="Example: No. 87, Laluan Taman Meru 8, Taman Meru 2B, 30020 Ipoh, Perak">{{ old("sides.$side.event.full_address", $event?->full_address) }}</textarea>
                 <label>Google Maps Link</label>
                 <input type="url" name="sides[{{ $side }}][event][google_maps_url]" placeholder="Example: https://maps.app.goo.gl/..." value="{{ old("sides.$side.event.google_maps_url", $event?->google_maps_url) }}">
+                <p class="field-help">The QR code on the back preview updates when you add a valid Google Maps link.</p>
                 <h3>Contact Persons</h3>
 
 @for ($contactNumber = 1; $contactNumber <= 3; $contactNumber++)
@@ -1354,6 +1355,8 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     });
 </script>
+<script src="{{ asset('js/qrcode-generator-core.js') }}?v={{ filemtime(public_path('js/qrcode-generator-core.js')) }}"></script>
+<script src="{{ asset('js/qrcode-generator-utf8.js') }}?v={{ filemtime(public_path('js/qrcode-generator-utf8.js')) }}"></script>
 <script>
     document.addEventListener('DOMContentLoaded', function () {
         const form = document.getElementById('customer-order-form');
@@ -1391,6 +1394,67 @@ document.addEventListener('DOMContentLoaded', function () {
         let activeSide = preview.querySelector('[data-card-preview]:not(.is-hidden)')?.dataset.cardPreview;
         let activeFace = 'front';
         let isFoldedCardPreview = preview.dataset.foldedCardPreview === 'true';
+        const locationQrDataUrls = new Map();
+
+        function makeLocationQrDataUrl(rawUrl) {
+            const mapUrl = String(rawUrl || '').trim();
+
+            if (!mapUrl || !window.qrcode) {
+                return '';
+            }
+
+            if (locationQrDataUrls.has(mapUrl)) {
+                return locationQrDataUrls.get(mapUrl);
+            }
+
+            try {
+                const parsedUrl = new URL(mapUrl);
+                if (!['http:', 'https:'].includes(parsedUrl.protocol) || !parsedUrl.hostname) {
+                    return '';
+                }
+
+                const qr = window.qrcode(0, 'M');
+                qr.addData(mapUrl, 'Byte');
+                qr.make();
+
+                const dataUrl = qr.createDataURL(4, 16);
+                locationQrDataUrls.set(mapUrl, dataUrl);
+
+                if (locationQrDataUrls.size > 4) {
+                    locationQrDataUrls.delete(locationQrDataUrls.keys().next().value);
+                }
+
+                return dataUrl;
+            } catch (error) {
+                return '';
+            }
+        }
+
+        function syncLocationQr(scope, mapUrl) {
+            const qrImages = scope.querySelectorAll('[data-preview-map-qr]');
+            if (!qrImages.length) {
+                return;
+            }
+
+            const dataUrl = makeLocationQrDataUrl(mapUrl);
+            qrImages.forEach(function (image) {
+                const hasQrCode = Boolean(dataUrl);
+                image.hidden = !hasQrCode;
+
+                if (hasQrCode) {
+                    if (image.getAttribute('src') !== dataUrl) {
+                        image.src = dataUrl;
+                    }
+                } else {
+                    image.removeAttribute('src');
+                }
+
+                const container = image.closest('[data-preview-map-qr-container]');
+                if (container) {
+                    container.classList.toggle('has-live-location-qr', hasQrCode);
+                }
+            });
+        }
 
         function field(name) {
             return form.elements.namedItem(name);
@@ -1644,6 +1708,7 @@ document.addEventListener('DOMContentLoaded', function () {
             setText(scope, 'bersanding_time', formatTime12Hour(value(prefix + '[event][bersanding_time]', '')));
             setText(scope, 'venue_name', value(prefix + '[event][venue_name]', 'VENUE NAME'));
             setText(scope, 'full_address', value(prefix + '[event][full_address]', 'Full event address'));
+            syncLocationQr(scope, value(prefix + '[event][google_maps_url]', ''));
 
             for (let number = 1; number <= 3; number += 1) {
                 const contactPrefix = prefix + '[event][contacts][' + number + ']';
