@@ -43,7 +43,7 @@
     ];
     $statusLabels = [
         'DETAILS_INCOMPLETE' => 'Details incomplete', 'READY_FOR_DESIGN' => 'Ready for design',
-        'DESIGN_IN_PROGRESS' => 'Design in progress', 'DESIGN_READY' => 'Ready for internal review',
+        'DESIGN_IN_PROGRESS' => 'Design in progress', 'DESIGN_READY' => 'Internal Design Review',
         'CORRECTION_REQUESTED' => 'Correction required', 'DESIGN_APPROVED' => 'Design approved',
         'BALANCE_PENDING' => 'Awaiting balance payment', 'READY_FOR_PRINT' => 'Ready for production',
         'PRINTING' => 'Production in progress', 'PRINTED' => 'Production complete',
@@ -60,7 +60,7 @@
     $nextActions = [
         'DETAILS_INCOMPLETE' => 'Collect missing customer details',
         'READY_FOR_DESIGN' => 'Start or assign design work', 'DESIGN_IN_PROGRESS' => 'Continue design work',
-        'DESIGN_READY' => 'Review the completed design', 'CORRECTION_REQUESTED' => 'Complete design corrections',
+        'DESIGN_READY' => 'Complete internal review of the design', 'CORRECTION_REQUESTED' => 'Complete design corrections',
         'DESIGN_APPROVED' => 'Review balance payment', 'BALANCE_PENDING' => 'Review balance payment',
         'READY_FOR_PRINT' => 'Start production', 'PRINTING' => 'Update or complete production',
         'PRINTED' => 'Start packing', 'READY_FOR_PACKING' => 'Start packing',
