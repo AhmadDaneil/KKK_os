@@ -8178,3 +8178,10 @@
     --islamic-groom-height: 8.928670;
     --islamic-bride-height: 8.824444;
 }
+
+
+/* CKI-001 (stored as CKI-801): slightly larger front names within the available ampersand/calendar gap. */
+.wedding-card-front[data-design-artwork][data-design-code="CKI-801"][data-preview-artwork-slot="card-front"]:not(.has-live-customer-photo) {
+    --islamic-groom-height: 9.128783;
+    --islamic-bride-height: 9.022222;
+}
