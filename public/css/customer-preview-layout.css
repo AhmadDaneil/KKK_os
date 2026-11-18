@@ -7230,3 +7230,24 @@
 .live-product.live-product--arrow:is([data-design-code="CKG-001"], [data-design-code="CKG-002"]) .desa-product-copy-couple span:last-child {
     padding-left: 0;
 }
+
+
+/* All theme-only buntings use the CKD-008 name arrangement around the source ampersand. */
+.live-product.live-product--banting[data-design-artwork][data-design-code]:not(.has-live-customer-photo) .desa-product-copy-couple {
+    top: var(--preview-couple-y, var(--desa-couple-y, 18.5%));
+    right: auto;
+    left: var(--preview-couple-x, var(--desa-couple-x, 50%));
+    width: 92%;
+    margin: 0;
+    grid-template-columns: minmax(0, 1fr) calc(var(--preview-ampersand-width, var(--desa-couple-spacer, 7.92%)) + .6em) minmax(0, 1fr);
+    gap: 0;
+    transform: translate(-50%, -50%);
+}
+.live-product.live-product--banting[data-design-artwork][data-design-code]:not(.has-live-customer-photo) .desa-product-copy-couple span:first-child {
+    padding-right: 0;
+    text-align: right;
+}
+.live-product.live-product--banting[data-design-artwork][data-design-code]:not(.has-live-customer-photo) .desa-product-copy-couple span:last-child {
+    padding-left: 0;
+    text-align: left;
+}
