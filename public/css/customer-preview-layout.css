@@ -8171,3 +8171,10 @@
 :is(.live-product, .wedding-card-front)[data-design-code="CKI-824"][data-preview-artwork-slot="bunting"]:not(.has-live-customer-photo) { --islamic-groom-x: 35.350000%; --islamic-groom-y: 28.875000%; --islamic-groom-width: 42.954545%; --islamic-groom-height: 8.450000; --islamic-bride-x: 35.350000%; --islamic-bride-y: 45.325000%; --islamic-bride-width: 52.954545%; --islamic-bride-height: 8.350000; }
 :is(.live-product, .wedding-card-front)[data-design-code="CKI-824"][data-preview-artwork-slot="card-front"]:not(.has-live-customer-photo) { --islamic-groom-x: 36.541667%; --islamic-groom-y: 34.483333%; --islamic-groom-width: 35.795455%; --islamic-groom-height: 9.388889; --islamic-bride-x: 36.541667%; --islamic-bride-y: 52.627778%; --islamic-bride-width: 44.128788%; --islamic-bride-height: 9.277778; }
 :is(.live-product, .wedding-card-front)[data-design-code="CKI-824"][data-preview-artwork-slot="sticker"]:not(.has-live-customer-photo) { --islamic-groom-x: 36.299435%; --islamic-groom-y: 35.205428%; --islamic-groom-width: 40.125835%; --islamic-groom-height: 12.004964; --islamic-bride-x: 36.299435%; --islamic-bride-y: 61.016949%; --islamic-bride-width: 49.435028%; --islamic-bride-height: 11.794350; }
+
+
+/* Slightly enlarge names on the Islamic front card shown in CKI-801. */
+.wedding-card-front:is([data-design-code="CKI-801"], [data-design-code="CKI-001"])[data-preview-artwork-slot="card-front"]:not(.has-live-customer-photo) {
+    --islamic-groom-height: 8.928670;
+    --islamic-bride-height: 8.824444;
+}
