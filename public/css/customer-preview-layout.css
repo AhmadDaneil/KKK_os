@@ -7455,3 +7455,9 @@
     grid-template-columns: minmax(0, 1fr) calc(var(--preview-ampersand-width, var(--banner-name-amp-width, 7.92%)) + .6em) minmax(0, 1fr);
     transform: translate(-50%, -50%);
 }
+
+
+/* ARCH script names need a larger display size on bunting and arrow previews. */
+.live-product:is(.live-product--banting, .live-product--arrow)[data-font-design-code^="CKA-"] .desa-product-copy-couple > span {
+    font-size: clamp(1rem, 3.6vw, 1.9rem);
+}
