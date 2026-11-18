@@ -513,6 +513,12 @@ html[data-customer-theme="dark"] .live-product :is(p, strong, small, span, i) {
     color: inherit !important;
 }
 
+/* Keep preview watermark text at its light-mode colour across all themes. */
+html[data-customer-theme="dark"] .wedding-card .live-preview-watermark-line,
+html[data-customer-theme="dark"] .live-product .live-preview-watermark-line {
+    color: rgba(255, 255, 255, .78) !important;
+}
+
 html[data-customer-theme="dark"] .live-product .live-product-label {
     color: #fff !important;
 }
