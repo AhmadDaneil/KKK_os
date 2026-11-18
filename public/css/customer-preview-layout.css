@@ -7213,8 +7213,8 @@
 }
 
 
-/* CKG-001 arrows use the CKD-008 name spacing with clearance below the heading. */
-.live-product.live-product--arrow[data-design-code="CKG-001"] .desa-product-copy-couple {
+/* CKG-001 and CKG-002 arrows use the CKD-008 name spacing with clearance below the heading. */
+.live-product.live-product--arrow:is([data-design-code="CKG-001"], [data-design-code="CKG-002"]) .desa-product-copy-couple {
     top: 82.25%;
     right: auto;
     left: 49.82%;
@@ -7224,9 +7224,9 @@
     gap: 0;
     transform: translate(-50%, -50%);
 }
-.live-product.live-product--arrow[data-design-code="CKG-001"] .desa-product-copy-couple span:first-child {
+.live-product.live-product--arrow:is([data-design-code="CKG-001"], [data-design-code="CKG-002"]) .desa-product-copy-couple span:first-child {
     padding-right: 0;
 }
-.live-product.live-product--arrow[data-design-code="CKG-001"] .desa-product-copy-couple span:last-child {
+.live-product.live-product--arrow:is([data-design-code="CKG-001"], [data-design-code="CKG-002"]) .desa-product-copy-couple span:last-child {
     padding-left: 0;
 }
