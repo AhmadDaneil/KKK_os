@@ -7211,3 +7211,22 @@
 .wedding-card-front[data-design-artwork][data-design-code="CKD-008"] .desa-card-custom-couple span:last-child {
     padding-left: 0;
 }
+
+
+/* CKG-001 arrows use the CKD-008 name spacing with clearance below the heading. */
+.live-product.live-product--arrow[data-design-code="CKG-001"] .desa-product-copy-couple {
+    top: 82.25%;
+    right: auto;
+    left: 49.82%;
+    width: 92%;
+    margin: 0;
+    grid-template-columns: minmax(0, 1fr) calc(7.92% + .6em) minmax(0, 1fr);
+    gap: 0;
+    transform: translate(-50%, -50%);
+}
+.live-product.live-product--arrow[data-design-code="CKG-001"] .desa-product-copy-couple span:first-child {
+    padding-right: 0;
+}
+.live-product.live-product--arrow[data-design-code="CKG-001"] .desa-product-copy-couple span:last-child {
+    padding-left: 0;
+}
