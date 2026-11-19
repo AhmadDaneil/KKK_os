@@ -120,7 +120,7 @@ def field_selector(code: str, slot: str, field: str) -> str:
 
 
 def horizontal_name_anchors(product: dict[str, Any], fields: dict[str, Any], slot: str) -> list[dict[str, Any]] | None:
-    if slot not in {"card-front", "arrow-left", "arrow-right", "bunting", "sticker"}:
+    if slot not in {"card-front", "arrow-left", "arrow-right", "bunting", "sticker", "banner"}:
         return None
     amp = product["selected"].get("&")
     if not amp:
@@ -146,7 +146,7 @@ def horizontal_name_anchors(product: dict[str, Any], fields: dict[str, Any], slo
 
 
 def vertical_name_anchors(product: dict[str, Any], fields: dict[str, Any], slot: str) -> list[dict[str, Any]] | None:
-    if slot not in {"card-front", "arrow-left", "arrow-right", "bunting", "sticker"}:
+    if slot not in {"card-front", "arrow-left", "arrow-right", "bunting", "sticker", "banner"}:
         return None
     amp = product["selected"].get("&")
     if not amp:

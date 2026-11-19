@@ -45,7 +45,7 @@ class PsdPreviewFontAuditTest(unittest.TestCase):
         self.assertEqual([250, 250], [anchor["y"] for anchor in anchors])
         self.assertEqual([375, 375], [anchor["width"] for anchor in anchors])
         self.assertEqual(["right", "left"], [anchor["align"] for anchor in anchors])
-        self.assertIsNone(builder.horizontal_name_anchors(product, fields, "banner"))
+        self.assertEqual(anchors, builder.horizontal_name_anchors(product, fields, "banner"))
         self.assertIsNone(builder.horizontal_name_anchors(product, fields, "wooden-hanger"))
 
     def test_stacked_names_keep_their_source_positions(self):
@@ -68,7 +68,7 @@ class PsdPreviewFontAuditTest(unittest.TestCase):
         self.assertAlmostEqual(313.6, anchors[1]["y"])
         self.assertEqual(["bottom", "top"], [anchor["vertical_align"] for anchor in anchors])
         self.assertEqual(anchors[0]["width"], anchors[1]["width"])
-        self.assertIsNone(builder.vertical_name_anchors(product, fields, "banner"))
+        self.assertEqual(anchors, builder.vertical_name_anchors(product, fields, "banner"))
         self.assertIsNone(builder.vertical_name_anchors(product, fields, "wooden-hanger"))
 
     def test_vertical_fitting_reserves_space_for_the_date(self):
