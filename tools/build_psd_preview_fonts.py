@@ -174,7 +174,7 @@ def build(catalog: dict[str, Any]) -> tuple[str, str, list[dict[str, Any]]]:
                 pixel_size = shared_size if field in name_fields else primary_run.get("pixel_size", 0)
                 if pixel_size > 0:
                     rule += "; --psd-font-size: " + format(pixel_size / product["width"] * 100, ".8g")
-                    rule += "; font-size: " + format(pixel_size / product["width"] * 100, ".8g") + "cqw"
+                    rule += "; font-size: " + format(pixel_size / product["width"] * 100, ".8g") + "cqw" + ("" if field in name_fields else " !important")
                 rule += "; letter-spacing: " + format(tracking / 1000, ".6g") + "em; }"
                 (common if slot in ("banner", "bunting") else items).append(rule)
                 report.append({"code": code, "slot": slot, "field": field, "source_font": original,
