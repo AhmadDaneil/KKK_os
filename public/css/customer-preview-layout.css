@@ -8393,25 +8393,19 @@
 
 /* Stack Arch names on every non-banner item except the already aligned hanger.
    Garden and Nostalgia banners use the same top-and-bottom name arrangement. */
-:is(.wedding-card-front, .live-product)[data-design-code^="CKA-"][data-preview-artwork-slot]:not([data-preview-artwork-slot="banner"]):not([data-preview-artwork-slot="wooden-hanger"]) :is(.desa-card-custom-couple, .desa-product-copy-couple),
+:is(.wedding-card-front, .live-product)[data-design-code^="CKA-"][data-preview-artwork-slot]:not([data-preview-artwork-slot="banner"]):not([data-preview-artwork-slot="wooden-hanger"]):not(.has-live-customer-photo) :is(.desa-card-custom-couple, .desa-product-copy-couple),
 .live-product.live-product--banner[data-design-artwork][data-design-code^="CKG-"]:not(.has-live-customer-photo) .desa-product-copy-couple,
-.live-product.live-product--banner[data-design-artwork][data-design-code^="CKN-"]:not(.has-live-customer-photo) .desa-product-copy-couple,
-.live-product.live-product--banner[data-design-artwork][data-design-code^="CKG-"].has-live-customer-photo .desa-product-copy-couple,
-.live-product.live-product--banner[data-design-artwork][data-design-code^="CKN-"].has-live-customer-photo .desa-product-copy-couple {
+.live-product.live-product--banner[data-design-artwork][data-design-code^="CKN-"]:not(.has-live-customer-photo) .desa-product-copy-couple {
     grid-template-columns: minmax(0, 1fr);
     grid-template-rows: auto auto auto;
 }
 
-:is(.wedding-card-front, .live-product)[data-design-code^="CKA-"][data-preview-artwork-slot]:not([data-preview-artwork-slot="banner"]):not([data-preview-artwork-slot="wooden-hanger"]) :is(.desa-card-custom-couple, .desa-product-copy-couple) > span:first-child,
-:is(.wedding-card-front, .live-product)[data-design-code^="CKA-"][data-preview-artwork-slot]:not([data-preview-artwork-slot="banner"]):not([data-preview-artwork-slot="wooden-hanger"]) :is(.desa-card-custom-couple, .desa-product-copy-couple) > span:last-child,
+:is(.wedding-card-front, .live-product)[data-design-code^="CKA-"][data-preview-artwork-slot]:not([data-preview-artwork-slot="banner"]):not([data-preview-artwork-slot="wooden-hanger"]):not(.has-live-customer-photo) :is(.desa-card-custom-couple, .desa-product-copy-couple) > span:first-child,
+:is(.wedding-card-front, .live-product)[data-design-code^="CKA-"][data-preview-artwork-slot]:not([data-preview-artwork-slot="banner"]):not([data-preview-artwork-slot="wooden-hanger"]):not(.has-live-customer-photo) :is(.desa-card-custom-couple, .desa-product-copy-couple) > span:last-child,
 .live-product.live-product--banner[data-design-artwork][data-design-code^="CKG-"]:not(.has-live-customer-photo) .desa-product-copy-couple > span:first-child,
 .live-product.live-product--banner[data-design-artwork][data-design-code^="CKG-"]:not(.has-live-customer-photo) .desa-product-copy-couple > span:last-child,
 .live-product.live-product--banner[data-design-artwork][data-design-code^="CKN-"]:not(.has-live-customer-photo) .desa-product-copy-couple > span:first-child,
-.live-product.live-product--banner[data-design-artwork][data-design-code^="CKN-"]:not(.has-live-customer-photo) .desa-product-copy-couple > span:last-child,
-.live-product.live-product--banner[data-design-artwork][data-design-code^="CKG-"].has-live-customer-photo .desa-product-copy-couple > span:first-child,
-.live-product.live-product--banner[data-design-artwork][data-design-code^="CKG-"].has-live-customer-photo .desa-product-copy-couple > span:last-child,
-.live-product.live-product--banner[data-design-artwork][data-design-code^="CKN-"].has-live-customer-photo .desa-product-copy-couple > span:first-child,
-.live-product.live-product--banner[data-design-artwork][data-design-code^="CKN-"].has-live-customer-photo .desa-product-copy-couple > span:last-child {
+.live-product.live-product--banner[data-design-artwork][data-design-code^="CKN-"]:not(.has-live-customer-photo) .desa-product-copy-couple > span:last-child {
     text-align: center;
 }
 

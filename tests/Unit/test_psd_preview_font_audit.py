@@ -112,6 +112,37 @@ class PsdPreviewFontAuditTest(unittest.TestCase):
         self.assertEqual(2, css.count("--psd-font-size: 10;"))
         self.assertEqual(2, css.count("top: 17% !important"))
 
+    def test_uploaded_photo_places_stacked_names_side_by_side(self):
+        stacked = [layer(0, "singkatanlelaki", "Belladonia"),
+                   layer(1, "singkatanperempuan", "Belladonia")]
+        stacked[0]["rect"] = [100, 300, 200, 700]
+        stacked[1]["rect"] = [400, 300, 500, 700]
+        horizontal = [layer(0, "singkatanlelaki", "Belladonia"),
+                      layer(1, "singkatanperempuan", "Belladonia")]
+        horizontal[0]["rect"] = [200, 100, 300, 400]
+        horizontal[1]["rect"] = [210, 600, 310, 900]
+        audit.assign_visibility(stacked)
+        audit.assign_visibility(horizontal)
+        stacked_fields, _ = audit.select_visible_fonts(stacked)
+        horizontal_fields, _ = audit.select_visible_fonts(horizontal)
+
+        _, css, _ = builder.build({
+            "CKD-001": {"items": {
+                "kad depan": {"width": 1000, "height": 1500, "selected": stacked_fields},
+                "banner": {"width": 1000, "height": 500, "selected": stacked_fields},
+            }},
+            "CKD-002": {"items": {
+                "banner": {"width": 1000, "height": 500, "selected": horizontal_fields},
+            }},
+        })
+
+        self.assertIn('[data-font-design-code="CKD-001"].has-customer-photo .desa-card-custom-couple'
+                      ' { display: grid !important; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr)', css)
+        self.assertIn('[data-font-design-code="CKD-001"].has-live-customer-photo .desa-product-copy-couple'
+                      ' { display: grid !important; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr)', css)
+        self.assertNotIn('[data-font-design-code="CKD-002"].has-live-customer-photo .desa-product-copy-couple', css)
+        self.assertIn('[data-font-design-code="CKD-001"][data-design-artwork]:not(.has-customer-photo)', css)
+
     def test_vip_card_uses_full_names_and_split_date_fields(self):
         names = {"font": "MonotypeCorsiva"}
         dates = {"font": "CenturyGothic"}

@@ -245,12 +245,29 @@ def build(catalog: dict[str, Any]) -> tuple[str, str, list[dict[str, Any]]]:
                                "layer": source["layer"], "groups": source["groups"], "rect": source["rect"],
                                "selector": selector})
             if len(name_fields) == 2:
+                boxes = [fields[field]["rect"] for field in name_fields]
+                centers = [((box[1] + box[3]) / 2, (box[0] + box[2]) / 2) for box in boxes]
+                is_stacked = abs(centers[0][1] - centers[1][1]) >= max(box[2] - box[0] for box in boxes) * 0.65
+                if is_stacked:
+                    photo_root = (".wedding-card-front" if slot == "card-front"
+                                  else '.live-product[data-preview-artwork-slot="' + slot + '"]')
+                    photo_class = ".has-customer-photo" if slot == "card-front" else ".has-live-customer-photo"
+                    photo_root += '[data-font-design-code="' + code + '"]' + photo_class
+                    photo_couple = ".desa-card-custom-couple" if slot == "card-front" else ".desa-product-copy-couple"
+                    items.append(photo_root + " " + photo_couple
+                                 + " { display: grid !important; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) !important;"
+                                 + " grid-template-rows: auto !important; column-gap: 8% !important; align-items: center !important; }")
+                    items.append(photo_root + " " + photo_couple + " > span"
+                                 + " { position: static !important; width: auto !important; max-width: 100% !important;"
+                                 + " margin: 0 !important; padding: 0 !important; text-align: center !important;"
+                                 + " transform: none !important; translate: none !important; }")
+                    items.append(photo_root + " " + photo_couple + " > .desa-couple-ampersand-spacer"
+                                 + " { display: none !important; }")
                 root = ".wedding-card-front" if slot == "card-front" else '.live-product[data-preview-artwork-slot="' + slot + '"]'
-                root += '[data-font-design-code="' + code + '"][data-design-artwork]:not(.has-live-customer-photo)'
+                photo_class = ".has-customer-photo" if slot == "card-front" else ".has-live-customer-photo"
+                root += '[data-font-design-code="' + code + '"][data-design-artwork]:not(' + photo_class + ')'
                 couple = ".desa-card-custom-couple" if slot == "card-front" else ".desa-product-copy-couple"
                 geometry.append(root + " " + couple + " { position: absolute !important; inset: 0 !important; width: 100% !important; height: 100% !important; margin: 0 !important; display: block !important; transform: none !important; }")
-                boxes = [fields[field]["rect"] for field in name_fields]
-                centers = [((b[1] + b[3]) / 2, (b[0] + b[2]) / 2) for b in boxes]
                 horizontal = abs(centers[0][1] - centers[1][1]) < max(b[2] - b[0] for b in boxes) * 0.65
                 anchors = horizontal_name_anchors(product, fields, slot) or vertical_name_anchors(product, fields, slot)
                 for index, (box, center) in enumerate(zip(boxes, centers)):
