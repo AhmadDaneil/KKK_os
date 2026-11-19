@@ -6703,9 +6703,9 @@
     --preview-qr-x: 28.5%;
     --preview-qr-y: 66.8%;
     --preview-qr-width: 24.6%;
-    --preview-venue-x: 66.3%;
-    --preview-venue-y: 79.1%;
-    --preview-venue-width: 38.5%;
+    --preview-venue-x: 69.5%;
+    --preview-venue-y: 78.5%;
+    --preview-venue-width: 45%;
 }
 
 .wedding-card-back[data-back-reference-layout][data-preview-artwork-slot="card-back"] .desa-card-back-live-names {
@@ -6886,9 +6886,7 @@
 }
 
 .wedding-card-back[data-back-reference-layout][data-preview-artwork-slot="card-back"] .desa-back-custom-contacts span {
-    font-size: 1.85cqw;
-    font-weight: 700;
-    line-height: 1;
+    display: none;
 }
 
 .wedding-card-back[data-back-reference-layout][data-preview-artwork-slot="card-back"] .desa-back-custom-contacts strong {
@@ -6925,6 +6923,11 @@
     background: #fff;
     font-size: inherit;
     line-height: inherit;
+}
+
+.wedding-card-back[data-back-reference-layout][data-preview-artwork-slot="card-back"] .desa-back-custom-venue [data-preview-field="full_address"] {
+    font-size: 2.2cqw !important;
+    overflow-wrap: break-word;
 }
 
 
