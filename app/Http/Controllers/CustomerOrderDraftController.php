@@ -25,6 +25,22 @@ class CustomerOrderDraftController extends Controller
             && (int) $order->package_count === 1
             && $order->packageSides->isEmpty();
 
+        foreach (['couple', 'second_couple'] as $coupleKey) {
+            $coupleInput = $request->input($coupleKey);
+
+            if (! is_array($coupleInput)) {
+                continue;
+            }
+
+            foreach (['groom_abbreviation', 'bride_abbreviation'] as $abbreviationKey) {
+                if (is_string($coupleInput[$abbreviationKey] ?? null)) {
+                    $coupleInput[$abbreviationKey] = mb_strtoupper($coupleInput[$abbreviationKey], 'UTF-8');
+                }
+            }
+
+            $request->merge([$coupleKey => $coupleInput]);
+        }
+
         $validated = $request->validate([
             'card_quantity' => ['sometimes', 'nullable', 'integer', 'min:1'],
             'couple' => ['sometimes', 'array'],
