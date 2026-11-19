@@ -565,7 +565,21 @@
                                 >
                                     Download Customer CSV
                                 </a>
+                                @if ((int) $order->package_count === 2)
+                                    <a
+                                        href="{{ route('staff.orders.photoshop.workbook', $order) }}"
+                                        class="staff-button"
+                                        data-save-file
+                                        data-save-file-type="xlsx"
+                                        data-save-filename="{{ $order->order_id }}_READY_TO_MERGE.xlsx"
+                                    >
+                                        Download Customer Excel
+                                    </a>
+                                @endif
                             </div>
+                            @if ((int) $order->package_count === 2)
+                                <p class="staff-muted">Excel mengasingkan Mockup Cheque ke sheet sendiri. Gunakan CSV untuk Photoshop Auto Merge.</p>
+                            @endif
                         </div>
                     @endif
 
@@ -1689,13 +1703,18 @@
                 const fileType = link.dataset.saveFileType;
                 const pickerOptions = {
                     suggestedName: link.dataset.saveFilename,
-                    id: fileType === 'csv' ? 'staff-customer-csv' : 'staff-customer-photo',
+                    id: fileType === 'csv' ? 'staff-customer-csv' : fileType === 'xlsx' ? 'staff-customer-workbook' : 'staff-customer-photo',
                 };
 
                 if (fileType === 'csv') {
                     pickerOptions.types = [{
                         description: 'CSV file',
                         accept: { 'text/csv': ['.csv'] },
+                    }];
+                } else if (fileType === 'xlsx') {
+                    pickerOptions.types = [{
+                        description: 'Excel workbook',
+                        accept: { 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': ['.xlsx'] },
                     }];
                 } else if (fileType === 'image') {
                     pickerOptions.types = [{
