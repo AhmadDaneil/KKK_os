@@ -1104,6 +1104,38 @@ document.addEventListener('DOMContentLoaded', function () {
             return;
         }
 
+        form.querySelectorAll('[name$="[groom_abbreviation]"], [name$="[bride_abbreviation]"]').forEach(function (input) {
+            function uppercaseInitial() {
+                const selectionStart = input.selectionStart;
+                const selectionEnd = input.selectionEnd;
+                const initialMatch = input.value.match(/^(\s*)(\S)/u);
+
+                if (!initialMatch) {
+                    return;
+                }
+
+                const initialEnd = initialMatch[0].length;
+                const formattedValue = initialMatch[1] + initialMatch[2].toUpperCase() + input.value.slice(initialEnd);
+
+                if (input.value === formattedValue) {
+                    return;
+                }
+
+                const positionChange = formattedValue.length - input.value.length;
+                input.value = formattedValue;
+
+                if (selectionStart !== null && selectionEnd !== null) {
+                    input.setSelectionRange(
+                        selectionStart >= initialEnd ? selectionStart + positionChange : selectionStart,
+                        selectionEnd >= initialEnd ? selectionEnd + positionChange : selectionEnd,
+                    );
+                }
+            }
+
+            uppercaseInitial();
+            input.addEventListener('input', uppercaseInitial);
+        });
+
         let autosaveTimer;
         let saveQueue = Promise.resolve();
         let draftRevision = 0;
