@@ -5,7 +5,6 @@ namespace App\Http\Controllers\Staff;
 use App\Http\Controllers\Controller;
 use App\Models\Order;
 use App\Services\Photoshop\GeneratePhotoshopCsvForOrderService;
-use App\Services\Photoshop\GeneratePhotoshopWorkbookForOrderService;
 use App\Services\Photoshop\LaunchPhotoshopService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -34,28 +33,6 @@ class StaffPhotoshopController extends Controller
 
         return response()
             ->download($path, $downloadName, ['Content-Type' => 'text/csv; charset=UTF-8'])
-            ->deleteFileAfterSend(true);
-    }
-
-    public function downloadWorkbook(
-        Request $request,
-        Order $order,
-        GeneratePhotoshopWorkbookForOrderService $service
-    ): BinaryFileResponse|RedirectResponse {
-        $this->authorizeAssignedDesigner($request, $order);
-
-        $directory = storage_path('app/private/photoshop-downloads');
-        $downloadName = $order->order_id.'_READY_TO_MERGE.xlsx';
-        $path = $directory.DIRECTORY_SEPARATOR.Str::uuid().'.xlsx';
-
-        try {
-            $service->generate($order, $path);
-        } catch (RuntimeException $exception) {
-            return back()->withErrors(['photoshop' => $exception->getMessage()]);
-        }
-
-        return response()
-            ->download($path, $downloadName, ['Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'])
             ->deleteFileAfterSend(true);
     }
 

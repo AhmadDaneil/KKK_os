@@ -97,6 +97,7 @@ Route::post('/semak-progress', [PublicOrderController::class, 'lookupProgress'])
     ->middleware('throttle:10,1')
     ->name('public.orders.progress.lookup');
 
+
 Route::post('/order/{orderId}/balance-receipt', [CustomerBalanceReceiptController::class, 'store'])
     ->middleware('throttle:10,1')
     ->name('orders.balance-receipt.store');
@@ -200,6 +201,7 @@ Route::middleware(['auth:admin', 'active.staff', 'staff.role:ADMIN'])
             ->name('print-jobs.mark-printed');
         Route::get('/print-jobs/{printJob}/progress-files/{file}', [StaffPrintingWorkflowController::class, 'showProgressFile'])
             ->name('print-jobs.progress-files.show');
+        
 
         Route::post('/packing-jobs/{packingJob}/assign', [StaffJobAssignmentController::class, 'assignPacking'])
             ->name('packing-jobs.assign');
@@ -277,6 +279,8 @@ Route::get(
     '/order/{orderId}/thank-you',
     [CustomerOrderThankYouController::class, 'show']
 )->name('orders.thank-you.show');
+
+
 
 /*
 |--------------------------------------------------------------------------
@@ -400,11 +404,6 @@ Route::middleware(['auth:staff', 'active.staff'])
                 [StaffPhotoshopController::class, 'downloadCsv']
             )->name('orders.photoshop.csv');
 
-            Route::get(
-                '/orders/{order}/photoshop/workbook',
-                [StaffPhotoshopController::class, 'downloadWorkbook']
-            )->name('orders.photoshop.workbook');
-
             Route::post(
                 '/orders/{order}/photoshop/launch',
                 [StaffPhotoshopController::class, 'launch']
@@ -473,6 +472,8 @@ Route::middleware(['auth:staff', 'active.staff'])
                 [StaffPrintingWorkflowController::class, 'markPrinted']
             )->name('print-jobs.mark-printed');
         });
+
+        
 
         /*
             |--------------------------------------------------------------------------

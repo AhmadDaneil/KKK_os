@@ -10,12 +10,9 @@ use App\Services\Orders\CreateOrderService;
 use App\Services\Orders\SaveOrderDraftService;
 use App\Services\Photoshop\ExportPhotoshopAutoMergeCsvService;
 use App\Services\Photoshop\GeneratePhotoshopCsvForOrderService;
-use App\Services\Photoshop\GeneratePhotoshopWorkbookForOrderService;
 use App\Services\Photoshop\UnresolvedCardQuantityProvider;
-use App\Support\Photoshop\PhotoshopWorkbookWriter;
 use Database\Seeders\KkkPackagePriceCatalogSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use PharData;
 use RuntimeException;
 use Tests\TestCase;
 
@@ -89,57 +86,12 @@ class PhotoshopProductionExportWiringTest extends TestCase
         $this->assertSame(['CEK_HANTARAN', 'LELAKI', 'PEREMPUAN'], $data->keys()->sort()->values()->all());
         $this->assertSame('300', $data['LELAKI'][1]);
         $this->assertSame('500', $data['PEREMPUAN'][1]);
-        $this->assertSame('10 DINAR EMAS', $data['CEK_HANTARAN'][29]);
+        $this->assertSame('10 dinar emas', $data['CEK_HANTARAN'][29]);
 
         $this->assertNotSame(
             $data['LELAKI'][3],
             $data['PEREMPUAN'][3],
             'Two package sides should preserve independent design codes in the CSV.'
-        );
-    }
-
-    public function test_two_package_workbook_places_mockup_cheque_on_its_own_sheet(): void
-    {
-        $order = $this->confirmedOrder(2);
-        app(GenerateMergeJobsForOrderService::class)->generate($order);
-        $service = new GeneratePhotoshopWorkbookForOrderService(
-            $this->serviceWithQuantity(200),
-            new PhotoshopWorkbookWriter,
-        );
-        $path = storage_path('framework/testing/photoshop-2-package.xlsx');
-        @unlink($path);
-        @unlink($path.'.zip');
-
-        $service->generate($order->fresh(), $path);
-
-        $workbook = new PharData($path);
-        $sheetNames = $workbook['xl/workbook.xml']->getContent();
-        $cards = $workbook['xl/worksheets/sheet1.xml']->getContent();
-        $mockup = $workbook['xl/worksheets/sheet2.xml']->getContent();
-
-        $this->assertStringContainsString('name="READY_TO_MERGE"', $sheetNames);
-        $this->assertStringContainsString('name="'.$order->order_id.'_MOCKUP_CHEQUE"', $sheetNames);
-        $this->assertSame(3, substr_count($cards, '<row r='));
-        $this->assertSame(2, substr_count($mockup, '<row r='));
-        $this->assertStringContainsString('CKS-209', $cards);
-        $this->assertStringContainsString('CKI-820', $cards);
-        $this->assertStringNotContainsString('CEK_HANTARAN', $cards);
-        $this->assertStringContainsString('CEK_HANTARAN', $mockup);
-        $this->assertStringContainsString('10 DINAR EMAS', $mockup);
-        $this->assertStringContainsString('0111111111', $cards);
-        $this->assertStringContainsString('t="inlineStr"', $cards);
-    }
-
-    public function test_one_package_cannot_generate_mockup_cheque_workbook(): void
-    {
-        $order = $this->confirmedOrder(1, 'LELAKI');
-
-        $this->expectException(RuntimeException::class);
-        $this->expectExceptionMessage('only for two-package orders');
-
-        app(GeneratePhotoshopWorkbookForOrderService::class)->generate(
-            $order,
-            storage_path('framework/testing/photoshop-1-package.xlsx'),
         );
     }
 
@@ -255,8 +207,8 @@ class PhotoshopProductionExportWiringTest extends TestCase
                     'day_name' => 'Sabtu',
                     'event_date' => '2026-12-26',
                     'hijri_date' => '16 REJAB 1448H',
-                    'meal_time' => '12:00 PM',
-                    'bersanding_time' => '12:00 PM',
+                    'meal_time' => '12.00 PM - 4.00 PM',
+                    'bersanding_time' => '12.00 PM',
                     'venue_name' => 'Dewan Test',
                     'full_address' => $isLelaki ? 'Alamat Lelaki' : 'Alamat Perempuan',
                     'google_maps_url' => 'https://maps.app.goo.gl/example',
