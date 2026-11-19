@@ -145,6 +145,42 @@ def horizontal_name_anchors(product: dict[str, Any], fields: dict[str, Any], slo
              "align": "right" if center[0] < (left + right) / 2 else "left"} for center in centers]
 
 
+def vertical_name_anchors(product: dict[str, Any], fields: dict[str, Any], slot: str) -> list[dict[str, Any]] | None:
+    if slot not in {"card-front", "arrow-left", "arrow-right", "bunting", "sticker"}:
+        return None
+    amp = product["selected"].get("&")
+    if not amp:
+        return None
+    boxes = [fields[field]["rect"] for field in ("groom_display", "bride_display")]
+    centers = [((box[1] + box[3]) / 2, (box[0] + box[2]) / 2) for box in boxes]
+    if abs(centers[0][1] - centers[1][1]) < max(box[2] - box[0] for box in boxes) * 0.65:
+        return None
+    top, left, bottom, right = amp["rect"]
+    if not min(center[1] for center in centers) < (top + bottom) / 2 < max(center[1] for center in centers):
+        return None
+    canvas_width, canvas_height = product["width"], product["height"]
+    x = (left + right) / 2
+    width = min(max(box[3] - box[1] for box in boxes) / 0.88,
+                2 * (min(x, canvas_width - x) - canvas_width * 0.05))
+    if width <= 0:
+        return None
+    gap = max(canvas_height * 0.0025, min((bottom - top) * 0.06, canvas_height * 0.0075))
+    other_boxes = [value["rect"] for field, value in fields.items()
+                   if field not in {"groom_display", "bride_display"}]
+    upper_limit = max([0] + [box[2] + canvas_height * 0.005 for box in other_boxes if box[2] < top])
+    lower_limit = min([canvas_height] + [box[0] - canvas_height * 0.005 for box in other_boxes if box[0] > bottom])
+    anchors = []
+    for box, center in zip(boxes, centers):
+        above = center[1] < (top + bottom) / 2
+        y = top - gap if above else bottom + gap
+        height = min(box[2] - box[0], y - upper_limit if above else lower_limit - y)
+        if height <= 0:
+            return None
+        anchors.append({"x": x, "y": y, "width": width, "height": height,
+                        "align": "center", "vertical_align": "bottom" if above else "top"})
+    return anchors
+
+
 def build(catalog: dict[str, Any]) -> tuple[str, str, list[dict[str, Any]]]:
     common = ["/* Generated from visible PSD text runs, including group visibility and duplicate-layer review. */"]
     for name, (filename, weight) in FONT_FILES.items():
@@ -216,26 +252,31 @@ def build(catalog: dict[str, Any]) -> tuple[str, str, list[dict[str, Any]]]:
                 boxes = [fields[field]["rect"] for field in name_fields]
                 centers = [((b[1] + b[3]) / 2, (b[0] + b[2]) / 2) for b in boxes]
                 horizontal = abs(centers[0][1] - centers[1][1]) < max(b[2] - b[0] for b in boxes) * 0.65
-                anchors = horizontal_name_anchors(product, fields, slot)
+                anchors = horizontal_name_anchors(product, fields, slot) or vertical_name_anchors(product, fields, slot)
                 for index, (box, center) in enumerate(zip(boxes, centers)):
                     x, y = center
                     if horizontal:
                         y = sum(c[1] for c in centers) / 2
                     width = (box[3] - box[1]) / product["width"] * 100 / 0.88
                     alignment = "center"
+                    vertical_alignment = "center"
                     transform = "translate(-50%, -50%)"
                     if anchors:
                         anchor = anchors[index]
                         x, y = anchor["x"], anchor["y"]
                         width = anchor["width"] / product["width"] * 100
                         alignment = anchor["align"]
-                        transform = "translate(-100%, -50%)" if alignment == "right" else "translate(0, -50%)"
-                    height = (box[2] - box[0]) / product["height"] * 100
+                        vertical_alignment = anchor.get("vertical_align", "center")
+                        if vertical_alignment != "center":
+                            transform = "translate(-50%, -100%)" if vertical_alignment == "bottom" else "translate(-50%, 0)"
+                        else:
+                            transform = "translate(-100%, -50%)" if alignment == "right" else "translate(0, -50%)"
+                    height = (anchors[index].get("height", box[2] - box[0]) if anchors else box[2] - box[0]) / product["height"] * 100
                     geometry.append(root + " " + couple + (" > span:first-child" if index == 0 else " > span:last-child")
                                     + " { position: absolute !important; display: block !important; left: " + format(x / product["width"] * 100, ".8g")
                                     + "% !important; top: " + format(y / product["height"] * 100, ".8g")
                                     + "% !important; width: " + format(width, ".8g") + "% !important; --psd-name-height: " + format(height, ".8g")
-                                    + ("; --psd-name-align: " + alignment if anchors else "") + "; margin: 0 !important; padding: 0 !important; text-align: " + alignment + " !important; line-height: 1 !important; transform: " + transform + " !important; }")
+                                    + ("; --psd-name-align: " + alignment + ("; --psd-name-vertical-align: " + vertical_alignment if vertical_alignment != "center" else "") if anchors else "") + "; margin: 0 !important; padding: 0 !important; text-align: " + alignment + " !important; line-height: 1 !important; transform: " + transform + " !important; }")
     items.extend(geometry)
     items.extend([
         "",
