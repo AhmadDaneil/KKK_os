@@ -26,6 +26,7 @@ use App\Services\Printing\StartPrintingService;
 use App\Services\Printing\SyncOrderPrintStatusService;
 use Database\Seeders\KkkPackagePriceCatalogSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use PharData;
 use Tests\TestCase;
 
 class StaffOrderVisibilityTest extends TestCase
@@ -991,6 +992,30 @@ class StaffOrderVisibilityTest extends TestCase
         $this->assertStringStartsWith("\xEF\xBB\xBF", $contents);
         $this->assertStringContainsString('noinvoice,qtykad,tema,designcode', $contents);
         $this->assertStringContainsString($order->order_id, $contents);
+    }
+
+    public function test_assigned_designer_can_download_two_package_excel_with_separate_mockup_sheet(): void
+    {
+        $designer = $this->staff(User::ROLE_DESIGNER);
+        $otherDesigner = $this->staff(User::ROLE_DESIGNER);
+        $admin = $this->staff(User::ROLE_ADMIN);
+        $order = $this->confirmedOrder(2, null, 'Photoshop Excel Download');
+        $job = $this->initializeDesignJobs($order)->firstOrFail();
+        app(AssignDesignJobService::class)->assign($job, $designer, $admin);
+
+        $response = $this->actingAs($designer, 'staff')
+            ->get(route('staff.orders.photoshop.workbook', $order));
+
+        $response->assertOk()->assertDownload($order->order_id.'_READY_TO_MERGE.xlsx');
+        $archive = new PharData($response->baseResponse->getFile()->getPathname());
+        $this->assertStringContainsString(
+            $order->order_id.'_MOCKUP_CHEQUE',
+            $archive['xl/workbook.xml']->getContent(),
+        );
+
+        $this->actingAs($otherDesigner, 'staff')
+            ->get(route('staff.orders.photoshop.workbook', $order))
+            ->assertNotFound();
     }
 
     public function test_assigned_designer_can_launch_photoshop_but_other_designer_cannot(): void
