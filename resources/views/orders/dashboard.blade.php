@@ -358,9 +358,9 @@
             <legend>Couple Details</legend>
             <div class="grid">
                 <div><label>Groom's Full Name</label><input name="couple[groom_name]" placeholder="Example: Muhammad Syafiq Bin Rahim" value="{{ old('couple.groom_name', $couple?->groom_name) }}"></div>
-                <div><label>Groom's Short Name</label><input name="couple[groom_abbreviation]" placeholder="Example: Syafiq" value="{{ old('couple.groom_abbreviation', $couple?->groom_abbreviation) }}"></div>
+                <div><label>Groom's Short Name (max 6 characters)</label><input name="couple[groom_abbreviation]" maxlength="6" placeholder="Example: Syafiq" value="{{ old('couple.groom_abbreviation', $couple?->groom_abbreviation) }}"></div>
                 <div><label>Bride's Full Name</label><input name="couple[bride_name]" placeholder="Example: Nur Awanis Binti Azman" value="{{ old('couple.bride_name', $couple?->bride_name) }}"></div>
-                <div><label>Bride's Short Name</label><input name="couple[bride_abbreviation]" placeholder="Example: Awanis" value="{{ old('couple.bride_abbreviation', $couple?->bride_abbreviation) }}"></div>
+                <div><label>Bride's Short Name (max 6 characters)</label><input name="couple[bride_abbreviation]" maxlength="6" placeholder="Example: Awanis" value="{{ old('couple.bride_abbreviation', $couple?->bride_abbreviation) }}"></div>
             </div>
         </fieldset>
         @foreach ($formPackageSides as $side)

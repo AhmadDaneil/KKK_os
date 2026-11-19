@@ -29,15 +29,15 @@ class CustomerOrderDraftController extends Controller
             'card_quantity' => ['sometimes', 'nullable', 'integer', 'min:1'],
             'couple' => ['sometimes', 'array'],
             'couple.groom_name' => ['nullable', 'string', 'max:255'],
-            'couple.groom_abbreviation' => ['nullable', 'string', 'max:100'],
+            'couple.groom_abbreviation' => ['nullable', 'string', 'max:6'],
             'couple.bride_name' => ['nullable', 'string', 'max:255'],
-            'couple.bride_abbreviation' => ['nullable', 'string', 'max:100'],
+            'couple.bride_abbreviation' => ['nullable', 'string', 'max:6'],
 
             'second_couple' => ['sometimes', 'array'],
             'second_couple.groom_name' => ['nullable', 'string', 'max:255'],
-            'second_couple.groom_abbreviation' => ['nullable', 'string', 'max:100'],
+            'second_couple.groom_abbreviation' => ['nullable', 'string', 'max:6'],
             'second_couple.bride_name' => ['nullable', 'string', 'max:255'],
-            'second_couple.bride_abbreviation' => ['nullable', 'string', 'max:100'],
+            'second_couple.bride_abbreviation' => ['nullable', 'string', 'max:6'],
 
             'sides' => ['sometimes', 'array'],
             'single_package_side' => [
