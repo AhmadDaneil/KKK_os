@@ -5,6 +5,7 @@ from __future__ import annotations
 import argparse
 import collections
 import json
+import math
 import struct
 from pathlib import Path
 from typing import Any, BinaryIO
@@ -114,6 +115,10 @@ def text_fonts(type_data: bytes) -> dict[str, Any]:
                          "tracking": style.get("Tracking", 0),
                          "horizontal_scale": style.get("HorizontalScale", 1),
                          "vertical_scale": style.get("VerticalScale", 1)})
+    transform = struct.unpack_from(">6d", type_data, 2) if type_data[:2] == b"\x00\x01" else (1, 0, 0, 1, 0, 0)
+    for run in runs:
+        if run["size"] is not None:
+            run["pixel_size"] = run["size"] * math.hypot(transform[2], transform[3]) * run["vertical_scale"]
     return {"text": text, "fonts": dict(used), "runs": runs}
 
 
@@ -242,7 +247,7 @@ def main() -> None:
         if not folder.is_dir():
             continue
         items = {}
-        for item in ("KAD DEPAN", "BANNER", "BANTING", "STICKER", "ARROW KIRI", "ARROW KANAN", "WOODEN HANGER", "VIP CARD"):
+        for item in ("KAD DEPAN", "BANNER", "BANTING", "STICKER", "ARROW KIRI", "ARROW KANAN", "WOODEN HANGER", "VIP CARD", "KAD BELAKANG"):
             path = folder / (item + ".psd")
             if path.exists():
                 try:

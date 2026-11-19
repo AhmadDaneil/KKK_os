@@ -9,6 +9,7 @@ from typing import Any
 
 
 FONT_FILES = {
+    "Perpetua": ("perpetua.woff", "400"),
     "AmalfiCoast": ("amalficoast.woff", "400"),
     "MomsHand": ("momshand.woff", "400"),
     "GreatVibes-Regular": ("greatvibes-regular.woff", "400"),
@@ -123,8 +124,10 @@ def build(catalog: dict[str, Any]) -> tuple[str, str, list[dict[str, Any]]]:
     for name, (filename, weight) in FONT_FILES.items():
         common.append('@font-face { font-family: "PSD ' + name + '"; src: url("../fonts/psd-preview/' + filename
                       + '") format("woff"); font-style: normal; font-weight: ' + weight + '; font-display: swap; }')
+    common.append(".wedding-card-front[data-design-artwork], .live-product[data-design-artwork] { container-type: inline-size; }")
     items = ["/* Item font mappings from the source PSD layers. */"]
     report = []
+    geometry = []
     for code, design in sorted(catalog.items()):
         for item, product in design["items"].items():
             for conflict in product.get("conflicts", []):
@@ -134,8 +137,29 @@ def build(catalog: dict[str, Any]) -> tuple[str, str, list[dict[str, Any]]]:
                     "majlis perkahwinan copy", "walimatul urus", "ke majlis perkahwinan",
                 }:
                     raise ValueError(f"Review mixed-font text before building: {code}/{item}/{conflict['field']}")
+            if item == "kad belakang":
+                aliases = {"groom_name": "namapengantinlelaki", "bride_name": "namapengantinperempuan",
+                           "father_name": "namaayah", "mother_name": "namaibu", "day_name_malay": "hari",
+                           "event_date_day": "tarikhhari", "event_date_month_year": "bulan", "hijri_date": "bulanislam",
+                           "meal_time": "masajamuanmakan", "bersanding_time": "masabersanding",
+                           "venue_name": "alamat", "full_address": "alamat"}
+                for index in range(1, 4):
+                    aliases["contact_" + str(index) + "_name"] = "nama" + str(index)
+                    aliases["contact_" + str(index) + "_phone"] = "notel" + str(index)
+                for field, alias in aliases.items():
+                    source = product["selected"].get(alias)
+                    runs = source.get("runs", []) if source else []
+                    size = max(runs, key=lambda run: len(run["text"])).get("pixel_size", 0) if runs else 0
+                    if size > 0:
+                        items.append('.wedding-card-back[data-design-code="' + code + '"] [data-preview-field="' + field + '"] { font-size: '
+                                     + format(size / product["width"] * 100, ".8g") + 'cqw !important; }')
+                continue
             slot = SLOTS[item]
-            for field, source in fields_for_item(product["selected"], slot).items():
+            fields = fields_for_item(product["selected"], slot)
+            name_fields = [field for field in ("groom_display", "bride_display") if field in fields]
+            name_sizes = [run.get("pixel_size", 0) for field in name_fields for run in fields[field].get("runs", []) if run.get("pixel_size", 0) > 0]
+            shared_size = min(name_sizes) if name_sizes else 0
+            for field, source in fields.items():
                 original = source["font"]
                 font = resolve_font(original)
                 runs = source.get("runs", [])
@@ -147,6 +171,10 @@ def build(catalog: dict[str, Any]) -> tuple[str, str, list[dict[str, Any]]]:
                 selector = field_selector(code, slot, field)
                 rule = selector + " { font-family: " + family + "; font-weight: " + str(weight)
                 rule += "; font-style: " + ("italic" if italic else "normal")
+                pixel_size = shared_size if field in name_fields else primary_run.get("pixel_size", 0)
+                if pixel_size > 0:
+                    rule += "; --psd-font-size: " + format(pixel_size / product["width"] * 100, ".8g")
+                    rule += "; font-size: " + format(pixel_size / product["width"] * 100, ".8g") + "cqw"
                 rule += "; letter-spacing: " + format(tracking / 1000, ".6g") + "em; }"
                 (common if slot in ("banner", "bunting") else items).append(rule)
                 report.append({"code": code, "slot": slot, "field": field, "source_font": original,
@@ -154,6 +182,26 @@ def build(catalog: dict[str, Any]) -> tuple[str, str, list[dict[str, Any]]]:
                                "tracking": tracking,
                                "layer": source["layer"], "groups": source["groups"], "rect": source["rect"],
                                "selector": selector})
+            if len(name_fields) == 2:
+                root = ".wedding-card-front" if slot == "card-front" else '.live-product[data-preview-artwork-slot="' + slot + '"]'
+                root += '[data-font-design-code="' + code + '"][data-design-artwork]:not(.has-live-customer-photo)'
+                couple = ".desa-card-custom-couple" if slot == "card-front" else ".desa-product-copy-couple"
+                geometry.append(root + " " + couple + " { position: absolute !important; inset: 0 !important; width: 100% !important; height: 100% !important; margin: 0 !important; display: block !important; transform: none !important; }")
+                boxes = [fields[field]["rect"] for field in name_fields]
+                centers = [((b[1] + b[3]) / 2, (b[0] + b[2]) / 2) for b in boxes]
+                horizontal = abs(centers[0][1] - centers[1][1]) < max(b[2] - b[0] for b in boxes) * 0.65
+                for index, (box, center) in enumerate(zip(boxes, centers)):
+                    x, y = center
+                    if horizontal:
+                        y = sum(c[1] for c in centers) / 2
+                    width = (box[3] - box[1]) / product["width"] * 100 / 0.88
+                    height = (box[2] - box[0]) / product["height"] * 100
+                    geometry.append(root + " " + couple + (" > span:first-child" if index == 0 else " > span:last-child")
+                                    + " { position: absolute !important; display: block !important; left: " + format(x / product["width"] * 100, ".8g")
+                                    + "% !important; top: " + format(y / product["height"] * 100, ".8g")
+                                    + "% !important; width: " + format(width, ".8g") + "% !important; --psd-name-height: " + format(height, ".8g")
+                                    + "; margin: 0 !important; padding: 0 !important; text-align: center !important; line-height: 1 !important; transform: translate(-50%, -50%) !important; }")
+    items.extend(geometry)
     items.extend([
         "",
         "/* Font fitting measures full glyph bounds, so the letterforms must remain visible. */",

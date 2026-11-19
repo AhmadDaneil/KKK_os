@@ -2658,11 +2658,12 @@ document.addEventListener('DOMContentLoaded', function () {
             if (!context) {
                 return;
             }
-            document.querySelectorAll('.live-product--banner, .wedding-card-front, .live-product--sticker, .live-product--arrow, .live-product--hanger, .live-product--banting[data-design-code^="CKC-"], .live-product--banting[data-design-code^="CKI-"]').forEach(function (banner) {
+            document.querySelectorAll('.live-product--banner, .wedding-card-front, .live-product--sticker, .live-product--arrow, .live-product--hanger, .live-product--banting').forEach(function (banner) {
                 if (banner.getBoundingClientRect().width === 0) {
                     return;
                 }
-                banner.querySelectorAll('.desa-product-copy-couple > span, .desa-card-custom-couple > span').forEach(function (name) {
+                const names = [...banner.querySelectorAll('.desa-product-copy-couple > span, .desa-card-custom-couple > span')];
+                names.forEach(function (name) {
                     name.style.removeProperty('font-size');
                     name.style.removeProperty('scale');
                     name.style.removeProperty('translate');
@@ -2674,12 +2675,14 @@ document.addEventListener('DOMContentLoaded', function () {
                         return;
                     }
                     const stackedHeight = parseFloat(style.getPropertyValue('--cartoon-name-height')) || 0;
-                    const maximumSize = stackedHeight > 0 ? banner.getBoundingClientRect().height * stackedHeight / 100 * 4 : parseFloat(style.fontSize);
+                    const sourceSize = parseFloat(style.getPropertyValue('--psd-font-size')) * banner.getBoundingClientRect().width / 100;
+                    const maximumSize = sourceSize > 0 ? sourceSize : stackedHeight > 0 ? banner.getBoundingClientRect().height * stackedHeight / 100 * 4 : parseFloat(style.fontSize);
                     const heightRatio = banner.classList.contains('wedding-card-front') ? 0.10
                         : banner.classList.contains('live-product--arrow') ? 0.12
                         : banner.classList.contains('live-product--hanger') ? 0.24
                         : banner.classList.contains('live-product--sticker') ? 0.20 : 0.16;
-                    const maximumHeight = banner.getBoundingClientRect().height * (stackedHeight > 0 ? stackedHeight / 100 : heightRatio);
+                    const sourceHeight = parseFloat(style.getPropertyValue('--psd-name-height'));
+                    const maximumHeight = banner.getBoundingClientRect().height * (sourceHeight > 0 ? sourceHeight / 100 : stackedHeight > 0 ? stackedHeight / 100 : heightRatio);
                     let low = 0.1;
                     let high = maximumSize;
                     for (let step = 0; step < 16; step++) {
@@ -2690,7 +2693,7 @@ document.addEventListener('DOMContentLoaded', function () {
                             Math.abs(metrics.actualBoundingBoxLeft || 0) + Math.abs(metrics.actualBoundingBoxRight || 0));
                         const inkHeight = (metrics.actualBoundingBoxAscent || size)
                             + (metrics.actualBoundingBoxDescent || 0);
-                        const spacing = parseFloat(style.letterSpacing) || 0;
+                        const spacing = (parseFloat(style.letterSpacing) || 0) * size / parseFloat(style.fontSize);
                         const totalWidth = inkWidth + Math.max(0, name.textContent.trim().length - 1) * spacing;
                         if (totalWidth <= availableWidth * 0.88 && inkHeight <= maximumHeight) {
                             low = size;
@@ -2714,6 +2717,20 @@ document.addEventListener('DOMContentLoaded', function () {
                         name.style.scale = String(availableWidth * 0.88 / fittedWidth);
                     }
                 });
+                const fittedNames = names.filter(name => name.textContent.trim() && parseFloat(name.style.fontSize) > 0);
+                const sharedSize = Math.min(...fittedNames.map(name => parseFloat(name.style.fontSize)));
+                fittedNames.forEach(function (name) {
+                    name.style.fontSize = sharedSize + 'px';
+                    name.style.removeProperty('scale');
+                    const style = getComputedStyle(name);
+                    context.font = style.fontStyle + ' ' + style.fontWeight + ' ' + style.fontSize + ' ' + style.fontFamily;
+                    const metrics = context.measureText(name.textContent.trim());
+                    if (metrics.fontBoundingBoxAscent !== undefined && parseFloat(style.getPropertyValue('--psd-name-height')) > 0) {
+                        const offset = (metrics.fontBoundingBoxAscent - metrics.fontBoundingBoxDescent
+                            - metrics.actualBoundingBoxAscent + metrics.actualBoundingBoxDescent) / 2;
+                        name.style.translate = '0 ' + (-offset) + 'px';
+                    }
+                });
             });
         }
 
@@ -2735,7 +2752,7 @@ document.addEventListener('DOMContentLoaded', function () {
             attributeFilter: ['class', 'data-font-design-code', 'data-design-code', 'data-photo-design-code'],
         });
         const previewResizeObserver = new ResizeObserver(schedulePreviewNameFit);
-        document.querySelectorAll('.live-product--banner, .wedding-card-front, .live-product--sticker, .live-product--arrow, .live-product--hanger, .live-product--banting[data-design-code^="CKC-"], .live-product--banting[data-design-code^="CKI-"]').forEach(function (banner) {
+        document.querySelectorAll('.live-product--banner, .wedding-card-front, .live-product--sticker, .live-product--arrow, .live-product--hanger, .live-product--banting').forEach(function (banner) {
             previewResizeObserver.observe(banner);
         });
         window.addEventListener('resize', schedulePreviewNameFit);
