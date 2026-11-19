@@ -2726,13 +2726,20 @@ document.addEventListener('DOMContentLoaded', function () {
                     context.font = style.fontStyle + ' ' + style.fontWeight + ' ' + style.fontSize + ' ' + style.fontFamily;
                     const metrics = context.measureText(name.textContent.trim());
                     const alignment = style.getPropertyValue('--psd-name-align').trim();
+                    const verticalAlignment = style.getPropertyValue('--psd-name-vertical-align').trim();
                     const horizontalOffset = alignment === 'right'
                         ? metrics.width - metrics.actualBoundingBoxRight
-                        : alignment === 'left' ? metrics.actualBoundingBoxLeft : 0;
+                        : alignment === 'left' ? metrics.actualBoundingBoxLeft
+                        : verticalAlignment ? (metrics.width + metrics.actualBoundingBoxLeft - metrics.actualBoundingBoxRight) / 2 : 0;
                     if (metrics.fontBoundingBoxAscent !== undefined && parseFloat(style.getPropertyValue('--psd-name-height')) > 0) {
                         const offset = (metrics.fontBoundingBoxAscent - metrics.fontBoundingBoxDescent
                             - metrics.actualBoundingBoxAscent + metrics.actualBoundingBoxDescent) / 2;
-                        name.style.translate = horizontalOffset + 'px ' + (-offset) + 'px';
+                        const size = parseFloat(style.fontSize);
+                        const baseline = (size + metrics.fontBoundingBoxAscent - metrics.fontBoundingBoxDescent) / 2;
+                        const verticalOffset = verticalAlignment === 'bottom'
+                            ? size - baseline - metrics.actualBoundingBoxDescent
+                            : verticalAlignment === 'top' ? metrics.actualBoundingBoxAscent - baseline : -offset;
+                        name.style.translate = horizontalOffset + 'px ' + verticalOffset + 'px';
                     }
                 });
             });

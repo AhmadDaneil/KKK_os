@@ -55,6 +55,33 @@ class PsdPreviewFontAuditTest(unittest.TestCase):
 
         self.assertIsNone(builder.horizontal_name_anchors(product, fields, "card-front"))
 
+    def test_vertical_names_share_ampersand_axis_and_equal_clearance(self):
+        fields = {"groom_display": {"rect": [100, 300, 200, 700]},
+                  "bride_display": {"rect": [400, 320, 500, 680]}}
+        product = {"width": 1000, "height": 1000,
+                   "selected": {"&": {"rect": [250, 470, 310, 530]}}}
+
+        anchors = builder.vertical_name_anchors(product, fields, "card-front")
+
+        self.assertEqual([500, 500], [anchor["x"] for anchor in anchors])
+        self.assertAlmostEqual(246.4, anchors[0]["y"])
+        self.assertAlmostEqual(313.6, anchors[1]["y"])
+        self.assertEqual(["bottom", "top"], [anchor["vertical_align"] for anchor in anchors])
+        self.assertEqual(anchors[0]["width"], anchors[1]["width"])
+        self.assertIsNone(builder.vertical_name_anchors(product, fields, "banner"))
+        self.assertIsNone(builder.vertical_name_anchors(product, fields, "wooden-hanger"))
+
+    def test_vertical_fitting_reserves_space_for_the_date(self):
+        fields = {"groom_display": {"rect": [100, 300, 200, 700]},
+                  "bride_display": {"rect": [400, 320, 500, 680]},
+                  "event_date": {"rect": [340, 300, 370, 700]}}
+        product = {"width": 1000, "height": 1000,
+                   "selected": {"&": {"rect": [250, 470, 310, 530]}}}
+
+        anchors = builder.vertical_name_anchors(product, fields, "sticker")
+
+        self.assertAlmostEqual(21.4, anchors[1]["height"])
+
     def test_rear_card_size_uses_its_own_source_scale(self):
         product = {"width": 1200, "selected": {"namaayah": {
             "runs": [{"text": "Father", "pixel_size": 48}]}}}
