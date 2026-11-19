@@ -2709,14 +2709,22 @@ document.addEventListener('DOMContentLoaded', function () {
                     const stackedHeight = parseFloat(style.getPropertyValue('--cartoon-name-height')) || 0;
                     const sourceSize = parseFloat(style.getPropertyValue('--psd-font-size')) * banner.getBoundingClientRect().width / 100;
                     const maximumSize = sourceSize > 0 ? sourceSize : stackedHeight > 0 ? banner.getBoundingClientRect().height * stackedHeight / 100 * 4 : parseFloat(style.fontSize);
+                    const isPhotoBunting = banner.classList.contains('live-product--banting')
+                        && banner.classList.contains('has-live-customer-photo');
+                    const fittedMaximumSize = isPhotoBunting
+                        ? Math.min(maximumSize * 0.8, banner.getBoundingClientRect().width * 0.09)
+                        : maximumSize;
                     const heightRatio = banner.classList.contains('wedding-card-front') ? 0.10
                         : banner.classList.contains('live-product--arrow') ? 0.12
                         : banner.classList.contains('live-product--hanger') ? 0.24
                         : banner.classList.contains('live-product--sticker') ? 0.20 : 0.16;
                     const sourceHeight = parseFloat(style.getPropertyValue('--psd-name-height'));
                     const maximumHeight = banner.getBoundingClientRect().height * (sourceHeight > 0 ? sourceHeight / 100 : stackedHeight > 0 ? stackedHeight / 100 : heightRatio);
+                    const fittedMaximumHeight = isPhotoBunting
+                        ? Math.min(maximumHeight, banner.getBoundingClientRect().height * 0.08)
+                        : maximumHeight;
                     let low = 0.1;
-                    let high = maximumSize;
+                    let high = fittedMaximumSize;
                     for (let step = 0; step < 16; step++) {
                         const size = (low + high) / 2;
                         context.font = style.fontStyle + ' ' + style.fontWeight + ' ' + size + 'px ' + style.fontFamily;
@@ -2727,7 +2735,7 @@ document.addEventListener('DOMContentLoaded', function () {
                             + (metrics.actualBoundingBoxDescent || 0);
                         const spacing = (parseFloat(style.letterSpacing) || 0) * size / parseFloat(style.fontSize);
                         const totalWidth = inkWidth + Math.max(0, name.textContent.trim().length - 1) * spacing;
-                        if (totalWidth <= availableWidth * 0.88 && inkHeight <= maximumHeight) {
+                        if (totalWidth <= availableWidth * 0.88 && inkHeight <= fittedMaximumHeight) {
                             low = size;
                         } else {
                             high = size;
