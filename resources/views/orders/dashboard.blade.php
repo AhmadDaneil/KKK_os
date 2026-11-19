@@ -2712,7 +2712,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     const isPhotoBunting = banner.classList.contains('live-product--banting')
                         && banner.classList.contains('has-live-customer-photo');
                     const fittedMaximumSize = isPhotoBunting
-                        ? Math.min(maximumSize * 0.8, banner.getBoundingClientRect().width * 0.09)
+                        ? Math.min(maximumSize * 0.9, banner.getBoundingClientRect().width * 0.12)
                         : maximumSize;
                     const heightRatio = banner.classList.contains('wedding-card-front') ? 0.10
                         : banner.classList.contains('live-product--arrow') ? 0.12
