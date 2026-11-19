@@ -119,6 +119,32 @@ def field_selector(code: str, slot: str, field: str) -> str:
     return root + '[data-font-design-code="' + code + '"] [data-preview-field="' + field + '"]'
 
 
+def horizontal_name_anchors(product: dict[str, Any], fields: dict[str, Any], slot: str) -> list[dict[str, Any]] | None:
+    if slot not in {"card-front", "arrow-left", "arrow-right", "bunting", "sticker"}:
+        return None
+    amp = product["selected"].get("&")
+    if not amp:
+        return None
+    boxes = [fields[field]["rect"] for field in ("groom_display", "bride_display")]
+    centers = [((box[1] + box[3]) / 2, (box[0] + box[2]) / 2) for box in boxes]
+    if abs(centers[0][1] - centers[1][1]) >= max(box[2] - box[0] for box in boxes) * 0.65:
+        return None
+    top, left, bottom, right = amp["rect"]
+    if not min(center[0] for center in centers) < (left + right) / 2 < max(center[0] for center in centers):
+        return None
+    if abs((top + bottom) / 2 - sum(center[1] for center in centers) / 2) > max(box[2] - box[0] for box in boxes):
+        return None
+    canvas_width = product["width"]
+    gap = max(canvas_width * 0.015, min((right - left) * 0.75, canvas_width * 0.05))
+    left_edge, right_edge = left - gap, right + gap
+    width = min(left_edge, canvas_width - right_edge) - canvas_width * 0.05
+    if width <= 0:
+        return None
+    return [{"x": left_edge if center[0] < (left + right) / 2 else right_edge,
+             "y": (top + bottom) / 2, "width": width,
+             "align": "right" if center[0] < (left + right) / 2 else "left"} for center in centers]
+
+
 def build(catalog: dict[str, Any]) -> tuple[str, str, list[dict[str, Any]]]:
     common = ["/* Generated from visible PSD text runs, including group visibility and duplicate-layer review. */"]
     for name, (filename, weight) in FONT_FILES.items():
@@ -190,17 +216,26 @@ def build(catalog: dict[str, Any]) -> tuple[str, str, list[dict[str, Any]]]:
                 boxes = [fields[field]["rect"] for field in name_fields]
                 centers = [((b[1] + b[3]) / 2, (b[0] + b[2]) / 2) for b in boxes]
                 horizontal = abs(centers[0][1] - centers[1][1]) < max(b[2] - b[0] for b in boxes) * 0.65
+                anchors = horizontal_name_anchors(product, fields, slot)
                 for index, (box, center) in enumerate(zip(boxes, centers)):
                     x, y = center
                     if horizontal:
                         y = sum(c[1] for c in centers) / 2
                     width = (box[3] - box[1]) / product["width"] * 100 / 0.88
+                    alignment = "center"
+                    transform = "translate(-50%, -50%)"
+                    if anchors:
+                        anchor = anchors[index]
+                        x, y = anchor["x"], anchor["y"]
+                        width = anchor["width"] / product["width"] * 100
+                        alignment = anchor["align"]
+                        transform = "translate(-100%, -50%)" if alignment == "right" else "translate(0, -50%)"
                     height = (box[2] - box[0]) / product["height"] * 100
                     geometry.append(root + " " + couple + (" > span:first-child" if index == 0 else " > span:last-child")
                                     + " { position: absolute !important; display: block !important; left: " + format(x / product["width"] * 100, ".8g")
                                     + "% !important; top: " + format(y / product["height"] * 100, ".8g")
                                     + "% !important; width: " + format(width, ".8g") + "% !important; --psd-name-height: " + format(height, ".8g")
-                                    + "; margin: 0 !important; padding: 0 !important; text-align: center !important; line-height: 1 !important; transform: translate(-50%, -50%) !important; }")
+                                    + ("; --psd-name-align: " + alignment if anchors else "") + "; margin: 0 !important; padding: 0 !important; text-align: " + alignment + " !important; line-height: 1 !important; transform: " + transform + " !important; }")
     items.extend(geometry)
     items.extend([
         "",

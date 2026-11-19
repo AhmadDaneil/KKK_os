@@ -34,6 +34,27 @@ def layer(index: int, name: str, font: str = "", flags: int = 0, section=None) -
 
 
 class PsdPreviewFontAuditTest(unittest.TestCase):
+    def test_horizontal_names_have_equal_clearance_from_ampersand(self):
+        fields = {"groom_display": {"rect": [200, 100, 300, 400]},
+                  "bride_display": {"rect": [210, 600, 310, 900]}}
+        product = {"width": 1000, "selected": {"&": {"rect": [220, 470, 280, 530]}}}
+
+        anchors = builder.horizontal_name_anchors(product, fields, "card-front")
+
+        self.assertEqual([425, 575], [anchor["x"] for anchor in anchors])
+        self.assertEqual([250, 250], [anchor["y"] for anchor in anchors])
+        self.assertEqual([375, 375], [anchor["width"] for anchor in anchors])
+        self.assertEqual(["right", "left"], [anchor["align"] for anchor in anchors])
+        self.assertIsNone(builder.horizontal_name_anchors(product, fields, "banner"))
+        self.assertIsNone(builder.horizontal_name_anchors(product, fields, "wooden-hanger"))
+
+    def test_stacked_names_keep_their_source_positions(self):
+        fields = {"groom_display": {"rect": [100, 300, 200, 700]},
+                  "bride_display": {"rect": [400, 300, 500, 700]}}
+        product = {"width": 1000, "selected": {"&": {"rect": [250, 470, 310, 530]}}}
+
+        self.assertIsNone(builder.horizontal_name_anchors(product, fields, "card-front"))
+
     def test_rear_card_size_uses_its_own_source_scale(self):
         product = {"width": 1200, "selected": {"namaayah": {
             "runs": [{"text": "Father", "pixel_size": 48}]}}}
