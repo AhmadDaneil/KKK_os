@@ -34,6 +34,36 @@ def layer(index: int, name: str, font: str = "", flags: int = 0, section=None) -
 
 
 class PsdPreviewFontAuditTest(unittest.TestCase):
+    def test_rear_card_size_uses_its_own_source_scale(self):
+        product = {"width": 1200, "selected": {"namaayah": {
+            "runs": [{"text": "Father", "pixel_size": 48}]}}}
+
+        _, css, _ = builder.build({"CKD-001": {"items": {"kad belakang": product}}})
+
+        self.assertIn('[data-preview-field="father_name"] { font-size: 4cqw !important;', css)
+
+    def test_source_font_size_includes_photoshop_transform(self):
+        payload = struct.pack(">H6d", 1, 2, 0, 0, 3, 0, 0) + text_engine()
+
+        result = audit.text_fonts(payload)
+
+        self.assertEqual(90, result["runs"][0]["pixel_size"])
+
+    def test_couple_uses_one_source_size_and_horizontal_baseline(self):
+        records = [layer(0, "singkatanlelaki", "Belladonia"), layer(1, "singkatanperempuan", "Belladonia")]
+        records[0]["runs"] = [{"text": "Syafiq", "pixel_size": 120}]
+        records[1]["runs"] = [{"text": "Awanis", "pixel_size": 100}]
+        records[0]["rect"] = [200, 100, 300, 400]
+        records[1]["rect"] = [210, 600, 310, 900]
+        audit.assign_visibility(records)
+        selected, _ = audit.select_visible_fonts(records)
+
+        _, css, _ = builder.build({"CKD-001": {"items": {"kad depan": {
+            "width": 1000, "height": 1500, "selected": selected}}}})
+
+        self.assertEqual(2, css.count("--psd-font-size: 10;"))
+        self.assertEqual(2, css.count("top: 17% !important"))
+
     def test_vip_card_uses_full_names_and_split_date_fields(self):
         names = {"font": "MonotypeCorsiva"}
         dates = {"font": "CenturyGothic"}
