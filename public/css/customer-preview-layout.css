@@ -7459,6 +7459,19 @@
     transform: translate(-50%, -50%);
 }
 
+/* CKD-006 keeps its title and date inside the right panel, while its PSD name
+   anchors are measured against the full banner canvas. */
+.live-product.live-product--banner[data-design-artwork][data-design-code="CKD-006"]:not(.has-live-customer-photo) .desa-product-name-overlay,
+.live-product.live-product--banner[data-design-artwork][data-design-code="CKD-006"]:not(.has-live-customer-photo) .desa-product-custom-copy {
+    overflow: visible;
+}
+
+.live-product.live-product--banner[data-preview-artwork-slot="banner"][data-design-artwork][data-design-code="CKD-006"]:not(.has-live-customer-photo) .desa-product-copy-couple {
+    left: -104.255319% !important;
+    right: auto !important;
+    width: 212.765958% !important;
+}
+
 
 /* ARCH script names need a larger display size on bunting and arrow previews. */
 .live-product:is(.live-product--banting, .live-product--arrow)[data-font-design-code^="CKA-"] .desa-product-copy-couple > span {
