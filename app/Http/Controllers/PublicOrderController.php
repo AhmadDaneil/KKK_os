@@ -52,7 +52,7 @@ class PublicOrderController extends Controller
             'side' => ['nullable', 'string', 'in:LELAKI,PEREMPUAN', 'required_if:package_count,1'],
             'package_type' => ['required', 'string', 'in:PUTERI_MANIS,JELATA'],
             'payment_plan' => ['required', 'in:DEPOSIT,FULL'],
-            'package_format' => ['nullable', 'string', 'in:SEPARATE,FOLDED', 'required_if:package_count,2'],
+            'package_format' => ['nullable', 'string', 'in:SEPARATE'],
             'first_event_side' => ['nullable', 'string', 'in:LELAKI,PEREMPUAN', 'required_if:package_count,2'],
             'customer_name' => ['required', 'string', 'max:255'],
             'customer_email' => ['required', 'email', 'max:255'],
@@ -185,4 +185,3 @@ class PublicOrderController extends Controller
             && parse_url((string) config('services.billplz.base_url', ''), PHP_URL_HOST) === 'www.billplz-sandbox.com';
     }
 }
-

@@ -35,7 +35,7 @@ class WabotOrderController extends Controller
             'package_count' => ['required', 'integer', 'in:1,2'],
             'side' => ['nullable', 'string', 'in:LELAKI,PEREMPUAN', 'required_if:package_count,1'],
             'package_type' => ['required', 'string', 'in:PUTERI_MANIS,JELATA'],
-            'package_format' => ['nullable', 'string', 'in:SEPARATE,FOLDED'],
+            'package_format' => ['nullable', 'string', 'in:SEPARATE'],
             'first_event_side' => ['nullable', 'string', 'in:LELAKI,PEREMPUAN'],
             'customer_name' => ['required', 'string', 'max:255'],
             'customer_email' => ['nullable', 'email', 'max:255'],

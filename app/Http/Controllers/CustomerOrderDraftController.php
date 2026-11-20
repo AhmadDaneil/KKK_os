@@ -65,7 +65,11 @@ class CustomerOrderDraftController extends Controller
                 'nullable',
                 'in:LELAKI,PEREMPUAN',
             ],
-            'package_format' => ['sometimes', 'string', 'in:SEPARATE,FOLDED'],
+            'package_format' => [
+                'sometimes',
+                'string',
+                $order->package_format === 'FOLDED' ? 'in:SEPARATE,FOLDED' : 'in:SEPARATE',
+            ],
             'first_event_side' => ['sometimes', 'string', 'in:LELAKI,PEREMPUAN'],
             'jumlah_hantaran' => [(int) $order->package_count === 2 ? 'sometimes' : 'prohibited', 'nullable', 'string', 'max:255'],
 

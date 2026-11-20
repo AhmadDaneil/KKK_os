@@ -72,14 +72,7 @@
             </div>
 
             <div id="test-two-package-options" hidden>
-                <div class="dropdown-field">
-                    <label for="test-package-format">Package format</label>
-                    <select id="test-package-format" name="package_format">
-                        <option value="SEPARATE" @selected(old('package_format', 'SEPARATE') === 'SEPARATE')>Separate packages</option>
-                        <option value="FOLDED" @selected(old('package_format') === 'FOLDED')>Combined package — folded card</option>
-                    </select>
-                    @error('package_format')<p class="field-error">{{ $message }}</p>@enderror
-                </div>
+                <input name="package_format" type="hidden" value="SEPARATE">
                 <div class="dropdown-field">
                     <label for="test-first-event-side">Whose event is first?</label>
                     <select id="test-first-event-side" name="first_event_side">
