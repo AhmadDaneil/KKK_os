@@ -5,7 +5,6 @@ namespace App\Services\Orders;
 use App\Models\Order;
 use App\Services\Payments\BillplzPaymentMethod;
 use App\Services\Payments\CreateBillplzBookingPaymentService;
-use App\Services\Orders\GenerateCustomerReferenceService;
 use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -286,17 +285,6 @@ class CreateWabotDraftOrderService
             ->where('source', 'WABOT')
             ->where('source_reference', $sourceReference)
             ->first();
-    }
-
-    private function alignOrderIdWithCustomerReference(Order $order): Order
-    {
-        $reference = $this->customerReferences->generate($order);
-
-        if ($order->order_id !== $reference) {
-            $order->update(['order_id' => $reference]);
-        }
-
-        return $order->fresh();
     }
 
     private function ensureSameBooking(
