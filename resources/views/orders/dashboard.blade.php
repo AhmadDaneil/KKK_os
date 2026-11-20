@@ -330,11 +330,9 @@
                 <p class="field-help">Each event has its own details and design choices.</p>
                 <div class="grid">
                     <div>
-                        <label for="package-format">Package Type</label>
-                        <select id="package-format" name="package_format">
-                            <option value="SEPARATE" @selected(old('package_format', $order->package_format) === 'SEPARATE')>Separate Packages</option>
-                            <option value="FOLDED" @selected(old('package_format', $order->package_format) === 'FOLDED')>Combined Package – Folded Card</option>
-                        </select>
+                        <span class="review-label">Package Type</span>
+                        <p>{{ $order->package_format === 'FOLDED' ? 'Combined Package – Folded Card' : 'Separate Packages' }}</p>
+                        <input id="package-format" name="package_format" type="hidden" value="{{ $order->package_format ?? 'SEPARATE' }}">
                     </div>
                     <div>
                         <label for="first-event-side">First Event</label>

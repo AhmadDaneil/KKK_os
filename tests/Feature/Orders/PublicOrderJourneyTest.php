@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Orders;
 
+use App\Models\Order;
 use App\Services\Orders\CreateOrderService;
 use App\Services\Orders\GenerateOrderAccessLinkService;
 use Database\Seeders\KkkPackagePriceCatalogSeeder;
@@ -179,6 +180,52 @@ class PublicOrderJourneyTest extends TestCase
         ])->assertStatus(405);
 
         $this->assertDatabaseCount('orders', 0);
+    }
+
+    public function test_sandbox_order_rejects_folded_cards_before_starting_payment(): void
+    {
+        Http::preventStrayRequests();
+
+        $this->post(route('public.orders.test.store'), [
+            'package_count' => 2,
+            'package_type' => 'PUTERI_MANIS',
+            'package_format' => 'FOLDED',
+            'first_event_side' => 'PEREMPUAN',
+            'customer_name' => 'Folded Sandbox Customer',
+            'customer_email' => 'folded@example.test',
+            'customer_phone' => '0123456789',
+        ])->assertSessionHasErrors([
+            'package_format' => 'The selected package format is invalid.',
+        ]);
+
+        $this->assertDatabaseCount('orders', 0);
+        $this->assertDatabaseCount('payment_transactions', 0);
+        Http::assertNothingSent();
+    }
+
+    public function test_sandbox_two_package_order_defaults_to_separate_packages_without_a_format_selection(): void
+    {
+        Http::preventStrayRequests();
+        $this->get(route('public.orders.test.create'))
+            ->assertDontSee('<option value="FOLDED"', false)
+            ->assertDontSee('<select id="test-package-format"', false)
+            ->assertSee('name="package_format" type="hidden" value="SEPARATE"', false);
+
+        $this->post(route('public.orders.test.store'), [
+            'package_count' => 2,
+            'package_type' => 'PUTERI_MANIS',
+            'first_event_side' => 'PEREMPUAN',
+            'customer_name' => 'Separate Sandbox Customer',
+            'customer_email' => 'separate@example.test',
+            'customer_phone' => '0123456789',
+        ])->assertRedirect('https://www.billplz-sandbox.com/bills/public-checkout')
+            ->assertSessionHasNoErrors();
+
+        $order = Order::query()->sole();
+        $this->assertSame('SEPARATE', $order->package_format);
+        $this->assertSame(2, $order->packageSides()->count());
+        $this->assertDatabaseCount('payment_transactions', 1);
+        Http::assertSentCount(1);
     }
 
     public function test_progress_lookup_shows_public_status_without_customer_details(): void

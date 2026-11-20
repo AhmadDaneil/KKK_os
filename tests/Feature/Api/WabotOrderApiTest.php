@@ -181,6 +181,56 @@ class WabotOrderApiTest extends TestCase
         app(GenerateOrderAccessLinkService::class)->generate($order);
     }
 
+    public function test_wabot_rejects_folded_card_bookings_with_422_without_starting_payment(): void
+    {
+        Http::preventStrayRequests();
+
+        $this->postJson(route('api.wabot.orders.store'), [
+            'external_reference' => 'folded-card-booking',
+            'package_count' => 2,
+            'package_type' => 'JELATA',
+            'package_format' => 'FOLDED',
+            'customer_name' => 'Folded Booking Customer',
+            'customer_phone' => '0123456789',
+        ], ['Authorization' => 'Bearer wabot-test-token'])
+            ->assertUnprocessable()
+            ->assertJsonValidationErrors([
+                'package_format' => 'The selected package format is invalid.',
+            ]);
+
+        $this->assertDatabaseCount('orders', 0);
+        $this->assertDatabaseCount('payment_transactions', 0);
+        Http::assertNothingSent();
+    }
+
+    public function test_wabot_defaults_two_package_bookings_to_separate_packages(): void
+    {
+        Http::preventStrayRequests();
+        Http::fake(['www.billplz-sandbox.com/*' => Http::response([
+            'id' => 'separate-format-booking',
+            'collection_id' => 'sandbox-collection',
+            'amount' => 10000,
+            'url' => 'https://www.billplz-sandbox.com/bills/separate-format-booking',
+        ])]);
+
+        $response = $this->postJson(route('api.wabot.orders.store'), [
+            'external_reference' => 'separate-format-booking',
+            'package_count' => 2,
+            'package_type' => 'JELATA',
+            'customer_name' => 'Separate Booking Customer',
+            'customer_phone' => '0123456789',
+        ], ['Authorization' => 'Bearer wabot-test-token'])
+            ->assertCreated()
+            ->assertJsonPath('booking.amount', '100.00');
+
+        $order = Order::query()->where('order_id', $response->json('order_id'))->firstOrFail();
+        $this->assertSame('SEPARATE', $order->package_format);
+        $this->assertSame(2, $order->packageSides()->count());
+        $this->assertDatabaseCount('orders', 1);
+        $this->assertDatabaseCount('payment_transactions', 1);
+        Http::assertSentCount(1);
+    }
+
     public function test_wabot_receives_reference_dashboard_link_and_receipt_only_after_verified_callback(): void
     {
         Http::preventStrayRequests();

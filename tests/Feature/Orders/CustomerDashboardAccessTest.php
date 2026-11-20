@@ -168,7 +168,9 @@ class CustomerDashboardAccessTest extends TestCase
             ->assertSee('Back to Home')
             ->assertSee('href="'.route('public.orders.progress', ['order_id' => $order->order_id]).'"', false)
             ->assertSee('Separate Packages')
-            ->assertSee('Combined Package – Folded Card')
+            ->assertDontSee('Combined Package – Folded Card')
+            ->assertDontSee('<select id="package-format"', false)
+            ->assertSee('name="package_format" type="hidden" value="SEPARATE"', false)
             ->assertSee("Event 1 – Bride's Side")
             ->assertSee("Event 2 – Groom's Side")
             ->assertSee('name="jumlah_hantaran"', false)
@@ -177,6 +179,60 @@ class CustomerDashboardAccessTest extends TestCase
             ->assertSee("Groom's Parents")
             ->assertSee('data-folded-second-design="true"', false)
             ->assertSee('data-preview-field="card_title_jawi"', false);
+    }
+
+    public function test_customer_cannot_change_a_separate_package_draft_to_a_folded_card(): void
+    {
+        $order = app(CreateOrderService::class)->create([
+            'package_count' => 2,
+            'package_format' => 'SEPARATE',
+            'first_event_side' => 'LELAKI',
+        ]);
+        $this->get(app(GenerateOrderAccessLinkService::class)->generate($order));
+        $this->get(route('orders.dashboard', ['orderId' => $order->order_id]))
+            ->assertOk()
+            ->assertSee('Separate Packages')
+            ->assertDontSee('<option value="FOLDED"', false)
+            ->assertDontSee('<select id="package-format"', false)
+            ->assertSee('name="package_format" type="hidden" value="SEPARATE"', false);
+
+        $this->post(route('orders.draft.update', ['orderId' => $order->order_id]), [
+            'package_format' => 'FOLDED',
+            'first_event_side' => 'PEREMPUAN',
+        ])->assertSessionHasErrors([
+            'package_format' => 'The selected package format is invalid.',
+        ]);
+
+        $this->assertDatabaseHas('orders', [
+            'id' => $order->id,
+            'package_format' => 'SEPARATE',
+            'first_event_side' => 'LELAKI',
+        ]);
+    }
+
+    public function test_customer_can_save_an_existing_folded_card_draft_without_losing_its_format(): void
+    {
+        $order = app(CreateOrderService::class)->create([
+            'package_count' => 2,
+            'package_format' => 'FOLDED',
+            'first_event_side' => 'LELAKI',
+        ]);
+        $this->get(app(GenerateOrderAccessLinkService::class)->generate($order));
+
+        $this->post(route('orders.draft.update', ['orderId' => $order->order_id]), [
+            'package_format' => 'FOLDED',
+            'first_event_side' => 'PEREMPUAN',
+        ])->assertRedirect()->assertSessionHasNoErrors();
+
+        $this->assertDatabaseHas('orders', [
+            'id' => $order->id,
+            'package_format' => 'FOLDED',
+            'first_event_side' => 'PEREMPUAN',
+        ]);
+        $this->get(route('orders.dashboard', ['orderId' => $order->order_id]))
+            ->assertSee('data-folded-card-preview="true"', false)
+            ->assertSee('name="package_format" type="hidden" value="FOLDED"', false)
+            ->assertDontSee('<select id="package-format"', false);
     }
 
     public function test_jumlah_hantaran_is_saved_only_for_two_package_orders(): void
