@@ -59,13 +59,10 @@
                     placeholder="Example: KKK-261019-0002"
                     autocomplete="off"
                     spellcheck="false"
-                    @if ($prefilledOrderId) readonly @endif
                     @error('customer_reference') aria-invalid="true" @enderror
                     required
                 >
-                @if ($prefilledOrderId)
-                    <p class="access-field-note">Order ID selected from Track Progress.</p>
-                @endif
+                <p class="access-field-note">You can edit the selected Order ID or enter an Order ID or customer reference.</p>
 
                 <label for="customer_phone">Phone number</label>
                 <input
