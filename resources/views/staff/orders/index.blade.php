@@ -17,8 +17,8 @@
         'fulfilment' => 'Order Fulfilment',
     ];
     $workstreamLabel = $workstreamLabels[$workstream] ?? null;
-    $isDesignerStaff = auth()->user()->hasStaffRole(\\App\\Models\\User::ROLE_DESIGNER);
-    $isProductionStaff = auth()->user()->hasStaffRole(\\App\\Models\\User::ROLE_PRODUCTION);
+    $isDesignerStaff = auth()->user()->hasStaffRole(\App\\Models\\User::ROLE_DESIGNER);
+    $isProductionStaff = auth()->user()->hasStaffRole(\App\\Models\\User::ROLE_PRODUCTION);
     $showWorkDuration = $isDesignerStaff || $isProductionStaff;
     $attentionLabels = [
         'pending_payment' => 'Payment Review',
