@@ -250,7 +250,9 @@
         $couple = $order->couples->firstWhere('couple_number', 1);
         $secondCouple = $order->couples->firstWhere('couple_number', 2);
         $isEditable = $order->status === 'DETAILS_INCOMPLETE';
-        $firstEventSide = old('first_event_side', $order->first_event_side ?: 'LELAKI');
+        $firstEventSide = (int) $order->package_count === 2
+            ? 'PEREMPUAN'
+            : old('first_event_side', $order->first_event_side ?: 'LELAKI');
         $orderedPackageSides = $order->packageSides->sortBy(fn ($item) => $item->side === $firstEventSide ? 0 : 1)->values();
         $hasSelectableSinglePackageSide = $isEditable && (int) $order->package_count === 1 && $orderedPackageSides->isEmpty();
         $needsSinglePackageSide = $hasSelectableSinglePackageSide;
@@ -305,6 +307,7 @@
             data-design-code-thumbnails="{{ json_encode($designCodeThumbnails) }}"
         >
             @csrf
+            <p class="field-help required-fields-note"><span class="required-marker" aria-hidden="true">*</span> Fields marked * must be completed before confirming your order.</p>
 
             <div class="order-form-layout">
                 <div class="order-form-fields">
@@ -314,7 +317,7 @@
         @if ($hasSelectableSinglePackageSide)
             <fieldset class="single-package-side-selection">
                 <legend>Wedding Card Package</legend>
-                <label for="single-package-side">Which side is this package for?</label>
+                <label for="single-package-side">Which side is this package for? <span class="required-marker" aria-hidden="true">*</span></label>
                 <select id="single-package-side" name="single_package_side" data-single-package-side-selector data-selected-side="{{ $singlePackageSide }}" required>
                     <option value="" @selected($selectedSinglePackageSide === '')>Choose a side</option>
                     <option value="LELAKI" @selected($selectedSinglePackageSide === 'LELAKI')>Groom's Side</option>
@@ -327,26 +330,19 @@
         @if ((int) $order->package_count === 2)
             <fieldset class="two-package-settings">
                 <legend>Two-Package Settings</legend>
-                <p class="field-help">Each event has its own details and design choices.</p>
                 <div class="grid">
                     <div>
-                        <span class="review-label">Package Type</span>
-                        <p>{{ $order->package_format === 'FOLDED' ? 'Combined Package – Folded Card' : 'Separate Packages' }}</p>
-                        <input id="package-format" name="package_format" type="hidden" value="{{ $order->package_format ?? 'SEPARATE' }}">
+                        <span class="review-label">First Event</span>
+                        <input id="first-event-side-display" type="text" value="Bride's Side" readonly aria-readonly="true">
+                        <input id="first-event-side" name="first_event_side" type="hidden" value="PEREMPUAN">
                     </div>
                     <div>
-                        <label for="first-event-side">First Event</label>
-                        <select id="first-event-side" name="first_event_side">
-                            <option value="LELAKI" @selected($firstEventSide === 'LELAKI')>Groom's Side</option>
-                            <option value="PEREMPUAN" @selected($firstEventSide === 'PEREMPUAN')>Bride's Side</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label for="jumlah-hantaran">Gift Amount</label>
+                        <label for="jumlah-hantaran">Gift Amount <span class="required-marker" aria-hidden="true">*</span></label>
                         <input id="jumlah-hantaran" name="jumlah_hantaran" type="text" maxlength="255" value="{{ old('jumlah_hantaran', $order->jumlah_hantaran) }}" placeholder="Example: RM 10,000.00 or 10 gold dinars">
                         <p class="field-help">Enter this before confirming your order for a complimentary ceremonial cheque mockup.</p>
                     </div>
                 </div>
+                <input id="package-format" name="package_format" type="hidden" value="{{ $order->package_format ?? 'SEPARATE' }}">
             </fieldset>
         @endif
 
@@ -355,9 +351,9 @@
         <fieldset>
             <legend>Couple Details</legend>
             <div class="grid">
-                <div><label>Groom's Full Name</label><input name="couple[groom_name]" placeholder="Example: Muhammad Syafiq Bin Rahim" value="{{ old('couple.groom_name', $couple?->groom_name) }}"></div>
+                <div><label>Groom's Full Name <span class="required-marker" aria-hidden="true">*</span></label><input name="couple[groom_name]" placeholder="Example: Muhammad Syafiq Bin Rahim" value="{{ old('couple.groom_name', $couple?->groom_name) }}"></div>
                 <div><label>Groom's Short Name (max 6 characters)</label><input name="couple[groom_abbreviation]" maxlength="6" placeholder="Example: Syafiq" value="{{ old('couple.groom_abbreviation', $couple?->groom_abbreviation) }}"></div>
-                <div><label>Bride's Full Name</label><input name="couple[bride_name]" placeholder="Example: Nur Awanis Binti Azman" value="{{ old('couple.bride_name', $couple?->bride_name) }}"></div>
+                <div><label>Bride's Full Name <span class="required-marker" aria-hidden="true">*</span></label><input name="couple[bride_name]" placeholder="Example: Nur Awanis Binti Azman" value="{{ old('couple.bride_name', $couple?->bride_name) }}"></div>
                 <div><label>Bride's Short Name (max 6 characters)</label><input name="couple[bride_abbreviation]" maxlength="6" placeholder="Example: Awanis" value="{{ old('couple.bride_abbreviation', $couple?->bride_abbreviation) }}"></div>
             </div>
         </fieldset>
@@ -375,7 +371,7 @@
 
                 <div>
                     <label for="card_quantity_{{ strtolower($side) }}" data-package-quantity-label>
-                        {{ $hasSelectableSinglePackageSide ? 'Card Quantity' : 'Card Quantity — '.($side === 'LELAKI' ? "Groom's Side" : "Bride's Side") }}
+                        {{ $hasSelectableSinglePackageSide ? 'Card Quantity' : 'Card Quantity — '.($side === 'LELAKI' ? "Groom's Side" : "Bride's Side") }} <span class="required-marker" aria-hidden="true">*</span>
                     </label>
 
                     <select
@@ -403,7 +399,7 @@
 
 <div class="grid">
     <div>
-        <label>Theme</label>
+        <label>Theme <span class="required-marker" aria-hidden="true">*</span></label>
         @php
             $selectedTheme = old("sides.$side.design.theme", $packageSide?->design?->theme);
             $selectedDesignCode = old("sides.$side.design.design_code", $packageSide?->design?->design_code);
@@ -436,7 +432,7 @@
     </div>
 
     <div>
-        <label id="design-code-label-{{ strtolower($side) }}" for="design-code-{{ strtolower($side) }}">Design Code</label>
+        <label id="design-code-label-{{ strtolower($side) }}" for="design-code-{{ strtolower($side) }}">Design Code <span class="required-marker" aria-hidden="true">*</span></label>
         <select
             id="design-code-{{ strtolower($side) }}"
             name="sides[{{ $side }}][design][design_code]"
@@ -505,7 +501,7 @@
 
 <div class="image-upload-field" data-card-image-upload data-has-card-image="{{ filled($packageSide?->design?->card_image_path) ? 'true' : 'false' }}" data-saved-photo-url="{{ route('orders.customer-photo-preview', ['orderId' => $order->order_id, 'side' => $side]) }}">
     <label for="card-image-{{ strtolower($side) }}">
-        Couple Photo
+        Couple Photo <span class="required-marker" data-card-image-required @if (strtoupper((string) $selectedTheme) !== 'PORTRAIT') hidden @endif aria-hidden="true">*</span>
     </label>
 
     <p class="field-help" data-card-image-guidance>
@@ -551,8 +547,8 @@
                 <h3>{{ $hasSelectableSinglePackageSide ? 'Parents' : ($side === 'LELAKI' ? "Groom's Parents" : "Bride's Parents") }}</h3>
                 <p class="field-help">Enter the names of the parents hosting this event.</p>
                 <div class="grid">
-                    <div><label>Father's Name</label><input name="sides[{{ $side }}][parents][father_name]" placeholder="Example: Mr Rahim Bin Abdullah" value="{{ old("sides.$side.parents.father_name", $packageSide?->parents?->father_name) }}"></div>
-                    <div><label>Mother's Name</label><input name="sides[{{ $side }}][parents][mother_name]" placeholder="Example: Mrs Aminah Binti Ismail" value="{{ old("sides.$side.parents.mother_name", $packageSide?->parents?->mother_name) }}"></div>
+                    <div><label>Father's Name <span class="required-marker" aria-hidden="true">*</span></label><input name="sides[{{ $side }}][parents][father_name]" placeholder="Example: Mr Rahim Bin Abdullah" value="{{ old("sides.$side.parents.father_name", $packageSide?->parents?->father_name) }}"></div>
+                    <div><label>Mother's Name <span class="required-marker" aria-hidden="true">*</span></label><input name="sides[{{ $side }}][parents][mother_name]" placeholder="Example: Mrs Aminah Binti Ismail" value="{{ old("sides.$side.parents.mother_name", $packageSide?->parents?->mother_name) }}"></div>
                 </div>
                 <h3>Event</h3>
                 <div class="grid">
@@ -582,7 +578,7 @@
     </select>
 </div>
                     <div>
-                        <label>Date</label>
+                        <label>Date <span class="required-marker" aria-hidden="true">*</span></label>
                         <input type="date" name="sides[{{ $side }}][event][event_date]" value="{{ old("sides.$side.event.event_date", $event?->event_date?->format('Y-m-d')) }}" data-event-date>
                         <p class="date-picker-help" data-event-date-help>Select a day first to show only matching dates.</p>
                     </div>
@@ -591,11 +587,11 @@
                         <input name="sides[{{ $side }}][event][hijri_date]" placeholder="Example: 4 Zulhijjah 1446H" value="{{ old("sides.$side.event.hijri_date", $event?->hijri_date) }}" data-hijri-date>
                         <p class="date-picker-help" data-hijri-date-help>Select a day first to filter matching Hijri dates.</p>
                     </div>
-                    <div><label>Meal Time</label><input type="time" name="sides[{{ $side }}][event][meal_time]" value="{{ old("sides.$side.event.meal_time", $event?->meal_time ? substr($event->meal_time, 0, 5) : '') }}"></div>
+                    <div><label>Meal Time <span class="required-marker" aria-hidden="true">*</span></label><input type="time" name="sides[{{ $side }}][event][meal_time]" value="{{ old("sides.$side.event.meal_time", $event?->meal_time ? substr($event->meal_time, 0, 5) : '') }}"></div>
                     <div><label>Wedding Reception Time</label><input type="time" name="sides[{{ $side }}][event][bersanding_time]" value="{{ old("sides.$side.event.bersanding_time", $event?->bersanding_time ? substr($event->bersanding_time, 0, 5) : '') }}"></div>
-                    <div><label>Venue Name</label><input name="sides[{{ $side }}][event][venue_name]" placeholder="Example: Seri Impian Hall" value="{{ old("sides.$side.event.venue_name", $event?->venue_name) }}"></div>
+                    <div><label>Venue Name <span class="required-marker" aria-hidden="true">*</span></label><input name="sides[{{ $side }}][event][venue_name]" placeholder="Example: Seri Impian Hall" value="{{ old("sides.$side.event.venue_name", $event?->venue_name) }}"></div>
                 </div>
-                <label>Full Address</label>
+                <label>Full Address <span class="required-marker" aria-hidden="true">*</span></label>
                 <textarea rows="4" name="sides[{{ $side }}][event][full_address]" placeholder="Example: No. 87, Laluan Taman Meru 8, Taman Meru 2B, 30020 Ipoh, Perak">{{ old("sides.$side.event.full_address", $event?->full_address) }}</textarea>
                 <label>Google Maps Link</label>
                 <input type="url" name="sides[{{ $side }}][event][google_maps_url]" placeholder="Example: https://maps.app.goo.gl/..." value="{{ old("sides.$side.event.google_maps_url", $event?->google_maps_url) }}">
@@ -609,7 +605,7 @@
 
     <div class="grid">
         <div>
-            <label>Contact {{ $contactNumber }} - Name</label>
+            <label>Contact {{ $contactNumber }} - Name <span class="required-marker" aria-hidden="true">*</span></label>
             <input
                 name="sides[{{ $side }}][event][contacts][{{ $contactNumber }}][contact_name]"
                 placeholder="Example: Ahmad"
@@ -618,7 +614,7 @@
         </div>
 
         <div>
-            <label>Contact {{ $contactNumber }} - Phone</label>
+            <label>Contact {{ $contactNumber }} - Phone <span class="required-marker" aria-hidden="true">*</span></label>
             <input
                 name="sides[{{ $side }}][event][contacts][{{ $contactNumber }}][contact_phone]"
                 type="tel"
@@ -637,7 +633,7 @@
         @endforeach
 
         <fieldset>
-    <legend>Delivery / Pickup</legend>
+    <legend>Delivery / Pickup <span class="required-marker" aria-hidden="true">*</span></legend>
 
     @php
         $fulfilmentMethod = old('fulfilment.method', $order->fulfilment?->method);
@@ -684,7 +680,7 @@
 
     <div class="grid">
         <div>
-            <label>Recipient Name</label>
+            <label>Recipient Name <span class="required-marker" aria-hidden="true">*</span></label>
             <input
                 id="courier-recipient-name"
                 name="fulfilment[recipient_name]"
@@ -694,7 +690,7 @@
         </div>
 
         <div>
-            <label>Recipient Phone</label>
+            <label>Recipient Phone <span class="required-marker" aria-hidden="true">*</span></label>
             <input
                 id="courier-recipient-phone"
                 name="fulfilment[recipient_phone]"
@@ -710,7 +706,7 @@
         </div>
     </div>
 
-    <label>Delivery Address</label>
+    <label>Delivery Address <span class="required-marker" aria-hidden="true">*</span></label>
     <textarea
         id="courier-shipping-address"
         rows="4"
@@ -1902,8 +1898,13 @@ document.addEventListener('DOMContentLoaded', function () {
                 const hasPhoto = uploadField.dataset.hasCardImage === 'true'
                     || Boolean(photoInput && photoInput.files.length > 0);
                 const guidance = uploadField.querySelector('[data-card-image-guidance]');
+                const requiredMarker = uploadField.querySelector('[data-card-image-required]');
 
                 uploadField.hidden = false;
+
+                if (requiredMarker) {
+                    requiredMarker.hidden = theme !== 'PORTRAIT';
+                }
 
                 if (!guidance) {
                     return;

@@ -33,12 +33,13 @@
 
         <form class="public-form" method="POST" action="{{ route('public.orders.test.store') }}">
             @csrf
+            <p class="field-help"><span class="required-marker" aria-hidden="true">*</span> Fields marked * must be completed.</p>
             @if ($errors->any())
                 <div class="form-alert" role="alert">Please review the information below.</div>
             @endif
 
             <fieldset>
-                <legend>Number of packages</legend>
+                <legend>Number of packages <span class="required-marker" aria-hidden="true">*</span></legend>
                 <div class="choice-grid">
                     <label class="choice-card">
                         <input type="radio" name="package_count" value="1" @checked(old('package_count', '1') == '1')>
@@ -53,17 +54,17 @@
             </fieldset>
 
             <fieldset>
-                <label for="package-type">Card package</label>
+                <label for="package-type">Card package <span class="required-marker" aria-hidden="true">*</span></label>
                 <select id="package-type" name="package_type" required>
                     <option value="">Choose a package</option>
-                    <option value="PUTERI_MANIS" @selected(old('package_type') === 'PUTERI_MANIS')>Puteri Manis</option>
-                    <option value="JELATA" @selected(old('package_type') === 'JELATA')>Jelata</option>
+                    <option value="PUTERI_MANIS" @selected(old('package_type') === 'PUTERI_MANIS')>Puteri Manis (Full package)</option>
+                    <option value="JELATA" @selected(old('package_type') === 'JELATA')>Jelata (card and envelope only)</option>
                 </select>
                 @error('package_type')<p class="field-error">{{ $message }}</p>@enderror
             </fieldset>
 
             <div id="test-side-field">
-                <label for="test-side">Package side</label>
+                <label for="test-side">Package side <span class="required-marker" aria-hidden="true">*</span></label>
                 <select id="test-side" name="side">
                     <option value="LELAKI" @selected(old('side', 'LELAKI') === 'LELAKI')>Groom's side</option>
                     <option value="PEREMPUAN" @selected(old('side') === 'PEREMPUAN')>Bride's side</option>
@@ -71,17 +72,7 @@
                 @error('side')<p class="field-error">{{ $message }}</p>@enderror
             </div>
 
-            <div id="test-two-package-options" hidden>
-                <input name="package_format" type="hidden" value="SEPARATE">
-                <div class="dropdown-field">
-                    <label for="test-first-event-side">Whose event is first?</label>
-                    <select id="test-first-event-side" name="first_event_side">
-                        <option value="LELAKI" @selected(old('first_event_side', 'LELAKI') === 'LELAKI')>Groom's side</option>
-                        <option value="PEREMPUAN" @selected(old('first_event_side') === 'PEREMPUAN')>Bride's side</option>
-                    </select>
-                    @error('first_event_side')<p class="field-error">{{ $message }}</p>@enderror
-                </div>
-            </div>
+            <input name="package_format" type="hidden" value="SEPARATE">
 
             <fieldset>
                 <label for="test-payment-plan">Payment</label>
@@ -93,18 +84,18 @@
                 @error('payment_plan')<p class="field-error">{{ $message }}</p>@enderror
             </fieldset>
 
-            <label for="test-customer-name">Customer name</label>
+            <label for="test-customer-name">Customer name <span class="required-marker" aria-hidden="true">*</span></label>
             <input id="test-customer-name" name="customer_name" value="{{ old('customer_name') }}" autocomplete="name" required>
             @error('customer_name')<p class="field-error">{{ $message }}</p>@enderror
 
             <div class="two-columns">
                 <div>
-                    <label for="test-customer-email">Email</label>
+                    <label for="test-customer-email">Email <span class="required-marker" aria-hidden="true">*</span></label>
                     <input id="test-customer-email" type="email" name="customer_email" value="{{ old('customer_email') }}" autocomplete="email" required>
                     @error('customer_email')<p class="field-error">{{ $message }}</p>@enderror
                 </div>
                 <div>
-                    <label for="test-customer-phone">Phone number</label>
+                    <label for="test-customer-phone">Phone number <span class="required-marker" aria-hidden="true">*</span></label>
                     <input id="test-customer-phone" type="tel" name="customer_phone" value="{{ old('customer_phone') }}" placeholder="0123456789" pattern="01[0-9]{8,9}" inputmode="numeric" minlength="10" maxlength="11" autocomplete="tel" required>
                     @error('customer_phone')<p class="field-error">{{ $message }}</p>@enderror
                 </div>
@@ -119,7 +110,6 @@
     <script>
         const packageInputs = document.querySelectorAll('input[name="package_count"]');
         const sideField = document.getElementById('test-side-field');
-        const twoPackageOptions = document.getElementById('test-two-package-options');
         const paymentPlan = document.getElementById('test-payment-plan');
         const paymentHelp = document.getElementById('test-payment-plan-help');
         const submitButton = document.getElementById('test-order-submit-button');
@@ -130,10 +120,6 @@
 
             sideField.hidden = twoPackagesSelected;
             sideField.querySelector('select').disabled = twoPackagesSelected;
-            twoPackageOptions.hidden = !twoPackagesSelected;
-            twoPackageOptions.querySelectorAll('select').forEach((select) => {
-                select.disabled = !twoPackagesSelected;
-            });
         }
 
         function updatePaymentPlan() {
