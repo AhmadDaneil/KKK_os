@@ -595,8 +595,24 @@
                 </div>
                 <label>Full Address <span class="required-marker" aria-hidden="true">*</span></label>
                 <textarea rows="4" name="sides[{{ $side }}][event][full_address]" placeholder="Example: No. 87, Laluan Taman Meru 8, Taman Meru 2B, 30020 Ipoh, Perak">{{ old("sides.$side.event.full_address", $event?->full_address) }}</textarea>
-                <label>Google Maps Link</label>
-                <input type="url" name="sides[{{ $side }}][event][google_maps_url]" placeholder="Example: https://maps.app.goo.gl/..." value="{{ old("sides.$side.event.google_maps_url", $event?->google_maps_url) }}">
+                <div class="google-maps-link-label">
+                    <label for="google-maps-link-{{ strtolower($side) }}">Google Maps Link</label>
+                    <span class="google-maps-link-help">
+                        <button
+                            class="google-maps-link-help__trigger"
+                            type="button"
+                            aria-label="Show how to copy a Google Maps link"
+                            aria-describedby="google-maps-link-guide-{{ strtolower($side) }}"
+                        >?</button>
+                        <span class="google-maps-link-help__tooltip" id="google-maps-link-guide-{{ strtolower($side) }}" role="tooltip">
+                            <img
+                                src="{{ asset('images/help/google-maps-share-guide.png') }}?v={{ filemtime(public_path('images/help/google-maps-share-guide.png')) }}"
+                                alt="In Google Maps, open Share and choose Copy Link to copy the location link."
+                            >
+                        </span>
+                    </span>
+                </div>
+                <input id="google-maps-link-{{ strtolower($side) }}" type="url" name="sides[{{ $side }}][event][google_maps_url]" placeholder="Example: https://maps.app.goo.gl/..." value="{{ old("sides.$side.event.google_maps_url", $event?->google_maps_url) }}">
                 <p class="field-help">The QR code on the back preview updates when you add a valid Google Maps link.</p>
                 <h3>Contact Persons</h3>
 
