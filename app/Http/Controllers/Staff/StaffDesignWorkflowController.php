@@ -17,6 +17,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use RuntimeException;
@@ -31,13 +32,35 @@ class StaffDesignWorkflowController extends Controller
         SyncOrderDesignStatusService $sync
     ): RedirectResponse {
         $this->authorizeAssignedDesigner($request, $designJob);
+        $startedBothPackages = false;
 
         try {
-            $service->start(
-                $designJob,
-                $request->user()
-            );
-            $sync->sync($designJob->order);
+            DB::transaction(function () use ($request, $designJob, $service, $sync, &$startedBothPackages): void {
+                $order = $designJob->order()->lockForUpdate()->firstOrFail();
+                $orderDesignJobs = DesignJob::query()
+                    ->where('order_id', $order->id)
+                    ->orderBy('id')
+                    ->lockForUpdate()
+                    ->get();
+                $clickedDesignJob = $orderDesignJobs->firstWhere('id', $designJob->id);
+
+                abort_unless($clickedDesignJob !== null, 404);
+
+                $startedBothPackages = (int) $order->package_count === 2
+                    && $orderDesignJobs->count() === 2
+                    && $orderDesignJobs->every(fn (DesignJob $job): bool => $job->assigned_user_id === $request->user()->id
+                        && in_array($job->status, ['READY_FOR_DESIGN', 'DESIGN_IN_PROGRESS'], true)
+                    );
+                $jobsToStart = $startedBothPackages
+                    ? $orderDesignJobs
+                    : collect([$clickedDesignJob]);
+
+                foreach ($jobsToStart as $job) {
+                    $service->start($job, $request->user());
+                }
+
+                $sync->sync($order);
+            });
         } catch (RuntimeException $exception) {
             return back()->withErrors([
                 'design_job' => $exception->getMessage(),
@@ -46,7 +69,9 @@ class StaffDesignWorkflowController extends Controller
 
         return back()->with(
             'status',
-            'Design work started successfully.'
+            $startedBothPackages
+                ? 'Design work started successfully for both packages.'
+                : 'Design work started successfully.'
         );
     }
 
