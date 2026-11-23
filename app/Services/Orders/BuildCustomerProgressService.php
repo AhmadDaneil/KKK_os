@@ -17,7 +17,7 @@ class BuildCustomerProgressService
             'DETAILS_CONFIRMED' => [35, 'Awaiting Deposit Confirmation', 'Your deposit is awaiting staff review.'],
             'READY_FOR_DESIGN' => [40, 'Awaiting Design', 'Your details have been received and are ready for design.'],
             'DESIGN_IN_PROGRESS' => [50, ...$this->designProgressCopy($order)],
-            'DESIGN_READY' => [60, 'Internal Design Review', 'Our team is reviewing the design.'],
+            'DESIGN_READY' => [60, 'Design in Progress', 'Our team is preparing your design for the next step.'],
             'CORRECTION_REQUESTED' => [60, 'Design Corrections in Progress', 'Your correction request has been received.'],
             'DESIGN_APPROVED' => [70, 'Design Approved', 'The design has been approved internally. Please pay the remaining balance to proceed to printing.'],
             'BALANCE_PENDING' => [75, 'Awaiting Balance Payment', 'The remaining balance is required before the next step.'],
@@ -106,25 +106,24 @@ class BuildCustomerProgressService
             'BOOKED', 'DEPOSIT_PAID', 'DETAILS_INCOMPLETE' => 1,
             'DETAILS_CONFIRMED' => 2,
             'READY_FOR_DESIGN', 'DESIGN_IN_PROGRESS' => 3,
-            'DESIGN_READY', 'CORRECTION_REQUESTED' => 4,
-            'DESIGN_APPROVED', 'BALANCE_PENDING' => 5,
-            'PAID', 'READY_FOR_PRINT', 'PRINTING' => 6,
-            'PRINTED', 'READY_FOR_PACKING', 'PACKING', 'PACKED', 'READY_FOR_FULFILMENT' => 7,
-            'READY_FOR_PICKUP', 'SHIPPED' => 8,
-            'COMPLETED', 'ARCHIVED' => 9,
+            'DESIGN_READY', 'CORRECTION_REQUESTED' => 3,
+            'DESIGN_APPROVED', 'BALANCE_PENDING' => 4,
+            'PAID', 'READY_FOR_PRINT', 'PRINTING' => 5,
+            'PRINTED', 'READY_FOR_PACKING', 'PACKING', 'PACKED', 'READY_FOR_FULFILMENT' => 6,
+            'READY_FOR_PICKUP', 'SHIPPED' => 7,
+            'COMPLETED', 'ARCHIVED' => 8,
             default => null,
         };
 
         $stageLabels = app()->bound('translator')
             ? __('ui.stages')
-            : ['Order', 'Details', 'Deposit Confirmation', 'Design', 'Approval', 'Balance Payment', 'Printing', 'Packing', 'Delivery / Pickup', 'Complete'];
+            : ['Order', 'Details', 'Deposit Confirmation', 'Design', 'Balance Payment', 'Printing', 'Packing', 'Delivery / Pickup', 'Complete'];
 
         return collect([
             ['label' => 'Order', 'description' => 'Order received'],
             ['label' => 'Details', 'description' => 'Details confirmed'],
             ['label' => 'Deposit Confirmation', 'description' => 'Deposit reviewed and confirmed'],
             ['label' => 'Design', 'description' => 'Design being prepared'],
-            ['label' => 'Approval', 'description' => 'Internal design review'],
             ['label' => 'Balance Payment', 'description' => 'Full payment'],
             ['label' => 'Printing', 'description' => 'Cards printed'],
             ['label' => 'Packing', 'description' => 'Cards packed'],
@@ -135,7 +134,7 @@ class BuildCustomerProgressService
             $stage['number'] = $index + 1;
             $stage['state'] = match (true) {
                 $currentStage === null => 'pending',
-                $currentStage === 9 && $index === 9 => 'complete',
+                $currentStage === 8 && $index === 8 => 'complete',
                 $index < $currentStage => 'complete',
                 $index === $currentStage => 'current',
                 default => 'pending',
