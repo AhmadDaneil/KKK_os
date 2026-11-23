@@ -2390,3 +2390,31 @@ html[data-customer-theme="dark"] body.brand-order-dashboard .design-code-picker-
         grid-template-columns: 1fr;
     }
 }
+
+body.brand-order-progress .button-online-transfer {
+    border: 1px solid #a61d24 !important;
+    color: #fff !important;
+    background: #c62828 !important;
+    box-shadow: 0 6px 14px rgba(173, 29, 36, .2);
+}
+
+body.brand-order-progress .button-online-transfer:hover {
+    border-color: #8e161b !important;
+    background: #a61d24 !important;
+}
+
+body.brand-order-progress .button-online-transfer:focus-visible {
+    outline: 3px solid rgba(198, 40, 40, .32);
+    outline-offset: 3px;
+}
+
+html[data-customer-theme="dark"] body.brand-order-progress .button-online-transfer {
+    border-color: #a61d24 !important;
+    color: #fff !important;
+    background: #c62828 !important;
+}
+
+html[data-customer-theme="dark"] body.brand-order-progress .button-online-transfer:hover {
+    border-color: #8e161b !important;
+    background: #a61d24 !important;
+}

@@ -121,7 +121,7 @@
                                     <form method="POST" action="{{ route('orders.balance-payment.billplz.store', ['orderId' => $orderId]) }}">
                                         @csrf
                                         <input type="hidden" name="payment_method" value="BILLPLZ">
-                                        <button class="button button-primary" type="submit">Pay remaining balance · RM {{ number_format((float) $balanceBillplzAmount, 2) }} · Billplz</button>
+                                        <button class="button button-primary button-online-transfer" type="submit">Pay remaining balance · RM {{ number_format((float) $balanceBillplzAmount, 2) }} · Online Transfer</button>
                                     </form>
                                     @if (config('services.billplz.duitnow_qr_enabled'))
                                         <form method="POST" action="{{ route('orders.balance-payment.billplz.store', ['orderId' => $orderId]) }}">
