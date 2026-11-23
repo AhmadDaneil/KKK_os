@@ -14,6 +14,13 @@
     $customerFeedbackMessage = "Hello {$order->customer_name}, thank you for choosing KingKadKahwin. We would appreciate your feedback and are happy to help with any questions about order {$displayOrderIdentifier}.";
     $customerPaymentReminder = "Hello {$order->customer_name}, this is a friendly reminder from KingKadKahwin about the outstanding balance or charges for order {$displayOrderIdentifier}. Please contact us if you need help.";
     $hasDesignJobs = $order->relationLoaded('designJobs');
+    $assignedDesignJobs = $hasDesignJobs
+        ? $order->designJobs->where('assigned_user_id', auth()->id())
+        : collect();
+    $canStartBothPackageDesigns = (int) $order->package_count === 2
+        && $assignedDesignJobs->count() === 2
+        && $assignedDesignJobs->pluck('side')->unique()->count() === 2
+        && $assignedDesignJobs->every(fn ($job) => in_array($job->status, ['READY_FOR_DESIGN', 'DESIGN_IN_PROGRESS'], true));
     $batchArtworkJobs = $hasDesignJobs
         ? $order->designJobs->filter(fn ($job) =>
             auth()->user()->hasStaffRole(\App\Models\User::ROLE_DESIGNER)
@@ -718,9 +725,9 @@
                                                 method="POST"
                                                 action="{{ route($operationRoutePrefix.'design-jobs.start', $job) }}"
                                                 class="js-staff-confirmation-form"
-                                                data-confirm-title="Start design work {{ $job->side === 'LELAKI' ? 'Groom' : 'Bride' }}?"
-                                                data-confirm-message="This package will be marked as in design and the start time recorded."
-                                                data-confirm-button="Yes, start design"
+                                                data-confirm-title="{{ $canStartBothPackageDesigns ? 'Start design work for both packages?' : 'Start design work '.($job->side === 'LELAKI' ? 'Groom' : 'Bride').'?' }}"
+                                                data-confirm-message="{{ $canStartBothPackageDesigns ? 'Both packages will be marked as in design and their start times recorded.' : 'This package will be marked as in design and the start time recorded.' }}"
+                                                data-confirm-button="{{ $canStartBothPackageDesigns ? 'Yes, start both designs' : 'Yes, start design' }}"
                                             >
                                                 @csrf
 
