@@ -139,10 +139,6 @@ class CustomerOrderDraftController extends Controller
             'fulfilment.recipient_phone.regex' => 'The phone number must contain 10 or 11 digits and start with 01.',
         ]);
 
-        if ((int) $order->package_count === 2) {
-            $validated['first_event_side'] = 'PEREMPUAN';
-        }
-
         if ($needsSinglePackageSide) {
             $selectedSide = $validated['single_package_side'];
             $initializeOrderStructure->initialize($order, $selectedSide);
