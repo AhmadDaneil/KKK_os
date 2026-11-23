@@ -54,7 +54,7 @@ class SaveOrderDraftService
                             ?? 'SEPARATE',
                         'first_event_side' => $data['first_event_side']
                             ?? $order->first_event_side
-                            ?? 'LELAKI',
+                            ?? 'PEREMPUAN',
                         'jumlah_hantaran' => array_key_exists('jumlah_hantaran', $data)
                             ? $this->cleanString($data['jumlah_hantaran'])
                             : $order->jumlah_hantaran,

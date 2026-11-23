@@ -251,7 +251,7 @@
         $secondCouple = $order->couples->firstWhere('couple_number', 2);
         $isEditable = $order->status === 'DETAILS_INCOMPLETE';
         $firstEventSide = (int) $order->package_count === 2
-            ? 'PEREMPUAN'
+            ? old('first_event_side', $order->first_event_side ?: 'PEREMPUAN')
             : old('first_event_side', $order->first_event_side ?: 'LELAKI');
         $orderedPackageSides = $order->packageSides->sortBy(fn ($item) => $item->side === $firstEventSide ? 0 : 1)->values();
         $hasSelectableSinglePackageSide = $isEditable && (int) $order->package_count === 1 && $orderedPackageSides->isEmpty();
@@ -332,9 +332,11 @@
                 <legend>Two-Package Settings</legend>
                 <div class="grid">
                     <div>
-                        <span class="review-label">First Event</span>
-                        <input id="first-event-side-display" type="text" value="Bride's Side" readonly aria-readonly="true">
-                        <input id="first-event-side" name="first_event_side" type="hidden" value="PEREMPUAN">
+                        <label for="first-event-side">First Event</label>
+                        <select id="first-event-side" name="first_event_side">
+                            <option value="LELAKI" @selected($firstEventSide === 'LELAKI')>Groom's Side</option>
+                            <option value="PEREMPUAN" @selected($firstEventSide === 'PEREMPUAN')>Bride's Side</option>
+                        </select>
                     </div>
                     <div>
                         <label for="jumlah-hantaran">Gift Amount <span class="required-marker" aria-hidden="true">*</span></label>

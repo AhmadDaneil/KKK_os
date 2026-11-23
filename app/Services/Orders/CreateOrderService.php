@@ -38,7 +38,7 @@ class CreateOrderService
                     ? ($data['package_format'] ?? 'SEPARATE')
                     : null,
                 'first_event_side' => (int) $data['package_count'] === 2
-                    ? ($data['first_event_side'] ?? 'LELAKI')
+                    ? ($data['first_event_side'] ?? 'PEREMPUAN')
                     : null,
                 'customer_name' => $data['customer_name'] ?? null,
                 'customer_email' => isset($data['customer_email'])

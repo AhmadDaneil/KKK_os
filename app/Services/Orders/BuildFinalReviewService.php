@@ -60,7 +60,7 @@ class BuildFinalReviewService
             ],
 
             'package_sides' => $order->packageSides
-                ->sortBy(fn ($side) => $side->side === ($order->first_event_side ?: 'LELAKI') ? 0 : 1)
+                ->sortBy(fn ($side) => $side->side === ($order->first_event_side ?: 'PEREMPUAN') ? 0 : 1)
                 ->map(function ($side) {
                     return [
                         'side' => $side->side,
