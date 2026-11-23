@@ -762,6 +762,18 @@ a.staff-card:hover {
     font-size: 13px;
 }
 
+.staff-order-duration {
+    display: inline-flex;
+    align-items: center;
+    padding: 3px 8px;
+    border: 1px solid color-mix(in srgb, var(--staff-primary) 24%, var(--staff-border));
+    border-radius: 999px;
+    color: var(--staff-primary);
+    background: color-mix(in srgb, var(--staff-primary) 8%, var(--staff-surface));
+    font-size: 12px;
+    font-weight: 700;
+}
+
 .staff-order-work {
     display: grid;
     gap: 7px;
