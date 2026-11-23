@@ -17,6 +17,9 @@
         'fulfilment' => 'Order Fulfilment',
     ];
     $workstreamLabel = $workstreamLabels[$workstream] ?? null;
+    $isDesignerStaff = auth()->user()->hasStaffRole(\\App\\Models\\User::ROLE_DESIGNER);
+    $isProductionStaff = auth()->user()->hasStaffRole(\\App\\Models\\User::ROLE_PRODUCTION);
+    $showWorkDuration = $isDesignerStaff || $isProductionStaff;
     $attentionLabels = [
         'pending_payment' => 'Payment Review',
         'unassigned_design' => 'Unassigned Design Work',
@@ -162,6 +165,19 @@
 
             <div id="staff-order-list" class="staff-order-list">
                 @forelse ($orders as $order)
+                    @php
+                        $durationJobs = $showWorkDuration
+                            ? ($isDesignerStaff ? $order->designJobs : $order->printJobs)
+                            : collect();
+                        $durationStartedAt = $durationJobs
+                            ->map(fn ($job) => $job->assigned_at ?? $job->started_at)
+                            ->filter()
+                            ->sortBy(fn ($date) => $date->getTimestamp())
+                            ->first();
+                        $durationDays = $durationStartedAt
+                            ? intdiv(max(0, now()->getTimestamp() - $durationStartedAt->getTimestamp()), 86400)
+                            : null;
+                    @endphp
                     <article class="staff-order-card">
                         <div class="staff-order-primary">
                             <div class="staff-order-heading">
@@ -187,6 +203,12 @@
                                 @if ($order->card_quantity)
                                     <span>
                                         {{ $order->card_quantity }} cards
+                                    </span>
+                                @endif
+
+                                @if ($showWorkDuration && $durationDays !== null)
+                                    <span class="staff-order-duration">
+                                        Duration: {{ $durationDays }} {{ $durationDays === 1 ? 'day' : 'days' }}
                                     </span>
                                 @endif
                             </div>
