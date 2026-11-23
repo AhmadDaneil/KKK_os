@@ -47,7 +47,9 @@
                             <small>ORDER JOURNEY</small>
                             <h4 id="order-lifecycle-title">Your order progress</h4>
                         </div>
-                        <span>The current stage is highlighted</span>
+                        @if (! empty($progress['active_day_counter']))
+                            <span class="stage-day-counter">{{ __('ui.stage_day_counter', $progress['active_day_counter']) }}</span>
+                        @endif
                     </div>
                     <ol class="order-lifecycle-list">
                         @foreach ($progress['stages'] as $stage)
@@ -55,9 +57,6 @@
                                 <span class="order-lifecycle-marker" aria-hidden="true">{{ $stage['state'] === 'complete' ? '✓' : $stage['number'] }}</span>
                                 <strong>{{ $stage['label'] }}</strong>
                                 <small>{{ $stage['description'] }}</small>
-                                @if (! empty($stage['day_counter']))
-                                    <small class="stage-day-counter">{{ __('ui.stage_day_counter', $stage['day_counter']) }}</small>
-                                @endif
                             </li>
                         @endforeach
                     </ol>
