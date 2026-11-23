@@ -51,11 +51,14 @@ class PublicOrderController extends Controller
             'side' => ['nullable', 'string', 'in:LELAKI,PEREMPUAN', 'required_if:package_count,1'],
             'package_type' => ['required', 'string', 'in:PUTERI_MANIS,JELATA'],
             'package_format' => ['nullable', 'string', 'in:SEPARATE'],
-            'first_event_side' => ['nullable', 'string', 'in:LELAKI,PEREMPUAN', 'required_if:package_count,2'],
             'customer_name' => ['required', 'string', 'max:255'],
             'customer_email' => ['required', 'email', 'max:255'],
             'customer_phone' => ['required', 'string', 'regex:/^01\d{8,9}$/'],
         ]);
+
+        if ((int) $validated['package_count'] === 2) {
+            $validated['first_event_side'] = 'PEREMPUAN';
+        }
 
         $validated['customer_phone'] = $phones->normalize($validated['customer_phone']);
 

@@ -88,3 +88,12 @@
         transition: none;
     }
 }
+
+.required-marker {
+    color: #b42318;
+    font-weight: 800;
+}
+
+.required-fields-note {
+    margin: 0 0 14px;
+}
