@@ -7,7 +7,7 @@
         <div class="live-preview-heading">
             <div>
                 <p class="eyebrow">LIVE PREVIEW</p>
-                <h2 id="live-preview-title">Live Card Preview</h2>
+                <h2 id="live-preview-title">Live Preview</h2>
                 @if ($hasSelectableSinglePackageSide)
                     <p class="preview-note" data-single-package-preview-note>Sample layout — choose the package side in the order form.</p>
                 @endif
