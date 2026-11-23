@@ -55,6 +55,9 @@
                                 <span class="order-lifecycle-marker" aria-hidden="true">{{ $stage['state'] === 'complete' ? '✓' : $stage['number'] }}</span>
                                 <strong>{{ $stage['label'] }}</strong>
                                 <small>{{ $stage['description'] }}</small>
+                                @if (! empty($stage['day_counter']))
+                                    <small class="stage-day-counter">{{ __('ui.stage_day_counter', $stage['day_counter']) }}</small>
+                                @endif
                             </li>
                         @endforeach
                     </ol>

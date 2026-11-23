@@ -3,6 +3,8 @@
 namespace App\Services\Orders;
 
 use App\Models\Order;
+use App\Models\PrintJobEvent;
+use Carbon\Carbon;
 
 class BuildCustomerProgressService
 {
@@ -47,7 +49,7 @@ class BuildCustomerProgressService
             'tone' => $this->tone($percentage),
             'label' => $label,
             'message' => $message,
-            'stages' => $this->stages($status),
+            'stages' => $this->stages($order, $status),
         ];
     }
 
@@ -99,7 +101,7 @@ class BuildCustomerProgressService
         };
     }
 
-    private function stages(string $status): array
+    private function stages(Order $order, string $status): array
     {
         $currentStage = match ($status) {
             'BOOKING_PENDING' => 0,
@@ -119,6 +121,9 @@ class BuildCustomerProgressService
             ? __('ui.stages')
             : ['Order', 'Details', 'Deposit Confirmation', 'Design', 'Balance Payment', 'Printing', 'Packing', 'Delivery / Pickup', 'Complete'];
 
+        $designDays = $currentStage === 3 ? $this->elapsedStageDays($this->designStartedAt($order)) : null;
+        $productionDays = $currentStage === 5 ? $this->elapsedStageDays($this->productionStartedAt($order)) : null;
+
         return collect([
             ['label' => 'Order', 'description' => 'Order received'],
             ['label' => 'Details', 'description' => 'Details confirmed'],
@@ -129,7 +134,7 @@ class BuildCustomerProgressService
             ['label' => 'Packing', 'description' => 'Cards packed'],
             ['label' => 'Delivery / Pickup', 'description' => 'Shipped or collected'],
             ['label' => 'Complete', 'description' => 'Order complete'],
-        ])->map(function (array $stage, int $index) use ($currentStage, $stageLabels) {
+        ])->map(function (array $stage, int $index) use ($currentStage, $stageLabels, $designDays, $productionDays) {
             $stage['label'] = $stageLabels[$index];
             $stage['number'] = $index + 1;
             $stage['state'] = match (true) {
@@ -140,7 +145,65 @@ class BuildCustomerProgressService
                 default => 'pending',
             };
 
+            $elapsedDays = match ($index) {
+                3 => $designDays,
+                5 => $productionDays,
+                default => null,
+            };
+
+            if ($stage['state'] === 'current' && $elapsedDays !== null) {
+                $stage['day_counter'] = [
+                    'day' => $elapsedDays,
+                    'min' => $index === 3 ? 1 : 7,
+                    'max' => $index === 3 ? 7 : 14,
+                ];
+            }
+
             return $stage;
         })->all();
+    }
+
+    private function designStartedAt(Order $order): ?string
+    {
+        $startedAt = $order->statusEvents()
+            ->where('to_status', 'READY_FOR_DESIGN')
+            ->orderBy('occurred_at')
+            ->value('occurred_at');
+
+        return $startedAt ?? $order->designJobs()->min('created_at');
+    }
+
+    private function productionStartedAt(Order $order): ?string
+    {
+        $printJobIds = $order->printJobs()->select('id');
+        $startedAt = PrintJobEvent::query()
+            ->whereIn('print_job_id', $printJobIds)
+            ->where('to_status', 'READY_FOR_PRINT')
+            ->orderBy('occurred_at')
+            ->value('occurred_at');
+
+        if ($startedAt !== null) {
+            return $startedAt;
+        }
+
+        $startedAt = $order->payments()
+            ->where('payment_type', 'BALANCE')
+            ->where('status', 'PAID')
+            ->whereNotNull('paid_at')
+            ->orderBy('paid_at')
+            ->value('paid_at');
+
+        return $startedAt ?? $order->printJobs()->min('created_at');
+    }
+
+    private function elapsedStageDays(?string $startedAt): ?int
+    {
+        if ($startedAt === null || trim($startedAt) === '') {
+            return null;
+        }
+
+        $startDate = Carbon::parse($startedAt)->startOfDay();
+
+        return max(1, (int) $startDate->diffInDays(now()->startOfDay()) + 1);
     }
 }
