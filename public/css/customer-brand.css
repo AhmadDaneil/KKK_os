@@ -2419,12 +2419,12 @@ html[data-customer-theme="dark"] body.brand-order-progress .button-online-transf
     background: #a61d24 !important;
 }
 
-body.brand-order-progress .order-lifecycle-list .stage-day-counter {
+body.brand-order-progress .order-lifecycle-heading .stage-day-counter {
     color: #7b5b1d;
-    font-size: .64rem;
+    font-size: .78rem;
     font-weight: 800;
 }
 
-html[data-customer-theme="dark"] body.brand-order-progress .order-lifecycle-list .stage-day-counter {
+html[data-customer-theme="dark"] body.brand-order-progress .order-lifecycle-heading .stage-day-counter {
     color: #e2bd60;
 }

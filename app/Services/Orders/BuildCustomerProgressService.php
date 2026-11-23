@@ -44,12 +44,18 @@ class BuildCustomerProgressService
             [$label, $message] = $translations[array_key_exists($translationStatus, $translations) ? $translationStatus : 'DEFAULT'];
         }
 
+        $stages = $this->stages($order, $status);
+        $activeStage = collect($stages)->first(
+            fn (array $stage) => $stage['state'] === 'current' && isset($stage['day_counter']),
+        );
+
         return [
             'percentage' => $percentage,
             'tone' => $this->tone($percentage),
             'label' => $label,
             'message' => $message,
-            'stages' => $this->stages($order, $status),
+            'active_day_counter' => $activeStage['day_counter'] ?? null,
+            'stages' => $stages,
         ];
     }
 
