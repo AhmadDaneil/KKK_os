@@ -281,7 +281,7 @@
             Order Form
         </button>
         <button type="button" class="customer-view-switcher-button" data-customer-view-button="preview" aria-pressed="false">
-            Live Card Preview
+            Live Preview
         </button>
     </section>
 
@@ -544,7 +544,7 @@
                 </div>
                 <section class="additional-products" aria-labelledby="included-design-items-{{ strtolower($side) }}">
                     <h3 id="included-design-items-{{ strtolower($side) }}">Included in the Card Package</h3>
-                    <p class="field-help">Banner and bunting are included automatically. An uploaded photo is used throughout PORTRAIT design items; for other themes it is used only in Banner and Bunting. Without a photo, the supplied templates are used.</p>
+                    <p class="field-help">An uploaded photo will be used on your banner and bunting. If no photo is uploaded, the standard design will be used.</p>
                 </section>
                 <h3>{{ $hasSelectableSinglePackageSide ? 'Parents' : ($side === 'LELAKI' ? "Groom's Parents" : "Bride's Parents") }}</h3>
                 <p class="field-help">Enter the names of the parents hosting this event.</p>
