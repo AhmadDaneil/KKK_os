@@ -1700,8 +1700,12 @@ document.addEventListener('DOMContentLoaded', function () {
                 genericNameCopy.hidden = shouldShowArtwork;
                 productCustomNameCopy.hidden = !shouldShowArtwork;
                 placeholder.hidden = shouldShowArtwork || isUnavailable;
-                product.dataset.themeArtworkSrc = shouldShowArtwork ? assetBase + type + '.webp' : '';
-                syncArtworkImage(artwork, shouldShowArtwork ? assetBase + type + '.webp' : '', normalizedCode + ' ' + themeName + ' ' + type.replaceAll('-', ' ') + ' design');
+                const artworkVersion = normalizedCode === 'CKI-814' && type === 'banner'
+                    ? '?v=4ec40cdb53e9a385'
+                    : '';
+                const artworkSource = shouldShowArtwork ? assetBase + type + '.webp' + artworkVersion : '';
+                product.dataset.themeArtworkSrc = artworkSource;
+                syncArtworkImage(artwork, artworkSource, normalizedCode + ' ' + themeName + ' ' + type.replaceAll('-', ' ') + ' design');
                 const hasPhotoMask = shouldShowArtwork && theme === 'portrait' && type !== 'wooden-hanger' && type !== 'card-back';
                 syncArtworkPhotoMask(product, hasPhotoMask ? assetBase + type + '-photo-mask.webp' : '');
             });
