@@ -24,6 +24,18 @@ class StaffOrderController extends Controller
         $this->applyWorkstream($query, $workstream);
         $this->applyFilters($query, $request, $user);
 
+        if ($user->hasStaffRole(User::ROLE_DESIGNER)) {
+            $query->with(['designJobs' => fn (Builder $jobQuery) => $jobQuery
+                ->where('assigned_user_id', $user->id)
+                ->whereIn('status', ['READY_FOR_DESIGN', 'DESIGN_IN_PROGRESS', 'CORRECTION_REQUESTED'])
+                ->select(['id', 'order_id', 'status', 'assigned_at', 'started_at'])]);
+        } elseif ($user->hasStaffRole(User::ROLE_PRODUCTION)) {
+            $query->with(['printJobs' => fn (Builder $jobQuery) => $jobQuery
+                ->where('assigned_user_id', $user->id)
+                ->whereIn('status', ['READY_FOR_PRINT', 'PRINTING'])
+                ->select(['id', 'order_id', 'status', 'assigned_at', 'started_at'])]);
+        }
+
         $perPage = 10;
 
         $orders = $query
