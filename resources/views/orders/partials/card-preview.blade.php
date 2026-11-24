@@ -175,16 +175,20 @@
     @endforeach
 
     @foreach ($previewPackageSides as $packageSide)
+        @php
+            $hasIncludedWoodenHanger = ($order->package_type ?: $order->wabot_package_code) === 'PUTERI_MANIS'
+                || strtoupper((string) $packageSide->design?->theme) === 'PORTRAIT';
+        @endphp
         <section class="live-product-previews @if (! $loop->first) is-hidden @endif" data-live-product-preview="{{ $packageSide->side }}">
             <div class="live-product-heading">
                 <div>
                     <p class="eyebrow">Included in your package</p>
-                    <h3>{{ ($order->package_type ?: $order->wabot_package_code) === 'PUTERI_MANIS' ? 'Banner, Bunting, Arrow Posters, Sticker & Wooden Hanger' : 'Banner, Bunting, Arrow Posters & Sticker' }}</h3>
+                    <h3>{{ $hasIncludedWoodenHanger ? 'Banner, Bunting, Arrow Posters, Sticker & Wooden Hanger' : 'Banner, Bunting, Arrow Posters & Sticker' }}</h3>
                 </div>
                 <span>{{ $packageSide->side === 'LELAKI' ? "Groom's Side" : "Bride's Side" }}</span>
             </div>
 
-            <div class="live-product-grid{{ ($order->package_type ?: $order->wabot_package_code) === 'PUTERI_MANIS' ? ' live-product-grid--puteri-manis' : '' }}">
+            <div class="live-product-grid{{ $hasIncludedWoodenHanger ? ' live-product-grid--puteri-manis' : '' }}">
                 <article class="live-product live-product--banner" data-live-product-theme data-desa-product="banner" data-preview-artwork-slot="banner">
                     <p class="artwork-unavailable-message" data-artwork-unavailable-message hidden role="status">Banner preview is not available for this design yet.</p>
                     <img class="desa-product-artwork" data-desa-product-artwork alt="" hidden>
@@ -330,7 +334,7 @@
                     <div data-desa-product-placeholder hidden></div>
                 </article>
 
-                @if (($order->package_type ?: $order->wabot_package_code) === 'PUTERI_MANIS')
+                @if ($hasIncludedWoodenHanger)
                     <article class="live-product live-product--hanger" data-live-product-theme data-desa-product="wooden-hanger" data-preview-artwork-slot="wooden-hanger">
                         <img class="desa-product-artwork" data-desa-product-artwork alt="" hidden>
                                                                         <div class="desa-product-name-overlay" data-desa-product-name-overlay hidden>
