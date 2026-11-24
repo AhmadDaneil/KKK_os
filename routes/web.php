@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Admin\AdminAuthController;
 use App\Http\Controllers\Admin\AdminDashboardController;
+use App\Http\Controllers\Admin\AdminInvoiceController;
 use App\Http\Controllers\Admin\AdminPasswordResetController;
 use App\Http\Controllers\Admin\AdminStaffController;
 use App\Http\Controllers\BalancePaymentReturnController;
@@ -134,6 +135,7 @@ Route::middleware(['auth:admin', 'active.staff', 'staff.role:ADMIN'])
     ->name('admin.')
     ->group(function () {
         Route::get('/', [AdminDashboardController::class, 'index'])->name('dashboard');
+        Route::get('/invoices', [AdminInvoiceController::class, 'index'])->name('invoices.index');
         Route::post('/logout', [AdminAuthController::class, 'destroy'])->name('logout');
 
         Route::get('/staff', [AdminStaffController::class, 'index'])->name('staff.index');

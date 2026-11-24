@@ -21,6 +21,7 @@
             <p>{{ __('ui.management') }}</p>
             <a href="{{ route('admin.dashboard') }}" @class(['is-active' => request()->routeIs('admin.dashboard')])><span>OV</span>{{ __('ui.overview') }}</a>
             <a href="{{ route('admin.dashboard') }}#sales-analysis"><span>SA</span>{{ __('ui.sales_analysis') }}</a>
+            <a href="{{ route('admin.invoices.index') }}" @class(['is-active' => request()->routeIs('admin.invoices.*')])><span>IN</span>Sales Invoice</a>
             <a href="{{ route('admin.staff.index') }}" @class(['is-active' => request()->routeIs('admin.staff.*')])><span>ST</span>{{ __('ui.staff_access') }}</a>
             <p>{{ __('ui.operations') }}</p>
             <a href="{{ route('admin.orders.index') }}"><span>OR</span>{{ __('ui.all_orders') }}</a>

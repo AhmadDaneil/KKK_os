@@ -210,3 +210,10 @@ html[data-operations-theme="dark"] .staff-workspace input[type="file"]::file-sel
 html[data-operations-theme="dark"] .staff-order-card { border-left-color: #62c884; }
 html[data-operations-theme="dark"] .staff-order-card:hover,
 html[data-operations-theme="dark"] .staff-order-card:focus-visible { border-left-color: #8be6aa; }
+
+html[data-operations-theme="dark"] :is(.admin-total-orders-filter select,.admin-invoice-filter-grid input,.admin-invoice-filter-grid select) { color: var(--operations-text); border-color: #887650; background: #211c15; }
+html[data-operations-theme="dark"] .admin-invoice-filters { border-color: var(--operations-line); background: var(--operations-soft); }
+html[data-operations-theme="dark"] .admin-invoice-filter-grid label { color: var(--operations-text); }
+html[data-operations-theme="dark"] .admin-invoice-status.is-paid { color: #c5f2d5; background: #244232; }
+html[data-operations-theme="dark"] .admin-invoice-status.is-partially_paid { color: #f2d68c; background: #463719; }
+html[data-operations-theme="dark"] .admin-invoice-status.is-unpaid { color: #ffc6bd; background: #4b2824; }

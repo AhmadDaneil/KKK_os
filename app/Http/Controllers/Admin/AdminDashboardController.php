@@ -44,10 +44,25 @@ class AdminDashboardController extends Controller
         return redirect()->route('admin.orders.show', $order->order_id);
     }
 
-    public function index(BuildSalesAnalysisService $salesAnalysis): View
+    public function index(Request $request, BuildSalesAnalysisService $salesAnalysis): View
     {
+        $ordersPeriod = $request->query('orders_period', 'yearly');
+        if (! in_array($ordersPeriod, ['weekly', 'monthly', 'yearly'], true)) {
+            $ordersPeriod = 'yearly';
+        }
+
+        $currentTime = now();
+        $ordersPeriodStart = match ($ordersPeriod) {
+            'weekly' => $currentTime->copy()->startOfWeek(),
+            'monthly' => $currentTime->copy()->startOfMonth(),
+            default => $currentTime->copy()->startOfYear(),
+        };
+
         $statistics = [
-            'orders_total' => Order::where('status', '!=', 'DETAILS_INCOMPLETE')->count(),
+            'orders_total' => Order::where('status', '!=', 'DETAILS_INCOMPLETE')
+                ->whereBetween('created_at', [$ordersPeriodStart, $currentTime])
+                ->count(),
+            'orders_period' => $ordersPeriod,
             'orders_active' => Order::where('status', '!=', 'DETAILS_INCOMPLETE')
                 ->whereNotIn('status', Order::TERMINAL_OPERATIONAL_STATUSES)
                 ->whereNotIn('status', ['COMPLETED'])
