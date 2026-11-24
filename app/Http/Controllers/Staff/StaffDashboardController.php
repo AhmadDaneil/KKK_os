@@ -10,15 +10,18 @@ use App\Models\PackingJob;
 use App\Models\PaymentTransaction;
 use App\Models\PrintJob;
 use App\Models\User;
+use App\Services\Dashboard\BuildAttentionPulseService;
 use Illuminate\View\View;
 
 class StaffDashboardController extends Controller
 {
-    public function index(): View
+    public function index(BuildAttentionPulseService $attentionPulseBuilder): View
     {
         $user = auth()->user();
         $attention = [];
+        $attentionPulse = ['pending_payments' => false, 'design_queue' => false, 'printing_queue' => false, 'total' => false];
         $designerAttention = 0;
+        $designerStartAttention = 0;
         $digitalDesignerQueue = 0;
         $productionAttention = ['ready' => 0, 'printing' => 0];
         $packingAttention = ['ready' => 0, 'packing' => 0, 'fulfilment' => 0];
@@ -26,13 +29,23 @@ class StaffDashboardController extends Controller
         if ($user->canMonitorAllDepartments()) {
             $attention = [
                 'pending_payments' => PaymentTransaction::where('status', 'PENDING')->whereHas('order', fn ($query) => $query->whereNotIn('status', Order::TERMINAL_OPERATIONAL_STATUSES))->count(),
-                'design_queue' => DesignJob::whereIn('status', ['READY_FOR_DESIGN', 'CORRECTION_REQUESTED'])->whereHas('order', fn ($query) => $query->whereNotIn('status', Order::TERMINAL_OPERATIONAL_STATUSES))->count(),
-                'printing_queue' => PrintJob::where('status', 'READY_FOR_PRINT')->whereHas('order', fn ($query) => $query->whereNotIn('status', Order::TERMINAL_OPERATIONAL_STATUSES))->count(),
+                'design_queue' => DesignJob::whereIn('status', ['READY_FOR_DESIGN', 'DESIGN_IN_PROGRESS', 'CORRECTION_REQUESTED'])->whereHas('order', fn ($query) => $query->whereNotIn('status', Order::TERMINAL_OPERATIONAL_STATUSES))->count(),
+                'printing_queue' => PrintJob::whereIn('status', ['READY_FOR_PRINT', 'PRINTING'])->whereHas('order', fn ($query) => $query->whereNotIn('status', Order::TERMINAL_OPERATIONAL_STATUSES))->count(),
                 'unassigned_packing' => PackingJob::whereNull('assigned_user_id')->where('status', 'READY_FOR_PACKING')->whereHas('order', fn ($query) => $query->whereNotIn('status', Order::TERMINAL_OPERATIONAL_STATUSES))->count(),
             ];
+            $attentionPulse = [
+                'pending_payments' => $attention['pending_payments'] > 0,
+                'design_queue' => $attentionPulseBuilder->hasOverdueDesignTasks(),
+                'printing_queue' => $attentionPulseBuilder->hasOverdueProductionTasks(),
+            ];
+            $attentionPulse['total'] = in_array(true, $attentionPulse, true);
         }
 
         if ($user->hasStaffRole(User::ROLE_DESIGNER)) {
+            $designerStartAttention = DesignJob::where('assigned_user_id', $user->id)
+                ->where('status', 'READY_FOR_DESIGN')
+                ->whereHas('order', fn ($query) => $query->whereNotIn('status', Order::TERMINAL_OPERATIONAL_STATUSES))
+                ->count();
             $designerAttention = DesignJob::where('assigned_user_id', $user->id)
                 ->whereIn('status', ['READY_FOR_DESIGN', 'CORRECTION_REQUESTED'])
                 ->whereHas('order', fn ($query) => $query->whereNotIn('status', Order::TERMINAL_OPERATIONAL_STATUSES))
@@ -72,6 +85,6 @@ class StaffDashboardController extends Controller
             ];
         }
 
-        return view('staff.dashboard', compact('attention', 'designerAttention', 'digitalDesignerQueue', 'productionAttention', 'packingAttention'));
+        return view('staff.dashboard', compact('attention', 'attentionPulse', 'designerAttention', 'designerStartAttention', 'digitalDesignerQueue', 'productionAttention', 'packingAttention'));
     }
 }

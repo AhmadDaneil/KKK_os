@@ -51,16 +51,16 @@
                     <section class="staff-attention-panel" aria-labelledby="staff-attention-title">
                         <div class="staff-attention-heading">
                             <div><p class="staff-kicker">Operations Management Actions</p><h2 id="staff-attention-title">Needs Attention</h2></div>
-                            <span class="staff-attention-total @if ($attentionTotal > 0) has-alert @endif">{{ $attentionTotal > 0 ? $attentionTotal.' actions' : 'All clear' }}</span>
+                            <span class="staff-attention-total @if ($attentionTotal > 0) has-alert @endif @if ($attentionPulse['total']) is-pulsing @endif">{{ $attentionTotal > 0 ? $attentionTotal.' actions' : 'All clear' }}</span>
                         </div>
                         <div class="staff-attention-grid">
                             @foreach ([
-                                ['key' => 'pending_payments', 'label' => 'Payment Review', 'description' => 'Payments requiring approval or rejection', 'icon' => 'RM', 'params' => ['attention' => 'pending_payment']],
-                                ['key' => 'design_queue', 'label' => 'Design Tasks', 'description' => 'Automatically assigned to the lead designer', 'icon' => 'RB', 'params' => ['workstream' => 'design']],
-                                ['key' => 'printing_queue', 'label' => 'Production Tasks', 'description' => 'Automatically assigned to the lead production staff', 'icon' => 'CT', 'params' => ['workstream' => 'printing']],
-                                ['key' => 'unassigned_packing', 'label' => 'Unassigned Packing', 'description' => 'Assign Operations Management to packing and fulfilment', 'icon' => 'PK', 'params' => ['workstream' => 'packing', 'attention' => 'unassigned_packing']],
+                                ['key' => 'pending_payments', 'label' => 'Payment Review', 'description' => 'Payments requiring approval or rejection', 'icon' => 'RM', 'params' => ['attention' => 'pending_payment'], 'pulse' => $attentionPulse['pending_payments']],
+                                ['key' => 'design_queue', 'label' => 'Design Tasks', 'description' => 'Automatically assigned to the lead designer', 'icon' => 'RB', 'params' => ['workstream' => 'design'], 'pulse' => $attentionPulse['design_queue']],
+                                ['key' => 'printing_queue', 'label' => 'Production Tasks', 'description' => 'Automatically assigned to the lead production staff', 'icon' => 'CT', 'params' => ['workstream' => 'printing'], 'pulse' => $attentionPulse['printing_queue']],
+                                ['key' => 'unassigned_packing', 'label' => 'Unassigned Packing', 'description' => 'Assign Operations Management to packing and fulfilment', 'icon' => 'PK', 'params' => ['workstream' => 'packing', 'attention' => 'unassigned_packing'], 'pulse' => false],
                             ] as $item)
-                                <a href="{{ route('staff.orders.index', $item['params']) }}" class="staff-attention-card @if ($attention[$item['key']] > 0) has-alert @else is-clear @endif">
+                                <a href="{{ route('staff.orders.index', $item['params']) }}" @class(['staff-attention-card', 'has-alert' => $attention[$item['key']] > 0, 'is-clear' => $attention[$item['key']] === 0, 'is-pulsing' => $item['pulse']])>
                                     <span class="staff-attention-icon">{{ $item['icon'] }}</span><span><strong>{{ $item['label'] }}</strong><small>{{ $item['description'] }}</small></span><b>{{ $attention[$item['key']] }}</b>
                                 </a>
                             @endforeach
@@ -74,9 +74,9 @@
                     <section class="staff-attention-panel staff-designer-attention" aria-labelledby="designer-attention-title">
                         <div class="staff-attention-heading">
                             <div><p class="staff-kicker">Designer Actions</p><h2 id="designer-attention-title">Needs Attention</h2></div>
-                            <span class="staff-attention-total @if ($designerAttention > 0) has-alert @endif">{{ $designerAttention > 0 ? $designerAttention.' tasks' : 'No action required' }}</span>
+                            <span class="staff-attention-total @if ($designerAttention > 0) has-alert @endif @if ($designerStartAttention > 0) is-pulsing @endif">{{ $designerAttention > 0 ? $designerAttention.' tasks' : 'No action required' }}</span>
                         </div>
-                        <a href="{{ route('staff.orders.index', ['workstream' => 'design']) }}" class="staff-attention-card @if ($designerAttention > 0) has-alert @else is-clear @endif">
+                        <a href="{{ route('staff.orders.index', ['workstream' => 'design']) }}" @class(['staff-attention-card', 'has-alert' => $designerAttention > 0, 'is-clear' => $designerAttention === 0, 'is-pulsing' => $designerStartAttention > 0])>
                             <span class="staff-attention-icon">RB</span><span><strong>{{ __('ui.design_queue') }}</strong><small>{{ $designerAttention > 0 ? 'Orders ready to start or requiring corrections' : 'All design tasks are up to date' }}</small></span><b>{{ $designerAttention }}</b>
                         </a>
                     </section>
@@ -87,11 +87,11 @@
                     <section class="staff-attention-panel staff-production-attention" aria-labelledby="production-attention-title">
                         <div class="staff-attention-heading">
                             <div><p class="staff-kicker">Production Actions</p><h2 id="production-attention-title">Needs Attention</h2></div>
-                            <span class="staff-attention-total @if ($productionTotal > 0) has-alert @endif">{{ $productionTotal > 0 ? $productionTotal.' tasks' : 'No action required' }}</span>
+                            <span class="staff-attention-total @if ($productionTotal > 0) has-alert @endif @if ($productionAttention['ready'] > 0) is-pulsing @endif">{{ $productionTotal > 0 ? $productionTotal.' tasks' : 'No action required' }}</span>
                         </div>
                         <div class="staff-attention-grid">
-                            <a href="{{ route('staff.orders.index', ['workstream' => 'printing', 'status' => 'READY_FOR_PRINT']) }}" class="staff-attention-card @if ($productionAttention['ready'] > 0) has-alert @else is-clear @endif"><span class="staff-attention-icon">CT</span><span><strong>Printing Not Started</strong><small>Printing work ready to begin</small></span><b>{{ $productionAttention['ready'] }}</b></a>
-                            <a href="{{ route('staff.orders.index', ['workstream' => 'printing', 'status' => 'PRINTING']) }}" class="staff-attention-card @if ($productionAttention['printing'] > 0) has-alert @else is-clear @endif"><span class="staff-attention-icon">CT</span><span><strong>Printing in Progress</strong><small>Upload progress and mark printing complete</small></span><b>{{ $productionAttention['printing'] }}</b></a>
+                            <a href="{{ route('staff.orders.index', ['workstream' => 'printing', 'status' => 'READY_FOR_PRINT']) }}" @class(['staff-attention-card', 'has-alert' => $productionAttention['ready'] > 0, 'is-clear' => $productionAttention['ready'] === 0, 'is-pulsing' => $productionAttention['ready'] > 0])><span class="staff-attention-icon">CT</span><span><strong>Printing Not Started</strong><small>Printing work ready to begin</small></span><b>{{ $productionAttention['ready'] }}</b></a>
+                            <a href="{{ route('staff.orders.index', ['workstream' => 'printing', 'status' => 'PRINTING']) }}" @class(['staff-attention-card', 'has-alert' => $productionAttention['printing'] > 0, 'is-clear' => $productionAttention['printing'] === 0])><span class="staff-attention-icon">CT</span><span><strong>Printing in Progress</strong><small>Upload progress and mark printing complete</small></span><b>{{ $productionAttention['printing'] }}</b></a>
                         </div>
                     </section>
                 @endif

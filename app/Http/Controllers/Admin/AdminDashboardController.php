@@ -10,6 +10,7 @@ use App\Models\PaymentTransaction;
 use App\Models\PrintJob;
 use App\Models\User;
 use App\Services\Admin\BuildSalesAnalysisService;
+use App\Services\Dashboard\BuildAttentionPulseService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -44,7 +45,7 @@ class AdminDashboardController extends Controller
         return redirect()->route('admin.orders.show', $order->order_id);
     }
 
-    public function index(Request $request, BuildSalesAnalysisService $salesAnalysis): View
+    public function index(Request $request, BuildSalesAnalysisService $salesAnalysis, BuildAttentionPulseService $attentionPulseBuilder): View
     {
         $ordersPeriod = $request->query('orders_period', 'yearly');
         if (! in_array($ordersPeriod, ['weekly', 'monthly', 'yearly'], true)) {
@@ -84,13 +85,20 @@ class AdminDashboardController extends Controller
 
         $attention = [
             'pending_payments' => PaymentTransaction::where('status', 'PENDING')->whereHas('order', fn ($query) => $query->whereNotIn('status', Order::TERMINAL_OPERATIONAL_STATUSES))->count(),
-            'design_queue' => DesignJob::whereIn('status', ['READY_FOR_DESIGN', 'CORRECTION_REQUESTED'])->whereHas('order', fn ($query) => $query->whereNotIn('status', Order::TERMINAL_OPERATIONAL_STATUSES))->count(),
-            'printing_queue' => PrintJob::where('status', 'READY_FOR_PRINT')->whereHas('order', fn ($query) => $query->whereNotIn('status', Order::TERMINAL_OPERATIONAL_STATUSES))->count(),
+            'design_queue' => DesignJob::whereIn('status', ['READY_FOR_DESIGN', 'DESIGN_IN_PROGRESS', 'CORRECTION_REQUESTED'])->whereHas('order', fn ($query) => $query->whereNotIn('status', Order::TERMINAL_OPERATIONAL_STATUSES))->count(),
+            'printing_queue' => PrintJob::whereIn('status', ['READY_FOR_PRINT', 'PRINTING'])->whereHas('order', fn ($query) => $query->whereNotIn('status', Order::TERMINAL_OPERATIONAL_STATUSES))->count(),
             'unassigned_packing' => PackingJob::whereNull('assigned_user_id')
                 ->whereIn('status', ['READY_FOR_PACKING'])
                 ->whereHas('order', fn ($query) => $query->whereNotIn('status', Order::TERMINAL_OPERATIONAL_STATUSES))
                 ->count(),
         ];
+
+        $attentionPulse = [
+            'pending_payments' => $attention['pending_payments'] > 0,
+            'design_queue' => $attentionPulseBuilder->hasOverdueDesignTasks(),
+            'printing_queue' => $attentionPulseBuilder->hasOverdueProductionTasks(),
+        ];
+        $attentionPulse['total'] = in_array(true, $attentionPulse, true);
 
         $teamCounts = User::query()
             ->whereIn('role', User::STAFF_ROLES)
@@ -107,6 +115,6 @@ class AdminDashboardController extends Controller
 
         $sales = $salesAnalysis->build();
 
-        return view('admin.dashboard', compact('statistics', 'queues', 'attention', 'teamCounts', 'recentOrders', 'sales'));
+        return view('admin.dashboard', compact('statistics', 'queues', 'attention', 'attentionPulse', 'teamCounts', 'recentOrders', 'sales'));
     }
 }
