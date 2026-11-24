@@ -286,6 +286,7 @@
             </div>
         </section>
 
+        @if ($order->booking_payment_status !== 'PAID')
         <section class="review-card payment-card">
             <div class="payment-heading">
                 <div>
@@ -351,6 +352,7 @@
                 </div>
             @endif
         </section>
+        @endif
 
         <section class="review-card confirmation-card">
             <h2>Final Confirmation</h2>
