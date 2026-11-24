@@ -357,6 +357,7 @@
             @endif
         </section>
 
+        @if ($order->booking_payment_status !== 'PAID' || $isFullTestPayment)
         <section class="review-card payment-card">
             <div class="payment-heading">
                 <div>
@@ -448,6 +449,7 @@
                 </div>
             @endif
         </section>
+        @endif
     </main>
 
     <dialog id="final-confirmation-dialog" class="final-confirmation-dialog" aria-labelledby="final-confirmation-dialog-title">
