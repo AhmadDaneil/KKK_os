@@ -25,7 +25,7 @@
                 <span class="payment-return-icon" aria-hidden="true">✓</span>
                 <p class="eyebrow">Payment confirmed</p>
                 <h1>Payment Successful</h1>
-                <p class="payment-return-lead">Your booking payment has been verified securely. You can now track your order progress.</p>
+                <p class="payment-return-lead">Your booking payment has been verified securely. Continue to complete your order form.</p>
                 <dl class="payment-return-summary">
                     <div><dt>{{ $order->displayCustomerReference() ? 'Customer Reference' : 'Order ID' }}</dt><dd>{{ $order->displayCustomerReference() ?: $order->order_id }}</dd></div>
                     <div><dt>Amount paid</dt><dd>MYR {{ number_format((float) $payment->amount, 2) }}</dd></div>
@@ -36,7 +36,7 @@
                     @if ($receiptUrl)
                         <a class="button button-secondary" href="{{ $receiptUrl }}" target="_blank" rel="noopener noreferrer">View Billplz E-Receipt</a>
                     @endif
-                    <a class="button button-primary" href="{{ route('public.orders.progress', ['order_id' => $order->displayCustomerReference() ?: $order->order_id]) }}">Continue to Track Progress →</a>
+                    <a class="button button-primary" href="{{ route('orders.dashboard', ['orderId' => $order->order_id]) }}">Continue To Form →</a>
                 </div>
                 <a class="payment-return-merchant" href="{{ route('home') }}">Return to Merchant</a>
             @else

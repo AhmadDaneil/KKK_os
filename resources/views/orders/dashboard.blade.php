@@ -292,7 +292,7 @@
                 foreach ($codes as $code) {
                     $assetPath = 'images/designs/'.strtolower($theme).'/'.$code.'/card-front.webp';
                     if (is_file(public_path($assetPath))) {
-                        $designCodeThumbnails[$theme][$code] = asset($assetPath);
+                        $designCodeThumbnails[$theme][$code] = asset($assetPath).'?v='.filemtime(public_path($assetPath));
                     }
                 }
             }
