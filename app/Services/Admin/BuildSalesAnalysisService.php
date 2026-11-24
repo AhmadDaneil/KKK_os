@@ -2,10 +2,7 @@
 
 namespace App\Services\Admin;
 
-use App\Models\Invoice;
 use App\Models\Order;
-use App\Models\OrderItem;
-use App\Models\OrderPricingSnapshot;
 use App\Models\PaymentTransaction;
 use Carbon\CarbonImmutable;
 
@@ -38,8 +35,6 @@ class BuildSalesAnalysisService
         $pendingQuery = PaymentTransaction::query()->where('status', 'PENDING');
         $pendingAmount = (float) (clone $pendingQuery)->sum('amount');
         $pendingCount = (clone $pendingQuery)->count();
-        $orderTotals = $monthPayments->groupBy('order_id')->map->sum('amount');
-
         $daily = collect(range(13, 0))->map(function (int $daysAgo) use ($now, $paid): array {
             $date = $now->subDays($daysAgo);
 
@@ -80,16 +75,7 @@ class BuildSalesAnalysisService
 
         $bestMonth = collect($monthly)->sortByDesc('amount')->first();
         $businessSummary = [
-            'gross_sales' => (float) Invoice::query()->sum('total_amount'),
-            'collected' => (float) PaymentTransaction::query()->where('status', 'PAID')->sum('amount'),
-            'outstanding' => (float) Invoice::query()->sum('balance_due'),
             'total_orders' => Order::query()->where('status', '!=', 'DETAILS_INCOMPLETE')->count(),
-            'addon_sales' => (float) OrderItem::query()->where('item_type', 'ADDON')->sum('line_total'),
-            'postage_sales' => (float) OrderPricingSnapshot::query()->sum('postage_amount'),
-            'booking_collected' => (float) PaymentTransaction::query()
-                ->where('status', 'PAID')->where('payment_type', 'BOOKING_DEPOSIT')->sum('amount'),
-            'balance_collected' => (float) PaymentTransaction::query()
-                ->where('status', 'PAID')->where('payment_type', 'BALANCE')->sum('amount'),
         ];
         $packageBreakdown = Order::query()
             ->where('status', '!=', 'DETAILS_INCOMPLETE')
@@ -113,7 +99,6 @@ class BuildSalesAnalysisService
                 'year' => (float) $yearPayments->sum('amount'),
                 'year_transactions' => $yearPayments->count(),
                 'year_orders' => $yearPayments->pluck('order_id')->unique()->count(),
-                'average_order_value' => $orderTotals->isEmpty() ? 0.0 : (float) $orderTotals->average(),
                 'pending_amount' => $pendingAmount,
                 'pending_count' => $pendingCount,
                 'month_change' => $previousMonthSales > 0

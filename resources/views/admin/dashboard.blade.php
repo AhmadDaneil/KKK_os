@@ -29,7 +29,22 @@
     </section>
 
     <section class="admin-stat-grid" aria-label="Operations summary">
-        <article><span>{{ __('ui.total_orders') }}</span><strong data-stat-value="{{ $statistics['orders_total'] }}">{{ number_format($statistics['orders_total']) }}</strong><small>All order records</small></article>
+        <article class="admin-total-orders-card">
+            <div>
+                <span>{{ __('ui.total_orders') }}</span>
+                <strong data-stat-value="{{ $statistics['orders_total'] }}">{{ number_format($statistics['orders_total']) }}</strong>
+                <small>Orders created {{ match ($statistics['orders_period']) { 'weekly' => 'this week', 'monthly' => 'this month', default => 'this year' } }}</small>
+            </div>
+            <form method="GET" action="{{ route('admin.dashboard') }}" class="admin-total-orders-filter">
+                <label class="sr-only" for="orders-period">Filter total orders by period</label>
+                <select id="orders-period" name="orders_period">
+                    <option value="weekly" @selected($statistics['orders_period'] === 'weekly')>Weekly</option>
+                    <option value="monthly" @selected($statistics['orders_period'] === 'monthly')>Monthly</option>
+                    <option value="yearly" @selected($statistics['orders_period'] === 'yearly')>Yearly</option>
+                </select>
+                <button class="admin-button admin-button-secondary" type="submit">Apply</button>
+            </form>
+        </article>
         <article><span>{{ __('ui.active_orders') }}</span><strong data-stat-value="{{ $statistics['orders_active'] }}">{{ number_format($statistics['orders_active']) }}</strong><small>Not completed or archived</small></article>
         <article @class(['is-warning', 'has-alert' => $statistics['pending_deposits'] > 0, 'is-clear' => $statistics['pending_deposits'] === 0])><span>{{ __('ui.pending_deposits') }}</span><strong data-stat-value="{{ $statistics['pending_deposits'] }}">{{ number_format($statistics['pending_deposits']) }}</strong><small>{{ $statistics['pending_deposits'] > 0 ? 'Review promptly' : 'No pending reviews' }}</small></article>
         <article @class(['is-warning', 'has-alert' => $statistics['pending_balances'] > 0, 'is-clear' => $statistics['pending_balances'] === 0])><span>{{ __('ui.pending_balances') }}</span><strong data-stat-value="{{ $statistics['pending_balances'] }}">{{ number_format($statistics['pending_balances']) }}</strong><small>{{ $statistics['pending_balances'] > 0 ? 'Review promptly' : 'No pending reviews' }}</small></article>
@@ -43,17 +58,10 @@
         </div>
 
         <div class="admin-sales-summary">
-            <article><span>Gross Sales</span><strong>RM {{ number_format($sales['business_summary']['gross_sales'], 2) }}</strong><small>Total invoice value</small></article>
-            <article><span>Collected</span><strong>RM {{ number_format($sales['business_summary']['collected'], 2) }}</strong><small>Paid transactions</small></article>
-            <article><span>Outstanding</span><strong>RM {{ number_format($sales['business_summary']['outstanding'], 2) }}</strong><small>Invoice balance</small></article>
             <article><span>Total Orders</span><strong>{{ number_format($sales['business_summary']['total_orders']) }}</strong><small>1 package: {{ $sales['package_breakdown'][1] }} · 2 packages: {{ $sales['package_breakdown'][2] }}</small></article>
-            <article><span>Add-on / Postage</span><strong>RM {{ number_format($sales['business_summary']['addon_sales'] + $sales['business_summary']['postage_sales'], 2) }}</strong><small>Add-on RM {{ number_format($sales['business_summary']['addon_sales'], 2) }} · Postage RM {{ number_format($sales['business_summary']['postage_sales'], 2) }}</small></article>
-            <article><span>Booking Collected</span><strong>RM {{ number_format($sales['business_summary']['booking_collected'], 2) }}</strong><small>Successful bookings</small></article>
-            <article><span>Balance Collected</span><strong>RM {{ number_format($sales['business_summary']['balance_collected'], 2) }}</strong><small>Balance payments received</small></article>
             <article><span>{{ __('ui.today') }}</span><strong>RM {{ number_format($sales['summary']['today'], 2) }}</strong><small>{{ __('ui.transactions', ['count' => $sales['summary']['today_transactions']]) }}</small></article>
             <article><span>{{ __('ui.this_month') }}</span><strong>RM {{ number_format($sales['summary']['month'], 2) }}</strong><small @class(['is-up' => $sales['summary']['month_change'] >= 0, 'is-down' => $sales['summary']['month_change'] < 0])>{{ $sales['summary']['month_change'] >= 0 ? '+' : '' }}{{ number_format($sales['summary']['month_change'], 1) }}% vs last month</small></article>
             <article><span>{{ __('ui.this_year') }}</span><strong>RM {{ number_format($sales['summary']['year'], 2) }}</strong><small>{{ $sales['summary']['year_orders'] }} orders · {{ __('ui.transactions', ['count' => $sales['summary']['year_transactions']]) }}</small></article>
-            <article><span>{{ __('ui.average_order') }}</span><strong>RM {{ number_format($sales['summary']['average_order_value'], 2) }}</strong><small>Based on this month's collections</small></article>
             <article class="is-pending"><span>{{ __('ui.pending_payment') }}</span><strong>RM {{ number_format($sales['summary']['pending_amount'], 2) }}</strong><small>{{ __('ui.transactions', ['count' => $sales['summary']['pending_count']]) }}</small></article>
         </div>
 
