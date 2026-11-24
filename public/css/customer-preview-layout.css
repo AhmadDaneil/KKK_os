@@ -8418,18 +8418,17 @@
     text-align: center;
 }
 
-/* Place Portrait VIP names side by side around the printed ampersand.
-   Keep the existing font family, weight, style, and size intact. */
+/* Keep Portrait VIP couple names on separate centered rows, below parent names. */
 .live-product--vip-card[data-catalog-artwork][data-design-code^="CKP-"] .vip-card-person-name--groom {
-    top: 44.3%;
-    left: 27%;
-    width: 42%;
-    text-align: right;
+    top: 57.6%;
+    left: 50%;
+    width: 92%;
+    text-align: center;
 }
 
 .live-product--vip-card[data-catalog-artwork][data-design-code^="CKP-"] .vip-card-person-name--bride {
-    top: 44.3%;
-    left: 73%;
-    width: 42%;
-    text-align: left;
+    top: 63.7%;
+    left: 50%;
+    width: 92%;
+    text-align: center;
 }
