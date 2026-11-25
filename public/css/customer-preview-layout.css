@@ -8474,3 +8474,34 @@
     margin: 0 !important;
     transform: translate(-50%, -50%) !important;
 }
+
+/* New catalog themes use centered banner copy, while couple names keep their
+   per-design anchors above so the printed ampersand in each artwork stays put. */
+.live-product--banner[data-preview-artwork-slot="banner"][data-design-artwork][data-design-code^="CKR-"],
+.live-product--banner[data-preview-artwork-slot="banner"][data-design-artwork][data-design-code^="CKS-"],
+.live-product--banner[data-preview-artwork-slot="banner"][data-design-artwork][data-design-code^="CKM-"] {
+    --preview-title-x: 50%;
+    --preview-title-width: 84%;
+    --preview-date-x: 50%;
+    --preview-date-width: 84%;
+    --preview-ampersand-visibility: hidden;
+}
+
+/* Match customer-entered text to each theme's printed palette and remove the
+   generic white halo that made the live text look doubled on the artwork. */
+:is(.wedding-card-front, .live-product)[data-design-artwork][data-design-code^="CKR-"] :is(.desa-card-custom-copy, .desa-product-custom-copy) {
+    color: #4d3b1d;
+}
+
+:is(.wedding-card-front, .live-product)[data-design-artwork][data-design-code^="CKS-"] :is(.desa-card-custom-copy, .desa-product-custom-copy) {
+    color: #fff;
+}
+
+:is(.wedding-card-front, .live-product)[data-design-artwork][data-design-code^="CKM-"] :is(.desa-card-custom-copy, .desa-product-custom-copy) {
+    color: #e7c4b1;
+}
+
+:is(.wedding-card-front, .live-product)[data-design-artwork]:is([data-design-code^="CKR-"], [data-design-code^="CKS-"], [data-design-code^="CKM-"]) :is(.desa-card-custom-copy, .desa-product-custom-copy) [data-preview-field] {
+    color: inherit !important;
+    text-shadow: none !important;
+}
