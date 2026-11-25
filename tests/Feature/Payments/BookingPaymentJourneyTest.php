@@ -58,7 +58,9 @@ class BookingPaymentJourneyTest extends TestCase
         $this->get(route('payments.booking.return', ['reference' => $payment->public_reference]))
             ->assertOk()
             ->assertSee($order->customer_reference)
-            ->assertSee('Continue to Landing Page');
+            ->assertSee('Continue To Form')
+            ->assertSee(route('orders.dashboard', ['orderId' => $order->order_id]))
+            ->assertDontSee('Track Order');
         $this->get(route('home'))
             ->assertOk()
             ->assertSee('Booking payment confirmed')
@@ -68,6 +70,30 @@ class BookingPaymentJourneyTest extends TestCase
         $this->get(route('orders.dashboard', ['orderId' => $order->order_id]))
             ->assertOk()
             ->assertSee('customer-order-form');
+    }
+
+    public function test_full_booking_payment_return_sends_customer_to_track_order(): void
+    {
+        $order = $this->createOrder(1);
+        $order->update(['booking_payment_status' => 'PAID']);
+        $payment = $order->payments()->create([
+            'payment_type' => 'BOOKING_DEPOSIT',
+            'provider' => 'BILLPLZ',
+            'public_reference' => 'full-payment-return-reference',
+            'amount' => '188.00',
+            'currency' => 'MYR',
+            'status' => 'PAID',
+            'paid_at' => now(),
+            'metadata' => ['payment_plan' => 'FULL'],
+        ]);
+
+        $this->get(route('payments.booking.return', ['reference' => $payment->public_reference]))
+            ->assertOk()
+            ->assertSee('Track Order')
+            ->assertSee(route('public.orders.progress', [
+                'order_id' => $order->displayCustomerReference() ?: $order->order_id,
+            ]))
+            ->assertDontSee('Continue To Form');
     }
 
     public function test_two_package_booking_amount_is_one_hundred_ringgit(): void
@@ -113,7 +139,9 @@ class BookingPaymentJourneyTest extends TestCase
         $this->get(route('payments.booking.return', ['reference' => $payment->public_reference]))
             ->assertOk()
             ->assertSee('Payment Successful')
-            ->assertSee('Continue to Landing Page');
+            ->assertSee('Continue To Form')
+            ->assertSee(route('orders.dashboard', ['orderId' => $order->order_id]))
+            ->assertDontSee('Track Order');
 
         $this->assertSame('PAID', $payment->fresh()->status);
         $this->assertSame('PAID', $order->fresh()->booking_payment_status);
