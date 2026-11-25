@@ -34,10 +34,6 @@ class StaffBatchArtworkController extends Controller
         $jobs = $order->designJobs()
             ->where('assigned_user_id', $request->user()->id)
             ->where('status', 'DESIGN_IN_PROGRESS')
-            ->with([
-                'packageSide',
-                'artworkVersions' => fn ($query) => $query->latest('version_number'),
-            ])
             ->orderBy('id')
             ->get();
 
@@ -45,40 +41,6 @@ class StaffBatchArtworkController extends Controller
             return back()->withErrors([
                 'design_job' => 'Both package design jobs must be assigned to you before you can mark them as done together.',
             ]);
-        }
-
-        foreach ($jobs as $job) {
-            if ($job->status !== 'DESIGN_IN_PROGRESS') {
-                return back()->withErrors([
-                    'design_job' => 'Both jobs must be in the design-in-progress state before you can mark them as done together.',
-                ]);
-            }
-
-            $latestArtwork = $job->artworkVersions->first();
-
-            if (! $latestArtwork) {
-                return back()->withErrors([
-                    'design_job' => 'Upload the latest artwork for the '.($job->side === 'LELAKI' ? "groom's" : "bride's").' package before marking both designs as done.',
-                ]);
-            }
-
-            $previewTypes = collect($latestArtwork->preview_files ?? [])
-                ->pluck('artwork_type')
-                ->map(fn (?string $type): string => mb_strtoupper(trim((string) $type)));
-            $requiredPreviewTypes = collect(['CARD', 'BANNER', 'BANTING']);
-            $missingTypes = $requiredPreviewTypes->reject(fn (string $type): bool => $previewTypes->contains($type));
-
-            if ($missingTypes->isNotEmpty()) {
-                $missingLabels = $missingTypes->map(fn (string $type): string => match ($type) {
-                    'CARD' => 'kad',
-                    'BANNER' => 'banner',
-                    'BANTING' => 'banting',
-                });
-
-                return back()->withErrors([
-                    'design_job' => 'Previews for '.$missingLabels->join(' and ').' are missing from the latest '.($job->side === 'LELAKI' ? "groom's" : "bride's").' package version. Upload a new design version with all previews before marking both designs as done.',
-                ]);
-            }
         }
 
         try {
@@ -105,7 +67,7 @@ class StaffBatchArtworkController extends Controller
             ]);
         }
 
-        return back()->with('status', 'Both designs have been marked done for internal tracking.');
+        return back()->with('status', 'Both designs have been marked as done.');
     }
 
     public function store(

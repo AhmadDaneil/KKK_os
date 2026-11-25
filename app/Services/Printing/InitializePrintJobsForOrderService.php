@@ -66,12 +66,6 @@ class InitializePrintJobsForOrderService
                     ->sortByDesc('version_number')
                     ->first();
 
-                if (! $latestArtwork) {
-                    throw new RuntimeException(
-                        "Design job {$designJob->id} has no artwork version."
-                    );
-                }
-
                 $printJob = PrintJob::firstOrCreate(
                     [
                         'design_job_id' => $designJob->id,
@@ -79,7 +73,7 @@ class InitializePrintJobsForOrderService
                     [
                         'order_id' => $order->id,
                         'order_package_side_id' => $designJob->order_package_side_id,
-                        'artwork_version_id' => $latestArtwork->id,
+                        'artwork_version_id' => $latestArtwork?->id,
                         'side' => $designJob->side,
                         'status' => $initialStatus,
                         'quantity' => $order->card_quantity,
@@ -96,8 +90,8 @@ class InitializePrintJobsForOrderService
                         'occurred_at' => now(),
                         'metadata' => [
                             'design_job_id' => $designJob->id,
-                            'artwork_version_id' => $latestArtwork->id,
-                            'artwork_version_number' => $latestArtwork->version_number,
+                            'artwork_version_id' => $latestArtwork?->id,
+                            'artwork_version_number' => $latestArtwork?->version_number,
                         ],
                     ]);
                 } elseif ($order->status === 'PAID' && $printJob->status === 'WAITING_FOR_PAYMENT') {

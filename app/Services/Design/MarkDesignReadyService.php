@@ -24,17 +24,12 @@ class MarkDesignReadyService
                 ->orderByDesc('version_number')
                 ->first();
 
-            if (! $latestArtwork) {
-                throw new RuntimeException(
-                    "Design job {$designJob->id} has no uploaded artwork version to mark as done."
-                );
-            }
-
-            if (! filled($latestArtwork->preview_storage_path)) {
-                throw new RuntimeException(
-                "Design job {$designJob->id} has no uploaded preview."
-                );
-            }
+            $artworkMetadata = $latestArtwork
+                ? [
+                    'artwork_version_id' => $latestArtwork->id,
+                    'version_number' => $latestArtwork->version_number,
+                ]
+                : ['completion_method' => 'manual'];
 
             $fromStatus = $designJob->status;
 
@@ -49,18 +44,17 @@ class MarkDesignReadyService
                 'to_status' => 'DESIGN_READY',
                 'actor_user_id' => $actor?->id,
                 'occurred_at' => now(),
-                'metadata' => [
-                    'artwork_version_id' => $latestArtwork->id,
-                    'version_number' => $latestArtwork->version_number,
-                ],
+                'metadata' => $artworkMetadata,
             ]);
 
-            $designJob->reviewActions()->create([
-                'artwork_version_id' => $latestArtwork->id,
-                'action' => 'DESIGN_READY',
-                'actor_user_id' => $actor?->id,
-                'acted_at' => now(),
-            ]);
+            if ($latestArtwork) {
+                $designJob->reviewActions()->create([
+                    'artwork_version_id' => $latestArtwork->id,
+                    'action' => 'DESIGN_READY',
+                    'actor_user_id' => $actor?->id,
+                    'acted_at' => now(),
+                ]);
+            }
 
             return $designJob->fresh();
         });
