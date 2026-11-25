@@ -1800,14 +1800,14 @@ function kkkInsertFramedPortrait(doc, imagePath, item, placeBehindArtwork, fallb
     var oldUnits = app.preferences.rulerUnits;
     var photoDoc = null, imported = null, group = null, matteLayer = null, hidden = [];
     var frame, stack;
-    var editablePhotoFill = item === "BANNER" || item === "BANTING";
+    var proportionalPhotoFill = item !== "WOODEN HANGER";
     try {
         if (!imagePath || !(new File(imagePath)).exists) throw new Error("Gambar pengantin tidak ditemui.");
         app.activeDocument = doc;
         app.preferences.rulerUnits = Units.PIXELS;
         frame = kkkFrameForDocument(doc, item, fallbackFrames);
         stack = kkkPhotoStack(doc);
-        if (editablePhotoFill && !frame.marker) {
+        if (proportionalPhotoFill && !frame.marker) {
             frame.box = kkkVisiblePhotoMaskBox(doc, stack.base);
             frame.source = "original-mask-visible-bounds:" + item;
         }
@@ -1842,10 +1842,10 @@ function kkkInsertFramedPortrait(doc, imagePath, item, placeBehindArtwork, fallb
         imported = doc.activeLayer;
 
         var before = _boundsPx(imported);
-        var placement = editablePhotoFill
+        var placement = proportionalPhotoFill
             ? kkkContainGeometry(before.w, before.h, frame.box)
             : kkkCoverGeometry(before.w, before.h, frame.box, 0.5, 0.5);
-        if (editablePhotoFill) {
+        if (proportionalPhotoFill) {
             var coverFill = imported.duplicate(group, ElementPlacement.INSIDE);
             coverFill.move(brush, ElementPlacement.PLACEBEFORE);
             coverFill.name = "Gambar Pengantin - fixed edge fill (keep below adjustable photo)";
@@ -1902,11 +1902,11 @@ function kkkInsertFramedPortrait(doc, imagePath, item, placeBehindArtwork, fallb
             !kkkReviewCrop(doc, imported, frame.box, cropState, forceCropReview ? "Banting" : null)) {
             throw new Error("Operator melangkau crop item ini.");
         }
-        if (editablePhotoFill) {
+        if (item === "BANNER" || item === "BANTING") {
             kkkBringNamedLayerAbovePhoto(doc, item === "BANNER" ? "SIGNATURE BANNER" : "SIGNATURE BANTING", group);
         }
         LAST_PORTRAIT_IMAGE_LAYER = imported.name;
-        LAST_PORTRAIT_IMAGE_METHOD = (editablePhotoFill ? "contain-main + fixed-cover-fill + original-mask-bounds + " : "V33 uniform-cover + ") + "clipping-mask + original-brush + " +
+        LAST_PORTRAIT_IMAGE_METHOD = (proportionalPhotoFill ? "proportional-main + fixed-cover-fill + original-mask-bounds + " : "V33 uniform-cover + ") + "clipping-mask + original-brush + " +
             (placeBehindArtwork === false ? "above-artwork" : "behind-artwork") + " | " + frame.source;
         return {box: frame.box, source: frame.source};
     } catch (error) {
@@ -2335,10 +2335,25 @@ try{
             var forceBantingCropReview = usesPhotoPortraitTemplate && tplLower.indexOf("banting") >= 0;
 
             var portraitItem = portraitDesign ? kkkPortraitItem(tplName) : "";
+            var isKadBelakangPortraitItem = portraitDesign && tplLower.indexOf("kad belakang") >= 0;
             var templatePhotoItem = !portraitDesign ? kkkTemplatePhotoItem(tplName) : "";
             var templatePhotoApplied = false;
             var isThemeBannerBanting = currentPhotoItem !== "" && !isPhotoVariant && !containsPortraitWord(tema);
-            if (portraitItem !== "" && !isThemeBannerBanting) {
+            if (isKadBelakangPortraitItem && !isThemeBannerBanting) {
+                try {
+                    var kadBelakangPhotoApplied = replaceKadBelakangPortraitImageIfExists(doc, gambarPath);
+                    if (!kadBelakangPhotoApplied) {
+                        kadBelakangPhotoApplied = addKadBelakangPortraitTopRegion(doc, gambarPath);
+                    }
+                    if (!kadBelakangPhotoApplied) throw new Error("Tiada ruang gambar yang sesuai pada KAD BELAKANG.");
+                    logBoth(logPath, custLogPath, "[PORTRAIT KAD BELAKANG] " + tplName + " | " +
+                        LAST_PORTRAIT_IMAGE_METHOD + " | nisbah gambar dikekalkan.");
+                } catch (kadBelakangPortraitError) {
+                    portraitFailCount++;
+                    logBoth(logPath, custLogPath, "[PORTRAIT KAD BELAKANG FAIL - NO EXPORT] " + tplName + " | " + kadBelakangPortraitError);
+                    continue;
+                }
+            } else if (portraitItem !== "" && !isThemeBannerBanting) {
                 try {
                     var frameResult = kkkInsertFramedPortrait(
                         doc, gambarPath, portraitItem, undefined, undefined, forceBantingCropReview
@@ -2352,7 +2367,7 @@ try{
                     continue; // finally closes this template; never export placeholder customer photo.
                 }
             } else if (portraitDesign) {
-                logBoth(logPath, custLogPath, "[PORTRAIT V33] NO CUSTOMER PHOTO (outside seven-item scope): " + tplName);
+                logBoth(logPath, custLogPath, "[PORTRAIT V33] NO CUSTOMER PHOTO (non-photo item, including Wooden Hanger): " + tplName);
             } else if (templatePhotoItem !== "" && gambarPath !== "" && !isThemeBannerBanting) {
                 try {
                     var templatePhotoResult;
