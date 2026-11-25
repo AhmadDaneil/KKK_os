@@ -1769,3 +1769,38 @@ html[data-customer-theme="dark"] .wedding-card-back .card-social-logo {
         0 .06em 0 #fff,
         .06em .06em 0 #fff;
 }
+/* Desa banner text aligns with the welcome panel; uploaded customer-photo banners keep their own layout. */
+.live-product--banner[data-theme="desa"]:not(.has-live-customer-photo) .desa-product-name-overlay {
+    inset: 0;
+    display: block;
+    padding: 0;
+    overflow: hidden;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+}
+
+.live-product--banner[data-theme="desa"]:not(.has-live-customer-photo) .desa-product-custom-copy {
+    position: absolute;
+    inset: 0;
+}
+
+.live-product--banner[data-theme="desa"]:not(.has-live-customer-photo) .desa-product-copy-subtitle {
+    top: 25%;
+    right: 4%;
+    left: 49%;
+    text-align: center;
+}
+
+.live-product--banner[data-theme="desa"]:not(.has-live-customer-photo) .desa-product-copy-couple {
+    top: 47%;
+    right: 4%;
+    left: 49%;
+}
+
+.live-product--banner[data-theme="desa"]:not(.has-live-customer-photo) .desa-product-copy-date {
+    top: 71.5%;
+    right: 4%;
+    left: 49%;
+}
+
