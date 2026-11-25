@@ -289,7 +289,7 @@
                         </div>
                         <div class="desa-product-custom-copy" data-desa-product-custom-copy hidden>
                         <strong class="desa-product-copy-couple"><span data-preview-field="groom_display">Groom</span><b class="desa-couple-ampersand-spacer" aria-hidden="true">&amp;</b><span data-preview-field="bride_display">Bride</span></strong>
-                        <span class="desa-product-copy-date" data-preview-field="event_date">TARIKH MAJLIS</span>
+                        <span class="desa-product-copy-date"><span class="desa-sticker-day" data-preview-field="day_name_malay">HARI</span><span data-preview-field="event_date">TARIKH MAJLIS</span></span>
                     </div>
                     </div>
                     <div data-desa-product-placeholder>
