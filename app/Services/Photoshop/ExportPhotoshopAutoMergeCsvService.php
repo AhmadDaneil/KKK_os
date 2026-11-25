@@ -86,8 +86,8 @@ class ExportPhotoshopAutoMergeCsvService
                 $eventRow = $cardRowsBySide[$order->first_event_side] ?? $firstCardRow;
                 $mockupRow = array_fill_keys($headers, '');
                 $mockupRow['noinvoice'] = mb_strtoupper($order->order_id, 'UTF-8');
-                $mockupRow['tema'] = PhotoshopCekHantaranContractV2::MOCKUP_THEME;
-                $mockupRow['designcode'] = PhotoshopCekHantaranContractV2::MOCKUP_DESIGN_CODE;
+                $mockupRow['tema_ch'] = PhotoshopCekHantaranContractV2::MOCKUP_THEME;
+                $mockupRow['designcode_ch'] = PhotoshopCekHantaranContractV2::MOCKUP_DESIGN_CODE;
                 $mockupRow['majlis'] = PhotoshopCekHantaranContractV2::MOCKUP_SIDE;
                 $mockupRow['namapengantinlelaki'] = $firstCardRow['namapengantinlelaki'] ?? '';
                 $mockupRow['namapengantinperempuan'] = $firstCardRow['namapengantinperempuan'] ?? '';
