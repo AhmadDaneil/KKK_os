@@ -92,7 +92,7 @@ class AdminInvoiceController extends Controller
             ->get(['id', 'name']);
 
         return view('admin.invoices.index', [
-            'invoices' => $invoicesQuery->orderByDesc('issued_at')->paginate(25)->withQueryString(),
+            'invoices' => $invoicesQuery->orderByDesc('issued_at')->paginate(20)->withQueryString(),
             'years' => $years,
             'staffOptions' => $staffOptions,
             'filters' => [
