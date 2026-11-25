@@ -18,6 +18,7 @@
     ];
     $workstreamLabel = $workstreamLabels[$workstream] ?? null;
     $isDesignerStaff = auth()->user()->hasStaffRole(\App\Models\User::ROLE_DESIGNER);
+    $isDesignerQueue = ! $isAdminPortal && $isDesignerStaff && $workstream === 'design';
     $isProductionStaff = auth()->user()->hasStaffRole(\App\Models\User::ROLE_PRODUCTION);
     $showWorkDuration = $isDesignerStaff || $isProductionStaff;
     $attentionLabels = [
@@ -120,6 +121,10 @@
                 <div class="staff-alert staff-alert-error">{{ $errors->first('order_delete') }}</div>
             @endif
 
+            @if ($errors->has('photoshop'))
+                <div class="staff-alert staff-alert-error">{{ $errors->first('photoshop') }}</div>
+            @endif
+
             <div class="staff-page-header">
                 <div>
                     <a
@@ -140,8 +145,26 @@
                     </p>
                 </div>
 
-                <div id="staff-order-count" class="staff-page-count" data-live-search-count>
-                    {{ $orders->total() }} orders
+                <div class="staff-page-header-actions">
+                    <div id="staff-order-count" class="staff-page-count" data-live-search-count>
+                        {{ $orders->total() }} orders
+                    </div>
+
+                    @if ($isDesignerQueue)
+                        <form
+                            method="POST"
+                            action="{{ route('staff.orders.photoshop.batch-csv') }}"
+                            data-current-page-context
+                        >
+                            @csrf
+                            @foreach (['workstream', 'search', 'status', 'attention', 'page'] as $parameter)
+                                <input type="hidden" name="{{ $parameter }}" value="{{ request($parameter) }}">
+                            @endforeach
+                            <button class="staff-button staff-button-primary" type="submit">
+                                Download CSV For 10 Customer
+                            </button>
+                        </form>
+                    @endif
                 </div>
             </div>
 
