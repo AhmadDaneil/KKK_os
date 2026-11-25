@@ -2335,25 +2335,10 @@ try{
             var forceBantingCropReview = usesPhotoPortraitTemplate && tplLower.indexOf("banting") >= 0;
 
             var portraitItem = portraitDesign ? kkkPortraitItem(tplName) : "";
-            var isKadBelakangPortraitItem = portraitDesign && tplLower.indexOf("kad belakang") >= 0;
             var templatePhotoItem = !portraitDesign ? kkkTemplatePhotoItem(tplName) : "";
             var templatePhotoApplied = false;
             var isThemeBannerBanting = currentPhotoItem !== "" && !isPhotoVariant && !containsPortraitWord(tema);
-            if (isKadBelakangPortraitItem && !isThemeBannerBanting) {
-                try {
-                    var kadBelakangPhotoApplied = replaceKadBelakangPortraitImageIfExists(doc, gambarPath);
-                    if (!kadBelakangPhotoApplied) {
-                        kadBelakangPhotoApplied = addKadBelakangPortraitTopRegion(doc, gambarPath);
-                    }
-                    if (!kadBelakangPhotoApplied) throw new Error("Tiada ruang gambar yang sesuai pada KAD BELAKANG.");
-                    logBoth(logPath, custLogPath, "[PORTRAIT KAD BELAKANG] " + tplName + " | " +
-                        LAST_PORTRAIT_IMAGE_METHOD + " | nisbah gambar dikekalkan.");
-                } catch (kadBelakangPortraitError) {
-                    portraitFailCount++;
-                    logBoth(logPath, custLogPath, "[PORTRAIT KAD BELAKANG FAIL - NO EXPORT] " + tplName + " | " + kadBelakangPortraitError);
-                    continue;
-                }
-            } else if (portraitItem !== "" && !isThemeBannerBanting) {
+            if (portraitItem !== "" && !isThemeBannerBanting) {
                 try {
                     var frameResult = kkkInsertFramedPortrait(
                         doc, gambarPath, portraitItem, undefined, undefined, forceBantingCropReview
