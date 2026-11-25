@@ -1578,6 +1578,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
         const artworkThemes = new Set(['akikah', 'arch', 'cartoon', 'desa', 'garden', 'islamic', 'minimalist', 'nostalgia', 'portrait', 'rusty', 'songket']);
         const artworkBase = @json(asset('images/designs'));
+        const artworkAssetVersion = @json((string) filemtime(public_path('css/customer-preview-layout.css')));
         const artworkDesignCodes = JSON.parse(form.dataset.designCodeOptions || '{}');
         const unavailableArtwork = {
             'CKS-218': ['card-back'],
@@ -1586,21 +1587,7 @@ document.addEventListener('DOMContentLoaded', function () {
         function syncArtworkImage(image, source, label) {
             const product = image.matches('[data-desa-product-artwork]') ? image.parentElement : null;
             if (product && (product.classList.contains('live-product--banner') || product.classList.contains('live-product--banting'))) {
-                let signature = product.querySelector('.live-product-signature-overlay');
-                if (!signature) {
-                    signature = document.createElement('img');
-                    signature.className = 'live-product-signature-overlay';
-                    signature.alt = '';
-                    signature.setAttribute('aria-hidden', 'true');
-                    signature.draggable = false;
-                    product.appendChild(signature);
-                }
-                signature.hidden = !source;
-                if (source) {
-                    signature.src = source;
-                } else {
-                    signature.removeAttribute('src');
-                }
+                product.querySelector('.live-product-signature-overlay')?.remove();
             }
 
             image.hidden = !source;
@@ -1655,7 +1642,8 @@ document.addEventListener('DOMContentLoaded', function () {
                 ornaments.forEach(function (ornament) {
                     ornament.hidden = hasArtwork;
                 });
-                syncArtworkImage(artwork, hasArtwork ? assetBase + 'card-front.webp' : '', normalizedCode + ' ' + themeName + ' card front');
+                const artworkVersion = theme === 'minimalist' ? '?v=' + artworkAssetVersion : '';
+                syncArtworkImage(artwork, hasArtwork ? assetBase + 'card-front.webp' + artworkVersion : '', normalizedCode + ' ' + themeName + ' card front');
                 syncArtworkPhotoMask(front, hasArtwork && theme === 'portrait' ? assetBase + 'card-front-photo-mask.webp' : '');
             }
 
@@ -1672,7 +1660,8 @@ document.addEventListener('DOMContentLoaded', function () {
                 customNameCopy.hidden = false;
                 back.toggleAttribute('data-design-artwork', hasBackArtwork);
                 back.toggleAttribute('data-catalog-artwork', hasBackArtwork && isCatalogArtwork);
-                syncArtworkImage(artwork, hasBackArtwork ? assetBase + 'card-back.webp' : '', normalizedCode + ' ' + themeName + ' card back');
+                const artworkVersion = theme === 'minimalist' ? '?v=' + artworkAssetVersion : '';
+                syncArtworkImage(artwork, hasBackArtwork ? assetBase + 'card-back.webp' + artworkVersion : '', normalizedCode + ' ' + themeName + ' card back');
             }
 
             scope.querySelectorAll('[data-desa-product]').forEach(function (product) {
@@ -1702,9 +1691,9 @@ document.addEventListener('DOMContentLoaded', function () {
                 genericNameCopy.hidden = shouldShowArtwork;
                 productCustomNameCopy.hidden = !shouldShowArtwork;
                 placeholder.hidden = shouldShowArtwork || isUnavailable;
-                const artworkVersion = normalizedCode === 'CKI-814' && type === 'banner'
-                    ? '?v=4ec40cdb53e9a385'
-                    : '';
+                const artworkVersion = theme === 'minimalist'
+                    ? '?v=' + artworkAssetVersion
+                    : (normalizedCode === 'CKI-814' && type === 'banner' ? '?v=4ec40cdb53e9a385' : '');
                 const artworkSource = shouldShowArtwork ? assetBase + type + '.webp' + artworkVersion : '';
                 product.dataset.themeArtworkSrc = artworkSource;
                 syncArtworkImage(artwork, artworkSource, normalizedCode + ' ' + themeName + ' ' + type.replaceAll('-', ' ') + ' design');
@@ -2634,14 +2623,20 @@ document.addEventListener('DOMContentLoaded', function () {
                         } else {
                             artwork.removeAttribute('src');
                         }
-                        const signature = product.querySelector('.live-product-signature-overlay');
-                        if (signature) {
-                            signature.hidden = !artworkSource;
-                            if (artworkSource) {
-                                signature.src = artworkSource;
-                            } else {
-                                signature.removeAttribute('src');
+                        let signature = product.querySelector('.live-product-signature-overlay');
+                        if (showProductPhoto && artworkSource) {
+                            if (!signature) {
+                                signature = document.createElement('img');
+                                signature.className = 'live-product-signature-overlay';
+                                signature.alt = '';
+                                signature.setAttribute('aria-hidden', 'true');
+                                signature.draggable = false;
+                                product.appendChild(signature);
                             }
+                            signature.src = artworkSource;
+                            signature.hidden = false;
+                        } else {
+                            signature?.remove();
                         }
                         if (showProductPhoto) {
                             product.style.setProperty('--preview-photo-mask', 'url("' + photoBase + item + '-photo-mask.webp")');

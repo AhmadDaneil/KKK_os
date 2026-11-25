@@ -8187,6 +8187,13 @@
 :is(.live-product, .wedding-card-front)[data-design-code="CKI-824"][data-preview-artwork-slot="sticker"]:not(.has-live-customer-photo) { --islamic-groom-x: 36.299435%; --islamic-groom-y: 35.205428%; --islamic-groom-width: 40.125835%; --islamic-groom-height: 12.004964; --islamic-bride-x: 36.299435%; --islamic-bride-y: 61.016949%; --islamic-bride-width: 49.435028%; --islamic-bride-height: 11.794350; }
 
 
+/* Slightly enlarge names on the Islamic front card shown in CKI-801. */
+.wedding-card-front:is([data-design-code="CKI-801"], [data-design-code="CKI-001"])[data-preview-artwork-slot="card-front"]:not(.has-live-customer-photo) {
+    --islamic-groom-height: 8.928670;
+    --islamic-bride-height: 8.824444;
+}
+
+
 /* CKI-001 (stored as CKI-801): slightly larger front names within the available ampersand/calendar gap. */
 .wedding-card-front[data-design-artwork][data-design-code="CKI-801"][data-preview-artwork-slot="card-front"]:not(.has-live-customer-photo) {
     --islamic-groom-height: 9.128783;
@@ -8699,7 +8706,7 @@
 }
 
 :is(.wedding-card-front, .live-product)[data-design-artwork][data-design-code^="CKM-"] :is(.desa-card-custom-copy, .desa-product-custom-copy) {
-    color: #e7c4b1;
+    color: var(--preview-copy-ink, #e7c4b1);
 }
 
 :is(.wedding-card-front, .live-product)[data-design-artwork]:is([data-design-code^="CKR-"], [data-design-code^="CKS-"], [data-design-code^="CKM-"]) :is(.desa-card-custom-copy, .desa-product-custom-copy) [data-preview-field] {
@@ -8912,6 +8919,16 @@
 /* Keep the source headings, footer and ampersand; replace only the variable fields. */
 .live-product--banner[data-preview-artwork-slot="banner"][data-design-code^="CKM-"] { --preview-title-display: none; --preview-quote-display: none; }
 
+/* The Minimalist master files already print the headings and taglines. */
+[data-design-code^="CKM-"][data-preview-artwork-slot="card-front"] { --preview-title-display: none; --preview-kicker-display: none; --preview-quote-display: none; }
+[data-design-code^="CKM-"][data-preview-artwork-slot="banner"] { --preview-kicker-display: none; }
+[data-design-code^="CKM-"][data-preview-artwork-slot="bunting"],
+[data-design-code^="CKM-"][data-preview-artwork-slot^="arrow-"] { --preview-kicker-display: none; --preview-title-display: none; --preview-quote-display: none; }
+
+:is(.wedding-card-front, .live-product)[data-design-artwork][data-design-code^="CKM-"]:not(.has-customer-photo):not(.has-live-customer-photo) :is(.desa-card-custom-copy, .desa-product-custom-copy) :is(.desa-card-custom-couple, .desa-card-custom-date, .desa-product-copy-couple, .desa-product-copy-date) {
+    color: var(--preview-copy-ink, #e7c4b1) !important;
+}
+
 /* CKM-001 headings are measured from its master and shared by this template family. */
 [data-design-code^="CKM-"][data-preview-artwork-slot="card-front"] { --preview-title-x: 49.458333%; --preview-title-y: 14.527778%; --preview-title-width: 40%; }
 [data-design-code^="CKM-"][data-preview-artwork-slot="bunting"] { --preview-kicker-x: 50.791667%; --preview-kicker-y: 13.020833%; --preview-kicker-width: 40%; }
@@ -8978,3 +8995,179 @@
     --preview-bunting-couple-safe-y: var(--preview-couple-y);
     --preview-bunting-date-safe-y: var(--preview-date-y);
 }
+
+/* Variable text ink sampled from each Minimalist master PSD. */
+:is(.wedding-card-front, .live-product)[data-design-artwork][data-design-code="CKM-001"][data-preview-artwork-slot="card-front"]:not(.has-customer-photo):not(.has-live-customer-photo) { --preview-copy-ink: #d1b79f; }
+:is(.wedding-card-front, .live-product)[data-design-artwork][data-design-code="CKM-001"][data-preview-artwork-slot="banner"]:not(.has-customer-photo):not(.has-live-customer-photo) { --preview-copy-ink: #d1b69e; }
+:is(.wedding-card-front, .live-product)[data-design-artwork][data-design-code="CKM-001"][data-preview-artwork-slot="bunting"]:not(.has-customer-photo):not(.has-live-customer-photo) { --preview-copy-ink: #d1b79f; }
+:is(.wedding-card-front, .live-product)[data-design-artwork][data-design-code="CKM-001"][data-preview-artwork-slot="arrow-left"]:not(.has-customer-photo):not(.has-live-customer-photo) { --preview-copy-ink: #d1b79f; }
+:is(.wedding-card-front, .live-product)[data-design-artwork][data-design-code="CKM-001"][data-preview-artwork-slot="arrow-right"]:not(.has-customer-photo):not(.has-live-customer-photo) { --preview-copy-ink: #d1b79f; }
+:is(.wedding-card-front, .live-product)[data-design-artwork][data-design-code="CKM-001"][data-preview-artwork-slot="sticker"]:not(.has-customer-photo):not(.has-live-customer-photo) { --preview-copy-ink: #d1b79f; }
+:is(.wedding-card-front, .live-product)[data-design-artwork][data-design-code="CKM-001"][data-preview-artwork-slot="wooden-hanger"]:not(.has-customer-photo):not(.has-live-customer-photo) { --preview-copy-ink: #221e1f; }
+:is(.wedding-card-front, .live-product)[data-design-artwork][data-design-code="CKM-002"][data-preview-artwork-slot="card-front"]:not(.has-customer-photo):not(.has-live-customer-photo) { --preview-copy-ink: #3a1f0f; }
+:is(.wedding-card-front, .live-product)[data-design-artwork][data-design-code="CKM-002"][data-preview-artwork-slot="banner"]:not(.has-customer-photo):not(.has-live-customer-photo) { --preview-copy-ink: #3a1f0f; }
+:is(.wedding-card-front, .live-product)[data-design-artwork][data-design-code="CKM-002"][data-preview-artwork-slot="bunting"]:not(.has-customer-photo):not(.has-live-customer-photo) { --preview-copy-ink: #3a1f0f; }
+:is(.wedding-card-front, .live-product)[data-design-artwork][data-design-code="CKM-002"][data-preview-artwork-slot="arrow-left"]:not(.has-customer-photo):not(.has-live-customer-photo) { --preview-copy-ink: #3a1f0f; }
+:is(.wedding-card-front, .live-product)[data-design-artwork][data-design-code="CKM-002"][data-preview-artwork-slot="arrow-right"]:not(.has-customer-photo):not(.has-live-customer-photo) { --preview-copy-ink: #3a1f0f; }
+:is(.wedding-card-front, .live-product)[data-design-artwork][data-design-code="CKM-002"][data-preview-artwork-slot="sticker"]:not(.has-customer-photo):not(.has-live-customer-photo) { --preview-copy-ink: #3a1f0f; }
+:is(.wedding-card-front, .live-product)[data-design-artwork][data-design-code="CKM-002"][data-preview-artwork-slot="wooden-hanger"]:not(.has-customer-photo):not(.has-live-customer-photo) { --preview-copy-ink: #221e1f; }
+:is(.wedding-card-front, .live-product)[data-design-artwork][data-design-code="CKM-003"][data-preview-artwork-slot="card-front"]:not(.has-customer-photo):not(.has-live-customer-photo) { --preview-copy-ink: #3a1f0f; }
+:is(.wedding-card-front, .live-product)[data-design-artwork][data-design-code="CKM-003"][data-preview-artwork-slot="banner"]:not(.has-customer-photo):not(.has-live-customer-photo) { --preview-copy-ink: #3a1f0f; }
+:is(.wedding-card-front, .live-product)[data-design-artwork][data-design-code="CKM-003"][data-preview-artwork-slot="bunting"]:not(.has-customer-photo):not(.has-live-customer-photo) { --preview-copy-ink: #3a1f0f; }
+:is(.wedding-card-front, .live-product)[data-design-artwork][data-design-code="CKM-003"][data-preview-artwork-slot="arrow-left"]:not(.has-customer-photo):not(.has-live-customer-photo) { --preview-copy-ink: #3a1f0f; }
+:is(.wedding-card-front, .live-product)[data-design-artwork][data-design-code="CKM-003"][data-preview-artwork-slot="arrow-right"]:not(.has-customer-photo):not(.has-live-customer-photo) { --preview-copy-ink: #3a1f0f; }
+:is(.wedding-card-front, .live-product)[data-design-artwork][data-design-code="CKM-003"][data-preview-artwork-slot="sticker"]:not(.has-customer-photo):not(.has-live-customer-photo) { --preview-copy-ink: #3a1f0f; }
+:is(.wedding-card-front, .live-product)[data-design-artwork][data-design-code="CKM-003"][data-preview-artwork-slot="wooden-hanger"]:not(.has-customer-photo):not(.has-live-customer-photo) { --preview-copy-ink: #221e1f; }
+:is(.wedding-card-front, .live-product)[data-design-artwork][data-design-code="CKM-004"][data-preview-artwork-slot="card-front"]:not(.has-customer-photo):not(.has-live-customer-photo) { --preview-copy-ink: #3a1f0f; }
+:is(.wedding-card-front, .live-product)[data-design-artwork][data-design-code="CKM-004"][data-preview-artwork-slot="banner"]:not(.has-customer-photo):not(.has-live-customer-photo) { --preview-copy-ink: #3a1f0f; }
+:is(.wedding-card-front, .live-product)[data-design-artwork][data-design-code="CKM-004"][data-preview-artwork-slot="bunting"]:not(.has-customer-photo):not(.has-live-customer-photo) { --preview-copy-ink: #3a1f0f; }
+:is(.wedding-card-front, .live-product)[data-design-artwork][data-design-code="CKM-004"][data-preview-artwork-slot="arrow-left"]:not(.has-customer-photo):not(.has-live-customer-photo) { --preview-copy-ink: #3a1f0f; }
+:is(.wedding-card-front, .live-product)[data-design-artwork][data-design-code="CKM-004"][data-preview-artwork-slot="arrow-right"]:not(.has-customer-photo):not(.has-live-customer-photo) { --preview-copy-ink: #3a1f0f; }
+:is(.wedding-card-front, .live-product)[data-design-artwork][data-design-code="CKM-004"][data-preview-artwork-slot="sticker"]:not(.has-customer-photo):not(.has-live-customer-photo) { --preview-copy-ink: #3a1f0f; }
+:is(.wedding-card-front, .live-product)[data-design-artwork][data-design-code="CKM-004"][data-preview-artwork-slot="wooden-hanger"]:not(.has-customer-photo):not(.has-live-customer-photo) { --preview-copy-ink: #221e1f; }
+:is(.wedding-card-front, .live-product)[data-design-artwork][data-design-code="CKM-005"][data-preview-artwork-slot="card-front"]:not(.has-customer-photo):not(.has-live-customer-photo) { --preview-copy-ink: #3a1f0f; }
+:is(.wedding-card-front, .live-product)[data-design-artwork][data-design-code="CKM-005"][data-preview-artwork-slot="banner"]:not(.has-customer-photo):not(.has-live-customer-photo) { --preview-copy-ink: #3a1f0f; }
+:is(.wedding-card-front, .live-product)[data-design-artwork][data-design-code="CKM-005"][data-preview-artwork-slot="bunting"]:not(.has-customer-photo):not(.has-live-customer-photo) { --preview-copy-ink: #3a1f0f; }
+:is(.wedding-card-front, .live-product)[data-design-artwork][data-design-code="CKM-005"][data-preview-artwork-slot="arrow-left"]:not(.has-customer-photo):not(.has-live-customer-photo) { --preview-copy-ink: #3a1f0f; }
+:is(.wedding-card-front, .live-product)[data-design-artwork][data-design-code="CKM-005"][data-preview-artwork-slot="arrow-right"]:not(.has-customer-photo):not(.has-live-customer-photo) { --preview-copy-ink: #3a1f0f; }
+:is(.wedding-card-front, .live-product)[data-design-artwork][data-design-code="CKM-005"][data-preview-artwork-slot="sticker"]:not(.has-customer-photo):not(.has-live-customer-photo) { --preview-copy-ink: #3a1f0f; }
+:is(.wedding-card-front, .live-product)[data-design-artwork][data-design-code="CKM-005"][data-preview-artwork-slot="wooden-hanger"]:not(.has-customer-photo):not(.has-live-customer-photo) { --preview-copy-ink: #221e1f; }
+:is(.wedding-card-front, .live-product)[data-design-artwork][data-design-code="CKM-006"][data-preview-artwork-slot="card-front"]:not(.has-customer-photo):not(.has-live-customer-photo) { --preview-copy-ink: #3a1f0f; }
+:is(.wedding-card-front, .live-product)[data-design-artwork][data-design-code="CKM-006"][data-preview-artwork-slot="banner"]:not(.has-customer-photo):not(.has-live-customer-photo) { --preview-copy-ink: #3a1f0f; }
+:is(.wedding-card-front, .live-product)[data-design-artwork][data-design-code="CKM-006"][data-preview-artwork-slot="bunting"]:not(.has-customer-photo):not(.has-live-customer-photo) { --preview-copy-ink: #3a1f0f; }
+:is(.wedding-card-front, .live-product)[data-design-artwork][data-design-code="CKM-006"][data-preview-artwork-slot="arrow-left"]:not(.has-customer-photo):not(.has-live-customer-photo) { --preview-copy-ink: #3a1f0f; }
+:is(.wedding-card-front, .live-product)[data-design-artwork][data-design-code="CKM-006"][data-preview-artwork-slot="arrow-right"]:not(.has-customer-photo):not(.has-live-customer-photo) { --preview-copy-ink: #3a1f0f; }
+:is(.wedding-card-front, .live-product)[data-design-artwork][data-design-code="CKM-006"][data-preview-artwork-slot="sticker"]:not(.has-customer-photo):not(.has-live-customer-photo) { --preview-copy-ink: #3a1f0f; }
+:is(.wedding-card-front, .live-product)[data-design-artwork][data-design-code="CKM-006"][data-preview-artwork-slot="wooden-hanger"]:not(.has-customer-photo):not(.has-live-customer-photo) { --preview-copy-ink: #221e1f; }
+:is(.wedding-card-front, .live-product)[data-design-artwork][data-design-code="CKM-007"][data-preview-artwork-slot="card-front"]:not(.has-customer-photo):not(.has-live-customer-photo) { --preview-copy-ink: #3a1f0f; }
+:is(.wedding-card-front, .live-product)[data-design-artwork][data-design-code="CKM-007"][data-preview-artwork-slot="banner"]:not(.has-customer-photo):not(.has-live-customer-photo) { --preview-copy-ink: #3a1f0f; }
+:is(.wedding-card-front, .live-product)[data-design-artwork][data-design-code="CKM-007"][data-preview-artwork-slot="bunting"]:not(.has-customer-photo):not(.has-live-customer-photo) { --preview-copy-ink: #3a1f0f; }
+:is(.wedding-card-front, .live-product)[data-design-artwork][data-design-code="CKM-007"][data-preview-artwork-slot="arrow-left"]:not(.has-customer-photo):not(.has-live-customer-photo) { --preview-copy-ink: #3a1f0f; }
+:is(.wedding-card-front, .live-product)[data-design-artwork][data-design-code="CKM-007"][data-preview-artwork-slot="arrow-right"]:not(.has-customer-photo):not(.has-live-customer-photo) { --preview-copy-ink: #3a1f0f; }
+:is(.wedding-card-front, .live-product)[data-design-artwork][data-design-code="CKM-007"][data-preview-artwork-slot="sticker"]:not(.has-customer-photo):not(.has-live-customer-photo) { --preview-copy-ink: #3a1f0f; }
+:is(.wedding-card-front, .live-product)[data-design-artwork][data-design-code="CKM-007"][data-preview-artwork-slot="wooden-hanger"]:not(.has-customer-photo):not(.has-live-customer-photo) { --preview-copy-ink: #221e1f; }
+:is(.wedding-card-front, .live-product)[data-design-artwork][data-design-code="CKM-008"][data-preview-artwork-slot="card-front"]:not(.has-customer-photo):not(.has-live-customer-photo) { --preview-copy-ink: #3b200f; }
+:is(.wedding-card-front, .live-product)[data-design-artwork][data-design-code="CKM-008"][data-preview-artwork-slot="banner"]:not(.has-customer-photo):not(.has-live-customer-photo) { --preview-copy-ink: #3b200f; }
+:is(.wedding-card-front, .live-product)[data-design-artwork][data-design-code="CKM-008"][data-preview-artwork-slot="bunting"]:not(.has-customer-photo):not(.has-live-customer-photo) { --preview-copy-ink: #3b200f; }
+:is(.wedding-card-front, .live-product)[data-design-artwork][data-design-code="CKM-008"][data-preview-artwork-slot="arrow-left"]:not(.has-customer-photo):not(.has-live-customer-photo) { --preview-copy-ink: #3b200f; }
+:is(.wedding-card-front, .live-product)[data-design-artwork][data-design-code="CKM-008"][data-preview-artwork-slot="arrow-right"]:not(.has-customer-photo):not(.has-live-customer-photo) { --preview-copy-ink: #3b200f; }
+:is(.wedding-card-front, .live-product)[data-design-artwork][data-design-code="CKM-008"][data-preview-artwork-slot="sticker"]:not(.has-customer-photo):not(.has-live-customer-photo) { --preview-copy-ink: #3a1f0f; }
+:is(.wedding-card-front, .live-product)[data-design-artwork][data-design-code="CKM-008"][data-preview-artwork-slot="wooden-hanger"]:not(.has-customer-photo):not(.has-live-customer-photo) { --preview-copy-ink: #221e1f; }
+:is(.wedding-card-front, .live-product)[data-design-artwork][data-design-code="CKM-009"][data-preview-artwork-slot="card-front"]:not(.has-customer-photo):not(.has-live-customer-photo) { --preview-copy-ink: #3a1f0f; }
+:is(.wedding-card-front, .live-product)[data-design-artwork][data-design-code="CKM-009"][data-preview-artwork-slot="banner"]:not(.has-customer-photo):not(.has-live-customer-photo) { --preview-copy-ink: #3a1f0f; }
+:is(.wedding-card-front, .live-product)[data-design-artwork][data-design-code="CKM-009"][data-preview-artwork-slot="bunting"]:not(.has-customer-photo):not(.has-live-customer-photo) { --preview-copy-ink: #3a1f0f; }
+:is(.wedding-card-front, .live-product)[data-design-artwork][data-design-code="CKM-009"][data-preview-artwork-slot="arrow-left"]:not(.has-customer-photo):not(.has-live-customer-photo) { --preview-copy-ink: #3a1f0f; }
+:is(.wedding-card-front, .live-product)[data-design-artwork][data-design-code="CKM-009"][data-preview-artwork-slot="arrow-right"]:not(.has-customer-photo):not(.has-live-customer-photo) { --preview-copy-ink: #3a1f0f; }
+:is(.wedding-card-front, .live-product)[data-design-artwork][data-design-code="CKM-009"][data-preview-artwork-slot="sticker"]:not(.has-customer-photo):not(.has-live-customer-photo) { --preview-copy-ink: #3a1f0f; }
+:is(.wedding-card-front, .live-product)[data-design-artwork][data-design-code="CKM-009"][data-preview-artwork-slot="wooden-hanger"]:not(.has-customer-photo):not(.has-live-customer-photo) { --preview-copy-ink: #221e1f; }
+:is(.wedding-card-front, .live-product)[data-design-artwork][data-design-code="CKM-010"][data-preview-artwork-slot="card-front"]:not(.has-customer-photo):not(.has-live-customer-photo) { --preview-copy-ink: #3b200f; }
+:is(.wedding-card-front, .live-product)[data-design-artwork][data-design-code="CKM-010"][data-preview-artwork-slot="banner"]:not(.has-customer-photo):not(.has-live-customer-photo) { --preview-copy-ink: #3a1f0f; }
+:is(.wedding-card-front, .live-product)[data-design-artwork][data-design-code="CKM-010"][data-preview-artwork-slot="bunting"]:not(.has-customer-photo):not(.has-live-customer-photo) { --preview-copy-ink: #3a1f0f; }
+:is(.wedding-card-front, .live-product)[data-design-artwork][data-design-code="CKM-010"][data-preview-artwork-slot="arrow-left"]:not(.has-customer-photo):not(.has-live-customer-photo) { --preview-copy-ink: #3a1f0f; }
+:is(.wedding-card-front, .live-product)[data-design-artwork][data-design-code="CKM-010"][data-preview-artwork-slot="arrow-right"]:not(.has-customer-photo):not(.has-live-customer-photo) { --preview-copy-ink: #3a1f0f; }
+:is(.wedding-card-front, .live-product)[data-design-artwork][data-design-code="CKM-010"][data-preview-artwork-slot="sticker"]:not(.has-customer-photo):not(.has-live-customer-photo) { --preview-copy-ink: #3a1f0f; }
+:is(.wedding-card-front, .live-product)[data-design-artwork][data-design-code="CKM-010"][data-preview-artwork-slot="wooden-hanger"]:not(.has-customer-photo):not(.has-live-customer-photo) { --preview-copy-ink: #221e1f; }
+:is(.wedding-card-front, .live-product)[data-design-artwork][data-design-code="CKM-011"][data-preview-artwork-slot="card-front"]:not(.has-customer-photo):not(.has-live-customer-photo) { --preview-copy-ink: #392013; }
+:is(.wedding-card-front, .live-product)[data-design-artwork][data-design-code="CKM-011"][data-preview-artwork-slot="banner"]:not(.has-customer-photo):not(.has-live-customer-photo) { --preview-copy-ink: #382014; }
+:is(.wedding-card-front, .live-product)[data-design-artwork][data-design-code="CKM-011"][data-preview-artwork-slot="bunting"]:not(.has-customer-photo):not(.has-live-customer-photo) { --preview-copy-ink: #392013; }
+:is(.wedding-card-front, .live-product)[data-design-artwork][data-design-code="CKM-011"][data-preview-artwork-slot="arrow-left"]:not(.has-customer-photo):not(.has-live-customer-photo) { --preview-copy-ink: #392013; }
+:is(.wedding-card-front, .live-product)[data-design-artwork][data-design-code="CKM-011"][data-preview-artwork-slot="arrow-right"]:not(.has-customer-photo):not(.has-live-customer-photo) { --preview-copy-ink: #392013; }
+:is(.wedding-card-front, .live-product)[data-design-artwork][data-design-code="CKM-011"][data-preview-artwork-slot="sticker"]:not(.has-customer-photo):not(.has-live-customer-photo) { --preview-copy-ink: #392013; }
+:is(.wedding-card-front, .live-product)[data-design-artwork][data-design-code="CKM-011"][data-preview-artwork-slot="wooden-hanger"]:not(.has-customer-photo):not(.has-live-customer-photo) { --preview-copy-ink: #221e1f; }
+:is(.wedding-card-front, .live-product)[data-design-artwork][data-design-code="CKM-012"][data-preview-artwork-slot="card-front"]:not(.has-customer-photo):not(.has-live-customer-photo) { --preview-copy-ink: #3a1f0f; }
+:is(.wedding-card-front, .live-product)[data-design-artwork][data-design-code="CKM-012"][data-preview-artwork-slot="banner"]:not(.has-customer-photo):not(.has-live-customer-photo) { --preview-copy-ink: #fcfbfd; }
+:is(.wedding-card-front, .live-product)[data-design-artwork][data-design-code="CKM-012"][data-preview-artwork-slot="bunting"]:not(.has-customer-photo):not(.has-live-customer-photo) { --preview-copy-ink: #3a1f0f; }
+:is(.wedding-card-front, .live-product)[data-design-artwork][data-design-code="CKM-012"][data-preview-artwork-slot="arrow-left"]:not(.has-customer-photo):not(.has-live-customer-photo) { --preview-copy-ink: #fbfafc; }
+:is(.wedding-card-front, .live-product)[data-design-artwork][data-design-code="CKM-012"][data-preview-artwork-slot="arrow-right"]:not(.has-customer-photo):not(.has-live-customer-photo) { --preview-copy-ink: #fbfafc; }
+:is(.wedding-card-front, .live-product)[data-design-artwork][data-design-code="CKM-012"][data-preview-artwork-slot="sticker"]:not(.has-customer-photo):not(.has-live-customer-photo) { --preview-copy-ink: #3a1f0f; }
+:is(.wedding-card-front, .live-product)[data-design-artwork][data-design-code="CKM-012"][data-preview-artwork-slot="wooden-hanger"]:not(.has-customer-photo):not(.has-live-customer-photo) { --preview-copy-ink: #221e1f; }
+:is(.wedding-card-front, .live-product)[data-design-artwork][data-design-code="CKM-013"][data-preview-artwork-slot="card-front"]:not(.has-customer-photo):not(.has-live-customer-photo) { --preview-copy-ink: #f0dbc3; }
+:is(.wedding-card-front, .live-product)[data-design-artwork][data-design-code="CKM-013"][data-preview-artwork-slot="banner"]:not(.has-customer-photo):not(.has-live-customer-photo) { --preview-copy-ink: #f5efe8; }
+:is(.wedding-card-front, .live-product)[data-design-artwork][data-design-code="CKM-013"][data-preview-artwork-slot="bunting"]:not(.has-customer-photo):not(.has-live-customer-photo) { --preview-copy-ink: #d4bda4; }
+:is(.wedding-card-front, .live-product)[data-design-artwork][data-design-code="CKM-013"][data-preview-artwork-slot="arrow-left"]:not(.has-customer-photo):not(.has-live-customer-photo) { --preview-copy-ink: #f0dbc3; }
+:is(.wedding-card-front, .live-product)[data-design-artwork][data-design-code="CKM-013"][data-preview-artwork-slot="arrow-right"]:not(.has-customer-photo):not(.has-live-customer-photo) { --preview-copy-ink: #f0dbc3; }
+:is(.wedding-card-front, .live-product)[data-design-artwork][data-design-code="CKM-013"][data-preview-artwork-slot="sticker"]:not(.has-customer-photo):not(.has-live-customer-photo) { --preview-copy-ink: #f0dbc3; }
+:is(.wedding-card-front, .live-product)[data-design-artwork][data-design-code="CKM-013"][data-preview-artwork-slot="wooden-hanger"]:not(.has-customer-photo):not(.has-live-customer-photo) { --preview-copy-ink: #221e1f; }
+:is(.wedding-card-front, .live-product)[data-design-artwork][data-design-code="CKM-014"][data-preview-artwork-slot="card-front"]:not(.has-customer-photo):not(.has-live-customer-photo) { --preview-copy-ink: #191917; }
+:is(.wedding-card-front, .live-product)[data-design-artwork][data-design-code="CKM-014"][data-preview-artwork-slot="banner"]:not(.has-customer-photo):not(.has-live-customer-photo) { --preview-copy-ink: #191917; }
+:is(.wedding-card-front, .live-product)[data-design-artwork][data-design-code="CKM-014"][data-preview-artwork-slot="bunting"]:not(.has-customer-photo):not(.has-live-customer-photo) { --preview-copy-ink: #191917; }
+:is(.wedding-card-front, .live-product)[data-design-artwork][data-design-code="CKM-014"][data-preview-artwork-slot="arrow-left"]:not(.has-customer-photo):not(.has-live-customer-photo) { --preview-copy-ink: #191917; }
+:is(.wedding-card-front, .live-product)[data-design-artwork][data-design-code="CKM-014"][data-preview-artwork-slot="arrow-right"]:not(.has-customer-photo):not(.has-live-customer-photo) { --preview-copy-ink: #191917; }
+:is(.wedding-card-front, .live-product)[data-design-artwork][data-design-code="CKM-014"][data-preview-artwork-slot="sticker"]:not(.has-customer-photo):not(.has-live-customer-photo) { --preview-copy-ink: #191917; }
+:is(.wedding-card-front, .live-product)[data-design-artwork][data-design-code="CKM-014"][data-preview-artwork-slot="wooden-hanger"]:not(.has-customer-photo):not(.has-live-customer-photo) { --preview-copy-ink: #221e1f; }
+:is(.wedding-card-front, .live-product)[data-design-artwork][data-design-code="CKM-015"][data-preview-artwork-slot="card-front"]:not(.has-customer-photo):not(.has-live-customer-photo) { --preview-copy-ink: #f0dbc3; }
+:is(.wedding-card-front, .live-product)[data-design-artwork][data-design-code="CKM-015"][data-preview-artwork-slot="banner"]:not(.has-customer-photo):not(.has-live-customer-photo) { --preview-copy-ink: #f0dbc3; }
+:is(.wedding-card-front, .live-product)[data-design-artwork][data-design-code="CKM-015"][data-preview-artwork-slot="bunting"]:not(.has-customer-photo):not(.has-live-customer-photo) { --preview-copy-ink: #f0dbc3; }
+:is(.wedding-card-front, .live-product)[data-design-artwork][data-design-code="CKM-015"][data-preview-artwork-slot="arrow-left"]:not(.has-customer-photo):not(.has-live-customer-photo) { --preview-copy-ink: #f0dbc3; }
+:is(.wedding-card-front, .live-product)[data-design-artwork][data-design-code="CKM-015"][data-preview-artwork-slot="arrow-right"]:not(.has-customer-photo):not(.has-live-customer-photo) { --preview-copy-ink: #f0dbc3; }
+:is(.wedding-card-front, .live-product)[data-design-artwork][data-design-code="CKM-015"][data-preview-artwork-slot="sticker"]:not(.has-customer-photo):not(.has-live-customer-photo) { --preview-copy-ink: #f0dbc3; }
+:is(.wedding-card-front, .live-product)[data-design-artwork][data-design-code="CKM-015"][data-preview-artwork-slot="wooden-hanger"]:not(.has-customer-photo):not(.has-live-customer-photo) { --preview-copy-ink: #221e1f; }
+:is(.wedding-card-front, .live-product)[data-design-artwork][data-design-code="CKM-016"][data-preview-artwork-slot="card-front"]:not(.has-customer-photo):not(.has-live-customer-photo) { --preview-copy-ink: #3a1f0f; }
+:is(.wedding-card-front, .live-product)[data-design-artwork][data-design-code="CKM-016"][data-preview-artwork-slot="banner"]:not(.has-customer-photo):not(.has-live-customer-photo) { --preview-copy-ink: #3a1f0f; }
+:is(.wedding-card-front, .live-product)[data-design-artwork][data-design-code="CKM-016"][data-preview-artwork-slot="bunting"]:not(.has-customer-photo):not(.has-live-customer-photo) { --preview-copy-ink: #3a1f0f; }
+:is(.wedding-card-front, .live-product)[data-design-artwork][data-design-code="CKM-016"][data-preview-artwork-slot="arrow-left"]:not(.has-customer-photo):not(.has-live-customer-photo) { --preview-copy-ink: #3a1f0f; }
+:is(.wedding-card-front, .live-product)[data-design-artwork][data-design-code="CKM-016"][data-preview-artwork-slot="arrow-right"]:not(.has-customer-photo):not(.has-live-customer-photo) { --preview-copy-ink: #3a1f0f; }
+:is(.wedding-card-front, .live-product)[data-design-artwork][data-design-code="CKM-016"][data-preview-artwork-slot="sticker"]:not(.has-customer-photo):not(.has-live-customer-photo) { --preview-copy-ink: #3a1f0f; }
+:is(.wedding-card-front, .live-product)[data-design-artwork][data-design-code="CKM-016"][data-preview-artwork-slot="wooden-hanger"]:not(.has-customer-photo):not(.has-live-customer-photo) { --preview-copy-ink: #221e1f; }
+:is(.wedding-card-front, .live-product)[data-design-artwork][data-design-code="CKM-017"][data-preview-artwork-slot="card-front"]:not(.has-customer-photo):not(.has-live-customer-photo) { --preview-copy-ink: #3a1f0f; }
+:is(.wedding-card-front, .live-product)[data-design-artwork][data-design-code="CKM-017"][data-preview-artwork-slot="banner"]:not(.has-customer-photo):not(.has-live-customer-photo) { --preview-copy-ink: #3a1f0f; }
+:is(.wedding-card-front, .live-product)[data-design-artwork][data-design-code="CKM-017"][data-preview-artwork-slot="bunting"]:not(.has-customer-photo):not(.has-live-customer-photo) { --preview-copy-ink: #3a1f0f; }
+:is(.wedding-card-front, .live-product)[data-design-artwork][data-design-code="CKM-017"][data-preview-artwork-slot="arrow-left"]:not(.has-customer-photo):not(.has-live-customer-photo) { --preview-copy-ink: #3a1f0f; }
+:is(.wedding-card-front, .live-product)[data-design-artwork][data-design-code="CKM-017"][data-preview-artwork-slot="arrow-right"]:not(.has-customer-photo):not(.has-live-customer-photo) { --preview-copy-ink: #3a1f0f; }
+:is(.wedding-card-front, .live-product)[data-design-artwork][data-design-code="CKM-017"][data-preview-artwork-slot="sticker"]:not(.has-customer-photo):not(.has-live-customer-photo) { --preview-copy-ink: #3a1f0f; }
+:is(.wedding-card-front, .live-product)[data-design-artwork][data-design-code="CKM-017"][data-preview-artwork-slot="wooden-hanger"]:not(.has-customer-photo):not(.has-live-customer-photo) { --preview-copy-ink: #221e1f; }
+:is(.wedding-card-front, .live-product)[data-design-artwork][data-design-code="CKM-018"][data-preview-artwork-slot="card-front"]:not(.has-customer-photo):not(.has-live-customer-photo) { --preview-copy-ink: #3a1f0f; }
+:is(.wedding-card-front, .live-product)[data-design-artwork][data-design-code="CKM-018"][data-preview-artwork-slot="banner"]:not(.has-customer-photo):not(.has-live-customer-photo) { --preview-copy-ink: #3a1f0f; }
+:is(.wedding-card-front, .live-product)[data-design-artwork][data-design-code="CKM-018"][data-preview-artwork-slot="bunting"]:not(.has-customer-photo):not(.has-live-customer-photo) { --preview-copy-ink: #3a1f0f; }
+:is(.wedding-card-front, .live-product)[data-design-artwork][data-design-code="CKM-018"][data-preview-artwork-slot="arrow-left"]:not(.has-customer-photo):not(.has-live-customer-photo) { --preview-copy-ink: #3a1f0f; }
+:is(.wedding-card-front, .live-product)[data-design-artwork][data-design-code="CKM-018"][data-preview-artwork-slot="arrow-right"]:not(.has-customer-photo):not(.has-live-customer-photo) { --preview-copy-ink: #3a1f0f; }
+:is(.wedding-card-front, .live-product)[data-design-artwork][data-design-code="CKM-018"][data-preview-artwork-slot="sticker"]:not(.has-customer-photo):not(.has-live-customer-photo) { --preview-copy-ink: #3a1f0f; }
+:is(.wedding-card-front, .live-product)[data-design-artwork][data-design-code="CKM-018"][data-preview-artwork-slot="wooden-hanger"]:not(.has-customer-photo):not(.has-live-customer-photo) { --preview-copy-ink: #221e1f; }
+:is(.wedding-card-front, .live-product)[data-design-artwork][data-design-code="CKM-019"][data-preview-artwork-slot="card-front"]:not(.has-customer-photo):not(.has-live-customer-photo) { --preview-copy-ink: #3a1f0f; }
+:is(.wedding-card-front, .live-product)[data-design-artwork][data-design-code="CKM-019"][data-preview-artwork-slot="banner"]:not(.has-customer-photo):not(.has-live-customer-photo) { --preview-copy-ink: #3a1f0f; }
+:is(.wedding-card-front, .live-product)[data-design-artwork][data-design-code="CKM-019"][data-preview-artwork-slot="bunting"]:not(.has-customer-photo):not(.has-live-customer-photo) { --preview-copy-ink: #3a1f0f; }
+:is(.wedding-card-front, .live-product)[data-design-artwork][data-design-code="CKM-019"][data-preview-artwork-slot="arrow-left"]:not(.has-customer-photo):not(.has-live-customer-photo) { --preview-copy-ink: #3a1f0f; }
+:is(.wedding-card-front, .live-product)[data-design-artwork][data-design-code="CKM-019"][data-preview-artwork-slot="arrow-right"]:not(.has-customer-photo):not(.has-live-customer-photo) { --preview-copy-ink: #3a1f0f; }
+:is(.wedding-card-front, .live-product)[data-design-artwork][data-design-code="CKM-019"][data-preview-artwork-slot="sticker"]:not(.has-customer-photo):not(.has-live-customer-photo) { --preview-copy-ink: #3a1f0f; }
+:is(.wedding-card-front, .live-product)[data-design-artwork][data-design-code="CKM-019"][data-preview-artwork-slot="wooden-hanger"]:not(.has-customer-photo):not(.has-live-customer-photo) { --preview-copy-ink: #221e1f; }
+:is(.wedding-card-front, .live-product)[data-design-artwork][data-design-code="CKM-020"][data-preview-artwork-slot="card-front"]:not(.has-customer-photo):not(.has-live-customer-photo) { --preview-copy-ink: #3a1f0f; }
+:is(.wedding-card-front, .live-product)[data-design-artwork][data-design-code="CKM-020"][data-preview-artwork-slot="banner"]:not(.has-customer-photo):not(.has-live-customer-photo) { --preview-copy-ink: #3a1f0f; }
+:is(.wedding-card-front, .live-product)[data-design-artwork][data-design-code="CKM-020"][data-preview-artwork-slot="bunting"]:not(.has-customer-photo):not(.has-live-customer-photo) { --preview-copy-ink: #3a1f0f; }
+:is(.wedding-card-front, .live-product)[data-design-artwork][data-design-code="CKM-020"][data-preview-artwork-slot="arrow-left"]:not(.has-customer-photo):not(.has-live-customer-photo) { --preview-copy-ink: #3a1f0f; }
+:is(.wedding-card-front, .live-product)[data-design-artwork][data-design-code="CKM-020"][data-preview-artwork-slot="arrow-right"]:not(.has-customer-photo):not(.has-live-customer-photo) { --preview-copy-ink: #3a1f0f; }
+:is(.wedding-card-front, .live-product)[data-design-artwork][data-design-code="CKM-020"][data-preview-artwork-slot="sticker"]:not(.has-customer-photo):not(.has-live-customer-photo) { --preview-copy-ink: #3a1f0f; }
+:is(.wedding-card-front, .live-product)[data-design-artwork][data-design-code="CKM-020"][data-preview-artwork-slot="wooden-hanger"]:not(.has-customer-photo):not(.has-live-customer-photo) { --preview-copy-ink: #221e1f; }
+:is(.wedding-card-front, .live-product)[data-design-artwork][data-design-code="CKM-021"][data-preview-artwork-slot="card-front"]:not(.has-customer-photo):not(.has-live-customer-photo) { --preview-copy-ink: #3a200f; }
+:is(.wedding-card-front, .live-product)[data-design-artwork][data-design-code="CKM-021"][data-preview-artwork-slot="banner"]:not(.has-customer-photo):not(.has-live-customer-photo) { --preview-copy-ink: #3a1f0f; }
+:is(.wedding-card-front, .live-product)[data-design-artwork][data-design-code="CKM-021"][data-preview-artwork-slot="bunting"]:not(.has-customer-photo):not(.has-live-customer-photo) { --preview-copy-ink: #3a1f0f; }
+:is(.wedding-card-front, .live-product)[data-design-artwork][data-design-code="CKM-021"][data-preview-artwork-slot="arrow-left"]:not(.has-customer-photo):not(.has-live-customer-photo) { --preview-copy-ink: #3a1f0f; }
+:is(.wedding-card-front, .live-product)[data-design-artwork][data-design-code="CKM-021"][data-preview-artwork-slot="arrow-right"]:not(.has-customer-photo):not(.has-live-customer-photo) { --preview-copy-ink: #3a1f0f; }
+:is(.wedding-card-front, .live-product)[data-design-artwork][data-design-code="CKM-021"][data-preview-artwork-slot="sticker"]:not(.has-customer-photo):not(.has-live-customer-photo) { --preview-copy-ink: #3a1f0f; }
+:is(.wedding-card-front, .live-product)[data-design-artwork][data-design-code="CKM-021"][data-preview-artwork-slot="wooden-hanger"]:not(.has-customer-photo):not(.has-live-customer-photo) { --preview-copy-ink: #221e1f; }
+:is(.wedding-card-front, .live-product)[data-design-artwork][data-design-code="CKM-022"][data-preview-artwork-slot="card-front"]:not(.has-customer-photo):not(.has-live-customer-photo) { --preview-copy-ink: #3a1f0f; }
+:is(.wedding-card-front, .live-product)[data-design-artwork][data-design-code="CKM-022"][data-preview-artwork-slot="banner"]:not(.has-customer-photo):not(.has-live-customer-photo) { --preview-copy-ink: #3a1f0f; }
+:is(.wedding-card-front, .live-product)[data-design-artwork][data-design-code="CKM-022"][data-preview-artwork-slot="bunting"]:not(.has-customer-photo):not(.has-live-customer-photo) { --preview-copy-ink: #3a1f0f; }
+:is(.wedding-card-front, .live-product)[data-design-artwork][data-design-code="CKM-022"][data-preview-artwork-slot="arrow-left"]:not(.has-customer-photo):not(.has-live-customer-photo) { --preview-copy-ink: #3a1f0f; }
+:is(.wedding-card-front, .live-product)[data-design-artwork][data-design-code="CKM-022"][data-preview-artwork-slot="arrow-right"]:not(.has-customer-photo):not(.has-live-customer-photo) { --preview-copy-ink: #3a1f0f; }
+:is(.wedding-card-front, .live-product)[data-design-artwork][data-design-code="CKM-022"][data-preview-artwork-slot="sticker"]:not(.has-customer-photo):not(.has-live-customer-photo) { --preview-copy-ink: #3a1f0f; }
+:is(.wedding-card-front, .live-product)[data-design-artwork][data-design-code="CKM-022"][data-preview-artwork-slot="wooden-hanger"]:not(.has-customer-photo):not(.has-live-customer-photo) { --preview-copy-ink: #221e1f; }
+:is(.wedding-card-front, .live-product)[data-design-artwork][data-design-code="CKM-023"][data-preview-artwork-slot="card-front"]:not(.has-customer-photo):not(.has-live-customer-photo) { --preview-copy-ink: #3a200f; }
+:is(.wedding-card-front, .live-product)[data-design-artwork][data-design-code="CKM-023"][data-preview-artwork-slot="banner"]:not(.has-customer-photo):not(.has-live-customer-photo) { --preview-copy-ink: #3a1f0f; }
+:is(.wedding-card-front, .live-product)[data-design-artwork][data-design-code="CKM-023"][data-preview-artwork-slot="bunting"]:not(.has-customer-photo):not(.has-live-customer-photo) { --preview-copy-ink: #3a1f0f; }
+:is(.wedding-card-front, .live-product)[data-design-artwork][data-design-code="CKM-023"][data-preview-artwork-slot="arrow-left"]:not(.has-customer-photo):not(.has-live-customer-photo) { --preview-copy-ink: #3a1f0f; }
+:is(.wedding-card-front, .live-product)[data-design-artwork][data-design-code="CKM-023"][data-preview-artwork-slot="arrow-right"]:not(.has-customer-photo):not(.has-live-customer-photo) { --preview-copy-ink: #3a1f0f; }
+:is(.wedding-card-front, .live-product)[data-design-artwork][data-design-code="CKM-023"][data-preview-artwork-slot="sticker"]:not(.has-customer-photo):not(.has-live-customer-photo) { --preview-copy-ink: #3a1f0f; }
+:is(.wedding-card-front, .live-product)[data-design-artwork][data-design-code="CKM-023"][data-preview-artwork-slot="wooden-hanger"]:not(.has-customer-photo):not(.has-live-customer-photo) { --preview-copy-ink: #221e1f; }
+:is(.wedding-card-front, .live-product)[data-design-artwork][data-design-code="CKM-024"][data-preview-artwork-slot="card-front"]:not(.has-customer-photo):not(.has-live-customer-photo) { --preview-copy-ink: #3a200f; }
+:is(.wedding-card-front, .live-product)[data-design-artwork][data-design-code="CKM-024"][data-preview-artwork-slot="banner"]:not(.has-customer-photo):not(.has-live-customer-photo) { --preview-copy-ink: #3a1f0f; }
+:is(.wedding-card-front, .live-product)[data-design-artwork][data-design-code="CKM-024"][data-preview-artwork-slot="bunting"]:not(.has-customer-photo):not(.has-live-customer-photo) { --preview-copy-ink: #3a1f0f; }
+:is(.wedding-card-front, .live-product)[data-design-artwork][data-design-code="CKM-024"][data-preview-artwork-slot="arrow-left"]:not(.has-customer-photo):not(.has-live-customer-photo) { --preview-copy-ink: #3a1f0f; }
+:is(.wedding-card-front, .live-product)[data-design-artwork][data-design-code="CKM-024"][data-preview-artwork-slot="arrow-right"]:not(.has-customer-photo):not(.has-live-customer-photo) { --preview-copy-ink: #3a1f0f; }
+:is(.wedding-card-front, .live-product)[data-design-artwork][data-design-code="CKM-024"][data-preview-artwork-slot="sticker"]:not(.has-customer-photo):not(.has-live-customer-photo) { --preview-copy-ink: #3a1f0f; }
+:is(.wedding-card-front, .live-product)[data-design-artwork][data-design-code="CKM-024"][data-preview-artwork-slot="wooden-hanger"]:not(.has-customer-photo):not(.has-live-customer-photo) { --preview-copy-ink: #221e1f; }
+
+/* CKM-012 prints white couple names on its purple plaque; dates stay dark. */
+:is(.wedding-card-front, .live-product)[data-design-artwork][data-design-code="CKM-012"][data-preview-artwork-slot="card-front"] .desa-card-custom-couple,
+:is(.live-product)[data-design-artwork][data-design-code="CKM-012"][data-preview-artwork-slot="bunting"] .desa-product-copy-couple,
+:is(.live-product)[data-design-artwork][data-design-code="CKM-012"][data-preview-artwork-slot^="arrow-"] .desa-product-copy-couple,
+:is(.live-product)[data-design-artwork][data-design-code="CKM-012"][data-preview-artwork-slot="sticker"] .desa-product-copy-couple { color: #fff !important; }
