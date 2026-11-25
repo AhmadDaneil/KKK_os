@@ -108,6 +108,6 @@
             </table>
         </div>
 
-        <div class="admin-invoice-pagination">{{ $invoices->links() }}</div>
+        <div class="admin-invoice-pagination">{{ $invoices->links('admin.partials.pagination') }}</div>
     </section>
 @endsection
