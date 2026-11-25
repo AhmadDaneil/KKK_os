@@ -8439,3 +8439,38 @@
     width: 92%;
     text-align: center;
 }
+/* Keep Desa banner couple names aligned to the full banner canvas. Customer-uploaded
+   banners keep their existing photo-specific layout. */
+.live-product--banner[data-design-artwork][data-design-code^="CKD-"]:not(.has-live-customer-photo) .desa-product-name-overlay {
+    inset: 0;
+    padding: 0;
+    overflow: visible;
+}
+
+.live-product--banner[data-design-artwork][data-design-code^="CKD-"]:not(.has-live-customer-photo) .desa-product-custom-copy {
+    inset: 0;
+    overflow: visible;
+}
+
+/* These values convert each CKD design's previous right-panel anchor onto the
+   full banner canvas, while keeping the name row at the reference height. */
+.live-product--banner[data-design-code="CKD-001"]:not(.has-live-customer-photo) { --banner-name-anchor-x: 71.027778%; --banner-name-anchor-y: 49.555556%; }
+.live-product--banner[data-design-code="CKD-002"]:not(.has-live-customer-photo) { --banner-name-anchor-x: 71.027778%; --banner-name-anchor-y: 48.925926%; }
+.live-product--banner[data-design-code="CKD-003"]:not(.has-live-customer-photo) { --banner-name-anchor-x: 70.564815%; --banner-name-anchor-y: 48.851852%; }
+.live-product--banner[data-design-code="CKD-004"]:not(.has-live-customer-photo) { --banner-name-anchor-x: 71.898148%; --banner-name-anchor-y: 48.629630%; }
+.live-product--banner[data-design-code="CKD-005"]:not(.has-live-customer-photo) { --banner-name-anchor-x: 68.879629%; --banner-name-anchor-y: 50.851852%; }
+.live-product--banner[data-design-code="CKD-006"]:not(.has-live-customer-photo) { --banner-name-anchor-x: 68.879629%; --banner-name-anchor-y: 45.814815%; }
+.live-product--banner[data-design-code="CKD-007"]:not(.has-live-customer-photo) { --banner-name-anchor-x: 68.879629%; --banner-name-anchor-y: 50.851852%; }
+.live-product--banner[data-design-code="CKD-008"]:not(.has-live-customer-photo) { --banner-name-anchor-x: 68.879629%; --banner-name-anchor-y: 50.851852%; }
+
+.live-product.live-product--banner[data-preview-artwork-slot="banner"][data-design-artwork][data-design-code^="CKD-"]:not(.has-live-customer-photo) .desa-product-copy-couple {
+    top: var(--banner-name-anchor-y) !important;
+    right: auto !important;
+    left: var(--banner-name-anchor-x) !important;
+    width: 43.24% !important;
+    max-width: 43.24% !important;
+    grid-template-columns: minmax(0, 1fr) calc(var(--banner-name-amp-width, 9.889677%) + .6em) minmax(0, 1fr) !important;
+    gap: 0 !important;
+    margin: 0 !important;
+    transform: translate(-50%, -50%) !important;
+}
