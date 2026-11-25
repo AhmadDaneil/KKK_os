@@ -30,6 +30,17 @@ function t(x){ return s(x).replace(/^\s+|\s+$/g, ""); } // manual trim
 function pad2(n){ return (n<10?"0":"")+n; }
 function nowStamp(){ var d=new Date(); return d.getFullYear()+pad2(d.getMonth()+1)+pad2(d.getDate())+"_"+pad2(d.getHours())+pad2(d.getMinutes()); }
 function safeName(x){ return s(x).replace(/[\\\/\:\*\?"<>\|]/g, "_").replace(/\s+/g," ").replace(/^\s+|\s+$/g,""); }
+function kkkCustomerFolderInfo(noInvoice, side, quantity, groomShort, brideShort){
+    var isBrideSide = side === "PEREMPUAN";
+    var firstShort = t(isBrideSide ? brideShort : groomShort);
+    var secondShort = t(isBrideSide ? groomShort : brideShort);
+    var namesShort = firstShort;
+    if(secondShort !== "") namesShort += (namesShort !== "" ? " & " : "") + secondShort;
+    var folderName = noInvoice + " " + side +
+        (namesShort !== "" ? (" " + namesShort) : "") +
+        (t(quantity) !== "" ? (" " + t(quantity) + " PCS") : "");
+    return {namesShort: namesShort, folderName: safeName(folderName)};
+}
 function ensureFolderObj(path){ var f = new Folder(path); if(!f.exists) f.create(); return f; }
 function logAppend(path, line){ try{ var f = new File(path); f.open("a"); f.write(line + "\r\n"); f.close(); }catch(e){} }
 function logBoth(globalPath, custPath, line){
@@ -2019,6 +2030,32 @@ try{
     var logPath = OUTPUT.fsName + "/_customer_log.txt";
     logAppend(logPath, "===== " + nowStamp() + " | START BATCH: " + batchName + " =====");
 
+    var brideFolderNamesByInvoice = {};
+    for(var brideRowIndex = 1; brideRowIndex < rows.length; brideRowIndex++){
+        var brideRow = rows[brideRowIndex];
+        var brideInvoice = t(brideRow[iNoInv]);
+        var brideSide = t(brideRow[iMajlis]).toUpperCase();
+        if(brideInvoice === "" || brideSide !== "PEREMPUAN") continue;
+        var brideFolderInfo = kkkCustomerFolderInfo(
+            brideInvoice,
+            brideSide,
+            iQty >= 0 ? t(brideRow[iQty]) : "",
+            iSingL >= 0 ? t(brideRow[iSingL]) : "",
+            iSingP >= 0 ? t(brideRow[iSingP]) : ""
+        );
+        brideFolderNamesByInvoice[brideInvoice] = brideFolderInfo.folderName;
+    }
+
+    function exportCekHantaranForBride(noInvoice, outputId, amount, bride, groom, day, date){
+        var brideFolderName = brideFolderNamesByInvoice[noInvoice];
+        if(!brideFolderName){
+            logAppend(logPath, "[CEK HANTARAN FAIL] " + outputId + " | baris pihak perempuan tidak ditemui");
+            return 0;
+        }
+        var brideFolder = ensureFolderObj(customerParent.fsName + "/" + brideFolderName);
+        return exportCekHantaranRow(brideFolder, outputId, amount, bride, groom, day, date, logPath);
+    }
+
     KKK_REVIEW_PORTRAIT_CROP = confirm("V35: Semak crop POTRAIT sebelum eksport?\n\nOK = semak dan laras kedudukan supaya kedua-dua pengantin kelihatan.\nCancel = crop tengah automatik (tanpa pengesanan muka).");
     var portraitFailCount = 0;
     var exportSuccessCount = 0;
@@ -2043,15 +2080,14 @@ try{
                 cekFailCount++;
                 continue;
             }
-            var cekOutputs = exportCekHantaranRow(
-                customerParent,
+            var cekOutputs = exportCekHantaranForBride(
+                NoInv,
                 cekOutputId,
                 t(g(iJumlahHantaran)),
                 t(g(iNamaP)),
                 t(g(iNamaL)),
                 t(g(iHari)),
-                t(g(iTarikh)),
-                logPath
+                t(g(iTarikh))
             );
             exportSuccessCount += cekOutputs;
             if(cekOutputs < 2) cekFailCount++;
@@ -2070,15 +2106,14 @@ try{
                 cekFailCount++;
             }else{
                 var chequeOutputId = NoInv.toUpperCase() + "-CH";
-                var chequeOutputs = exportCekHantaranRow(
-                    customerParent,
+                var chequeOutputs = exportCekHantaranForBride(
+                    NoInv,
                     chequeOutputId,
                     t(g(iJumlahHantaran)),
                     t(g(iNamaP)),
                     t(g(iNamaL)),
                     t(g(iHari)),
-                    t(g(iTarikh)),
-                    logPath
+                    t(g(iTarikh))
                 );
                 exportSuccessCount += chequeOutputs;
                 if(chequeOutputs < 2) cekFailCount++;
@@ -2138,14 +2173,9 @@ try{
         var singAtas  = isPerempuan ? singP : singL;
         var singBawah = isPerempuan ? singL : singP;
 
-        var namesShort = "";
-        if (t(singAtas) !== "") namesShort += t(singAtas);
-        if (t(singBawah) !== "") namesShort += (namesShort!=="" ? " & " : "") + t(singBawah);
-
-        // Include side in folder identity so two-package rows can never share
-        // the same output folder and accidentally overwrite each other.
-        var custFolderNameBase = NoInv + " " + majlis + (namesShort!=="" ? (" " + namesShort) : "") + (t(qty)!=="" ? (" " + t(qty) + " PCS") : "");
-        var custFolderSafe = safeName(custFolderNameBase);
+        var custFolderInfo = kkkCustomerFolderInfo(NoInv, majlis, qty, singL, singP);
+        var namesShort = custFolderInfo.namesShort;
+        var custFolderSafe = custFolderInfo.folderName;
 
         var custRoot = ensureFolderObj(customerParent.fsName + "/" + custFolderSafe);
         var fJPEG = ensureFolderObj(custRoot.fsName + "/Export JPEG");
