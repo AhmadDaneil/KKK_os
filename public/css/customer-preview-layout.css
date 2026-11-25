@@ -8470,7 +8470,6 @@
 
 /* New catalog themes use centered banner copy, while couple names keep their
    per-design anchors above so the printed ampersand in each artwork stays put. */
-.live-product--banner[data-preview-artwork-slot="banner"][data-design-artwork][data-design-code^="CKR-"],
 .live-product--banner[data-preview-artwork-slot="banner"][data-design-artwork][data-design-code^="CKS-"],
 .live-product--banner[data-preview-artwork-slot="banner"][data-design-artwork][data-design-code^="CKM-"] {
     --preview-title-x: 50%;
@@ -8480,10 +8479,219 @@
     --preview-ampersand-visibility: hidden;
 }
 
+/* The Rusty master artwork already contains its fixed headings, ampersand,
+   calendar and footer copy. Keep those printed layers and overlay only the
+   customer-entered names and date. */
+[data-design-code^="CKR-"][data-preview-artwork-slot="card-front"],
+[data-design-code^="CKR-"][data-preview-artwork-slot="banner"],
+[data-design-code^="CKR-"][data-preview-artwork-slot="bunting"],
+[data-design-code^="CKR-"][data-preview-artwork-slot^="arrow-"],
+[data-design-code^="CKR-"][data-preview-artwork-slot="sticker"],
+[data-design-code^="CKR-"][data-preview-artwork-slot="wooden-hanger"] {
+    --preview-ampersand-visibility: hidden;
+}
+
+[data-design-code^="CKR-"][data-preview-artwork-slot="card-front"],
+[data-design-code^="CKR-"][data-preview-artwork-slot="banner"],
+[data-design-code^="CKR-"][data-preview-artwork-slot="bunting"],
+[data-design-code^="CKR-"][data-preview-artwork-slot^="arrow-"],
+[data-design-code^="CKR-"][data-preview-artwork-slot="sticker"] {
+    --preview-title-display: none;
+    --preview-kicker-display: none;
+    --preview-quote-display: none;
+}
+
+.live-product--sticker .desa-product-copy-date .desa-sticker-day { display: none; }
+.live-product--sticker[data-design-code^="CKR-"] .desa-product-copy-date .desa-sticker-day { display: block; }
+
+/* PSD-measured date anchors; date field typography remains in customer-psd-item-fonts.css. */
+[data-design-code="CKR-001"][data-preview-artwork-slot="arrow-left"] { --preview-date-x: 49.758065%; --preview-date-y: 64.709236%; }
+[data-design-code="CKR-001"][data-preview-artwork-slot="arrow-right"] { --preview-date-x: 49.758065%; --preview-date-y: 64.723489%; }
+[data-design-code="CKR-001"][data-preview-artwork-slot="banner"] { --preview-date-x: 49.962963%; --preview-date-y: 75.888889%; }
+[data-design-code="CKR-001"][data-preview-artwork-slot="bunting"] { --preview-date-x: 49.958333%; --preview-date-y: 65.020833%; }
+[data-design-code="CKR-001"][data-preview-artwork-slot="card-front"] { --preview-date-x: 49.875000%; --preview-date-y: 72.972222%; }
+[data-design-code="CKR-001"][data-preview-artwork-slot="sticker"] { --preview-date-x: 49.576271%; --preview-date-y: 86.864407%; }
+[data-design-code="CKR-001"][data-preview-artwork-slot="wooden-hanger"] { --preview-date-x: 50.177778%; --preview-date-y: 70.946970%; }
+[data-design-code="CKR-002"][data-preview-artwork-slot="arrow-left"] { --preview-date-x: 49.959677%; --preview-date-y: 57.454390%; }
+[data-design-code="CKR-002"][data-preview-artwork-slot="arrow-right"] { --preview-date-x: 49.959677%; --preview-date-y: 57.454390%; }
+[data-design-code="CKR-002"][data-preview-artwork-slot="banner"] { --preview-date-x: 50.194444%; --preview-date-y: 77.111111%; }
+[data-design-code="CKR-002"][data-preview-artwork-slot="bunting"] { --preview-date-x: 49.500000%; --preview-date-y: 62.729167%; }
+[data-design-code="CKR-002"][data-preview-artwork-slot="card-front"] { --preview-date-x: 49.625000%; --preview-date-y: 59.250000%; }
+[data-design-code="CKR-002"][data-preview-artwork-slot="sticker"] { --preview-date-x: 49.293785%; --preview-date-y: 82.344633%; }
+[data-design-code="CKR-002"][data-preview-artwork-slot="wooden-hanger"] { --preview-date-x: 50.177778%; --preview-date-y: 70.946970%; }
+[data-design-code="CKR-003"][data-preview-artwork-slot="arrow-left"] { --preview-date-x: 49.919355%; --preview-date-y: 64.823261%; }
+[data-design-code="CKR-003"][data-preview-artwork-slot="arrow-right"] { --preview-date-x: 49.919355%; --preview-date-y: 64.823261%; }
+[data-design-code="CKR-003"][data-preview-artwork-slot="banner"] { --preview-date-x: 49.916667%; --preview-date-y: 77.018519%; }
+[data-design-code="CKR-003"][data-preview-artwork-slot="bunting"] { --preview-date-x: 49.875000%; --preview-date-y: 73.145833%; }
+[data-design-code="CKR-003"][data-preview-artwork-slot="card-front"] { --preview-date-x: 50.458333%; --preview-date-y: 73.138889%; }
+[data-design-code="CKR-003"][data-preview-artwork-slot="sticker"] { --preview-date-x: 50.141243%; --preview-date-y: 88.559322%; }
+[data-design-code="CKR-003"][data-preview-artwork-slot="wooden-hanger"] { --preview-date-x: 50.177778%; --preview-date-y: 70.946970%; }
+[data-design-code="CKR-004"][data-preview-artwork-slot="arrow-left"] { --preview-date-x: 49.919355%; --preview-date-y: 59.863170%; }
+[data-design-code="CKR-004"][data-preview-artwork-slot="arrow-right"] { --preview-date-x: 49.919355%; --preview-date-y: 59.863170%; }
+[data-design-code="CKR-004"][data-preview-artwork-slot="banner"] { --preview-date-x: 49.916667%; --preview-date-y: 75.537037%; }
+[data-design-code="CKR-004"][data-preview-artwork-slot="bunting"] { --preview-date-x: 50.625000%; --preview-date-y: 74.937500%; }
+[data-design-code="CKR-004"][data-preview-artwork-slot="card-front"] { --preview-date-x: 49.958333%; --preview-date-y: 78.694444%; }
+[data-design-code="CKR-004"][data-preview-artwork-slot="sticker"] { --preview-date-x: 49.858757%; --preview-date-y: 82.909605%; }
+[data-design-code="CKR-004"][data-preview-artwork-slot="wooden-hanger"] { --preview-date-x: 50.177778%; --preview-date-y: 70.946970%; }
+[data-design-code="CKR-005"][data-preview-artwork-slot="arrow-left"] { --preview-date-x: 49.919355%; --preview-date-y: 66.619156%; }
+[data-design-code="CKR-005"][data-preview-artwork-slot="arrow-right"] { --preview-date-x: 49.919355%; --preview-date-y: 66.619156%; }
+[data-design-code="CKR-005"][data-preview-artwork-slot="banner"] { --preview-date-x: 50.194444%; --preview-date-y: 75.277778%; }
+[data-design-code="CKR-005"][data-preview-artwork-slot="bunting"] { --preview-date-x: 50.125000%; --preview-date-y: 73.458333%; }
+[data-design-code="CKR-005"][data-preview-artwork-slot="card-front"] { --preview-date-x: 49.625000%; --preview-date-y: 76.638889%; }
+[data-design-code="CKR-005"][data-preview-artwork-slot="sticker"] { --preview-date-x: 49.858757%; --preview-date-y: 88.841808%; }
+[data-design-code="CKR-005"][data-preview-artwork-slot="wooden-hanger"] { --preview-date-x: 50.177778%; --preview-date-y: 70.946970%; }
+[data-design-code="CKR-006"][data-preview-artwork-slot="arrow-left"] { --preview-date-x: 49.798387%; --preview-date-y: 61.003421%; }
+[data-design-code="CKR-006"][data-preview-artwork-slot="arrow-right"] { --preview-date-x: 49.798387%; --preview-date-y: 61.003421%; }
+[data-design-code="CKR-006"][data-preview-artwork-slot="banner"] { --preview-date-x: 50.194444%; --preview-date-y: 75.314815%; }
+[data-design-code="CKR-006"][data-preview-artwork-slot="bunting"] { --preview-date-x: 50.500000%; --preview-date-y: 74.604167%; }
+[data-design-code="CKR-006"][data-preview-artwork-slot="card-front"] { --preview-date-x: 50.083333%; --preview-date-y: 77.666667%; }
+[data-design-code="CKR-006"][data-preview-artwork-slot="sticker"] { --preview-date-x: 49.858757%; --preview-date-y: 81.214689%; }
+[data-design-code="CKR-006"][data-preview-artwork-slot="wooden-hanger"] { --preview-date-x: 50.177778%; --preview-date-y: 70.946970%; }
+[data-design-code="CKR-007"][data-preview-artwork-slot="arrow-left"] { --preview-date-x: 49.516129%; --preview-date-y: 59.920182%; }
+[data-design-code="CKR-007"][data-preview-artwork-slot="arrow-right"] { --preview-date-x: 49.516129%; --preview-date-y: 59.920182%; }
+[data-design-code="CKR-007"][data-preview-artwork-slot="banner"] { --preview-date-x: 50.194444%; --preview-date-y: 76.907407%; }
+[data-design-code="CKR-007"][data-preview-artwork-slot="bunting"] { --preview-date-x: 50.500000%; --preview-date-y: 71.791667%; }
+[data-design-code="CKR-007"][data-preview-artwork-slot="card-front"] { --preview-date-x: 50.041667%; --preview-date-y: 77.083333%; }
+[data-design-code="CKR-007"][data-preview-artwork-slot="sticker"] { --preview-date-x: 50.141243%; --preview-date-y: 81.779661%; }
+[data-design-code="CKR-007"][data-preview-artwork-slot="wooden-hanger"] { --preview-date-x: 50.177778%; --preview-date-y: 70.946970%; }
+[data-design-code="CKR-008"][data-preview-artwork-slot="arrow-left"] { --preview-date-x: 50.080645%; --preview-date-y: 63.625998%; }
+[data-design-code="CKR-008"][data-preview-artwork-slot="arrow-right"] { --preview-date-x: 50.080645%; --preview-date-y: 63.625998%; }
+[data-design-code="CKR-008"][data-preview-artwork-slot="banner"] { --preview-date-x: 50.194444%; --preview-date-y: 78.537037%; }
+[data-design-code="CKR-008"][data-preview-artwork-slot="bunting"] { --preview-date-x: 51.125000%; --preview-date-y: 69.520833%; }
+[data-design-code="CKR-008"][data-preview-artwork-slot="card-front"] { --preview-date-x: 50.375000%; --preview-date-y: 77.527778%; }
+[data-design-code="CKR-008"][data-preview-artwork-slot="sticker"] { --preview-date-x: 49.576271%; --preview-date-y: 80.932203%; }
+[data-design-code="CKR-008"][data-preview-artwork-slot="wooden-hanger"] { --preview-date-x: 50.177778%; --preview-date-y: 70.946970%; }
+[data-design-code="CKR-009"][data-preview-artwork-slot="arrow-left"] { --preview-date-x: 50.120968%; --preview-date-y: 59.863170%; }
+[data-design-code="CKR-009"][data-preview-artwork-slot="arrow-right"] { --preview-date-x: 50.120968%; --preview-date-y: 59.863170%; }
+[data-design-code="CKR-009"][data-preview-artwork-slot="banner"] { --preview-date-x: 49.916667%; --preview-date-y: 75.314815%; }
+[data-design-code="CKR-009"][data-preview-artwork-slot="bunting"] { --preview-date-x: 50.083333%; --preview-date-y: 77.812500%; }
+[data-design-code="CKR-009"][data-preview-artwork-slot="card-front"] { --preview-date-x: 51.125000%; --preview-date-y: 73.638889%; }
+[data-design-code="CKR-009"][data-preview-artwork-slot="sticker"] { --preview-date-x: 50.141243%; --preview-date-y: 77.542373%; }
+[data-design-code="CKR-009"][data-preview-artwork-slot="wooden-hanger"] { --preview-date-x: 50.177778%; --preview-date-y: 70.946970%; }
+[data-design-code="CKR-010"][data-preview-artwork-slot="arrow-left"] { --preview-date-x: 50.161290%; --preview-date-y: 65.792474%; }
+[data-design-code="CKR-010"][data-preview-artwork-slot="arrow-right"] { --preview-date-x: 50.161290%; --preview-date-y: 65.792474%; }
+[data-design-code="CKR-010"][data-preview-artwork-slot="banner"] { --preview-date-x: 49.935185%; --preview-date-y: 70.759259%; }
+[data-design-code="CKR-010"][data-preview-artwork-slot="bunting"] { --preview-date-x: 50.083333%; --preview-date-y: 82.208333%; }
+[data-design-code="CKR-010"][data-preview-artwork-slot="card-front"] { --preview-date-x: 50.375000%; --preview-date-y: 75.916667%; }
+[data-design-code="CKR-010"][data-preview-artwork-slot="sticker"] { --preview-date-x: 49.858757%; --preview-date-y: 87.711864%; }
+[data-design-code="CKR-010"][data-preview-artwork-slot="wooden-hanger"] { --preview-date-x: 50.177778%; --preview-date-y: 70.946970%; }
+[data-design-code="CKR-011"][data-preview-artwork-slot="arrow-left"] { --preview-date-x: 49.475806%; --preview-date-y: 69.555302%; }
+[data-design-code="CKR-011"][data-preview-artwork-slot="arrow-right"] { --preview-date-x: 49.475806%; --preview-date-y: 69.555302%; }
+[data-design-code="CKR-011"][data-preview-artwork-slot="banner"] { --preview-date-x: 50.194444%; --preview-date-y: 75.833333%; }
+[data-design-code="CKR-011"][data-preview-artwork-slot="bunting"] { --preview-date-x: 50.208333%; --preview-date-y: 69.708333%; }
+[data-design-code="CKR-011"][data-preview-artwork-slot="card-front"] { --preview-date-x: 50.041667%; --preview-date-y: 73.250000%; }
+[data-design-code="CKR-011"][data-preview-artwork-slot="sticker"] { --preview-date-x: 50.141243%; --preview-date-y: 83.474576%; }
+[data-design-code="CKR-011"][data-preview-artwork-slot="wooden-hanger"] { --preview-date-x: 50.177778%; --preview-date-y: 70.946970%; }
+[data-design-code="CKR-012"][data-preview-artwork-slot="arrow-left"] { --preview-date-x: 50.201613%; --preview-date-y: 59.863170%; }
+[data-design-code="CKR-012"][data-preview-artwork-slot="arrow-right"] { --preview-date-x: 50.201613%; --preview-date-y: 59.863170%; }
+[data-design-code="CKR-012"][data-preview-artwork-slot="banner"] { --preview-date-x: 50.175926%; --preview-date-y: 77.129630%; }
+[data-design-code="CKR-012"][data-preview-artwork-slot="bunting"] { --preview-date-x: 50.083333%; --preview-date-y: 72.958333%; }
+[data-design-code="CKR-012"][data-preview-artwork-slot="card-front"] { --preview-date-x: 50.041667%; --preview-date-y: 75.138889%; }
+[data-design-code="CKR-012"][data-preview-artwork-slot="sticker"] { --preview-date-x: 49.858757%; --preview-date-y: 81.779661%; }
+[data-design-code="CKR-012"][data-preview-artwork-slot="wooden-hanger"] { --preview-date-x: 50.177778%; --preview-date-y: 70.946970%; }
+[data-design-code="CKR-013"][data-preview-artwork-slot="arrow-left"] { --preview-date-x: 50.000000%; --preview-date-y: 59.863170%; }
+[data-design-code="CKR-013"][data-preview-artwork-slot="arrow-right"] { --preview-date-x: 50.000000%; --preview-date-y: 59.863170%; }
+[data-design-code="CKR-013"][data-preview-artwork-slot="banner"] { --preview-date-x: 50.194444%; --preview-date-y: 75.833333%; }
+[data-design-code="CKR-013"][data-preview-artwork-slot="bunting"] { --preview-date-x: 49.250000%; --preview-date-y: 76.291667%; }
+[data-design-code="CKR-013"][data-preview-artwork-slot="card-front"] { --preview-date-x: 50.041667%; --preview-date-y: 84.250000%; }
+[data-design-code="CKR-013"][data-preview-artwork-slot="sticker"] { --preview-date-x: 50.423729%; --preview-date-y: 86.299435%; }
+[data-design-code="CKR-013"][data-preview-artwork-slot="wooden-hanger"] { --preview-date-x: 50.177778%; --preview-date-y: 70.946970%; }
+[data-design-code="CKR-014"][data-preview-artwork-slot="arrow-left"] { --preview-date-x: 50.483871%; --preview-date-y: 62.371722%; }
+[data-design-code="CKR-014"][data-preview-artwork-slot="arrow-right"] { --preview-date-x: 50.483871%; --preview-date-y: 62.371722%; }
+[data-design-code="CKR-014"][data-preview-artwork-slot="banner"] { --preview-date-x: 50.194444%; --preview-date-y: 77.129630%; }
+[data-design-code="CKR-014"][data-preview-artwork-slot="bunting"] { --preview-date-x: 51.166667%; --preview-date-y: 75.375000%; }
+[data-design-code="CKR-014"][data-preview-artwork-slot="card-front"] { --preview-date-x: 50.291667%; --preview-date-y: 74.472222%; }
+[data-design-code="CKR-014"][data-preview-artwork-slot="sticker"] { --preview-date-x: 50.141243%; --preview-date-y: 84.322034%; }
+[data-design-code="CKR-014"][data-preview-artwork-slot="wooden-hanger"] { --preview-date-x: 50.177778%; --preview-date-y: 70.946970%; }
+[data-design-code="CKR-015"][data-preview-artwork-slot="arrow-left"] { --preview-date-x: 49.516129%; --preview-date-y: 65.393387%; }
+[data-design-code="CKR-015"][data-preview-artwork-slot="arrow-right"] { --preview-date-x: 49.516129%; --preview-date-y: 65.393387%; }
+[data-design-code="CKR-015"][data-preview-artwork-slot="banner"] { --preview-date-x: 49.231481%; --preview-date-y: 76.944444%; }
+[data-design-code="CKR-015"][data-preview-artwork-slot="bunting"] { --preview-date-x: 49.000000%; --preview-date-y: 70.645833%; }
+[data-design-code="CKR-015"][data-preview-artwork-slot="card-front"] { --preview-date-x: 48.625000%; --preview-date-y: 75.638889%; }
+[data-design-code="CKR-015"][data-preview-artwork-slot="sticker"] { --preview-date-x: 50.141243%; --preview-date-y: 83.474576%; }
+[data-design-code="CKR-015"][data-preview-artwork-slot="wooden-hanger"] { --preview-date-x: 50.177778%; --preview-date-y: 70.946970%; }
+[data-design-code="CKR-016"][data-preview-artwork-slot="arrow-left"] { --preview-date-x: 50.725806%; --preview-date-y: 61.117446%; }
+[data-design-code="CKR-016"][data-preview-artwork-slot="arrow-right"] { --preview-date-x: 50.725806%; --preview-date-y: 61.117446%; }
+[data-design-code="CKR-016"][data-preview-artwork-slot="banner"] { --preview-date-x: 49.916667%; --preview-date-y: 77.129630%; }
+[data-design-code="CKR-016"][data-preview-artwork-slot="bunting"] { --preview-date-x: 50.541667%; --preview-date-y: 72.333333%; }
+[data-design-code="CKR-016"][data-preview-artwork-slot="card-front"] { --preview-date-x: 50.125000%; --preview-date-y: 78.027778%; }
+[data-design-code="CKR-016"][data-preview-artwork-slot="sticker"] { --preview-date-x: 50.141243%; --preview-date-y: 81.779661%; }
+[data-design-code="CKR-016"][data-preview-artwork-slot="wooden-hanger"] { --preview-date-x: 50.177778%; --preview-date-y: 70.946970%; }
+[data-design-code="CKR-017"][data-preview-artwork-slot="arrow-left"] { --preview-date-x: 50.161290%; --preview-date-y: 69.127708%; }
+[data-design-code="CKR-017"][data-preview-artwork-slot="arrow-right"] { --preview-date-x: 50.161290%; --preview-date-y: 69.127708%; }
+[data-design-code="CKR-017"][data-preview-artwork-slot="banner"] { --preview-date-x: 50.194444%; --preview-date-y: 75.314815%; }
+[data-design-code="CKR-017"][data-preview-artwork-slot="bunting"] { --preview-date-x: 50.500000%; --preview-date-y: 78.916667%; }
+[data-design-code="CKR-017"][data-preview-artwork-slot="card-front"] { --preview-date-x: 50.208333%; --preview-date-y: 85.694444%; }
+[data-design-code="CKR-017"][data-preview-artwork-slot="sticker"] { --preview-date-x: 50.141243%; --preview-date-y: 82.062147%; }
+[data-design-code="CKR-017"][data-preview-artwork-slot="wooden-hanger"] { --preview-date-x: 50.177778%; --preview-date-y: 70.946970%; }
+[data-design-code="CKR-018"][data-preview-artwork-slot="arrow-left"] { --preview-date-x: 50.080645%; --preview-date-y: 67.873432%; }
+[data-design-code="CKR-018"][data-preview-artwork-slot="arrow-right"] { --preview-date-x: 50.080645%; --preview-date-y: 67.873432%; }
+[data-design-code="CKR-018"][data-preview-artwork-slot="banner"] { --preview-date-x: 50.027778%; --preview-date-y: 77.055556%; }
+[data-design-code="CKR-018"][data-preview-artwork-slot="bunting"] { --preview-date-x: 50.458333%; --preview-date-y: 71.395833%; }
+[data-design-code="CKR-018"][data-preview-artwork-slot="card-front"] { --preview-date-x: 49.958333%; --preview-date-y: 73.250000%; }
+[data-design-code="CKR-018"][data-preview-artwork-slot="sticker"] { --preview-date-x: 49.858757%; --preview-date-y: 88.559322%; }
+[data-design-code="CKR-018"][data-preview-artwork-slot="wooden-hanger"] { --preview-date-x: 50.177778%; --preview-date-y: 70.946970%; }
+[data-design-code="CKR-019"][data-preview-artwork-slot="arrow-left"] { --preview-date-x: 49.395161%; --preview-date-y: 67.303307%; }
+[data-design-code="CKR-019"][data-preview-artwork-slot="arrow-right"] { --preview-date-x: 49.395161%; --preview-date-y: 67.303307%; }
+[data-design-code="CKR-019"][data-preview-artwork-slot="banner"] { --preview-date-x: 49.916667%; --preview-date-y: 75.277778%; }
+[data-design-code="CKR-019"][data-preview-artwork-slot="bunting"] { --preview-date-x: 50.125000%; --preview-date-y: 68.187500%; }
+[data-design-code="CKR-019"][data-preview-artwork-slot="card-front"] { --preview-date-x: 50.125000%; --preview-date-y: 81.361111%; }
+[data-design-code="CKR-019"][data-preview-artwork-slot="sticker"] { --preview-date-x: 50.141243%; --preview-date-y: 81.779661%; }
+[data-design-code="CKR-019"][data-preview-artwork-slot="wooden-hanger"] { --preview-date-x: 50.177778%; --preview-date-y: 70.946970%; }
+[data-design-code="CKR-020"][data-preview-artwork-slot="arrow-left"] { --preview-date-x: 50.161290%; --preview-date-y: 69.127708%; }
+[data-design-code="CKR-020"][data-preview-artwork-slot="arrow-right"] { --preview-date-x: 50.161290%; --preview-date-y: 69.127708%; }
+[data-design-code="CKR-020"][data-preview-artwork-slot="banner"] { --preview-date-x: 50.194444%; --preview-date-y: 75.314815%; }
+[data-design-code="CKR-020"][data-preview-artwork-slot="bunting"] { --preview-date-x: 50.000000%; --preview-date-y: 71.333333%; }
+[data-design-code="CKR-020"][data-preview-artwork-slot="card-front"] { --preview-date-x: 50.291667%; --preview-date-y: 73.472222%; }
+[data-design-code="CKR-020"][data-preview-artwork-slot="sticker"] { --preview-date-x: 50.141243%; --preview-date-y: 82.062147%; }
+[data-design-code="CKR-020"][data-preview-artwork-slot="wooden-hanger"] { --preview-date-x: 50.177778%; --preview-date-y: 70.946970%; }
+[data-design-code="CKR-021"][data-preview-artwork-slot="arrow-left"] { --preview-date-x: 50.504032%; --preview-date-y: 67.089510%; }
+[data-design-code="CKR-021"][data-preview-artwork-slot="arrow-right"] { --preview-date-x: 50.504032%; --preview-date-y: 67.089510%; }
+[data-design-code="CKR-021"][data-preview-artwork-slot="banner"] { --preview-date-x: 50.000000%; --preview-date-y: 85.111111%; }
+[data-design-code="CKR-021"][data-preview-artwork-slot="bunting"] { --preview-date-x: 50.083333%; --preview-date-y: 76.312500%; }
+[data-design-code="CKR-021"][data-preview-artwork-slot="card-front"] { --preview-date-x: 50.708333%; --preview-date-y: 76.694444%; }
+[data-design-code="CKR-021"][data-preview-artwork-slot="sticker"] { --preview-date-x: 50.000000%; --preview-date-y: 79.136888%; }
+[data-design-code="CKR-021"][data-preview-artwork-slot="wooden-hanger"] { --preview-date-x: 50.177778%; --preview-date-y: 70.946970%; }
+[data-design-code="CKR-022"][data-preview-artwork-slot="arrow-left"] { --preview-date-x: 50.262097%; --preview-date-y: 67.032497%; }
+[data-design-code="CKR-022"][data-preview-artwork-slot="arrow-right"] { --preview-date-x: 50.262097%; --preview-date-y: 67.032497%; }
+[data-design-code="CKR-022"][data-preview-artwork-slot="banner"] { --preview-date-x: 51.453704%; --preview-date-y: 74.870370%; }
+[data-design-code="CKR-022"][data-preview-artwork-slot="bunting"] { --preview-date-x: 50.833333%; --preview-date-y: 71.750000%; }
+[data-design-code="CKR-022"][data-preview-artwork-slot="card-front"] { --preview-date-x: 50.458333%; --preview-date-y: 73.583333%; }
+[data-design-code="CKR-022"][data-preview-artwork-slot="sticker"] { --preview-date-x: 49.697636%; --preview-date-y: 72.017592%; }
+[data-design-code="CKR-022"][data-preview-artwork-slot="wooden-hanger"] { --preview-date-x: 50.177778%; --preview-date-y: 70.946970%; }
+[data-design-code="CKR-023"][data-preview-artwork-slot="arrow-left"] { --preview-date-x: 49.153226%; --preview-date-y: 66.619156%; }
+[data-design-code="CKR-023"][data-preview-artwork-slot="arrow-right"] { --preview-date-x: 49.153226%; --preview-date-y: 66.619156%; }
+[data-design-code="CKR-023"][data-preview-artwork-slot="banner"] { --preview-date-x: 47.148148%; --preview-date-y: 84.925926%; }
+[data-design-code="CKR-023"][data-preview-artwork-slot="bunting"] { --preview-date-x: 51.208333%; --preview-date-y: 77.479167%; }
+[data-design-code="CKR-023"][data-preview-artwork-slot="card-front"] { --preview-date-x: 50.875000%; --preview-date-y: 82.416667%; }
+[data-design-code="CKR-023"][data-preview-artwork-slot="sticker"] { --preview-date-x: 50.706215%; --preview-date-y: 81.497175%; }
+[data-design-code="CKR-023"][data-preview-artwork-slot="wooden-hanger"] { --preview-date-x: 50.177778%; --preview-date-y: 70.946970%; }
+[data-design-code="CKR-024"][data-preview-artwork-slot="arrow-left"] { --preview-date-x: 50.806452%; --preview-date-y: 68.158495%; }
+[data-design-code="CKR-024"][data-preview-artwork-slot="arrow-right"] { --preview-date-x: 50.806452%; --preview-date-y: 68.158495%; }
+[data-design-code="CKR-024"][data-preview-artwork-slot="banner"] { --preview-date-x: 50.592593%; --preview-date-y: 79.185185%; }
+[data-design-code="CKR-024"][data-preview-artwork-slot="bunting"] { --preview-date-x: 50.791667%; --preview-date-y: 78.020833%; }
+[data-design-code="CKR-024"][data-preview-artwork-slot="card-front"] { --preview-date-x: 50.541667%; --preview-date-y: 76.472222%; }
+[data-design-code="CKR-024"][data-preview-artwork-slot="sticker"] { --preview-date-x: 49.890049%; --preview-date-y: 84.139637%; }
+[data-design-code="CKR-024"][data-preview-artwork-slot="wooden-hanger"] { --preview-date-x: 50.177778%; --preview-date-y: 70.946970%; }
+[data-design-code^="CKR-"][data-preview-artwork-slot="card-front"],
+[data-design-code^="CKR-"][data-preview-artwork-slot="banner"],
+[data-design-code^="CKR-"][data-preview-artwork-slot="bunting"],
+[data-design-code^="CKR-"][data-preview-artwork-slot^="arrow-"],
+[data-design-code^="CKR-"][data-preview-artwork-slot="sticker"],
+[data-design-code^="CKR-"][data-preview-artwork-slot="wooden-hanger"] {
+    --preview-date-width: 84%;
+}
+
+.live-product--sticker[data-design-code^="CKR-"] .desa-product-copy-date {
+    flex-direction: column;
+    gap: .05em;
+    text-align: center;
+}
+
 /* Match customer-entered text to each theme's printed palette and remove the
    generic white halo that made the live text look doubled on the artwork. */
 :is(.wedding-card-front, .live-product)[data-design-artwork][data-design-code^="CKR-"] :is(.desa-card-custom-copy, .desa-product-custom-copy) {
-    color: #4d3b1d;
+    color: #191613;
 }
 
 :is(.wedding-card-front, .live-product)[data-design-artwork][data-design-code^="CKS-"] :is(.desa-card-custom-copy, .desa-product-custom-copy) {
