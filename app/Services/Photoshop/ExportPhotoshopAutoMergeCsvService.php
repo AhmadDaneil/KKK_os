@@ -4,7 +4,6 @@ namespace App\Services\Photoshop;
 
 use App\Models\MergeJob;
 use App\Models\Order;
-use App\Support\Photoshop\PhotoshopAutoMergeContractV1;
 use App\Support\Photoshop\PhotoshopCekHantaranContractV2;
 use Illuminate\Support\Collection;
 use RuntimeException;
@@ -35,9 +34,7 @@ class ExportPhotoshopAutoMergeCsvService
             throw new RuntimeException('Gift amount is required for a two-package Photoshop export.');
         }
 
-        $headers = $hasMockup
-            ? PhotoshopCekHantaranContractV2::HEADERS
-            : PhotoshopAutoMergeContractV1::HEADERS;
+        $headers = PhotoshopCekHantaranContractV2::HEADERS;
 
         $directory = dirname($absolutePath);
 
@@ -57,20 +54,32 @@ class ExportPhotoshopAutoMergeCsvService
 
             fputcsv($handle, $headers);
 
-            $firstCardRow = null;
-            $cardRowsBySide = [];
+            $sortedMergeJobs = $mergeJobs->sortBy(['order_id', 'side', 'id']);
+            $mockupSide = $hasMockup
+                ? ($sortedMergeJobs->firstWhere('side', $order->first_event_side)?->side
+                    ?? $sortedMergeJobs->first()?->side)
+                : null;
 
-            foreach ($mergeJobs->sortBy(['order_id', 'side', 'id']) as $mergeJob) {
+            foreach ($sortedMergeJobs as $mergeJob) {
                 $row = $this->rowBuilder->build(
                     $mergeJob,
                     $quantityResolver($mergeJob)
                 );
+                $row['output_id'] = $hasMockup ? $mergeJob->job_id : '';
+                $row['jumlah_hantaran'] = '';
 
-                if ($hasMockup) {
-                    $row['output_id'] = $mergeJob->job_id;
-                    $row['jumlah_hantaran'] = '';
-                    $firstCardRow ??= $row;
-                    $cardRowsBySide[$mergeJob->side] = $row;
+                if (! $hasMockup) {
+                    $row['majlis_ch'] = 'TIADA';
+                    $row['tema_ch'] = 'TIADA';
+                    $row['designcode_ch'] = 'TIADA';
+                } elseif ($mergeJob->side === $mockupSide) {
+                    $row['majlis_ch'] = PhotoshopCekHantaranContractV2::MOCKUP_SIDE;
+                    $row['tema_ch'] = PhotoshopCekHantaranContractV2::MOCKUP_THEME;
+                    $row['designcode_ch'] = PhotoshopCekHantaranContractV2::MOCKUP_DESIGN_CODE;
+                    $row['jumlah_hantaran'] = mb_strtoupper(
+                        trim((string) $order->jumlah_hantaran),
+                        'UTF-8'
+                    );
                 }
 
                 $ordered = [];
@@ -80,27 +89,6 @@ class ExportPhotoshopAutoMergeCsvService
                 }
 
                 fputcsv($handle, $ordered);
-            }
-
-            if ($hasMockup) {
-                $eventRow = $cardRowsBySide[$order->first_event_side] ?? $firstCardRow;
-                $mockupRow = array_fill_keys($headers, '');
-                $mockupRow['noinvoice'] = mb_strtoupper($order->order_id, 'UTF-8');
-                $mockupRow['tema_ch'] = PhotoshopCekHantaranContractV2::MOCKUP_THEME;
-                $mockupRow['designcode_ch'] = PhotoshopCekHantaranContractV2::MOCKUP_DESIGN_CODE;
-                $mockupRow['majlis'] = PhotoshopCekHantaranContractV2::MOCKUP_SIDE;
-                $mockupRow['namapengantinlelaki'] = $firstCardRow['namapengantinlelaki'] ?? '';
-                $mockupRow['namapengantinperempuan'] = $firstCardRow['namapengantinperempuan'] ?? '';
-                $mockupRow['hari'] = $eventRow['hari'] ?? '';
-                $mockupRow['tarikh'] = $eventRow['tarikh'] ?? '';
-                $mockupRow['flaggambar'] = 'TIADA GAMBAR';
-                $mockupRow['output_id'] = mb_strtoupper($order->order_id.'-CH', 'UTF-8');
-                $mockupRow['jumlah_hantaran'] = mb_strtoupper(
-                    trim((string) $order->jumlah_hantaran),
-                    'UTF-8'
-                );
-
-                fputcsv($handle, array_values($mockupRow));
             }
         } finally {
             fclose($handle);

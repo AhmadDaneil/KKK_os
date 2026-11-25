@@ -8,6 +8,7 @@ final class PhotoshopCekHantaranContractV2
         ...PhotoshopAutoMergeContractV1::HEADERS,
         'output_id',
         'jumlah_hantaran',
+        'majlis_ch',
         'tema_ch',
         'designcode_ch',
     ];
