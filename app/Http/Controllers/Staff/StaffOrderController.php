@@ -5,12 +5,21 @@ namespace App\Http\Controllers\Staff;
 use App\Http\Controllers\Controller;
 use App\Models\Order;
 use App\Models\User;
+use App\Services\Design\ResumeDesignAfterCorrectionService;
+use App\Services\Design\StartDesignJobService;
+use App\Services\Design\SyncOrderDesignStatusService;
 use App\Services\Orders\BuildCustomerProgressService;
+use App\Services\Photoshop\GeneratePhotoshopCsvForOrdersService;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 use Illuminate\View\View;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
+use Throwable;
 
 class StaffOrderController extends Controller
 {
@@ -59,6 +68,109 @@ class StaffOrderController extends Controller
                 ->orderBy('status')
                 ->pluck('status'),
         ]);
+    }
+
+    public function downloadDesignQueueCsv(
+        Request $request,
+        GeneratePhotoshopCsvForOrdersService $csvService,
+        StartDesignJobService $startDesign,
+        ResumeDesignAfterCorrectionService $resumeDesign,
+        SyncOrderDesignStatusService $syncOrderStatus
+    ): BinaryFileResponse|RedirectResponse {
+        /** @var User $user */
+        $user = $request->user();
+
+        abort_unless($user->hasStaffRole(User::ROLE_DESIGNER), 403);
+
+        $validated = $request->validate([
+            'workstream' => ['required', 'in:design'],
+            'page' => ['nullable', 'integer', 'min:1'],
+            'search' => ['nullable', 'string', 'max:255'],
+            'status' => ['nullable', 'string', 'max:100'],
+            'attention' => ['nullable', 'string', 'max:100'],
+        ]);
+
+        $workstream = $this->allowedWorkstream($user, (string) $validated['workstream']);
+        abort_unless($workstream === 'design', 403);
+
+        $query = $this->visibleOrdersFor($user);
+        $this->applyWorkstream($query, $workstream);
+        $this->applyFilters($query, $request, $user);
+
+        $page = max(1, (int) ($validated['page'] ?? 1));
+        $orders = $query
+            ->latest('id')
+            ->paginate(10, ['*'], 'page', $page)
+            ->getCollection();
+
+        if ($orders->isEmpty()) {
+            return back()->withErrors([
+                'photoshop' => 'There are no customer orders on this page to export.',
+            ]);
+        }
+
+        $directory = storage_path('app/private/photoshop-downloads');
+        $downloadName = sprintf(
+            'DESIGN_QUEUE_PAGE_%d_%d_CUSTOMERS_READY_TO_MERGE.csv',
+            $page,
+            $orders->count()
+        );
+        $path = $directory.DIRECTORY_SEPARATOR.Str::uuid().'.csv';
+
+        try {
+            $csvService->generate($orders, $path);
+
+            DB::transaction(function () use (
+                $orders,
+                $user,
+                $startDesign,
+                $resumeDesign,
+                $syncOrderStatus
+            ): void {
+                foreach ($orders as $selectedOrder) {
+                    $order = Order::query()
+                        ->whereKey($selectedOrder->getKey())
+                        ->lockForUpdate()
+                        ->firstOrFail();
+
+                    $designJobs = $order->designJobs()
+                        ->where('assigned_user_id', $user->id)
+                        ->orderBy('id')
+                        ->lockForUpdate()
+                        ->get();
+
+                    foreach ($designJobs as $designJob) {
+                        if ($designJob->status === 'READY_FOR_DESIGN') {
+                            $startDesign->start($designJob, $user);
+                        } elseif ($designJob->status === 'CORRECTION_REQUESTED') {
+                            $resumeDesign->resume($designJob, $user);
+                        }
+                    }
+
+                    $syncOrderStatus->sync($order);
+                }
+            });
+        } catch (Throwable $exception) {
+            if (is_file($path)) {
+                unlink($path);
+            }
+
+            if ($exception instanceof \RuntimeException) {
+                return back()->withErrors([
+                    'photoshop' => $exception->getMessage(),
+                ]);
+            }
+
+            report($exception);
+
+            return back()->withErrors([
+                'photoshop' => 'The customer CSV could not be prepared. Please try again.',
+            ]);
+        }
+
+        return response()
+            ->download($path, $downloadName, ['Content-Type' => 'text/csv; charset=UTF-8'])
+            ->deleteFileAfterSend(true);
     }
 
     public function show(Request $request, string $orderId, BuildCustomerProgressService $progressBuilder): View

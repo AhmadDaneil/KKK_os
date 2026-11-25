@@ -79,4 +79,14 @@ document.addEventListener('DOMContentLoaded', () => {
             select.addEventListener('change', updateResults);
         });
     });
+
+    document.querySelectorAll('form[data-current-page-context]').forEach((contextForm) => {
+        contextForm.addEventListener('submit', () => {
+            const currentUrl = new URL(window.location.href);
+
+            contextForm.querySelectorAll('input[type="hidden"]').forEach((input) => {
+                input.value = currentUrl.searchParams.get(input.name) ?? '';
+            });
+        });
+    });
 });

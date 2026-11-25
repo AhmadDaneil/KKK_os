@@ -397,6 +397,11 @@ Route::middleware(['auth:staff', 'active.staff'])
         */
 
         Route::middleware('staff.role:DESIGNER')->group(function () {
+            Route::post(
+                '/orders/photoshop/batch-csv',
+                [StaffOrderController::class, 'downloadDesignQueueCsv']
+            )->name('orders.photoshop.batch-csv');
+
             Route::get(
                 '/orders/{order}/photoshop/csv',
                 [StaffPhotoshopController::class, 'downloadCsv']
