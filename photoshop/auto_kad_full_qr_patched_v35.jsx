@@ -1800,7 +1800,7 @@ function kkkInsertFramedPortrait(doc, imagePath, item, placeBehindArtwork, fallb
     var oldUnits = app.preferences.rulerUnits;
     var photoDoc = null, imported = null, group = null, matteLayer = null, hidden = [];
     var frame, stack;
-    var proportionalPhotoFill = item !== "WOODEN HANGER";
+    var proportionalPhotoFill = item !== "WOODEN HANGER" && item !== "VIP CARD";
     try {
         if (!imagePath || !(new File(imagePath)).exists) throw new Error("Gambar pengantin tidak ditemui.");
         app.activeDocument = doc;
