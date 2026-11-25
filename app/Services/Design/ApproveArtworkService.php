@@ -30,18 +30,27 @@ class ApproveArtworkService
 
             $latestArtwork = $designJob->artworkVersions()
                 ->orderByDesc('version_number')
-                ->firstOrFail();
+                ->first();
+
+            $artworkMetadata = $latestArtwork
+                ? [
+                    'artwork_version_id' => $latestArtwork->id,
+                    'version_number' => $latestArtwork->version_number,
+                ]
+                : ['completion_method' => 'manual'];
 
             $designJob->update([
                 'status' => 'DESIGN_APPROVED',
             ]);
 
-            $designJob->reviewActions()->create([
-                'artwork_version_id' => $latestArtwork->id,
-                'action' => 'DESIGN_APPROVED',
-                'actor_user_id' => $actor?->id,
-                'acted_at' => now(),
-            ]);
+            if ($latestArtwork) {
+                $designJob->reviewActions()->create([
+                    'artwork_version_id' => $latestArtwork->id,
+                    'action' => 'DESIGN_APPROVED',
+                    'actor_user_id' => $actor?->id,
+                    'acted_at' => now(),
+                ]);
+            }
 
             $designJob->events()->create([
                 'event_type' => 'DESIGN_APPROVED',
@@ -49,10 +58,7 @@ class ApproveArtworkService
                 'to_status' => 'DESIGN_APPROVED',
                 'actor_user_id' => $actor?->id,
                 'occurred_at' => now(),
-                'metadata' => [
-                    'artwork_version_id' => $latestArtwork->id,
-                    'version_number' => $latestArtwork->version_number,
-                ],
+                'metadata' => $artworkMetadata,
             ]);
 
             return $designJob->fresh();
