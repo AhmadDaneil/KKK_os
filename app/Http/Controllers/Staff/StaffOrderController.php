@@ -396,6 +396,7 @@ class StaffOrderController extends Controller
                 'payments',
                 fn (Builder $payment) => $payment->where('status', 'PENDING')
             ),
+            'pending_orders' => $query->awaitingDesignerAssignment(),
             'unassigned_design' => $query->whereHas(
                 'designJobs',
                 fn (Builder $job) => $job

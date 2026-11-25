@@ -56,6 +56,7 @@
                         <div class="staff-attention-grid">
                             @foreach ([
                                 ['key' => 'pending_payments', 'label' => 'Payment Review', 'description' => 'Payments requiring approval or rejection', 'icon' => 'RM', 'params' => ['attention' => 'pending_payment'], 'pulse' => $attentionPulse['pending_payments']],
+                                ['key' => 'pending_orders', 'label' => 'Pending Orders', 'description' => 'Orders awaiting designer assignment', 'icon' => 'PO', 'params' => ['attention' => 'pending_orders'], 'pulse' => $attentionPulse['pending_orders']],
                                 ['key' => 'design_queue', 'label' => 'Design Tasks', 'description' => 'Automatically assigned to the lead designer', 'icon' => 'RB', 'params' => ['workstream' => 'design'], 'pulse' => $attentionPulse['design_queue']],
                                 ['key' => 'printing_queue', 'label' => 'Production Tasks', 'description' => 'Automatically assigned to the lead production staff', 'icon' => 'CT', 'params' => ['workstream' => 'printing'], 'pulse' => $attentionPulse['printing_queue']],
                                 ['key' => 'unassigned_packing', 'label' => 'Unassigned Packing', 'description' => 'Assign Operations Management to packing and fulfilment', 'icon' => 'PK', 'params' => ['workstream' => 'packing', 'attention' => 'unassigned_packing'], 'pulse' => false],

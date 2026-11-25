@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -81,6 +82,18 @@ class Order extends Model
     public function isAssignmentLocked(): bool
     {
         return $this->status === 'COMPLETED' || $this->isTerminalOperationalStatus();
+    }
+
+    public function scopeAwaitingDesignerAssignment(Builder $query): Builder
+    {
+        return $query
+            ->whereIn('status', ['BOOKED', 'DEPOSIT_PAID', 'DETAILS_CONFIRMED', 'READY_FOR_DESIGN', 'DESIGN_IN_PROGRESS', 'CORRECTION_REQUESTED'])
+            ->where(function (Builder $pendingOrders): void {
+                $pendingOrders->whereDoesntHave('designJobs')
+                    ->orWhereHas('designJobs', fn (Builder $designJobs) => $designJobs
+                        ->whereNull('assigned_user_id')
+                        ->whereIn('status', ['READY_FOR_DESIGN', 'DESIGN_IN_PROGRESS', 'CORRECTION_REQUESTED']));
+            });
     }
 
     public function displayCustomerReference(): ?string
