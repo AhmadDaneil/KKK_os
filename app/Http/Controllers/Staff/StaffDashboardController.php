@@ -19,7 +19,7 @@ class StaffDashboardController extends Controller
     {
         $user = auth()->user();
         $attention = [];
-        $attentionPulse = ['pending_payments' => false, 'design_queue' => false, 'printing_queue' => false, 'total' => false];
+        $attentionPulse = ['pending_payments' => false, 'pending_orders' => false, 'design_queue' => false, 'printing_queue' => false, 'total' => false];
         $designerAttention = 0;
         $designerStartAttention = 0;
         $digitalDesignerQueue = 0;
@@ -29,12 +29,14 @@ class StaffDashboardController extends Controller
         if ($user->canMonitorAllDepartments()) {
             $attention = [
                 'pending_payments' => PaymentTransaction::where('status', 'PENDING')->whereHas('order', fn ($query) => $query->whereNotIn('status', Order::TERMINAL_OPERATIONAL_STATUSES))->count(),
+                'pending_orders' => Order::awaitingDesignerAssignment()->count(),
                 'design_queue' => DesignJob::whereIn('status', ['READY_FOR_DESIGN', 'DESIGN_IN_PROGRESS', 'CORRECTION_REQUESTED'])->whereHas('order', fn ($query) => $query->whereNotIn('status', Order::TERMINAL_OPERATIONAL_STATUSES))->count(),
                 'printing_queue' => PrintJob::whereIn('status', ['READY_FOR_PRINT', 'PRINTING'])->whereHas('order', fn ($query) => $query->whereNotIn('status', Order::TERMINAL_OPERATIONAL_STATUSES))->count(),
                 'unassigned_packing' => PackingJob::whereNull('assigned_user_id')->where('status', 'READY_FOR_PACKING')->whereHas('order', fn ($query) => $query->whereNotIn('status', Order::TERMINAL_OPERATIONAL_STATUSES))->count(),
             ];
             $attentionPulse = [
                 'pending_payments' => $attention['pending_payments'] > 0,
+                'pending_orders' => $attention['pending_orders'] > 0,
                 'design_queue' => $attentionPulseBuilder->hasOverdueDesignTasks(),
                 'printing_queue' => $attentionPulseBuilder->hasOverdueProductionTasks(),
             ];

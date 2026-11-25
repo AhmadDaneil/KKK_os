@@ -85,6 +85,7 @@ class AdminDashboardController extends Controller
 
         $attention = [
             'pending_payments' => PaymentTransaction::where('status', 'PENDING')->whereHas('order', fn ($query) => $query->whereNotIn('status', Order::TERMINAL_OPERATIONAL_STATUSES))->count(),
+            'pending_orders' => Order::awaitingDesignerAssignment()->count(),
             'design_queue' => DesignJob::whereIn('status', ['READY_FOR_DESIGN', 'DESIGN_IN_PROGRESS', 'CORRECTION_REQUESTED'])->whereHas('order', fn ($query) => $query->whereNotIn('status', Order::TERMINAL_OPERATIONAL_STATUSES))->count(),
             'printing_queue' => PrintJob::whereIn('status', ['READY_FOR_PRINT', 'PRINTING'])->whereHas('order', fn ($query) => $query->whereNotIn('status', Order::TERMINAL_OPERATIONAL_STATUSES))->count(),
             'unassigned_packing' => PackingJob::whereNull('assigned_user_id')
@@ -95,6 +96,7 @@ class AdminDashboardController extends Controller
 
         $attentionPulse = [
             'pending_payments' => $attention['pending_payments'] > 0,
+            'pending_orders' => $attention['pending_orders'] > 0,
             'design_queue' => $attentionPulseBuilder->hasOverdueDesignTasks(),
             'printing_queue' => $attentionPulseBuilder->hasOverdueProductionTasks(),
         ];

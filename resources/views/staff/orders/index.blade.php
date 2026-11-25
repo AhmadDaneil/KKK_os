@@ -22,6 +22,7 @@
     $showWorkDuration = $isDesignerStaff || $isProductionStaff;
     $attentionLabels = [
         'pending_payment' => 'Payment Review',
+        'pending_orders' => 'Pending Orders',
         'unassigned_design' => 'Unassigned Design Work',
         'unassigned_printing' => 'Unassigned Production Work',
         'unassigned_packing' => 'Unassigned Packing Work',
@@ -29,6 +30,7 @@
     ];
     $attentionDescriptions = [
         'pending_payment' => 'Review deposits and full payments awaiting confirmation.',
+        'pending_orders' => 'Review orders that are waiting for designer assignment.',
         'packing_fulfilment' => 'Review orders requiring packing, courier handover or pickup preparation.',
     ];
     $attention = request('attention');
