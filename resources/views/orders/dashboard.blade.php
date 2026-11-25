@@ -1576,10 +1576,11 @@ document.addEventListener('DOMContentLoaded', function () {
             return displayCardTitle(title);
         }
 
-        const artworkThemes = new Set(['akikah', 'arch', 'cartoon', 'desa', 'garden', 'islamic', 'nostalgia', 'portrait']);
+        const artworkThemes = new Set(['akikah', 'arch', 'cartoon', 'desa', 'garden', 'islamic', 'minimalist', 'nostalgia', 'portrait', 'rusty', 'songket']);
         const artworkBase = @json(asset('images/designs'));
         const artworkDesignCodes = JSON.parse(form.dataset.designCodeOptions || '{}');
         const unavailableArtwork = {
+            'CKS-218': ['card-back'],
         };
 
         function syncArtworkImage(image, source, label) {
@@ -1660,7 +1661,8 @@ document.addEventListener('DOMContentLoaded', function () {
 
             if (back) {
                 const artwork = back.querySelector('[data-desa-card-back-artwork]');
-                back.dataset.designCode = hasArtwork ? normalizedCode : '';
+                const hasBackArtwork = hasArtwork && !(unavailableArtwork[normalizedCode] || []).includes('card-back');
+                back.dataset.designCode = hasBackArtwork ? normalizedCode : '';
                 const liveNames = back.querySelector('[data-desa-card-back-live-names]');
                 const genericNameCopy = liveNames.querySelector('[data-desa-generic-copy]');
                 const customNameCopy = liveNames.querySelector('[data-desa-card-back-custom-copy]');
@@ -1668,9 +1670,9 @@ document.addEventListener('DOMContentLoaded', function () {
                 liveNames.hidden = false;
                 genericNameCopy.hidden = true;
                 customNameCopy.hidden = false;
-                back.toggleAttribute('data-design-artwork', hasArtwork);
-                back.toggleAttribute('data-catalog-artwork', isCatalogArtwork);
-                syncArtworkImage(artwork, hasArtwork ? assetBase + 'card-back.webp' : '', normalizedCode + ' ' + themeName + ' card back');
+                back.toggleAttribute('data-design-artwork', hasBackArtwork);
+                back.toggleAttribute('data-catalog-artwork', hasBackArtwork && isCatalogArtwork);
+                syncArtworkImage(artwork, hasBackArtwork ? assetBase + 'card-back.webp' : '', normalizedCode + ' ' + themeName + ' card back');
             }
 
             scope.querySelectorAll('[data-desa-product]').forEach(function (product) {
