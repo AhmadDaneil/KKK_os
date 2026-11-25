@@ -3,7 +3,6 @@
 namespace App\Services\Photoshop;
 
 use App\Models\Order;
-use App\Support\Photoshop\PhotoshopAutoMergeContractV1;
 use App\Support\Photoshop\PhotoshopCekHantaranContractV2;
 use Illuminate\Support\Collection;
 use RuntimeException;
@@ -23,9 +22,7 @@ class GeneratePhotoshopCsvForOrdersService
             throw new RuntimeException('The Photoshop batch must contain between 1 and 10 orders.');
         }
 
-        $headers = $orders->contains(fn (Order $order): bool => (int) $order->package_count === 2)
-            ? PhotoshopCekHantaranContractV2::HEADERS
-            : PhotoshopAutoMergeContractV1::HEADERS;
+        $headers = PhotoshopCekHantaranContractV2::HEADERS;
         $directory = dirname($absolutePath);
 
         if (! is_dir($directory) && ! mkdir($directory, 0775, true) && ! is_dir($directory)) {
