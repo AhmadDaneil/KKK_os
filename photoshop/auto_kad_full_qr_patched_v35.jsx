@@ -1969,6 +1969,9 @@ try{
     var iNoInv  = idx("NoInvoice");
     var iOutputId = idx("output_id");
     var iJumlahHantaran = idx("jumlah_hantaran");
+    var iMajlisCh = idx("majlis_ch");
+    var iTemaCh = idx("tema_ch");
+    var iDesignCodeCh = idx("designcode_ch");
     var iQty    = idx("qtykad");
     var iTema   = idx("Tema");
     var iCode   = idx("DesignCode");
@@ -1999,13 +2002,17 @@ try{
 
     var foundLelaki = false, foundPerempuan = false, foundCek = false;
     for(var checkRow = 1; checkRow < rows.length; checkRow++){
-        var checkSide = t(rows[checkRow][iMajlis]).toUpperCase();
+        var checkRowData = rows[checkRow];
+        var checkSide = t(checkRowData[iMajlis]).toUpperCase();
+        var checkChequeSide = iMajlisCh >= 0 && iMajlisCh < checkRowData.length
+            ? t(checkRowData[iMajlisCh]).toUpperCase()
+            : "";
         if(checkSide === "LELAKI") foundLelaki = true;
         if(checkSide === "PEREMPUAN") foundPerempuan = true;
-        if(checkSide === "CEK_HANTARAN") foundCek = true;
+        if(checkSide === "CEK_HANTARAN" || checkChequeSide === "CEK_HANTARAN") foundCek = true;
     }
     if(foundLelaki && foundPerempuan && (!foundCek || iOutputId < 0 || iJumlahHantaran < 0)){
-        alert("CSV 2 pakej ini tiada baris/kolum Cek Hantaran. Muat turun CSV daripada sistem versi baharu; jangan gunakan CSV lama.");
+        alert("CSV 2 pakej ini tiada maklumat mockup Cek Hantaran. Muat turun CSV versi terkini.");
         throw "CSV dua pakej tanpa Cek Hantaran";
     }
 
@@ -2028,6 +2035,7 @@ try{
         var tema = t(g(iTema));
         var code = t(g(iCode));
         var majlis = t(g(iMajlis)).toUpperCase();
+        var majlisCh = iMajlisCh >= 0 ? t(g(iMajlisCh)).toUpperCase() : "";
         if(majlis === "CEK_HANTARAN"){
             var cekOutputId = t(g(iOutputId));
             if(cekOutputId !== NoInv + "-CH"){
@@ -2053,6 +2061,28 @@ try{
         if(cardOutputId !== "" && cardOutputId !== NoInv + (majlis === "LELAKI" ? "-L" : "-P")){
             logAppend(logPath, "[SKIP] " + NoInv + " | output_id tidak sepadan: " + cardOutputId);
             continue;
+        }
+        if(majlisCh === "CEK_HANTARAN"){
+            var chequeTheme = t(g(iTemaCh)).toUpperCase();
+            var chequeDesignCode = t(g(iDesignCodeCh)).toUpperCase();
+            if(chequeTheme !== "GENERIC" || chequeDesignCode !== "CEK_HANTARAN"){
+                logAppend(logPath, "[CEK HANTARAN FAIL] " + NoInv + " | tema_ch atau designcode_ch tidak sah");
+                cekFailCount++;
+            }else{
+                var chequeOutputId = NoInv.toUpperCase() + "-CH";
+                var chequeOutputs = exportCekHantaranRow(
+                    customerParent,
+                    chequeOutputId,
+                    t(g(iJumlahHantaran)),
+                    t(g(iNamaP)),
+                    t(g(iNamaL)),
+                    t(g(iHari)),
+                    t(g(iTarikh)),
+                    logPath
+                );
+                exportSuccessCount += chequeOutputs;
+                if(chequeOutputs < 2) cekFailCount++;
+            }
         }
         var gambarRaw = t(g(iGambar));
         var gambarPath = "";
