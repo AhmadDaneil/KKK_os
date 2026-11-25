@@ -22,10 +22,11 @@
     <main class="payment-return-page">
         <section class="payment-return-card" aria-live="polite">
             @if ($payment->status === 'PAID')
+                @php($isFullPayment = strtoupper((string) data_get($payment->metadata, 'payment_plan', data_get($order, 'payment_plan', 'DEPOSIT'))) === 'FULL')
                 <span class="payment-return-icon" aria-hidden="true">✓</span>
                 <p class="eyebrow">Payment confirmed</p>
                 <h1>Payment Successful</h1>
-                <p class="payment-return-lead">Your booking payment has been verified securely. Continue to complete your order form.</p>
+                <p class="payment-return-lead">{{ $isFullPayment ? 'Your full payment has been verified securely. You can now track your order.' : 'Your booking payment has been verified securely. Continue to complete your order form.' }}</p>
                 <dl class="payment-return-summary">
                     <div><dt>{{ $order->displayCustomerReference() ? 'Customer Reference' : 'Order ID' }}</dt><dd>{{ $order->displayCustomerReference() ?: $order->order_id }}</dd></div>
                     <div><dt>Amount paid</dt><dd>MYR {{ number_format((float) $payment->amount, 2) }}</dd></div>
@@ -36,7 +37,9 @@
                     @if ($receiptUrl)
                         <a class="button button-secondary" href="{{ $receiptUrl }}" target="_blank" rel="noopener noreferrer">View Billplz E-Receipt</a>
                     @endif
-                    <a class="button button-primary" href="{{ route('orders.dashboard', ['orderId' => $order->order_id]) }}">Continue To Form →</a>
+                    <a class="button button-primary" href="{{ $isFullPayment
+                        ? route('public.orders.progress', ['order_id' => $order->displayCustomerReference() ?: $order->order_id])
+                        : route('orders.dashboard', ['orderId' => $order->order_id]) }}">{{ $isFullPayment ? 'Track Order' : 'Continue To Form →' }}</a>
                 </div>
                 <a class="payment-return-merchant" href="{{ route('home') }}">Return to Merchant</a>
             @else
