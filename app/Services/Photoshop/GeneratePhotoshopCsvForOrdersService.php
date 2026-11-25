@@ -54,8 +54,11 @@ class GeneratePhotoshopCsvForOrdersService
                 throw new RuntimeException("Cannot open Photoshop CSV export path: {$absolutePath}");
             }
 
-            fwrite($output, "\xEF\xBB\xBF");
-            fputcsv($output, $headers, escape: '');
+            if (fwrite($output, "\xEF\xBB\xBF") === false
+                || fputcsv($output, $headers, escape: '') === false
+            ) {
+                throw new RuntimeException('Cannot write Photoshop batch CSV headers.');
+            }
 
             foreach ($temporaryPaths as $temporaryPath) {
                 $this->appendOrderRows($temporaryPath, $output, $headers);
@@ -116,7 +119,9 @@ class GeneratePhotoshopCsvForOrdersService
                     $headers
                 );
 
-                fputcsv($output, $orderedRow, escape: '');
+                if (fputcsv($output, $orderedRow, escape: '') === false) {
+                    throw new RuntimeException('Cannot write a Photoshop batch CSV row.');
+                }
             }
         } finally {
             fclose($input);
