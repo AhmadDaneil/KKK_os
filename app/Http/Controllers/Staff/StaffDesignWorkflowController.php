@@ -113,21 +113,6 @@ class StaffDesignWorkflowController extends Controller
         $this->authorizeAssignedDesigner($request, $designJob);
 
         try {
-            $designJob->load(['packageSide', 'artworkVersions' => fn ($query) => $query->latest('version_number')]);
-            $requestedProducts = collect(['banner', 'banting']);
-            $previewTypes = collect($designJob->artworkVersions->first()?->preview_files ?? [])
-                ->pluck('artwork_type')
-                ->map(fn (string $type): string => mb_strtolower($type));
-            $missingProducts = $requestedProducts->reject(fn (string $product): bool => $previewTypes->contains($product));
-
-            if ($missingProducts->isNotEmpty()) {
-                throw new RuntimeException(
-                    'Upload previews for '.implode(' and ', $missingProducts->all())
-                    .' for the '.($designJob->side === 'LELAKI' ? "groom's" : "bride's")
-                    .' package before marking the design as done.'
-                );
-            }
-
             $service->markReady(
                 $designJob,
                 $request->user()
@@ -150,7 +135,7 @@ class StaffDesignWorkflowController extends Controller
 
         return back()->with(
             'status',
-            'Design marked as done. Admin and Operations Management can view the uploaded previews.'
+            'Design marked as done.'
         );
     }
 
