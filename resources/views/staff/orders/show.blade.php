@@ -21,15 +21,14 @@
         && $assignedDesignJobs->count() === 2
         && $assignedDesignJobs->pluck('side')->unique()->count() === 2
         && $assignedDesignJobs->every(fn ($job) => in_array($job->status, ['READY_FOR_DESIGN', 'DESIGN_IN_PROGRESS'], true));
-    $batchArtworkJobs = $hasDesignJobs
+    $batchDesignJobsInProgress = $hasDesignJobs
         ? $order->designJobs->filter(fn ($job) =>
             auth()->user()->hasStaffRole(\App\Models\User::ROLE_DESIGNER)
             && $job->assigned_user_id === auth()->id()
             && $job->status === 'DESIGN_IN_PROGRESS'
         )
         : collect();
-    $usesBatchArtworkUpload = $batchArtworkJobs->count() > 1;
-    $hasTwoBatchArtworkJobs = $batchArtworkJobs->count() === 2;
+    $hasTwoBatchDesignJobs = $batchDesignJobsInProgress->count() === 2;
     $canUsePhotoshop = auth()->user()->hasStaffRole(\App\Models\User::ROLE_DESIGNER)
         && $hasDesignJobs
         && $order->designJobs->contains('assigned_user_id', auth()->id());
@@ -753,176 +752,29 @@
                                                 </button>
                                             </form>
                                         @elseif ($job->status === 'DESIGN_IN_PROGRESS')
-                                            @php
-                                                $isBatchArtworkJob = $usesBatchArtworkUpload
-                                                    && $batchArtworkJobs->contains('id', $job->id);
-                                            @endphp
                                             <div class="staff-design-upload">
                                                 <div class="staff-design-upload-heading">
-                                                    <h4>Upload Design Version</h4>
-
-                                                    <p>
-                                                        Upload editable source files and
-                                                        internal previews for Admin and Operations Management.
-                                                    </p>
+                                                    <h4>Design Work</h4>
+                                                    <p>When this package's design work is complete, mark it as done to continue the order.</p>
                                                 </div>
 
-                                                @if ($isBatchArtworkJob)
-                                                    <div class="staff-artwork-form">
-                                                @else
-                                                    <form
-                                                        method="POST"
-                                                        action="{{ route($operationRoutePrefix.'design-jobs.artwork.store', $job) }}"
-                                                        enctype="multipart/form-data"
-                                                        class="staff-artwork-form js-staff-confirmation-form js-async-artwork-upload"
-                                                        data-confirm-title="Upload design {{ $job->side === 'LELAKI' ? 'Groom' : 'Bride' }}?"
-                                                        data-confirm-message="Check that the selected source files and internal previews are correct. They will be saved as a new design version for Admin and Operations Management to view."
-                                                        data-confirm-button="Yes, upload"
-                                                    >
-                                                        @csrf
-                                                @endif
-
-                                                    <div class="staff-field">
-                                                        <label for="source-artwork-{{ $job->id }}">
-                                                            Design Source Files
-                                                        </label>
-
-                                                        <div class="staff-multi-file-picker" data-file-kind="source artwork">
-                                                        <input
-                                                            id="source-artwork-{{ $job->id }}"
-                                                            type="file"
-                                                            name="{{ $isBatchArtworkJob ? 'artworks['.$job->id.'][source_artwork][]' : 'source_artwork[]' }}"
-                                                            @if ($isBatchArtworkJob) form="batch-artwork-upload" @endif
-                                                            accept=".psd,.pdf,image/vnd.adobe.photoshop,application/photoshop,application/x-photoshop,application/pdf"
-                                                            multiple
-                                                            required
-                                                        >
-                                                            <button type="button" class="staff-file-add" aria-controls="source-artwork-{{ $job->id }}">+ Add Files</button>
-                                                            <ul class="staff-selected-files" aria-live="polite"></ul>
-                                                        </div>
-
-                                                        <span class="staff-field-help">
-                                                            PSD or PDF. Maximum 300 MB per source file.
-                                                        </span>
-                                                    </div>
-
-                                                    <div class="staff-supplementary-artworks">
-                                                        <div class="staff-supplementary-heading">
-                                                            <h4>Wedding Card Preview</h4>
-                                                            <p>Upload both sides of the card as internal previews.</p>
-                                                        </div>
-                                                        <div class="staff-supplementary-grid">
-                                                            <div class="staff-field">
-                                                                <label for="card-front-preview-{{ $job->id }}">Front Side <span class="staff-optional">(required)</span></label>
-                                                                <span class="staff-artwork-ratio staff-artwork-ratio--card" aria-hidden="true">2 : 3</span>
-                                                                <input id="card-front-preview-{{ $job->id }}" type="file" name="{{ $isBatchArtworkJob ? 'artworks['.$job->id.'][customer_preview][]' : 'customer_preview[]' }}" @if ($isBatchArtworkJob) form="batch-artwork-upload" @endif accept=".jpg,.jpeg,.png,image/jpeg,image/png" required>
-                                                                <span class="staff-field-help">Portrait 2:3 format, such as 800 × 1200 px.</span>
-                                                            </div>
-                                                            <div class="staff-field">
-                                                                <label for="card-back-preview-{{ $job->id }}">Back Side <span class="staff-optional">(required)</span></label>
-                                                                <span class="staff-artwork-ratio staff-artwork-ratio--card" aria-hidden="true">2 : 3</span>
-                                                                <input id="card-back-preview-{{ $job->id }}" type="file" name="{{ $isBatchArtworkJob ? 'artworks['.$job->id.'][customer_preview][]' : 'customer_preview[]' }}" @if ($isBatchArtworkJob) form="batch-artwork-upload" @endif accept=".jpg,.jpeg,.png,image/jpeg,image/png" required>
-                                                                <span class="staff-field-help">Portrait 2:3 format, such as 800 × 1200 px.</span>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-
-                                                    <div class="staff-supplementary-artworks">
-                                                        <div class="staff-supplementary-heading">
-                                                            <h4>Card Package Preview</h4>
-                                                            <p>Banner and bunting are included with every wedding card package. Use the same short names and card design theme.</p>
-                                                            @if ($hasCustomerPhoto)
-                                                                <p class="staff-field-help"><strong>Customer photo uploaded:</strong> use it for all items with the PORTRAIT theme, or for banner and bunting only with other themes. Use the supplied template for other items.
-                                                                    @if (auth()->user()->hasStaffRole(\App\Models\User::ROLE_DESIGNER)
-                                                                        && $job->assigned_user_id === auth()->id())
-                                                                        Use the Download Picture button below.
-                                                                    @else
-                                                                        <a href="{{ route($operationRoutePrefix.'orders.customer-photo', ['orderId' => $order->order_id, 'side' => $jobPackageSide->side]) }}">Download couple photo</a>
-                                                                    @endif
-                                                                </p>
-                                                            @else
-                                                                <p class="staff-field-help"><strong>Theme {{ $jobTheme ?: '-' }}:</strong> prepare the banner and bunting using the design theme only, without a couple photo.</p>
-                                                            @endif
-                                                        </div>
-                                                        <div class="staff-supplementary-grid">
-                                                            <div class="staff-field">
-                                                                <label for="banner-preview-{{ $job->id }}">Preview banner <span class="staff-optional">(required)</span></label>
-                                                                <span class="staff-artwork-ratio staff-artwork-ratio--banner" aria-hidden="true">2 : 1</span>
-                                                                <input id="banner-preview-{{ $job->id }}" type="file" name="{{ $isBatchArtworkJob ? 'artworks['.$job->id.'][banner_preview]' : 'banner_preview' }}" @if ($isBatchArtworkJob) form="batch-artwork-upload" @endif accept=".jpg,.jpeg,.png,image/jpeg,image/png" required>
-                                                                <span class="staff-field-help">Landscape 2:1 format, such as 1280 × 640 px. Use the short names and card theme.</span>
-                                                            </div>
-                                                            <div class="staff-field">
-                                                                <label for="banting-preview-{{ $job->id }}">Bunting preview <span class="staff-optional">(required)</span></label>
-                                                                <span class="staff-artwork-ratio staff-artwork-ratio--banting" aria-hidden="true">1 : 2</span>
-                                                                <input id="banting-preview-{{ $job->id }}" type="file" name="{{ $isBatchArtworkJob ? 'artworks['.$job->id.'][banting_preview]' : 'banting_preview' }}" @if ($isBatchArtworkJob) form="batch-artwork-upload" @endif accept=".jpg,.jpeg,.png,image/jpeg,image/png" required>
-                                                                <span class="staff-field-help">Portrait 1:2 format, such as 640 × 1280 px. Use the short names and card theme.</span>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-
-
-                                                    <div class="staff-field">
-                                                        <label for="internal-note-{{ $job->id }}">
-                                                            Internal Note
-                                                            <span class="staff-optional">(optional)</span>
-                                                        </label>
-
-                                                        <textarea
-                                                            id="internal-note-{{ $job->id }}"
-                                                            name="{{ $isBatchArtworkJob ? 'artworks['.$job->id.'][internal_note]' : 'internal_note' }}"
-                                                            @if ($isBatchArtworkJob) form="batch-artwork-upload" @endif
-                                                            rows="3"
-                                                            maxlength="5000"
-                                                        >{{ old($isBatchArtworkJob ? 'artworks.'.$job->id.'.internal_note' : 'internal_note') }}</textarea>
-                                                    </div>
-
-                                                    @if ($isBatchArtworkJob)
-                                                        </div>
-                                                    @else
-                                                        <button
-                                                            type="submit"
-                                                            class="staff-button staff-button-primary"
-                                                        >
-                                                            Upload Design
-                                                        </button>
-                                                        <p class="staff-upload-notice" role="status" aria-live="polite" hidden></p>
-                                                        </form>
-                                                    @endif
-
-                                                <div class="staff-artwork-ready-panel" data-artwork-ready-panel @if ($job->artworkVersions->isEmpty()) hidden @endif>
-                                                        <div>
-                                                            <strong>Design uploaded</strong>
-                                                            <p>
-                                                                Version <span data-artwork-version>{{ $job->artworkVersions->max('version_number') }}</span> is the latest version.
-                                                                Send to the customer after checking the previews.
-                                                            </p>
-                                                        </div>
-
-                                                        <form
-                                                            method="POST"
-                                                            action="{{ route($operationRoutePrefix.'design-jobs.mark-ready', $job) }}"
-                                                            class="js-staff-confirmation-form"
-                                                            data-confirm-title="Mark {{ $job->side === 'LELAKI' ? 'Groom' : 'Bride' }} design as done?"
-                                                            data-confirm-message="Version {{ $job->artworkVersions->max('version_number') }} will be marked complete for internal tracking. Admin and Operations Management can view the uploaded previews; they will not be sent to the customer."
-                                                            data-confirm-button="Yes, mark as done"
-                                                        >
-                                                            @csrf
-                                                            <button
-                                                                type="submit"
-                                                                class="staff-button staff-button-primary"
-                                                            >
-                                                                Mark as Done
-                                                            </button>
-                                                        </form>
-                                                    </div>
-                                                    <p class="staff-work-message" data-artwork-upload-hint @if ($job->artworkVersions->isNotEmpty()) hidden @endif>
-                                                        Upload source files and internal previews first.
-                                                        The Mark as Done button will then appear.
-                                                    </p>
+                                                <form
+                                                    method="POST"
+                                                    action="{{ route($operationRoutePrefix.'design-jobs.mark-ready', $job) }}"
+                                                    class="js-staff-confirmation-form"
+                                                    data-confirm-title="Mark {{ $job->side === 'LELAKI' ? 'Groom' : 'Bride' }} design as done?"
+                                                    data-confirm-message="This will mark the package design work as done and continue the order workflow."
+                                                    data-confirm-button="Yes, mark as done"
+                                                >
+                                                    @csrf
+                                                    <button type="submit" class="staff-button staff-button-primary">
+                                                        Mark as Done
+                                                    </button>
+                                                </form>
                                             </div>
                                         @elseif ($job->status === 'DESIGN_READY')
                                             <p class="staff-work-message">
-                                                Design is ready for internal review.
+                                                Design work has been marked as done.
                                             </p>
                                         @endif
 
@@ -947,32 +799,13 @@
                         @endforelse
                     </div>
 
-                    @if ($usesBatchArtworkUpload)
-                        <form
-                            id="batch-artwork-upload"
-                            method="POST"
-                            action="{{ route('staff.orders.design-artworks.store', $order) }}"
-                            enctype="multipart/form-data"
-                            class="staff-batch-artwork-form js-staff-confirmation-form js-async-artwork-upload"
-                            data-confirm-title="Upload both designs?"
-                            data-confirm-message="Check the source files and internal previews for the groom's and bride's packages. Both will be saved as new design versions for Admin and Operations Management to view."
-                            data-confirm-button="Yes, upload both"
-                        >
-                            @csrf
-                            <button type="submit" class="staff-button staff-button-primary">
-                                Upload Both Designs
-                            </button>
-                            <p class="staff-upload-notice" role="status" aria-live="polite" hidden></p>
-                        </form>
-                    @endif
-
-                    @if ($hasTwoBatchArtworkJobs)
+                    @if ($hasTwoBatchDesignJobs)
                         <form
                             method="POST"
                             action="{{ route('staff.orders.design-jobs.mark-ready', $order) }}"
                             class="staff-batch-review-form js-staff-confirmation-form"
                             data-confirm-title="Mark both designs as done?"
-                            data-confirm-message="Both packages will be marked complete for internal tracking. Admin and Operations Management can view the uploaded card, banner and bunting previews; they will not be sent to the customer."
+                            data-confirm-message="Both package design jobs will be marked as done and the order will continue to the next workflow step."
                             data-confirm-button="Yes, mark both as done"
                         >
                             @csrf
