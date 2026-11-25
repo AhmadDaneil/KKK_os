@@ -195,10 +195,17 @@
                             ? ($isDesignerStaff ? $order->designJobs : $order->printJobs)
                             : collect();
                         $durationStartedAt = $durationJobs
-                            ->map(fn ($job) => $job->assigned_at ?? $job->started_at)
+                            ->map(fn ($job) => $job->started_at)
                             ->filter()
                             ->sortBy(fn ($date) => $date->getTimestamp())
                             ->first();
+                        if ($durationStartedAt === null) {
+                            $durationStartedAt = $durationJobs
+                                ->map(fn ($job) => $job->assigned_at)
+                                ->filter()
+                                ->sortBy(fn ($date) => $date->getTimestamp())
+                                ->first();
+                        }
                         $durationDays = $durationStartedAt
                             ? intdiv(max(0, now()->getTimestamp() - $durationStartedAt->getTimestamp()), 86400)
                             : null;
