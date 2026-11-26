@@ -334,7 +334,7 @@
                             @csrf
                             <input type="hidden" name="payment_method" value="BILLPLZ">
                             <button class="confirm-button" type="submit">
-                                Pay booking deposit · RM {{ number_format((float) $review['pricing']['deposit_amount'], 2) }} · Billplz
+                                Pay booking deposit · RM {{ number_format((float) $review['pricing']['deposit_amount'], 2) }} · Online Banking
                             </button>
                         </form>
                         @if (config('services.billplz.duitnow_qr_enabled'))
