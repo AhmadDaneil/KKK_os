@@ -688,8 +688,8 @@ button {
 }
 
 .autosave-status {
-    flex: 0 1 auto;
-    width: fit-content;
+    flex: 1 1 auto;
+    min-width: 0;
     max-width: 100%;
     color: #6b7280;
     font-size: 0.875rem;
@@ -711,6 +711,7 @@ button {
     border: 1px solid #111827;
     background: #111827;
     color: #fff;
+    margin-left: auto;
 }
 
 .form-actions button:hover {
@@ -736,6 +737,7 @@ button {
     .form-actions button,
     .form-actions a {
         width: 100%;
+        margin-left: 0;
     }
 }
 
