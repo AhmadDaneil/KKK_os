@@ -37,32 +37,6 @@ class StaffOrderLifecycleController extends Controller
         return back()->with('status', "Order {$displayOrderIdentifier} cancelled. Its record has been retained.");
     }
 
-    public function archive(
-        Request $request,
-        Order $order,
-        OrderLifecycleService $service,
-    ): RedirectResponse {
-        $this->authorizeOperationManagement($request);
-        $validated = $this->validateReason($request);
-
-        try {
-            $service->archive(
-                $order,
-                $validated['reason'],
-                $request->user(),
-                $this->source($request),
-            );
-        } catch (RuntimeException $exception) {
-            return back()->withErrors([
-                'order_lifecycle' => $exception->getMessage(),
-            ]);
-        }
-
-        $displayOrderIdentifier = $order->displayCustomerReference() ?: $order->order_id;
-
-        return back()->with('status', "Order {$displayOrderIdentifier} archived. Its record has been retained.");
-    }
-
     /** @return array{reason: string} */
     private function validateReason(Request $request): array
     {

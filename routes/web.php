@@ -163,8 +163,6 @@ Route::middleware(['auth:admin', 'active.staff', 'staff.role:ADMIN'])
             ->name('orders.destroy');
         Route::post('/orders/{order}/cancel', [StaffOrderLifecycleController::class, 'cancel'])
             ->name('orders.cancel');
-        Route::post('/orders/{order}/archive', [StaffOrderLifecycleController::class, 'archive'])
-            ->name('orders.archive');
         Route::post('/orders/{order}/assign-printing', [StaffOrderProductionAssignmentController::class, 'assignPrinting'])
             ->name('orders.assign-printing');
         Route::post('/orders/{order}/assign-packing-fulfilment', [StaffOrderProductionAssignmentController::class, 'assignPackingAndFulfilment'])
@@ -354,8 +352,6 @@ Route::middleware(['auth:staff', 'active.staff'])
                 ->name('orders.destroy');
             Route::post('/orders/{order}/cancel', [StaffOrderLifecycleController::class, 'cancel'])
                 ->name('orders.cancel');
-            Route::post('/orders/{order}/archive', [StaffOrderLifecycleController::class, 'archive'])
-                ->name('orders.archive');
             Route::post('/orders/{order}/assign-printing', [StaffOrderProductionAssignmentController::class, 'assignPrinting'])
                 ->name('orders.assign-printing');
             Route::post('/orders/{order}/assign-packing-fulfilment', [StaffOrderProductionAssignmentController::class, 'assignPackingAndFulfilment'])
