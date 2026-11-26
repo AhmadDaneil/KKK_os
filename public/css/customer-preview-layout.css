@@ -8811,7 +8811,7 @@
 [data-design-code="CKM-014"][data-preview-artwork-slot="bunting"] { --preview-couple-x: 50.666667%; --preview-couple-y: 68.125000%; --preview-couple-width: 94.000000%; --preview-ampersand-width: 14.450355%; --preview-date-x: 50.458333%; --preview-date-y: 77.125000%; --preview-date-width: 43.250000%; --preview-ampersand-visibility: hidden; }
 [data-design-code="CKM-014"][data-preview-artwork-slot="arrow-left"] { --preview-couple-x: 50.806452%; --preview-couple-y: 60.575827%; --preview-couple-width: 82.572581%; --preview-ampersand-width: 14.259205%; --preview-date-x: 53.508065%; --preview-date-y: 82.297605%; --preview-date-width: 47.612903%; --preview-ampersand-visibility: hidden; }
 [data-design-code="CKM-014"][data-preview-artwork-slot="arrow-right"] { --preview-couple-x: 50.806452%; --preview-couple-y: 60.575827%; --preview-couple-width: 82.572581%; --preview-ampersand-width: 14.259205%; --preview-date-x: 48.306452%; --preview-date-y: 82.297605%; --preview-date-width: 47.612903%; --preview-ampersand-visibility: hidden; }
-[data-design-code="CKM-014"][data-preview-artwork-slot="sticker"] { --preview-couple-x: 50.316108%; --preview-couple-y: 74.876306%; --preview-couple-width: 71.145684%; --preview-ampersand-width: 14.063393%; --preview-date-x: 50.164926%; --preview-date-y: 75.948323%; --preview-date-width: 9.793293%; --preview-ampersand-visibility: hidden; }
+[data-design-code="CKM-014"][data-preview-artwork-slot="sticker"] { --preview-couple-x: 50.316108%; --preview-couple-y: 74.876306%; --preview-couple-width: 71.145684%; --preview-ampersand-width: 14.063393%; --preview-date-x: 50%; --preview-date-y: 88.152831%; --preview-date-width: 27.432655%; --preview-ampersand-visibility: hidden; }
 [data-design-code="CKM-014"][data-preview-artwork-slot="wooden-hanger"] { --preview-couple-x: 50.222222%; --preview-couple-y: 50.454545%; --preview-couple-width: 77.644444%; --preview-ampersand-width: 12.707499%; --preview-date-x: 50.177778%; --preview-date-y: 70.946970%; --preview-date-width: 48.222222%; --preview-ampersand-visibility: hidden; }
 [data-design-code="CKM-015"][data-preview-artwork-slot="card-front"] { --preview-couple-x: 49.354167%; --preview-couple-y: 42.138889%; --preview-couple-width: 51.500000%; --preview-date-x: 48.958333%; --preview-date-y: 72.277778%; --preview-date-width: 42.833333%; --preview-ampersand-visibility: hidden; }
 [data-design-code="CKM-015"][data-preview-artwork-slot="banner"] { --preview-date-x: 49.888889%; --preview-date-y: 72.629630%; --preview-date-width: 26.777778%; --preview-ampersand-visibility: hidden; }
@@ -8960,13 +8960,9 @@
 .live-product--sticker[data-design-code^="CKM-"] .desa-product-copy-date { flex-direction: column; align-items: center; gap: .05em; }
 .live-product--sticker[data-design-code^="CKM-"] .desa-product-copy-date .desa-sticker-day { display: block !important; }
 
-/* CKM-014 separates the weekday from the date on every product master. */
-[data-design-code="CKM-014"][data-preview-artwork-slot="card-front"] { --preview-day-x: 29.958333%; --preview-day-y: 31.500000%; --preview-day-width: 19%; }
-[data-design-code="CKM-014"][data-preview-artwork-slot="banner"] { --preview-day-x: 45.546296%; --preview-day-y: 35.555556%; --preview-day-width: 12%; }
-[data-design-code="CKM-014"][data-preview-artwork-slot="bunting"] { --preview-day-x: 29.958333%; --preview-day-y: 33.750000%; --preview-day-width: 19%; }
-[data-design-code="CKM-014"][data-preview-artwork-slot="arrow-left"] { --preview-day-x: 40.302419%; --preview-day-y: 40.569556%; --preview-day-width: 13%; }
-[data-design-code="CKM-014"][data-preview-artwork-slot="arrow-right"] { --preview-day-x: 40.302419%; --preview-day-y: 40.569556%; --preview-day-width: 13%; }
-[data-design-code="CKM-014"][data-preview-artwork-slot="sticker"] { --preview-day-x: 34.497526%; --preview-day-y: 24.212205%; --preview-day-width: 16%; }
+/* CKM-014 and both wooden hanger masters have no visible weekday. */
+:is(.wedding-card-front, .live-product)[data-design-code="CKM-014"] [data-preview-field="day_name_malay"],
+.live-product:is([data-design-code^="CKM-"], [data-design-code^="CKS-"])[data-preview-artwork-slot="wooden-hanger"] [data-preview-field="day_name_malay"] { display: none !important; }
 
 .wedding-card-front[data-design-code="CKM-014"] .desa-card-custom-copy { inset: 0; }
 .wedding-card-front[data-design-code="CKM-014"] .desa-card-custom-date { position: static !important; display: contents !important; }
