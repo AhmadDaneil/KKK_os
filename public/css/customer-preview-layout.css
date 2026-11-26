@@ -8785,12 +8785,12 @@
 [data-design-code="CKM-010"][data-preview-artwork-slot="arrow-right"] { --preview-couple-x: 49.838710%; --preview-couple-y: 38.554732%; --preview-couple-width: 59.064516%; --preview-date-x: 49.223790%; --preview-date-y: 65.307868%; --preview-date-width: 48.983871%; --preview-ampersand-visibility: hidden; }
 [data-design-code="CKM-010"][data-preview-artwork-slot="sticker"] { --preview-couple-x: 49.646893%; --preview-couple-y: 45.762712%; --preview-couple-width: 51.197740%; --preview-date-x: 49.576271%; --preview-date-y: 82.344633%; --preview-date-width: 47.525424%; --preview-ampersand-visibility: hidden; }
 [data-design-code="CKM-010"][data-preview-artwork-slot="wooden-hanger"] { --preview-couple-x: 49.444444%; --preview-couple-y: 50.454545%; --preview-couple-width: 77.644444%; --preview-ampersand-width: 12.707499%; --preview-date-x: 50.177778%; --preview-date-y: 70.946970%; --preview-date-width: 48.222222%; --preview-ampersand-visibility: hidden; }
-[data-design-code="CKM-011"][data-preview-artwork-slot="card-front"] { --preview-couple-x: 50.187500%; --preview-couple-y: 42.083333%; --preview-couple-width: 51.500000%; --preview-date-x: 50.520833%; --preview-date-y: 65.277778%; --preview-date-width: 42.833333%; --preview-ampersand-visibility: hidden; }
-[data-design-code="CKM-011"][data-preview-artwork-slot="banner"] { --preview-date-x: 49.305556%; --preview-date-y: 78.203704%; --preview-date-width: 28.203704%; --preview-ampersand-visibility: hidden; }
-[data-design-code="CKM-011"][data-preview-artwork-slot="bunting"] { --preview-couple-x: 50.208333%; --preview-couple-y: 40.604167%; --preview-couple-width: 62.500000%; --preview-date-x: 50.645833%; --preview-date-y: 62.187500%; --preview-date-width: 51.666667%; --preview-ampersand-visibility: hidden; }
-[data-design-code="CKM-011"][data-preview-artwork-slot="arrow-left"] { --preview-couple-x: 49.213710%; --preview-couple-y: 41.391106%; --preview-couple-width: 49.790323%; --preview-date-x: 49.526210%; --preview-date-y: 65.037058%; --preview-date-width: 41.443548%; --preview-ampersand-visibility: hidden; }
-[data-design-code="CKM-011"][data-preview-artwork-slot="arrow-right"] { --preview-couple-x: 49.213710%; --preview-couple-y: 41.391106%; --preview-couple-width: 49.790323%; --preview-date-x: 49.526210%; --preview-date-y: 65.037058%; --preview-date-width: 41.443548%; --preview-ampersand-visibility: hidden; }
-[data-design-code="CKM-011"][data-preview-artwork-slot="sticker"] { --preview-couple-x: 30.964816%; --preview-couple-y: 48.185816%; --preview-couple-width: 51.409566%; --preview-date-x: 31.280924%; --preview-date-y: 82.875206%; --preview-date-width: 42.778450%; --preview-ampersand-visibility: hidden; }
+[data-design-code="CKM-011"][data-preview-artwork-slot="card-front"] { --preview-couple-x: 25.5%; --preview-couple-y: 60.1%; --preview-couple-width: 32.5%; --preview-date-x: 21.8%; --preview-date-y: 27.6%; --preview-date-width: 26.3%; --preview-ampersand-visibility: hidden; }
+[data-design-code="CKM-011"][data-preview-artwork-slot="banner"] { --preview-date-x: 40.9%; --preview-date-y: 73.4%; --preview-date-width: 25.4%; --preview-ampersand-visibility: hidden; }
+[data-design-code="CKM-011"][data-preview-artwork-slot="bunting"] { --preview-couple-x: 37.8%; --preview-couple-y: 54.9%; --preview-couple-width: 44.2%; --preview-date-x: 27%; --preview-date-y: 26.4%; --preview-date-width: 28.8%; --preview-ampersand-visibility: hidden; }
+[data-design-code="CKM-011"][data-preview-artwork-slot="arrow-left"] { --preview-couple-x: 33.3%; --preview-couple-y: 55.2%; --preview-couple-width: 38%; --preview-date-x: 30.5%; --preview-date-y: 31.4%; --preview-date-width: 37%; --preview-ampersand-visibility: hidden; }
+[data-design-code="CKM-011"][data-preview-artwork-slot="arrow-right"] { --preview-couple-x: 33.3%; --preview-couple-y: 55.2%; --preview-couple-width: 38%; --preview-date-x: 30.5%; --preview-date-y: 31.4%; --preview-date-width: 37%; --preview-ampersand-visibility: hidden; }
+[data-design-code="CKM-011"][data-preview-artwork-slot="sticker"] { --preview-couple-x: 24.3%; --preview-couple-y: 55.2%; --preview-couple-width: 46%; --preview-date-x: 17%; --preview-date-y: 28.5%; --preview-date-width: 24%; --preview-ampersand-visibility: hidden; }
 [data-design-code="CKM-011"][data-preview-artwork-slot="wooden-hanger"] { --preview-couple-x: 49.444444%; --preview-couple-y: 50.454545%; --preview-couple-width: 77.644444%; --preview-ampersand-width: 12.707499%; --preview-date-x: 50.177778%; --preview-date-y: 70.946970%; --preview-date-width: 48.222222%; --preview-ampersand-visibility: hidden; }
 [data-design-code="CKM-012"][data-preview-artwork-slot="card-front"] { --preview-couple-x: 50.041667%; --preview-couple-y: 48.472222%; --preview-couple-width: 44.416667%; --preview-date-x: 49.458333%; --preview-date-y: 89.777778%; --preview-date-width: 42.833333%; --preview-ampersand-visibility: hidden; }
 [data-design-code="CKM-012"][data-preview-artwork-slot="banner"] { --preview-date-x: 50.000000%; --preview-date-y: 74.629630%; --preview-date-width: 26.777778%; --preview-ampersand-visibility: hidden; }
@@ -9067,12 +9067,12 @@
 :is(.wedding-card-front, .live-product)[data-design-artwork][data-design-code="CKM-010"][data-preview-artwork-slot="arrow-right"]:not(.has-customer-photo):not(.has-live-customer-photo) { --preview-copy-ink: #3a1f0f; }
 :is(.wedding-card-front, .live-product)[data-design-artwork][data-design-code="CKM-010"][data-preview-artwork-slot="sticker"]:not(.has-customer-photo):not(.has-live-customer-photo) { --preview-copy-ink: #3a1f0f; }
 :is(.wedding-card-front, .live-product)[data-design-artwork][data-design-code="CKM-010"][data-preview-artwork-slot="wooden-hanger"]:not(.has-customer-photo):not(.has-live-customer-photo) { --preview-copy-ink: #221e1f; }
-:is(.wedding-card-front, .live-product)[data-design-artwork][data-design-code="CKM-011"][data-preview-artwork-slot="card-front"]:not(.has-customer-photo):not(.has-live-customer-photo) { --preview-copy-ink: #392013; }
-:is(.wedding-card-front, .live-product)[data-design-artwork][data-design-code="CKM-011"][data-preview-artwork-slot="banner"]:not(.has-customer-photo):not(.has-live-customer-photo) { --preview-copy-ink: #382014; }
-:is(.wedding-card-front, .live-product)[data-design-artwork][data-design-code="CKM-011"][data-preview-artwork-slot="bunting"]:not(.has-customer-photo):not(.has-live-customer-photo) { --preview-copy-ink: #392013; }
-:is(.wedding-card-front, .live-product)[data-design-artwork][data-design-code="CKM-011"][data-preview-artwork-slot="arrow-left"]:not(.has-customer-photo):not(.has-live-customer-photo) { --preview-copy-ink: #392013; }
-:is(.wedding-card-front, .live-product)[data-design-artwork][data-design-code="CKM-011"][data-preview-artwork-slot="arrow-right"]:not(.has-customer-photo):not(.has-live-customer-photo) { --preview-copy-ink: #392013; }
-:is(.wedding-card-front, .live-product)[data-design-artwork][data-design-code="CKM-011"][data-preview-artwork-slot="sticker"]:not(.has-customer-photo):not(.has-live-customer-photo) { --preview-copy-ink: #392013; }
+:is(.wedding-card-front, .live-product)[data-design-artwork][data-design-code="CKM-011"][data-preview-artwork-slot="card-front"]:not(.has-customer-photo):not(.has-live-customer-photo) { --preview-copy-ink: #897456; }
+:is(.wedding-card-front, .live-product)[data-design-artwork][data-design-code="CKM-011"][data-preview-artwork-slot="banner"]:not(.has-customer-photo):not(.has-live-customer-photo) { --preview-copy-ink: #897456; }
+:is(.wedding-card-front, .live-product)[data-design-artwork][data-design-code="CKM-011"][data-preview-artwork-slot="bunting"]:not(.has-customer-photo):not(.has-live-customer-photo) { --preview-copy-ink: #897456; }
+:is(.wedding-card-front, .live-product)[data-design-artwork][data-design-code="CKM-011"][data-preview-artwork-slot="arrow-left"]:not(.has-customer-photo):not(.has-live-customer-photo) { --preview-copy-ink: #897456; }
+:is(.wedding-card-front, .live-product)[data-design-artwork][data-design-code="CKM-011"][data-preview-artwork-slot="arrow-right"]:not(.has-customer-photo):not(.has-live-customer-photo) { --preview-copy-ink: #897456; }
+:is(.wedding-card-front, .live-product)[data-design-artwork][data-design-code="CKM-011"][data-preview-artwork-slot="sticker"]:not(.has-customer-photo):not(.has-live-customer-photo) { --preview-copy-ink: #897456; }
 :is(.wedding-card-front, .live-product)[data-design-artwork][data-design-code="CKM-011"][data-preview-artwork-slot="wooden-hanger"]:not(.has-customer-photo):not(.has-live-customer-photo) { --preview-copy-ink: #221e1f; }
 :is(.wedding-card-front, .live-product)[data-design-artwork][data-design-code="CKM-012"][data-preview-artwork-slot="card-front"]:not(.has-customer-photo):not(.has-live-customer-photo) { --preview-copy-ink: #3a1f0f; }
 :is(.wedding-card-front, .live-product)[data-design-artwork][data-design-code="CKM-012"][data-preview-artwork-slot="banner"]:not(.has-customer-photo):not(.has-live-customer-photo) { --preview-copy-ink: #fcfbfd; }
@@ -9165,6 +9165,24 @@
 :is(.wedding-card-front, .live-product)[data-design-artwork][data-design-code="CKM-024"][data-preview-artwork-slot="arrow-right"]:not(.has-customer-photo):not(.has-live-customer-photo) { --preview-copy-ink: #3a1f0f; }
 :is(.wedding-card-front, .live-product)[data-design-artwork][data-design-code="CKM-024"][data-preview-artwork-slot="sticker"]:not(.has-customer-photo):not(.has-live-customer-photo) { --preview-copy-ink: #3a1f0f; }
 :is(.wedding-card-front, .live-product)[data-design-artwork][data-design-code="CKM-024"][data-preview-artwork-slot="wooden-hanger"]:not(.has-customer-photo):not(.has-live-customer-photo) { --preview-copy-ink: #221e1f; }
+
+/* CKM-011 Master artwork already contains its heading and ampersand. */
+.wedding-card-front[data-design-code="CKM-011"][data-preview-artwork-slot="card-front"] .desa-card-custom-title,
+.live-product[data-design-code="CKM-011"][data-preview-artwork-slot="banner"] .desa-product-copy-subtitle,
+.live-product[data-design-code="CKM-011"][data-preview-artwork-slot="bunting"] .desa-product-copy-kicker,
+.live-product[data-design-code="CKM-011"][data-preview-artwork-slot^="arrow-"] .desa-product-copy-kicker {
+    display: none !important;
+}
+/* CKM-014 arrow colors and one-line date follow the Master artwork. */
+.live-product[data-design-code="CKM-014"][data-preview-artwork-slot^="arrow-"] .desa-product-copy-couple {
+    color: #397379 !important;
+}
+.live-product[data-design-code="CKM-014"][data-preview-artwork-slot^="arrow-"] [data-preview-field="event_date"] {
+    color: #fff !important;
+}
+.live-product[data-design-code="CKM-014"][data-preview-artwork-slot^="arrow-"] [data-preview-field="day_name_malay"] {
+    display: none !important;
+}
 
 /* CKM-012 prints white couple names on its purple plaque; dates stay dark. */
 :is(.wedding-card-front, .live-product)[data-design-artwork][data-design-code="CKM-012"][data-preview-artwork-slot="card-front"] .desa-card-custom-couple,
