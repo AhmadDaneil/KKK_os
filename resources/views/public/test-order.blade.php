@@ -63,14 +63,14 @@
                 @error('package_type')<p class="field-error">{{ $message }}</p>@enderror
             </fieldset>
 
-            <div id="test-side-field">
+            <fieldset id="test-side-field">
                 <label for="test-side">Package side <span class="required-marker" aria-hidden="true">*</span></label>
                 <select id="test-side" name="side">
                     <option value="LELAKI" @selected(old('side', 'LELAKI') === 'LELAKI')>Groom's side</option>
                     <option value="PEREMPUAN" @selected(old('side') === 'PEREMPUAN')>Bride's side</option>
                 </select>
                 @error('side')<p class="field-error">{{ $message }}</p>@enderror
-            </div>
+            </fieldset>
 
             <input name="package_format" type="hidden" value="SEPARATE">
 
@@ -139,5 +139,6 @@
         updatePackageFields();
         updatePaymentPlan();
     </script>
+    @include('public.partials.theme-toggle')
 </body>
 </html>
