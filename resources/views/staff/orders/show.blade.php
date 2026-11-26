@@ -185,12 +185,6 @@
                             <button class="staff-button staff-button-danger" type="submit">Cancel Order</button>
                         </form>
 
-                        <form method="POST" action="{{ route($operationRoutePrefix.'orders.archive', $order) }}" class="staff-reject-payment-form js-staff-confirmation-form" data-confirm-title="Archive order {{ $displayOrderIdentifier }}?" data-confirm-message="The order record will be retained with ARCHIVED status and cannot be reactivated." data-confirm-button="Yes, archive order">
-                            @csrf
-                            <label for="archive-reason">Archive reason</label>
-                            <textarea id="archive-reason" name="reason" maxlength="1000" required>{{ old('reason') }}</textarea>
-                            <button class="staff-button staff-button-secondary" type="submit">Archive Order</button>
-                        </form>
                     </div>
                 </section>
             @endif

@@ -38,30 +38,38 @@ class StaffOrderLifecycleTest extends TestCase
         $this->assertModelExists($order);
     }
 
-    public function test_admin_can_archive_an_order_and_the_action_is_audited(): void
+    #[DataProvider('archivePortals')]
+    public function test_archive_is_unavailable_and_keeps_the_order_unchanged(string $portal, string $role): void
     {
-        $admin = $this->staff(User::ROLE_ADMIN);
-        $order = $this->order('COMPLETED');
+        $user = $this->staff($role);
+        $order = $this->order('DETAILS_CONFIRMED');
 
-        $this->actingAs($admin, 'admin')
-            ->post(route('admin.orders.archive', $order), ['reason' => 'Completed order retention'])
-            ->assertRedirect()
-            ->assertSessionHas('status', "Order {$order->order_id} archived. Its record has been retained.");
+        $this->actingAs($user, $portal)
+            ->get(route($portal.'.orders.show', $order->order_id))
+            ->assertSee('Cancel Order')
+            ->assertDontSee('Archive Order')
+            ->assertDontSee('archive-reason');
+
+        $this->post('/'.$portal.'/orders/'.$order->getRouteKey().'/archive', [
+            'reason' => 'Archive is no longer available',
+        ])->assertNotFound();
 
         $this->assertDatabaseHas('orders', [
             'id' => $order->id,
-            'status' => 'ARCHIVED',
+            'status' => 'DETAILS_CONFIRMED',
         ]);
-        $this->assertDatabaseHas('order_status_events', [
+        $this->assertDatabaseMissing('order_status_events', [
             'order_id' => $order->id,
             'event_type' => 'ORDER_ARCHIVED',
-            'from_status' => 'COMPLETED',
-            'to_status' => 'ARCHIVED',
-            'reason' => 'Completed order retention',
-            'actor_user_id' => $admin->id,
-            'source' => 'ADMIN',
         ]);
-        $this->assertModelExists($order);
+    }
+
+    public static function archivePortals(): array
+    {
+        return [
+            'admin' => ['admin', User::ROLE_ADMIN],
+            'staff management' => ['staff', User::ROLE_OM],
+        ];
     }
 
     public function test_reason_is_required_before_an_order_can_be_cancelled(): void
@@ -74,7 +82,7 @@ class StaffOrderLifecycleTest extends TestCase
             ->post(route('staff.orders.cancel', $order), [])
             ->assertRedirect(route('staff.orders.show', $order->order_id))
             ->assertSessionHasErrors([
-                'reason' => 'Sila nyatakan sebab tindakan ini.',
+                'reason' => 'Please provide a reason for this action.',
             ]);
 
         $this->assertDatabaseHas('orders', [
@@ -107,23 +115,23 @@ class StaffOrderLifecycleTest extends TestCase
         ]);
     }
 
-    public function test_terminal_order_cannot_transition_to_the_other_terminal_status(): void
+    public function test_archived_order_cannot_be_cancelled(): void
     {
         $manager = $this->staff(User::ROLE_OM);
-        $order = $this->order('CANCELLED');
+        $order = $this->order('ARCHIVED');
 
         $this->actingAs($manager, 'staff')
-            ->post(route('staff.orders.archive', $order), ['reason' => 'Invalid terminal transition'])
+            ->post(route('staff.orders.cancel', $order), ['reason' => 'Invalid terminal transition'])
             ->assertRedirect()
             ->assertSessionHasErrors('order_lifecycle');
 
         $this->assertDatabaseHas('orders', [
             'id' => $order->id,
-            'status' => 'CANCELLED',
+            'status' => 'ARCHIVED',
         ]);
         $this->assertDatabaseMissing('order_status_events', [
             'order_id' => $order->id,
-            'event_type' => 'ORDER_ARCHIVED',
+            'event_type' => 'ORDER_CANCELLED',
         ]);
     }
 
