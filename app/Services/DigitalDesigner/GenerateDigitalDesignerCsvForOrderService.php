@@ -28,7 +28,7 @@ class GenerateDigitalDesignerCsvForOrderService
     }
 
     /**
-     * @param EloquentCollection<int, Order> $orders
+     * @param  EloquentCollection<int, Order>  $orders
      */
     public function generateForOrders(EloquentCollection $orders, string $absolutePath): string
     {
@@ -60,7 +60,7 @@ class GenerateDigitalDesignerCsvForOrderService
     }
 
     /**
-     * @param EloquentCollection<int, Order> $orders
+     * @param  EloquentCollection<int, Order>  $orders
      */
     private function writeOrders(EloquentCollection $orders, string $absolutePath): string
     {
