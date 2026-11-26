@@ -249,6 +249,20 @@ body {
     margin-top: 1.25rem;
 }
 
+.payment-method-actions {
+    display: grid;
+    gap: 12px;
+    margin-top: 1rem;
+}
+
+.payment-method-actions form {
+    margin: 0;
+}
+
+.payment-method-actions .confirm-button {
+    width: 100%;
+}
+
 .confirm-button {
     border: 0;
     border-radius: 9px;
