@@ -5,6 +5,7 @@ namespace Tests\Feature\Staff;
 use App\Models\Order;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
 class StaffDigitalDesignerBatchCsvTest extends TestCase
@@ -17,6 +18,8 @@ class StaffDigitalDesignerBatchCsvTest extends TestCase
             'role' => User::ROLE_DIGITAL_DESIGNER,
             'is_active' => true,
         ]);
+        Storage::fake('local');
+        Storage::fake('local');
         $this->createPaidOrders(11);
 
         $response = $this->actingAs($designer, 'staff')
@@ -127,9 +130,12 @@ class StaffDigitalDesignerBatchCsvTest extends TestCase
         $contents = preg_replace('/^\xEF\xBB\xBF/', '', $contents) ?? $contents;
         $lines = preg_split('/\r\n|\n|\r/', trim($contents)) ?: [];
 
-        return array_map(
+        $rows = array_map(
             static fn (string $line): array => str_getcsv($line),
             $lines,
         );
+        Storage::disk('local')->deleteDirectory('digital-designer-downloads');
+
+        return $rows;
     }
 }
