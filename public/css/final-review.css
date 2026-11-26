@@ -256,6 +256,8 @@ body {
 }
 
 .payment-method-actions form {
+    display: grid;
+    gap: 12px;
     margin: 0;
 }
 
