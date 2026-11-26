@@ -312,6 +312,9 @@ Route::middleware(['auth:staff', 'active.staff'])
         Route::get('/digital-designer/orders', [StaffDigitalDesignerController::class, 'index'])
             ->middleware('staff.role:'.User::ROLE_DIGITAL_DESIGNER)
             ->name('digital-designer.orders.index');
+        Route::get('/digital-designer/orders/page-csv', [StaffDigitalDesignerController::class, 'downloadPageCsv'])
+            ->middleware('staff.role:'.User::ROLE_DIGITAL_DESIGNER)
+            ->name('digital-designer.orders.page-csv');
         Route::get('/digital-designer/orders/{order}/csv', [StaffDigitalDesignerController::class, 'downloadCsv'])
             ->middleware('staff.role:'.User::ROLE_DIGITAL_DESIGNER)
             ->name('digital-designer.orders.csv');
