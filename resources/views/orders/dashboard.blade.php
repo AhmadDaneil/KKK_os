@@ -1755,6 +1755,17 @@ document.addEventListener('DOMContentLoaded', function () {
 
             const theme = value(prefix + '[design][theme]', 'songket').toLowerCase();
             const designCode = value(prefix + '[design][design_code]', '');
+            if (theme === 'songket' || theme === 'minimalist') {
+                const masterWeddingTitle = designCardTitle(cardTitle) === 'MAJLIS PERKAHWINAN';
+                scope.querySelectorAll('[data-preview-field="card_title_malay"]').forEach(function (title) {
+                    const slot = title.closest('[data-preview-artwork-slot]')?.dataset.previewArtworkSlot;
+                    if (slot === 'banner') {
+                        title.textContent = masterWeddingTitle ? 'Majlis Perkahwinan' : 'Majlis Kesyukuran';
+                    } else if (slot === 'card-front' || slot === 'bunting' || slot?.startsWith('arrow-')) {
+                        title.textContent = masterWeddingTitle ? 'Walimatul Urus' : 'Majlis Kesyukuran';
+                    }
+                });
+            }
             scope.querySelectorAll('[data-live-product-theme], .wedding-card-front').forEach(function (item) {
                 item.setAttribute('data-theme', theme);
             });
@@ -2801,12 +2812,55 @@ document.addEventListener('DOMContentLoaded', function () {
             });
         }
 
+        function fitPreviewTitles() {
+            const context = document.createElement('canvas').getContext('2d');
+            if (!context) {
+                return;
+            }
+            document.querySelectorAll('[data-design-code^="CKM-"], [data-design-code^="CKS-"]').forEach(function (preview) {
+                const title = preview.querySelector('.desa-card-custom-title, .desa-product-copy-subtitle, .desa-product-copy-kicker');
+                if (!title) {
+                    return;
+                }
+                title.style.removeProperty('font-size');
+                const style = getComputedStyle(title);
+                const availableWidth = title.clientWidth - parseFloat(style.paddingLeft || 0) - parseFloat(style.paddingRight || 0);
+                const text = title.textContent.trim();
+                if (style.display === 'none' || availableWidth <= 0 || !text) {
+                    return;
+                }
+                const masterSize = parseFloat(style.getPropertyValue('--psd-font-size')) * preview.getBoundingClientRect().width / 100;
+                const maximumSize = masterSize > 0 ? Math.min(masterSize, parseFloat(style.fontSize)) : parseFloat(style.fontSize);
+                const sourceSpacing = parseFloat(style.letterSpacing) || 0;
+                let low = 0;
+                let high = maximumSize;
+                for (let step = 0; step < 16; step++) {
+                    const size = (low + high) / 2;
+                    context.font = style.fontStyle + ' ' + style.fontWeight + ' ' + size + 'px ' + style.fontFamily;
+                    const metrics = context.measureText(text);
+                    const inkWidth = Math.max(metrics.width,
+                        Math.abs(metrics.actualBoundingBoxLeft || 0) + Math.abs(metrics.actualBoundingBoxRight || 0));
+                    const width = inkWidth + Math.max(0, text.length - 1) * sourceSpacing * size / maximumSize;
+                    if (width <= availableWidth * 0.9) {
+                        low = size;
+                    } else {
+                        high = size;
+                    }
+                }
+                title.style.setProperty('font-size', Math.max(0.1, Math.floor(low * 10) / 10) + 'px', 'important');
+                title.style.setProperty('overflow', 'visible');
+                title.style.setProperty('text-overflow', 'clip');
+                title.style.setProperty('white-space', 'nowrap');
+            });
+        }
+
         let previewFitFrame = 0;
         function schedulePreviewNameFit() {
             if (!previewFitFrame) {
                 previewFitFrame = requestAnimationFrame(function () {
                     previewFitFrame = 0;
                     fitPreviewNames();
+                    fitPreviewTitles();
                 });
             }
         }
