@@ -14,9 +14,10 @@
         .digital-designer-order h2 { margin:0 0 7px; font-size:17px; }
         .digital-designer-order p { margin:4px 0; color:var(--staff-muted); font-size:13px; }
         .digital-designer-order-actions { display:flex; align-items:center; gap:10px; }
+        .digital-designer-queue-heading { display:flex; align-items:center; justify-content:space-between; gap:14px; }
         .digital-designer-order-actions .staff-button { white-space:nowrap; }
         .digital-designer-note { margin:0 0 18px; color:var(--staff-muted); }
-        @media (max-width:700px) { .digital-designer-order { grid-template-columns:1fr; } .digital-designer-order-actions { justify-content:flex-start; } }
+        @media (max-width:700px) { .digital-designer-order { grid-template-columns:1fr; } .digital-designer-order-actions { justify-content:flex-start; } .digital-designer-queue-heading { align-items:flex-start; flex-direction:column; } }
     </style>
 </head>
 <body>
@@ -33,7 +34,12 @@
 
             <main class="staff-main">
                 <section class="staff-section">
-                    <div class="staff-section-title"><h2>Paid booking queue</h2></div>
+                    <div class="staff-section-title digital-designer-queue-heading">
+                        <h2>Paid booking queue</h2>
+                        @if ($orders->isNotEmpty())
+                            <a href="{{ route('staff.digital-designer.orders.page-csv', ['page' => $orders->currentPage()]) }}" class="staff-button staff-button-primary">Download CSV For 10 Customer</a>
+                        @endif
+                    </div>
                     <p class="digital-designer-note">Orders appear here after the booking deposit is paid. The separate Digital Designer CSV follows the Alive Card V1 format and reflects the information saved by the customer; fields not filled yet remain blank.</p>
 
                     <div class="digital-designer-queue">
