@@ -417,7 +417,7 @@
                             <form id="full-payment-form" method="POST" action="{{ route('orders.booking-payment.store', ['orderId' => $order->order_id]) }}">
                                 @csrf
                                 <button class="confirm-button" type="submit" name="payment_method" value="BILLPLZ">
-                                    Pay full card package · RM {{ number_format((float) $review['pricing']['deposit_amount'], 2) }} · Billplz
+                                    Pay full card package · RM {{ number_format((float) $review['pricing']['deposit_amount'], 2) }} · Online Banking
                                 </button>
                                 @if (config('services.billplz.duitnow_qr_enabled'))
                                     <button class="confirm-button" type="submit" name="payment_method" value="DUITNOW_QR">
@@ -430,7 +430,7 @@
                                 @csrf
                                 <input type="hidden" name="payment_method" value="BILLPLZ">
                                 <button class="confirm-button" type="submit">
-                                    Pay booking deposit · RM {{ number_format((float) $review['pricing']['deposit_amount'], 2) }} · Billplz
+                                    Pay booking deposit · RM {{ number_format((float) $review['pricing']['deposit_amount'], 2) }} · Online Banking
                                 </button>
                             </form>
                             @if (config('services.billplz.duitnow_qr_enabled'))
