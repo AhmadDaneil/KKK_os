@@ -28,6 +28,7 @@ class CustomerProgressEmailTest extends TestCase
         config([
             'customer_reminders.enabled' => true,
             'customer_reminders.mailer' => 'customer-reminders',
+            'mail.mailers.customer-reminders.transport' => 'smtp',
             'mail.mailers.customer-reminders.username' => 'sender@example.test',
             'mail.mailers.customer-reminders.password' => 'test-only-password',
             'queue.default' => 'sync',
