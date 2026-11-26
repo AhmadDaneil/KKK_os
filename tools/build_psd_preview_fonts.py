@@ -269,7 +269,12 @@ def build(catalog: dict[str, Any]) -> tuple[str, str, list[dict[str, Any]]]:
                 couple = ".desa-card-custom-couple" if slot == "card-front" else ".desa-product-copy-couple"
                 geometry.append(root + " " + couple + " { position: absolute !important; inset: 0 !important; width: 100% !important; height: 100% !important; margin: 0 !important; display: block !important; transform: none !important; }")
                 horizontal = abs(centers[0][1] - centers[1][1]) < max(b[2] - b[0] for b in boxes) * 0.65
-                anchors = horizontal_name_anchors(product, fields, slot) or vertical_name_anchors(product, fields, slot)
+                # Minimalist and Songket use each name's source text box.
+                # Ampersand-edge anchors shift the names into nearby artwork.
+                anchors = None
+                if not code.startswith(("CKM-", "CKS-")) or code == "CKM-011":
+                    anchors = (horizontal_name_anchors(product, fields, slot)
+                               or vertical_name_anchors(product, fields, slot))
                 for index, (box, center) in enumerate(zip(boxes, centers)):
                     x, y = center
                     if horizontal:

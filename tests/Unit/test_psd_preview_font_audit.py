@@ -34,6 +34,31 @@ def layer(index: int, name: str, font: str = "", flags: int = 0, section=None) -
 
 
 class PsdPreviewFontAuditTest(unittest.TestCase):
+    def test_minimalist_and_songket_names_use_master_text_boxes(self):
+        selected = {
+            "&": {"rect": [220, 470, 280, 530]},
+            "singkatanlelaki": {"font": "Belladonia", "layer": 1, "groups": [],
+                                   "rect": [200, 100, 300, 400],
+                                   "runs": [{"text": "Syafiq", "pixel_size": 100}]},
+            "singkatanperempuan": {"font": "Belladonia", "layer": 2, "groups": [],
+                                      "rect": [210, 600, 310, 900],
+                                      "runs": [{"text": "Awanis", "pixel_size": 100}]},
+        }
+        for code in ("CKM-900", "CKS-900"):
+            with self.subTest(code=code):
+                _, css, _ = builder.build({code: {"items": {"kad depan": {
+                    "width": 1000, "height": 1000, "selected": selected}}}})
+                groom = next(line for line in css.splitlines()
+                             if f'[data-font-design-code="{code}"]' in line
+                             and ".desa-card-custom-couple > span:first-child" in line)
+                bride = next(line for line in css.splitlines()
+                             if f'[data-font-design-code="{code}"]' in line
+                             and ".desa-card-custom-couple > span:last-child" in line)
+                self.assertIn("left: 25% !important", groom)
+                self.assertIn("left: 75% !important", bride)
+                self.assertIn("top: 25.5% !important", groom)
+                self.assertIn("top: 25.5% !important", bride)
+
     def test_horizontal_names_have_equal_clearance_from_ampersand(self):
         fields = {"groom_display": {"rect": [200, 100, 300, 400]},
                   "bride_display": {"rect": [210, 600, 310, 900]}}
