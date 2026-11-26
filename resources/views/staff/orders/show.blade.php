@@ -122,8 +122,8 @@
 @endif
             <div class="staff-page-header">
                 <div>
-                    <a href="{{ route($ordersIndexRoute) }}" class="staff-back-link">
-                        &larr; Order
+                    <a href="{{ route($ordersIndexRoute) }}" class="staff-button staff-button-small staff-back-link">
+                        &larr; Back
                     </a>
 
                     <div class="staff-detail-heading">
