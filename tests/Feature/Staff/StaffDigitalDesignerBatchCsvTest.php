@@ -26,6 +26,7 @@ class StaffDigitalDesignerBatchCsvTest extends TestCase
 
         $rows = $this->readCsvRows($response);
         $headers = array_shift($rows);
+        $this->assertIsArray($headers);
         $invoiceIndex = array_search('noinvoice', $headers, true);
 
         $this->assertIsInt($invoiceIndex);
@@ -62,6 +63,7 @@ class StaffDigitalDesignerBatchCsvTest extends TestCase
 
         $rows = $this->readCsvRows($response);
         $headers = array_shift($rows);
+        $this->assertIsArray($headers);
         $invoiceIndex = array_search('noinvoice', $headers, true);
 
         $this->assertIsInt($invoiceIndex);
