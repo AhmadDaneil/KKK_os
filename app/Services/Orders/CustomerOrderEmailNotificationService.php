@@ -23,10 +23,20 @@ class CustomerOrderEmailNotificationService
 
     public function isReady(): bool
     {
-        return (bool) config('customer_reminders.enabled')
-            && filled(config('mail.mailers.customer-reminders.username'))
-            && filled(config('mail.mailers.customer-reminders.password'))
-            && filled(config('customer_reminders.from_address'));
+        if (! (bool) config('customer_reminders.enabled') || ! filled(config('customer_reminders.from_address'))) {
+            return false;
+        }
+
+        $mailer = (string) config('customer_reminders.mailer');
+
+        if (config("mail.mailers.{$mailer}.transport") === 'gmail-api') {
+            return filled(config("mail.mailers.{$mailer}.client_id"))
+                && filled(config("mail.mailers.{$mailer}.client_secret"))
+                && filled(config("mail.mailers.{$mailer}.refresh_token"));
+        }
+
+        return filled(config("mail.mailers.{$mailer}.username"))
+            && filled(config("mail.mailers.{$mailer}.password"));
     }
 
     public function queueDetailsReminder(Order $order): bool

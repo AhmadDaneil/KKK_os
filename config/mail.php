@@ -50,7 +50,10 @@ return [
         ],
 
         'customer-reminders' => [
-            'transport' => 'smtp',
+            'transport' => env('CUSTOMER_EMAIL_TRANSPORT', 'gmail-api'),
+            'client_id' => env('CUSTOMER_EMAIL_GMAIL_CLIENT_ID'),
+            'client_secret' => env('CUSTOMER_EMAIL_GMAIL_CLIENT_SECRET'),
+            'refresh_token' => env('CUSTOMER_EMAIL_GMAIL_REFRESH_TOKEN'),
             'scheme' => env('CUSTOMER_EMAIL_SCHEME', 'smtp'),
             'host' => env('CUSTOMER_EMAIL_HOST', 'smtp.gmail.com'),
             'port' => (int) env('CUSTOMER_EMAIL_PORT', 587),
