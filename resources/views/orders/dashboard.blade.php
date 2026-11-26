@@ -1580,9 +1580,7 @@ document.addEventListener('DOMContentLoaded', function () {
         const artworkBase = @json(asset('images/designs'));
         const artworkAssetVersion = @json((string) filemtime(public_path('css/customer-preview-layout.css')));
         const artworkDesignCodes = JSON.parse(form.dataset.designCodeOptions || '{}');
-        const unavailableArtwork = {
-            'CKS-218': ['card-back'],
-        };
+        const unavailableArtwork = {};
 
         function syncArtworkImage(image, source, label) {
             const product = image.matches('[data-desa-product-artwork]') ? image.parentElement : null;
