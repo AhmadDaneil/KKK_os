@@ -19,7 +19,6 @@ class StaffDigitalDesignerBatchCsvTest extends TestCase
             'is_active' => true,
         ]);
         Storage::fake('local');
-        Storage::fake('local');
         $this->createPaidOrders(11);
 
         $response = $this->actingAs($designer, 'staff')
@@ -57,6 +56,7 @@ class StaffDigitalDesignerBatchCsvTest extends TestCase
             'role' => User::ROLE_DIGITAL_DESIGNER,
             'is_active' => true,
         ]);
+        Storage::fake('local');
         $this->createPaidOrders(11);
 
         $response = $this->actingAs($designer, 'staff')
