@@ -688,7 +688,9 @@ button {
 }
 
 .autosave-status {
-    flex: 1 1 220px;
+    flex: 0 1 auto;
+    width: fit-content;
+    max-width: 100%;
     color: #6b7280;
     font-size: 0.875rem;
 }
