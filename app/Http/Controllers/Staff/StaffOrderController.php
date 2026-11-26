@@ -363,13 +363,24 @@ class StaffOrderController extends Controller
             return $query;
         }
 
+        if ($user->role === User::ROLE_DIGITAL_DESIGNER) {
+            return $query->where(fn (Builder $digitalQuery) => $digitalQuery
+                ->where(fn (Builder $paidQuery) => $paidQuery
+                    ->where('booking_payment_status', 'PAID')
+                    ->whereNotIn('status', Order::TERMINAL_OPERATIONAL_STATUSES))
+                ->orWhere(fn (Builder $assignedQuery) => $assignedQuery
+                    ->where('status', '!=', 'DETAILS_INCOMPLETE')
+                    ->whereHas('designJobs', fn (Builder $jobQuery) => $jobQuery
+                        ->where('assigned_user_id', $user->id))));
+        }
+
         // Incomplete entries are customer drafts, not operational orders.
         $query->where('status', '!=', 'DETAILS_INCOMPLETE');
 
         return match ($user->role) {
             User::ROLE_ADMIN => $query,
 
-            User::ROLE_DESIGNER, User::ROLE_DIGITAL_DESIGNER => $query->whereHas(
+            User::ROLE_DESIGNER => $query->whereHas(
                 'designJobs',
                 fn (Builder $jobQuery) => $jobQuery
                     ->where('assigned_user_id', $user->id)

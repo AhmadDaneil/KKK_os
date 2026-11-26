@@ -13,7 +13,7 @@
         .digital-designer-order { display:grid; grid-template-columns:minmax(0,1fr) auto; align-items:center; gap:18px; padding:18px 20px; border:1px solid var(--staff-border); border-radius:14px; background:var(--staff-surface,#fff); box-shadow:0 4px 14px rgba(23,56,43,.06); }
         .digital-designer-order h2 { margin:0 0 7px; font-size:17px; }
         .digital-designer-order p { margin:4px 0; color:var(--staff-muted); font-size:13px; }
-        .digital-designer-order-actions { display:flex; align-items:center; gap:10px; }
+        .digital-designer-order-actions { display:flex; flex-wrap:wrap; align-items:center; gap:10px; }
         .digital-designer-queue-heading { display:flex; align-items:center; justify-content:space-between; gap:14px; }
         .digital-designer-order-actions .staff-button { white-space:nowrap; }
         .digital-designer-note { margin:0 0 18px; color:var(--staff-muted); }
@@ -52,6 +52,7 @@
                                     <p>Order date: {{ $order->created_at?->timezone(config('app.display_timezone'))->format('d/m/Y, g:i A') ?: '-' }}</p>
                                 </div>
                                 <div class="digital-designer-order-actions">
+                                    <a href="{{ route('staff.orders.show', $order->order_id) }}" class="staff-button">View Order</a>
                                     <a href="{{ route('staff.digital-designer.orders.csv', $order) }}" class="staff-button staff-button-primary">Download Digital Designer CSV</a>
                                 </div>
                             </article>
