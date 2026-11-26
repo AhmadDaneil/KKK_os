@@ -70,7 +70,13 @@
                                     <a href="{{ $orders->previousPageUrl() }}" class="staff-pagination-link" rel="prev">Previous</a>
                                 @endif
 
-                                <span class="staff-pagination-summary">Page {{ $orders->currentPage() }} of {{ $orders->lastPage() }}</span>
+                                @foreach ($orders->getUrlRange(1, $orders->lastPage()) as $page => $url)
+                                    @if ($page === $orders->currentPage())
+                                        <span class="staff-pagination-link is-current" aria-current="page">{{ $page }}</span>
+                                    @else
+                                        <a href="{{ $url }}" class="staff-pagination-link">{{ $page }}</a>
+                                    @endif
+                                @endforeach
 
                                 @if ($orders->hasMorePages())
                                     <a href="{{ $orders->nextPageUrl() }}" class="staff-pagination-link" rel="next">Next</a>
