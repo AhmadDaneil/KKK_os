@@ -6,6 +6,7 @@ use App\Models\Order;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Testing\TestResponse;
 use Tests\TestCase;
 
 class StaffDigitalDesignerBatchCsvTest extends TestCase
@@ -123,7 +124,7 @@ class StaffDigitalDesignerBatchCsvTest extends TestCase
     /**
      * @return array<int, array<int, string|null>>
      */
-    private function readCsvRows(\Illuminate\Testing\TestResponse $response): array
+    private function readCsvRows(TestResponse $response): array
     {
         $contents = file_get_contents($response->baseResponse->getFile()->getPathname());
         $this->assertIsString($contents);
