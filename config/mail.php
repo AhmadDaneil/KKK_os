@@ -49,6 +49,17 @@ return [
             'local_domain' => env('MAIL_EHLO_DOMAIN', parse_url((string) env('APP_URL', 'http://localhost'), PHP_URL_HOST)),
         ],
 
+        'customer-reminders' => [
+            'transport' => 'smtp',
+            'scheme' => env('CUSTOMER_EMAIL_SCHEME', 'smtp'),
+            'host' => env('CUSTOMER_EMAIL_HOST', 'smtp.gmail.com'),
+            'port' => (int) env('CUSTOMER_EMAIL_PORT', 587),
+            'username' => env('CUSTOMER_EMAIL_USERNAME', 'kingkadkahwinhq@gmail.com'),
+            'password' => env('CUSTOMER_EMAIL_PASSWORD'),
+            'timeout' => 30,
+            'local_domain' => env('MAIL_EHLO_DOMAIN', parse_url((string) env('APP_URL', 'http://localhost'), PHP_URL_HOST)),
+        ],
+
         'ses' => [
             'transport' => 'ses',
         ],

@@ -14,6 +14,8 @@ use RuntimeException;
 
 class CreateOrderProgressUpdateService
 {
+    public function __construct(private CustomerOrderEmailNotificationService $emailNotifications) {}
+
     public function create(
         Order $order,
         User $uploader,
@@ -54,7 +56,7 @@ class CreateOrderProgressUpdateService
         ]));
 
         try {
-            return DB::transaction(fn () => OrderProgressUpdate::create([
+            $progressUpdate = DB::transaction(fn () => OrderProgressUpdate::create([
                 'order_id' => $order->id,
                 'uploader_user_id' => $uploader->id,
                 'uploader_role' => $uploader->role,
@@ -87,5 +89,11 @@ class CreateOrderProgressUpdateService
 
             throw $exception;
         }
+
+        if ($customerVisible) {
+            $this->emailNotifications->queueProgressUpdate($order, $progressUpdate);
+        }
+
+        return $progressUpdate;
     }
 }
