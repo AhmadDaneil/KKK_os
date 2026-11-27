@@ -1643,3 +1643,9 @@ a.staff-pagination-link:hover {
 .staff-attention-card.is-pulsing b{animation:staff-attention-number-flash 1s ease-in-out infinite}
 .staff-attention-total.is-pulsing{animation:staff-attention-flash 1s ease-in-out infinite}
 @media(prefers-reduced-motion:reduce){.staff-attention-card.is-pulsing,.staff-attention-card.is-pulsing b,.staff-attention-total.is-pulsing{animation:none}}
+
+.staff-add-on-form { display:grid; gap:10px; max-width:760px; margin:16px 0 24px; padding:16px; border:1px solid var(--staff-border); border-radius:10px; }
+.staff-add-on-form label { font-weight:800; }
+.staff-add-on-form input:not([type=hidden]), .staff-add-on-form select { box-sizing:border-box; width:100%; min-height:44px; padding:10px 12px; border:1px solid var(--staff-border); border-radius:8px; background:var(--staff-surface); color:inherit; font:inherit; }
+.staff-add-on-form p { margin:0; }
+.staff-add-on-form button { justify-self:start; }

@@ -72,10 +72,10 @@
                         @if ($deposit['status'] === 'FAILED' && $deposit['reason'])<p>Reason: {{ $deposit['reason'] }}</p>@endif
                     </div>
                 @endif
-                @if (($orderStatus ?? null) === 'DESIGN_APPROVED' || ! empty($balance))
+                @if (($orderStatus ?? null) === 'DESIGN_APPROVED' || ! empty($balance) || ($canPayAdditionalBalance ?? false))
                     <section id="balance-payment" class="balance-payment-card" data-status="{{ strtolower($balance['status'] ?? 'new') }}">
                         <div class="balance-payment-heading">
-                            <div><small>REMAINING BALANCE</small><h4>Balance payment after design approval</h4></div>
+                            <div><small>REMAINING BALANCE</small><h4>Order balance due</h4></div>
                             @if ((float) ($balanceAmount ?? 0) > 0)<strong>RM {{ number_format((float) $balanceAmount, 2) }}</strong>@endif
                         </div>
 
