@@ -20,6 +20,7 @@ class DesignAssignmentControlTest extends TestCase
         $manager = User::factory()->create(['role' => $role, 'is_active' => true]);
         $leader = User::factory()->create(['role' => User::ROLE_DESIGNER, 'is_active' => true, 'is_design_lead' => true]);
         $designer = User::factory()->create(['role' => User::ROLE_DESIGNER, 'is_active' => true, 'is_design_lead' => false]);
+        $digital = User::factory()->create(['role' => User::ROLE_DIGITAL_DESIGNER, 'is_active' => true]);
         $inactive = User::factory()->create(['role' => User::ROLE_DESIGNER, 'is_active' => false]);
         $order = app(CreateOrderService::class)->create(['package_count' => 1, 'side' => 'PEREMPUAN', 'customer_name' => 'Assignment Customer']);
         $order->update(['status' => 'DETAILS_CONFIRMED']);
@@ -34,7 +35,13 @@ class DesignAssignmentControlTest extends TestCase
             ->assertSee('Assign Design')
             ->assertSee('Leader Designer')
             ->assertSee('value="'.$designer->id.'"', false)
-            ->assertDontSee('value="'.$inactive->id.'"', false);
+            ->assertDontSee('value="'.$inactive->id.'"', false)
+            ->assertDontSee('value="'.$digital->id.'"', false);
+
+        $this->post(route($portal.'.design-jobs.assign', $job), ['assigned_user_id' => $digital->id])
+            ->assertSessionHasErrors('assigned_user_id');
+        $this->assertSame($leader->id, $job->fresh()->assigned_user_id);
+        $this->assertDatabaseMissing('design_job_events', ['design_job_id' => $job->id, 'event_type' => 'DESIGNER_ASSIGNED']);
 
         foreach ([$designer, $leader] as $assignee) {
             $this->post(route($portal.'.design-jobs.assign', $job), ['assigned_user_id' => $assignee->id])->assertRedirect();

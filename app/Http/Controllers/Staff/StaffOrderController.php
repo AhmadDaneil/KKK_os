@@ -305,7 +305,7 @@ class StaffOrderController extends Controller
         if ($user->isOperationManagement() && ! $request->attributes->get('staff_overview_mode', false)) {
             $assignmentOptions = [
                 'designStaff' => User::query()
-                    ->whereIn('role', User::DESIGNER_ROLES)
+                    ->where('role', User::ROLE_DESIGNER)
                     ->where('is_active', true)
                     ->orderByDesc('is_design_lead')
                     ->orderBy('name')
