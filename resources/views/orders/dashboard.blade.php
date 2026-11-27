@@ -1691,7 +1691,9 @@ document.addEventListener('DOMContentLoaded', function () {
                 placeholder.hidden = shouldShowArtwork || isUnavailable;
                 const artworkVersion = theme === 'minimalist'
                     ? '?v=' + artworkAssetVersion
-                    : (normalizedCode === 'CKI-814' && type === 'banner' ? '?v=4ec40cdb53e9a385' : '');
+                    : (normalizedCode === 'CKS-209' && type === 'sticker'
+                        ? '?v=7ea10273d5954369'
+                        : (normalizedCode === 'CKI-814' && type === 'banner' ? '?v=4ec40cdb53e9a385' : ''));
                 const artworkSource = shouldShowArtwork ? assetBase + type + '.webp' + artworkVersion : '';
                 product.dataset.themeArtworkSrc = artworkSource;
                 syncArtworkImage(artwork, artworkSource, normalizedCode + ' ' + themeName + ' ' + type.replaceAll('-', ' ') + ' design');
@@ -1770,6 +1772,34 @@ document.addEventListener('DOMContentLoaded', function () {
                 item.setAttribute('data-theme', theme);
             });
             syncDesignArtwork(scope, theme, designCode);
+
+            // CKS-209 has a two-letter monogram inside its wreath in the master.
+            // Keep those letters tied to the customer's abbreviations.
+            scope.querySelectorAll('[data-preview-artwork-slot="card-front"], [data-preview-artwork-slot="bunting"], [data-preview-artwork-slot="sticker"]').forEach(function (product) {
+                const overlay = product.querySelector('[data-desa-card-name-overlay], [data-desa-product-name-overlay]');
+                if (!overlay) {
+                    return;
+                }
+                if (theme !== 'songket' || designCode.toUpperCase() !== 'CKS-209') {
+                    overlay.querySelectorAll('.songket-monogram-initial').forEach(function (initial) {
+                        initial.remove();
+                    });
+                    return;
+                }
+                [groomDisplay, brideDisplay].forEach(function (name, index) {
+                    const role = index === 0 ? 'groom' : 'bride';
+                    let initial = overlay.querySelector('.songket-monogram-initial--' + role);
+                    if (!initial) {
+                        initial = document.createElement('span');
+                        initial.className = 'songket-monogram-initial songket-monogram-initial--' + role;
+                        initial.setAttribute('aria-hidden', 'true');
+                        overlay.appendChild(initial);
+                    }
+                    initial.textContent = Array.from(name.trim()).find(function (letter) {
+                        return /\p{L}/u.test(letter);
+                    }) || '';
+                });
+            });
         }
 
         function syncCard(side) {
