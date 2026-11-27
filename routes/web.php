@@ -459,10 +459,6 @@ Route::middleware(['auth:staff', 'active.staff'])
             ->name('print-jobs.progress-files.show');
 
         Route::middleware('staff.role:PRODUCTION')->group(function () {
-            Route::post(
-                '/print-jobs/{printJob}/progress-files',
-                [StaffPrintingWorkflowController::class, 'uploadProgress']
-            )->name('print-jobs.progress-files.store');
 
             Route::post(
                 '/print-jobs/{printJob}/start',
