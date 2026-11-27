@@ -27,8 +27,7 @@
         @if ($isAdminPortal)
             <section class="staff-nav-section">
                 <h2>{{ __('ui.management') }}</h2>
-                <a href="{{ route('admin.dashboard') }}" @class(['staff-nav-link', 'is-active' => request()->routeIs('admin.dashboard')])><span class="staff-nav-icon" aria-hidden="true">OV</span>{{ __('ui.overview') }}</a>
-                <a href="{{ route('admin.dashboard') }}#sales-analysis" class="staff-nav-link"><span class="staff-nav-icon" aria-hidden="true">SA</span>{{ __('ui.sales_analysis') }}</a>
+                <a href="{{ route('admin.dashboard') }}" @class(['staff-nav-link', 'is-active' => request()->routeIs('admin.dashboard')])><span class="staff-nav-icon" aria-hidden="true">SA</span>{{ __('ui.sales_analysis') }}</a>
                 <a href="{{ route('admin.invoices.index') }}" @class(['staff-nav-link', 'is-active' => request()->routeIs('admin.invoices.*')])><span class="staff-nav-icon" aria-hidden="true">IN</span>Sales Invoice</a>
                 <a href="{{ route('admin.staff.index') }}" @class(['staff-nav-link', 'is-active' => request()->routeIs('admin.staff.*')])><span class="staff-nav-icon" aria-hidden="true">ST</span>{{ __('ui.staff_access') }}</a>
             </section>
