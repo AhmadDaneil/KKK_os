@@ -7,10 +7,10 @@ use App\Models\Order;
 use App\Models\PaymentTransaction;
 use App\Models\WabotMessageLog;
 use App\Services\Orders\ActivateCustomerDashboardService;
+use App\Services\Orders\AdvancePaidConfirmedOrderToDesignService;
 use App\Services\Orders\BuildFinalReviewService;
 use App\Services\Orders\BuildOrderPricingService;
 use App\Services\Orders\ConfirmOrderDetailsService;
-use App\Services\Orders\AdvancePaidConfirmedOrderToDesignService;
 use App\Services\Printing\InitializePrintJobsForOrderService;
 use App\Services\Printing\SyncOrderPrintStatusService;
 use Carbon\CarbonImmutable;
@@ -94,12 +94,14 @@ class HandlePaymentCallbackService
                         ->lockForUpdate()
                         ->firstOrFail();
 
-                    if (! $order->isTerminalOperationalStatus()) {
+                    $this->financials->synchronize($order);
+                    if (! $order->isTerminalOperationalStatus() && ! (bool) data_get($payment->metadata, 'preserve_workflow_status', false)
+                        && in_array($order->status, ['DESIGN_APPROVED', 'BALANCE_PENDING', 'PAID'], true)) {
+                        $outstanding = (float) ($order->pricingSnapshot()->value('outstanding_amount') ?? 0);
                         $order->update([
-                            'status' => 'PAID',
+                            'status' => $outstanding > 0 ? 'BALANCE_PENDING' : 'PAID',
                         ]);
                     }
-                    $this->financials->synchronize($order);
                 } elseif ($payment->payment_type === 'BOOKING_DEPOSIT') {
                     $order = $payment->order()
                         ->lockForUpdate()

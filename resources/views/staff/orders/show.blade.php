@@ -191,7 +191,7 @@
 
             @if ($hasFullQueueView)
                 <nav class="staff-order-sections" aria-label="Order sections">
-                    <a href="#customer-data">Customer</a><a href="#design-work">Design</a><a href="#payment">Payments</a><a href="#production">Production</a><a href="#packing">Packing</a><a href="#fulfilment">Order Fulfilment</a>
+                    <a href="#customer-data">Customer</a>@if ($canManageAddOns)<a href="#order-add-ons">Add-On</a>@endif<a href="#design-work">Design</a><a href="#payment">Payments</a><a href="#production">Production</a><a href="#packing">Packing</a><a href="#fulfilment">Order Fulfilment</a>
                 </nav>
             @endif
 
@@ -203,6 +203,9 @@
             @php
                 $confirmedPreview = data_get($order->confirmation?->confirmed_snapshot, 'live_preview');
             @endphp
+            @if ($canManageAddOns)
+                @include('staff.partials.order-add-ons')
+            @endif
             <div id="customer-data" class="staff-detail-grid staff-department-group">
                 <section class="staff-card">
                     <h2>Order Summary</h2>
