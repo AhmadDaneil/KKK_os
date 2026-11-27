@@ -9,9 +9,10 @@ use RuntimeException;
 
 class StartPackingService
 {
-    public function start(PackingJob $packingJob, ?User $actor = null): PackingJob
+    /** @param list<array{key: string, description: string, quantity: int, side: ?string}> $checklist */
+    public function start(PackingJob $packingJob, ?User $actor = null, array $checklist = []): PackingJob
     {
-        return DB::transaction(function () use ($packingJob, $actor) {
+        return DB::transaction(function () use ($packingJob, $actor, $checklist) {
             $packingJob->refresh();
 
             if (! in_array($packingJob->status, ['READY_FOR_PACKING', 'PACKING'], true)) {
@@ -35,6 +36,7 @@ class StartPackingService
                 'to_status' => 'PACKING',
                 'actor_user_id' => $actor?->id,
                 'occurred_at' => now(),
+                'metadata' => ['package_checklist' => $checklist],
             ]);
 
             return $packingJob->fresh();

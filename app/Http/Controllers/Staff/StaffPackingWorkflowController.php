@@ -10,6 +10,7 @@ use App\Models\User;
 use App\Services\Fulfilment\CompleteCourierFulfilmentService;
 use App\Services\Fulfilment\InitializeFulfilmentJobForOrderService;
 use App\Services\Fulfilment\MarkPickupCollectedService;
+use App\Services\Packing\BuildPackingChecklistService;
 use App\Services\Packing\MarkPackingJobPackedService;
 use App\Services\Packing\StartPackingService;
 use App\Services\Packing\VerifyPackingItemService;
@@ -80,14 +81,32 @@ class StaffPackingWorkflowController extends Controller
     public function start(
         Request $request,
         PackingJob $packingJob,
-        StartPackingService $service
+        StartPackingService $service,
+        BuildPackingChecklistService $checklistBuilder,
     ): RedirectResponse {
         $this->authorizePackingOperation($request, $packingJob);
+        $checklist = [];
+        if ($packingJob->status === 'READY_FOR_PACKING') {
+            $checklist = $checklistBuilder->build($packingJob->order);
+            if ($checklist === []) {
+                return back()->withErrors(['packing_job' => 'No package items are configured. Complete the package quantities before starting packing.']);
+            }
+            $rules = ['packing_checks' => ['required', 'array']];
+            foreach ($checklist as $check) {
+                $rules['packing_checks.'.$check['key']] = ['required', 'accepted'];
+            }
+            $request->validate($rules, [
+                'packing_checks.required' => 'Check every package item before starting packing.',
+                'packing_checks.*.required' => 'Check every package item before starting packing.',
+                'packing_checks.*.accepted' => 'Check every package item before starting packing.',
+            ]);
+        }
 
         try {
             $service->start(
                 $packingJob,
-                $request->user()
+                $request->user(),
+                $checklist,
             );
         } catch (RuntimeException $exception) {
             return back()->withErrors([
