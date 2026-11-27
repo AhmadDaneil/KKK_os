@@ -9169,6 +9169,47 @@
 .live-product[data-design-code="CKM-011"][data-preview-artwork-slot^="arrow-"] .desa-product-copy-kicker {
     display: none !important;
 }
+/* CKM-011's current raster Master uses HandBoys for the names. The PSD is an
+   older composition, so its Amalfi font and lower bunting date do not match. */
+:is(.wedding-card-front, .live-product)[data-design-code="CKM-011"][data-design-artwork]:not(.has-customer-photo):not(.has-live-customer-photo):not([data-preview-artwork-slot="wooden-hanger"]) :is([data-preview-field="groom_display"], [data-preview-field="bride_display"]) {
+    font-family: "PSD HandBoys", serif !important;
+}
+.wedding-card-front[data-design-code="CKM-011"][data-font-design-code="CKM-011"][data-design-artwork][data-preview-artwork-slot="card-front"]:not(.has-customer-photo) .desa-card-custom-couple > :is(span:first-child, span:last-child) {
+    --psd-font-size: 10.8;
+    --psd-name-height: 15.5 !important;
+    width: 45% !important;
+}
+.live-product[data-design-code="CKM-011"][data-font-design-code="CKM-011"][data-design-artwork][data-preview-artwork-slot="banner"]:not(.has-live-customer-photo) .desa-product-copy-couple > :is(span:first-child, span:last-child) {
+    --psd-font-size: 6.5;
+    --psd-name-height: 25 !important;
+    width: 26% !important;
+}
+.live-product[data-design-code="CKM-011"][data-font-design-code="CKM-011"][data-design-artwork][data-preview-artwork-slot="bunting"]:not(.has-live-customer-photo) .desa-product-copy-couple > :is(span:first-child, span:last-child) {
+    --psd-font-size: 13;
+    --psd-name-height: 14 !important;
+    width: 58% !important;
+}
+.live-product[data-design-code="CKM-011"][data-font-design-code="CKM-011"][data-design-artwork][data-preview-artwork-slot="sticker"]:not(.has-live-customer-photo) .desa-product-copy-couple > :is(span:first-child, span:last-child) {
+    --psd-font-size: 7.2;
+    --psd-name-height: 15 !important;
+    width: 35% !important;
+}
+.live-product[data-design-code="CKM-011"][data-font-design-code="CKM-011"][data-design-artwork][data-preview-artwork-slot^="arrow-"]:not(.has-live-customer-photo) .desa-product-copy-couple > :is(span:first-child, span:last-child) {
+    --psd-font-size: 14.5;
+    --psd-name-height: 17 !important;
+    width: 50% !important;
+}
+:is(.wedding-card-front, .live-product)[data-design-code="CKM-011"][data-design-artwork]:not(.has-customer-photo):not(.has-live-customer-photo):not([data-preview-artwork-slot="wooden-hanger"]) [data-preview-field="day_name_malay"] {
+    display: none !important;
+}
+.live-product--banting[data-design-code="CKM-011"][data-design-artwork][data-preview-artwork-slot="bunting"] .desa-product-copy-date {
+    top: var(--preview-date-y) !important;
+    width: 39% !important;
+}
+.live-product--banting[data-design-code="CKM-011"][data-font-design-code="CKM-011"][data-design-artwork][data-preview-artwork-slot="bunting"] [data-preview-field="event_date"] {
+    font-size: 2.8cqw !important;
+    white-space: nowrap !important;
+}
 /* CKM-014 arrow colors and one-line date follow the Master artwork. */
 .live-product[data-design-code="CKM-014"][data-preview-artwork-slot^="arrow-"] .desa-product-copy-couple {
     color: #397379 !important;
@@ -9180,11 +9221,18 @@
     display: none !important;
 }
 
-/* CKM-012 prints white couple names on its purple plaque; dates stay dark. */
-:is(.wedding-card-front, .live-product)[data-design-artwork][data-design-code="CKM-012"][data-preview-artwork-slot="card-front"] .desa-card-custom-couple,
-:is(.live-product)[data-design-artwork][data-design-code="CKM-012"][data-preview-artwork-slot="bunting"] .desa-product-copy-couple,
-:is(.live-product)[data-design-artwork][data-design-code="CKM-012"][data-preview-artwork-slot^="arrow-"] .desa-product-copy-couple,
-:is(.live-product)[data-design-artwork][data-design-code="CKM-012"][data-preview-artwork-slot="sticker"] .desa-product-copy-couple { color: #fff !important; }
+/* CKM-012 names are white on the purple plaque; its dates below are dark. */
+:is(.wedding-card-front, .live-product)[data-design-artwork][data-design-code="CKM-012"][data-preview-artwork-slot="card-front"] :is([data-preview-field="groom_display"], [data-preview-field="bride_display"]),
+.live-product[data-design-artwork][data-design-code="CKM-012"][data-preview-artwork-slot="bunting"] :is([data-preview-field="groom_display"], [data-preview-field="bride_display"]),
+.live-product[data-design-artwork][data-design-code="CKM-012"][data-preview-artwork-slot="sticker"] :is([data-preview-field="groom_display"], [data-preview-field="bride_display"]),
+.live-product[data-design-artwork][data-design-code="CKM-012"][data-preview-artwork-slot^="arrow-"] :is([data-preview-field="groom_display"], [data-preview-field="bride_display"]) {
+    color: #fff !important;
+    text-shadow: none !important;
+}
+/* CKM-013 bunting has cream names and day, but a darker date in the Master. */
+.live-product[data-design-artwork][data-design-code="CKM-013"][data-preview-artwork-slot="bunting"] :is([data-preview-field="groom_display"], [data-preview-field="bride_display"], [data-preview-field="day_name_malay"]) {
+    color: #f0dbc3 !important;
+}
 
 /* Songket: per-field positions and ink from the visible master PSD layers. */
 .wedding-card-front[data-design-code="CKS-201"][data-preview-artwork-slot="card-front"][data-design-artwork]:not(.has-customer-photo):not(.has-live-customer-photo) .desa-card-custom-copy { position: static !important; }
