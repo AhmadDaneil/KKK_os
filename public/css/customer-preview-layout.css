@@ -10353,6 +10353,44 @@
 .live-product[data-design-code="CKS-220"][data-preview-artwork-slot="arrow-left"][data-design-artwork]:not(.has-customer-photo):not(.has-live-customer-photo) .desa-product-copy-kicker,
 .live-product[data-design-code="CKS-220"][data-preview-artwork-slot="arrow-right"][data-design-artwork]:not(.has-customer-photo):not(.has-live-customer-photo) .desa-product-copy-kicker,
 .live-product[data-design-code="CKS-223"][data-preview-artwork-slot="arrow-left"][data-design-artwork]:not(.has-customer-photo):not(.has-live-customer-photo) .desa-product-copy-kicker,
-.live-product[data-design-code="CKS-223"][data-preview-artwork-slot="arrow-right"][data-design-artwork]:not(.has-customer-photo):not(.has-live-customer-photo) .desa-product-copy-kicker {
+.live-product[data-design-code="CKS-223"][data-preview-artwork-slot="arrow-right"][data-design-artwork]:not(.has-customer-photo):not(.has-live-customer-photo) .desa-product-copy-kicker,
+.wedding-card-front[data-design-code="CKS-209"][data-preview-artwork-slot="card-front"][data-design-artwork]:not(.has-customer-photo):not(.has-live-customer-photo) .desa-card-custom-title {
     display: none !important;
 }
+.songket-monogram-initial {
+    display: none;
+}
+
+[data-design-code="CKS-209"][data-preview-artwork-slot="card-front"] .songket-monogram-initial,
+[data-design-code="CKS-209"][data-preview-artwork-slot="bunting"] .songket-monogram-initial,
+[data-design-code="CKS-209"][data-preview-artwork-slot="sticker"] .songket-monogram-initial {
+    position: absolute;
+    z-index: 2;
+    display: block;
+    width: 22%;
+    color: #b8852c;
+    font-family: "PSD GreatVibes-Regular", "Brush Script MT", cursive;
+    font-weight: 400;
+    line-height: 1;
+    text-align: center;
+    text-shadow: none;
+    white-space: nowrap;
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+}
+
+[data-design-code="CKS-209"][data-preview-artwork-slot="card-front"] .songket-monogram-initial,
+[data-design-code="CKS-209"][data-preview-artwork-slot="bunting"] .songket-monogram-initial {
+    font-size: 17.45cqw;
+}
+
+[data-design-code="CKS-209"][data-preview-artwork-slot="sticker"] .songket-monogram-initial {
+    font-size: 7cqw;
+}
+
+[data-design-code="CKS-209"][data-preview-artwork-slot="card-front"] .songket-monogram-initial--groom { left: 41.71%; top: 33%; }
+[data-design-code="CKS-209"][data-preview-artwork-slot="card-front"] .songket-monogram-initial--bride { left: 58.71%; top: 37.31%; }
+[data-design-code="CKS-209"][data-preview-artwork-slot="bunting"] .songket-monogram-initial--groom { left: 42.38%; top: 32.21%; }
+[data-design-code="CKS-209"][data-preview-artwork-slot="bunting"] .songket-monogram-initial--bride { left: 58.38%; top: 35.44%; }
+[data-design-code="CKS-209"][data-preview-artwork-slot="sticker"] .songket-monogram-initial--groom { left: 46.67%; top: 35.29%; }
+[data-design-code="CKS-209"][data-preview-artwork-slot="sticker"] .songket-monogram-initial--bride { left: 53.11%; top: 37.85%; }
