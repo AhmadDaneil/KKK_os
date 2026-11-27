@@ -12,6 +12,7 @@
     <link rel="stylesheet" href="{{ asset('css/customer-brand.css') }}?v={{ filemtime(public_path('css/customer-brand.css')) }}">
     <link rel="stylesheet" href="{{ asset('css/customer-psd-fonts.css') }}?v={{ filemtime(public_path('css/customer-psd-fonts.css')) }}">
     <link rel="stylesheet" href="{{ asset('css/customer-psd-item-fonts.css') }}?v={{ filemtime(public_path('css/customer-psd-item-fonts.css')) }}">
+    <link rel="stylesheet" href="{{ asset('css/customer-rusty-layout.css') }}?v={{ filemtime(public_path('css/customer-rusty-layout.css')) }}">
 </head>
 <body class="brand-order-dashboard">
 <main>
