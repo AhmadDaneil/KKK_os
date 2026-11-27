@@ -191,7 +191,7 @@
 
             @if ($hasFullQueueView)
                 <nav class="staff-order-sections" aria-label="Order sections">
-                    <a href="#customer-data">Customer</a><a href="#design-work">Design</a><a href="#payment">Payments</a><a href="#production">Production</a><a href="#packing">Packing</a><a href="#fulfilment">Order Fulfilment</a>
+                    <a href="#customer-data">Customer</a>@if ($canManageAddOns)<a href="#order-add-ons">Add-On</a>@endif<a href="#design-work">Design</a><a href="#payment">Payments</a><a href="#production">Production</a><a href="#packing">Packing</a><a href="#fulfilment">Order Fulfilment</a>
                 </nav>
             @endif
 
@@ -203,6 +203,9 @@
             @php
                 $confirmedPreview = data_get($order->confirmation?->confirmed_snapshot, 'live_preview');
             @endphp
+            @if ($canManageAddOns)
+                @include('staff.partials.order-add-ons')
+            @endif
             <div id="customer-data" class="staff-detail-grid staff-department-group">
                 <section class="staff-card">
                     <h2>Order Summary</h2>
@@ -1001,7 +1004,9 @@
                                     <div>
                                         <dt>Couple Names</dt>
                                         <dd>
-                                            @php($couple = $order->couples->firstWhere('couple_number', 1))
+                                            @php
+                                                $couple = $order->couples->firstWhere('couple_number', 1);
+                                            @endphp
                                             {{ collect([
                                                 $couple?->groom_abbreviation ?: $couple?->groom_name,
                                                 $couple?->bride_abbreviation ?: $couple?->bride_name,
@@ -1070,17 +1075,6 @@
                                     @elseif ($job->status === 'WAITING_FOR_PAYMENT')
                                         <p class="staff-work-message">Awaiting full payment confirmation before printing can begin.</p>
                                     @elseif ($job->status === 'PRINTING')
-                                        <form method="POST" enctype="multipart/form-data" action="{{ route('staff.print-jobs.progress-files.store', $job) }}" class="staff-packing-complete-form js-staff-confirmation-form js-async-progress-upload" data-confirm-title="Upload printing progress {{ $job->side === 'LELAKI' ? 'Groom' : 'Bride' }}?" data-confirm-message="The selected image or PDF will be saved as proof of current printing progress." data-confirm-button="Yes, upload progress">
-                                            @csrf
-                                            <label for="print-progress-{{ $job->id }}">Upload production progress</label>
-                                            <div class="staff-file-picker">
-                                                <input id="print-progress-{{ $job->id }}" type="file" name="progress_files[]" accept=".jpg,.jpeg,.png,.webp,.pdf,image/jpeg,image/png,image/webp,application/pdf" multiple required>
-                                                <button type="button" class="staff-file-cancel" hidden aria-controls="print-progress-{{ $job->id }}">Cancel</button>
-                                            </div>
-                                            <p class="staff-muted-text">Upload images or PDFs showing production progress. Maximum 10 files, 20 MB each.</p>
-                                            <button type="submit" class="staff-button staff-button-secondary">Upload Progress</button>
-                                            <p class="staff-upload-notice" role="status" aria-live="polite" hidden></p>
-                                        </form>
                                         <form method="POST" action="{{ route($operationRoutePrefix.'print-jobs.mark-printed', $job) }}" class="staff-workflow-form js-staff-confirmation-form" data-confirm-title="Mark printing {{ $job->side === 'LELAKI' ? 'Groom' : 'Bride' }} as complete?" data-confirm-message="Make sure all {{ $job->quantity ?? $order->card_quantity ?? '-' }} cards have been printed and checked before continuing." data-confirm-button="Yes, mark complete" data-confirm-tone="danger">@csrf<button type="submit" class="staff-button staff-button-primary">Mark Printing Complete</button></form>
                                     @elseif ($job->status === 'PRINTED')
                                         <p class="staff-work-message">Printing for this package is complete.</p>
@@ -1153,6 +1147,22 @@
                             </div>
                         @endif
 
+                        @php
+                            $packingStart = $order->packingJob->events->where('event_type', 'PACKING_STARTED')->sortByDesc('id')->first();
+                            $confirmedPackingChecklist = $packingStart?->metadata['package_checklist'] ?? [];
+                        @endphp
+                        @if ($confirmedPackingChecklist !== [])
+                            <div class="staff-proof-status">
+                                <strong>Package checklist confirmed before packing</strong>
+                                <p>{{ $packingStart->actor?->name ?? 'Staff' }} · {{ $packingStart->occurred_at?->timezone(config('app.display_timezone'))->format('d/m/Y H:i') }}</p>
+                                <ul>
+                                    @foreach ($confirmedPackingChecklist as $check)
+                                        <li>✓ {{ $check['description'] }}{{ $check['side'] ? ' — '.($check['side'] === 'LELAKI' ? "Groom's side" : "Bride's side") : '' }}</li>
+                                    @endforeach
+                                </ul>
+                            </div>
+                        @endif
+
                         @if ($order->packingJob->proofs->isNotEmpty())
                             <div class="staff-proof-status">
                                 <strong>Packing photos:</strong>
@@ -1175,7 +1185,22 @@
 
                         @if (auth()->user()->isOperationManagement())
                             @if ($order->packingJob->status === 'READY_FOR_PACKING')
-                                <form method="POST" action="{{ route($operationRoutePrefix.'packing-jobs.start', $order->packingJob) }}" class="staff-workflow-form js-staff-confirmation-form" data-confirm-title="Start packing?" data-confirm-message="The packing start time will be recorded. Make sure all printed items are ready to check and pack." data-confirm-button="Yes, start packing">@csrf<button type="submit" class="staff-button staff-button-primary">Start Packing</button></form>
+                                <form method="POST" action="{{ route($operationRoutePrefix.'packing-jobs.start', $order->packingJob) }}" class="staff-packing-complete-form js-staff-confirmation-form" data-confirm-title="Start packing?" data-confirm-message="Confirm that every package item has been checked. Your checklist and packing start time will be recorded." data-confirm-button="Yes, start packing">
+                                    @csrf
+                                    <fieldset class="staff-packing-checklist">
+                                        <legend>Package checklist before packing — {{ $order->package_type === 'PUTERI_MANIS' ? 'Puteri Manis' : ($order->package_type === 'JELATA' ? 'Jelata' : 'Order items') }}</legend>
+                                        <p>Check the quantity, correct design and condition of every physical item before starting packing.</p>
+                                        @forelse ($packingChecklist as $check)
+                                            <label class="staff-progress-visibility">
+                                                <input type="checkbox" name="packing_checks[{{ $check['key'] }}]" value="1" required @checked(old('packing_checks.'.$check['key']))>
+                                                <span>{{ $check['description'] }}{{ $check['side'] ? ' — '.($check['side'] === 'LELAKI' ? "Groom's side" : "Bride's side") : '' }}</span>
+                                            </label>
+                                        @empty
+                                            <p>No package items are configured. Complete the package quantities before starting packing.</p>
+                                        @endforelse
+                                    </fieldset>
+                                    <button type="submit" class="staff-button staff-button-primary" @disabled(empty($packingChecklist))>Start Packing</button>
+                                </form>
                             @endif
                             @if ($order->packingJob->status === 'PACKING')
                                 @if ($order->packingJob->items->every(fn ($item) => $item->verified_present))
@@ -1721,57 +1746,6 @@
             notice.classList.toggle('is-error', isError);
         }
 
-        async function submitProgressUpload(form) {
-            const submitButton = form.querySelector('[type="submit"]');
-            const fileInput = form.querySelector('[name="progress_files[]"]');
-            const cancelButton = form.querySelector('.staff-file-cancel');
-            const originalButtonText = submitButton.textContent;
-
-            submitButton.disabled = true;
-            submitButton.textContent = 'Uploading...';
-
-            try {
-                const response = await fetch(form.action, {
-                    method: 'POST',
-                    body: new FormData(form),
-                    credentials: 'same-origin',
-                    headers: {
-                        Accept: 'application/json',
-                        'X-Requested-With': 'XMLHttpRequest',
-                    },
-                });
-                const payload = await response.json().catch(function () { return {}; });
-
-                if (!response.ok) {
-                    const errors = payload.errors ? Object.values(payload.errors).flat().join(' ') : null;
-                    throw new Error(errors || payload.message || 'Could not upload progress.');
-                }
-
-                const fileNames = (payload.files || []).map(function (file) {
-                    return file.original_name;
-                }).filter(Boolean);
-
-                if (fileInput) {
-                    fileInput.value = '';
-                }
-                if (cancelButton) {
-                    cancelButton.hidden = true;
-                }
-
-                showUploadNotice(
-                    form,
-                    (payload.message || 'Production progress uploaded successfully.')
-                        + (fileNames.length ? ' ' + fileNames.join(', ') : ''),
-                    false
-                );
-            } catch (error) {
-                showUploadNotice(form, error.message || 'Could not upload progress.', true);
-            } finally {
-                submitButton.disabled = false;
-                submitButton.textContent = originalButtonText;
-            }
-        }
-
         async function submitArtworkUpload(form) {
             const submitButton = form.querySelector('[type="submit"]');
             const originalButtonText = submitButton.textContent;
@@ -1875,16 +1849,6 @@
                 confirmButton.disabled = false;
                 confirmButton.textContent = 'Yes, continue';
                 submitAssignment(form);
-                return;
-            }
-
-            if (pendingForm.classList.contains('js-async-progress-upload')) {
-                const form = pendingForm;
-                pendingForm = null;
-                dialog.close();
-                confirmButton.disabled = false;
-                confirmButton.textContent = 'Yes, continue';
-                submitProgressUpload(form);
                 return;
             }
 

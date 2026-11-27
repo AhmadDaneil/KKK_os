@@ -98,95 +98,32 @@ class StaffPrintingWorkflowTest extends TestCase
         $this->assertSame('PRINTED', $event->to_status);
     }
 
-    public function test_assigned_production_staff_can_upload_printing_progress_files(): void
+    public function test_production_progress_upload_is_no_longer_available(): void
     {
-        Storage::fake('local');
-
-        $admin = $this->admin();
         $production = $this->staff(User::ROLE_PRODUCTION);
         [, $jobs] = $this->printJobs();
         $job = $jobs->first();
 
-        app(AssignPrintJobService::class)->assign($job, $production, $admin);
-
         $this->actingAs($production, 'staff')
-            ->post(route('staff.print-jobs.start', $job))
-            ->assertRedirect();
+            ->post('/staff/print-jobs/'.$job->id.'/progress-files', [
+                'progress_files' => [UploadedFile::fake()->image('printing-stage.jpg')],
+            ])->assertNotFound();
 
-        $this->actingAs($production, 'staff')
-            ->post(route('staff.print-jobs.progress-files.store', $job), [
-                'progress_files' => [
-                    UploadedFile::fake()->image('printing-stage-1.jpg'),
-                    UploadedFile::fake()->create('machine-log.pdf', 100, 'application/pdf'),
-                ],
-                'customer_visible' => '1',
-            ])
-            ->assertRedirect()
-            ->assertSessionHasNoErrors()
-            ->assertSessionHas('status', 'Progress production berjaya dimuat naik.');
-
-        $job->refresh();
-
-        $this->assertCount(2, $job->progress_files);
-        $this->assertNotNull($job->progress_updated_at);
-
-        foreach ($job->progress_files as $file) {
-            Storage::disk('local')->assertExists($file['path']);
-            $this->assertSame('PRODUCTION', $file['uploaded_by_role']);
-            $this->assertTrue($file['customer_visible']);
-        }
-
-        $this->assertDatabaseHas('print_job_events', [
-            'print_job_id' => $job->id,
-            'event_type' => 'PRINT_PROGRESS_UPLOADED',
-            'actor_user_id' => $production->id,
-        ]);
-
-        $this->actingAs($production, 'staff')
-            ->get(route('staff.print-jobs.progress-files.show', [
-                'printJob' => $job,
-                'file' => 0,
-            ]))
-            ->assertOk()
-            ->assertHeader('Content-Type', 'image/jpeg');
+        $this->assertEmpty($job->fresh()->progress_files);
+        $this->assertNull($job->fresh()->progress_updated_at);
     }
 
-    public function test_assigned_production_staff_can_upload_progress_without_a_page_redirect(): void
+    public function test_async_production_progress_upload_is_no_longer_available(): void
     {
-        Storage::fake('local');
-
-        $admin = $this->admin();
         $production = $this->staff(User::ROLE_PRODUCTION);
         [, $jobs] = $this->printJobs();
         $job = $jobs->first();
 
-        app(AssignPrintJobService::class)->assign($job, $production, $admin);
-
         $this->actingAs($production, 'staff')
-            ->post(route('staff.print-jobs.start', $job))
-            ->assertRedirect();
+            ->postJson('/staff/print-jobs/'.$job->id.'/progress-files')
+            ->assertNotFound();
 
-        $this->actingAs($production, 'staff')
-            ->withHeaders([
-                'Accept' => 'application/json',
-                'X-Requested-With' => 'XMLHttpRequest',
-            ])
-            ->post(route('staff.print-jobs.progress-files.store', $job), [
-                'progress_files' => [
-                    UploadedFile::fake()->image('printing-stage-async.jpg'),
-                ],
-            ])
-            ->assertOk()
-            ->assertJsonPath('message', 'Progress production berjaya dimuat naik.')
-            ->assertJsonCount(1, 'files')
-            ->assertJsonPath('files.0.original_name', 'printing-stage-async.jpg');
-
-        $job->refresh();
-
-        $this->assertCount(1, $job->progress_files);
-        $this->assertNotNull($job->progress_updated_at);
-        $this->assertFalse($job->progress_files[0]['customer_visible']);
-        $this->assertSame('PRODUCTION', $job->progress_files[0]['uploaded_by_role']);
+        $this->assertEmpty($job->fresh()->progress_files);
     }
 
     public function test_operation_management_can_view_production_progress_files(): void
