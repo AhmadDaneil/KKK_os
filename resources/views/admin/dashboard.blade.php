@@ -1,7 +1,7 @@
 @extends('admin.layouts.app')
 
-@section('title', __('ui.admin_dashboard'))
-@section('heading', __('ui.overview'))
+@section('title', __('ui.sales_analysis'))
+@section('heading', __('ui.sales_analysis'))
 
 @section('content')
     @php
