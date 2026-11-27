@@ -29,3 +29,11 @@ Schedule::command('payments:reconcile-pending-billplz')
     ->withoutOverlapping(2)
     ->onOneServer()
     ->when(static fn (): bool => (bool) config('services.billplz.enabled'));
+
+Schedule::command('customers:send-order-reminders')
+    ->everyThirtyMinutes()
+    ->timezone((string) config('app.display_timezone', 'Asia/Kuala_Lumpur'))
+    ->between('09:00', '21:00')
+    ->withoutOverlapping(180)
+    ->onOneServer()
+    ->when(static fn (): bool => (bool) config('customer_reminders.enabled'));
