@@ -1579,7 +1579,11 @@ document.addEventListener('DOMContentLoaded', function () {
 
         const artworkThemes = new Set(['akikah', 'arch', 'cartoon', 'desa', 'garden', 'islamic', 'minimalist', 'nostalgia', 'portrait', 'rusty', 'songket']);
         const artworkBase = @json(asset('images/designs'));
-        const artworkAssetVersion = @json((string) filemtime(public_path('css/customer-preview-layout.css')));
+        const artworkAssetVersion = @json((string) max(
+            filemtime(public_path('css/customer-preview-layout.css')),
+            filemtime(public_path('css/customer-rusty-layout.css')),
+            filemtime(public_path('images/designs/rusty/CKR-003/arrow-right.webp'))
+        ));
         const artworkDesignCodes = JSON.parse(form.dataset.designCodeOptions || '{}');
         const unavailableArtwork = {};
 
@@ -1641,7 +1645,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 ornaments.forEach(function (ornament) {
                     ornament.hidden = hasArtwork;
                 });
-                const artworkVersion = theme === 'minimalist' ? '?v=' + artworkAssetVersion : '';
+                const artworkVersion = ['minimalist', 'rusty'].includes(theme) ? '?v=' + artworkAssetVersion : '';
                 syncArtworkImage(artwork, hasArtwork ? assetBase + 'card-front.webp' + artworkVersion : '', normalizedCode + ' ' + themeName + ' card front');
                 syncArtworkPhotoMask(front, hasArtwork && theme === 'portrait' ? assetBase + 'card-front-photo-mask.webp' : '');
             }
@@ -1659,7 +1663,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 customNameCopy.hidden = false;
                 back.toggleAttribute('data-design-artwork', hasBackArtwork);
                 back.toggleAttribute('data-catalog-artwork', hasBackArtwork && isCatalogArtwork);
-                const artworkVersion = theme === 'minimalist' ? '?v=' + artworkAssetVersion : '';
+                const artworkVersion = ['minimalist', 'rusty'].includes(theme) ? '?v=' + artworkAssetVersion : '';
                 syncArtworkImage(artwork, hasBackArtwork ? assetBase + 'card-back.webp' + artworkVersion : '', normalizedCode + ' ' + themeName + ' card back');
             }
 
@@ -1690,7 +1694,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 genericNameCopy.hidden = shouldShowArtwork;
                 productCustomNameCopy.hidden = !shouldShowArtwork;
                 placeholder.hidden = shouldShowArtwork || isUnavailable;
-                const artworkVersion = theme === 'minimalist'
+                const artworkVersion = ['minimalist', 'rusty'].includes(theme)
                     ? '?v=' + artworkAssetVersion
                     : (normalizedCode === 'CKS-209' && type === 'sticker'
                         ? '?v=7ea10273d5954369'
