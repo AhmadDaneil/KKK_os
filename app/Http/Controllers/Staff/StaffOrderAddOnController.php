@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Staff;
 
 use App\Http\Controllers\Controller;
 use App\Models\Order;
+use App\Models\OrderItem;
 use App\Services\Orders\AddStaffOrderAddOnService;
 use App\Services\Orders\OrderAddOnCatalogService;
 use Illuminate\Http\RedirectResponse;
@@ -28,5 +29,13 @@ class StaffOrderAddOnController extends Controller
         $addOns->add($order, $request->user(), $validated['code'], (int) $validated['quantity'], $validated['notes'] ?? null, $validated['request_id']);
 
         return back()->with('status', 'Add-On added to the order.');
+    }
+
+    public function destroy(Request $request, Order $order, OrderItem $orderItem, AddStaffOrderAddOnService $addOns): RedirectResponse
+    {
+        abort_unless($request->user()->isOperationManagement() || $request->user()->isCustomerService(), 403);
+        $addOns->remove($order, $orderItem, $request->user());
+
+        return back()->with('status', 'Add-On removed. The invoice and remaining balance have been updated.');
     }
 }
