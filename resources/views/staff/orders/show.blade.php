@@ -608,6 +608,19 @@
                                         <dd>{{ $job->artworkVersions->count() }}</dd>
                                     </div>
                                 </dl>
+
+                                @if (auth()->user()->isOperationManagement() && ! $order->isAssignmentLocked() && ! request()->attributes->get('staff_overview_mode', false))
+                                    <form method="POST" action="{{ route($operationRoutePrefix.'design-jobs.assign', $job) }}" class="staff-form">
+                                        @csrf
+                                        <label for="design-assignee-{{ $job->id }}">Assign design to</label>
+                                        <select id="design-assignee-{{ $job->id }}" name="assigned_user_id" required>
+                                            @foreach ($designStaff as $designer)
+                                                <option value="{{ $designer->id }}" @selected((int) $job->assigned_user_id === (int) $designer->id)>{{ $designer->name }}{{ $designer->is_design_lead ? ' — Leader Designer' : ' — Designer' }}</option>
+                                            @endforeach
+                                        </select>
+                                        <button class="staff-button" type="submit">Assign Design</button>
+                                    </form>
+                                @endif
                                 @php
                                     $latestProofArtwork = $job->artworkVersions->sortByDesc('version_number')->first();
                                     $latestProofFiles = collect($latestProofArtwork?->preview_files ?: array_filter([
