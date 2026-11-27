@@ -9,6 +9,7 @@ use App\Services\Design\ResumeDesignAfterCorrectionService;
 use App\Services\Design\StartDesignJobService;
 use App\Services\Design\SyncOrderDesignStatusService;
 use App\Services\Orders\BuildCustomerProgressService;
+use App\Services\Packing\BuildPackingChecklistService;
 use App\Services\Photoshop\GeneratePhotoshopCsvForOrdersService;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -173,7 +174,7 @@ class StaffOrderController extends Controller
             ->deleteFileAfterSend(true);
     }
 
-    public function show(Request $request, string $orderId, BuildCustomerProgressService $progressBuilder): View
+    public function show(Request $request, string $orderId, BuildCustomerProgressService $progressBuilder, BuildPackingChecklistService $packingChecklist): View
     {
         /** @var User $user */
         $user = $request->user();
@@ -327,6 +328,9 @@ class StaffOrderController extends Controller
             'order' => $order,
             'orderProgress' => $progressBuilder->build($order),
             'timelineEvents' => $timelineEvents,
+            'packingChecklist' => $order->packingJob?->status === 'READY_FOR_PACKING' && $user->isOperationManagement()
+                ? $packingChecklist->build($order)
+                : [],
             'canAssignProduction' => $order->designJobs()->exists()
                 && $order->designJobs()
                     ->where('status', '!=', 'DESIGN_APPROVED')

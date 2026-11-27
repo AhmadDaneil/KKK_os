@@ -1001,7 +1001,9 @@
                                     <div>
                                         <dt>Couple Names</dt>
                                         <dd>
-                                            @php($couple = $order->couples->firstWhere('couple_number', 1))
+                                            @php
+                                                $couple = $order->couples->firstWhere('couple_number', 1);
+                                            @endphp
                                             {{ collect([
                                                 $couple?->groom_abbreviation ?: $couple?->groom_name,
                                                 $couple?->bride_abbreviation ?: $couple?->bride_name,
@@ -1153,6 +1155,22 @@
                             </div>
                         @endif
 
+                        @php
+                            $packingStart = $order->packingJob->events->where('event_type', 'PACKING_STARTED')->sortByDesc('id')->first();
+                            $confirmedPackingChecklist = $packingStart?->metadata['package_checklist'] ?? [];
+                        @endphp
+                        @if ($confirmedPackingChecklist !== [])
+                            <div class="staff-proof-status">
+                                <strong>Package checklist confirmed before packing</strong>
+                                <p>{{ $packingStart->actor?->name ?? 'Staff' }} · {{ $packingStart->occurred_at?->timezone(config('app.display_timezone'))->format('d/m/Y H:i') }}</p>
+                                <ul>
+                                    @foreach ($confirmedPackingChecklist as $check)
+                                        <li>✓ {{ $check['description'] }}{{ $check['side'] ? ' — '.($check['side'] === 'LELAKI' ? "Groom's side" : "Bride's side") : '' }}</li>
+                                    @endforeach
+                                </ul>
+                            </div>
+                        @endif
+
                         @if ($order->packingJob->proofs->isNotEmpty())
                             <div class="staff-proof-status">
                                 <strong>Packing photos:</strong>
@@ -1175,7 +1193,22 @@
 
                         @if (auth()->user()->isOperationManagement())
                             @if ($order->packingJob->status === 'READY_FOR_PACKING')
-                                <form method="POST" action="{{ route($operationRoutePrefix.'packing-jobs.start', $order->packingJob) }}" class="staff-workflow-form js-staff-confirmation-form" data-confirm-title="Start packing?" data-confirm-message="The packing start time will be recorded. Make sure all printed items are ready to check and pack." data-confirm-button="Yes, start packing">@csrf<button type="submit" class="staff-button staff-button-primary">Start Packing</button></form>
+                                <form method="POST" action="{{ route($operationRoutePrefix.'packing-jobs.start', $order->packingJob) }}" class="staff-packing-complete-form js-staff-confirmation-form" data-confirm-title="Start packing?" data-confirm-message="Confirm that every package item has been checked. Your checklist and packing start time will be recorded." data-confirm-button="Yes, start packing">
+                                    @csrf
+                                    <fieldset class="staff-packing-checklist">
+                                        <legend>Package checklist before packing — {{ $order->package_type === 'PUTERI_MANIS' ? 'Puteri Manis' : ($order->package_type === 'JELATA' ? 'Jelata' : 'Order items') }}</legend>
+                                        <p>Check the quantity, correct design and condition of every physical item before starting packing.</p>
+                                        @forelse ($packingChecklist as $check)
+                                            <label class="staff-progress-visibility">
+                                                <input type="checkbox" name="packing_checks[{{ $check['key'] }}]" value="1" required @checked(old('packing_checks.'.$check['key']))>
+                                                <span>{{ $check['description'] }}{{ $check['side'] ? ' — '.($check['side'] === 'LELAKI' ? "Groom's side" : "Bride's side") : '' }}</span>
+                                            </label>
+                                        @empty
+                                            <p>No package items are configured. Complete the package quantities before starting packing.</p>
+                                        @endforelse
+                                    </fieldset>
+                                    <button type="submit" class="staff-button staff-button-primary" @disabled(empty($packingChecklist))>Start Packing</button>
+                                </form>
                             @endif
                             @if ($order->packingJob->status === 'PACKING')
                                 @if ($order->packingJob->items->every(fn ($item) => $item->verified_present))
