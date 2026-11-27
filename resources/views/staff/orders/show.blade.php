@@ -1072,17 +1072,6 @@
                                     @elseif ($job->status === 'WAITING_FOR_PAYMENT')
                                         <p class="staff-work-message">Awaiting full payment confirmation before printing can begin.</p>
                                     @elseif ($job->status === 'PRINTING')
-                                        <form method="POST" enctype="multipart/form-data" action="{{ route('staff.print-jobs.progress-files.store', $job) }}" class="staff-packing-complete-form js-staff-confirmation-form js-async-progress-upload" data-confirm-title="Upload printing progress {{ $job->side === 'LELAKI' ? 'Groom' : 'Bride' }}?" data-confirm-message="The selected image or PDF will be saved as proof of current printing progress." data-confirm-button="Yes, upload progress">
-                                            @csrf
-                                            <label for="print-progress-{{ $job->id }}">Upload production progress</label>
-                                            <div class="staff-file-picker">
-                                                <input id="print-progress-{{ $job->id }}" type="file" name="progress_files[]" accept=".jpg,.jpeg,.png,.webp,.pdf,image/jpeg,image/png,image/webp,application/pdf" multiple required>
-                                                <button type="button" class="staff-file-cancel" hidden aria-controls="print-progress-{{ $job->id }}">Cancel</button>
-                                            </div>
-                                            <p class="staff-muted-text">Upload images or PDFs showing production progress. Maximum 10 files, 20 MB each.</p>
-                                            <button type="submit" class="staff-button staff-button-secondary">Upload Progress</button>
-                                            <p class="staff-upload-notice" role="status" aria-live="polite" hidden></p>
-                                        </form>
                                         <form method="POST" action="{{ route($operationRoutePrefix.'print-jobs.mark-printed', $job) }}" class="staff-workflow-form js-staff-confirmation-form" data-confirm-title="Mark printing {{ $job->side === 'LELAKI' ? 'Groom' : 'Bride' }} as complete?" data-confirm-message="Make sure all {{ $job->quantity ?? $order->card_quantity ?? '-' }} cards have been printed and checked before continuing." data-confirm-button="Yes, mark complete" data-confirm-tone="danger">@csrf<button type="submit" class="staff-button staff-button-primary">Mark Printing Complete</button></form>
                                     @elseif ($job->status === 'PRINTED')
                                         <p class="staff-work-message">Printing for this package is complete.</p>
@@ -1754,57 +1743,6 @@
             notice.classList.toggle('is-error', isError);
         }
 
-        async function submitProgressUpload(form) {
-            const submitButton = form.querySelector('[type="submit"]');
-            const fileInput = form.querySelector('[name="progress_files[]"]');
-            const cancelButton = form.querySelector('.staff-file-cancel');
-            const originalButtonText = submitButton.textContent;
-
-            submitButton.disabled = true;
-            submitButton.textContent = 'Uploading...';
-
-            try {
-                const response = await fetch(form.action, {
-                    method: 'POST',
-                    body: new FormData(form),
-                    credentials: 'same-origin',
-                    headers: {
-                        Accept: 'application/json',
-                        'X-Requested-With': 'XMLHttpRequest',
-                    },
-                });
-                const payload = await response.json().catch(function () { return {}; });
-
-                if (!response.ok) {
-                    const errors = payload.errors ? Object.values(payload.errors).flat().join(' ') : null;
-                    throw new Error(errors || payload.message || 'Could not upload progress.');
-                }
-
-                const fileNames = (payload.files || []).map(function (file) {
-                    return file.original_name;
-                }).filter(Boolean);
-
-                if (fileInput) {
-                    fileInput.value = '';
-                }
-                if (cancelButton) {
-                    cancelButton.hidden = true;
-                }
-
-                showUploadNotice(
-                    form,
-                    (payload.message || 'Production progress uploaded successfully.')
-                        + (fileNames.length ? ' ' + fileNames.join(', ') : ''),
-                    false
-                );
-            } catch (error) {
-                showUploadNotice(form, error.message || 'Could not upload progress.', true);
-            } finally {
-                submitButton.disabled = false;
-                submitButton.textContent = originalButtonText;
-            }
-        }
-
         async function submitArtworkUpload(form) {
             const submitButton = form.querySelector('[type="submit"]');
             const originalButtonText = submitButton.textContent;
@@ -1908,16 +1846,6 @@
                 confirmButton.disabled = false;
                 confirmButton.textContent = 'Yes, continue';
                 submitAssignment(form);
-                return;
-            }
-
-            if (pendingForm.classList.contains('js-async-progress-upload')) {
-                const form = pendingForm;
-                pendingForm = null;
-                dialog.close();
-                confirmButton.disabled = false;
-                confirmButton.textContent = 'Yes, continue';
-                submitProgressUpload(form);
                 return;
             }
 

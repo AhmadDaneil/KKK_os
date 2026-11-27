@@ -9,12 +9,9 @@ use App\Services\Packing\InitializePackingJobForOrderService;
 use App\Services\Printing\MarkPrintJobPrintedService;
 use App\Services\Printing\StartPrintingService;
 use App\Services\Printing\SyncOrderPrintStatusService;
-use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Str;
 use RuntimeException;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
@@ -81,101 +78,6 @@ class StaffPrintingWorkflowController extends Controller
             'status',
             'Production completed successfully.'
         );
-    }
-
-    public function uploadProgress(
-        Request $request,
-        PrintJob $printJob
-    ): RedirectResponse|JsonResponse {
-        $this->authorizeAssignedPrintingStaff($request, $printJob);
-
-        if ($printJob->status !== 'PRINTING') {
-            if ($request->expectsJson()) {
-                return response()->json([
-                    'message' => 'Progress files can only be uploaded while this job is in production.',
-                ], 422);
-            }
-
-            return back()->withErrors([
-                'print_job' => 'Progress files can only be uploaded while this job is in production.',
-            ]);
-        }
-
-        $validated = $request->validate([
-            'progress_files' => ['required', 'array', 'min:1', 'max:10'],
-            'progress_files.*' => ['required', 'file', 'mimes:jpg,jpeg,png,webp,pdf', 'max:20480'],
-        ]);
-
-        $disk = Storage::disk('local');
-        $directory = 'printing-progress/'.$printJob->id.'/'.Str::uuid();
-        $storedPaths = [];
-
-        try {
-            $newFiles = collect($validated['progress_files'])
-                ->values()
-                ->map(function (UploadedFile $file, int $index) use ($disk, $directory, &$storedPaths, $request): array {
-                    $path = $disk->putFileAs(
-                        $directory,
-                        $file,
-                        'progress-'.($index + 1).'.'.strtolower($file->extension())
-                    );
-
-                    if ($path === false) {
-                        throw new RuntimeException('Unable to store the printing progress file.');
-                    }
-
-                    $storedPaths[] = $path;
-
-                    return [
-                        'path' => $path,
-                        'original_name' => $file->getClientOriginalName(),
-                        'mime_type' => $file->getMimeType() ?: 'application/octet-stream',
-                        'size' => $file->getSize(),
-                        'uploaded_at' => now()->toIso8601String(),
-                        'uploaded_by_user_id' => $request->user()->id,
-                        'uploaded_by_role' => User::ROLE_PRODUCTION,
-                        'customer_visible' => false,
-                    ];
-                })
-                ->all();
-
-            $printJob->update([
-                'progress_files' => array_merge($printJob->progress_files ?? [], $newFiles),
-                'progress_updated_at' => now(),
-            ]);
-
-            $printJob->events()->create([
-                'event_type' => 'PRINT_PROGRESS_UPLOADED',
-                'from_status' => 'PRINTING',
-                'to_status' => 'PRINTING',
-                'actor_user_id' => $request->user()->id,
-                'metadata' => [
-                    'file_count' => count($newFiles),
-                    'customer_visible_file_count' => 0,
-                ],
-                'occurred_at' => now(),
-            ]);
-        } catch (RuntimeException $exception) {
-            $disk->delete($storedPaths);
-
-            if ($request->expectsJson()) {
-                return response()->json(['message' => $exception->getMessage()], 422);
-            }
-
-            return back()->withErrors([
-                'print_job' => $exception->getMessage(),
-            ]);
-        }
-
-        if ($request->expectsJson()) {
-            return response()->json([
-                'message' => 'Production progress uploaded successfully.',
-                'files' => $newFiles,
-                'progress_updated_at' => $printJob->fresh()->progress_updated_at?->toIso8601String(),
-            ]);
-        }
-
-        return back()->with('status', 'Production progress uploaded successfully.');
     }
 
     public function showProgressFile(
