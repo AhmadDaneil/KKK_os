@@ -176,6 +176,7 @@
 
     @foreach ($previewPackageSides as $packageSide)
         @php
+            $hangerHostIsGroom = $packageSide->side === 'LELAKI';
             $hasIncludedWoodenHanger = ($order->package_type ?: $order->wabot_package_code) === 'PUTERI_MANIS'
                 || strtoupper((string) $packageSide->design?->theme) === 'PORTRAIT';
         @endphp
@@ -339,10 +340,10 @@
                         <img class="desa-product-artwork" data-desa-product-artwork alt="" hidden>
                                                                         <div class="desa-product-name-overlay" data-desa-product-name-overlay hidden>
                         <div class="desa-product-generic-copy" data-desa-generic-copy>
-                            <span data-preview-field="groom_display">Groom</span><b>&amp;</b><span data-preview-field="bride_display">Bride</span>
+                            <span data-preview-field="{{ $hangerHostIsGroom ? 'groom_display' : 'bride_display' }}">{{ $hangerHostIsGroom ? 'Groom' : 'Bride' }}</span><b>&amp;</b><span data-preview-field="{{ $hangerHostIsGroom ? 'bride_display' : 'groom_display' }}">{{ $hangerHostIsGroom ? 'Bride' : 'Groom' }}</span>
                         </div>
                         <div class="desa-product-custom-copy" data-desa-product-custom-copy hidden>
-                            <strong class="desa-product-copy-couple"><span data-preview-field="groom_display">Groom</span><b class="desa-couple-ampersand-spacer" aria-hidden="true">&amp;</b><span data-preview-field="bride_display">Bride</span></strong>
+                            <strong class="desa-product-copy-couple"><span data-preview-field="{{ $hangerHostIsGroom ? 'groom_display' : 'bride_display' }}">{{ $hangerHostIsGroom ? 'Groom' : 'Bride' }}</span><b class="desa-couple-ampersand-spacer" aria-hidden="true">&amp;</b><span data-preview-field="{{ $hangerHostIsGroom ? 'bride_display' : 'groom_display' }}">{{ $hangerHostIsGroom ? 'Bride' : 'Groom' }}</span></strong>
                             <span class="desa-product-copy-date" data-preview-field="event_date">TARIKH MAJLIS</span>
                         </div>
                     </div>
@@ -382,9 +383,9 @@
                                 <circle cx="360" cy="124" r="2.5" />
                             </g>
                             <text class="hanger-couple-names" x="360" y="157" text-anchor="middle">
-                                <tspan data-preview-field="groom_display">Groom</tspan>
+                                <tspan data-preview-field="{{ $hangerHostIsGroom ? 'groom_display' : 'bride_display' }}">{{ $hangerHostIsGroom ? 'Groom' : 'Bride' }}</tspan>
                                 <tspan class="hanger-name-ampersand"> &amp; </tspan>
-                                <tspan data-preview-field="bride_display">Bride</tspan>
+                                <tspan data-preview-field="{{ $hangerHostIsGroom ? 'bride_display' : 'groom_display' }}">{{ $hangerHostIsGroom ? 'Bride' : 'Groom' }}</tspan>
                             </text>
                             <text class="hanger-event-date" x="360" y="180" text-anchor="middle" data-preview-field="event_date">Event Date</text>
                             </svg>
