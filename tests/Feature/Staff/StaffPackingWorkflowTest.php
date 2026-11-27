@@ -2,7 +2,9 @@
 
 namespace Tests\Feature\Staff;
 
+use App\Models\PackingJob;
 use App\Models\User;
+use App\Services\Packing\BuildPackingChecklistService;
 use App\Services\Design\ApproveArtworkService;
 use App\Services\Design\CreateArtworkVersionService;
 use App\Services\Design\InitializeDesignJobsForOrderService;
@@ -41,7 +43,7 @@ class StaffPackingWorkflowTest extends TestCase
             ->assign($job, $operationManagement, $admin);
 
         $response = $this->actingAs($operationManagement)->post(
-            route('staff.packing-jobs.start', $job)
+            route('staff.packing-jobs.start', $job), $this->prePackingChecks($job)
         );
 
         $response->assertRedirect();
@@ -73,7 +75,7 @@ class StaffPackingWorkflowTest extends TestCase
             ->assign($job, $assignedOperationManagementStaff, $admin);
 
         $this->actingAs($operationManagement)
-            ->post(route('staff.packing-jobs.start', $job))
+            ->post(route('staff.packing-jobs.start', $job), $this->prePackingChecks($job))
             ->assertRedirect();
 
         $job->refresh();
@@ -100,7 +102,7 @@ class StaffPackingWorkflowTest extends TestCase
             ->assign($job, $operationManagement, $admin);
 
         $this->actingAs($operationManagement)->post(
-            route('staff.packing-jobs.start', $job)
+            route('staff.packing-jobs.start', $job), $this->prePackingChecks($job)
         );
 
         $item = $job->items()->firstOrFail();
@@ -146,7 +148,7 @@ class StaffPackingWorkflowTest extends TestCase
             ->assign($job, $operationManagement, $admin);
 
         $this->actingAs($operationManagement)->post(
-            route('staff.packing-jobs.start', $job)
+            route('staff.packing-jobs.start', $job), $this->prePackingChecks($job)
         );
 
         $firstItem = $job->items()
@@ -186,7 +188,7 @@ class StaffPackingWorkflowTest extends TestCase
             ->assign($job, $operationManagement, $admin);
 
         $this->actingAs($operationManagement)->post(
-            route('staff.packing-jobs.start', $job)
+            route('staff.packing-jobs.start', $job), $this->prePackingChecks($job)
         );
 
         $item = $job->items()->firstOrFail();
@@ -252,7 +254,7 @@ class StaffPackingWorkflowTest extends TestCase
             ->assign($job, $operationManagement, $admin);
 
         $this->actingAs($operationManagement)->post(
-            route('staff.packing-jobs.start', $job)
+            route('staff.packing-jobs.start', $job), $this->prePackingChecks($job)
         );
 
         $items = $job->items()
@@ -324,7 +326,7 @@ class StaffPackingWorkflowTest extends TestCase
             ->assign($job, $operationManagement, $admin);
 
         $this->actingAs($operationManagement)
-            ->post(route('staff.packing-jobs.start', $job))
+            ->post(route('staff.packing-jobs.start', $job), $this->prePackingChecks($job))
             ->assertRedirect();
 
         $item = $job->items()->firstOrFail();
@@ -470,7 +472,7 @@ class StaffPackingWorkflowTest extends TestCase
             ->assign($job, $assigned, $admin);
 
         $this->actingAs($other, 'staff')
-            ->post(route('staff.packing-jobs.start', $job))
+            ->post(route('staff.packing-jobs.start', $job), $this->prePackingChecks($job))
             ->assertRedirect();
 
         $this->assertSame(
@@ -490,7 +492,7 @@ class StaffPackingWorkflowTest extends TestCase
             ->assign($job, $operationManagement, $admin);
 
         $this->actingAs($admin, 'staff')
-            ->post(route('staff.packing-jobs.start', $job))
+            ->post(route('staff.packing-jobs.start', $job), $this->prePackingChecks($job))
             ->assertNotFound();
 
         $this->assertSame(
@@ -521,11 +523,11 @@ class StaffPackingWorkflowTest extends TestCase
             ->assign($secondJob, $operationManagement, $admin);
 
         $this->actingAs($operationManagement)->post(
-            route('staff.packing-jobs.start', $firstJob)
+            route('staff.packing-jobs.start', $firstJob), $this->prePackingChecks($firstJob)
         );
 
         $this->actingAs($operationManagement)->post(
-            route('staff.packing-jobs.start', $secondJob)
+            route('staff.packing-jobs.start', $secondJob), $this->prePackingChecks($secondJob)
         );
 
         $foreignItem = $secondJob->items()
@@ -588,6 +590,14 @@ class StaffPackingWorkflowTest extends TestCase
             'role' => $role,
             'is_active' => true,
         ]);
+    }
+
+    /** @return array{packing_checks: array<string, string>} */
+    private function prePackingChecks(PackingJob $job): array
+    {
+        $items = app(BuildPackingChecklistService::class)->build($job->order);
+
+        return ['packing_checks' => array_fill_keys(array_column($items, 'key'), '1')];
     }
 
     private function packingJob(
@@ -805,7 +815,7 @@ class StaffPackingWorkflowTest extends TestCase
             ->assign($job, $operationManagement, $admin);
 
         $this->actingAs($operationManagement)
-            ->post(route('staff.packing-jobs.start', $job))
+            ->post(route('staff.packing-jobs.start', $job), $this->prePackingChecks($job))
             ->assertRedirect();
 
         $items = $job->items()
@@ -967,7 +977,7 @@ class StaffPackingWorkflowTest extends TestCase
             ->assign($job, $operationManagement, $admin);
 
         $this->actingAs($operationManagement)
-            ->post(route('staff.packing-jobs.start', $job))
+            ->post(route('staff.packing-jobs.start', $job), $this->prePackingChecks($job))
             ->assertRedirect();
 
         $item = $job->items()->firstOrFail();
@@ -1059,7 +1069,7 @@ class StaffPackingWorkflowTest extends TestCase
             ->assign($job, $assignedOperationManagement, $admin);
 
         $this->actingAs($assignedOperationManagement)
-            ->post(route('staff.packing-jobs.start', $job))
+            ->post(route('staff.packing-jobs.start', $job), $this->prePackingChecks($job))
             ->assertRedirect();
 
         $item = $job->items()->firstOrFail();
@@ -1133,7 +1143,7 @@ class StaffPackingWorkflowTest extends TestCase
             ->assign($job, $assignedOperationManagement, $admin);
 
         $this->actingAs($assignedOperationManagement)
-            ->post(route('staff.packing-jobs.start', $job))
+            ->post(route('staff.packing-jobs.start', $job), $this->prePackingChecks($job))
             ->assertRedirect();
 
         $item = $job->items()->firstOrFail();
@@ -1212,7 +1222,7 @@ class StaffPackingWorkflowTest extends TestCase
             ->assign($job, $operationManagement, $admin);
 
         $this->actingAs($operationManagement)
-            ->post(route('staff.packing-jobs.start', $job))
+            ->post(route('staff.packing-jobs.start', $job), $this->prePackingChecks($job))
             ->assertRedirect();
 
         $item = $job->items()->firstOrFail();
@@ -1328,7 +1338,7 @@ class StaffPackingWorkflowTest extends TestCase
             ->assign($job, $operationManagement, $admin);
 
         $this->actingAs($operationManagement)
-            ->post(route('staff.packing-jobs.start', $job))
+            ->post(route('staff.packing-jobs.start', $job), $this->prePackingChecks($job))
             ->assertRedirect();
 
         $item = $job->items()->firstOrFail();
@@ -1390,7 +1400,7 @@ class StaffPackingWorkflowTest extends TestCase
     {
         $manager = $this->staff(User::ROLE_OM);
         [$order, $job] = $this->packingJob(1, 'Packing Form');
-        $this->actingAs($manager, 'staff')->post(route('staff.packing-jobs.start', $job))->assertRedirect();
+        $this->actingAs($manager, 'staff')->post(route('staff.packing-jobs.start', $job), $this->prePackingChecks($job))->assertRedirect();
         $this->post(route('staff.packing-jobs.items.verify', [
             'packingJob' => $job,
             'packingItem' => $job->items()->firstOrFail(),
@@ -1412,7 +1422,7 @@ class StaffPackingWorkflowTest extends TestCase
         $operationManagement = $this->staff(User::ROLE_OM);
         [$order, $job] = $this->packingJob(1, 'Tracking During Packing', 'COURIER');
         app(AssignPackingJobService::class)->assign($job, $operationManagement, $admin);
-        $this->actingAs($operationManagement)->post(route('staff.packing-jobs.start', $job))->assertRedirect();
+        $this->actingAs($operationManagement)->post(route('staff.packing-jobs.start', $job), $this->prePackingChecks($job))->assertRedirect();
         $this->post(route('staff.packing-jobs.items.verify', [
             'packingJob' => $job,
             'packingItem' => $job->items()->firstOrFail(),
@@ -1523,7 +1533,7 @@ class StaffPackingWorkflowTest extends TestCase
             ->assign($job, $operationManagement, $admin);
 
         $this->actingAs($operationManagement)
-            ->post(route('staff.packing-jobs.start', $job))
+            ->post(route('staff.packing-jobs.start', $job), $this->prePackingChecks($job))
             ->assertRedirect();
 
         $items = $job->items()
@@ -1618,7 +1628,7 @@ class StaffPackingWorkflowTest extends TestCase
             ->assign($job, $assignedOperationManagement, $admin);
 
         $this->actingAs($assignedOperationManagement)
-            ->post(route('staff.packing-jobs.start', $job))
+            ->post(route('staff.packing-jobs.start', $job), $this->prePackingChecks($job))
             ->assertRedirect();
 
         $item = $job->items()->firstOrFail();
@@ -1690,7 +1700,7 @@ class StaffPackingWorkflowTest extends TestCase
             ->assign($job, $assignedOperationManagement, $admin);
 
         $this->actingAs($assignedOperationManagement)
-            ->post(route('staff.packing-jobs.start', $job))
+            ->post(route('staff.packing-jobs.start', $job), $this->prePackingChecks($job))
             ->assertRedirect();
 
         $item = $job->items()->firstOrFail();
@@ -1763,7 +1773,7 @@ class StaffPackingWorkflowTest extends TestCase
             ->assign($job, $operationManagement, $admin);
 
         $this->actingAs($operationManagement)
-            ->post(route('staff.packing-jobs.start', $job))
+            ->post(route('staff.packing-jobs.start', $job), $this->prePackingChecks($job))
             ->assertRedirect();
 
         $item = $job->items()->firstOrFail();
