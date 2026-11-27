@@ -10,6 +10,8 @@ use Illuminate\Validation\ValidationException;
 
 class CreateBillplzBalancePaymentService
 {
+    public const PAYABLE_STATUSES = ['DESIGN_APPROVED', 'BALANCE_PENDING', 'PAID', 'READY_FOR_PRINT', 'PRINTING', 'PRINTED', 'READY_FOR_PACKING'];
+
     public function __construct(private BillplzPaymentGateway $gateway) {}
 
     public function create(Order $order, string $paymentMethod = BillplzPaymentMethod::BILLPLZ): string
@@ -28,7 +30,7 @@ class CreateBillplzBalancePaymentService
                 ->lockForUpdate()
                 ->firstOrFail();
 
-            if (! in_array($lockedOrder->status, ['DESIGN_APPROVED', 'BALANCE_PENDING'], true)) {
+            if (! in_array($lockedOrder->status, self::PAYABLE_STATUSES, true)) {
                 throw ValidationException::withMessages([
                     'billplz' => 'The balance can only be paid after the artwork is approved.',
                 ]);
@@ -51,18 +53,15 @@ class CreateBillplzBalancePaymentService
             $existing = PaymentTransaction::query()
                 ->where('order_id', $lockedOrder->id)
                 ->where('payment_type', 'BALANCE')
-                ->whereIn('status', ['PENDING', 'PAID'])
+                ->where('status', 'PENDING')
                 ->lockForUpdate()
                 ->latest('id')
                 ->first();
 
             if ($existing !== null) {
-                if ($existing->status === 'PAID') {
-                    throw ValidationException::withMessages([
-                        'billplz' => 'The balance payment for this order has already been confirmed.',
-                    ]);
+                if ((string) $existing->amount !== $amount) {
+                    throw ValidationException::withMessages(['billplz' => 'The pending payment amount does not match the current remaining balance. Please contact Customer Service.']);
                 }
-
                 if ($existing->provider !== 'BILLPLZ') {
                     throw ValidationException::withMessages([
                         'billplz' => 'An existing balance payment is awaiting review. Please use that transaction.',
@@ -97,6 +96,7 @@ class CreateBillplzBalancePaymentService
                 'currency' => $snapshot->currency,
                 'status' => 'PENDING',
                 'metadata' => [
+                    'preserve_workflow_status' => ! in_array($lockedOrder->status, ['DESIGN_APPROVED', 'BALANCE_PENDING'], true),
                     'billplz' => [
                         'checkout_status' => 'CREATING',
                         'payment_method' => $paymentMethod,
@@ -115,7 +115,9 @@ class CreateBillplzBalancePaymentService
                 'occurred_at' => now(),
             ]);
 
-            $lockedOrder->update(['status' => 'BALANCE_PENDING']);
+            if (in_array($lockedOrder->status, ['DESIGN_APPROVED', 'BALANCE_PENDING'], true)) {
+                $lockedOrder->update(['status' => 'BALANCE_PENDING']);
+            }
 
             return [
                 'payment' => $payment,

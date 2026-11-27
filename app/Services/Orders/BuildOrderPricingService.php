@@ -22,6 +22,9 @@ class BuildOrderPricingService
      *     profile: OrderPricingProfile,
      *     currency: string,
      *     package_amount: string,
+     *     add_on_amount: string,
+     *     subtotal_amount: string,
+     *     add_ons: list<array{description: string, quantity: int, unit_price: string, line_total: string}>,
      *     postage_amount: string,
      *     delivery: array{amount: string, region: string|null, region_label: string, description: string},
      *     deposit_amount: string,
@@ -51,11 +54,13 @@ class BuildOrderPricingService
         }
 
         $packageCents = $this->toCents((string) $package['amount']);
+        $addOnItems = $order->items()->where('item_type', 'ADDON')->get(['description', 'quantity', 'unit_price', 'line_total']);
+        $addOnCents = $addOnItems->sum(fn (OrderItem $item): int => $this->toCents((string) $item->line_total));
         $delivery = $this->postageCalculator->quote($order);
         $postageCents = $this->toCents($delivery['amount']);
         $depositCents = $this->toCents((string) $profile->deposit_value);
 
-        if ($depositCents > ($packageCents + $postageCents)) {
+        if ($depositCents > ($packageCents + $addOnCents + $postageCents)) {
             throw ValidationException::withMessages([
                 'pricing' => 'The deposit cannot exceed the total order price.',
             ]);
@@ -66,10 +71,13 @@ class BuildOrderPricingService
             'profile' => $profile,
             'currency' => $profile->currency,
             'package_amount' => $this->fromCents($packageCents),
+            'add_on_amount' => $this->fromCents($addOnCents),
+            'subtotal_amount' => $this->fromCents($packageCents + $addOnCents),
+            'add_ons' => $addOnItems->toArray(),
             'postage_amount' => $this->fromCents($postageCents),
             'delivery' => $delivery,
             'deposit_amount' => $this->fromCents($depositCents),
-            'total_amount' => $this->fromCents($packageCents + $postageCents),
+            'total_amount' => $this->fromCents($packageCents + $addOnCents + $postageCents),
         ];
     }
 
@@ -96,7 +104,7 @@ class BuildOrderPricingService
             $snapshot = $lockedOrder->pricingSnapshot()->create([
                 'pricing_profile_id' => $quote['profile']->id,
                 'currency' => $quote['currency'],
-                'subtotal' => $packageAmount,
+                'subtotal' => $quote['subtotal_amount'],
                 'postage_amount' => $postageAmount,
                 'discount_amount' => '0.00',
                 'total_amount' => $totalAmount,
@@ -111,6 +119,8 @@ class BuildOrderPricingService
                     'catalog_item_code' => $package['catalog_item']->code,
                     'catalog_item_name' => $package['catalog_item']->name,
                     'package_amount' => $quote['package_amount'],
+                    'add_on_amount' => $quote['add_on_amount'],
+                    'add_ons' => $quote['add_ons'],
                     'postage_amount' => $postageAmount,
                     'postage_region' => $quote['delivery']['region'],
                     'deposit_profile_code' => $quote['profile']->code,

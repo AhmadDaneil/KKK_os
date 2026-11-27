@@ -41,6 +41,7 @@ use App\Http\Controllers\Staff\StaffDesignWorkflowController;
 use App\Http\Controllers\Staff\StaffDigitalDesignerController;
 use App\Http\Controllers\Staff\StaffInvoiceController;
 use App\Http\Controllers\Staff\StaffJobAssignmentController;
+use App\Http\Controllers\Staff\StaffOrderAddOnController;
 use App\Http\Controllers\Staff\StaffOrderController;
 use App\Http\Controllers\Staff\StaffOrderDeletionController;
 use App\Http\Controllers\Staff\StaffOrderLifecycleController;
@@ -146,6 +147,7 @@ Route::middleware(['auth:admin', 'active.staff', 'staff.role:ADMIN'])
 
         Route::get('/orders', [StaffOrderController::class, 'index'])->name('orders.index');
         Route::get('/orders/find', [AdminDashboardController::class, 'findOrder'])->name('orders.find');
+        Route::post('/orders/{order}/add-ons', [StaffOrderAddOnController::class, 'store'])->name('orders.add-ons.store');
         Route::get('/orders/{orderId}', [StaffOrderController::class, 'show'])->name('orders.show');
         Route::get('/invoices/{invoice}/print', [StaffInvoiceController::class, 'print'])
             ->middleware(['auth:admin', 'active.staff', 'staff.role:ADMIN'])
@@ -320,6 +322,7 @@ Route::middleware(['auth:staff', 'active.staff'])
         Route::get('/orders', [StaffOrderController::class, 'index'])
             ->name('orders.index');
 
+        Route::post('/orders/{order}/add-ons', [StaffOrderAddOnController::class, 'store'])->name('orders.add-ons.store');
         Route::get('/orders/{orderId}', [StaffOrderController::class, 'show'])
             ->name('orders.show');
         Route::get('/orders/{orderId}/gambar-pengantin/{side}', [StaffOrderController::class, 'downloadCustomerPhoto'])
