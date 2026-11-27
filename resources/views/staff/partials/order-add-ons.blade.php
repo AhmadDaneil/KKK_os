@@ -29,6 +29,14 @@
             <div class="staff-packing-item">
                 <div><strong>{{ $item->description }}</strong><p>{{ $item->quantity }} × RM {{ number_format((float) $item->unit_price, 2) }}</p></div>
                 <strong>RM {{ number_format((float) $item->line_total, 2) }}</strong>
+                @if ($addOnBlockingReason === null)
+                    <form method="POST" action="{{ route($operationRoutePrefix.'orders.add-ons.destroy', ['order' => $order, 'orderItem' => $item]) }}" class="staff-workflow-form js-staff-confirmation-form" data-confirm-title="Remove this Add-On?" data-confirm-message="This item will be removed from the order, invoice and packing checklist. The remaining balance will be recalculated." data-confirm-button="Yes, remove Add-On" data-confirm-tone="danger">
+                        @csrf
+                        @method('DELETE')
+                        <button class="staff-button staff-button-danger staff-button-small" type="submit">Remove Add-On</button>
+                    </form>
+                @endif
+
             </div>
         @empty
             <p>No Add-Ons added yet.</p>

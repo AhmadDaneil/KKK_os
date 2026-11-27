@@ -148,6 +148,7 @@ Route::middleware(['auth:admin', 'active.staff', 'staff.role:ADMIN'])
         Route::get('/orders', [StaffOrderController::class, 'index'])->name('orders.index');
         Route::get('/orders/find', [AdminDashboardController::class, 'findOrder'])->name('orders.find');
         Route::post('/orders/{order}/add-ons', [StaffOrderAddOnController::class, 'store'])->name('orders.add-ons.store');
+        Route::delete('/orders/{order}/add-ons/{orderItem}', [StaffOrderAddOnController::class, 'destroy'])->name('orders.add-ons.destroy');
         Route::get('/orders/{orderId}', [StaffOrderController::class, 'show'])->name('orders.show');
         Route::get('/invoices/{invoice}/print', [StaffInvoiceController::class, 'print'])
             ->middleware(['auth:admin', 'active.staff', 'staff.role:ADMIN'])
@@ -323,6 +324,7 @@ Route::middleware(['auth:staff', 'active.staff'])
             ->name('orders.index');
 
         Route::post('/orders/{order}/add-ons', [StaffOrderAddOnController::class, 'store'])->name('orders.add-ons.store');
+        Route::delete('/orders/{order}/add-ons/{orderItem}', [StaffOrderAddOnController::class, 'destroy'])->name('orders.add-ons.destroy');
         Route::get('/orders/{orderId}', [StaffOrderController::class, 'show'])
             ->name('orders.show');
         Route::get('/orders/{orderId}/gambar-pengantin/{side}', [StaffOrderController::class, 'downloadCustomerPhoto'])
