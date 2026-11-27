@@ -8,7 +8,9 @@ use App\Models\User;
 use App\Services\Design\ResumeDesignAfterCorrectionService;
 use App\Services\Design\StartDesignJobService;
 use App\Services\Design\SyncOrderDesignStatusService;
+use App\Services\Orders\AddStaffOrderAddOnService;
 use App\Services\Orders\BuildCustomerProgressService;
+use App\Services\Orders\OrderAddOnCatalogService;
 use App\Services\Packing\BuildPackingChecklistService;
 use App\Services\Photoshop\GeneratePhotoshopCsvForOrdersService;
 use Illuminate\Database\Eloquent\Builder;
@@ -174,7 +176,7 @@ class StaffOrderController extends Controller
             ->deleteFileAfterSend(true);
     }
 
-    public function show(Request $request, string $orderId, BuildCustomerProgressService $progressBuilder, BuildPackingChecklistService $packingChecklist): View
+    public function show(Request $request, string $orderId, BuildCustomerProgressService $progressBuilder, BuildPackingChecklistService $packingChecklist, OrderAddOnCatalogService $addOnCatalog, AddStaffOrderAddOnService $addOns): View
     {
         /** @var User $user */
         $user = $request->user();
@@ -328,6 +330,10 @@ class StaffOrderController extends Controller
             'order' => $order,
             'orderProgress' => $progressBuilder->build($order),
             'timelineEvents' => $timelineEvents,
+            'canManageAddOns' => $user->isOperationManagement() || $user->isCustomerService(),
+            'staffAddOnOptions' => $user->canMonitorAllDepartments() ? $addOnCatalog->options() : [],
+            'staffOrderAddOns' => $user->canMonitorAllDepartments() ? $order->items()->where('item_type', 'ADDON')->get() : collect(),
+            'addOnBlockingReason' => $user->canMonitorAllDepartments() ? $addOns->blockingReason($order) : null,
             'packingChecklist' => $order->packingJob?->status === 'READY_FOR_PACKING' && $user->isOperationManagement()
                 ? $packingChecklist->build($order)
                 : [],

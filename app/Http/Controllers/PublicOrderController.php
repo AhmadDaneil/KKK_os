@@ -7,6 +7,7 @@ use App\Services\Orders\BuildCustomerProgressService;
 use App\Services\Orders\CreateOrderService;
 use App\Services\Orders\CustomerOrderSessionAccessService;
 use App\Services\Orders\NormalizeCustomerPhoneService;
+use App\Services\Payments\CreateBillplzBalancePaymentService;
 use App\Services\Payments\CreateBillplzBookingPaymentService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -133,6 +134,11 @@ class PublicOrderController extends Controller
         $order->load(['fulfilmentJob', 'payments', 'designJobs.artworkVersions', 'pricingSnapshot']);
         $deposit = $order->payments->firstWhere('payment_type', 'BOOKING_DEPOSIT');
         $balance = $order->payments->where('payment_type', 'BALANCE')->sortByDesc('id')->first();
+        $canPayAdditionalBalance = in_array($order->status, CreateBillplzBalancePaymentService::PAYABLE_STATUSES, true)
+            && (float) ($order->pricingSnapshot?->outstanding_amount ?? 0) > 0;
+        if ($canPayAdditionalBalance && $balance?->status === 'PAID') {
+            $balance = null;
+        }
         $progressStatus = $customerProgress->resolveStatus($order);
 
         return view('public.order-progress', [
@@ -165,6 +171,7 @@ class PublicOrderController extends Controller
                     : null,
             ] : null,
             'balanceAmount' => (string) ($order->pricingSnapshot?->outstanding_amount ?? config('kingkadkahwin.balance.amount', '0.00')),
+            'canPayAdditionalBalance' => $canPayAdditionalBalance,
             'balanceBillplzAmount' => $order->pricingSnapshot?->outstanding_amount,
             'balanceQrImage' => (string) config('kingkadkahwin.balance.qr_image'),
         ]);
