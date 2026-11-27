@@ -297,12 +297,19 @@ class StaffOrderController extends Controller
         }
 
         $assignmentOptions = [
+            'designStaff' => collect(),
             'productionStaff' => collect(),
             'packingStaff' => collect(),
         ];
 
         if ($user->isOperationManagement() && ! $request->attributes->get('staff_overview_mode', false)) {
             $assignmentOptions = [
+                'designStaff' => User::query()
+                    ->whereIn('role', User::DESIGNER_ROLES)
+                    ->where('is_active', true)
+                    ->orderByDesc('is_design_lead')
+                    ->orderBy('name')
+                    ->get(['id', 'name', 'is_design_lead']),
                 'productionStaff' => User::query()
                     ->where('role', User::ROLE_PRODUCTION)
                     ->where('is_active', true)
